@@ -215,17 +215,44 @@ warehouses, payment_methods, shipping_companies, taxes,
 products (el producto es global, se publica vía product_stores)
 ```
 
-## Registro en Kernel
+## Registro del middleware
+
+En Laravel moderno, el registro de middlewares se
+realiza en `bootstrap/app.php`:
 
 ```php
-// app/Http/Kernel.php (registro conceptual)
-protected $middlewareGroups = [
-    'api' => [
-        // ... otros middlewares
-        \App\Http\Middleware\ResolveStoreFromDomain::class,
-    ],
-];
+// bootstrap/app.php
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->alias([
+        'store.resolve' => ResolveStoreFromDomain::class,
+    ]);
+})
 ```
 
-**Estado:** Pendiente de implementar. Actualmente no
-existe el middleware ni el servicio.
+## Estado
+
+```txt
+ResolveStoreFromDomain:
+  - Creado como base estructural en
+    app/Http/Middleware/ResolveStoreFromDomain.php
+
+StoreContextService:
+  - Creado como base estructural en
+    app/Services/Stores/StoreContextService.php
+
+Integración con rutas admin:
+  - Pendiente: validación con X-Store-Id
+
+Validación de acceso con UserStore:
+  - Pendiente
+
+Policies por tienda:
+  - Pendientes
+
+Scopes por store_id:
+  - Pendientes
+```
+
+Los componentes base están creados. La integración
+completa con rutas administrativas, policies y
+scopes debe verificarse en el código.

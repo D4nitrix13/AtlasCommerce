@@ -25,8 +25,9 @@ el dueño.
   una tienda. Controla si un producto está visible,
   a qué precio se publica y su orden de aparición.
 - **UserStore** — Relación entre un usuario
-  administrativo y una tienda. Determina qué
-  tienda puede administrar.
+  administrativo, una tienda y un rol específico
+  dentro de esa tienda. Determina qué tienda puede
+  administrar y con qué permisos.
 - **CustomerStore** — Relación entre un cliente y
   una tienda. Clasifica clientes por tienda de
   origen.
@@ -192,17 +193,36 @@ sales_channels      → canales de venta
 
 ## Flujo completo de una compra
 
+### Desde storefront (cliente)
+
 ```txt
 1. Cliente visita kitsune.com
 2. Frontend resuelve Store{id: 2} desde el dominio
-3. GET /api/products?store_id=2 → productos visibles en Kitsune
+3. GET /api/products?store_id=2 → productos visibles
 4. Cliente agrega producto al carrito
 5. POST /api/carts { store_id: 2, product_id: 15 }
 6. Cliente realiza checkout
 7. POST /api/orders { store_id: 2, ... }
+   → orders.user_creator_id = null (cliente)
 8. POST /api/invoices { store_id: 2, order_id: 100 }
+   → invoices.user_issuer_id = null (automático)
 9. Pago procesado, stock actualizado (global)
 10. Factura generada con store_id=2
+```
+
+### Desde panel administrativo
+
+```txt
+1. Admin selecciona tienda Panda
+2. Envía header X-Store-Id: 1
+3. Crea pedido para un cliente
+4. POST /api/orders { store_id: 1, ... }
+   → orders.user_creator_id = admin.id
+5. Emite factura
+6. POST /api/invoices { store_id: 1, order_id: 50 }
+   → invoices.user_issuer_id = admin.id
+7. El sistema puede rastrear quién creó cada
+   pedido y quién emitió cada factura
 ```
 
 ## Consideraciones de diseño
@@ -232,7 +252,44 @@ referencia o costo.
 Un usuario administrador puede estar asignado a
 una sola tienda (solo Panda), a ambas tiendas, o
 ser admin global (ve todo). Esto se controla
-mediante la tabla `user_stores`.
+mediante la tabla `user_stores`, que además define
+el rol del usuario dentro de cada tienda.
+
+Un usuario puede tener diferente rol por tienda
+mediante `user_stores.role_id`:
+
+```txt
+Usuario: Carlos
+
+Panda:
+  - Rol: Facturador
+  - Puede crear pedidos y emitir facturas
+
+Kitsune:
+  - Rol: Supervisor
+  - Puede revisar operaciones, pero no
+    necesariamente emitir facturas
+```
+
+### Trazabilidad administrativa
+
+Cuando un pedido o factura se crea desde el panel
+administrativo, el sistema registra qué usuario
+realizó la operación:
+
+```txt
+orders.user_creator_id
+  → Usuario que creó el pedido desde el admin
+  → Puede ser null si el cliente creó el pedido
+    desde storefront
+
+invoices.user_issuer_id
+  → Usuario que emitió la factura
+  → Permite saber quién generó la factura
+```
+
+Estos campos no reemplazan la auditoría. Son
+complementos para trazabilidad comercial directa.
 
 ## Diagrama de entidades multi-tienda
 

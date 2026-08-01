@@ -66,6 +66,10 @@ La implementación en `Laravel` usa nombres en inglés:
 - `PERMISO` → `permissions`
 - `USUARIO` → `users`
 - `CLIENTE` → `customers`
+- `ROL` → `roles`
+- `PERMISO` → `permissions`
+- `ROL_PERMISO` → `role_permissions`
+- `USUARIO_TIENDA` → `user_stores`
 - `CLIENTE_DIRECCION` → `customer_addresses`
 - `CATEGORIA` → `categories`
 - `MARCA` → `brands`
@@ -86,9 +90,11 @@ La implementación en `Laravel` usa nombres en inglés:
 - `PEDIDO` → `orders`
 - `DETALLE_PEDIDO` → `order_items`
 - `PEDIDO_ESTADO_HISTORIAL` → `order_status_histories`
+- `PEDIDO_USUARIO_CREADOR` → `orders.user_creator_id`
 - `FACTURA` → `invoices`
 - `DETALLE_FACTURA` → `invoice_items`
 - `FACTURA_ESTADO_HISTORIAL` → `invoice_status_histories`
+- `FACTURA_USUARIO_EMISOR` → `invoices.user_issuer_id`
 - `METODO_PAGO` → `payment_methods`
 - `PAGO` → `payments`
 - `FACTURA_PAGO` → `invoice_payments`
@@ -128,8 +134,7 @@ La implementación en `Laravel` usa nombres en inglés:
 - `users` — Usuarios del sistema
 - `roles` — Roles de acceso
 - `permissions` — Permisos granulares
-- `model_has_roles` — Relación roles-permisos (`Spatie`)
-- `model_has_permissions` — Relación permisos-usuarios (`Spatie`)
+- `role_permissions` — Relación rol-permiso
 - `currencies` — Monedas
 - `exchange_rates` — Tipos de cambio
 - `brands` — Marcas
@@ -150,8 +155,10 @@ La implementación en `Laravel` usa nombres en inglés:
 - `store_social_links` — Redes sociales por tienda
 - `store_settings` — Configuración clave-valor
 - `user_stores` — Usuarios admin por tienda
+  (con `role_id`)
 - `customer_stores` — Clientes por tienda
 - `product_stores` — Publicación de productos por tienda
+- `sales_channels` — Canales de venta
 - `orders` — Pedidos por tienda
 - `invoices` — Facturas por tienda
 - `carts` — Carritos por tienda

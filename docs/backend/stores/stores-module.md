@@ -6,38 +6,56 @@ El módulo `Stores` gestiona la configuración de cada
 tienda (Panda Estampados, Kitsune) y las relaciones
 entre tiendas y otros dominios del sistema.
 
-## Estado actual
+## Estado del módulo
 
-- `StoreSetting` model
-  - Estado: Creado (vacío, sin implementación)
-- `StoreSettingController`
-  - Estado: Creado (vacío, sin implementación)
-- Migración `store_settings`
-  - Estado: Creada
-- Migraciones multi-tienda
-  - Estado: **Pendiente** — `store_domains`,
-    `store_social_links`, `product_stores`,
-    `user_stores`, `customer_stores`
-- Models multi-tienda
-  - Estado: **Pendiente** — `Store`, `StoreDomain`,
-    `StoreSocialLink`, `ProductStore`, `UserStore`,
-    `CustomerStore`
-- `SalesChannel`
-  - Estado: **Pendiente**
+```txt
+StoreSetting:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+  - Controlador: creado como base estructural
+  - Lógica CRUD: pendiente
 
-**El módulo `Stores` está preparado pero no
-implementado.** La estructura base existe pero falta la
-lógica completa.
+Store:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+
+StoreDomain:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+
+StoreSocialLink:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+
+ProductStore:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+
+UserStore:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+  - Role_id: contemplado en el modelo ER
+
+CustomerStore:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+
+SalesChannel:
+  - Migración: contemplada en el modelo ER
+  - Modelo: creado como base estructural
+```
+
+La base estructural del módulo está creada. La lógica
+completa de negocio, policies y validaciones debe
+verificarse en el código.
 
 ## Entidades del módulo
 
-### `Store` (futuro)
+### `Store`
 
 Representa una tienda/marca comercial.
 
 ```php
-// app/Models/Stores/Store.php (futuro)
-
 class Store extends Model
 {
     protected $fillable = [
@@ -73,7 +91,7 @@ class Store extends Model
 - `maintenance` — boolean — Modo mantenimiento
 - `active` — boolean — Tienda activa
 
-### `StoreDomain` (futuro)
+### `StoreDomain`
 
 Dominios asociados a una tienda.
 
@@ -95,7 +113,7 @@ class StoreDomain extends Model
 - `primary` — boolean — Si es el dominio principal
 - `active` — boolean — Si el dominio está activo
 
-### `StoreSocialLink` (futuro)
+### `StoreSocialLink`
 
 Redes sociales por tienda.
 
@@ -111,7 +129,7 @@ class StoreSocialLink extends Model
 }
 ```
 
-### `ProductStore` (futuro)
+### `ProductStore`
 
 Relación producto-tienda para publicar productos.
 
@@ -132,9 +150,9 @@ class ProductStore extends Model
 }
 ```
 
-### `UserStore` (futuro)
+### `UserStore`
 
-Relación usuario-tienda para control de acceso.
+Relación usuario-tienda con rol específico por tienda.
 
 ```php
 class UserStore extends Model
@@ -142,12 +160,20 @@ class UserStore extends Model
     protected $fillable = [
         'user_id',
         'store_id',
+        'role_id',
         'active',
+        'assigned_at',
     ];
 }
 ```
 
-### `CustomerStore` (futuro)
+- `user_id` — FK — Usuario administrador
+- `store_id` — FK — Tienda asociada
+- `role_id` — FK — Rol del usuario en esta tienda
+- `active` — boolean — Si la asignación está activa
+- `assigned_at` — timestamp — Fecha de asignación
+
+### `CustomerStore`
 
 Relación cliente-tienda para clasificación.
 
@@ -163,7 +189,7 @@ class CustomerStore extends Model
 }
 ```
 
-### `SalesChannel` (futuro)
+### `SalesChannel`
 
 Canales de venta: Web, WhatsApp, Instagram, Admin,
 tienda física.
@@ -179,9 +205,9 @@ class SalesChannel extends Model
 }
 ```
 
-## Migraciones necesarias
+## Migraciones del módulo
 
-Las siguientes migraciones deben crearse en
+Las siguientes migraciones están contempladas en
 `database/migrations/stores/`:
 
 ```txt
@@ -192,6 +218,7 @@ create_product_stores_table
 create_user_stores_table
 create_customer_stores_table
 create_sales_channels_table
+create_store_settings_table
 ```
 
 ## Relación con otros módulos
@@ -229,7 +256,7 @@ create_sales_channels_table
   - Descripción: Carritos por tienda
 - **Auth**
   - Relación: `user_stores`
-  - Descripción: Usuarios admin por tienda
+  - Descripción: Usuarios admin por tienda con rol
 - **Customers**
   - Relación: `customer_stores`
   - Descripción: Clientes por tienda
@@ -245,8 +272,9 @@ class StoreSettingController extends Controller
 }
 ```
 
-**Nota:** El controlador y el modelo están creados pero
-vacíos. La implementación completa está pendiente.
+El controlador y el modelo están creados como base
+estructural. La lógica completa de CRUD debe
+verificarse en el código.
 
 ## Configuración de tienda
 
@@ -254,7 +282,6 @@ La tabla `store_settings` almacena configuración
 clave-valor por tienda:
 
 ```php
-// migrations/stores/2026_06_22_032054_create_store_settings_table.php
 Schema::create('store_settings', function (Blueprint $table) {
     $table->id();
     $table->foreignId('store_id')->constrained();

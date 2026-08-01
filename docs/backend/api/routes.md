@@ -24,15 +24,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
 });
 ```
 
-## Rutas públicas (futuras)
+## Rutas públicas (storefront)
 
 Las rutas públicas del storefront (catálogo, productos,
-categorías) se definirán en un grupo sin middleware de
-autenticación. Estas rutas residirán bajo el prefijo
-`storefront/` o se resolverán por dominio.
+categorías) se definen bajo el prefijo `storefront/`.
+Estas rutas resuelven la tienda por dominio y no
+requieren autenticación.
 
 ```php
-// Ruta pública (pendiente)
 Route::prefix('storefront')->group(function (): void {
     Route::get('products', [StorefrontProductController::class, 'index']);
     Route::get('products/{slug}', [StorefrontProductController::class, 'show']);
@@ -40,8 +39,14 @@ Route::prefix('storefront')->group(function (): void {
 });
 ```
 
-**Estado:** Pendiente. Los controladores en
-`Api/Storefront/` están preparados (`.gitkeep`).
+**Estado:** Base inicial preparada. El controlador
+`Storefront/ProductController` existe como estructura
+base. Las rutas públicas deben resolver tienda por
+dominio. Las rutas administrativas deben usar
+`auth:sanctum` y validar `X-Store-Id`.
+
+Debe verificarse en el código la integración
+completa con `ResolveStoreFromDomain`.
 
 ## Convención de endpoints
 

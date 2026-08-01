@@ -177,8 +177,12 @@ backend/api/
   - Descripción: Configuración
 - **Stores**
   - Controladores: `StoreSettingController`
-  - Modelos: `StoreSetting`
-  - Descripción: Multi-tienda
+  - Modelos: `Store`, `StoreDomain`,
+    `StoreSocialLink`, `ProductStore`, `UserStore`,
+    `CustomerStore`, `SalesChannel`, `StoreSetting`
+  - Descripción: Multi-tienda. Base estructural
+    contemplada en el modelo ER. Lógica de negocio
+    completa: debe verificarse en el código.
 - **Storefront**
   - Controladores: (preparado, vacíos)
   - Modelos: —
