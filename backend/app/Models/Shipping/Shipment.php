@@ -9,7 +9,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -70,11 +69,6 @@ class Shipment extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
-    }
-
-    public function trackings(): HasMany
-    {
-        return $this->hasMany(ShipmentTracking::class);
     }
 
     public function scopePending(Builder $query): Builder

@@ -29,6 +29,10 @@ return new class extends Migration
                 ->restrictOnDelete();
 
             $table->string('tracking_code', 160)->nullable()->unique();
+            $table->string('tracking_url')->nullable();
+            $table->string('last_event_status', 80)->nullable();
+            $table->string('last_event_location')->nullable();
+            $table->timestamp('last_event_at')->nullable();
             $table->unsignedBigInteger('shipping_cost_cents')->default(0);
             $table->string('status', 50)->default('pending');
             $table->timestamp('shipped_at')->nullable();

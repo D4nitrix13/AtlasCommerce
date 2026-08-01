@@ -2,7 +2,6 @@
 
 namespace App\Models\Catalog;
 
-use App\Models\Customization\ProductCustomization;
 use App\Models\Inventory\Inventory;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
@@ -95,11 +94,6 @@ class Product extends Model
             related: ProductStore::class,
             table: 'product_stores',
         )->withPivot(columns: ['is_visible']);
-    }
-
-    public function customization(): HasMany
-    {
-        return $this->hasMany(ProductCustomization::class);
     }
 
     public function inventories(): HasMany

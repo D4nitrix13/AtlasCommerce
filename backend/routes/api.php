@@ -2,9 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\PermissionController;
 use App\Http\Controllers\Api\Auth\PermissionRoleController;
-use App\Http\Controllers\Api\Auth\RecoveryCodeController;
 use App\Http\Controllers\Api\Auth\RoleController;
-use App\Http\Controllers\Api\Auth\TwoFactorAuthController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Carts\CartController;
 use App\Http\Controllers\Api\Carts\CartItemController;
@@ -29,7 +27,6 @@ use App\Http\Controllers\Api\Marketing\ProductPromotionController;
 use App\Http\Controllers\Api\Marketing\PromotionController;
 use App\Http\Controllers\Api\Payments\InvoicePaymentController;
 use App\Http\Controllers\Api\Payments\PaymentController;
-use App\Http\Controllers\Api\Payments\PaymentInstallmentController;
 use App\Http\Controllers\Api\Payments\PaymentMethodController;
 use App\Http\Controllers\Api\Payments\PaymentTransactionController;
 use App\Http\Controllers\Api\Purchases\PurchaseController;
@@ -47,7 +44,6 @@ use App\Http\Controllers\Api\Sales\OrderStatusHistoryController;
 use App\Http\Controllers\Api\Settings\CurrencyController;
 use App\Http\Controllers\Api\Settings\ExchangeRateController;
 use App\Http\Controllers\Api\Shipping\ShipmentController;
-use App\Http\Controllers\Api\Shipping\ShipmentTrackingController;
 use App\Http\Controllers\Api\Shipping\ShippingCompanyController;
 use App\Http\Controllers\Api\Shipping\ShippingZoneController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
@@ -92,29 +88,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('permissions', PermissionController::class);
     Route::apiResource('permission-roles', PermissionRoleController::class);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Two-Factor Authentication
-    |--------------------------------------------------------------------------
-    |
-    | Endpoints para gestión de 2FA: estado, envío y verificación de Email OTP,
-    | recovery codes y desactivación. Todos requieren token Sanctum válido.
-    | La lógica de negocio vive en EmailOtpService y RecoveryCodeService.
-    |
-    */
-
-    Route::prefix('auth')->group(function (): void {
-        Route::get('/2fa', [TwoFactorAuthController::class, 'show']);
-
-        Route::post('/2fa/email/send', [TwoFactorAuthController::class, 'sendEmailOtp']);
-        Route::post('/2fa/email/verify', [TwoFactorAuthController::class, 'verifyEmailOtp']);
-
-        Route::get('/2fa/recovery-codes', [RecoveryCodeController::class, 'index']);
-        Route::post('/2fa/recovery-codes/regenerate', [RecoveryCodeController::class, 'regenerate']);
-
-        Route::post('/2fa/disable', [TwoFactorAuthController::class, 'disable']);
-    });
 
     /*
     |--------------------------------------------------------------------------
@@ -215,7 +188,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::apiResource('payments', PaymentController::class);
     Route::apiResource('payment-methods', PaymentMethodController::class);
     Route::apiResource('payment-transactions', PaymentTransactionController::class);
-    Route::apiResource('payment-installments', PaymentInstallmentController::class);
     Route::apiResource('invoice-payments', InvoicePaymentController::class);
 
     /*
@@ -230,7 +202,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::apiResource('shipping-companies', ShippingCompanyController::class);
     Route::apiResource('shipping-zones', ShippingZoneController::class);
     Route::apiResource('shipments', ShipmentController::class);
-    Route::apiResource('shipments.tracking', ShipmentTrackingController::class);
 
     /*
     |--------------------------------------------------------------------------

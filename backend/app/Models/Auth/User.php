@@ -6,7 +6,6 @@ use Database\Factories\Auth\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -100,54 +99,6 @@ class User extends Authenticatable
     public function passwordResetTokens(): HasMany
     {
         return $this->hasMany(PasswordResetToken::class);
-    }
-
-    /**
-     * Dispositivos de confianza registrados.
-     */
-    public function trustedDevices(): HasMany
-    {
-        return $this->hasMany(TrustedDevice::class);
-    }
-
-    /**
-     * Configuración global de 2FA del usuario (relación 1:1).
-     */
-    public function twoFactorSetting(): HasOne
-    {
-        return $this->hasOne(TwoFactorSetting::class);
-    }
-
-    /**
-     * Métodos 2FA individuales registrados (relación N:1).
-     */
-    public function twoFactorMethods(): HasMany
-    {
-        return $this->hasMany(TwoFactorMethod::class);
-    }
-
-    /**
-     * Retos OTP generados para el usuario (relación N:1).
-     */
-    public function otpChallenges(): HasMany
-    {
-        return $this->hasMany(OtpChallenge::class);
-    }
-
-    /**
-     * Códigos de recuperación de uso único (relación N:1).
-     */
-    public function recoveryCodes(): HasMany
-    {
-        return $this->hasMany(RecoveryCode::class);
-    }
-
-    /**
-     * Credenciales WebAuthn / Passkeys (relación N:1).
-     */
-    public function passkeyCredentials(): HasMany
-    {
-        return $this->hasMany(PasskeyCredential::class);
     }
 
     /**
