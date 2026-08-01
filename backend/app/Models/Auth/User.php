@@ -2,13 +2,12 @@
 
 namespace App\Models\Auth;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Database\Factories\Auth\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -17,20 +16,13 @@ use Laravel\Sanctum\HasApiTokens;
  * Modelo de usuario principal.
  *
  * Representa la tabla `users` y actúa como modelo base para todo el sistema
- * de autenticación. Incluye relaciones con el módulo de 2FA:
- *
- * - `twoFactorSetting`: configuración global 1:1 (habilitado, método preferido, obligatorio).
- * - `twoFactorMethods`: métodos individuales 2FA registrados (email_otp, totp, passkey).
- * - `otpChallenges`: retos OTP generados con código hasheado y control de intentos.
- * - `recoveryCodes`: códigos de recuperación de uso único (hash bcrypt).
- * - `passkeyCredentials`: credenciales WebAuthn para passkeys (fase futura).
+ * de autenticación. Incluye relaciones con roles, intentos de login,
+ * eventos de seguridad y configuración de 2FA.
  *
  * La autenticación de API se gestiona mediante Laravel Sanctum (trait HasApiTokens).
  * El cast automático `hashed` en `password` garantiza que la contraseña nunca se
  * almacene en texto plano.
  */
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     use HasApiTokens;
@@ -39,6 +31,22 @@ class User extends Authenticatable
     use HasFactory;
 
     use Notifiable;
+    use SoftDeletes;
+
+    protected $fillable = [
+        'role_id',
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'phone',
+        'is_active',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     /**
      * Atributos con cast automático.
@@ -54,14 +62,56 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'registered_at' => 'datetime',
+            'password_changed_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'locked_until' => 'datetime',
         ];
     }
 
     /**
+     * Rol asignado al usuario (opcional).
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Intentos de login registrados.
+     */
+    public function loginAttempts(): HasMany
+    {
+        return $this->hasMany(LoginAttempt::class);
+    }
+
+    /**
+     * Eventos de seguridad registrados.
+     */
+    public function securityEvents(): HasMany
+    {
+        return $this->hasMany(SecurityEvent::class);
+    }
+
+    /**
+     * Tokens de restablecimiento de contraseña.
+     */
+    public function passwordResetTokens(): HasMany
+    {
+        return $this->hasMany(PasswordResetToken::class);
+    }
+
+    /**
+     * Dispositivos de confianza registrados.
+     */
+    public function trustedDevices(): HasMany
+    {
+        return $this->hasMany(TrustedDevice::class);
+    }
+
+    /**
      * Configuración global de 2FA del usuario (relación 1:1).
-     *
-     * Contiene si 2FA está habilitado, el método preferido y si es obligatorio.
-     * Se crea/actualiza cuando el usuario activa o desactiva 2FA.
      */
     public function twoFactorSetting(): HasOne
     {
@@ -70,9 +120,6 @@ class User extends Authenticatable
 
     /**
      * Métodos 2FA individuales registrados (relación N:1).
-     *
-     * Un usuario puede tener múltiples métodos (email_otp, totp, passkey),
-     * cada uno con su propio estado de verificación y activación.
      */
     public function twoFactorMethods(): HasMany
     {
@@ -81,9 +128,6 @@ class User extends Authenticatable
 
     /**
      * Retos OTP generados para el usuario (relación N:1).
-     *
-     * Cada reto almacena el hash del código, control de intentos,
-     * fecha de expiración y metadata de seguridad (IP, user-agent).
      */
     public function otpChallenges(): HasMany
     {
@@ -92,9 +136,6 @@ class User extends Authenticatable
 
     /**
      * Códigos de recuperación de uso único (relación N:1).
-     *
-     * Almacenados como hash bcrypt. Se muestran al usuario solo una vez
-     * al generarlos y luego solo permanecen los hashes en la BD.
      */
     public function recoveryCodes(): HasMany
     {
@@ -103,12 +144,17 @@ class User extends Authenticatable
 
     /**
      * Credenciales WebAuthn / Passkeys (relación N:1).
-     *
-     * Preparado para la fase futura de passkeys. Almacena la clave pública,
-     * contador de firmas y metadata del authenticator.
      */
     public function passkeyCredentials(): HasMany
     {
         return $this->hasMany(PasskeyCredential::class);
+    }
+
+    /**
+     * Nombre completo del usuario.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
     }
 }
