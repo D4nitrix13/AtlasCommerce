@@ -284,18 +284,6 @@ erDiagram
         datetime fecha_creacion
     }
 
-    API_TOKEN {
-        int id_api_token PK
-        int id_usuario FK
-        string nombre
-        string token_hash
-        json abilities
-        datetime ultimo_uso
-        datetime fecha_expiracion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
     CLIENTE {
         int id_cliente PK
         int id_usuario FK
@@ -1081,9 +1069,9 @@ erDiagram
 
     RESENA_PRODUCTO {
         int id_resena PK
-        int id_tienda FK
         int id_producto FK
         int id_cliente FK
+        int id_tienda FK nullable
         int calificacion
         string comentario
         boolean aprobado
@@ -1095,9 +1083,9 @@ erDiagram
 
     PREGUNTA_PRODUCTO {
         int id_pregunta PK
-        int id_tienda FK
         int id_producto FK
         int id_cliente FK
+        int id_tienda FK nullable
         string pregunta
         string respuesta
         datetime fecha_pregunta
@@ -1109,8 +1097,8 @@ erDiagram
 
     TICKET_SOPORTE {
         int id_ticket PK
-        int id_tienda FK
         int id_cliente FK
+        int id_tienda FK nullable
         string asunto
         string descripcion
         string estado
@@ -1199,7 +1187,6 @@ erDiagram
     USUARIO ||--o{ DISPOSITIVO_CONFIABLE : confia
     USUARIO ||--o{ INTENTO_LOGIN : registra
     USUARIO ||--o{ EVENTO_SEGURIDAD : genera
-    USUARIO ||--o{ API_TOKEN : posee
     USUARIO ||--o{ AUDITORIA : genera
     USUARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
     USUARIO ||--o{ COMPRA : realiza
