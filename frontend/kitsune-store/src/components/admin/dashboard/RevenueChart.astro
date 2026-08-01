@@ -22,16 +22,21 @@ const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 4
   </div>
 
   <div class="h-[360px]">
-    <canvas id={chartId}></canvas>
+    <canvas
+      id={chartId}
+      data-labels={JSON.stringify(labels)}
+      data-values={JSON.stringify(values)}
+    ></canvas>
   </div>
 </section>
 
-<script define:vars={{ chartId, labels, values }}>
+<script>
   import Chart from "chart.js/auto";
 
-  const canvas = document.getElementById(chartId);
+  document.querySelectorAll<HTMLCanvasElement>("canvas[id^='revenue-chart']").forEach((canvas) => {
+    const labels = JSON.parse(canvas.dataset.labels || "[]");
+    const values = JSON.parse(canvas.dataset.values || "[]");
 
-  if (canvas) {
     new Chart(canvas, {
       type: "line",
       data: {
@@ -83,5 +88,5 @@ const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 4
         },
       },
     });
-  }
+  });
 </script>

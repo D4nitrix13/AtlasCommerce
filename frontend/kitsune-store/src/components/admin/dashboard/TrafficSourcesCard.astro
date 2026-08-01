@@ -15,7 +15,10 @@ const sources = [
 
   <div class="flex items-center gap-6">
     <div class="relative h-44 w-44 shrink-0">
-      <canvas id={chartId}></canvas>
+      <canvas
+        id={chartId}
+        data-sources={JSON.stringify(sources)}
+      ></canvas>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         <span class="text-2xl font-bold text-slate-950">284K</span>
         <span class="text-xs text-slate-500">Visitas</span>
@@ -36,20 +39,20 @@ const sources = [
   </div>
 </section>
 
-<script define:vars={{ chartId, sources }}>
+<script>
   import Chart from "chart.js/auto";
 
-  const canvas = document.getElementById(chartId);
+  document.querySelectorAll<HTMLCanvasElement>("canvas[id^='traffic-chart']").forEach((canvas) => {
+    const sources = JSON.parse(canvas.dataset.sources || "[]");
 
-  if (canvas) {
     new Chart(canvas, {
       type: "doughnut",
       data: {
-        labels: sources.map((s) => s.label),
+        labels: sources.map((s: { label: string }) => s.label),
         datasets: [
           {
-            data: sources.map((s) => s.value),
-            backgroundColor: sources.map((s) => s.color),
+            data: sources.map((s: { value: number }) => s.value),
+            backgroundColor: sources.map((s: { color: string }) => s.color),
             borderWidth: 0,
             cutout: "70%",
           },
@@ -64,5 +67,5 @@ const sources = [
         },
       },
     });
-  }
+  });
 </script>
