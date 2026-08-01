@@ -14,7 +14,7 @@ URL completa:         GET /api/products
 
 ## Rutas protegidas
 
-Todas las rutas actuales requieren autenticación
+Las rutas privadas actuales requieren autenticación
 `Sanctum`. El middleware `auth:sanctum` se aplica a nivel
 de grupo:
 

@@ -83,11 +83,13 @@ Enfoque:    B2C, pedidos individuales, experiencia
 - **Catálogo público** — `product_stores` controla
   qué productos aparecen en cada tienda
 - **Precio público** —
-  `product_stores.precio_publico` override por
-  tienda
+  `product_stores.public_price` override por
+  tienda (equivalente DER:
+  `product_stores.precio_publico`)
 - **Descripción pública** —
-  `product_stores.descripcion_publica` override
-  por tienda
+  `product_stores.public_description` override
+  por tienda (equivalente DER:
+  `product_stores.descripcion_publica`)
 - **Redes sociales** — `store_social_links` por
   tienda
 - **Dominios** — `store_domains` por tienda
@@ -151,7 +153,7 @@ públicas. En el admin, se usa un parámetro
 ### Entidades con `store_id`
 
 ```txt
-products_stores     → qué productos publica cada tienda
+product_stores     → qué productos publica cada tienda
 orders              → pedidos por tienda
 invoices            → facturas por tienda
 carts               → carritos por tienda
@@ -243,7 +245,7 @@ tienda, se debería crear una tabla
 
 Un mismo producto puede tener diferente precio
 público en cada tienda. Esto se controla mediante
-`product_stores.precio_publico`. El precio base
+`product_stores.public_price`. El precio base
 del producto (`products.price`) es el precio de
 referencia o costo.
 
