@@ -18,24 +18,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * - Propósito (`purpose`): permite distinguir entre login_2fa, enable_2fa, change_2fa.
  *
  * Flujo de vida:
- * 1. Se crea con `used: false` y `attempts: 0`.
+ * 1. Se crea con `used_at: null` y `attempts: 0`.
  * 2. Cada intento de verificación incrementa `attempts`.
- * 3. Si el código es correcto, se marca `used: true` y `used_at: now()`.
+ * 3. Si el código es correcto, se marca `used_at: now()`.
  * 4. Si se agotan los intentos o expira, el reto queda inutilizable.
  */
 class OtpChallenge extends Model
 {
     protected $fillable = [
         'user_id',
+        'challenge_uuid',
         'method',
         'purpose',
         'code_hash',
         'destination',
         'attempts',
         'max_attempts',
-        'used',
+        'resend_count',
+        'last_sent_at',
         'expires_at',
         'used_at',
+        'locked_until',
         'request_ip',
         'user_agent',
     ];
@@ -43,9 +46,11 @@ class OtpChallenge extends Model
     protected $casts = [
         'attempts' => 'integer',
         'max_attempts' => 'integer',
-        'used' => 'boolean',
+        'resend_count' => 'integer',
+        'last_sent_at' => 'datetime',
         'expires_at' => 'datetime',
         'used_at' => 'datetime',
+        'locked_until' => 'datetime',
     ];
 
     /**

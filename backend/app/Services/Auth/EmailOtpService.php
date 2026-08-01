@@ -6,6 +6,7 @@ use App\Models\Auth\OtpChallenge;
 use App\Models\Auth\User;
 use App\Notifications\Auth\EmailOtpNotification;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * Servicio de autenticación OTP por correo electrónico.
@@ -58,13 +59,13 @@ class EmailOtpService
         // Esto protege la integridad del código incluso si la BD es comprometida.
         $challenge = OtpChallenge::create([
             'user_id' => $user->id,
+            'challenge_uuid' => Str::uuid(),
             'method' => 'email_otp',
             'purpose' => $purpose,
             'code_hash' => Hash::make(value: $code),
             'destination' => $user->email,
             'attempts' => 0,
             'max_attempts' => $maxAttempts,
-            'used' => false,
             'expires_at' => now()->addMinutes(value: $expiresMinutes),
             'request_ip' => $ip,
             'user_agent' => $userAgent,
@@ -79,7 +80,7 @@ class EmailOtpService
      * Verifica un código OTP ingresado por el usuario.
      *
      * Flujo de verificación:
-     * 1. Busca el último reto activo (no usado) para el usuario y propósito.
+     * 1. Busca el último reto activo (sin `used_at`) para el usuario y propósito.
      * 2. Si no hay reto, retorna false.
      * 3. Verifica que no esté expirado y que tenga intentos disponibles.
      * 4. Incrementa el contador de intentos ANTES de verificar (cuenta incluso intentos fallidos).
@@ -101,7 +102,7 @@ class EmailOtpService
             ->where(column: 'user_id', operator: '=', value: $user->id, boolean: 'and')
             ->where(column: 'method', operator: '=', value: 'email_otp', boolean: 'and')
             ->where(column: 'purpose', operator: '=', value: $purpose, boolean: 'and')
-            ->where(column: 'used', operator: '=', value: false, boolean: 'and')
+            ->whereNull('used_at', 'and')
             ->latest()
             ->first();
 
@@ -125,7 +126,6 @@ class EmailOtpService
         // Se invalida el reto después de una verificación exitosa para evitar reutilización.
         // Un código OTP solo puede usarse una vez.
         $challenge->update([
-            'used' => true,
             'used_at' => now(),
         ]);
 

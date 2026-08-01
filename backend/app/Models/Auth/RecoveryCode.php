@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * 1. Se generan en lote (default: 8) al activar 2FA o al regenerar.
  * 2. Los códigos en texto plano se muestran al usuario UNA SOLA VEZ.
  * 3. Solo permanecen los hashes en la BD.
- * 4. Al usar un código, se marca `used: true` y `used_at: now()`.
+ * 4. Al usar un código, se marca `used_at: now()`.
  * 5. La regeneración elimina todos los códigos anteriores y crea nuevos.
  *
  * Los recovery codes son un mecanismo de respaldo para cuando el usuario
@@ -28,13 +28,12 @@ class RecoveryCode extends Model
 {
     protected $fillable = [
         'user_id',
+        'batch_uuid',
         'code_hash',
-        'used',
         'used_at',
     ];
 
     protected $casts = [
-        'used' => 'boolean',
         'used_at' => 'datetime',
     ];
 
