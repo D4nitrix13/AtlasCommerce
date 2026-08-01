@@ -5,6 +5,7 @@ namespace App\Models\Inventory;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductVariant;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,6 +30,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Inventory extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'warehouse_id',
         'product_id',

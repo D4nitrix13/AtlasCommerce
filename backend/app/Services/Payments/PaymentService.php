@@ -9,6 +9,7 @@ use App\Models\Payments\InvoicePayment;
 use App\Models\Payments\Payment;
 use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Invoice;
+use App\Services\Inventory\StockService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -33,6 +34,10 @@ use RuntimeException;
  */
 final class PaymentService
 {
+    public function __construct(
+        private readonly StockService $stock,
+    ) {}
+
     /**
      * Aplica un pago a una invoice.
      *
@@ -111,13 +116,23 @@ final class PaymentService
                 default => 'pending',
             };
 
+            // PHASE 9: el stock se decrementa SOLO cuando la invoice
+            // pasa a 'paid'. Pagos parciales no mueven stock — el riesgo
+            // de venta sin entregar ya está cubierto por la idempotencia
+            // de la invoice y por el lock pesimista.
+            $becameFullyPaid = $newStatus === 'paid';
+
             $locked->update([
                 'payment_status' => $newStatus,
             ]);
 
-            // Si el pago liquidó completamente la invoice, marcamos el Payment como completed.
-            if ($paid >= $locked->total_cents) {
+            if ($becameFullyPaid) {
                 $payment->update(['status' => 'completed']);
+
+                $this->stock->decrementForInvoice(
+                    invoice: $locked,
+                    user: auth()->user(),
+                );
             }
 
             return $payment->fresh(['invoicePayments']);
