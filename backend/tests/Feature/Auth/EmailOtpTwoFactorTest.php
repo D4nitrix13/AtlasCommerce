@@ -44,7 +44,7 @@ class EmailOtpTwoFactorTest extends TestCase
      * 7. Consulta estadísticas → total: 8, used: 0, remaining: 8.
      * 8. Desactiva 2FA → settings con enabled: false.
      */
-    public function testAuthenticatedUserCanCompleteEmailOtpTwoFactorFlow(): void
+    public function test_authenticated_user_can_complete_email_otp_two_factor_flow(): void
     {
         Notification::fake();
 
@@ -98,13 +98,13 @@ class EmailOtpTwoFactorTest extends TestCase
             ->assertJsonPath('message', 'Email OTP enabled successfully.');
 
         // Paso 5: Validar en BD que 2FA se activó correctamente.
-        $this->assertDatabaseHas('two_factor_settings', [
+        $this->assertDatabaseHas(table: 'two_factor_settings', data: [
             'user_id' => $user->id,
             'enabled' => true,
             'preferred_method' => 'email_otp',
         ]);
 
-        $this->assertDatabaseHas('two_factor_methods', [
+        $this->assertDatabaseHas(table: 'two_factor_methods', data: [
             'user_id' => $user->id,
             'method' => 'email_otp',
             'active' => true,
@@ -112,7 +112,7 @@ class EmailOtpTwoFactorTest extends TestCase
         ]);
 
         // El challenge debe estar marcado como usado.
-        $this->assertDatabaseMissing('otp_challenges', [
+        $this->assertDatabaseMissing(table: 'otp_challenges', data: [
             'user_id' => $user->id,
             'method' => 'email_otp',
             'purpose' => 'enable_2fa',
@@ -123,7 +123,7 @@ class EmailOtpTwoFactorTest extends TestCase
         $this->postJson('/api/auth/2fa/recovery-codes/regenerate')
             ->assertOk()
             ->assertJsonPath('message', 'Recovery codes regenerated successfully.')
-            ->assertJsonCount(8, 'codes');
+            ->assertJsonCount(count: 8, key: 'codes');
 
         // Paso 7: Consultar estadísticas de recovery codes.
         $this->getJson('/api/auth/2fa/recovery-codes')
@@ -138,7 +138,7 @@ class EmailOtpTwoFactorTest extends TestCase
             ->assertJsonPath('message', 'Two-factor authentication disabled successfully.');
 
         // Validar que 2FA quedó deshabilitado en BD.
-        $this->assertDatabaseHas('two_factor_settings', [
+        $this->assertDatabaseHas(table: 'two_factor_settings', data: [
             'user_id' => $user->id,
             'enabled' => false,
             'preferred_method' => null,
@@ -152,7 +152,7 @@ class EmailOtpTwoFactorTest extends TestCase
      * 1. La respuesta sea 422 con mensaje de error.
      * 2. 2FA NO se active en la BD.
      */
-    public function testInvalidEmailOtpIsRejected(): void
+    public function test_invalid_email_otp_is_rejected(): void
     {
         Notification::fake();
 
@@ -171,7 +171,7 @@ class EmailOtpTwoFactorTest extends TestCase
             ->assertJsonPath('message', 'Invalid or expired security code.');
 
         // 2FA no debe haberse activado.
-        $this->assertDatabaseMissing('two_factor_settings', [
+        $this->assertDatabaseMissing(table: 'two_factor_settings', data: [
             'user_id' => $user->id,
             'enabled' => true,
             'preferred_method' => 'email_otp',
