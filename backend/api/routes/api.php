@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\Auth\PermissionController;
 use App\Http\Controllers\Api\Auth\PermissionRoleController;
+use App\Http\Controllers\Api\Auth\RecoveryCodeController;
 use App\Http\Controllers\Api\Auth\RoleController;
+use App\Http\Controllers\Api\Auth\TwoFactorAuthController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Carts\CartController;
 use App\Http\Controllers\Api\Carts\CartItemController;
@@ -59,15 +61,70 @@ use App\Http\Controllers\Api\Taxes\ProductTaxController;
 use App\Http\Controllers\Api\Taxes\TaxController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Protected API Routes
+|--------------------------------------------------------------------------
+|
+| All routes in this file require a valid Laravel Sanctum token.
+| The frontend must send the token using:
+|
+| Authorization: Bearer {token}
+|
+| Do not include "/api" here. Laravel already applies the API prefix
+| to routes defined in this file.
+|
+*/
 
-    // Auth
+Route::middleware('auth:sanctum')->group(function (): void {
+    /*
+    |--------------------------------------------------------------------------
+    | Auth and Access Control
+    |--------------------------------------------------------------------------
+    |
+    | Users, roles, permissions and role-permission assignments.
+    | These endpoints are part of the internal administration area.
+    |
+    */
+
     Route::apiResource('users', UserController::class);
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('permissions', PermissionController::class);
     Route::apiResource('permission-roles', PermissionRoleController::class);
 
-    // Catálogo
+    /*
+    |--------------------------------------------------------------------------
+    | Two-Factor Authentication
+    |--------------------------------------------------------------------------
+    |
+    | Security endpoints for account protection.
+    | These routes are grouped under /auth/2fa but they are already protected
+    | by the parent auth:sanctum middleware.
+    |
+    */
+
+    Route::prefix('auth')->group(function (): void {
+        Route::get('/2fa', [TwoFactorAuthController::class, 'show']);
+
+        Route::post('/2fa/email/send', [TwoFactorAuthController::class, 'sendEmailOtp']);
+        Route::post('/2fa/email/verify', [TwoFactorAuthController::class, 'verifyEmailOtp']);
+
+        Route::get('/2fa/recovery-codes', [RecoveryCodeController::class, 'index']);
+        Route::post('/2fa/recovery-codes/regenerate', [RecoveryCodeController::class, 'regenerate']);
+
+        Route::post('/2fa/disable', [TwoFactorAuthController::class, 'disable']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Catalog
+    |--------------------------------------------------------------------------
+    |
+    | Product catalog management: brands, categories, products, images,
+    | variants and product attributes.
+    |
+    */
+
     Route::apiResource('brands', BrandController::class);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('products', ProductController::class);
@@ -77,27 +134,67 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('product-attribute-values', ProductAttributeValueController::class);
     Route::apiResource('variant-attribute-values', VariantAttributeValueController::class);
 
-    // Clientes
+    /*
+    |--------------------------------------------------------------------------
+    | Customers
+    |--------------------------------------------------------------------------
+    |
+    | Customer profiles and customer addresses.
+    |
+    */
+
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('customers.addresses', CustomerAddressController::class);
 
-    // Inventario
+    /*
+    |--------------------------------------------------------------------------
+    | Inventory
+    |--------------------------------------------------------------------------
+    |
+    | Warehouses, current stock and inventory movements.
+    |
+    */
+
     Route::apiResource('warehouses', WarehouseController::class);
     Route::apiResource('inventories', InventoryController::class);
     Route::apiResource('inventory-movements', InventoryMovementController::class);
 
-    // Compras
+    /*
+    |--------------------------------------------------------------------------
+    | Purchases
+    |--------------------------------------------------------------------------
+    |
+    | Suppliers, purchases and purchase items.
+    |
+    */
+
     Route::apiResource('suppliers', SupplierController::class);
     Route::apiResource('purchases', PurchaseController::class);
     Route::apiResource('purchases.items', PurchaseItemController::class);
 
-    // Carritos
+    /*
+    |--------------------------------------------------------------------------
+    | Carts and Wishlists
+    |--------------------------------------------------------------------------
+    |
+    | Shopping carts, cart items, wishlists and wishlist items.
+    |
+    */
+
     Route::apiResource('carts', CartController::class);
     Route::apiResource('carts.items', CartItemController::class);
     Route::apiResource('wishlists', WishlistController::class);
     Route::apiResource('wishlists.items', WishlistItemController::class);
 
-    // Ventas
+    /*
+    |--------------------------------------------------------------------------
+    | Sales
+    |--------------------------------------------------------------------------
+    |
+    | Orders, invoices, order items, invoice items and status histories.
+    |
+    */
+
     Route::apiResource('orders', OrderController::class);
     Route::apiResource('orders.items', OrderItemController::class);
     Route::apiResource('orders.status-histories', OrderStatusHistoryController::class);
@@ -105,45 +202,113 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('invoices.items', InvoiceItemController::class);
     Route::apiResource('invoices.status-histories', InvoiceStatusHistoryController::class);
 
-    // Pagos
+    /*
+    |--------------------------------------------------------------------------
+    | Payments
+    |--------------------------------------------------------------------------
+    |
+    | Payment methods, payments, installments, transactions and invoice payments.
+    |
+    */
+
     Route::apiResource('payments', PaymentController::class);
     Route::apiResource('payment-methods', PaymentMethodController::class);
     Route::apiResource('payment-transactions', PaymentTransactionController::class);
     Route::apiResource('payment-installments', PaymentInstallmentController::class);
     Route::apiResource('invoice-payments', InvoicePaymentController::class);
 
-    // Envío
+    /*
+    |--------------------------------------------------------------------------
+    | Shipping
+    |--------------------------------------------------------------------------
+    |
+    | Shipping companies, zones, shipments and tracking events.
+    |
+    */
+
     Route::apiResource('shipping-companies', ShippingCompanyController::class);
     Route::apiResource('shipping-zones', ShippingZoneController::class);
     Route::apiResource('shipments', ShipmentController::class);
     Route::apiResource('shipments.tracking', ShipmentTrackingController::class);
 
-    // Marketing
+    /*
+    |--------------------------------------------------------------------------
+    | Marketing
+    |--------------------------------------------------------------------------
+    |
+    | Coupons, coupon usage, promotions and product promotions.
+    |
+    */
+
     Route::apiResource('coupons', CouponController::class);
     Route::apiResource('coupon-usages', CouponUsageController::class);
     Route::apiResource('promotions', PromotionController::class);
     Route::apiResource('product-promotions', ProductPromotionController::class);
 
-    // Impuestos
+    /*
+    |--------------------------------------------------------------------------
+    | Taxes
+    |--------------------------------------------------------------------------
+    |
+    | Tax definitions and product-tax relationships.
+    |
+    */
+
     Route::apiResource('taxes', TaxController::class);
     Route::apiResource('product-taxes', ProductTaxController::class);
 
-    // Devoluciones
+    /*
+    |--------------------------------------------------------------------------
+    | Returns
+    |--------------------------------------------------------------------------
+    |
+    | Return requests, returned items and refunds.
+    |
+    */
+
     Route::apiResource('return-requests', ReturnRequestController::class);
     Route::apiResource('return-request-items', ReturnRequestItemController::class);
     Route::apiResource('refunds', RefundController::class);
 
-    // Soporte
+    /*
+    |--------------------------------------------------------------------------
+    | Support
+    |--------------------------------------------------------------------------
+    |
+    | Support tickets, ticket messages, product reviews and product questions.
+    |
+    */
+
     Route::apiResource('support-tickets', SupportTicketController::class);
     Route::apiResource('support-ticket-messages', SupportTicketMessageController::class);
     Route::apiResource('product-reviews', ProductReviewController::class);
     Route::apiResource('product-questions', ProductQuestionController::class);
 
-    // Sistema
-    Route::apiResource('audits', AuditController::class)->only(['index', 'show']);
-    Route::apiResource('notifications', NotificationController::class)->only(['index', 'show', 'update']);
+    /*
+    |--------------------------------------------------------------------------
+    | System
+    |--------------------------------------------------------------------------
+    |
+    | Audits are read-only from the API. Notifications can be listed, viewed
+    | and updated.
+    |
+    */
 
-    // Configuración
+    Route::apiResource('audits', AuditController::class)
+        ->only(['index', 'show']);
+
+    Route::apiResource('notifications', NotificationController::class)
+        ->only(['index', 'show', 'update']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Settings
+    |--------------------------------------------------------------------------
+    |
+    | Store configuration, currencies and exchange rates.
+    |
+    */
+
     Route::apiResource('currencies', CurrencyController::class);
     Route::apiResource('exchange-rates', ExchangeRateController::class);
     Route::apiResource('store-settings', StoreSettingController::class);

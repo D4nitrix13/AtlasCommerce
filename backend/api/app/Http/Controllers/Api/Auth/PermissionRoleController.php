@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\PermissionRole;
+use App\Models\Auth\PermissionRole;
 use Illuminate\Http\Request;
 
 class PermissionRoleController extends Controller
