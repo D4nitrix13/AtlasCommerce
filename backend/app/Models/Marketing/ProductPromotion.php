@@ -2,16 +2,35 @@
 
 namespace App\Models\Marketing;
 
+use App\Models\Catalog\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Asociación entre una promoción y un producto.
  *
- * Tabla: `product_promotions` — relación N:1 con `promotions` y `products`.
- *
- * Tabla pivote que vincula promociones con productos específicos.
+ * Tabla: `product_promotion` — pivote N:N entre `promotions` y `products`.
  */
 class ProductPromotion extends Model
 {
-    //
+    protected $fillable = [
+        'product_id',
+        'promotion_id',
+    ];
+
+    /**
+     * Producto asociado.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Promoción asociada.
+     */
+    public function promotion(): BelongsTo
+    {
+        return $this->belongsTo(Promotion::class);
+    }
 }
