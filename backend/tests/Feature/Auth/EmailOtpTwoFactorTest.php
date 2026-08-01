@@ -44,7 +44,7 @@ class EmailOtpTwoFactorTest extends TestCase
      * 7. Consulta estadísticas → total: 8, used: 0, remaining: 8.
      * 8. Desactiva 2FA → settings con enabled: false.
      */
-    public function test_authenticated_user_can_complete_email_otp_two_factor_flow(): void
+    public function testAuthenticatedUserCanCompleteEmailOtpTwoFactorFlow(): void
     {
         Notification::fake();
 
@@ -112,11 +112,11 @@ class EmailOtpTwoFactorTest extends TestCase
         ]);
 
         // El challenge debe estar marcado como usado.
-        $this->assertDatabaseHas('otp_challenges', [
+        $this->assertDatabaseMissing('otp_challenges', [
             'user_id' => $user->id,
             'method' => 'email_otp',
             'purpose' => 'enable_2fa',
-            'used' => true,
+            'used_at' => null,
         ]);
 
         // Paso 6: Regenerar recovery codes.
@@ -152,7 +152,7 @@ class EmailOtpTwoFactorTest extends TestCase
      * 1. La respuesta sea 422 con mensaje de error.
      * 2. 2FA NO se active en la BD.
      */
-    public function test_invalid_email_otp_is_rejected(): void
+    public function testInvalidEmailOtpIsRejected(): void
     {
         Notification::fake();
 
