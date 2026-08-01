@@ -1,17 +1,16 @@
 import { useEffect, useState, type ReactElement } from "react";
-import { apiFetch, type ApiError } from "../../../lib/api";
+import { authedFetch } from "../../../lib/auth";
+import { type ApiError } from "../../../lib/api";
 import { API_ENDPOINTS } from "../../../lib/endpoints";
 import { formatMoney, formatDateTime } from "../../../lib/formatters";
+import { useTranslations } from "../../../i18n";
 import type {
   Shipment,
   ShipmentStatus,
   ShipmentWithRelations,
 } from "../../../types/shipping";
 import type { PaginatedResponse } from "../../../types/api";
-import {
-  SHIPMENT_STATUS_LABELS,
-  SHIPMENT_STATUS_COLORS,
-} from "../../../types/shipping";
+import { SHIPMENT_STATUS_COLORS } from "../../../types/shipping";
 
 const SHIPPING_TRANSITIONS: Record<ShipmentStatus, ShipmentStatus[]> = {
   pending: ["shipped", "cancelled"],
@@ -21,7 +20,16 @@ const SHIPPING_TRANSITIONS: Record<ShipmentStatus, ShipmentStatus[]> = {
   cancelled: [],
 };
 
+const STATUS_LABEL_KEYS = {
+  pending: "admin.shipments.status.pending",
+  shipped: "admin.shipments.status.shipped",
+  in_transit: "admin.shipments.status.in_transit",
+  delivered: "admin.shipments.status.delivered",
+  cancelled: "admin.shipments.status.cancelled",
+} as const satisfies Record<ShipmentStatus, string>;
+
 export default function ShipmentsAdmin(): ReactElement {
+  const { t } = useTranslations();
   const [shipments, setShipments] = useState<ShipmentWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +39,7 @@ export default function ShipmentsAdmin(): ReactElement {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiFetch<PaginatedResponse<ShipmentWithRelations>>(
+      const response = await authedFetch<PaginatedResponse<ShipmentWithRelations>>(
         API_ENDPOINTS.shipping.shipments,
       );
       setShipments(response.data);
@@ -59,7 +67,7 @@ export default function ShipmentsAdmin(): ReactElement {
             ? `${API_ENDPOINTS.shipping.shipments}/${shipment.id}/deliver`
             : `${API_ENDPOINTS.shipping.shipments}/${shipment.id}/cancel`;
 
-      await apiFetch<{ data: Shipment }>(endpoint, { method: "POST" });
+      await authedFetch<{ data: Shipment }>(endpoint, { method: "POST" });
       await loadShipments();
     } catch (apiError) {
       const err = apiError as ApiError;
@@ -71,14 +79,14 @@ export default function ShipmentsAdmin(): ReactElement {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-center text-gray-500">Cargando envíos...</div>
+      <div className="p-8 text-center text-gray-500">{t("admin.shipments.loading")}</div>
     );
   }
 
   if (error) {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-        No se pudieron cargar los envíos: {error}
+        {t("admin.shipments.error", { message: error })}
       </div>
     );
   }
@@ -86,7 +94,7 @@ export default function ShipmentsAdmin(): ReactElement {
   if (shipments.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
-        No hay envíos registrados todavía.
+        {t("admin.shipments.table.empty")}
       </div>
     );
   }
@@ -96,14 +104,14 @@ export default function ShipmentsAdmin(): ReactElement {
       <table className="w-full text-left text-sm">
         <thead className="bg-gray-50 text-xs uppercase text-gray-600">
           <tr>
-            <th className="px-4 py-3">Tracking</th>
-            <th className="px-4 py-3">Orden</th>
-            <th className="px-4 py-3">Estado</th>
-            <th className="px-4 py-3">Costo</th>
-            <th className="px-4 py-3">Zona</th>
-            <th className="px-4 py-3">Despachado</th>
-            <th className="px-4 py-3">Entregado</th>
-            <th className="px-4 py-3 text-right">Acciones</th>
+            <th className="px-4 py-3">{t("admin.shipments.table.tracking")}</th>
+            <th className="px-4 py-3">{t("admin.shipments.table.order")}</th>
+            <th className="px-4 py-3">{t("admin.shipments.table.status")}</th>
+            <th className="px-4 py-3">{t("admin.shipments.table.cost")}</th>
+            <th className="px-4 py-3">{t("admin.shipments.table.zone")}</th>
+            <th className="px-4 py-3">{t("admin.shipments.table.shippedAt")}</th>
+            <th className="px-4 py-3">{t("admin.shipments.table.deliveredAt")}</th>
+            <th className="px-4 py-3 text-right">{t("admin.shipments.table.actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -119,7 +127,7 @@ export default function ShipmentsAdmin(): ReactElement {
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${SHIPMENT_STATUS_COLORS[shipment.status]}`}
                   >
-                    {SHIPMENT_STATUS_LABELS[shipment.status]}
+                    {t(STATUS_LABEL_KEYS[shipment.status])}
                   </span>
                 </td>
                 <td className="px-4 py-3">{formatMoney(shipment.shipping_cost)}</td>
@@ -143,7 +151,7 @@ export default function ShipmentsAdmin(): ReactElement {
                           onClick={() => void handleTransition(shipment, target)}
                           className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          {SHIPMENT_STATUS_LABELS[target]}
+                          {t(STATUS_LABEL_KEYS[target])}
                         </button>
                       ))
                     )}

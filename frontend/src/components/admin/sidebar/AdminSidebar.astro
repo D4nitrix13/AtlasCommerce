@@ -1,5 +1,6 @@
 ---
 import AdminSidebarItem from "./AdminSidebarItem.astro";
+import AdminUserMenu from "../auth/AdminUserMenu";
 
 const currentPath = Astro.url.pathname;
 
@@ -172,18 +173,7 @@ const menu = [
   </nav>
 
   <div class="border-t border-white/10 p-4">
-    <div class="flex items-center gap-3 overflow-hidden rounded-2xl px-2 py-2">
-      <div class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">
-        AS
-      </div>
-
-      <div class="sidebar-label min-w-0 flex-1">
-        <p class="truncate text-sm font-medium text-white">Admin</p>
-        <p class="text-xs text-slate-500">Administrador</p>
-      </div>
-
-      <span class="sidebar-label text-slate-500">↗</span>
-    </div>
+    <AdminUserMenu client:load />
   </div>
 </aside>
 

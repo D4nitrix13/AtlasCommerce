@@ -1,0 +1,171 @@
+import { useSyncExternalStore } from "react";
+import type { LoginPayload, LoginResponse, User } from "../types/auth";
+import { apiFetch } from "../lib/api";
+
+/**
+ * Store de autenticación (React 19 + useSyncExternalStore).
+ *
+ * Sin dependencias externas: implementa el patrón subscribe/getSnapshot
+ * manualmente. El token se persiste en `localStorage` para sobrevivir
+ * recargas; el user se rehidrata via /auth/me al boot.
+ *
+ * Uso:
+ *   const { user, token, login, logout, isAuthenticated } = useAuth();
+ */
+
+const TOKEN_STORAGE_KEY = "auth.token";
+
+type AuthState = {
+  token: string | null;
+  user: User | null;
+  isHydrating: boolean;
+};
+
+const initialState: AuthState = {
+  token: readTokenFromStorage(),
+  user: null,
+  isHydrating: false,
+};
+
+let state: AuthState = initialState;
+const listeners = new Set<() => void>();
+
+function emit(): void {
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
+function readTokenFromStorage(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return window.localStorage.getItem(TOKEN_STORAGE_KEY);
+}
+
+function writeTokenToStorage(token: string | null): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (token === null) {
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  } else {
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  }
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot(): AuthState {
+  return state;
+}
+
+export function getAuthToken(): string | null {
+  return state.token;
+}
+
+export function getAuthUser(): User | null {
+  return state.user;
+}
+
+export function isAuthenticated(): boolean {
+  return state.token !== null;
+}
+
+async function login(payload: LoginPayload): Promise<LoginResponse> {
+  
+  const response = await apiFetch<LoginResponse>("/auth/login", {
+    method: "POST",
+    body: payload,
+  });
+
+  state = { ...state, token: response.token, user: response.user };
+  writeTokenToStorage(response.token);
+  emit();
+
+  return response;
+}
+
+async function logout(): Promise<void> {
+  
+
+  try {
+    if (state.token !== null) {
+      await apiFetch("/auth/logout", {
+        method: "POST",
+        token: state.token,
+      });
+    }
+  } catch {
+    // Ignorar errores de logout (token expirado, network, etc.).
+    // El objetivo es limpiar el estado local de todas formas.
+  }
+
+  state = { ...state, token: null, user: null };
+  writeTokenToStorage(null);
+  emit();
+}
+
+/**
+ * Rehidrata el user desde el backend usando el token guardado.
+ * Llamar al boot de la app para validar que el token sigue vigente.
+ */
+async function hydrate(): Promise<void> {
+  const token = state.token;
+
+  if (token === null) {
+    return;
+  }
+
+  state = { ...state, isHydrating: true };
+  emit();
+
+  
+
+  try {
+    const response = await apiFetch<{ user: User }>("/auth/me", { token });
+    state = { ...state, user: response.user, isHydrating: false };
+  } catch {
+    // Token expirado o inválido → limpiar.
+    state = { token: null, user: null, isHydrating: false };
+    writeTokenToStorage(null);
+  }
+
+  emit();
+}
+
+export const authStore = {
+  login,
+  logout,
+  hydrate,
+  subscribe,
+  getSnapshot,
+};
+
+export function useAuth(): {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isHydrating: boolean;
+  login: (payload: LoginPayload) => Promise<LoginResponse>;
+  logout: () => Promise<void>;
+} {
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  return {
+    user: snapshot.user,
+    token: snapshot.token,
+    isAuthenticated: snapshot.token !== null,
+    isHydrating: snapshot.isHydrating,
+    login,
+    logout,
+  };
+}
