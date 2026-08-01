@@ -45,7 +45,7 @@ Página HTML estática (Astro)
 ## Estructura del proyecto
 
 ```txt
-frontend/kitsune-store/
+frontend/
 ├── src/
 │   ├── assets/                     # Imágenes y iconos
 │   ├── components/

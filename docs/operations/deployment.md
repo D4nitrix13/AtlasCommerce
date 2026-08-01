@@ -31,12 +31,12 @@ cd ecommerce
 
 ```bash
 # Backend
-cp backend/api/.env.example backend/api/.env
-nano backend/api/.env
+cp backend/.env.example backend/.env
+nano backend/.env
 
 # Frontend
-cp frontend/kitsune-store/.env.example frontend/kitsune-store/.env
-nano frontend/kitsune-store/.env
+cp frontend/.env.example frontend/.env
+nano frontend/.env
 
 # Docker
 cp docker/dev/.env.example docker/dev/.env

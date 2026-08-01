@@ -19,7 +19,7 @@ Autenticación: Requiere login + token Sanctum
 
 ```txt
 ┌─────────────┬─────────────────────────────────┐
-│             │  AdminHeader (search, avatar)    │
+│             │  AdminHeader (search, avatar)   │
 │  Sidebar    ├─────────────────────────────────┤
 │  (260px)    │  Contenido de la página         │
 │  fixed      │                                 │
@@ -31,16 +31,16 @@ Autenticación: Requiere login + token Sanctum
 
 El sidebar contiene 8 secciones con 22 items:
 
-| Sección | Items |
-| --- | --- |
-| **Resumen** | Dashboard, Analíticas |
-| **Comercio** | Órdenes, Productos, Clientes, Facturas |
-| **Catálogo** | Categorías, Marcas, Variantes |
-| **Inventario** | Stock, Movimientos, Depósitos |
-| **Compras** | Proveedores, Compras |
-| **Marketing** | Cupones, Promociones |
-| **Soporte** | Tickets, Reseñas, Preguntas |
-| **Sistema** | Usuarios, Roles, Auditoría, Configuración |
+| Sección        | Items                                     |
+| -------------- | ----------------------------------------- |
+| **Resumen**    | Dashboard, Analíticas                     |
+| **Comercio**   | Órdenes, Productos, Clientes, Facturas    |
+| **Catálogo**   | Categorías, Marcas, Variantes             |
+| **Inventario** | Stock, Movimientos, Depósitos             |
+| **Compras**    | Proveedores, Compras                      |
+| **Marketing**  | Cupones, Promociones                      |
+| **Soporte**    | Tickets, Reseñas, Preguntas               |
+| **Sistema**    | Usuarios, Roles, Auditoría, Configuración |
 
 La configuración del menú está en `src/config/menu.ts`.
 
@@ -58,9 +58,9 @@ El header incluye:
 El panel admin debe permitir cambiar entre tiendas:
 
 ```txt
-┌──────────────────────────────────────────────┐
-│ [Panda Estampados]  notifications  user@email│
-└──────────────────────────────────────────────┘
+┌───────────────────────────────────────────────┐
+│ [Panda Estampados]  notifications  user@email │
+└───────────────────────────────────────────────┘
 ```
 
 El selector envía un header `X-Store-Id` en cada petición
