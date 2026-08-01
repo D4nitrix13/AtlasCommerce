@@ -11,13 +11,21 @@ class Store extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'currency_id',
         'name',
         'slug',
         'logo',
+        'favicon',
+        'cover_image',
+        'og_image',
         'email',
         'phone',
+        'whatsapp',
         'address',
+        'description',
         'primary_currency',
+        'primary_color',
+        'secondary_color',
         'maintenance_mode',
         'is_active',
     ];

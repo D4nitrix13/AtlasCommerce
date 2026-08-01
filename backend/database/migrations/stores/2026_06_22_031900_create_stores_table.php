@@ -29,6 +29,9 @@ return new class extends Migration
             // Slug único para URLs amigables: /tienda/mi-tienda
             $table->string(column: 'slug', length: 160)->unique();
             $table->string(column: 'logo')->nullable();
+            $table->string(column: 'favicon')->nullable();
+            $table->string(column: 'cover_image')->nullable();
+            $table->string(column: 'og_image')->nullable();
             $table->string(column: 'email', length: 150)->nullable();
             $table->string(column: 'phone', length: 30)->nullable();
             $table->string(column: 'whatsapp', length: 30)->nullable();
