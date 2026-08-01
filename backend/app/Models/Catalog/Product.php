@@ -4,7 +4,10 @@ namespace App\Models\Catalog;
 
 use App\Models\Customization\ProductCustomization;
 use App\Models\Inventory\Inventory;
+use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,10 +19,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Tabla: `products` — relación 1:N con `product_variants`,
  * `product_images`, `product_attribute_values` y N:N con `stores`
- * a través de `product_stores`.
+ * a través de `product_stores`. N:1 con `currencies`.
  *
- * Entidad central del catálogo: almacena nombre, descripción,
- * precio base, SKU y estado de publicación.
+ * @property int $id
+ * @property int $category_id
+ * @property int|null $brand_id
+ * @property int|null $currency_id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property string $sku
+ * @property int $base_price_cents
+ * @property int $cost_cents
+ * @property bool $is_active
+ * @property Carbon|null $published_at
  */
 class Product extends Model
 {
@@ -28,112 +41,94 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'brand_id',
+        'currency_id',
         'name',
         'slug',
         'description',
         'sku',
-        'base_price',
-        'cost',
+        'base_price_cents',
+        'cost_cents',
         'is_active',
         'published_at',
     ];
 
     protected $casts = [
-        'base_price' => 'decimal:2',
-        'cost' => 'decimal:2',
+        'base_price_cents' => 'integer',
+        'cost_cents' => 'integer',
         'is_active' => 'boolean',
         'published_at' => 'datetime',
     ];
 
-    /**
-     * Categoría a la que pertenece el producto.
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    /**
-     * Marca del producto (opcional).
-     */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
-    /**
-     * Variantes del producto (talla, color, etc.).
-     */
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
     }
 
-    /**
-     * Imágenes del producto.
-     */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
 
-    /**
-     * Valores de atributos asignados al producto.
-     */
     public function attributeValues(): HasMany
     {
         return $this->hasMany(ProductAttributeValue::class);
     }
 
-    /**
-     * Tiendas donde se publica el producto.
-     */
     public function stores(): BelongsToMany
     {
         return $this->belongsToMany(
             related: ProductStore::class,
             table: 'product_stores',
-        )->withPivot('is_visible');
+        )->withPivot(columns: ['is_visible']);
     }
 
-    /**
-     * Configuración de personalización del producto.
-     */
     public function customization(): HasMany
     {
         return $this->hasMany(ProductCustomization::class);
     }
 
-    /**
-     * Registros de inventario del producto.
-     */
     public function inventories(): HasMany
     {
         return $this->hasMany(Inventory::class);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function scopePublished($query)
+    public function scopePublished(Builder $query): Builder
     {
         return $query->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
 
-    public function scopeByCategory($query, int $categoryId)
+    public function scopeByCategory(Builder $query, int $categoryId): Builder
     {
         return $query->where('category_id', $categoryId);
     }
 
-    public function scopeByBrand($query, int $brandId)
+    public function scopeByBrand(Builder $query, int $brandId): Builder
     {
         return $query->where('brand_id', $brandId);
     }
 
-    public function scopeBySku($query, string $sku)
+    public function scopeBySku(Builder $query, string $sku): Builder
     {
         return $query->where('sku', $sku);
     }
