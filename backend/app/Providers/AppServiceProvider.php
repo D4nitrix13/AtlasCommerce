@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Stores\StoreContextService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // El contexto de tienda debe ser único por request para que el
+        // global scope `BelongsToStore` y el middleware vean la misma instancia.
+        $this->app->singleton(StoreContextService::class);
     }
 
     /**
