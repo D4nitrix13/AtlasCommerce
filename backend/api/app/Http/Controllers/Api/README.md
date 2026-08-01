@@ -1,6 +1,6 @@
 # API Controllers - Ecommerce Backend
 
-Este directorio contiene los controladores API del backend Laravel para el sistema ecommerce. Los controladores reciben solicitudes HTTP del frontend, coordinan la ejecución necesaria y devuelven respuestas JSON.
+Este directorio contiene los controladores API del backend Laravel para el sistema store. Los controladores reciben solicitudes HTTP del frontend, coordinan la ejecución necesaria y devuelven respuestas JSON.
 
 El frontend principal del proyecto será una aplicación Astro que consumirá endpoints de Laravel mediante API.
 
@@ -57,7 +57,7 @@ app/Http/Controllers/
 └── Controller.php
 ```
 
-Esta estructura mantiene separados los módulos del ecommerce y facilita encontrar cada controlador.
+Esta estructura mantiene separados los módulos del store y facilita encontrar cada controlador.
 
 ## Nota sobre la carpeta Auth fuera de Api
 

@@ -1,6 +1,6 @@
 # Models - Ecommerce Backend
 
-Este directorio contiene los modelos Eloquent del backend Laravel para el sistema ecommerce. Cada modelo representa una entidad principal del dominio y define la relación entre Laravel y las tablas de la base de datos.
+Este directorio contiene los modelos Eloquent del backend Laravel para el sistema store. Cada modelo representa una entidad principal del dominio y define la relación entre Laravel y las tablas de la base de datos.
 
 ## Objetivo del directorio
 
@@ -316,7 +316,7 @@ ProductVariant.php
 VariantAttributeValue.php
 ```
 
-Este módulo maneja el catálogo del ecommerce.
+Este módulo maneja el catálogo del store.
 
 Responsabilidades principales:
 

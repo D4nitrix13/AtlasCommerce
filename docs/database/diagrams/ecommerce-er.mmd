@@ -1,5 +1,79 @@
 erDiagram
 
+    TIENDA {
+        int id_tienda PK
+        int id_moneda FK
+        string nombre
+        string slug
+        string logo
+        string correo
+        string telefono
+        string whatsapp
+        string direccion
+        string descripcion
+        string color_primario
+        string color_secundario
+        boolean mantenimiento
+        boolean activa
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    TIENDA_DOMINIO {
+        int id_tienda_dominio PK
+        int id_tienda FK
+        string dominio
+        boolean principal
+        boolean activo
+        datetime fecha_creacion
+    }
+
+    TIENDA_RED_SOCIAL {
+        int id_tienda_red_social PK
+        int id_tienda FK
+        string plataforma
+        string url
+        boolean activa
+    }
+
+    USUARIO_TIENDA {
+        int id_usuario_tienda PK
+        int id_usuario FK
+        int id_tienda FK
+        int id_rol FK
+        boolean activo
+        datetime fecha_asignacion
+    }
+
+    CLIENTE_TIENDA {
+        int id_cliente_tienda PK
+        int id_cliente FK
+        int id_tienda FK
+        string tipo_cliente
+        boolean activo
+        datetime fecha_registro
+    }
+
+    PRODUCTO_TIENDA {
+        int id_producto_tienda PK
+        int id_producto FK
+        int id_tienda FK
+        string slug
+        decimal precio_publico
+        string descripcion_publica
+        boolean visible
+        boolean destacado
+        int orden
+        datetime fecha_publicacion
+    }
+
+    CANAL_VENTA {
+        int id_canal_venta PK
+        string nombre
+        string descripcion
+        boolean activo
+    }
+
     ROL {
         int id_rol PK
         string nombre
@@ -248,6 +322,7 @@ erDiagram
 
     CARRITO {
         int id_carrito PK
+        int id_tienda FK
         int id_cliente FK
         string estado
         datetime fecha_creacion
@@ -266,6 +341,7 @@ erDiagram
 
     WISHLIST {
         int id_wishlist PK
+        int id_tienda FK
         int id_cliente FK
         datetime fecha_creacion
     }
@@ -279,8 +355,11 @@ erDiagram
 
     PEDIDO {
         int id_pedido PK
+        int id_tienda FK
         int id_cliente FK
         int id_direccion_envio FK
+        int id_canal_venta FK
+        int id_usuario_creador FK
         decimal subtotal
         decimal descuento
         decimal impuesto
@@ -312,8 +391,11 @@ erDiagram
 
     FACTURA {
         int id_factura PK
+        int id_tienda FK
         int id_pedido FK
         int id_cliente FK
+        int id_usuario_emisor FK
+        int id_canal_venta FK
         string numero_factura
         decimal subtotal
         decimal descuento
@@ -354,6 +436,7 @@ erDiagram
 
     PAGO {
         int id_pago PK
+        int id_tienda FK
         int id_cliente FK
         int id_metodo_pago FK
         decimal monto
@@ -429,6 +512,7 @@ erDiagram
 
     CUPON {
         int id_cupon PK
+        int id_tienda FK
         string codigo
         string tipo_descuento
         decimal valor
@@ -449,6 +533,7 @@ erDiagram
 
     PROMOCION {
         int id_promocion PK
+        int id_tienda FK
         string nombre
         string descripcion
         string tipo_descuento
@@ -506,6 +591,7 @@ erDiagram
 
     RESENA_PRODUCTO {
         int id_resena PK
+        int id_tienda FK
         int id_producto FK
         int id_cliente FK
         int calificacion
@@ -516,6 +602,7 @@ erDiagram
 
     PREGUNTA_PRODUCTO {
         int id_pregunta PK
+        int id_tienda FK
         int id_producto FK
         int id_cliente FK
         string pregunta
@@ -526,6 +613,7 @@ erDiagram
 
     TICKET_SOPORTE {
         int id_ticket PK
+        int id_tienda FK
         int id_cliente FK
         string asunto
         string descripcion
@@ -544,6 +632,7 @@ erDiagram
 
     NOTIFICACION {
         int id_notificacion PK
+        int id_tienda FK
         int id_usuario FK
         string titulo
         string mensaje
@@ -554,23 +643,13 @@ erDiagram
 
     AUDITORIA {
         int id_auditoria PK
+        int id_tienda FK
         int id_usuario FK
         string accion
         string tabla_afectada
         string registro_id
         string descripcion
         datetime fecha_registro
-    }
-
-    CONFIGURACION_TIENDA {
-        int id_configuracion PK
-        string nombre_tienda
-        string logo
-        string correo
-        string telefono
-        string direccion
-        string moneda_principal
-        boolean mantenimiento
     }
 
     MONEDA {
@@ -588,11 +667,34 @@ erDiagram
         date fecha
     }
 
+    MONEDA ||--o{ TIENDA : usa
+    MONEDA ||--o{ TIPO_CAMBIO : tiene
+
+    TIENDA ||--o{ TIENDA_DOMINIO : posee
+    TIENDA ||--o{ TIENDA_RED_SOCIAL : tiene
+    TIENDA ||--o{ USUARIO_TIENDA : asigna
+    TIENDA ||--o{ CLIENTE_TIENDA : atiende
+    TIENDA ||--o{ PRODUCTO_TIENDA : publica
+    TIENDA ||--o{ CARRITO : contiene
+    TIENDA ||--o{ WISHLIST : contiene
+    TIENDA ||--o{ PEDIDO : recibe
+    TIENDA ||--o{ FACTURA : emite
+    TIENDA ||--o{ PAGO : registra
+    TIENDA ||--o{ CUPON : ofrece
+    TIENDA ||--o{ PROMOCION : publica
+    TIENDA ||--o{ RESENA_PRODUCTO : recibe
+    TIENDA ||--o{ PREGUNTA_PRODUCTO : recibe
+    TIENDA ||--o{ TICKET_SOPORTE : atiende
+    TIENDA ||--o{ NOTIFICACION : genera
+    TIENDA ||--o{ AUDITORIA : registra
+
     ROL ||--o{ USUARIO : asigna
     ROL ||--o{ ROL_PERMISO : contiene
+    ROL ||--o{ USUARIO_TIENDA : define_acceso
     PERMISO ||--o{ ROL_PERMISO : pertenece
 
     USUARIO ||--o| CLIENTE : puede_ser
+    USUARIO ||--o{ USUARIO_TIENDA : administra
     USUARIO ||--o| USUARIO_2FA_CONFIGURACION : configura
     USUARIO ||--o{ USUARIO_2FA_METODO : tiene
     USUARIO ||--o{ OTP_DESAFIO : genera
@@ -601,11 +703,14 @@ erDiagram
     USUARIO ||--o{ AUDITORIA : genera
     USUARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
     USUARIO ||--o{ COMPRA : realiza
+    USUARIO ||--o{ PEDIDO : crea
+    USUARIO ||--o{ FACTURA : emite
     USUARIO ||--o{ PEDIDO_ESTADO_HISTORIAL : cambia
     USUARIO ||--o{ FACTURA_ESTADO_HISTORIAL : cambia
     USUARIO ||--o{ TICKET_MENSAJE : escribe
     USUARIO ||--o{ NOTIFICACION : recibe
 
+    CLIENTE ||--o{ CLIENTE_TIENDA : pertenece
     CLIENTE ||--o{ CLIENTE_DIRECCION : tiene
     CLIENTE ||--o{ CARRITO : posee
     CLIENTE ||--o{ WISHLIST : posee
@@ -622,72 +727,74 @@ erDiagram
     CATEGORIA ||--o{ PRODUCTO : clasifica
     MARCA ||--o{ PRODUCTO : fabrica
 
+    PRODUCTO ||--o{ PRODUCTO_TIENDA : aparece_en
     PRODUCTO ||--o{ PRODUCTO_IMAGEN : tiene
     PRODUCTO ||--o{ PRODUCTO_VARIANTE : tiene
     PRODUCTO ||--o{ PRODUCTO_ATRIBUTO : posee
+    PRODUCTO ||--o{ INVENTARIO : tiene_stock
+    PRODUCTO ||--o{ DETALLE_COMPRA : comprado
+    PRODUCTO ||--o{ CARRITO_DETALLE : agregado
+    PRODUCTO ||--o{ WISHLIST_DETALLE : guardado
+    PRODUCTO ||--o{ DETALLE_PEDIDO : vendido
+    PRODUCTO ||--o{ DETALLE_FACTURA : facturado
+    PRODUCTO ||--o{ PRODUCTO_PROMOCION : participa
+    PRODUCTO ||--o{ PRODUCTO_IMPUESTO : tiene
+    PRODUCTO ||--o{ DETALLE_DEVOLUCION : devuelto
+    PRODUCTO ||--o{ RESENA_PRODUCTO : recibe
+    PRODUCTO ||--o{ PREGUNTA_PRODUCTO : recibe
+
     ATRIBUTO ||--o{ PRODUCTO_ATRIBUTO : define
     PRODUCTO_VARIANTE ||--o{ VARIANTE_ATRIBUTO : posee
+    PRODUCTO_VARIANTE ||--o{ INVENTARIO : tiene_stock
+    PRODUCTO_VARIANTE ||--o{ DETALLE_COMPRA : comprado
+    PRODUCTO_VARIANTE ||--o{ CARRITO_DETALLE : agregado
+    PRODUCTO_VARIANTE ||--o{ DETALLE_PEDIDO : vendido
+    PRODUCTO_VARIANTE ||--o{ DETALLE_FACTURA : facturado
+    PRODUCTO_VARIANTE ||--o{ DETALLE_DEVOLUCION : devuelto
     ATRIBUTO ||--o{ VARIANTE_ATRIBUTO : define
 
     ALMACEN ||--o{ INVENTARIO : contiene
-    PRODUCTO ||--o{ INVENTARIO : tiene_stock
-    PRODUCTO_VARIANTE ||--o{ INVENTARIO : tiene_stock
     INVENTARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
 
     PROVEEDOR ||--o{ COMPRA : suministra
     COMPRA ||--o{ DETALLE_COMPRA : incluye
-    PRODUCTO ||--o{ DETALLE_COMPRA : comprado
-    PRODUCTO_VARIANTE ||--o{ DETALLE_COMPRA : comprado
 
     CARRITO ||--o{ CARRITO_DETALLE : contiene
-    PRODUCTO ||--o{ CARRITO_DETALLE : agregado
-    PRODUCTO_VARIANTE ||--o{ CARRITO_DETALLE : agregado
 
     WISHLIST ||--o{ WISHLIST_DETALLE : contiene
-    PRODUCTO ||--o{ WISHLIST_DETALLE : guardado
 
     CLIENTE_DIRECCION ||--o{ PEDIDO : usada_en
+    CANAL_VENTA ||--o{ PEDIDO : origina
+    CANAL_VENTA ||--o{ FACTURA : registra
+
     PEDIDO ||--o{ DETALLE_PEDIDO : contiene
-    PRODUCTO ||--o{ DETALLE_PEDIDO : vendido
-    PRODUCTO_VARIANTE ||--o{ DETALLE_PEDIDO : vendido
     PEDIDO ||--o{ PEDIDO_ESTADO_HISTORIAL : historial
-
     PEDIDO ||--o| FACTURA : genera
-    FACTURA ||--o{ DETALLE_FACTURA : contiene
-    PRODUCTO ||--o{ DETALLE_FACTURA : facturado
-    PRODUCTO_VARIANTE ||--o{ DETALLE_FACTURA : facturado
-    FACTURA ||--o{ FACTURA_ESTADO_HISTORIAL : historial
+    PEDIDO ||--o| ENVIO : tiene
+    PEDIDO ||--o{ USO_CUPON : aplica
+    PEDIDO ||--o{ DEVOLUCION : puede_tener
 
-    METODO_PAGO ||--o{ PAGO : usado_en
-    PAGO ||--o{ FACTURA_PAGO : aplicado
+    FACTURA ||--o{ DETALLE_FACTURA : contiene
+    FACTURA ||--o{ FACTURA_ESTADO_HISTORIAL : historial
     FACTURA ||--o{ FACTURA_PAGO : recibe
     FACTURA ||--o{ CUOTA_PAGO : divide
+
+    METODO_PAGO ||--o{ PAGO : usado_en
+    METODO_PAGO ||--o{ REEMBOLSO : usado_en
+    PAGO ||--o{ FACTURA_PAGO : aplicado
     PAGO ||--o{ TRANSACCION_PAGO : genera
 
     EMPRESA_ENVIO ||--o{ ENVIO : transporta
     ZONA_ENVIO ||--o{ ENVIO : pertenece
-    PEDIDO ||--o| ENVIO : tiene
     ENVIO ||--o{ SEGUIMIENTO_ENVIO : actualiza
 
     CUPON ||--o{ USO_CUPON : registra
-    PEDIDO ||--o{ USO_CUPON : aplica
 
     PROMOCION ||--o{ PRODUCTO_PROMOCION : incluye
-    PRODUCTO ||--o{ PRODUCTO_PROMOCION : participa
 
     IMPUESTO ||--o{ PRODUCTO_IMPUESTO : aplica
-    PRODUCTO ||--o{ PRODUCTO_IMPUESTO : tiene
 
-    PEDIDO ||--o{ DEVOLUCION : puede_tener
     DEVOLUCION ||--o{ DETALLE_DEVOLUCION : contiene
-    PRODUCTO ||--o{ DETALLE_DEVOLUCION : devuelto
-    PRODUCTO_VARIANTE ||--o{ DETALLE_DEVOLUCION : devuelto
     DEVOLUCION ||--o| REEMBOLSO : genera
-    METODO_PAGO ||--o{ REEMBOLSO : usado_en
-
-    PRODUCTO ||--o{ RESENA_PRODUCTO : recibe
-    PRODUCTO ||--o{ PREGUNTA_PRODUCTO : recibe
 
     TICKET_SOPORTE ||--o{ TICKET_MENSAJE : contiene
-
-    MONEDA ||--o{ TIPO_CAMBIO : tiene

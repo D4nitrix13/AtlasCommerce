@@ -2,7 +2,7 @@
 
 ## Resumen del Proyecto
 
-API REST para un ecommerce completo construida con **Laravel 13** y **PHP 8.3+**.
+API REST para un store completo construida con **Laravel 13** y **PHP 8.3+**.
 Base de datos: **PostgreSQL** (nombre: `store`).
 Autenticación: **Laravel Sanctum** (tokens Bearer).
 
