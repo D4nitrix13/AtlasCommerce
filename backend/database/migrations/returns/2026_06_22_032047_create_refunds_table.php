@@ -7,43 +7,53 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de reembolsos para gestionar la devolución
+     * de montos a clientes por devoluciones aprobadas.
      */
     public function up(): void
     {
-        Schema::create('refunds', function (Blueprint $table) {
+        Schema::create(table: 'refunds', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->foreignId('return_request_id')
-                ->constrained('return_requests')
+            // Solicitud de devolución asociada al reembolso: cascadeOnDelete porque si se elimina la solicitud el reembolso no tiene sentido
+            $table->foreignId(column: 'return_request_id')
+                ->constrained(table: 'return_requests')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('payment_method_id')
+            // Método de pago para el reembolso, nullable temporalmente hasta asignar método
+            // nullOnDelete: si se elimina el método de pago, el reembolso se mantiene pero sin método asociado
+            $table->foreignId(column: 'payment_method_id')
                 ->nullable()
-                ->constrained('payment_methods')
+                ->constrained(table: 'payment_methods')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->decimal('amount', 12, 2);
-            $table->string('status', 50)->default('pending');
-            $table->timestamp('refunded_at')->nullable();
+            // Monto total a reembolsar con precisión monetaria
+            $table->decimal(column: 'amount', total: 12, places: 2);
+            // Estado del reembolso: 'pending', 'processing', 'completed', 'failed', etc.
+            $table->string(column: 'status', length: 50)->default(value: 'pending');
+            // Fecha y hora en que se ejecutó efectivamente el reembolso
+            $table->timestamp(column: 'refunded_at')->nullable();
 
             $table->timestamps();
+            // Soft deletes para conservar historial de reembolsos eliminados
             $table->softDeletes();
 
-            $table->index('return_request_id');
-            $table->index('payment_method_id');
-            $table->index('status');
-            $table->index('refunded_at');
+            $table->index(columns: ['return_request_id'], name: 'refunds_return_request_id_idx');
+            $table->index(columns: ['payment_method_id'], name: 'refunds_payment_method_id_idx');
+            $table->index(columns: ['status'], name: 'refunds_status_idx');
+            $table->index(columns: ['refunded_at'], name: 'refunds_refunded_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('refunds');
+        Schema::dropIfExists(table: 'refunds');
     }
 };

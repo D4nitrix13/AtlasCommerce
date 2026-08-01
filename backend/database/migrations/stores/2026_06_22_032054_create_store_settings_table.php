@@ -7,30 +7,39 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'store_settings' que almacena la configuración general de la tienda
+     * incluyendo nombre, logo, datos de contacto, dirección, moneda primaria y modo
+     * mantenimiento. Esta tabla complementa la información de la tabla 'stores' con
+     * ajustes adicionales de presentación y funcionamiento.
      */
     public function up(): void
     {
-        Schema::create('store_settings', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'store_settings', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->string('store_name', 160);
-            $table->string('logo')->nullable();
-            $table->string('email', 150)->nullable();
-            $table->string('phone', 30)->nullable();
-            $table->text('address')->nullable();
-            $table->string('primary_currency', 10)->default('NIO');
-            $table->boolean('maintenance_mode')->default(false);
+            $table->string(column: 'store_name', length: 160);
+            $table->string(column: 'logo')->nullable();
+            $table->string(column: 'email', length: 150)->nullable();
+            $table->string(column: 'phone', length: 30)->nullable();
+            $table->text(column: 'address')->nullable();
+            // Moneda primaria para mostrar precios en la tienda
+            $table->string(column: 'primary_currency', length: 10)->default(value: 'NIO');
+            // Modo mantenimiento desactiva temporalmente la tienda para los clientes
+            $table->boolean(column: 'maintenance_mode')->default(value: false);
 
             $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'store_settings' y todas sus restricciones de integridad referencial.
      */
     public function down(): void
     {
-        Schema::dropIfExists('store_settings');
+        Schema::dropIfExists(table: 'store_settings');
     }
 };

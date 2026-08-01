@@ -7,31 +7,39 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de empresas de envío para configurar
+     * las opciones de entrega disponibles en el store.
      */
     public function up(): void
     {
-        Schema::create('shipping_companies', function (Blueprint $table) {
+        Schema::create(table: 'shipping_companies', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->string('name', 160);
-            $table->string('phone', 30)->nullable();
-            $table->string('email', 150)->nullable();
-            $table->boolean('is_active')->default(true);
+            // Nombre de la empresa de envío para identificación en el sistema
+            $table->string(column: 'name', length: 160);
+            // Teléfono de contacto de la empresa, nullable si no se requiere contacto telefónico
+            $table->string(column: 'phone', length: 30)->nullable();
+            // Email de contacto de la empresa, nullable para empresas sin contacto por email
+            $table->string(column: 'email', length: 150)->nullable();
+            // Estado de activación: permite ocultar empresas de envío sin eliminar su configuración
+            $table->boolean(column: 'is_active')->default(value: true);
 
             $table->timestamps();
+            // Soft deletes para conservar historial de envíos realizados con empresas eliminadas
             $table->softDeletes();
 
-            $table->index('name');
-            $table->index('is_active');
+            $table->index(columns: ['name'], name: 'shipping_companies_name_idx');
+            $table->index(columns: ['is_active'], name: 'shipping_companies_is_active_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('shipping_companies');
+        Schema::dropIfExists(table: 'shipping_companies');
     }
 };

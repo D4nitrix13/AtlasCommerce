@@ -7,41 +7,49 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla "carts" que almacena los carritos de compra de cada
+     * cliente. Un cliente puede tener múltiples carritos (por tienda) y
+     * cada carrito tiene un estado que controla su ciclo de vida.
      */
     public function up(): void
     {
-        Schema::create('carts', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'carts', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('customer_id')
-                ->constrained('customers')
+            // Relación con el cliente propietario del carrito
+            $table->foreignId(column: 'customer_id')
+                ->constrained(table: 'customers')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('store_id')
+            // Tienda opcional: permite carritos globales o por tienda específica
+            $table->foreignId(column: 'store_id')
                 ->nullable()
-                ->constrained('stores')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete();
 
-            $table->string('status', 50)->default('active');
-            $table->timestamp('expires_at')->nullable();
+            $table->string(column: 'status', length: 50)->default(value: 'active');
+            $table->timestamp(column: 'expires_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('customer_id');
-            $table->index('store_id');
-            $table->index('status');
-            $table->index('expires_at');
+            $table->index(columns: ['customer_id'], name: 'carts_customer_id_idx');
+            $table->index(columns: ['store_id'], name: 'carts_store_id_idx');
+            $table->index(columns: ['status'], name: 'carts_status_idx');
+            $table->index(columns: ['expires_at'], name: 'carts_expires_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
+     *
+     * Elimina la tabla "carts" y todas sus dependencias.
      */
     public function down(): void
     {
-        Schema::dropIfExists('carts');
+        Schema::dropIfExists(table: 'carts');
     }
 };

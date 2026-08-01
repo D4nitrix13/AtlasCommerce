@@ -6,38 +6,62 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla `passkey_credentials` que almacena las credenciales
+     * FIDO2/WebAuthn de los usuarios para autenticación sin contraseña.
+     */
     public function up(): void
     {
-        Schema::create('passkey_credentials', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'passkey_credentials', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('user_id')
-                ->constrained('users')
+            // Cascade on delete: si se elimina el usuario, se eliminan sus passkeys
+            $table->foreignId(column: 'user_id')
+                ->constrained(table: 'users')
                 ->cascadeOnDelete();
 
-            $table->string('credential_id', 1024)->unique();
-            $table->text('public_key');
-            $table->unsignedBigInteger('sign_count')->default(0);
-            $table->jsonb('transports')->nullable();
-            $table->string('aaguid', 100)->nullable();
-            $table->string('device_name', 100)->nullable();
+            // ID de credencial WebAuthn, longitud grande para soportar cualquier implementación
+            // unique() porque cada credencial es única a nivel mundial
+            $table->string(column: 'credential_id', length: 1024)->unique();
+            // Clave pública PEM del dispositivo
+            $table->text(column: 'public_key');
+            // Contador de autenticación para detectar clonación de credenciales
+            $table->unsignedBigInteger('sign_count')->default(value: 0);
+            // Transportes soportados (usb, nfc, ble, internal): jsonb para consultas eficientes
+            $table->jsonb(column: 'transports')->nullable();
+            // AAGUID identifica el fabricante/tipo de autenticador
+            $table->string(column: 'aaguid', length: 100)->nullable();
+            // Nombre descriptivo del dispositivo para que el usuario lo identifique
+            $table->string(column: 'device_name', length: 100)->nullable();
 
-            $table->boolean('backup_eligible')->default(false);
-            $table->boolean('backup_state')->default(false);
+            // Indica si la passkey puede ser respaldada (sync entre dispositivos)
+            $table->boolean(column: 'backup_eligible')->default(value: false);
+            // Estado actual del respaldo (true si la passkey está sincronizada)
+            $table->boolean(column: 'backup_state')->default(value: false);
 
-            $table->timestamp('last_used_at')->nullable();
-            $table->boolean('active')->default(true);
-            $table->timestamp('revoked_at')->nullable()->index();
+            // Timestamp del último uso para auditoría
+            $table->timestamp(column: 'last_used_at')->nullable();
+            $table->boolean(column: 'active')->default(value: true);
+            // Timestamp de revocación: index() para filtrar passkeys revocadas
+            $table->timestamp(column: 'revoked_at')->nullable()->index();
 
             $table->timestamps();
 
-            $table->index(['user_id', 'active'], 'passkeys_user_active_idx');
-            $table->index(['user_id', 'revoked_at'], 'passkeys_user_revoked_idx');
+            // Índices compuestos para consultas frecuentes:
+            // Buscar passkeys activas de un usuario
+            $table->index(columns: ['user_id', 'active'], name: 'passkeys_user_active_idx');
+            // Buscar passkeys revocadas de un usuario para limpieza
+            $table->index(columns: ['user_id', 'revoked_at'], name: 'passkeys_user_revoked_idx');
         });
     }
 
+    /**
+     * Revierte las migraciones.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('passkey_credentials');
+        Schema::dropIfExists(table: 'passkey_credentials');
     }
 };

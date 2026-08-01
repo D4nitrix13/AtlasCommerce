@@ -6,47 +6,76 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Tabla que almacena los archivos multimedia subidos por usuarios/clientes
+     * para usar en sus diseños personalizados (imágenes, SVG, etc.).
+     */
     public function up(): void
     {
-        Schema::create('design_assets', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'design_assets', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('user_id')
+            // Usuario propietario del asset (opcional para clientes no autenticados)
+            $table->foreignId(column: 'user_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete();
 
-            $table->foreignId('customer_id')
+            // Cliente propietario del asset (opcional para usuarios autenticados)
+            $table->foreignId(column: 'customer_id')
                 ->nullable()
-                ->constrained('customers')
+                ->constrained(table: 'customers')
                 ->nullOnDelete();
 
-            $table->string('original_name');
-            $table->string('file_name');
-            $table->string('mime_type', 120)->index();
-            $table->string('extension', 20)->index();
-            $table->string('storage_disk')->default('public');
-            $table->string('file_path');
+            // Nombre original del archivo subido por el usuario
+            $table->string(column: 'original_name');
+
+            // Nombre del archivo almacenado en disco (UUID o hash)
+            $table->string(column: 'file_name');
+
+            // Tipo MIME del archivo para validación en el frontend
+            $table->string(column: 'mime_type', length: 120)->index();
+
+            // Extensión del archivo (jpg, png, svg, etc.)
+            $table->string(column: 'extension', length: 20)->index();
+
+            // Disco de almacenamiento: 'public', 's3', 'local', etc.
+            $table->string(column: 'storage_disk')->default(value: 'public');
+
+            // Ruta completa del archivo en el disco seleccionado
+            $table->string(column: 'file_path');
+
+            // Tamaño del archivo en bytes para validación de límites
             $table->unsignedBigInteger('size_bytes');
 
+            // Dimensiones de la imagen (null para archivos no imagen)
             $table->unsignedInteger('width_px')->nullable();
             $table->unsignedInteger('height_px')->nullable();
             $table->unsignedSmallInteger('dpi')->nullable();
 
-            $table->string('checksum', 128)->nullable()->index();
-            $table->string('source', 40)->default('upload')->index();
-            $table->string('status', 40)->default('active')->index();
+            // Checksum MD5/SHA para detectar duplicados y verificar integridad
+            $table->string(column: 'checksum', length: 128)->nullable()->index();
+
+            // Origen del asset: 'upload', 'library', 'stock', etc.
+            $table->string(column: 'source', length: 40)->default(value: 'upload')->index();
+
+            // Estado del asset: 'active', 'deleted', 'pending_review'
+            $table->string(column: 'status', length: 40)->default(value: 'active')->index();
 
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['customer_id', 'status'], 'design_assets_customer_status_idx');
-            $table->index(['user_id', 'status'], 'design_assets_user_status_idx');
+            // Índices para buscar assets por cliente/usuario y estado
+            $table->index(columns: ['customer_id', 'status'], name: 'design_assets_customer_status_idx');
+            $table->index(columns: ['user_id', 'status'], name: 'design_assets_user_status_idx');
         });
     }
 
+    /**
+     * Elimina la tabla de assets de diseño.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('design_assets');
+        Schema::dropIfExists(table: 'design_assets');
     }
 };

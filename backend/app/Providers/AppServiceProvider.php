@@ -19,10 +19,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Recorre todas las subcarpetas dentro de database/migrations
+        /*
+         * Laravel carga automáticamente los archivos ubicados directamente en:
+         *
+         * database/migrations/*.php
+         *
+         * Este bloque solo registra las subcarpetas modulares, por ejemplo:
+         *
+         * database/migrations/auth
+         * database/migrations/catalog
+         * database/migrations/customization
+         *
+         * Así mantenemos las migraciones organizadas por dominio sin perder
+         * el comportamiento nativo de Laravel para las migraciones raíz.
+         */
         foreach (
             glob(
-                pattern: database_path(path: "migrations/*"),
+                pattern: database_path(path: 'migrations/*'),
                 flags: GLOB_ONLYDIR
             ) ?: [] as $directory
         ) {

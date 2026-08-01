@@ -7,29 +7,35 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla `permissions` que almacena los permisos del sistema.
+     * Cada permiso tiene un nombre legible, un slug único para referencia
+     * programática, y un módulo al que pertenece para agrupación lógica.
      */
     public function up(): void
     {
-        Schema::create('permissions', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'permissions', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->string('name', 100);
-            $table->string('slug', 120)->unique();
-            $table->string('module', 80);
-            $table->text('description')->nullable();
+            $table->string(column: 'name', length: 100);
+            $table->string(column: 'slug', length: 120)->unique();
+            $table->string(column: 'module', length: 80);
+            // Descripción opcional, no todos los permisos requieren explicación detallada
+            $table->text(column: 'description')->nullable();
 
             $table->timestamps();
 
-            $table->index('module');
+            // Índice para búsquedas frecuentes por módulo (listados de permisos por módulo)
+            $table->index(columns: ['module'], name: 'permissions_module_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('permissions');
+        Schema::dropIfExists(table: 'permissions');
     }
 };

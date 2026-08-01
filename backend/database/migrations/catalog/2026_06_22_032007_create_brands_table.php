@@ -7,32 +7,38 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla "brands" para gestionar las marcas de productos.
+     * Cada marca tiene nombre y slug únicos, con soporte para logo
+     * y estado de activación.
      */
     public function up(): void
     {
-        Schema::create('brands', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'brands', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->string('name', 120)->unique();
-            $table->string('slug', 150)->unique();
-            $table->text('description')->nullable();
-            $table->string('logo_url')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->string(column: 'name', length: 120)->unique();
+            $table->string(column: 'slug', length: 150)->unique();
+            $table->text(column: 'description')->nullable();
+            $table->string(column: 'logo_url')->nullable();
+            $table->boolean(column: 'is_active')->default(value: true);
 
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('slug');
-            $table->index('is_active');
+            $table->index(columns: ['slug'], name: 'brands_slug_idx');
+            $table->index(columns: ['is_active'], name: 'brands_is_active_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
+     *
+     * Elimina la tabla "brands" y todas sus dependencias.
      */
     public function down(): void
     {
-        Schema::dropIfExists('brands');
+        Schema::dropIfExists(table: 'brands');
     }
 };

@@ -7,50 +7,62 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de reseñas de productos para recopilar
+     * opiniones y calificaciones de clientes sobre productos.
      */
     public function up(): void
     {
-        Schema::create('product_reviews', function (Blueprint $table) {
+        Schema::create(table: 'product_reviews', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->foreignId('product_id')
-                ->constrained('products')
+            // Producto reseñado: cascadeOnDelete porque si se elimina el producto sus reseñas no tienen sentido
+            $table->foreignId(column: 'product_id')
+                ->constrained(table: 'products')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('customer_id')
-                ->constrained('customers')
+            // Cliente que escribió la reseña: cascadeOnDelete porque la reseña se mantiene en esta tabla
+            $table->foreignId(column: 'customer_id')
+                ->constrained(table: 'customers')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('store_id')
+            // Store asociado al producto reseñado, nullable para reseñas de productos globales
+            // restrictOnDelete: no se debe eliminar un store que tenga reseñas asociadas
+            $table->foreignId(column: 'store_id')
                 ->nullable()
-                ->constrained('stores')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete();
 
-            $table->unsignedTinyInteger('rating');
-            $table->text('comment')->nullable();
-            $table->boolean('is_approved')->default(false);
-            $table->timestamp('reviewed_at')->useCurrent();
+            // Calificación numérica del producto (ej: 1-5 estrellas)
+            $table->unsignedTinyInteger(column: 'rating');
+            // Comentario escrito por el cliente, nullable si solo califica sin escribir
+            $table->text(column: 'comment')->nullable();
+            // Estado de aprobación: controla la visibilidad pública de la reseña
+            $table->boolean(column: 'is_approved')->default(value: false);
+            // Fecha y hora en que se publicó la reseña
+            $table->timestamp(column: 'reviewed_at')->useCurrent();
 
             $table->timestamps();
+            // Soft deletes para conservar historial de reseñas eliminadas
             $table->softDeletes();
 
-            $table->index('product_id');
-            $table->index('customer_id');
-            $table->index('store_id');
-            $table->index('rating');
-            $table->index('is_approved');
-            $table->index('reviewed_at');
+            $table->index(columns: ['product_id'], name: 'product_reviews_product_id_idx');
+            $table->index(columns: ['customer_id'], name: 'product_reviews_customer_id_idx');
+            $table->index(columns: ['store_id'], name: 'product_reviews_store_id_idx');
+            $table->index(columns: ['rating'], name: 'product_reviews_rating_idx');
+            $table->index(columns: ['is_approved'], name: 'product_reviews_is_approved_idx');
+            $table->index(columns: ['reviewed_at'], name: 'product_reviews_reviewed_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_reviews');
+        Schema::dropIfExists(table: 'product_reviews');
     }
 };

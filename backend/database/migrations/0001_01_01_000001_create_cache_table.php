@@ -7,29 +7,34 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea las tablas de caché y bloqueos de caché utilizadas
+     * por el sistema de caché de Laravel.
      */
     public function up(): void
     {
-        Schema::create('cache', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->mediumText('value');
-            $table->bigInteger('expiration')->index();
+        Schema::create(table: 'cache', callback: function (Blueprint $table): void {
+            $table->string(column: 'key')->primary();
+            $table->mediumText(column: 'value');
+            // Índice en expiration para búsquedas por tiempo de expiración
+            $table->bigInteger(column: 'expiration')->index();
         });
 
-        Schema::create('cache_locks', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->string('owner');
-            $table->bigInteger('expiration')->index();
+        Schema::create(table: 'cache_locks', callback: function (Blueprint $table): void {
+            $table->string(column: 'key')->primary();
+            // Owner identifica qué proceso instanció el bloqueo
+            $table->string(column: 'owner');
+            $table->bigInteger(column: 'expiration')->index();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('cache');
-        Schema::dropIfExists('cache_locks');
+        Schema::dropIfExists(table: 'cache_locks');
+        Schema::dropIfExists(table: 'cache');
     }
 };

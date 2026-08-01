@@ -7,30 +7,37 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla `roles` que define los roles del sistema (admin, user, etc.).
+     * Cada rol tiene nombre y slug únicos, y puede activarse o desactivarse.
+     * Se usa soft deletes para preservar integridad referencial con usuarios existentes.
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'roles', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->string('name', 80)->unique();
-            $table->string('slug', 100)->unique();
-            $table->text('description')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->string(column: 'name', length: 80)->unique();
+            $table->string(column: 'slug', length: 100)->unique();
+            // Descripción opcional para documentar el propósito del rol
+            $table->text(column: 'description')->nullable();
+            $table->boolean(column: 'is_active')->default(value: true);
 
             $table->timestamps();
+            // Soft deletes para no perder referencias en tablas dependientes al desactivar un rol
             $table->softDeletes();
 
-            $table->index('is_active');
+            // Índice para filtrar roles activos en consultas frecuentes
+            $table->index(columns: ['is_active'], name: 'roles_is_active_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists(table: 'roles');
     }
 };

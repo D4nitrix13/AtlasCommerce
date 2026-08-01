@@ -4,53 +4,55 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Migración para la tabla `two_factor_methods`.
- *
- * Almacena los métodos 2FA individuales registrados por cada usuario (relación N:1).
- * Un usuario puede tener múltiples métodos (email_otp, totp, passkey), cada uno
- * con su propio estado de verificación y activación.
- *
- * Índices compuestos optimizados para las consultas más frecuentes:
- * - [user_id, method]: buscar métodos por tipo para un usuario.
- * - [user_id, active]: filtrar solo métodos activos de un usuario.
- */
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla `two_factor_methods` que almacena cada método 2FA
+     * registrado por los usuarios, con su estado de verificación y activación.
      */
     public function up(): void
     {
-        Schema::create('two_factor_methods', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'two_factor_methods', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('user_id')
-                ->constrained('users')
+            // Cascade en ambas direcciones: eliminar usuario elimina sus métodos 2FA
+            $table->foreignId(column: 'user_id')
+                ->constrained(table: 'users')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->enum('method', ['email_otp', 'totp', 'passkey']);
-            $table->string('display_name', 100)->nullable();
-            $table->string('destination')->nullable();
-            $table->text('encrypted_secret')->nullable();
+            // enum limita a los métodos 2FA soportados por el sistema
+            $table->enum(column: 'method', allowed: ['email_otp', 'totp', 'passkey']);
+            // Nombre visible para que el usuario identifique el método (ej: "Mi email personal")
+            $table->string(column: 'display_name', length: 100)->nullable();
+            // Destino del método (email, dirección de authenticator): nullable para passkeys
+            $table->string(column: 'destination')->nullable();
+            // Secreto cifrado para TOTP: nullable para métodos que no requieren secreto
+            $table->text(column: 'encrypted_secret')->nullable();
 
-            $table->boolean('active')->default(true);
-            $table->boolean('verified')->default(false);
-            $table->timestamp('verified_at')->nullable();
+            $table->boolean(column: 'active')->default(value: true);
+            // Verificado indica que el usuario completó el proceso de setup
+            $table->boolean(column: 'verified')->default(value: false);
+            // Timestamp de cuándo se verificó el método por primera vez
+            $table->timestamp(column: 'verified_at')->nullable();
 
             $table->timestamps();
 
-            $table->index(['user_id', 'method']);
-            $table->index(['user_id', 'active']);
+            // Índices compuestos para consultas frecuentes:
+            // Buscar métodos por tipo para un usuario específico
+            $table->index(columns: ['user_id', 'method'], name: 'two_factor_methods_user_id_method_idx');
+            // Filtrar solo métodos activos de un usuario
+            $table->index(columns: ['user_id', 'active'], name: 'two_factor_methods_user_id_active_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('two_factor_methods');
+        Schema::dropIfExists(table: 'two_factor_methods');
     }
 };

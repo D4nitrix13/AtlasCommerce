@@ -6,41 +6,66 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'product_stores' que implementa la relación multi-tienda entre productos
+     * y tiendas. Permite que un mismo producto tenga configuración diferente en cada tienda:
+     * slug propio, precio público, descripción pública, visibilidad, destacado y orden de
+     * clasificación. Se usan claves únicas compuestas para garantizar la integridad de datos.
+     */
     public function up(): void
     {
-        Schema::create('product_stores', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'product_stores', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('product_id')
+            $table->foreignId(column: 'product_id')
                 ->constrained()
                 ->restrictOnDelete();
 
-            $table->foreignId('store_id')
+            $table->foreignId(column: 'store_id')
                 ->constrained()
                 ->restrictOnDelete();
 
-            $table->string('slug')->nullable();
-            $table->decimal('public_price', 12, 2)->nullable();
-            $table->text('public_description')->nullable();
+            // Slug propio del producto para esta tienda (permite URLs diferentes por tienda)
+            $table->string(column: 'slug')->nullable();
+            // Precio público que puede diferir del precio base del producto
+            $table->decimal(column: 'public_price', total: 12, places: 2)->nullable();
+            // Descripción pública que puede diferir de la descripción base del producto
+            $table->text(column: 'public_description')->nullable();
 
-            $table->boolean('is_visible')->default(true)->index();
-            $table->boolean('is_featured')->default(false)->index();
-            $table->unsignedInteger('sort_order')->default(0)->index();
-            $table->timestamp('published_at')->nullable()->index();
+            // Controla la visibilidad del producto en la tienda
+            $table->boolean(column: 'is_visible')->default(value: true)->index();
+            // Marca el producto como destacado en la tienda
+            $table->boolean(column: 'is_featured')->default(value: false)->index();
+            // Orden de clasificación para mostrar productos en la tienda
+            $table->unsignedInteger('sort_order')->default(value: 0)->index();
+            // Fecha de publicación del producto en la tienda
+            $table->timestamp(column: 'published_at')->nullable()->index();
 
             $table->timestamps();
 
-            $table->unique(['product_id', 'store_id'], 'product_stores_product_store_unique');
-            $table->unique(['store_id', 'slug'], 'product_stores_store_slug_unique');
+            // Un producto solo puede aparecer una vez por tienda
+            $table->unique(columns: ['product_id', 'store_id'], name: 'product_stores_product_store_unique');
+            // Un slug solo puede existir una vez por tienda
+            $table->unique(columns: ['store_id', 'slug'], name: 'product_stores_store_slug_unique');
 
-            $table->index(['store_id', 'is_visible'], 'product_stores_store_visible_idx');
-            $table->index(['store_id', 'is_visible', 'is_featured'], 'product_stores_visible_featured_idx');
-            $table->index(['store_id', 'sort_order'], 'product_stores_store_sort_idx');
+            // Índice compuesto para filtrar productos visibles por tienda
+            $table->index(columns: ['store_id', 'is_visible'], name: 'product_stores_store_visible_idx');
+            // Índice compuesto para filtrar productos visibles y destacados por tienda
+            $table->index(columns: ['store_id', 'is_visible', 'is_featured'], name: 'product_stores_visible_featured_idx');
+            // Índice compuesto para ordenar productos por tienda
+            $table->index(columns: ['store_id', 'sort_order'], name: 'product_stores_store_sort_idx');
         });
     }
 
+    /**
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'product_stores' y todas sus restricciones de integridad referencial.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('product_stores');
+        Schema::dropIfExists(table: 'product_stores');
     }
 };
