@@ -8,12 +8,11 @@ use App\Models\Sales\Invoice;
 use App\Models\Settings\Currency;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * Registro de un pago realizado por un cliente.
  *
@@ -33,9 +32,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon|null $paid_at
  * @property string|null $notes
  */
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Payment extends Model
 {
     use BelongsToStore;
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [

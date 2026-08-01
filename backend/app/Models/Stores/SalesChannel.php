@@ -2,9 +2,8 @@
 
 namespace App\Models\Stores;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 /**
  * Canal de venta configurado para una tienda.
  *
@@ -13,8 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Define los canales por los que se comercializan los productos:
  * tienda web, marketplace, redes sociales, etc.
  */
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class SalesChannel extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'store_id',
         'name',

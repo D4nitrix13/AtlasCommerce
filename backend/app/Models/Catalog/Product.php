@@ -8,12 +8,11 @@ use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * Producto principal del catálogo.
  *
@@ -34,8 +33,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property bool $is_active
  * @property Carbon|null $published_at
  */
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Product extends Model
 {
+    use HasFactory;
     use HasSlug;
     use SoftDeletes;
 

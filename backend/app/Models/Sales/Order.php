@@ -10,11 +10,10 @@ use App\Models\Settings\Currency;
 use App\Models\Stores\SalesChannel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * Pedido realizado por un cliente.
  *
@@ -41,9 +40,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon $ordered_at
  * @property string|null $notes
  */
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Order extends Model
 {
     use BelongsToStore;
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [

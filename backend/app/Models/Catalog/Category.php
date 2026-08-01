@@ -4,11 +4,10 @@ namespace App\Models\Catalog;
 
 use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * Categoría del catálogo de productos.
  *
@@ -25,8 +24,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $image_path
  * @property bool $is_active
  */
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Category extends Model
 {
+    use HasFactory;
     use HasSlug;
     use SoftDeletes;
 

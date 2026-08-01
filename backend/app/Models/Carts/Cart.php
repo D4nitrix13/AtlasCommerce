@@ -7,11 +7,10 @@ use App\Models\Customers\Customer;
 use App\Models\Settings\Currency;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * Representa el carrito de compras de un cliente.
  *
@@ -25,9 +24,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $status
  * @property Carbon|null $expires_at
  */
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Cart extends Model
 {
     use BelongsToStore;
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
