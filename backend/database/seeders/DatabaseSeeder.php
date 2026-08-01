@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
+            StoreSeeder::class,
             DesignFontSeeder::class,
             DesignGraphicSeeder::class,
             ProductCustomizationDemoSeeder::class,
