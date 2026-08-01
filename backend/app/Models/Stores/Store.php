@@ -59,11 +59,13 @@ class Store extends Model
         'description',
         'primary_color',
         'secondary_color',
+        'tax_rate',
         'maintenance_mode',
         'is_active',
     ];
 
     protected $casts = [
+        'tax_rate' => 'decimal:2',
         'maintenance_mode' => 'boolean',
         'is_active' => 'boolean',
     ];
