@@ -2,16 +2,39 @@
 
 namespace App\Models\Carts;
 
+use App\Models\Catalog\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Artículo individual dentro de una lista de deseos.
  *
  * Tabla: `wishlist_items` — relación N:1 con `wishlists`.
- *
- * Referencia al producto guardado por el usuario en su lista de deseos.
  */
 class WishlistItem extends Model
 {
-    //
+    protected $fillable = [
+        'wishlist_id',
+        'product_id',
+    ];
+
+    protected $casts = [
+        'added_at' => 'datetime',
+    ];
+
+    /**
+     * Lista de deseos a la que pertenece.
+     */
+    public function wishlist(): BelongsTo
+    {
+        return $this->belongsTo(Wishlist::class);
+    }
+
+    /**
+     * Producto en la lista.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
 }
