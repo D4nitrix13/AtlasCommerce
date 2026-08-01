@@ -1,1320 +1,1068 @@
 erDiagram
+    %% E-commerce multi-tenant ER diagram.
+    %%
+    %% Naming convention: snake_case (English) to match Laravel migrations.
+    %% Money columns: suffix `_cents` (bigInteger) — never use `decimal`
+    %% for money. Currency is captured per-transaction via `currency_id`
+    %% FK + `exchange_rate_snapshot` decimal(18,8).
+    %%
+    %% Multi-tenancy: operational tables carry `store_id NOT NULL`.
+    %% The `BelongsToStore` global scope filters automatically per request.
+    %% Catalog (products, categories, brands) is global; per-store
+    %% visibility is controlled via `product_stores` pivot.
+    %%
+    %% Auth: minimal in MVP — users, roles, permissions, password_reset_tokens.
+    %% 2FA / passkeys / otp_challenges / recovery_codes / trusted_devices /
+    %% login_attempts / security_events are deferred to a future phase
+    %% (table is dropped from the schema).
+    %%
+    %% Customization: minimal in MVP — only `custom_designs` (file upload
+    %% per order item) + `order_custom_designs` bridge. The full design
+    %% editor (design_layers, print_areas, product_mockups, etc.) is
+    %% deferred to v2.
+    %%
+    %% Shipping: lightweight tracking via columns on `shipments`
+    %% (`tracking_url`, `last_event_status`, `last_event_at`) — no
+    %% separate `shipment_trackings` table.
+    %%
+    %% Payments: `payments` is the only ledger; `invoices` has NO
+    %% denormalized `paid_amount` / `pending_balance`. Both are computed
+    %% via `Invoice::paidAmountCents() = SUM(invoice_payments.applied_amount_cents)`.
+    %% No `payment_installments` in MVP — deferred to v2.
 
-    MONEDA {
-        int id_moneda PK
-        string codigo
-        string nombre
-        string simbolo
-        boolean principal
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    CURRENCY {
+        int id PK
+        string code "ISO 4217 (3 chars)"
+        string name
+        string symbol
+        tinyint decimal_places "0..6, drives money arithmetic"
+        boolean is_primary
+        boolean is_active
+        datetime created_at
+        datetime updated_at
     }
 
-    TIPO_CAMBIO {
-        int id_tipo_cambio PK
-        int id_moneda FK
-        decimal valor
-        date fecha
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    EXCHANGE_RATE {
+        int id PK
+        int from_currency_id FK
+        int to_currency_id FK
+        decimal value "decimal(18,8)"
+        date rate_date
+        datetime created_at
+        datetime updated_at
     }
 
-    TIENDA {
-        int id_tienda PK
-        int id_moneda FK
-        string nombre
-        string slug
-        string logo
-        string favicon
-        string imagen_portada
-        string imagen_og
-        string correo
-        string telefono
+    STORE {
+        int id PK
+        int currency_id FK
+        string name
+        string slug UK
+        string logo_path
+        string favicon_path
+        string cover_image_path
+        string og_image_path
+        string email
+        string phone
         string whatsapp
-        string direccion
-        string descripcion
-        string color_primario
-        string color_secundario
-        boolean mantenimiento
-        boolean activa
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+        text address
+        text description
+        string primary_color "hex"
+        string secondary_color "hex"
+        boolean maintenance_mode
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    TIENDA_CONFIGURACION {
-        int id_tienda_configuracion PK
-        int id_tienda FK
-        string grupo
-        string clave
-        text valor
-        string tipo_valor
-        string descripcion
-        boolean publico
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    STORE_DOMAIN {
+        int id PK
+        int store_id FK
+        string domain UK
+        string type
+        string base_path
+        boolean redirect_to_primary
+        boolean is_primary
+        boolean is_active
+        datetime verified_at
+        datetime created_at
+        datetime updated_at
     }
 
-    TIENDA_DOMINIO {
-        int id_tienda_dominio PK
-        int id_tienda FK
-        string dominio
-        string tipo
-        string ruta_base
-        boolean redirigir_a_principal
-        boolean principal
-        boolean activo
-        datetime verificado_en
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    TIENDA_RED_SOCIAL {
-        int id_tienda_red_social PK
-        int id_tienda FK
-        string plataforma
+    STORE_SOCIAL_LINK {
+        int id PK
+        int store_id FK
+        string platform
         string url
-        string nombre_visible
-        string icono_url
-        int orden
-        boolean activa
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+        string display_name
+        string icon_url
+        int position
+        boolean is_active
+        datetime created_at
+        datetime updated_at
     }
 
-    CANAL_VENTA {
-        int id_canal_venta PK
-        int id_tienda FK
-        string nombre
-        string tipo
-        string descripcion
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    STORE_SETTING {
+        int id PK
+        int store_id FK
+        string setting_group
+        string setting_key
+        text setting_value
+        string value_type
+        string description
+        boolean is_public
+        datetime created_at
+        datetime updated_at
     }
 
-    ROL {
-        int id_rol PK
-        string nombre
+    SALES_CHANNEL {
+        int id PK
+        int store_id FK
+        string name
+        string type "online, physical, marketplace"
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    ROLE {
+        int id PK
+        string name UK
+        string slug UK
+        string description
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    PERMISSION {
+        int id PK
+        string name UK
+        string slug UK
+        string module
+        string description
+        datetime created_at
+        datetime updated_at
+    }
+
+    ROLE_PERMISSION {
+        int id PK
+        int role_id FK
+        int permission_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    USER {
+        int id PK
+        string first_name
+        string last_name
+        string email UK
+        timestamp email_verified_at
+        string password
+        string phone
+        boolean is_active
+        timestamp last_login_at
+        string last_login_ip
+        int failed_login_attempts
+        timestamp locked_until
+        datetime registered_at
+        string remember_token
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    USER_STORE {
+        int id PK
+        int user_id FK
+        int store_id FK
+        int role_id FK "role per-store, not global"
+        boolean is_active
+        datetime assigned_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    CUSTOMER {
+        int id PK
+        int user_id FK "nullable: guest checkout allowed"
+        string customer_type "retail, wholesale, vip"
+        string identity_document
+        string first_name
+        string last_name
+        string email
+        string phone
+        boolean is_active
+        datetime registered_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    CUSTOMER_STORE {
+        int id PK
+        int customer_id FK
+        int store_id FK
+        string customer_type
+        boolean is_active
+        datetime registered_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    CUSTOMER_ADDRESS {
+        int id PK
+        int customer_id FK
+        string address_type "shipping, billing"
+        string country "default 'Nicaragua'"
+        string department
+        string municipality
+        text detailed_address
+        text reference
+        boolean is_primary
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    CATEGORY {
+        int id PK
+        int parent_id FK "self-reference for hierarchy"
+        string name
+        string slug UK
+        text description
+        string image_path
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    BRAND {
+        int id PK
+        string name UK
+        string slug UK
+        text description
+        string logo_url
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    PRODUCT {
+        int id PK
+        int category_id FK "primary category"
+        int brand_id FK "nullable"
+        int currency_id FK
+        string name
+        string slug UK
+        longtext description
+        string sku UK
+        bigint base_price_cents
+        bigint cost_cents
+        boolean is_active
+        timestamp published_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    CATEGORY_PRODUCT {
+        int id PK
+        int category_id FK
+        int product_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    PRODUCT_STORE {
+        int id PK
+        int product_id FK
+        int store_id FK
         string slug
-        string descripcion
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+        string public_title
+        bigint public_price_cents
+        text public_description
+        string meta_title
+        text meta_description
+        string og_image_url
+        boolean is_visible
+        boolean is_featured
+        int position
+        timestamp published_at
+        timestamp unpublished_at
+        datetime created_at
+        datetime updated_at
     }
 
-    PERMISO {
-        int id_permiso PK
-        string nombre
-        string slug
-        string modulo
-        string descripcion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    PRODUCT_IMAGE {
+        int id PK
+        int product_id FK
+        string image_url
+        string alt_text
+        boolean is_primary
+        int position
+        datetime created_at
+        datetime updated_at
     }
 
-    ROL_PERMISO {
-        int id_rol_permiso PK
-        int id_rol FK
-        int id_permiso FK
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    PRODUCT_STORE_IMAGE {
+        int id PK
+        int product_store_id FK
+        string image_url
+        string alt_text
+        boolean is_primary
+        int position
+        datetime created_at
+        datetime updated_at
     }
 
-    USUARIO {
-        int id_usuario PK
-        int id_rol FK
-        string nombres
-        string apellidos
-        string correo
-        string password_hash
-        string telefono
-        boolean activo
-        datetime correo_verificado
-        datetime password_changed_at
-        datetime ultimo_login
-        string ultimo_login_ip
-        int intentos_fallidos
-        datetime bloqueado_hasta
-        datetime fecha_registro
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    PRODUCT_VARIANT {
+        int id PK
+        int product_id FK
+        string name
+        string sku UK
+        bigint price_cents
+        bigint cost_cents
+        string barcode UK
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    USUARIO_TIENDA {
-        int id_usuario_tienda PK
-        int id_usuario FK
-        int id_tienda FK
-        int id_rol FK
-        boolean activo
-        datetime fecha_asignacion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    ATTRIBUTE {
+        int id PK
+        string name
+        string slug UK
+        string type
+        text description
+        boolean is_filterable
+        boolean is_required
+        datetime created_at
+        datetime updated_at
     }
 
-    USUARIO_2FA_CONFIGURACION {
-        int id_2fa_configuracion PK
-        int id_usuario FK
-        boolean habilitado
-        string metodo_preferido
-        boolean requerir_2fa
-        datetime fecha_activacion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    PRODUCT_ATTRIBUTE_VALUE {
+        int id PK
+        int product_id FK
+        int attribute_id FK
+        string value
+        datetime created_at
+        datetime updated_at
     }
 
-    USUARIO_2FA_METODO {
-        int id_2fa_metodo PK
-        int id_usuario FK
-        string metodo
-        string nombre_visible
-        string destino
-        string secreto_cifrado
-        boolean activo
-        boolean verificado
-        datetime fecha_verificacion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    VARIANT_ATTRIBUTE_VALUE {
+        int id PK
+        int product_variant_id FK
+        int attribute_id FK
+        string value
+        datetime created_at
+        datetime updated_at
     }
 
-    OTP_DESAFIO {
-        int id_otp_desafio PK
-        int id_usuario FK
-        string challenge_uuid
-        string metodo
-        string proposito
-        string codigo_hash
-        string destino
-        int intentos
-        int max_intentos
-        int reenvios
-        datetime ultimo_envio
-        datetime fecha_expiracion
-        datetime fecha_uso
-        datetime bloqueado_hasta
-        string ip_solicitud
-        string user_agent
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    WAREHOUSE {
+        int id PK
+        string name
+        text address
+        string phone
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    CODIGO_RECUPERACION_2FA {
-        int id_codigo_recuperacion PK
-        int id_usuario FK
-        string lote_uuid
-        string codigo_hash
-        datetime fecha_uso
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    INVENTORY {
+        int id PK
+        int warehouse_id FK
+        int product_id FK
+        int product_variant_id FK "nullable"
+        int current_stock
+        int minimum_stock
+        int reserved_stock
+        datetime created_at
+        datetime updated_at
     }
 
-    PASSKEY_CREDENCIAL {
-        int id_passkey PK
-        int id_usuario FK
-        string credential_id
-        string public_key
-        int sign_count
-        json transports
-        string aaguid
-        string nombre_dispositivo
-        boolean backup_eligible
-        boolean backup_state
-        datetime ultimo_uso
-        datetime revocado_en
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    INVENTORY_MOVEMENT {
+        int id PK
+        int inventory_id FK
+        int user_id FK
+        string movement_type "in, out, adjustment, transfer"
+        int quantity
+        int previous_stock
+        int new_stock
+        text reason
+        datetime moved_at
+        datetime created_at
+        datetime updated_at
     }
 
-    PASSWORD_RESET_TOKEN {
-        int id_password_reset_token PK
-        int id_usuario FK
-        string token_hash
-        datetime fecha_expiracion
-        datetime fecha_uso
-        string ip_solicitud
-        string user_agent
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    DISPOSITIVO_CONFIABLE {
-        int id_dispositivo_confiable PK
-        int id_usuario FK
-        string fingerprint_hash
-        string nombre_dispositivo
-        string ultimo_ip
-        string ultimo_user_agent
-        datetime confiado_en
-        datetime ultimo_uso
-        datetime fecha_expiracion
-        datetime revocado_en
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    INTENTO_LOGIN {
-        int id_intento_login PK
-        int id_usuario FK
-        string correo
-        boolean exitoso
-        string motivo_fallo
-        string ip
-        string user_agent
-        string pais
-        string ciudad
-        boolean sospechoso
-        datetime fecha_intento
-        datetime fecha_creacion
-    }
-
-    EVENTO_SEGURIDAD {
-        int id_evento_seguridad PK
-        int id_usuario FK
-        string correo
-        string tipo_evento
-        string severidad
-        string ip
-        string user_agent
-        json metadata
-        datetime fecha_evento
-        datetime fecha_creacion
-    }
-
-    CLIENTE {
-        int id_cliente PK
-        int id_usuario FK
-        string tipo_cliente
-        string documento_identidad
-        string nombres
-        string apellidos
-        string correo
-        string telefono
-        datetime fecha_registro
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    CLIENTE_TIENDA {
-        int id_cliente_tienda PK
-        int id_cliente FK
-        int id_tienda FK
-        string tipo_cliente
-        boolean activo
-        datetime fecha_registro
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    CLIENTE_DIRECCION {
-        int id_direccion PK
-        int id_cliente FK
-        string tipo_direccion
-        string pais
-        string departamento
-        string municipio
-        string direccion_detallada
-        string referencia
-        boolean principal
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    CATEGORIA {
-        int id_categoria PK
-        int id_categoria_padre FK
-        string nombre
-        string slug
-        string descripcion
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    MARCA {
-        int id_marca PK
-        string nombre
-        string slug
-        string descripcion
-        string logo
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    PRODUCTO {
-        int id_producto PK
-        int id_categoria FK
-        int id_marca FK
-        string nombre
-        string slug
-        string descripcion
-        string sku
-        decimal precio_base
-        decimal costo
-        boolean activo
-        datetime fecha_publicacion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    PRODUCTO_TIENDA {
-        int id_producto_tienda PK
-        int id_producto FK
-        int id_tienda FK
-        string slug
-        string titulo_publico
-        decimal precio_publico
-        text descripcion_publica
-        string meta_titulo
-        text meta_descripcion
-        string imagen_og_url
-        boolean visible
-        boolean destacado
-        int orden
-        datetime fecha_publicacion
-        datetime fecha_despublicacion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    PRODUCTO_IMAGEN {
-        int id_imagen PK
-        int id_producto FK
-        string url_imagen
-        string texto_alt
-        boolean principal
-        int orden
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    PRODUCTO_TIENDA_IMAGEN {
-        int id_imagen_tienda PK
-        int id_producto_tienda FK
-        string url_imagen
-        string texto_alt
-        boolean principal
-        int orden
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    PRODUCTO_VARIANTE {
-        int id_variante PK
-        int id_producto FK
-        string sku_variante
-        string nombre_variante
-        decimal precio
-        decimal costo
-        string codigo_barras
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    ATRIBUTO {
-        int id_atributo PK
-        string nombre
-        string slug
-        string tipo
-        string descripcion
-        boolean filtrable
-        boolean requerido
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    PRODUCTO_ATRIBUTO {
-        int id_producto_atributo PK
-        int id_producto FK
-        int id_atributo FK
-        string valor
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    VARIANTE_ATRIBUTO {
-        int id_variante_atributo PK
-        int id_variante FK
-        int id_atributo FK
-        string valor
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    PRODUCTO_PERSONALIZACION {
-        int id_producto_personalizacion PK
-        int id_producto FK
-        int id_variante FK
-        boolean personalizable
-        string tipo_personalizacion
-        string editor_tipo
-        string estado
-        text instrucciones
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    AREA_IMPRESION {
-        int id_area_impresion PK
-        int id_producto_personalizacion FK
-        string nombre
-        string codigo
-        string vista
-        decimal ancho_pulgadas
-        decimal alto_pulgadas
-        int ancho_px
-        int alto_px
-        int dpi
-        decimal posicion_x
-        decimal posicion_y
-        decimal ancho_relativo
-        decimal alto_relativo
-        json mascara
-        json zona_segura
-        boolean activa
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    MOCKUP_PRODUCTO {
-        int id_mockup_producto PK
-        int id_producto_personalizacion FK
-        string nombre
-        string vista
-        string tipo_mockup
-        string imagen_base_url
-        string imagen_mascara_url
-        string imagen_sombra_url
-        json configuracion_render
-        boolean principal
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    DISENO_PERSONALIZADO {
-        int id_diseno_personalizado PK
-        int id_cliente FK
-        int id_usuario FK
-        int id_producto FK
-        int id_variante FK
-        int id_producto_personalizacion FK
-        string nombre
-        string estado
-        string fondo_color
-        int canvas_ancho_px
-        int canvas_alto_px
-        json configuracion_canvas
-        string preview_url
-        string archivo_produccion_url
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    DISENO_CAPA {
-        int id_diseno_capa PK
-        int id_diseno_personalizado FK
-        int id_area_impresion FK
-        int id_archivo_diseno FK
-        int id_fuente_diseno FK
-        int id_grafico_biblioteca FK
-        string tipo_capa
-        string nombre
-        text contenido_texto
-        string color
-        string color_fondo
-        string alineacion
-        decimal posicion_x
-        decimal posicion_y
-        decimal ancho
-        decimal alto
-        decimal escala_x
-        decimal escala_y
-        decimal rotacion
-        decimal opacidad
-        int orden_z
-        boolean bloqueada
-        boolean visible
-        json estilos
-        json efectos
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    ARCHIVO_DISENO {
-        int id_archivo_diseno PK
-        int id_usuario FK
-        int id_cliente FK
-        string nombre_original
-        string nombre_archivo
-        string mime_type
-        string extension
-        string storage_disk
-        string ruta_archivo
-        int tamano_bytes
-        int ancho_px
-        int alto_px
-        int dpi
-        string checksum
-        string origen
-        string estado
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    FUENTE_DISENO {
-        int id_fuente_diseno PK
-        string nombre
-        string familia
-        string estilo
-        string peso
-        string ruta_archivo
-        string licencia
-        boolean activa
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    GRAFICO_BIBLIOTECA {
-        int id_grafico_biblioteca PK
-        string nombre
-        string categoria
-        string tags
-        string tipo
-        string url_archivo
-        string url_preview
-        string licencia
-        boolean gratuito
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    DISENO_MOCKUP_RENDER {
-        int id_diseno_mockup_render PK
-        int id_diseno_personalizado FK
-        int id_mockup_producto FK
-        string vista
-        string imagen_render_url
-        string estado
-        json metadata
-        datetime fecha_render
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    PEDIDO_DISENO_PERSONALIZADO {
-        int id_pedido_diseno_personalizado PK
-        int id_pedido FK
-        int id_detalle_pedido FK
-        int id_diseno_personalizado FK
-        int id_usuario_revisor FK
-        json snapshot_diseno
-        string archivo_produccion_url
-        string estado_produccion
-        text notas_produccion
-        datetime fecha_revision
-        datetime fecha_aprobacion
-        datetime fecha_rechazo
-        text motivo_rechazo
-        datetime fecha_inicio_produccion
-        datetime fecha_finalizacion_produccion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    ALMACEN {
-        int id_almacen PK
-        string nombre
-        string direccion
-        string telefono
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
-    }
-
-    INVENTARIO {
-        int id_inventario PK
-        int id_almacen FK
-        int id_producto FK
-        int id_variante FK
-        int stock_actual
-        int stock_minimo
-        int stock_reservado
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    MOVIMIENTO_INVENTARIO {
-        int id_movimiento PK
-        int id_inventario FK
-        int id_usuario FK
-        string tipo_movimiento
-        int cantidad
-        int stock_anterior
-        int stock_nuevo
-        string motivo
-        datetime fecha_movimiento
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-    }
-
-    PROVEEDOR {
-        int id_proveedor PK
-        string nombre
+    SUPPLIER {
+        int id PK
+        string name
         string ruc
-        string telefono
-        string correo
-        string direccion
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+        string phone
+        string email
+        text address
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    COMPRA {
-        int id_compra PK
-        int id_proveedor FK
-        int id_usuario FK
-        string numero_compra
-        decimal subtotal
-        decimal impuesto
-        decimal descuento
-        decimal total
-        string estado
-        datetime fecha_compra
-        text notas
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    PURCHASE {
+        int id PK
+        int supplier_id FK
+        int user_id FK
+        int currency_id FK
+        string purchase_number UK
+        bigint subtotal_cents
+        bigint tax_cents
+        bigint discount_cents
+        bigint total_cents
+        string status "pending, received, cancelled"
+        timestamp purchased_at
+        text notes
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    DETALLE_COMPRA {
-        int id_detalle_compra PK
-        int id_compra FK
-        int id_producto FK
-        int id_variante FK
-        int cantidad
-        decimal precio_compra
-        decimal subtotal
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    PURCHASE_ITEM {
+        int id PK
+        int purchase_id FK
+        int product_id FK
+        int product_variant_id FK "nullable"
+        int quantity
+        bigint unit_cost_cents
+        bigint subtotal_cents
+        datetime created_at
+        datetime updated_at
     }
 
-    CARRITO {
-        int id_carrito PK
-        int id_tienda FK
-        int id_cliente FK
-        string estado
-        datetime fecha_expiracion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    CART {
+        int id PK
+        int customer_id FK
+        int store_id FK
+        int currency_id FK
+        string status "active, converted, abandoned"
+        timestamp expires_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    CARRITO_DETALLE {
-        int id_carrito_detalle PK
-        int id_carrito FK
-        int id_producto FK
-        int id_variante FK
-        int id_diseno_personalizado FK
-        string cart_line_key
-        int cantidad
-        decimal precio_unitario
-        decimal subtotal
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    CART_ITEM {
+        int id PK
+        int cart_id FK
+        int product_id FK
+        int product_variant_id FK "nullable"
+        int custom_design_id FK "nullable"
+        string cart_line_key "unique within cart_id"
+        int quantity
+        bigint unit_price_cents
+        bigint subtotal_cents
+        datetime created_at
+        datetime updated_at
     }
 
     WISHLIST {
-        int id_wishlist PK
-        int id_tienda FK
-        int id_cliente FK
-        string nombre
-        boolean principal
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+        int id PK
+        int customer_id FK
+        int store_id FK
+        string name
+        boolean is_default
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    WISHLIST_DETALLE {
-        int id_wishlist_detalle PK
-        int id_wishlist FK
-        int id_producto FK
-        datetime fecha_agregado
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    WISHLIST_ITEM {
+        int id PK
+        int wishlist_id FK
+        int product_id FK
+        timestamp added_at
+        datetime created_at
+        datetime updated_at
     }
 
-    PEDIDO {
-        int id_pedido PK
-        int id_tienda FK
-        int id_cliente FK
-        int id_direccion_envio FK
-        int id_canal_venta FK
-        int id_usuario_creador FK
-        string numero_pedido
-        decimal subtotal
-        decimal descuento
-        decimal impuesto
-        decimal total
-        string estado
-        datetime fecha_pedido
-        text notas
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    CUSTOM_DESIGN {
+        int id PK
+        int customer_id FK "nullable"
+        int user_id FK "nullable"
+        int product_id FK
+        int product_variant_id FK "nullable"
+        string name
+        string status "draft, ready"
+        string preview_url
+        string production_file_url
+        json metadata
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    DETALLE_PEDIDO {
-        int id_detalle_pedido PK
-        int id_pedido FK
-        int id_producto FK
-        int id_variante FK
-        int id_diseno_personalizado FK
-        int cantidad
-        decimal precio_unitario
-        decimal descuento
-        decimal subtotal
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    ORDER {
+        int id PK
+        int customer_id FK
+        int shipping_address_id FK
+        int store_id FK
+        int sales_channel_id FK
+        int user_creator_id FK
+        int currency_id FK
+        string order_number UK
+        bigint subtotal_cents
+        bigint discount_cents
+        bigint tax_cents
+        bigint shipping_cents
+        bigint total_cents
+        decimal exchange_rate_snapshot "decimal(18,8) — frozen at sale"
+        bigint total_in_base_currency_cents
+        string status
+        timestamp ordered_at
+        text notes
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    PEDIDO_ESTADO_HISTORIAL {
-        int id_historial_pedido PK
-        int id_pedido FK
-        int id_usuario FK
-        string estado_anterior
-        string estado_nuevo
-        string observacion
-        datetime fecha_cambio
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    ORDER_ITEM {
+        int id PK
+        int order_id FK
+        int product_id FK
+        int product_variant_id FK "nullable"
+        int custom_design_id FK "nullable"
+        int quantity
+        bigint unit_price_cents
+        bigint discount_cents
+        bigint subtotal_cents
+        string product_name_snapshot "preserved at order time"
+        string product_sku_snapshot "preserved at order time"
+        datetime created_at
+        datetime updated_at
     }
 
-    FACTURA {
-        int id_factura PK
-        int id_tienda FK
-        int id_pedido FK
-        int id_cliente FK
-        int id_usuario_emisor FK
-        int id_canal_venta FK
-        string numero_factura
-        decimal subtotal
-        decimal descuento
-        decimal impuesto
-        decimal total
-        decimal monto_pagado
-        decimal saldo_pendiente
-        string estado_pago
-        string estado_factura
-        datetime fecha_emision
-        datetime fecha_vencimiento
-        text notas
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    ORDER_STATUS_HISTORY {
+        int id PK
+        int order_id FK
+        int user_id FK "nullable"
+        string previous_status
+        string new_status
+        text observation
+        timestamp changed_at
+        datetime created_at
+        datetime updated_at
     }
 
-    DETALLE_FACTURA {
-        int id_detalle_factura PK
-        int id_factura FK
-        int id_producto FK
-        int id_variante FK
-        int cantidad
-        decimal precio_unitario
-        decimal subtotal
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    INVOICE {
+        int id PK
+        int order_id FK "nullable"
+        int customer_id FK
+        int store_id FK
+        int sales_channel_id FK
+        int user_issuer_id FK
+        int currency_id FK
+        string invoice_number UK
+        bigint subtotal_cents
+        bigint discount_cents
+        bigint tax_cents
+        bigint total_cents
+        decimal exchange_rate_snapshot "decimal(18,8) — frozen at issue"
+        string payment_status "pending, partial, paid, refunded"
+        string invoice_status "issued, cancelled"
+        timestamp issued_at
+        timestamp due_at
+        text notes
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    FACTURA_ESTADO_HISTORIAL {
-        int id_historial_factura PK
-        int id_factura FK
-        int id_usuario FK
-        string estado_anterior
-        string estado_nuevo
-        string observacion
-        datetime fecha_cambio
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    INVOICE_ITEM {
+        int id PK
+        int invoice_id FK
+        int product_id FK
+        int product_variant_id FK "nullable"
+        int quantity
+        bigint unit_price_cents
+        bigint subtotal_cents
+        string product_name_snapshot
+        string product_sku_snapshot
+        datetime created_at
+        datetime updated_at
     }
 
-    METODO_PAGO {
-        int id_metodo_pago PK
-        string nombre
-        string descripcion
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    INVOICE_STATUS_HISTORY {
+        int id PK
+        int invoice_id FK
+        int user_id FK "nullable"
+        string previous_status
+        string new_status
+        text observation
+        timestamp changed_at
+        datetime created_at
+        datetime updated_at
     }
 
-    PAGO {
-        int id_pago PK
-        int id_tienda FK
-        int id_cliente FK
-        int id_metodo_pago FK
-        decimal monto
-        string referencia
-        string estado
-        datetime fecha_pago
-        text notas
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    PAYMENT_METHOD {
+        int id PK
+        string code UK
+        string name
+        string provider "stripe, paypal, cash, etc."
+        boolean is_active
+        datetime created_at
+        datetime updated_at
     }
 
-    FACTURA_PAGO {
-        int id_factura_pago PK
-        int id_factura FK
-        int id_pago FK
-        decimal monto_aplicado
-        datetime fecha_aplicacion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    PAYMENT {
+        int id PK
+        int customer_id FK
+        int payment_method_id FK
+        int store_id FK
+        int currency_id FK
+        bigint amount_cents
+        decimal exchange_rate_snapshot
+        string reference
+        string status "pending, completed, failed, refunded"
+        timestamp paid_at
+        text notes
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    CUOTA_PAGO {
-        int id_cuota PK
-        int id_factura FK
-        int numero_cuota
-        decimal monto_programado
-        decimal monto_pagado
-        date fecha_vencimiento
-        string estado
-        datetime fecha_pago
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    INVOICE_PAYMENT {
+        int id PK
+        int invoice_id FK
+        int payment_id FK
+        bigint applied_amount_cents "ledger: SUM per invoice = paid"
+        timestamp applied_at
+        datetime created_at
+        datetime updated_at
     }
 
-    TRANSACCION_PAGO {
-        int id_transaccion PK
-        int id_pago FK
-        string proveedor_pago
-        string codigo_transaccion
-        text respuesta
-        string estado
-        datetime fecha_transaccion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    PAYMENT_TRANSACTION {
+        int id PK
+        int payment_id FK
+        string payment_provider
+        string transaction_code
+        longtext provider_response
+        bigint amount_cents "nullable — partial provider auth"
+        string status
+        timestamp transacted_at
+        datetime created_at
+        datetime updated_at
     }
 
-    EMPRESA_ENVIO {
-        int id_empresa_envio PK
-        string nombre
-        string telefono
-        string correo
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    SHIPPING_COMPANY {
+        int id PK
+        string name
+        string phone
+        string email
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    ZONA_ENVIO {
-        int id_zona_envio PK
-        string nombre
-        string descripcion
-        decimal costo_base
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    SHIPPING_ZONE {
+        int id PK
+        string name
+        text description
+        decimal base_cost "decimal(12,2) — currency-agnostic fee"
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    ENVIO {
-        int id_envio PK
-        int id_pedido FK
-        int id_empresa_envio FK
-        int id_zona_envio FK
-        string codigo_seguimiento
-        decimal costo_envio
-        string estado
-        datetime fecha_envio
-        datetime fecha_entrega
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    SHIPMENT {
+        int id PK
+        int order_id FK
+        int shipping_company_id FK "nullable"
+        int shipping_zone_id FK "nullable"
+        int currency_id FK
+        string tracking_code UK
+        string tracking_url
+        string last_event_status
+        string last_event_location
+        timestamp last_event_at
+        bigint shipping_cost_cents
+        string status
+        timestamp shipped_at
+        timestamp delivered_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    SEGUIMIENTO_ENVIO {
-        int id_seguimiento PK
-        int id_envio FK
-        string estado
-        string ubicacion
-        string descripcion
-        datetime fecha_registro
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    COUPON {
+        int id PK
+        int store_id FK "nullable: global coupons allowed"
+        string code UK
+        string discount_type "percentage, fixed"
+        decimal value
+        decimal minimum_amount
+        date valid_from
+        date valid_to
+        int usage_limit
+        int current_usages
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    CUPON {
-        int id_cupon PK
-        int id_tienda FK
-        string codigo
-        string tipo_descuento
-        decimal valor
-        decimal monto_minimo
-        date fecha_inicio
-        date fecha_fin
-        int limite_usos
-        int usos_actuales
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    COUPON_USAGE {
+        int id PK
+        int coupon_id FK
+        int customer_id FK
+        int order_id FK "nullable: dry-run usage"
+        timestamp used_at
+        datetime created_at
+        datetime updated_at
     }
 
-    USO_CUPON {
-        int id_uso_cupon PK
-        int id_cupon FK
-        int id_cliente FK
-        int id_pedido FK
-        datetime fecha_uso
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    PROMOTION {
+        int id PK
+        int store_id FK "nullable: global promotions allowed"
+        string name
+        text description
+        string discount_type
+        decimal value
+        date valid_from
+        date valid_to
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    PROMOCION {
-        int id_promocion PK
-        int id_tienda FK
-        string nombre
-        string descripcion
-        string tipo_descuento
-        decimal valor
-        date fecha_inicio
-        date fecha_fin
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    PRODUCT_PROMOTION {
+        int id PK
+        int product_id FK
+        int promotion_id FK
+        datetime created_at
+        datetime updated_at
     }
 
-    PRODUCTO_PROMOCION {
-        int id_producto_promocion PK
-        int id_producto FK
-        int id_promocion FK
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    TAX {
+        int id PK
+        string name
+        decimal percentage
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    IMPUESTO {
-        int id_impuesto PK
-        string nombre
-        decimal porcentaje
-        boolean activo
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    PRODUCT_TAX {
+        int id PK
+        int product_id FK
+        int tax_id FK
+        datetime created_at
+        datetime updated_at
     }
 
-    PRODUCTO_IMPUESTO {
-        int id_producto_impuesto PK
-        int id_producto FK
-        int id_impuesto FK
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    RETURN_REQUEST {
+        int id PK
+        int store_id FK
+        int order_id FK
+        int customer_id FK
+        text reason
+        string status "pending, approved, rejected, completed"
+        timestamp requested_at
+        timestamp resolved_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    DEVOLUCION {
-        int id_devolucion PK
-        int id_pedido FK
-        int id_cliente FK
-        string motivo
-        string estado
-        datetime fecha_solicitud
-        datetime fecha_resolucion
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    RETURN_REQUEST_ITEM {
+        int id PK
+        int return_request_id FK
+        int product_id FK
+        int product_variant_id FK "nullable"
+        int quantity
+        bigint amount_cents
+        datetime created_at
+        datetime updated_at
     }
 
-    DETALLE_DEVOLUCION {
-        int id_detalle_devolucion PK
-        int id_devolucion FK
-        int id_producto FK
-        int id_variante FK
-        int cantidad
-        decimal monto
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    REFUND {
+        int id PK
+        int store_id FK
+        int return_request_id FK
+        int payment_method_id FK "nullable"
+        int currency_id FK
+        bigint amount_cents
+        decimal exchange_rate_snapshot
+        string status
+        timestamp refunded_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    REEMBOLSO {
-        int id_reembolso PK
-        int id_devolucion FK
-        int id_metodo_pago FK
-        decimal monto
-        string estado
-        datetime fecha_reembolso
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    ORDER_CUSTOM_DESIGN {
+        int id PK
+        int order_id FK
+        int order_item_id FK
+        int custom_design_id FK "nullable"
+        json design_snapshot
+        string production_file_url
+        string production_status
+        text production_notes
+        int reviewed_by FK "nullable, references users.id"
+        timestamp reviewed_at
+        timestamp approved_at
+        timestamp rejected_at
+        text rejection_reason
+        timestamp production_started_at
+        timestamp production_completed_at
+        datetime created_at
+        datetime updated_at
     }
 
-    RESENA_PRODUCTO {
-        int id_resena PK
-        int id_producto FK
-        int id_cliente FK
-        int id_tienda FK nullable
-        int calificacion
-        string comentario
-        boolean aprobado
-        datetime fecha_resena
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    PRODUCT_REVIEW {
+        int id PK
+        int product_id FK
+        int customer_id FK
+        int store_id FK "nullable: global reviews allowed"
+        tinyint rating "1..5"
+        text comment
+        boolean is_approved
+        timestamp reviewed_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    PREGUNTA_PRODUCTO {
-        int id_pregunta PK
-        int id_producto FK
-        int id_cliente FK
-        int id_tienda FK nullable
-        string pregunta
-        string respuesta
-        datetime fecha_pregunta
-        datetime fecha_respuesta
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    PRODUCT_QUESTION {
+        int id PK
+        int product_id FK
+        int customer_id FK
+        int store_id FK "nullable"
+        text question
+        text answer
+        timestamp asked_at
+        timestamp answered_at
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    TICKET_SOPORTE {
-        int id_ticket PK
-        int id_cliente FK
-        int id_tienda FK nullable
-        string asunto
-        string descripcion
-        string estado
-        string prioridad
-        datetime fecha_creacion
-        datetime fecha_actualizacion
-        datetime fecha_eliminacion
+    SUPPORT_TICKET {
+        int id PK
+        int customer_id FK
+        int store_id FK "nullable"
+        string subject
+        text description
+        string status
+        string priority
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
-    TICKET_MENSAJE {
-        int id_ticket_mensaje PK
-        int id_ticket FK
-        int id_usuario FK
-        string mensaje
-        datetime fecha_mensaje
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    SUPPORT_TICKET_MESSAGE {
+        int id PK
+        int support_ticket_id FK
+        int user_id FK
+        text message
+        timestamp messaged_at
+        datetime created_at
+        datetime updated_at
     }
 
-    NOTIFICACION {
-        int id_notificacion PK
-        int id_tienda FK
-        int id_usuario FK
-        string titulo
-        string mensaje
-        string tipo
-        boolean leida
-        datetime fecha_lectura
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    NOTIFICATION {
+        int id PK
+        int store_id FK "nullable"
+        int user_id FK
+        string title
+        text body
+        string type
+        boolean is_read
+        timestamp read_at
+        datetime created_at
+        datetime updated_at
     }
 
-    AUDITORIA {
-        int id_auditoria PK
-        int id_tienda FK
-        int id_usuario FK
-        string accion
-        string tabla_afectada
-        string registro_id
-        string descripcion
-        json valores_anteriores
-        json valores_nuevos
-        string ip
-        string user_agent
-        datetime fecha_registro
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+    AUDIT {
+        int id PK
+        int store_id FK "nullable"
+        int user_id FK "nullable"
+        string action "created, updated, deleted"
+        string table_name
+        string record_id
+        text description
+        json old_values
+        json new_values
+        string ip_address
+        text user_agent
+        timestamp registered_at
+        datetime created_at
+        datetime updated_at
     }
 
-    MONEDA ||--o{ TIENDA : usa
-    MONEDA ||--o{ TIPO_CAMBIO : tiene
+    %% ---- Currency / FX ----
+    CURRENCY ||--o{ EXCHANGE_RATE : "from"
+    CURRENCY ||--o{ EXCHANGE_RATE : "to"
 
-    TIENDA ||--o{ TIENDA_CONFIGURACION : configura
-    TIENDA ||--o{ TIENDA_DOMINIO : posee
-    TIENDA ||--o{ TIENDA_RED_SOCIAL : tiene
-    TIENDA ||--o{ CANAL_VENTA : opera
-    TIENDA ||--o{ USUARIO_TIENDA : asigna
-    TIENDA ||--o{ CLIENTE_TIENDA : atiende
-    TIENDA ||--o{ PRODUCTO_TIENDA : publica
-    TIENDA ||--o{ CARRITO : contiene
-    TIENDA ||--o{ WISHLIST : contiene
-    TIENDA ||--o{ PEDIDO : recibe
-    TIENDA ||--o{ FACTURA : emite
-    TIENDA ||--o{ PAGO : registra
-    TIENDA ||--o{ CUPON : ofrece
-    TIENDA ||--o{ PROMOCION : publica
-    TIENDA ||--o{ RESENA_PRODUCTO : recibe
-    TIENDA ||--o{ PREGUNTA_PRODUCTO : recibe
-    TIENDA ||--o{ TICKET_SOPORTE : atiende
-    TIENDA ||--o{ NOTIFICACION : genera
-    TIENDA ||--o{ AUDITORIA : registra
+    %% ---- Store fan-out ----
+    STORE ||--o{ STORE_DOMAIN : owns
+    STORE ||--o{ STORE_SOCIAL_LINK : has
+    STORE ||--o{ STORE_SETTING : configures
+    STORE ||--o{ SALES_CHANNEL : operates
+    STORE ||--o{ USER_STORE : assigns
+    STORE ||--o{ CUSTOMER_STORE : serves
+    STORE ||--o{ PRODUCT_STORE : publishes
+    STORE ||--o{ CART : contains
+    STORE ||--o{ WISHLIST : contains
+    STORE ||--o{ ORDER : receives
+    STORE ||--o{ INVOICE : issues
+    STORE ||--o{ PAYMENT : registers
+    STORE ||--o{ COUPON : offers
+    STORE ||--o{ PROMOTION : runs
+    STORE ||--o{ RETURN_REQUEST : tracks
+    STORE ||--o{ REFUND : records
+    STORE ||--o{ PRODUCT_REVIEW : hosts
+    STORE ||--o{ PRODUCT_QUESTION : hosts
+    STORE ||--o{ SUPPORT_TICKET : handles
+    STORE ||--o{ NOTIFICATION : generates
+    STORE ||--o{ AUDIT : scopes
+    STORE ||--o{ CART : holds
 
-    ROL ||--o{ USUARIO : asigna
-    ROL ||--o{ ROL_PERMISO : contiene
-    ROL ||--o{ USUARIO_TIENDA : define_acceso
-    PERMISO ||--o{ ROL_PERMISO : pertenece
+    %% ---- Auth ----
+    ROLE ||--o{ USER : global_role
+    ROLE ||--o{ USER_STORE : per_store_role
+    ROLE ||--o{ ROLE_PERMISSION : grants
+    PERMISSION ||--o{ ROLE_PERMISSION : belongs_to
 
-    USUARIO ||--o| CLIENTE : puede_ser
-    USUARIO ||--o{ USUARIO_TIENDA : administra
-    USUARIO ||--o| USUARIO_2FA_CONFIGURACION : configura
-    USUARIO ||--o{ USUARIO_2FA_METODO : tiene
-    USUARIO ||--o{ OTP_DESAFIO : genera
-    USUARIO ||--o{ CODIGO_RECUPERACION_2FA : posee
-    USUARIO ||--o{ PASSKEY_CREDENCIAL : registra
-    USUARIO ||--o{ PASSWORD_RESET_TOKEN : solicita
-    USUARIO ||--o{ DISPOSITIVO_CONFIABLE : confia
-    USUARIO ||--o{ INTENTO_LOGIN : registra
-    USUARIO ||--o{ EVENTO_SEGURIDAD : genera
-    USUARIO ||--o{ AUDITORIA : genera
-    USUARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
-    USUARIO ||--o{ COMPRA : realiza
-    USUARIO ||--o{ PEDIDO : crea
-    USUARIO ||--o{ FACTURA : emite
-    USUARIO ||--o{ PEDIDO_ESTADO_HISTORIAL : cambia
-    USUARIO ||--o{ FACTURA_ESTADO_HISTORIAL : cambia
-    USUARIO ||--o{ TICKET_MENSAJE : escribe
-    USUARIO ||--o{ NOTIFICACION : recibe
-    USUARIO ||--o{ DISENO_PERSONALIZADO : administra
-    USUARIO ||--o{ ARCHIVO_DISENO : sube
+    %% ---- User fan-out ----
+    USER ||--o| CUSTOMER : linked_to
+    USER ||--o{ USER_STORE : has_access
+    USER ||--o{ INVENTORY_MOVEMENT : triggers
+    USER ||--o{ PURCHASE : creates
+    USER ||--o{ ORDER : creates
+    USER ||--o{ INVOICE : issues
+    USER ||--o{ ORDER_STATUS_HISTORY : changes
+    USER ||--o{ INVOICE_STATUS_HISTORY : changes
+    USER ||--o{ SUPPORT_TICKET_MESSAGE : writes
+    USER ||--o{ NOTIFICATION : receives
+    USER ||--o{ AUDIT : actor
+    USER ||--o{ CUSTOM_DESIGN : creates
+    USER ||--o{ ORDER_CUSTOM_DESIGN : reviews
 
-    CLIENTE ||--o{ CLIENTE_TIENDA : pertenece
-    CLIENTE ||--o{ CLIENTE_DIRECCION : tiene
-    CLIENTE ||--o{ CARRITO : posee
-    CLIENTE ||--o{ WISHLIST : posee
-    CLIENTE ||--o{ PEDIDO : realiza
-    CLIENTE ||--o{ FACTURA : recibe
-    CLIENTE ||--o{ PAGO : realiza
-    CLIENTE ||--o{ USO_CUPON : usa
-    CLIENTE ||--o{ DEVOLUCION : solicita
-    CLIENTE ||--o{ RESENA_PRODUCTO : escribe
-    CLIENTE ||--o{ PREGUNTA_PRODUCTO : pregunta
-    CLIENTE ||--o{ TICKET_SOPORTE : abre
-    CLIENTE ||--o{ DISENO_PERSONALIZADO : crea
-    CLIENTE ||--o{ ARCHIVO_DISENO : sube
+    %% ---- Customer fan-out ----
+    CUSTOMER ||--o{ CUSTOMER_STORE : linked
+    CUSTOMER ||--o{ CUSTOMER_ADDRESS : has
+    CUSTOMER ||--o{ CART : owns
+    CUSTOMER ||--o{ WISHLIST : owns
+    CUSTOMER ||--o{ ORDER : places
+    CUSTOMER ||--o{ INVOICE : receives
+    CUSTOMER ||--o{ PAYMENT : makes
+    CUSTOMER ||--o{ COUPON_USAGE : uses
+    CUSTOMER ||--o{ RETURN_REQUEST : requests
+    CUSTOMER ||--o{ PRODUCT_REVIEW : writes
+    CUSTOMER ||--o{ PRODUCT_QUESTION : asks
+    CUSTOMER ||--o{ SUPPORT_TICKET : opens
+    CUSTOMER ||--o{ CUSTOM_DESIGN : authors
 
-    CATEGORIA ||--o{ CATEGORIA : subcategoria
-    CATEGORIA ||--o{ PRODUCTO : clasifica
-    MARCA ||--o{ PRODUCTO : fabrica
+    %% ---- Catalog ----
+    CATEGORY ||--o{ CATEGORY : parent_of
+    CATEGORY ||--o{ PRODUCT : primary
+    CATEGORY ||--o{ CATEGORY_PRODUCT : many_to_many
+    PRODUCT ||--o{ CATEGORY_PRODUCT : many_to_many
+    BRAND ||--o{ PRODUCT : manufactures
 
-    PRODUCTO ||--o{ PRODUCTO_TIENDA : aparece_en
-    PRODUCTO ||--o{ PRODUCTO_IMAGEN : tiene
-    PRODUCTO_TIENDA ||--o{ PRODUCTO_TIENDA_IMAGEN : tiene_imagenes
-    PRODUCTO ||--o{ PRODUCTO_VARIANTE : tiene
-    PRODUCTO ||--o{ PRODUCTO_ATRIBUTO : posee
-    PRODUCTO ||--o{ PRODUCTO_PERSONALIZACION : configura
-    PRODUCTO ||--o{ INVENTARIO : tiene_stock
-    PRODUCTO ||--o{ DETALLE_COMPRA : comprado
-    PRODUCTO ||--o{ CARRITO_DETALLE : agregado
-    PRODUCTO ||--o{ WISHLIST_DETALLE : guardado
-    PRODUCTO ||--o{ DETALLE_PEDIDO : vendido
-    PRODUCTO ||--o{ DETALLE_FACTURA : facturado
-    PRODUCTO ||--o{ PRODUCTO_PROMOCION : participa
-    PRODUCTO ||--o{ PRODUCTO_IMPUESTO : tiene
-    PRODUCTO ||--o{ DETALLE_DEVOLUCION : devuelto
-    PRODUCTO ||--o{ RESENA_PRODUCTO : recibe
-    PRODUCTO ||--o{ PREGUNTA_PRODUCTO : recibe
-    PRODUCTO ||--o{ DISENO_PERSONALIZADO : base_diseno
+    %% ---- Catalog publishing ----
+    PRODUCT ||--o{ PRODUCT_STORE : appears_in
+    PRODUCT ||--o{ PRODUCT_IMAGE : has
+    PRODUCT_STORE ||--o{ PRODUCT_STORE_IMAGE : has
+    PRODUCT ||--o{ PRODUCT_VARIANT : has
+    PRODUCT ||--o{ PRODUCT_ATTRIBUTE_VALUE : has
+    PRODUCT_VARIANT ||--o{ VARIANT_ATTRIBUTE_VALUE : has
+    PRODUCT ||--o{ CART_ITEM : line_in
+    PRODUCT ||--o{ WISHLIST_ITEM : saved_in
+    PRODUCT ||--o{ ORDER_ITEM : line_in
+    PRODUCT ||--o{ INVOICE_ITEM : line_in
+    PRODUCT ||--o{ PURCHASE_ITEM : line_in
+    PRODUCT ||--o{ RETURN_REQUEST_ITEM : line_in
+    PRODUCT ||--o{ PRODUCT_PROMOTION : promotes
+    PRODUCT ||--o{ PRODUCT_TAX : taxed_by
+    PRODUCT ||--o{ PRODUCT_REVIEW : receives
+    PRODUCT ||--o{ PRODUCT_QUESTION : receives
+    PRODUCT ||--o{ CUSTOM_DESIGN : base_of
 
-    ATRIBUTO ||--o{ PRODUCTO_ATRIBUTO : define
-    ATRIBUTO ||--o{ VARIANTE_ATRIBUTO : define
+    PRODUCT_VARIANT ||--o{ CART_ITEM : variant_in
+    PRODUCT_VARIANT ||--o{ ORDER_ITEM : variant_in
+    PRODUCT_VARIANT ||--o{ INVOICE_ITEM : variant_in
+    PRODUCT_VARIANT ||--o{ PURCHASE_ITEM : variant_in
+    PRODUCT_VARIANT ||--o{ RETURN_REQUEST_ITEM : variant_in
+    PRODUCT_VARIANT ||--o{ INVENTORY : stocked_as
+    PRODUCT_VARIANT ||--o{ CUSTOM_DESIGN : variant_of
 
-    PRODUCTO_VARIANTE ||--o{ VARIANTE_ATRIBUTO : posee
-    PRODUCTO_VARIANTE ||--o{ PRODUCTO_PERSONALIZACION : configura
-    PRODUCTO_VARIANTE ||--o{ INVENTARIO : tiene_stock
-    PRODUCTO_VARIANTE ||--o{ DETALLE_COMPRA : comprado
-    PRODUCTO_VARIANTE ||--o{ CARRITO_DETALLE : agregado
-    PRODUCTO_VARIANTE ||--o{ DETALLE_PEDIDO : vendido
-    PRODUCTO_VARIANTE ||--o{ DETALLE_FACTURA : facturado
-    PRODUCTO_VARIANTE ||--o{ DETALLE_DEVOLUCION : devuelto
-    PRODUCTO_VARIANTE ||--o{ DISENO_PERSONALIZADO : variante_diseno
+    ATTRIBUTE ||--o{ PRODUCT_ATTRIBUTE_VALUE : defines
+    ATTRIBUTE ||--o{ VARIANT_ATTRIBUTE_VALUE : defines
 
-    PRODUCTO_PERSONALIZACION ||--o{ AREA_IMPRESION : define
-    PRODUCTO_PERSONALIZACION ||--o{ MOCKUP_PRODUCTO : tiene
-    PRODUCTO_PERSONALIZACION ||--o{ DISENO_PERSONALIZADO : usa
+    %% ---- Inventory ----
+    WAREHOUSE ||--o{ INVENTORY : stocks
+    INVENTORY ||--o{ INVENTORY_MOVEMENT : logs
 
-    AREA_IMPRESION ||--o{ DISENO_CAPA : contiene
+    %% ---- Purchases ----
+    SUPPLIER ||--o{ PURCHASE : supplies
+    PURCHASE ||--o{ PURCHASE_ITEM : contains
 
-    DISENO_PERSONALIZADO ||--o{ DISENO_CAPA : contiene
-    DISENO_PERSONALIZADO ||--o{ DISENO_MOCKUP_RENDER : genera
-    DISENO_PERSONALIZADO ||--o{ PEDIDO_DISENO_PERSONALIZADO : se_compra
-    DISENO_PERSONALIZADO ||--o{ CARRITO_DETALLE : agregado_al_carrito
-    DISENO_PERSONALIZADO ||--o{ DETALLE_PEDIDO : comprado_en
+    %% ---- Carts ----
+    CART ||--o{ CART_ITEM : contains
+    CUSTOM_DESIGN ||--o{ CART_ITEM : attached_to
 
-    USUARIO ||--o{ PEDIDO_DISENO_PERSONALIZADO : revisa
+    %% ---- Wishlists ----
+    WISHLIST ||--o{ WISHLIST_ITEM : contains
 
-    ARCHIVO_DISENO ||--o{ DISENO_CAPA : usa
-    FUENTE_DISENO ||--o{ DISENO_CAPA : aplica
-    GRAFICO_BIBLIOTECA ||--o{ DISENO_CAPA : usa
+    %% ---- Sales ----
+    CUSTOMER_ADDRESS ||--o{ ORDER : shipped_to
+    SALES_CHANNEL ||--o{ ORDER : sourced_from
+    ORDER ||--o{ ORDER_ITEM : contains
+    ORDER ||--o{ ORDER_STATUS_HISTORY : tracks
+    ORDER ||--o| INVOICE : bills
+    ORDER ||--o| SHIPMENT : ships
+    ORDER ||--o{ COUPON_USAGE : applies
+    ORDER ||--o{ RETURN_REQUEST : subject_of
+    ORDER ||--o{ ORDER_CUSTOM_DESIGN : customizes
+    ORDER_ITEM ||--o| ORDER_CUSTOM_DESIGN : realizes
 
-    MOCKUP_PRODUCTO ||--o{ DISENO_MOCKUP_RENDER : renderiza
+    INVOICE ||--o{ INVOICE_ITEM : contains
+    INVOICE ||--o{ INVOICE_STATUS_HISTORY : tracks
+    INVOICE ||--o{ INVOICE_PAYMENT : receives
+    INVOICE_PAYMENT ||--o{ PAYMENT : applies_to
 
-    ALMACEN ||--o{ INVENTARIO : contiene
-    INVENTARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
+    %% ---- Payments ----
+    PAYMENT_METHOD ||--o{ PAYMENT : used_in
+    PAYMENT_METHOD ||--o{ REFUND : used_in
+    PAYMENT ||--o{ INVOICE_PAYMENT : applied_via
+    PAYMENT ||--o{ PAYMENT_TRANSACTION : logs
 
-    PROVEEDOR ||--o{ COMPRA : suministra
-    COMPRA ||--o{ DETALLE_COMPRA : incluye
+    %% ---- Shipping ----
+    SHIPPING_COMPANY ||--o{ SHIPMENT : delivers
+    SHIPPING_ZONE ||--o{ SHIPMENT : covers
 
-    CARRITO ||--o{ CARRITO_DETALLE : contiene
+    %% ---- Marketing ----
+    COUPON ||--o{ COUPON_USAGE : records
+    PROMOTION ||--o{ PRODUCT_PROMOTION : applies_to
 
-    WISHLIST ||--o{ WISHLIST_DETALLE : contiene
+    %% ---- Returns ----
+    RETURN_REQUEST ||--o{ RETURN_REQUEST_ITEM : contains
+    RETURN_REQUEST ||--o| REFUND : triggers
 
-    CLIENTE_DIRECCION ||--o{ PEDIDO : usada_en
-    CANAL_VENTA ||--o{ PEDIDO : origina
-    CANAL_VENTA ||--o{ FACTURA : registra
+    %% ---- Support ----
+    SUPPORT_TICKET ||--o{ SUPPORT_TICKET_MESSAGE : contains
 
-    PEDIDO ||--o{ DETALLE_PEDIDO : contiene
-    PEDIDO ||--o{ PEDIDO_ESTADO_HISTORIAL : historial
-    PEDIDO ||--o| FACTURA : genera
-    PEDIDO ||--o| ENVIO : tiene
-    PEDIDO ||--o{ USO_CUPON : aplica
-    PEDIDO ||--o{ DEVOLUCION : puede_tener
-    PEDIDO ||--o{ PEDIDO_DISENO_PERSONALIZADO : incluye
-
-    DETALLE_PEDIDO ||--o| PEDIDO_DISENO_PERSONALIZADO : referencia
-
-    FACTURA ||--o{ DETALLE_FACTURA : contiene
-    FACTURA ||--o{ FACTURA_ESTADO_HISTORIAL : historial
-    FACTURA ||--o{ FACTURA_PAGO : recibe
-    FACTURA ||--o{ CUOTA_PAGO : divide
-
-    METODO_PAGO ||--o{ PAGO : usado_en
-    METODO_PAGO ||--o{ REEMBOLSO : usado_en
-    PAGO ||--o{ FACTURA_PAGO : aplicado
-    PAGO ||--o{ TRANSACCION_PAGO : genera
-
-    EMPRESA_ENVIO ||--o{ ENVIO : transporta
-    ZONA_ENVIO ||--o{ ENVIO : pertenece
-    ENVIO ||--o{ SEGUIMIENTO_ENVIO : actualiza
-
-    CUPON ||--o{ USO_CUPON : registra
-
-    PROMOCION ||--o{ PRODUCTO_PROMOCION : incluye
-
-    IMPUESTO ||--o{ PRODUCTO_IMPUESTO : aplica
-
-    DEVOLUCION ||--o{ DETALLE_DEVOLUCION : contiene
-    DEVOLUCION ||--o| REEMBOLSO : genera
-
-    TICKET_SOPORTE ||--o{ TICKET_MENSAJE : contiene
+    %% ---- Customization ----
+    CUSTOM_DESIGN ||--o{ ORDER_CUSTOM_DESIGN : realized_in
+    CUSTOM_DESIGN ||--o{ ORDER_ITEM : attached_to
