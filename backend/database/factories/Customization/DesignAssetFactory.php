@@ -25,7 +25,7 @@ class DesignAssetFactory extends Factory
             'extension' => $extension,
             'storage_disk' => 'public',
             'file_path' => 'designs/'.fake()->uuid().'.'.$extension,
-            'size_bytes' => fake()->numberBetween(1024, 10485760),
+            'size_bytes' => fake()->numberBetween(min: 1024, max: 10485760),
             'width_px' => fake()->optional()->randomElement([800, 1200, 1600, 2400]),
             'height_px' => fake()->optional()->randomElement([800, 1200, 1600, 2400]),
             'dpi' => fake()->optional()->randomElement([72, 150, 300]),
