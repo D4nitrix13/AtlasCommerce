@@ -1,0 +1,39 @@
+<header class="sticky top-0 z-30 border-b border-slate-200/80 bg-[#f6f7f9]/90 backdrop-blur">
+  <div class="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-sm">
+      <label class="relative block">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          🔎
+        </span>
+
+        <input
+          type="search"
+          placeholder="Buscar..."
+          class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
+        />
+      </label>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a
+        href="/admin/sales/orders"
+        class="hidden rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:inline-flex"
+      >
+        + Nueva orden
+      </a>
+
+      <button class="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-slate-900">
+        🌙
+      </button>
+
+      <button class="relative grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-slate-900">
+        🔔
+        <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"></span>
+      </button>
+
+      <div class="grid h-10 w-10 place-items-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+        AS
+      </div>
+    </div>
+  </div>
+</header>
