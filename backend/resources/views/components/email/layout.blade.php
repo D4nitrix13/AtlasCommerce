@@ -21,10 +21,10 @@
 
 @props([
     'appName' => config('app.name'),
-    'logoUrl' => asset(config('brand.logo_path')),
-    'address' => config('brand.address'),
-    'facebookUrl' => config('brand.social.facebook_url'),
-    'instagramUrl' => config('brand.social.instagram_url'),
+    'logoUrl' => asset(config('brand.default_logo_path')),
+    'address' => '',
+    'facebookUrl' => null,
+    'instagramUrl' => null,
     'facebookIconUrl' => asset(config('brand.social.facebook_icon_path')),
     'instagramIconUrl' => asset(config('brand.social.instagram_icon_path')),
 ])

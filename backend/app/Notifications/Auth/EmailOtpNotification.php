@@ -67,8 +67,8 @@ class EmailOtpNotification extends Notification
                     'expiresMinutes' => $this->expiresMinutes,
                     'logoUrl' => asset(
                         path: (string) config(
-                            key: 'brand.logo_path',
-                            default: 'images/brand/app-logo.png',
+                            key: 'brand.default_logo_path',
+                            default: 'images/shared/brand/app-logo.webp',
                         ),
                     ),
                     'userName' => $notifiable->first_name ?? null,
@@ -76,28 +76,19 @@ class EmailOtpNotification extends Notification
                         key: 'brand.support_email',
                         default: 'support@example.test',
                     ),
-                    'address' => config(
-                        key: 'brand.address',
-                        default: '',
-                    ),
-                    'facebookUrl' => config(
-                        key: 'brand.social.facebook_url',
-                        default: null,
-                    ),
-                    'instagramUrl' => config(
-                        key: 'brand.social.instagram_url',
-                        default: null,
-                    ),
+                    'address' => '',
+                    'facebookUrl' => null,
+                    'instagramUrl' => null,
                     'facebookIconUrl' => asset(
                         path: (string) config(
                             key: 'brand.social.facebook_icon_path',
-                            default: 'images/social/facebook.png',
+                            default: 'images/shared/icons/social/facebook.webp',
                         ),
                     ),
                     'instagramIconUrl' => asset(
                         path: (string) config(
                             key: 'brand.social.instagram_icon_path',
-                            default: 'images/social/instagram.png',
+                            default: 'images/shared/icons/social/instagram.webp',
                         ),
                     ),
                 ],
