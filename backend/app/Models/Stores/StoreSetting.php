@@ -9,17 +9,16 @@ class StoreSetting extends Model
 {
     protected $fillable = [
         'store_id',
-        'store_name',
-        'logo',
-        'email',
-        'phone',
-        'address',
-        'primary_currency',
-        'maintenance_mode',
+        'setting_group',
+        'setting_key',
+        'setting_value',
+        'value_type',
+        'description',
+        'is_public',
     ];
 
     protected $casts = [
-        'maintenance_mode' => 'boolean',
+        'is_public' => 'boolean',
     ];
 
     public function store(): BelongsTo
