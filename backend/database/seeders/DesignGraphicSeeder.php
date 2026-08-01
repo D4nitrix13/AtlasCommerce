@@ -24,8 +24,8 @@ class DesignGraphicSeeder extends Seeder
 
         foreach ($graphics as $graphic) {
             DesignGraphic::updateOrCreate(
-                ['name' => $graphic['name']],
-                $graphic,
+                attributes: ['name' => $graphic['name']],
+                values: $graphic,
             );
         }
     }

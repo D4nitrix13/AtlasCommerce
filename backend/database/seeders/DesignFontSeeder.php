@@ -26,8 +26,8 @@ class DesignFontSeeder extends Seeder
 
         foreach ($fonts as $font) {
             DesignFont::updateOrCreate(
-                ['family' => $font['family'], 'style' => $font['style'], 'weight' => $font['weight']],
-                $font,
+                attributes: ['family' => $font['family'], 'style' => $font['style'], 'weight' => $font['weight']],
+                values: $font,
             );
         }
     }
