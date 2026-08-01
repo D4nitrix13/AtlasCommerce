@@ -81,6 +81,7 @@ final class CheckoutService
             $notes,
             $exchangeRate,
             $storeId,
+            $store,
         ): Order {
             $cart->loadMissing('items.product', 'items.productVariant');
 
@@ -92,6 +93,16 @@ final class CheckoutService
             }
 
             $subtotalCents = (int) $items->sum('subtotal_cents');
+
+            // Tax: tasa por tienda aplicada al subtotal. El snapshot queda
+            // implícito al persistir tax_cents en la orden (no recalculamos
+            // si la tasa del store cambia después).
+            $taxCents = $this->calculateTaxCents(
+                subtotalCents: $subtotalCents,
+                taxRate: (float) ($store?->tax_rate ?? 0),
+            );
+
+            $totalCents = $subtotalCents + $taxCents;
 
             // Snapshot a order_items.
             $orderItemsPayload = $items->map(function (CartItem $item) {
@@ -121,9 +132,9 @@ final class CheckoutService
                 'order_number' => $this->generateOrderNumber(),
                 'subtotal_cents' => $subtotalCents,
                 'discount_cents' => 0,
-                'tax_cents' => 0,
+                'tax_cents' => $taxCents,
                 'shipping_cents' => 0,
-                'total_cents' => $subtotalCents,
+                'total_cents' => $totalCents,
                 'exchange_rate_snapshot' => $exchangeRate,
                 'total_in_base_currency_cents' => (int) round(
                     $subtotalCents * (float) $exchangeRate
@@ -146,8 +157,8 @@ final class CheckoutService
                 'invoice_number' => $this->generateInvoiceNumber(),
                 'subtotal_cents' => $subtotalCents,
                 'discount_cents' => 0,
-                'tax_cents' => 0,
-                'total_cents' => $subtotalCents,
+                'tax_cents' => $taxCents,
+                'total_cents' => $totalCents,
                 'exchange_rate_snapshot' => $exchangeRate,
                 'payment_status' => 'pending',
                 'invoice_status' => 'issued',
@@ -200,6 +211,23 @@ final class CheckoutService
             ->first();
 
         return $rate ? (float) $rate->value : 1.0;
+    }
+
+    /**
+     * Calcula los centavos de impuesto sobre el subtotal.
+     *
+     * `tax_rate` es porcentaje (0..100). Para $12.34 con tasa 15%:
+     *   1234 * 0.15 = 185.1 → 185 cents (banker's rounding evita sesgo).
+     *
+     * Si la tasa es 0 o negativa, retorna 0.
+     */
+    private function calculateTaxCents(int $subtotalCents, float $taxRate): int
+    {
+        if ($taxRate <= 0) {
+            return 0;
+        }
+
+        return (int) round($subtotalCents * $taxRate / 100, 0, PHP_ROUND_HALF_EVEN);
     }
 
     /**

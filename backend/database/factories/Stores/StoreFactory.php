@@ -26,6 +26,7 @@ class StoreFactory extends Factory
             'description' => fake()->sentence(),
             'primary_color' => '#111827',
             'secondary_color' => '#f97316',
+            'tax_rate' => 0,
             'maintenance_mode' => false,
             'is_active' => true,
         ];
