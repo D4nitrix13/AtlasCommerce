@@ -2,17 +2,49 @@
 
 namespace App\Models\Marketing;
 
+use App\Models\Customers\Customer;
+use App\Models\Sales\Order;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Registro de uso de un cupón por un cliente.
  *
- * Tabla: `coupon_usages` — relación N:1 con `coupons`.
- *
- * Rastrea cada vez que un cupón es aplicado,
- * evitando usos múltiples cuando no está permitido.
+ * Tabla: `coupon_usages` — relación N:1 con `coupons`, `customers` y `orders`.
  */
 class CouponUsage extends Model
 {
-    //
+    protected $fillable = [
+        'coupon_id',
+        'customer_id',
+        'order_id',
+    ];
+
+    protected $casts = [
+        'used_at' => 'datetime',
+    ];
+
+    /**
+     * Cupón utilizado.
+     */
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    /**
+     * Cliente que usó el cupón.
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * Orden en la que se aplicó.
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
 }
