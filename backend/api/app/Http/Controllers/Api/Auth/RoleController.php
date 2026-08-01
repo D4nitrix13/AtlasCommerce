@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
+use App\Models\Auth\Role;
 use Illuminate\Http\Request;
 
 class RoleController extends Controller
