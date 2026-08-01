@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Returns;
 
+use App\Enums\RefundStatus;
 use App\Models\Concerns\BelongsToStore;
 use App\Models\Concerns\LogsActivity;
 use App\Models\Payments\PaymentMethod;
@@ -25,7 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $currency_id
  * @property int $amount_cents
  * @property string $exchange_rate_snapshot
- * @property string $status
+ * @property RefundStatus $status
  * @property Carbon|null $refunded_at
  */
 class Refund extends Model
@@ -47,6 +50,7 @@ class Refund extends Model
     ];
 
     protected $casts = [
+        'status' => RefundStatus::class,
         'amount_cents' => 'integer',
         'exchange_rate_snapshot' => 'decimal:8',
         'refunded_at' => 'datetime',
@@ -69,21 +73,21 @@ class Refund extends Model
 
     public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', 'pending');
+        return $query->where(column: 'status', operator: '=', value: RefundStatus::Pending->value);
     }
 
     public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where('status', 'completed');
+        return $query->where(column: 'status', operator: '=', value: RefundStatus::Completed->value);
     }
 
     public function scopeFailed(Builder $query): Builder
     {
-        return $query->where('status', 'failed');
+        return $query->where(column: 'status', operator: '=', value: RefundStatus::Failed->value);
     }
 
     public function scopeByReturnRequest(Builder $query, int $returnRequestId): Builder
     {
-        return $query->where('return_request_id', $returnRequestId);
+        return $query->where(column: 'return_request_id', operator: '=', value: $returnRequestId);
     }
 }
