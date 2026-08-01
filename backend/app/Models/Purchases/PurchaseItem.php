@@ -10,7 +10,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Artículo individual dentro de una orden de compra.
  *
- * Tabla: `purchase_items` — relación N:1 con `purchases`.
+ * Tabla: `purchase_items` — relación N:1 con `purchases`, `products`,
+ * `product_variants`.
+ *
+ * @property int $id
+ * @property int $purchase_id
+ * @property int $product_id
+ * @property int|null $product_variant_id
+ * @property int $quantity
+ * @property int $unit_cost_cents
+ * @property int $subtotal_cents
  */
 class PurchaseItem extends Model
 {
@@ -19,35 +28,26 @@ class PurchaseItem extends Model
         'product_id',
         'product_variant_id',
         'quantity',
-        'purchase_price',
-        'subtotal',
+        'unit_cost_cents',
+        'subtotal_cents',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
-        'purchase_price' => 'decimal:2',
-        'subtotal' => 'decimal:2',
+        'unit_cost_cents' => 'integer',
+        'subtotal_cents' => 'integer',
     ];
 
-    /**
-     * Orden de compra.
-     */
     public function purchase(): BelongsTo
     {
         return $this->belongsTo(Purchase::class);
     }
 
-    /**
-     * Producto comprado.
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Variante del producto (opcional).
-     */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);

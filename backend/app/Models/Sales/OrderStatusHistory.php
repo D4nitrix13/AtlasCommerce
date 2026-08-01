@@ -3,6 +3,7 @@
 namespace App\Models\Sales;
 
 use App\Models\Auth\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,6 +14,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Registra cada transición de estado (pendiente, procesando,
  * enviado, entregado, cancelado) con timestamp y usuario responsable.
+ *
+ * @property int $id
+ * @property int $order_id
+ * @property int|null $user_id
+ * @property string|null $previous_status
+ * @property string $new_status
+ * @property string|null $observation
+ * @property Carbon $changed_at
  */
 class OrderStatusHistory extends Model
 {

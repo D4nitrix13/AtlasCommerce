@@ -2,24 +2,28 @@
 
 namespace App\Models\Payments;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Método de pago configurado en el sistema.
+ * Método de pago configurado en el sistema (tarjeta, transferencia,
+ * efectivo, pasarela externa, etc.).
  *
- * Tabla: `payment_methods` — relación 1:N con `payments`.
+ * Tabla: `payment_methods` — relación 1:N con `payments`, `refunds`.
  *
- * Define los métodos aceptados (efectivo, tarjeta, transferencia, etc.).
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string|null $provider
+ * @property bool $is_active
  */
 class PaymentMethod extends Model
 {
-    use SoftDeletes;
-
     protected $fillable = [
+        'code',
         'name',
-        'description',
+        'provider',
         'is_active',
     ];
 
@@ -27,15 +31,12 @@ class PaymentMethod extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Pagos realizados con este método.
-     */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

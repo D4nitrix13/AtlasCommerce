@@ -2,6 +2,8 @@
 
 namespace App\Models\Shipping;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,6 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Registra cada evento en la cadena de seguimiento:
  * recibido, en tránsito, en reparto, entregado, etc.
+ *
+ * @property int $id
+ * @property int $shipment_id
+ * @property string $status
+ * @property string|null $location
+ * @property string|null $description
+ * @property Carbon $registered_at
  */
 class ShipmentTracking extends Model
 {
@@ -34,13 +43,26 @@ class ShipmentTracking extends Model
         return $this->belongsTo(Shipment::class);
     }
 
-    public function scopeByStatus($query, string $status)
+    /**
+     * Filtra eventos por estado específico.
+     *
+     * @param  Builder<ShipmentTracking>  $query  Consulta del modelo.
+     * @param  string  $status  Estado del evento de seguimiento.
+     * @return Builder<ShipmentTracking>
+     */
+    public function scopeByStatus(Builder $query, string $status): Builder
     {
-        return $query->where('status', $status);
+        return $query->where(column: 'status', value: $status);
     }
 
-    public function scopeLatest($query)
+    /**
+     * Ordena eventos del más reciente al más antiguo.
+     *
+     * @param  Builder<ShipmentTracking>  $query  Consulta del modelo.
+     * @return Builder<ShipmentTracking>
+     */
+    public function scopeLatest(Builder $query): Builder
     {
-        return $query->orderBy('registered_at', 'desc');
+        return $query->orderBy(column: 'registered_at', direction: 'desc');
     }
 }

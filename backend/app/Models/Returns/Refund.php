@@ -3,6 +3,9 @@
 namespace App\Models\Returns;
 
 use App\Models\Payments\PaymentMethod;
+use App\Models\Settings\Currency;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,7 +13,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Reembolso procesado para una devolución.
  *
- * Tabla: `refunds` — relación N:1 con `return_requests` y `payment_methods`.
+ * Tabla: `refunds` — relación N:1 con `return_requests`, `payment_methods`,
+ * `currencies`.
+ *
+ * @property int $id
+ * @property int $return_request_id
+ * @property int|null $payment_method_id
+ * @property int $currency_id
+ * @property int $amount_cents
+ * @property string $exchange_rate_snapshot
+ * @property string $status
+ * @property Carbon|null $refunded_at
  */
 class Refund extends Model
 {
@@ -19,48 +32,50 @@ class Refund extends Model
     protected $fillable = [
         'return_request_id',
         'payment_method_id',
-        'amount',
+        'currency_id',
+        'amount_cents',
+        'exchange_rate_snapshot',
         'status',
         'refunded_at',
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2',
+        'amount_cents' => 'integer',
+        'exchange_rate_snapshot' => 'decimal:8',
         'refunded_at' => 'datetime',
     ];
 
-    /**
-     * Solicitud de devolución asociada.
-     */
     public function returnRequest(): BelongsTo
     {
         return $this->belongsTo(ReturnRequest::class);
     }
 
-    /**
-     * Método de pago utilizado para el reembolso.
-     */
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class);
     }
 
-    public function scopePending($query)
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
 
-    public function scopeCompleted($query)
+    public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', 'completed');
     }
 
-    public function scopeFailed($query)
+    public function scopeFailed(Builder $query): Builder
     {
         return $query->where('status', 'failed');
     }
 
-    public function scopeByReturnRequest($query, int $returnRequestId)
+    public function scopeByReturnRequest(Builder $query, int $returnRequestId): Builder
     {
         return $query->where('return_request_id', $returnRequestId);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models\Shipping;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,6 +11,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Zona geográfica para cálculo de costos de envío.
  *
  * Tabla: `shipping_zones` — relación 1:N con `shipments`.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property string $base_cost
+ * @property bool $is_active
  */
 class ShippingZone extends Model
 {
@@ -35,8 +42,14 @@ class ShippingZone extends Model
         return $this->hasMany(Shipment::class);
     }
 
+    /**
+     * Filtra zonas de envío activas.
+     *
+     * @param  Builder<ShippingZone>  $query  Consulta del modelo.
+     * @return Builder<ShippingZone>
+     */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where(column: 'is_active', value: true);
     }
 }

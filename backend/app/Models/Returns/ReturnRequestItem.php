@@ -10,7 +10,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Artículo individual incluido en una solicitud de devolución.
  *
- * Tabla: `return_request_items` — relación N:1 con `return_requests`.
+ * Tabla: `return_request_items` — relación N:1 con `return_requests`,
+ * `products`, `product_variants`.
+ *
+ * @property int $id
+ * @property int $return_request_id
+ * @property int $product_id
+ * @property int|null $product_variant_id
+ * @property int $quantity
+ * @property int $amount_cents
  */
 class ReturnRequestItem extends Model
 {
@@ -19,33 +27,24 @@ class ReturnRequestItem extends Model
         'product_id',
         'product_variant_id',
         'quantity',
-        'amount',
+        'amount_cents',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
-        'amount' => 'decimal:2',
+        'amount_cents' => 'integer',
     ];
 
-    /**
-     * Solicitud de devolución.
-     */
     public function returnRequest(): BelongsTo
     {
         return $this->belongsTo(ReturnRequest::class);
     }
 
-    /**
-     * Producto devuelto.
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Variante del producto (opcional).
-     */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);

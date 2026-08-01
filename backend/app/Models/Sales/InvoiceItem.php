@@ -10,10 +10,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Línea individual de una factura.
  *
- * Tabla: `invoice_items` — relación N:1 con `invoices`.
+ * Tabla: `invoice_items` — relación N:1 con `invoices`,
+ * `products`, `product_variants`.
  *
- * Detalla cada producto facturado con su cantidad,
- * precio unitario y subtotal.
+ * @property int $id
+ * @property int $invoice_id
+ * @property int $product_id
+ * @property int|null $product_variant_id
+ * @property int $quantity
+ * @property int $unit_price_cents
+ * @property int $subtotal_cents
+ * @property string|null $product_name_snapshot
+ * @property string|null $product_sku_snapshot
  */
 class InvoiceItem extends Model
 {
@@ -22,35 +30,28 @@ class InvoiceItem extends Model
         'product_id',
         'product_variant_id',
         'quantity',
-        'unit_price',
-        'subtotal',
+        'unit_price_cents',
+        'subtotal_cents',
+        'product_name_snapshot',
+        'product_sku_snapshot',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
-        'unit_price' => 'decimal:2',
-        'subtotal' => 'decimal:2',
+        'unit_price_cents' => 'integer',
+        'subtotal_cents' => 'integer',
     ];
 
-    /**
-     * Factura a la que pertenece el ítem.
-     */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    /**
-     * Producto referenciado.
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Variante específica del producto (opcional).
-     */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);

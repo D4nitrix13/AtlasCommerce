@@ -5,8 +5,12 @@ namespace App\Models\Sales;
 use App\Models\Auth\User;
 use App\Models\Customers\Customer;
 use App\Models\Customers\CustomerAddress;
+use App\Models\Settings\Currency;
+use App\Models\Shipping\Shipment;
 use App\Models\Stores\SalesChannel;
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,10 +20,27 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Pedido realizado por un cliente.
  *
  * Tabla: `orders` — relación 1:N con `order_items`, `order_status_histories`,
- * `order_custom_designs`.
+ * `order_custom_designs`, `invoices`, `shipments`. N:1 con `customers`,
+ * `customer_addresses`, `stores`, `sales_channels`, `users`, `currencies`.
  *
- * Registra la transacción completa: productos, cantidades,
- * costos de envío, impuestos, descuentos y estado del pedido.
+ * @property int $id
+ * @property int $customer_id
+ * @property int|null $shipping_address_id
+ * @property int $store_id
+ * @property int|null $sales_channel_id
+ * @property int|null $user_creator_id
+ * @property int $currency_id
+ * @property string $order_number
+ * @property int $subtotal_cents
+ * @property int $discount_cents
+ * @property int $tax_cents
+ * @property int $shipping_cents
+ * @property int $total_cents
+ * @property string $exchange_rate_snapshot
+ * @property int $total_in_base_currency_cents
+ * @property string $status
+ * @property Carbon $ordered_at
+ * @property string|null $notes
  */
 class Order extends Model
 {
@@ -31,113 +52,112 @@ class Order extends Model
         'store_id',
         'sales_channel_id',
         'user_creator_id',
+        'currency_id',
         'order_number',
-        'subtotal',
-        'discount',
-        'tax',
-        'total',
+        'subtotal_cents',
+        'discount_cents',
+        'tax_cents',
+        'shipping_cents',
+        'total_cents',
+        'exchange_rate_snapshot',
+        'total_in_base_currency_cents',
         'status',
+        'ordered_at',
         'notes',
     ];
 
     protected $casts = [
-        'subtotal' => 'decimal:2',
-        'discount' => 'decimal:2',
-        'tax' => 'decimal:2',
-        'total' => 'decimal:2',
+        'subtotal_cents' => 'integer',
+        'discount_cents' => 'integer',
+        'tax_cents' => 'integer',
+        'shipping_cents' => 'integer',
+        'total_cents' => 'integer',
+        'total_in_base_currency_cents' => 'integer',
+        'exchange_rate_snapshot' => 'decimal:8',
         'ordered_at' => 'datetime',
     ];
 
-    /**
-     * Cliente que realizó la orden.
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * Dirección de envío (opcional — retiro en tienda).
-     */
     public function shippingAddress(): BelongsTo
     {
         return $this->belongsTo(CustomerAddress::class, 'shipping_address_id');
     }
 
-    /**
-     * Tienda asociada a la orden (opcional — órdenes del panel admin).
-     */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
-    /**
-     * Canal de venta de origen (web, POS, teléfono, etc.).
-     */
     public function salesChannel(): BelongsTo
     {
         return $this->belongsTo(SalesChannel::class);
     }
 
-    /**
-     * Usuario administrador que creó la orden manualmente.
-     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_creator_id');
     }
 
-    /**
-     * Ítems de la orden.
-     */
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    /**
-     * Historial de cambios de estado.
-     */
     public function statusHistory(): HasMany
     {
         return $this->hasMany(OrderStatusHistory::class);
     }
 
-    /**
-     * Diseños personalizados asociados.
-     */
     public function customDesigns(): HasMany
     {
         return $this->hasMany(OrderCustomDesign::class);
     }
 
-    public function scopePending($query)
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class);
+    }
+
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
 
-    public function scopeProcessing($query)
+    public function scopeProcessing(Builder $query): Builder
     {
         return $query->where('status', 'processing');
     }
 
-    public function scopeCompleted($query)
+    public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', 'completed');
     }
 
-    public function scopeCancelled($query)
+    public function scopeCancelled(Builder $query): Builder
     {
         return $query->where('status', 'cancelled');
     }
 
-    public function scopeByCustomer($query, int $customerId)
+    public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
         return $query->where('customer_id', $customerId);
     }
 
-    public function scopeByStore($query, int $storeId)
+    public function scopeByStore(Builder $query, int $storeId): Builder
     {
         return $query->where('store_id', $storeId);
     }
