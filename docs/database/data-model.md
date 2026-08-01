@@ -16,8 +16,8 @@ pedidos y reportes separados.
 3. **Productos globales** — Los productos son entidades globales.
    Se publican selectivamente en tiendas vía `product_stores`.
 4. **Inventario global** — El stock es compartido entre tiendas.
-5. **Roles globales** — Los permisos y roles no se duplican
-   por tienda.
+5. **Roles por tienda** — Cada usuario puede tener un rol
+   distinto por tienda mediante `user_stores.role_id`.
 
 ## Entidades multi-tienda
 
@@ -105,17 +105,24 @@ product_stores
 ### UserStore (Usuario admin por tienda)
 
 Asocia usuarios administradores con las tiendas que pueden
-gestionar.
+gestionar. Incluye el rol específico del usuario dentro
+de cada tienda.
 
 ```txt
 user_stores
 ├── id                  PK
 ├── user_id             FK → users
 ├── store_id            FK → stores
+├── role_id             FK → roles
 ├── active              boolean
 ├── assigned_at         timestamp
-└── created_at          timestamp
+├── created_at          timestamp
+└── updated_at          timestamp
 ```
+
+El campo `role_id` define el rol del usuario
+específicamente dentro de esa tienda. Un usuario puede
+tener un rol diferente por tienda.
 
 ### CustomerStore (Cliente por tienda)
 
@@ -193,6 +200,39 @@ shipping_companies  → empresas de envío
 shipping_zones      → zonas de envío
 taxes               → impuestos
 ```
+
+## Trazabilidad administrativa
+
+Cuando un pedido o factura se crea desde el panel
+administrativo, el sistema registra qué usuario
+administrativo realizó la operación.
+
+### `orders.user_creator_id`
+
+Usuario administrativo que creó el pedido desde
+el panel. Puede ser `null` si el pedido fue creado
+por el cliente desde storefront.
+
+Permite al dueño saber qué usuario generó cada
+pedido sin depender únicamente de la auditoría.
+
+### `invoices.user_issuer_id`
+
+Usuario administrativo que emitió la factura.
+Permite saber quién generó la factura sin depender
+únicamente de la auditoría.
+
+### Equivalencias DER → implementación
+
+```txt
+PEDIDO.id_usuario_creador   → orders.user_creator_id
+FACTURA.id_usuario_emisor   → invoices.user_issuer_id
+USUARIO_TIENDA.id_rol       → user_stores.role_id
+```
+
+Estos campos no reemplazan la auditoría. Son
+complementos que permiten trazabilidad comercial
+directa.
 
 ## Relaciones importantes
 
