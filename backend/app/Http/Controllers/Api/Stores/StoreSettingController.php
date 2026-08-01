@@ -4,46 +4,54 @@ namespace App\Http\Controllers\Api\Stores;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stores\StoreSetting;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para la gestión de configuración de tienda.
+ *
+ * Administra los ajustes y parámetros de cada tienda,
+ * incluyendo preferencias generales, opciones de visualización
+ * y configuraciones del storefront.
+ */
 class StoreSettingController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lista todas las configuraciones de tienda disponibles.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena una nueva configuración de tienda en el sistema.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de una configuración de tienda específica.
      */
-    public function show(StoreSetting $storeSetting)
+    public function show(StoreSetting $storeSetting): JsonResponse
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la información de una configuración de tienda existente.
      */
-    public function update(Request $request, StoreSetting $storeSetting)
+    public function update(Request $request, StoreSetting $storeSetting): JsonResponse
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina una configuración de tienda del sistema.
      */
-    public function destroy(StoreSetting $storeSetting)
+    public function destroy(StoreSetting $storeSetting): JsonResponse
     {
         //
     }

@@ -8,49 +8,39 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * Servicio de códigos de recuperación para 2FA.
+ * Servicio para gestionar códigos de recuperación de 2FA.
  *
- * Gestiona el ciclo de vida completo de los recovery codes:
+ * Los códigos de recuperación permiten al usuario acceder a su cuenta
+ * cuando no tiene acceso a su método de 2FA principal.
  *
- * 1. **Generación**: códigos con formato PREFIX-XXXX-XXXX usando un alfabeto reducido
- *    que excluye caracteres ambiguos (I, O, 0, 1) para facilitar la escritura manual.
- * 2. **Almacenamiento**: cada código se guarda como hash bcrypt en `recovery_codes.code_hash`.
- *    El texto plano NUNCA se persiste en la BD.
- * 3. **Visualización**: los códigos en texto plano se devuelven al usuario UNA SOLA VEZ
- *    al momento de la regeneración.
- * 4. **Verificación**: se itera sobre los códigos no usados y se compara con `Hash::check()`.
- *    Si hay coincidencia, se marca como usado (de un solo uso).
+ * Cada código se almacena hasheado con SHA-256. Se agrupan por lote
+ * (batch_uuid) para facilitar la auditoría y regeneración.
  *
- * Seguridad:
- * - La regeneración elimina TODOS los códigos anteriores antes de crear nuevos.
- * - Cada código solo puede usarse una vez (campo `used_at`).
- * - El hash bcrypt protege los códigos incluso si la BD es comprometida.
+ * Formato del código: `PREFIX-XXXX-XXXX` donde PREFIX es configurable
+ * (default: APP) y XXXX son grupos de 4 caracteres alfanuméricos.
+ *
+ * Configuración (desde config/two_factor.php):
+ * - `count`: número de códigos por lote (default: 8).
+ * - `prefix`: prefijo de los códigos (default: APP).
  */
 class RecoveryCodeService
 {
     /**
-     * Regenera los recovery codes de un usuario.
+     * Regenera un nuevo lote de códigos de recuperación para el usuario.
      *
-     * Flujo:
-     * 1. Lee la cantidad configurada de `config/two_factor.recovery_codes.count`.
-     * 2. Elimina todos los recovery codes anteriores del usuario.
-     * 3. Genera nuevos códigos y los almacena como hash bcrypt.
-     * 4. Retorna los códigos en texto plano (solo esta vez se muestran).
+     * Elimina todos los códigos anteriores del usuario y genera un nuevo
+     * lote con un UUID único. Retorna los códigos en texto plano para
+     * que el usuario los guarde de forma segura.
      *
-     * **Importante**: el caller es responsable de mostrar estos códigos al usuario
-     * solo una vez. No hay forma de recuperarlos después de esta llamada.
-     *
-     * @param  User  $user  Usuario cuyos recovery codes se regeneran.
+     * @param  User  $user  Usuario para el que se regeneran los códigos.
      * @return array<int, string> Lista de códigos en texto plano.
      */
     public function regenerate(User $user): array
     {
-        $count = (int) config(key: 'two_factor.recovery_codes.count', default: 8);
+        $count = (int) config('two_factor.recovery_codes.count', default: 8);
 
-        // Se eliminan los códigos anteriores antes de generar nuevos.
-        // Esto invalida cualquier código que el usuario pudiera tener guardado.
         RecoveryCode::query()
-            ->where(column: 'user_id', operator: '=', value: $user->id, boolean: 'and')
+            ->where('user_id', $user->id)
             ->delete();
 
         $plainCodes = [];
@@ -59,11 +49,10 @@ class RecoveryCodeService
         for ($index = 0; $index < $count; $index++) {
             $plainCode = $this->generateCode();
 
-            // Cada código se guarda como hash bcrypt; el texto plano solo se retorna en la respuesta.
             RecoveryCode::create([
                 'user_id' => $user->id,
                 'batch_uuid' => $batchUuid,
-                'code_hash' => Hash::make(value: $plainCode),
+                'code_hash' => Hash::make($plainCode),
             ]);
 
             $plainCodes[] = $plainCode;
@@ -73,20 +62,14 @@ class RecoveryCodeService
     }
 
     /**
-     * Verifica un código de recuperación ingresado por el usuario.
+     * Verifica un código de recuperación enviado por el usuario.
      *
-     * Flujo de verificación:
-     * 1. Carga todos los recovery codes NO usados del usuario.
-     * 2. Itera cada código y compara con `Hash::check()`.
-     * 3. Si hay coincidencia, marca el código como usado y retorna true.
-     * 4. Si ninguno coincide, retorna false.
+     * Busca entre los códigos no usados del usuario y compara el hash.
+     * Si coincide, marca el código como usado y retorna true.
      *
-     * Nota: esta verificación es O(n) donde n es la cantidad de códigos no usados.
-     * Con 8 códigos máximo, el impacto es despreciable.
-     *
-     * @param  User  $user  Usuario que intenta verificar el código.
-     * @param  string  $submittedCode  Código de recuperación ingresado.
-     * @return bool true si el código es válido, false en caso contrario.
+     * @param  User  $user  Usuario que envía el código.
+     * @param  string  $submittedCode  Código en texto plano enviado por el usuario.
+     * @return bool true si el código es válido, false si no.
      */
     public function verify(User $user, string $submittedCode): bool
     {
@@ -96,12 +79,10 @@ class RecoveryCodeService
             ->get();
 
         foreach ($codes as $code) {
-            // Hash::check compara el código ingresado contra el hash bcrypt almacenado.
-            if (! Hash::check(value: $submittedCode, hashedValue: $code->code_hash)) {
+            if (! Hash::check($submittedCode, $code->code_hash)) {
                 continue;
             }
 
-            // Se marca como usado inmediatamente para prevenir reutilización.
             $code->update([
                 'used_at' => now(),
             ]);
@@ -113,14 +94,14 @@ class RecoveryCodeService
     }
 
     /**
-     * Genera un código con formato PREFIX-XXXX-XXXX.
+     * Genera un código de recuperación con el formato `PREFIX-XXXX-XXXX`.
      *
-     * El prefijo se lee de `config/two_factor.recovery_codes.prefix` (default: 'APP').
-     * Los grupos de 4 caracteres se generan con el alfabeto reducido.
+     * El prefijo se lee de la configuración. Los grupos son 4 caracteres
+     * alfanuméricos sin caracteres ambiguos (sin I, O, 0, 1).
      */
     private function generateCode(): string
     {
-        $prefix = config('two_factor.recovery_codes.prefix', 'APP');
+        $prefix = config('two_factor.recovery_codes.prefix', default: 'APP');
 
         return sprintf(
             '%s-%s-%s',
@@ -131,15 +112,12 @@ class RecoveryCodeService
     }
 
     /**
-     * Genera un grupo de caracteres alfanuméricos del alfabeto reducido.
+     * Genera un grupo aleatorio de caracteres alfanuméricos.
      *
-     * El alfabeto excluye caracteres ambiguos:
-     * - I (parece 1 o l)
-     * - O (parece 0)
-     * - 0 (parece O)
-     * - 1 (parece I o l)
+     * Usa un alfabeto sin caracteres ambiguos para mejorar la legibilidad.
+     * Cada carácter se selecciona de forma criptográficamente segura.
      *
-     * Esto facilita la lectura y escritura manual de los códigos.
+     * @param  int  $length  Longitud del grupo (default: 4).
      */
     private function randomGroup(int $length = 4): string
     {
@@ -147,7 +125,7 @@ class RecoveryCodeService
         $value = '';
 
         for ($index = 0; $index < $length; $index++) {
-            $value .= $alphabet[random_int(min: 0, max: strlen(string: $alphabet) - 1)];
+            $value .= $alphabet[random_int(0, strlen($alphabet) - 1)];
         }
 
         return $value;

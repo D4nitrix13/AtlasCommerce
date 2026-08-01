@@ -9,6 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Archivo multimedia subido por un usuario para usar en diseños.
+ *
+ * Tabla: `design_assets` — relación N:1 con `users` y `customers`.
+ *
+ * Almacena imágenes, vectores y otros archivos con metadatos
+ * como dimensiones, DPI, checksum y estado de procesamiento.
+ */
 class DesignAsset extends Model
 {
     use SoftDeletes;
@@ -38,16 +46,25 @@ class DesignAsset extends Model
         'dpi' => 'integer',
     ];
 
+    /**
+     * Usuario que subió el archivo.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Cliente propietario del archivo.
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /**
+     * Capas de diseño que utilizan este archivo.
+     */
     public function designLayers(): HasMany
     {
         return $this->hasMany(DesignLayer::class);

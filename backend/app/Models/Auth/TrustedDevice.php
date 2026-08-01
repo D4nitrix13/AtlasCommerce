@@ -5,10 +5,12 @@ namespace App\Models\Auth;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo base para representar dispositivos de confianza del usuario.
+ * Representa un dispositivo de confianza registrado por un usuario.
  *
- * Este archivo se crea como parte de la estructura del dominio de seguridad.
- * La lógica, relaciones, casts y scopes se implementarán en una fase posterior.
+ * Tabla: `trusted_devices` — relación N:1 con `users`.
+ *
+ * Permite al usuario recordar dispositivos para omitir
+ * la verificación de dos factores en futuros inicios de sesión.
  */
 class TrustedDevice extends Model
 {

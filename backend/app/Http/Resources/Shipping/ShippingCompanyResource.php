@@ -5,10 +5,17 @@ namespace App\Http\Resources\Shipping;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para representar una empresa de transportes.
+ *
+ * Contiene la información de una empresa de envíos disponible,
+ * incluyendo nombre, cobertura de zonas, tarifas y estado
+ * de la relación comercial.
+ */
 class ShippingCompanyResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Transforma el resource en un array para la respuesta JSON.
      *
      * @return array<string, mixed>
      */

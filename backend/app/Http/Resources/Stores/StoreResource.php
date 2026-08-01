@@ -5,10 +5,11 @@ namespace App\Http\Resources\Stores;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para tiendas.
+ * Resource para representar una tienda del vendedor.
  *
- * La respuesta JSON detallada se implementará junto con los endpoints
- * del módulo Stores.
+ * Contiene la información completa de una tienda, incluyendo nombre,
+ * descripción, logo, dominio, configuración de pedidos y estado
+ * de activación.
  */
 class StoreResource extends JsonResource
 {

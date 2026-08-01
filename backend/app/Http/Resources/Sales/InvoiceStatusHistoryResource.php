@@ -5,10 +5,17 @@ namespace App\Http\Resources\Sales;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para representar un registro en el historial de estados de factura.
+ *
+ * Contiene la información de un cambio de estado en una factura,
+ * incluyendo el estado anterior, nuevo estado, fecha del cambio
+ * y usuario que realizó la acción.
+ */
 class InvoiceStatusHistoryResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Transforma el resource en un array para la respuesta JSON.
      *
      * @return array<string, mixed>
      */

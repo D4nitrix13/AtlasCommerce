@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\InventoryMovement;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar movimientos de inventario.
+ */
 class InventoryMovementController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class InventoryMovementController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class InventoryMovementController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el movimiento de inventario especificado.
      */
     public function show(InventoryMovement $inventoryMovement)
     {
@@ -33,7 +36,7 @@ class InventoryMovementController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el movimiento de inventario especificado en la base de datos.
      */
     public function update(Request $request, InventoryMovement $inventoryMovement)
     {
@@ -41,7 +44,7 @@ class InventoryMovementController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el movimiento de inventario especificado de la base de datos.
      */
     public function destroy(InventoryMovement $inventoryMovement)
     {

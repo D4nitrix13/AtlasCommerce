@@ -5,10 +5,16 @@ namespace App\Http\Resources\Taxes;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para representar un impuesto configurado en el sistema.
+ *
+ * Contiene la información de un impuesto, incluyendo nombre, código,
+ * tasa porcentual, jurisdicción aplicable y estado de activación.
+ */
 class TaxResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Transforma el resource en un array para la respuesta JSON.
      *
      * @return array<string, mixed>
      */

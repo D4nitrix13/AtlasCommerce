@@ -10,34 +10,24 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Controlador de autenticación de dos factores.
+ * Controlador para gestionar la autenticación de dos factores (2FA).
  *
- * Gestiona el ciclo de vida completo de 2FA para usuarios autenticados:
+ * Expone los endpoints para consultar el estado de 2FA, enviar códigos OTP
+ * por correo, verificar códigos y desactivar 2FA.
  *
- * - **Estado** (`show`): retorna si 2FA está habilitado, el método preferido
- *   y la lista de métodos registrados (sin exponer datos sensibles).
- * - **Envío** (`sendEmailOtp`): genera un código OTP y lo envía por correo.
- * - **Verificación** (`verifyEmailOtp`): valida el código y activa 2FA si es correcto.
- * - **Desactivación** (`disable`): desactiva 2FA y todos los métodos registrados.
- *
- * La lógica de generación y verificación de códigos vive en `EmailOtpService`.
- * Este controlador solo orquesta las operaciones y gestiona las respuestas HTTP.
- *
- * Todos los endpoints requieren un token Sanctum válido (middleware auth:sanctum).
+ * Flujo principal:
+ * 1. `show` → consulta el estado actual de 2FA del usuario.
+ * 2. `sendEmailOtp` → genera y envía un código OTP al correo del usuario.
+ * 3. `verifyEmailOtp` → valida el código y activa 2FA si es correcto.
+ * 4. `disable` → desactiva 2FA y deshabilita todos los métodos.
  */
 class TwoFactorAuthController extends Controller
 {
     /**
-     * Muestra el estado actual de 2FA del usuario.
+     * Muestra el estado actual de 2FA del usuario autenticado.
      *
-     * Endpoint: `GET /api/auth/2fa`
-     *
-     * Retorna:
-     * - `enabled`: si 2FA está activo.
-     * - `preferred_method`: método preferido (email_otp, totp, passkey) o null.
-     * - `required`: si 2FA es obligatorio (preparado para uso futuro).
-     * - `enabled_at`: fecha de activación.
-     * - `methods`: lista de métodos registrados (sin `encrypted_secret` ni otros datos sensibles).
+     * Retorna si 2FA está habilitado, el método preferido, si es obligatorio,
+     * la fecha de activación y la lista de métodos configurados.
      */
     public function show(Request $request): JsonResponse
     {
@@ -45,22 +35,15 @@ class TwoFactorAuthController extends Controller
 
         $setting = $user->twoFactorSetting()->first();
 
-        // Se seleccionan solo campos seguros para exponer en la API.
         $methods = $user->twoFactorMethods()
             ->select([
-                'id',
-                'method',
-                'display_name',
-                'destination',
-                'active',
-                'verified',
-                'verified_at',
-                'created_at',
+                'id', 'method', 'display_name', 'destination',
+                'active', 'verified', 'verified_at', 'created_at',
             ])
             ->orderBy('method')
             ->get();
 
-        return response()->json(data: [
+        return response()->json([
             'enabled' => (bool) $setting?->enabled,
             'preferred_method' => $setting?->preferred_method,
             'required' => (bool) $setting?->required,
@@ -70,17 +53,10 @@ class TwoFactorAuthController extends Controller
     }
 
     /**
-     * Envía un código OTP al correo del usuario.
+     * Envía un código OTP al correo del usuario para activar 2FA.
      *
-     * Endpoint: `POST /api/auth/2fa/email/send`
-     *
-     * Delega a `EmailOtpService::send()` que:
-     * 1. Genera el código numérico.
-     * 2. Lo guarda como hash en `otp_challenges`.
-     * 3. Lo envía por correo.
-     *
-     * Se registra metadata de seguridad (IP, user-agent) en el challenge
-     * para auditoría y detección de actividad sospechosa.
+     * Delega a `EmailOtpService::send()` que genera el código, lo almacena
+     * hasheado en la BD y envía la notificación por correo.
      */
     public function sendEmailOtp(Request $request, EmailOtpService $emailOtpService): JsonResponse
     {
@@ -93,7 +69,7 @@ class TwoFactorAuthController extends Controller
             userAgent: $request->userAgent(),
         );
 
-        return response()->json(data: [
+        return response()->json([
             'message' => 'Security code sent.',
             'expires_at' => $challenge->expires_at,
             'destination' => $challenge->destination,
@@ -103,22 +79,13 @@ class TwoFactorAuthController extends Controller
     /**
      * Verifica el código OTP y activa 2FA si es correcto.
      *
-     * Endpoint: `POST /api/auth/2fa/email/verify`
-     *
-     * Flujo de activación:
-     * 1. Valida que el código tenga entre 4 y 10 caracteres.
-     * 2. Delega la verificación a `EmailOtpService::verify()`.
-     * 3. Si el código es correcto:
-     *    a. Crea/actualiza `two_factor_settings` con `enabled: true`.
-     *    b. Crea/actualiza `two_factor_methods` con el método `email_otp` verificado.
-     * 4. Si el código es incorrecto o expirado, retorna error 422.
-     *
-     * Se usa `updateOrCreate` para ser idempotente: si el usuario repite
-     * el proceso, se actualiza en lugar de duplicar registros.
+     * Valida que el código no esté expirado, que tenga intentos disponibles
+     * y que coincida con el hash almacenado. Si es correcto, crea o actualiza
+     * la configuración de 2FA y el método email_otp del usuario.
      */
     public function verifyEmailOtp(Request $request, EmailOtpService $emailOtpService): JsonResponse
     {
-        $validated = $request->validate(rules: [
+        $validated = $request->validate([
             'code' => ['required', 'string', 'min:4', 'max:10'],
         ]);
 
@@ -131,30 +98,26 @@ class TwoFactorAuthController extends Controller
         );
 
         if (! $verified) {
-            return response()->json(data: [
+            return response()->json([
                 'message' => 'Invalid or expired security code.',
             ], status: 422);
         }
 
-        // Se activa 2FA global del usuario después de verificación exitosa.
-        // updateOrCreate garantiza idempotencia en caso de múltiples llamadas.
         TwoFactorSetting::updateOrCreate(
-            ['user_id' => $user->id],
-            [
+            attributes: ['user_id' => $user->id],
+            values: [
                 'enabled' => true,
                 'preferred_method' => 'email_otp',
                 'enabled_at' => now(),
             ],
         );
 
-        // Se registra el método email_otp como verificado y activo.
-        // El destination se guarda para referencia futura (ej. listar métodos).
         TwoFactorMethod::updateOrCreate(
-            [
+            attributes: [
                 'user_id' => $user->id,
                 'method' => 'email_otp',
             ],
-            [
+            values: [
                 'display_name' => 'Main email',
                 'destination' => $user->email,
                 'active' => true,
@@ -163,26 +126,16 @@ class TwoFactorAuthController extends Controller
             ],
         );
 
-        return response()->json(data: [
+        return response()->json([
             'message' => 'Email OTP enabled successfully.',
         ], status: 200);
     }
 
     /**
-     * Desactiva 2FA para el usuario.
+     * Desactiva la autenticación de dos factores del usuario.
      *
-     * Endpoint: `POST /api/auth/2fa/disable`
-     *
-     * Flujo de desactivación:
-     * 1. Verifica que 2FA esté habilitado (si no, retorna 422).
-     * 2. Actualiza `two_factor_settings`:
-     *    - `enabled: false`
-     *    - `preferred_method: null`
-     *    - `enabled_at: null`
-     * 3. Desactiva TODOS los métodos registrados (`active: false`).
-     *
-     * Nota: no se eliminan los registros, solo se marcan como inactivos.
-     * Esto preserva el historial para auditoría.
+     * Deshabilita la configuración 2FA y todos los métodos asociados.
+     * No elimina los métodos registrados, solo los marca como inactivos.
      */
     public function disable(Request $request): JsonResponse
     {
@@ -191,7 +144,7 @@ class TwoFactorAuthController extends Controller
         $setting = $user->twoFactorSetting()->first();
 
         if (! $setting || ! $setting->enabled) {
-            return response()->json(data: [
+            return response()->json([
                 'message' => 'Two-factor authentication is not enabled.',
             ], status: 422);
         }
@@ -206,7 +159,7 @@ class TwoFactorAuthController extends Controller
             'active' => false,
         ]);
 
-        return response()->json(data: [
+        return response()->json([
             'message' => 'Two-factor authentication disabled successfully.',
         ], status: 200);
     }

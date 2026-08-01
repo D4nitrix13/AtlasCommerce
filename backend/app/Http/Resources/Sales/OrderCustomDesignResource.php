@@ -5,9 +5,11 @@ namespace App\Http\Resources\Sales;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para snapshots de diseños personalizados en pedidos.
+ * Resource para representar el snapshot de un diseño personalizado en un pedido.
  *
- * La transformación JSON se implementará en una fase posterior.
+ * Contiene la instantánea del diseño personalizado tal como quedó
+ * al momento de la compra, incluyendo capas, configuración
+ * y área de impresión seleccionada.
  */
 class OrderCustomDesignResource extends JsonResource
 {

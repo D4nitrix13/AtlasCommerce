@@ -41,7 +41,7 @@ class MailPreviewOtpCommand extends Command
     public function handle(): int
     {
         // Protección contra ejecución accidental en producción.
-        if (config(key: 'app.env') === 'production') {
+        if (config('app.env') === 'production') {
             $this->error(string: 'Este comando no debe ejecutarse en producción.');
 
             return self::FAILURE;
@@ -71,11 +71,7 @@ class MailPreviewOtpCommand extends Command
         $user->email = $email;
 
         $user->notify(
-            instance: new EmailOtpNotification(
-                code: $code,
-                expiresMinutes: $expiresMinutes,
-                store: $store,
-            ),
+            new EmailOtpNotification(code: $code, expiresMinutes: $expiresMinutes, store: $store),
         );
 
         $this->info(string: "Correo OTP de prueba enviado a {$email}.");

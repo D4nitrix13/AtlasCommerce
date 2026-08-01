@@ -5,10 +5,10 @@ namespace App\Http\Resources\Stores;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para enlaces sociales de tienda.
+ * Resource para representar un enlace de redes sociales de una tienda.
  *
- * La respuesta JSON detallada se implementará junto con los endpoints
- * del módulo Stores.
+ * Contiene la información de una red social asociada a una tienda,
+ * incluyendo plataforma, URL del perfil y orden de visualización.
  */
 class StoreSocialLinkResource extends JsonResource
 {

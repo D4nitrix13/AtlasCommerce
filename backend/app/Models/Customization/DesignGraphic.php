@@ -5,6 +5,14 @@ namespace App\Models\Customization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Gráfico o plantilla predefinida para usar en diseños.
+ *
+ * Tabla: `design_graphics` — relación 1:N con `design_layers`.
+ *
+ * Contiene gráficos SVG, PNG o vectoriales organizados por categoría,
+ * con opciones de licencia gratuita o premium.
+ */
 class DesignGraphic extends Model
 {
     protected $fillable = [
@@ -25,6 +33,9 @@ class DesignGraphic extends Model
         'active' => 'boolean',
     ];
 
+    /**
+     * Capas de diseño que utilizan este gráfico.
+     */
     public function designLayers(): HasMany
     {
         return $this->hasMany(DesignLayer::class);

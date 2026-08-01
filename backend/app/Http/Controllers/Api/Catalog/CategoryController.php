@@ -6,44 +6,50 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para gestionar las categorías del catálogo.
+ *
+ * Proporciona operaciones CRUD para el recurso de categoría,
+ * permitiendo listar, crear, mostrar, actualizar y eliminar categorías.
+ */
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todas las categorías disponibles en el catálogo.
      */
-    public function index()
+    public function index(): mixed
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear una nueva categoría en el catálogo.
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar los detalles de una categoría específica.
      */
-    public function show(Category $category)
+    public function show(Category $category): mixed
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar la información de una categoría existente.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Category $category): mixed
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar una categoría del catálogo.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category): mixed
     {
         //
     }

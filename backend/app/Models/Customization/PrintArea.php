@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Área de impresión definida para un producto personalizable.
+ *
+ * Tabla: `print_areas` — relación N:1 con `product_customizations` y 1:N con `design_layers`.
+ *
+ * Define las zonas donde el usuario puede colocar su diseño,
+ * con dimensiones en pulgadas y píxeles, posición relativa
+ * y configuraciones de máscara y zona segura.
+ */
 class PrintArea extends Model
 {
     protected $fillable = [
@@ -39,11 +48,17 @@ class PrintArea extends Model
         'active' => 'boolean',
     ];
 
+    /**
+     * Configuración de personalización del producto.
+     */
     public function productCustomization(): BelongsTo
     {
         return $this->belongsTo(ProductCustomization::class);
     }
 
+    /**
+     * Capas de diseño ubicadas en esta área.
+     */
     public function designLayers(): HasMany
     {
         return $this->hasMany(DesignLayer::class);

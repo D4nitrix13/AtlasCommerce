@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar transacciones de pago.
+ */
 class PaymentTransactionController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class PaymentTransactionController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class PaymentTransactionController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra la transacción de pago especificada.
      */
     public function show(PaymentTransaction $paymentTransaction)
     {
@@ -33,7 +36,7 @@ class PaymentTransactionController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la transacción de pago especificada en la base de datos.
      */
     public function update(Request $request, PaymentTransaction $paymentTransaction)
     {
@@ -41,7 +44,7 @@ class PaymentTransactionController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina la transacción de pago especificada de la base de datos.
      */
     public function destroy(PaymentTransaction $paymentTransaction)
     {

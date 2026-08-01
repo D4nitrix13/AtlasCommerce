@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\SupportTicketMessage;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar mensajes de tickets de soporte.
+ */
 class SupportTicketMessageController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class SupportTicketMessageController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class SupportTicketMessageController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el mensaje de ticket de soporte especificado.
      */
     public function show(SupportTicketMessage $supportTicketMessage)
     {
@@ -33,7 +36,7 @@ class SupportTicketMessageController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el mensaje de ticket de soporte especificado en la base de datos.
      */
     public function update(Request $request, SupportTicketMessage $supportTicketMessage)
     {
@@ -41,7 +44,7 @@ class SupportTicketMessageController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el mensaje de ticket de soporte especificado de la base de datos.
      */
     public function destroy(SupportTicketMessage $supportTicketMessage)
     {

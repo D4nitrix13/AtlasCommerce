@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar pedidos.
+ */
 class OrderController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el pedido especificado.
      */
     public function show(Order $order)
     {
@@ -33,7 +36,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el pedido especificado en la base de datos.
      */
     public function update(Request $request, Order $order)
     {
@@ -41,7 +44,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el pedido especificado de la base de datos.
      */
     public function destroy(Order $order)
     {

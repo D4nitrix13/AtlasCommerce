@@ -5,10 +5,11 @@ namespace App\Http\Resources\Customization;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para personalización de productos.
+ * Resource para representar la configuración de personalización de un producto.
  *
- * La estructura de respuesta JSON se implementará cuando se creen
- * los endpoints del módulo de personalización.
+ * Contiene los datos de personalización aplicados a un producto en un pedido,
+ * incluyendo diseño seleccionado, área de impresión y opciones
+ * de personalización elegidas.
  */
 class ProductCustomizationResource extends JsonResource
 {

@@ -3,19 +3,50 @@
 namespace App\Services\Customization;
 
 use App\Models\Customization\CustomDesign;
+use App\Models\Customization\DesignLayer;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Servicio para construir snapshots completos de diseños personalizados.
+ *
+ * Un snapshot es una representación serializada del estado completo de un
+ * diseño, incluyendo el producto, variante, capas agrupadas por área de
+ * impresión, y todos los assets, fuentes y gráficos utilizados.
+ *
+ * Los snapshots se usan para:
+ * - Persistir el estado del diseño en pedidos y facturas.
+ * - Regenerar previews sin recalcular todo el árbol de relaciones.
+ * - Auditar qué assets se usaron en cada diseño.
+ *
+ * Estructura del snapshot:
+ * ```
+ * [
+ *   'custom_design' => [...],
+ *   'product' => [...],
+ *   'variant' => [...]|null,
+ *   'product_customization' => [...],
+ *   'layers_by_print_area' => ['code' => [...]],
+ *   'assets_used' => [...],
+ *   'fonts_used' => [...],
+ *   'graphics_used' => [...],
+ *   'generated_at' => 'ISO 8601',
+ * ]
+ * ```
+ */
 class DesignSnapshotService
 {
     /**
-     * Build a JSON-serializable snapshot of a custom design for order archival.
+     * Construye el snapshot completo de un diseño personalizado.
      *
-     * The snapshot captures the complete design state at the moment of purchase,
-     * including all layers grouped by print area, referenced assets, fonts,
-     * graphics, and canvas configuration.
+     * Carga las relaciones necesarias en una sola consulta (eager loading)
+     * y agrupa las capas por código de área de impresión.
+     *
+     * @param  CustomDesign  $customDesign  Diseño del que se genera el snapshot.
+     * @return array<string, mixed> Snapshot estructurado del diseño.
      */
     public function build(CustomDesign $customDesign): array
     {
-        $customDesign->loadMissing([
+        $customDesign->loadMissing(relations: [
             'product',
             'productVariant',
             'productCustomization',
@@ -25,7 +56,7 @@ class DesignSnapshotService
             'designLayers.designGraphic',
         ]);
 
-        $layersByArea = $this->groupLayersByPrintArea($customDesign->designLayers);
+        $layersByArea = $this->groupLayersByPrintArea(layers: $customDesign->designLayers);
 
         return [
             'custom_design' => [
@@ -54,19 +85,28 @@ class DesignSnapshotService
                 'editor' => $customDesign->productCustomization->editor_type,
             ],
             'layers_by_print_area' => $layersByArea,
-            'assets_used' => $this->extractAssets($customDesign->designLayers),
-            'fonts_used' => $this->extractFonts($customDesign->designLayers),
-            'graphics_used' => $this->extractGraphics($customDesign->designLayers),
+            'assets_used' => $this->extractAssets(layers: $customDesign->designLayers),
+            'fonts_used' => $this->extractFonts(layers: $customDesign->designLayers),
+            'graphics_used' => $this->extractGraphics(layers: $customDesign->designLayers),
             'generated_at' => now()->toIso8601String(),
         ];
     }
 
-    private function groupLayersByPrintArea($layers): array
+    /**
+     * Agrupa las capas por código de área de impresión.
+     *
+     * Si una capa no tiene área de impresión asignada, se agrupa bajo
+     * la clave `'default'`.
+     *
+     * @param  Collection<int, DesignLayer>  $layers  Capas del diseño.
+     * @return array<string, array<int, array<string, mixed>>> Capas agrupadas por código de área.
+     */
+    private function groupLayersByPrintArea(Collection $layers): array
     {
         $grouped = [];
 
         foreach ($layers as $layer) {
-            $areaKey = $layer->printArea ? $layer->printArea->code : 'default';
+            $areaKey = $layer->printArea?->code ?? 'default';
 
             $grouped[$areaKey][] = [
                 'id' => $layer->id,
@@ -95,7 +135,16 @@ class DesignSnapshotService
         return $grouped;
     }
 
-    private function extractAssets($layers): array
+    /**
+     * Extrae los assets de diseño utilizados en las capas.
+     *
+     * Filtra solo las capas que tienen un `design_asset_id` asignado
+     * y retorna sus datos relevantes (nombre original, ruta, MIME type).
+     *
+     * @param  Collection<int, DesignLayer>  $layers  Capas del diseño.
+     * @return array<int, array{id: int, original_name: string, file_path: string, mime_type: string}>
+     */
+    private function extractAssets(Collection $layers): array
     {
         return $layers
             ->filter(fn ($layer) => $layer->design_asset_id !== null)
@@ -109,7 +158,16 @@ class DesignSnapshotService
             ->all();
     }
 
-    private function extractFonts($layers): array
+    /**
+     * Extrae las fuentes tipográficas utilizadas en las capas.
+     *
+     * Filtra las capas con `design_font_id` y retorna datos de la fuente
+     * (familia, estilo, peso). Elimina duplicados por ID de fuente.
+     *
+     * @param  Collection<int, DesignLayer>  $layers  Capas del diseño.
+     * @return array<int, array{id: int, family: string, style: string, weight: string}>
+     */
+    private function extractFonts(Collection $layers): array
     {
         return $layers
             ->filter(fn ($layer) => $layer->design_font_id !== null)
@@ -119,12 +177,21 @@ class DesignSnapshotService
                 'style' => $layer->designFont->style,
                 'weight' => $layer->designFont->weight,
             ])
-            ->unique('id')
+            ->unique(key: 'id')
             ->values()
             ->all();
     }
 
-    private function extractGraphics($layers): array
+    /**
+     * Extrae los gráficos de biblioteca utilizados en las capas.
+     *
+     * Filtra las capas con `design_graphic_id` y retorna datos del gráfico
+     * (nombre, tipo, URL). Elimina duplicados por ID de gráfico.
+     *
+     * @param  Collection<int, DesignLayer>  $layers  Capas del diseño.
+     * @return array<int, array{id: int, name: string, type: string, file_url: string}>
+     */
+    private function extractGraphics(Collection $layers): array
     {
         return $layers
             ->filter(fn ($layer) => $layer->design_graphic_id !== null)
@@ -134,7 +201,7 @@ class DesignSnapshotService
                 'type' => $layer->designGraphic->type,
                 'file_url' => $layer->designGraphic->file_url,
             ])
-            ->unique('id')
+            ->unique(key: 'id')
             ->values()
             ->all();
     }

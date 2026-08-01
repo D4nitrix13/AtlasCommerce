@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\ShippingZone;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar zonas de envío.
+ */
 class ShippingZoneController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class ShippingZoneController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class ShippingZoneController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra la zona de envío especificada.
      */
     public function show(ShippingZone $shippingZone)
     {
@@ -33,7 +36,7 @@ class ShippingZoneController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la zona de envío especificada en la base de datos.
      */
     public function update(Request $request, ShippingZone $shippingZone)
     {
@@ -41,7 +44,7 @@ class ShippingZoneController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina la zona de envío especificada de la base de datos.
      */
     public function destroy(ShippingZone $shippingZone)
     {

@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductTax;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar impuestos de productos.
+ */
 class ProductTaxController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class ProductTaxController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class ProductTaxController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el impuesto de producto especificado.
      */
     public function show(ProductTax $productTax)
     {
@@ -33,7 +36,7 @@ class ProductTaxController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el impuesto de producto especificado en la base de datos.
      */
     public function update(Request $request, ProductTax $productTax)
     {
@@ -41,7 +44,7 @@ class ProductTaxController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el impuesto de producto especificado de la base de datos.
      */
     public function destroy(ProductTax $productTax)
     {

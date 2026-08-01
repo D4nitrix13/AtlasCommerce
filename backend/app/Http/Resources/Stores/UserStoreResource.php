@@ -5,10 +5,11 @@ namespace App\Http\Resources\Stores;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para relación usuario-tienda.
+ * Resource para representar la relación entre un usuario y una tienda.
  *
- * La respuesta JSON detallada se implementará junto con los endpoints
- * del módulo Stores.
+ * Contiene la información de la afiliación de un usuario a una tienda,
+ * incluyendo el rol asignado (propietario, administrador, colaborador)
+ * y permisos específicos.
  */
 class UserStoreResource extends JsonResource
 {

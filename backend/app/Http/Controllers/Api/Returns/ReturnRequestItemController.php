@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\ReturnRequestItem;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar artículos de solicitud de devolución.
+ */
 class ReturnRequestItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class ReturnRequestItemController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class ReturnRequestItemController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el artículo de solicitud de devolución especificado.
      */
     public function show(ReturnRequestItem $returnRequestItem)
     {
@@ -33,7 +36,7 @@ class ReturnRequestItemController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el artículo de solicitud de devolución especificado en la base de datos.
      */
     public function update(Request $request, ReturnRequestItem $returnRequestItem)
     {
@@ -41,7 +44,7 @@ class ReturnRequestItemController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el artículo de solicitud de devolución especificado de la base de datos.
      */
     public function destroy(ReturnRequestItem $returnRequestItem)
     {

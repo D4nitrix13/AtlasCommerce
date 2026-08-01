@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\CouponUsage;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar usos de cupones.
+ */
 class CouponUsageController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class CouponUsageController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class CouponUsageController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el uso de cupón especificado.
      */
     public function show(CouponUsage $couponUsage)
     {
@@ -33,7 +36,7 @@ class CouponUsageController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el uso de cupón especificado en la base de datos.
      */
     public function update(Request $request, CouponUsage $couponUsage)
     {
@@ -41,7 +44,7 @@ class CouponUsageController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el uso de cupón especificado de la base de datos.
      */
     public function destroy(CouponUsage $couponUsage)
     {

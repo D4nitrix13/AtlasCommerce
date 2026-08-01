@@ -6,44 +6,50 @@ use App\Http\Controllers\Controller;
 use App\Models\VariantAttributeValue;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para gestionar los valores de atributo de variante del catálogo.
+ *
+ * Proporciona operaciones CRUD para el recurso de valor de atributo de variante,
+ * permitiendo listar, crear, mostrar, actualizar y eliminar valores de atributo.
+ */
 class VariantAttributeValueController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todos los valores de atributo de variante disponibles en el catálogo.
      */
-    public function index()
+    public function index(): mixed
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear un nuevo valor de atributo de variante en el catálogo.
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar los detalles de un valor de atributo de variante específico.
      */
-    public function show(VariantAttributeValue $variantAttributeValue)
+    public function show(VariantAttributeValue $variantAttributeValue): mixed
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar la información de un valor de atributo de variante existente.
      */
-    public function update(Request $request, VariantAttributeValue $variantAttributeValue)
+    public function update(Request $request, VariantAttributeValue $variantAttributeValue): mixed
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar un valor de atributo de variante del catálogo.
      */
-    public function destroy(VariantAttributeValue $variantAttributeValue)
+    public function destroy(VariantAttributeValue $variantAttributeValue): mixed
     {
         //
     }

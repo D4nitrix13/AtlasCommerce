@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Configuración de personalización para un producto o variante.
+ *
+ * Tabla: `product_customizations` — relación N:1 con `products` y `product_variants`.
+ *
+ * Indica si un producto es personalizable, el tipo de personalización
+ * soportada, el editor utilizado y las instrucciones para el cliente.
+ */
 class ProductCustomization extends Model
 {
     protected $fillable = [
@@ -24,26 +32,41 @@ class ProductCustomization extends Model
         'customizable' => 'boolean',
     ];
 
+    /**
+     * Producto al que pertenece la configuración.
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * Variante específica del producto.
+     */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
     }
 
+    /**
+     * Áreas de impresión disponibles para esta configuración.
+     */
     public function printAreas(): HasMany
     {
         return $this->hasMany(PrintArea::class);
     }
 
+    /**
+     * Mockups del producto para vista previa.
+     */
     public function mockups(): HasMany
     {
         return $this->hasMany(ProductMockup::class);
     }
 
+    /**
+     * Diseños personalizados creados con esta configuración.
+     */
     public function customDesigns(): HasMany
     {
         return $this->hasMany(CustomDesign::class);

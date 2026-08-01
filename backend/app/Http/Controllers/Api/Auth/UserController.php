@@ -4,46 +4,52 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Auth\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para la gestión de usuarios del sistema.
+ *
+ * Maneja las operaciones CRUD de usuarios dentro del módulo de autenticación.
+ */
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lista todos los usuarios registrados.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Registra un nuevo usuario en el sistema.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los datos de un usuario específico.
      */
-    public function show(User $user)
+    public function show(User $user): JsonResponse
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza los datos de un usuario existente.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user): JsonResponse
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un usuario del sistema.
      */
-    public function destroy(User $user)
+    public function destroy(User $user): JsonResponse
     {
         //
     }

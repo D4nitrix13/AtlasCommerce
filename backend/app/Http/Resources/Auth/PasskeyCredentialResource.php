@@ -5,9 +5,10 @@ namespace App\Http\Resources\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para credenciales de passkey.
+ * Resource para representar una credencial de passkey registrada.
  *
- * La transformación JSON detallada se implementará en una fase posterior.
+ * Contiene los metadatos de la clave de autenticación WebAuthn
+ * asociada a un usuario, incluyendo identificador y nombre del dispositivo.
  */
 class PasskeyCredentialResource extends JsonResource
 {

@@ -5,6 +5,14 @@ namespace App\Models\Customization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Fuente tipográfica disponible para el editor de diseños.
+ *
+ * Tabla: `design_fonts` — relación 1:N con `design_layers`.
+ *
+ * Almacena la información de cada fuente: nombre, familia,
+ * estilo, peso, ruta del archivo y licencia.
+ */
 class DesignFont extends Model
 {
     protected $fillable = [
@@ -21,6 +29,9 @@ class DesignFont extends Model
         'active' => 'boolean',
     ];
 
+    /**
+     * Capas de diseño que utilizan esta fuente.
+     */
     public function designLayers(): HasMany
     {
         return $this->hasMany(DesignLayer::class);

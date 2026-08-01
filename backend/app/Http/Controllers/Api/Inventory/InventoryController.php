@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar inventario.
+ */
 class InventoryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class InventoryController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class InventoryController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el inventario especificado.
      */
     public function show(Inventory $inventory)
     {
@@ -33,7 +36,7 @@ class InventoryController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el inventario especificado en la base de datos.
      */
     public function update(Request $request, Inventory $inventory)
     {
@@ -41,7 +44,7 @@ class InventoryController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el inventario especificado de la base de datos.
      */
     public function destroy(Inventory $inventory)
     {

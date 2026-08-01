@@ -5,10 +5,12 @@ namespace App\Models\Auth;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo base para representar tokens de recuperación de contraseña.
+ * Almacena tokens de recuperación de contraseña.
  *
- * Este archivo se crea como parte de la estructura del dominio de seguridad.
- * La lógica, relaciones, casts y scopes se implementarán en una fase posterior.
+ * Tabla: `password_reset_tokens` — relación N:1 con `users`.
+ *
+ * Cada token se genera cuando el usuario solicita restablecer su contraseña.
+ * El token tiene un tiempo de expiración y se invalida después de su uso.
  */
 class PasswordResetToken extends Model
 {

@@ -5,10 +5,17 @@ namespace App\Http\Resources\Support;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para representar una pregunta sobre un producto.
+ *
+ * Contiene la información de una consulta realizada por un cliente
+ * sobre un producto, incluyendo autor, fecha de publicación,
+ * respuesta oficial y estado de resolución.
+ */
 class ProductQuestionResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Transforma el resource en un array para la respuesta JSON.
      *
      * @return array<string, mixed>
      */

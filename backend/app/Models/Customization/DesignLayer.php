@@ -5,6 +5,14 @@ namespace App\Models\Customization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Capa individual dentro de un diseño personalizado.
+ *
+ * Tabla: `design_layers` — relación N:1 con `custom_designs`, `print_areas`, `design_assets`, `design_fonts` y `design_graphics`.
+ *
+ * Representa un elemento visual (texto, imagen, gráfico) con su posición,
+ * dimensiones, opacidad, orden de apilamiento y estilos aplicados.
+ */
 class DesignLayer extends Model
 {
     protected $fillable = [
@@ -50,26 +58,41 @@ class DesignLayer extends Model
         'effects' => 'array',
     ];
 
+    /**
+     * Diseño personalizado al que pertenece esta capa.
+     */
     public function customDesign(): BelongsTo
     {
         return $this->belongsTo(CustomDesign::class);
     }
 
+    /**
+     * Área de impresión donde se ubica la capa.
+     */
     public function printArea(): BelongsTo
     {
         return $this->belongsTo(PrintArea::class);
     }
 
+    /**
+     * Archivo multimedia asociado a la capa.
+     */
     public function designAsset(): BelongsTo
     {
         return $this->belongsTo(DesignAsset::class);
     }
 
+    /**
+     * Fuente tipográfica utilizada en la capa de texto.
+     */
     public function designFont(): BelongsTo
     {
         return $this->belongsTo(DesignFont::class);
     }
 
+    /**
+     * Gráfico predefinido asociado a la capa.
+     */
     public function designGraphic(): BelongsTo
     {
         return $this->belongsTo(DesignGraphic::class);

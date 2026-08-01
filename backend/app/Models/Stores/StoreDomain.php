@@ -5,6 +5,14 @@ namespace App\Models\Stores;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Dominio configurado para una tienda.
+ *
+ * Tabla: `store_domains` — relación N:1 con `stores`.
+ *
+ * Almacena los dominios personalizados asociados a la tienda,
+ * incluyendo el dominio principal y redirecciones.
+ */
 class StoreDomain extends Model
 {
     protected $fillable = [
@@ -25,6 +33,9 @@ class StoreDomain extends Model
         'verified_at' => 'datetime',
     ];
 
+    /**
+     * Tienda propietaria del dominio.
+     */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);

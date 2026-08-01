@@ -6,44 +6,50 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para gestionar las imágenes de producto del catálogo.
+ *
+ * Proporciona operaciones CRUD para el recurso de imagen de producto,
+ * permitiendo listar, crear, mostrar, actualizar y eliminar imágenes.
+ */
 class ProductImageController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todas las imágenes de producto disponibles en el catálogo.
      */
-    public function index()
+    public function index(): mixed
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear una nueva imagen de producto en el catálogo.
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar los detalles de una imagen de producto específica.
      */
-    public function show(ProductImage $productImage)
+    public function show(ProductImage $productImage): mixed
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar la información de una imagen de producto existente.
      */
-    public function update(Request $request, ProductImage $productImage)
+    public function update(Request $request, ProductImage $productImage): mixed
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar una imagen de producto del catálogo.
      */
-    public function destroy(ProductImage $productImage)
+    public function destroy(ProductImage $productImage): mixed
     {
         //
     }

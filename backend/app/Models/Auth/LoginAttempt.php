@@ -5,10 +5,13 @@ namespace App\Models\Auth;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo base para registrar intentos de inicio de sesión.
+ * Registra intentos de inicio de sesión del usuario.
  *
- * Este archivo se crea como parte de la estructura del dominio de seguridad.
- * La lógica, relaciones, casts y scopes se implementarán en una fase posterior.
+ * Tabla: `login_attempts` — relación N:1 con `users`.
+ *
+ * Almacena cada intento de acceso con su resultado (exitoso/fallido),
+ * dirección IP, user agent y timestamp. Utilizable para detectar
+ * ataques de fuerza bruta y bloquear cuentas temporalmente.
  */
 class LoginAttempt extends Model
 {
