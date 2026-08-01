@@ -29,10 +29,16 @@ return new class extends Migration
 
             // Slug propio del producto para esta tienda (permite URLs diferentes por tienda)
             $table->string(column: 'slug')->nullable();
+            $table->string(column: 'public_title', length: 180)->nullable();
             // Precio público que puede diferir del precio base del producto
             $table->decimal(column: 'public_price', total: 12, places: 2)->nullable();
             // Descripción pública que puede diferir de la descripción base del producto
             $table->text(column: 'public_description')->nullable();
+
+            // SEO por tienda
+            $table->string(column: 'meta_title', length: 160)->nullable();
+            $table->text(column: 'meta_description')->nullable();
+            $table->string(column: 'og_image_url')->nullable();
 
             // Controla la visibilidad del producto en la tienda
             $table->boolean(column: 'is_visible')->default(value: true)->index();
@@ -42,6 +48,7 @@ return new class extends Migration
             $table->unsignedInteger('sort_order')->default(value: 0)->index();
             // Fecha de publicación del producto en la tienda
             $table->timestamp(column: 'published_at')->nullable()->index();
+            $table->timestamp(column: 'unpublished_at')->nullable()->index();
 
             $table->timestamps();
 
