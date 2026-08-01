@@ -3,6 +3,7 @@
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Warehouse extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
@@ -27,10 +29,6 @@ class Warehouse extends Model
         'address',
         'phone',
         'is_active',
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
     ];
 
     /**
@@ -49,6 +47,6 @@ class Warehouse extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where(column: 'is_active', value: true);
+        return $query->whereRaw('is_active = ?', [1]);
     }
 }
