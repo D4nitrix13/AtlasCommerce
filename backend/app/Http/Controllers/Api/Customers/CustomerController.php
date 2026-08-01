@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Customers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class CustomerController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class CustomerController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class CustomerController extends Controller
     /**
      * Muestra el cliente especificado.
      */
-    public function show(Customer $customer)
+    public function show(Customer $customer): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class CustomerController extends Controller
     /**
      * Actualiza el cliente especificado en la base de datos.
      */
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, Customer $customer): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class CustomerController extends Controller
     /**
      * Elimina el cliente especificado de la base de datos.
      */
-    public function destroy(Customer $customer)
+    public function destroy(Customer $customer): JsonResponse
     {
         //
     }

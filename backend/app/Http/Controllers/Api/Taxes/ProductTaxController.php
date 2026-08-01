@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Taxes;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductTax;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ProductTaxController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ProductTaxController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ProductTaxController extends Controller
     /**
      * Muestra el impuesto de producto especificado.
      */
-    public function show(ProductTax $productTax)
+    public function show(ProductTax $productTax): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ProductTaxController extends Controller
     /**
      * Actualiza el impuesto de producto especificado en la base de datos.
      */
-    public function update(Request $request, ProductTax $productTax)
+    public function update(Request $request, ProductTax $productTax): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ProductTaxController extends Controller
     /**
      * Elimina el impuesto de producto especificado de la base de datos.
      */
-    public function destroy(ProductTax $productTax)
+    public function destroy(ProductTax $productTax): JsonResponse
     {
         //
     }

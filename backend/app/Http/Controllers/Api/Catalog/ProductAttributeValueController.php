@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductAttributeValue;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class ProductAttributeValueController extends Controller
     /**
      * Listar todos los valores de atributo de producto disponibles en el catálogo.
      */
-    public function index(): mixed
+    public function index(): JsonResponse
     {
         //
     }
@@ -25,7 +26,7 @@ class ProductAttributeValueController extends Controller
     /**
      * Crear un nuevo valor de atributo de producto en el catálogo.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -33,7 +34,7 @@ class ProductAttributeValueController extends Controller
     /**
      * Mostrar los detalles de un valor de atributo de producto específico.
      */
-    public function show(ProductAttributeValue $productAttributeValue): mixed
+    public function show(ProductAttributeValue $productAttributeValue): JsonResponse
     {
         //
     }
@@ -41,7 +42,7 @@ class ProductAttributeValueController extends Controller
     /**
      * Actualizar la información de un valor de atributo de producto existente.
      */
-    public function update(Request $request, ProductAttributeValue $productAttributeValue): mixed
+    public function update(Request $request, ProductAttributeValue $productAttributeValue): JsonResponse
     {
         //
     }
@@ -49,7 +50,7 @@ class ProductAttributeValueController extends Controller
     /**
      * Eliminar un valor de atributo de producto del catálogo.
      */
-    public function destroy(ProductAttributeValue $productAttributeValue): mixed
+    public function destroy(ProductAttributeValue $productAttributeValue): JsonResponse
     {
         //
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductAttribute;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class ProductAttributeController extends Controller
     /**
      * Listar todos los atributos de producto disponibles en el catálogo.
      */
-    public function index(): mixed
+    public function index(): JsonResponse
     {
         //
     }
@@ -25,7 +26,7 @@ class ProductAttributeController extends Controller
     /**
      * Crear un nuevo atributo de producto en el catálogo.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -33,7 +34,7 @@ class ProductAttributeController extends Controller
     /**
      * Mostrar los detalles de un atributo de producto específico.
      */
-    public function show(ProductAttribute $productAttribute): mixed
+    public function show(ProductAttribute $productAttribute): JsonResponse
     {
         //
     }
@@ -41,7 +42,7 @@ class ProductAttributeController extends Controller
     /**
      * Actualizar la información de un atributo de producto existente.
      */
-    public function update(Request $request, ProductAttribute $productAttribute): mixed
+    public function update(Request $request, ProductAttribute $productAttribute): JsonResponse
     {
         //
     }
@@ -49,7 +50,7 @@ class ProductAttributeController extends Controller
     /**
      * Eliminar un atributo de producto del catálogo.
      */
-    public function destroy(ProductAttribute $productAttribute): mixed
+    public function destroy(ProductAttribute $productAttribute): JsonResponse
     {
         //
     }

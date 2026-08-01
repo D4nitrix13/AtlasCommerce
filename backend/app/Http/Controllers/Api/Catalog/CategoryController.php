@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class CategoryController extends Controller
     /**
      * Listar todas las categorías disponibles en el catálogo.
      */
-    public function index(): mixed
+    public function index(): JsonResponse
     {
         //
     }
@@ -25,7 +26,7 @@ class CategoryController extends Controller
     /**
      * Crear una nueva categoría en el catálogo.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -33,7 +34,7 @@ class CategoryController extends Controller
     /**
      * Mostrar los detalles de una categoría específica.
      */
-    public function show(Category $category): mixed
+    public function show(Category $category): JsonResponse
     {
         //
     }
@@ -41,7 +42,7 @@ class CategoryController extends Controller
     /**
      * Actualizar la información de una categoría existente.
      */
-    public function update(Request $request, Category $category): mixed
+    public function update(Request $request, Category $category): JsonResponse
     {
         //
     }
@@ -49,7 +50,7 @@ class CategoryController extends Controller
     /**
      * Eliminar una categoría del catálogo.
      */
-    public function destroy(Category $category): mixed
+    public function destroy(Category $category): JsonResponse
     {
         //
     }

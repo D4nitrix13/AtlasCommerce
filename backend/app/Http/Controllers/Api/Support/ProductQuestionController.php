@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Support;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductQuestion;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ProductQuestionController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ProductQuestionController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ProductQuestionController extends Controller
     /**
      * Muestra la pregunta de producto especificada.
      */
-    public function show(ProductQuestion $productQuestion)
+    public function show(ProductQuestion $productQuestion): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ProductQuestionController extends Controller
     /**
      * Actualiza la pregunta de producto especificada en la base de datos.
      */
-    public function update(Request $request, ProductQuestion $productQuestion)
+    public function update(Request $request, ProductQuestion $productQuestion): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ProductQuestionController extends Controller
     /**
      * Elimina la pregunta de producto especificada de la base de datos.
      */
-    public function destroy(ProductQuestion $productQuestion)
+    public function destroy(ProductQuestion $productQuestion): JsonResponse
     {
         //
     }

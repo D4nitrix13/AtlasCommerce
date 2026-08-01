@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Marketing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class CouponController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class CouponController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class CouponController extends Controller
     /**
      * Muestra el cupón especificado.
      */
-    public function show(Coupon $coupon)
+    public function show(Coupon $coupon): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class CouponController extends Controller
     /**
      * Actualiza el cupón especificado en la base de datos.
      */
-    public function update(Request $request, Coupon $coupon)
+    public function update(Request $request, Coupon $coupon): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class CouponController extends Controller
     /**
      * Elimina el cupón especificado de la base de datos.
      */
-    public function destroy(Coupon $coupon)
+    public function destroy(Coupon $coupon): JsonResponse
     {
         //
     }

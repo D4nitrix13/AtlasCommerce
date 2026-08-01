@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Payments;
 
 use App\Http\Controllers\Controller;
 use App\Models\InvoicePayment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class InvoicePaymentController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class InvoicePaymentController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class InvoicePaymentController extends Controller
     /**
      * Muestra el pago de factura especificado.
      */
-    public function show(InvoicePayment $invoicePayment)
+    public function show(InvoicePayment $invoicePayment): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class InvoicePaymentController extends Controller
     /**
      * Actualiza el pago de factura especificado en la base de datos.
      */
-    public function update(Request $request, InvoicePayment $invoicePayment)
+    public function update(Request $request, InvoicePayment $invoicePayment): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class InvoicePaymentController extends Controller
     /**
      * Elimina el pago de factura especificado de la base de datos.
      */
-    public function destroy(InvoicePayment $invoicePayment)
+    public function destroy(InvoicePayment $invoicePayment): JsonResponse
     {
         //
     }

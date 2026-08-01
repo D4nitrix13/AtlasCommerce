@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Purchases;
 
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseItem;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class PurchaseItemController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class PurchaseItemController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class PurchaseItemController extends Controller
     /**
      * Muestra el artículo de compra especificado.
      */
-    public function show(PurchaseItem $purchaseItem)
+    public function show(PurchaseItem $purchaseItem): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class PurchaseItemController extends Controller
     /**
      * Actualiza el artículo de compra especificado en la base de datos.
      */
-    public function update(Request $request, PurchaseItem $purchaseItem)
+    public function update(Request $request, PurchaseItem $purchaseItem): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class PurchaseItemController extends Controller
     /**
      * Elimina el artículo de compra especificado de la base de datos.
      */
-    public function destroy(PurchaseItem $purchaseItem)
+    public function destroy(PurchaseItem $purchaseItem): JsonResponse
     {
         //
     }

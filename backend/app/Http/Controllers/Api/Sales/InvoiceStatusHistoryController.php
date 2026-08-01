@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Models\InvoiceStatusHistory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class InvoiceStatusHistoryController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class InvoiceStatusHistoryController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class InvoiceStatusHistoryController extends Controller
     /**
      * Muestra el historial de estado de factura especificado.
      */
-    public function show(InvoiceStatusHistory $invoiceStatusHistory)
+    public function show(InvoiceStatusHistory $invoiceStatusHistory): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class InvoiceStatusHistoryController extends Controller
     /**
      * Actualiza el historial de estado de factura especificado en la base de datos.
      */
-    public function update(Request $request, InvoiceStatusHistory $invoiceStatusHistory)
+    public function update(Request $request, InvoiceStatusHistory $invoiceStatusHistory): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class InvoiceStatusHistoryController extends Controller
     /**
      * Elimina el historial de estado de factura especificado de la base de datos.
      */
-    public function destroy(InvoiceStatusHistory $invoiceStatusHistory)
+    public function destroy(InvoiceStatusHistory $invoiceStatusHistory): JsonResponse
     {
         //
     }

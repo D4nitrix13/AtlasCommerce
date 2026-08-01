@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Returns;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReturnRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ReturnRequestController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ReturnRequestController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ReturnRequestController extends Controller
     /**
      * Muestra la solicitud de devolución especificada.
      */
-    public function show(ReturnRequest $returnRequest)
+    public function show(ReturnRequest $returnRequest): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ReturnRequestController extends Controller
     /**
      * Actualiza la solicitud de devolución especificada en la base de datos.
      */
-    public function update(Request $request, ReturnRequest $returnRequest)
+    public function update(Request $request, ReturnRequest $returnRequest): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ReturnRequestController extends Controller
     /**
      * Elimina la solicitud de devolución especificada de la base de datos.
      */
-    public function destroy(ReturnRequest $returnRequest)
+    public function destroy(ReturnRequest $returnRequest): JsonResponse
     {
         //
     }
