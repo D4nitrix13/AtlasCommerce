@@ -12,6 +12,7 @@ use App\Models\Customers\Customer;
 use App\Models\Customers\CustomerAddress;
 use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Order;
+use App\Models\Shipping\ShippingZone;
 use App\Services\Sales\CheckoutService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -90,10 +91,18 @@ class OrderController extends Controller
         $address = $this->resolveOwnedAddress($customer, (int) $request->integer('shipping_address_id'));
         $paymentMethod = PaymentMethod::findOrFail($request->integer('payment_method_id'));
 
+        $shippingZone = null;
+        if ($request->filled('shipping_zone_id')) {
+            $shippingZone = ShippingZone::findOrFail(
+                $request->integer('shipping_zone_id'),
+            );
+        }
+
         $order = $this->checkout->checkout(
             cart: $cart,
             shippingAddress: $address,
             paymentMethod: $paymentMethod,
+            shippingZone: $shippingZone,
             notes: $request->input('notes'),
         );
 

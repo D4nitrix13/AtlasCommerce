@@ -12,6 +12,7 @@ use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Invoice;
 use App\Models\Sales\Order;
 use App\Models\Settings\ExchangeRate;
+use App\Models\Shipping\ShippingZone;
 use App\Services\Stores\StoreContextService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -61,6 +62,7 @@ final class CheckoutService
         Cart $cart,
         CustomerAddress $shippingAddress,
         PaymentMethod $paymentMethod,
+        ?ShippingZone $shippingZone = null,
         ?string $notes = null,
     ): Order {
         $store = $this->storeContext->getStore();
@@ -82,6 +84,7 @@ final class CheckoutService
             $exchangeRate,
             $storeId,
             $store,
+            $shippingZone,
         ): Order {
             $cart->loadMissing('items.product', 'items.productVariant');
 
@@ -102,7 +105,13 @@ final class CheckoutService
                 taxRate: (float) ($store?->tax_rate ?? 0),
             );
 
-            $totalCents = $subtotalCents + $taxCents;
+            // Shipping: zona elegida por el cliente o default de la tienda.
+            $shippingCents = $this->resolveShippingCents(
+                requestedZone: $shippingZone,
+                storeId: (int) $storeId,
+            );
+
+            $totalCents = $subtotalCents + $taxCents + $shippingCents;
 
             // Snapshot a order_items.
             $orderItemsPayload = $items->map(function (CartItem $item) {
@@ -133,7 +142,7 @@ final class CheckoutService
                 'subtotal_cents' => $subtotalCents,
                 'discount_cents' => 0,
                 'tax_cents' => $taxCents,
-                'shipping_cents' => 0,
+                'shipping_cents' => $shippingCents,
                 'total_cents' => $totalCents,
                 'exchange_rate_snapshot' => $exchangeRate,
                 'total_in_base_currency_cents' => (int) round(
@@ -158,6 +167,7 @@ final class CheckoutService
                 'subtotal_cents' => $subtotalCents,
                 'discount_cents' => 0,
                 'tax_cents' => $taxCents,
+                'shipping_cents' => $shippingCents,
                 'total_cents' => $totalCents,
                 'exchange_rate_snapshot' => $exchangeRate,
                 'payment_status' => 'pending',
@@ -228,6 +238,31 @@ final class CheckoutService
         }
 
         return (int) round($subtotalCents * $taxRate / 100, 0, PHP_ROUND_HALF_EVEN);
+    }
+
+    /**
+     * Resuelve el costo de envío en centavos.
+     *
+     * Reglas:
+     *  1. Si el cliente eligió zona explícita, usa esa.
+     *  2. Si no, toma la primera zona activa de la tienda.
+     *  3. Si no hay zonas, 0 (envío gratis implícito — el admin decide
+     *     manualmente si cobra envío).
+     */
+    private function resolveShippingCents(?ShippingZone $requestedZone, int $storeId): int
+    {
+        if ($requestedZone !== null) {
+            return (int) $requestedZone->base_cost_cents;
+        }
+
+        $zone = ShippingZone::query()
+            ->where('is_active', true)
+            // shipping_zones no tiene store_id (es global); el filtro
+            // por tienda se hace via order.shipping_zone_id en una fase futura.
+            ->orderBy('id')
+            ->first();
+
+        return $zone !== null ? (int) $zone->base_cost_cents : 0;
     }
 
     /**
