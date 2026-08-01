@@ -3,6 +3,7 @@
 namespace App\Models\Shipping;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,22 +16,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property string $name
  * @property string|null $description
- * @property string $base_cost
+ * @property int $base_cost_cents
  * @property bool $is_active
  */
 class ShippingZone extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
         'name',
         'description',
-        'base_cost',
+        'base_cost_cents',
         'is_active',
     ];
 
     protected $casts = [
-        'base_cost' => 'decimal:2',
+        'base_cost_cents' => 'integer',
         'is_active' => 'boolean',
     ];
 

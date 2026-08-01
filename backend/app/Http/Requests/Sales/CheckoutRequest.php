@@ -34,6 +34,7 @@ class CheckoutRequest extends FormRequest
             'cart_id' => ['required', 'integer', 'exists:carts,id'],
             'shipping_address_id' => ['required', 'integer', 'exists:customer_addresses,id'],
             'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id'],
+            'shipping_zone_id' => ['nullable', 'integer', 'exists:shipping_zones,id'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
