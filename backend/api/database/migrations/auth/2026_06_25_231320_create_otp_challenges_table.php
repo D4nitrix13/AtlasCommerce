@@ -4,7 +4,26 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+/**
+ * Migración para la tabla `otp_challenges`.
+ *
+ * Almacena cada intento de verificación OTP con su código hasheado (bcrypt),
+ * control de intentos, expiración y metadata de seguridad.
+ *
+ * El código OTP nunca se almacena en texto plano; solo su hash en `code_hash`.
+ *
+ * El campo `purpose` permite distinguir entre diferentes usos:
+ * - `login_2fa`: verificación durante el proceso de login.
+ * - `enable_2fa`: activación de 2FA por primera vez.
+ * - `change_2fa`: cambio de método 2FA.
+ *
+ * Índices compuestos:
+ * - [user_id, used]: buscar challenges activos de un usuario.
+ * - [user_id, expires_at]: limpiar challenges expirados.
+ * - [method, purpose]: buscar challenges por tipo y propósito.
+ */
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */

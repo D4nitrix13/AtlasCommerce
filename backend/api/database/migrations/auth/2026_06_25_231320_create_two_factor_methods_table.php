@@ -4,7 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+/**
+ * Migración para la tabla `two_factor_methods`.
+ *
+ * Almacena los métodos 2FA individuales registrados por cada usuario (relación N:1).
+ * Un usuario puede tener múltiples métodos (email_otp, totp, passkey), cada uno
+ * con su propio estado de verificación y activación.
+ *
+ * Índices compuestos optimizados para las consultas más frecuentes:
+ * - [user_id, method]: buscar métodos por tipo para un usuario.
+ * - [user_id, active]: filtrar solo métodos activos de un usuario.
+ */
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
