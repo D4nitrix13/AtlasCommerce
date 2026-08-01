@@ -57,5 +57,8 @@ class DatabaseSeeder extends Seeder
                 'sku' => 'DEMO-001',
                 'base_price_cents' => 19_99,
             ]);
+
+        // Catálogo de permisos + roles (admin, staff).
+        $this->call(class: PermissionsCatalogSeeder::class);
     }
 }

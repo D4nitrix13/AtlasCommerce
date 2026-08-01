@@ -108,4 +108,34 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    /**
+     * Determina si el usuario tiene el permiso identificado por slug.
+     *
+     * Reglas:
+     *  - Si el usuario no tiene rol → false.
+     *  - Si el rol es `admin` (slug) → bypasea el chequeo (siempre true).
+     *  - Si el rol está inactivo → false aunque tenga el permiso.
+     *  - Si no, consulta `role.permissions` y compara por slug.
+     */
+    public function hasPermission(string $slug): bool
+    {
+        $role = $this->role;
+
+        if ($role === null) {
+            return false;
+        }
+
+        if ($role->slug === 'admin') {
+            return true;
+        }
+
+        if (! $role->is_active) {
+            return false;
+        }
+
+        return $role->permissions()
+            ->where(column: 'slug', operator: '=', value: $slug)
+            ->exists();
+    }
 }
