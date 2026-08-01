@@ -59,6 +59,7 @@ La implementación en `Laravel` usa nombres en inglés:
 - `TIENDA_DOMINIO` → `store_domains`
 - `TIENDA_RED_SOCIAL` → `store_social_links`
 - `USUARIO_TIENDA` → `user_stores`
+- `USUARIO_TIENDA.id_rol` → `user_stores.role_id`
 - `CLIENTE_TIENDA` → `customer_stores`
 - `PRODUCTO_TIENDA` → `product_stores`
 - `CANAL_VENTA` → `sales_channels`
@@ -87,11 +88,11 @@ La implementación en `Laravel` usa nombres en inglés:
 - `PEDIDO` → `orders`
 - `DETALLE_PEDIDO` → `order_items`
 - `PEDIDO_ESTADO_HISTORIAL` → `order_status_histories`
-- `PEDIDO_USUARIO_CREADOR` → `PEDIDO.id_usuario_creador`
+- `PEDIDO.id_usuario_creador` → `orders.user_creator_id`
 - `FACTURA` → `invoices`
 - `DETALLE_FACTURA` → `invoice_items`
 - `FACTURA_ESTADO_HISTORIAL` → `invoice_status_histories`
-- `FACTURA_USUARIO_EMISOR` → `FACTURA.id_usuario_emisor`
+- `FACTURA.id_usuario_emisor` → `invoices.user_issuer_id`
 - `METODO_PAGO` → `payment_methods`
 - `PAGO` → `payments`
 - `FACTURA_PAGO` → `invoice_payments`

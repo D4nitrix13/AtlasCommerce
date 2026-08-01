@@ -116,13 +116,16 @@ class ResolveStoreFromDomain
 Un servicio que encapsula la lógica de resolución:
 
 ```php
-// Ejemplo conceptual — base estructural creada
+// Ejemplo conceptual — base estructural creada;
+// la integración completa debe verificarse en código
 
 class StoreContextService
 {
     public function getCurrentStore(): ?Store
     {
-        return app()->instance('currentStore');
+        return app()->bound('currentStore')
+            ? app('currentStore')
+            : null;
     }
 
     public function getStoreId(): ?int
