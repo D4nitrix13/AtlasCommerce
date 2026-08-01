@@ -61,7 +61,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Un solo diseño personalizado por ítem de orden
-            $table->unique('order_item_id', 'order_custom_design_order_item_unique');
+            $table->unique(columns: 'order_item_id', name: 'order_custom_design_order_item_unique');
             // Índice compuesto para buscar diseños de una orden por estado de producción
             $table->index(columns: ['order_id', 'production_status'], name: 'order_custom_design_order_status_idx');
             // Índice compuesto para filtrar por estado y fecha de aprobación

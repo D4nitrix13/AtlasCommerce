@@ -38,7 +38,7 @@ return new class extends Migration
                 ->cascadeOnUpdate();
 
             // Cantidad de unidades a devolver de este ítem
-            $table->unsignedInteger('quantity');
+            $table->unsignedInteger(column: 'quantity');
             // Monto a devolver por este ítem (quantity * precio unitario original)
             $table->decimal(column: 'amount', total: 12, places: 2);
 

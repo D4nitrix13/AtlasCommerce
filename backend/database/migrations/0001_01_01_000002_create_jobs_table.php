@@ -20,12 +20,12 @@ return new class extends Migration
             $table->string(column: 'queue')->index();
             $table->longText(column: 'payload');
             // Número máximo de intentos antes de marcar como fallido
-            $table->unsignedSmallInteger('attempts');
+            $table->unsignedSmallInteger(column: 'attempts');
             // TimestampUnix de cuando se reservó el trabajo para procesamiento
-            $table->unsignedInteger('reserved_at')->nullable();
+            $table->unsignedInteger(column: 'reserved_at')->nullable();
             // TimestampUnix de cuando el trabajo estará disponible para procesar
-            $table->unsignedInteger('available_at');
-            $table->unsignedInteger('created_at');
+            $table->unsignedInteger(column: 'available_at');
+            $table->unsignedInteger(column: 'created_at');
         });
 
         Schema::create(table: 'job_batches', callback: function (Blueprint $table): void {

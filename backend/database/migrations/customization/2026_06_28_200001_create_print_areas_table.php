@@ -34,11 +34,11 @@ return new class extends Migration
             $table->decimal(column: 'height_inches', total: 8, places: 2)->nullable();
 
             // Dimensiones en píxeles (para diseño digital)
-            $table->unsignedInteger('width_px');
-            $table->unsignedInteger('height_px');
+            $table->unsignedInteger(column: 'width_px');
+            $table->unsignedInteger(column: 'height_px');
 
             // Resolución de impresión; 300 DPI es estándar para calidad fotográfica
-            $table->unsignedSmallInteger('dpi')->default(value: 300)->index();
+            $table->unsignedSmallInteger(column: 'dpi')->default(value: 300)->index();
 
             // Posición absoluta del área dentro del mockup (en píxeles)
             $table->decimal(column: 'position_x', total: 10, places: 4)->default(value: 0);

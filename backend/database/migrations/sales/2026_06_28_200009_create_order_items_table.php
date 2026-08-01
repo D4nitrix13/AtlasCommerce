@@ -42,7 +42,7 @@ return new class extends Migration
                 ->constrained(table: 'custom_designs')
                 ->nullOnDelete();
 
-            $table->unsignedInteger('quantity');
+            $table->unsignedInteger(column: 'quantity');
             $table->decimal(column: 'unit_price', total: 12, places: 2);
             $table->decimal(column: 'discount', total: 12, places: 2)->default(value: 0);
             $table->decimal(column: 'subtotal', total: 12, places: 2);

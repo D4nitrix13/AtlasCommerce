@@ -37,9 +37,9 @@ return new class extends Migration
             // Fecha de fin de vigencia, nullable para cupones sin fecha de expiración
             $table->date(column: 'ends_at')->nullable();
             // Límite máximo de usos totales del cupón, nullable para uso ilimitado
-            $table->unsignedInteger('usage_limit')->nullable();
+            $table->unsignedInteger(column: 'usage_limit')->nullable();
             // Contador de usos actuales del cupón para controlar el límite
-            $table->unsignedInteger('used_count')->default(value: 0);
+            $table->unsignedInteger(column: 'used_count')->default(value: 0);
             // Estado de activación: permite pausar cupones sin eliminarlos
             $table->boolean(column: 'is_active')->default(value: true);
 

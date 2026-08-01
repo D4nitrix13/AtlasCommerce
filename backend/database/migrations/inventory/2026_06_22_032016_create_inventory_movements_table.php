@@ -34,12 +34,12 @@ return new class extends Migration
             // Tipo de movimiento: 'entry', 'exit', 'transfer', 'adjustment', etc.
             $table->string(column: 'movement_type', length: 50);
             // Cantidad movida (siempre positiva, el tipo determina si es entrada o salida)
-            $table->unsignedInteger('quantity');
+            $table->unsignedInteger(column: 'quantity');
 
             // Stock antes del movimiento para auditoría y trazabilidad
-            $table->unsignedInteger('previous_stock')->default(value: 0);
+            $table->unsignedInteger(column: 'previous_stock')->default(value: 0);
             // Stock después del movimiento para auditoría y trazabilidad
-            $table->unsignedInteger('new_stock')->default(value: 0);
+            $table->unsignedInteger(column: 'new_stock')->default(value: 0);
 
             // Razón o justificación del movimiento, nullable por si no se requiere explicación
             $table->text(column: 'reason')->nullable();

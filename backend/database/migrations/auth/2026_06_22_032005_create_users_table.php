@@ -46,7 +46,7 @@ return new class extends Migration
             $table->timestamp(column: 'last_login_at')->nullable()->index();
             // IP del último login, max 45 chars para IPv6
             $table->string(column: 'last_login_ip', length: 45)->nullable();
-            $table->unsignedInteger('failed_login_attempts')->default(value: 0);
+            $table->unsignedInteger(column: 'failed_login_attempts')->default(value: 0);
             // Bloqueo temporal tras intentos fallidos: index() para limpieza periódica
             $table->timestamp(column: 'locked_until')->nullable()->index();
 

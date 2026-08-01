@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string(column: 'image_url');
             $table->string(column: 'alt_text', length: 160)->nullable();
             $table->boolean(column: 'is_primary')->default(value: false);
-            $table->unsignedInteger('sort_order')->default(value: 0);
+            $table->unsignedInteger(column: 'sort_order')->default(value: 0);
 
             $table->timestamps();
 
