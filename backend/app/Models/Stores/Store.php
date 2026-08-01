@@ -4,11 +4,10 @@ namespace App\Models\Stores;
 
 use App\Models\Concerns\HasSlug;
 use App\Models\Settings\Currency;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * Tienda virtual del ecosistema.
  *
@@ -37,8 +36,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property bool $maintenance_mode
  * @property bool $is_active
  */
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Store extends Model
 {
+    use HasFactory;
     use HasSlug;
     use SoftDeletes;
 

@@ -5,12 +5,11 @@ namespace App\Models\Customers;
 use App\Models\Auth\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-
 /**
  * Cliente del sistema.
  *
@@ -32,9 +31,12 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_active
  * @property Carbon $registered_at
  */
+use Laravel\Sanctum\HasApiTokens;
+
 class Customer extends Model
 {
     use HasApiTokens;
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [

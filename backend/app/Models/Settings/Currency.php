@@ -3,9 +3,8 @@
 namespace App\Models\Settings;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-
 /**
  * Moneda soportada por el sistema.
  *
@@ -22,8 +21,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $is_primary
  * @property bool $is_active
  */
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Currency extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'code',
         'name',
