@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\Settings;
+namespace App\Http\Controllers\Api\Stores;
 
 use App\Http\Controllers\Controller;
-use App\Models\StoreSetting;
+use App\Models\Stores\StoreSetting;
 use Illuminate\Http\Request;
 
 class StoreSettingController extends Controller
