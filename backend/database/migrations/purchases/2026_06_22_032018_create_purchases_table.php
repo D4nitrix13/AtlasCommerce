@@ -6,63 +6,70 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Ejecutar las migraciones.
-     *
-     * Crea la tabla de compras para gestionar las órdenes
-     * de compra a proveedores del sistema.
-     */
     public function up(): void
     {
-        Schema::create(table: 'purchases', callback: function (Blueprint $table): void {
+        Schema::create('purchases', function (Blueprint $table): void {
             $table->id();
-
-            // Relación con proveedor: restrictOnDelete porque no se debe eliminar un proveedor que tenga compras registradas
-            $table->foreignId(column: 'supplier_id')
-                ->constrained(table: 'suppliers')
+            $table->foreignId('supplier_id')
+                ->constrained('suppliers')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
-
-            // Usuario que registró la compra, nullable si es una compra importada o automática
-            // nullOnDelete: si se elimina el usuario, se conserva el registro de compra
-            $table->foreignId(column: 'user_id')
+            $table->foreignId('user_id')
                 ->nullable()
-                ->constrained(table: 'users')
+                ->constrained('users')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
+            $table->foreignId('currency_id')
+                ->constrained('currencies')
+                ->restrictOnDelete();
+
+            $table->string('purchase_number', 80)->unique();
+            $table->unsignedBigInteger('subtotal_cents')->default(0);
+            $table->unsignedBigInteger('tax_cents')->default(0);
+            $table->unsignedBigInteger('discount_cents')->default(0);
+            $table->unsignedBigInteger('total_cents')->default(0);
+
+            $table->string('status', 50)->default('pending');
+            $table->timestamp('purchased_at')->useCurrent();
+            $table->text('notes')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['supplier_id', 'status'], 'purchases_supplier_status_idx');
+            $table->index('purchased_at', 'purchases_purchased_at_idx');
+        });
+
+        Schema::create('purchase_items', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('purchase_id')
+                ->constrained('purchases')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+            $table->foreignId('product_id')
+                ->constrained('products')
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
+            $table->foreignId('product_variant_id')
+                ->nullable()
+                ->constrained('product_variants')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            // Número único de referencia de la compra para identificación interna
-            $table->string(column: 'purchase_number', length: 80)->unique();
-            // Montos financieros con 2 decimales para precisión monetaria
-            $table->decimal(column: 'subtotal', total: 12, places: 2)->default(value: 0);
-            $table->decimal(column: 'tax', total: 12, places: 2)->default(value: 0);
-            $table->decimal(column: 'discount', total: 12, places: 2)->default(value: 0);
-            $table->decimal(column: 'total', total: 12, places: 2)->default(value: 0);
-
-            // Estado de la compra: 'pending', 'confirmed', 'received', 'cancelled', etc.
-            $table->string(column: 'status', length: 50)->default(value: 'pending');
-            // Fecha de la compra, se establece automáticamente al crear
-            $table->timestamp(column: 'purchase_date')->useCurrent();
-            // Observaciones o notas adicionales sobre la compra
-            $table->text(column: 'notes')->nullable();
+            $table->unsignedInteger('quantity');
+            $table->unsignedBigInteger('unit_cost_cents');
+            $table->unsignedBigInteger('subtotal_cents');
 
             $table->timestamps();
-            // Soft deletes para conservar historial de compras eliminadas
-            $table->softDeletes();
 
-            $table->index(columns: ['supplier_id'], name: 'purchases_supplier_id_idx');
-            $table->index(columns: ['user_id'], name: 'purchases_user_id_idx');
-            $table->index(columns: ['purchase_number'], name: 'purchases_purchase_number_idx');
-            $table->index(columns: ['status'], name: 'purchases_status_idx');
-            $table->index(columns: ['purchase_date'], name: 'purchases_purchase_date_idx');
+            $table->index('purchase_id', 'purchase_items_purchase_id_idx');
+            $table->index('product_id', 'purchase_items_product_id_idx');
         });
     }
 
-    /**
-     * Revertir las migraciones.
-     */
     public function down(): void
     {
-        Schema::dropIfExists(table: 'purchases');
+        Schema::dropIfExists('purchase_items');
+        Schema::dropIfExists('purchases');
     }
 };
