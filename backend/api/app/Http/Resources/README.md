@@ -28,7 +28,7 @@ app/Http/Resources/
 
 ## Organización por módulos
 
-Los Resources están organizados según los módulos principales del ecommerce:
+Los Resources están organizados según los módulos principales del store:
 
 ```text
 Resources/
@@ -210,7 +210,7 @@ También se puede usar un formato legible si el frontend lo necesita:
 
 ## Montos monetarios
 
-Para ecommerce, los montos deben devolverse de forma consistente.
+Para store, los montos deben devolverse de forma consistente.
 
 Ejemplo:
 
@@ -438,4 +438,4 @@ class OrderResource extends JsonResource
 
 ## Estado actual
 
-Los API Resources ya fueron generados como estructura base. El siguiente paso es completar cada Resource con los campos reales de su tabla y las relaciones necesarias para cada pantalla del ecommerce.
+Los API Resources ya fueron generados como estructura base. El siguiente paso es completar cada Resource con los campos reales de su tabla y las relaciones necesarias para cada pantalla del store.

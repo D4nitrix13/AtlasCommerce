@@ -1,6 +1,6 @@
 # Migraciones del Ecommerce
 
-Este directorio contiene las migraciones de base de datos del ecommerce definido en `APP_NAME`.
+Este directorio contiene las migraciones de base de datos del store definido en `APP_NAME`.
 
 La estructura separa las migraciones por responsabilidad para evitar archivos demasiado grandes, facilitar el mantenimiento del esquema y permitir ubicar rápidamente cada parte de la base de datos.
 
@@ -98,7 +98,7 @@ jobs
 personal_access_tokens
 ```
 
-La migración `personal_access_tokens` pertenece a Laravel Sanctum y puede quedarse en la raíz porque es una tabla técnica para tokens API, no una entidad propia del ecommerce.
+La migración `personal_access_tokens` pertenece a Laravel Sanctum y puede quedarse en la raíz porque es una tabla técnica para tokens API, no una entidad propia del store.
 
 ## Carga de migraciones en subcarpetas
 
@@ -624,11 +624,11 @@ customers
 customer_addresses
 ```
 
-La tabla `customers` representa al comprador dentro del ecommerce. La tabla `customer_addresses` permite guardar varias direcciones por cliente, por ejemplo dirección de envío y dirección de facturación.
+La tabla `customers` representa al comprador dentro del store. La tabla `customer_addresses` permite guardar varias direcciones por cliente, por ejemplo dirección de envío y dirección de facturación.
 
 ## Módulo `catalog`
 
-Contiene el catálogo de productos del ecommerce.
+Contiene el catálogo de productos del store.
 
 Tablas principales:
 
@@ -1022,7 +1022,7 @@ docker compose exec app php artisan migrate:status
 Para listar tablas en PostgreSQL:
 
 ```bash
-psql -U postgres -d ecommerce -c "\dt"
+psql -U postgres -d store -c "\dt"
 ```
 
 ## Reiniciar base de datos en desarrollo
@@ -1187,7 +1187,7 @@ POST   /api/auth/2fa/disable
 
 ## Estado actual del esquema
 
-La estructura actual representa una base completa para un ecommerce profesional.
+La estructura actual representa una base completa para un store profesional.
 
 Estado esperado:
 

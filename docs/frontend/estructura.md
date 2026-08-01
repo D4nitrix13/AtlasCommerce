@@ -1,27 +1,34 @@
 # Frontend Structure - Ecommerce Astro
 
-Este documento explica la estructura del frontend del ecommerce construido con Astro, Tailwind, React y TypeScript. El objetivo es mantener una organización clara, modular y alineada con los módulos del backend Laravel API.
+Este documento explica la estructura del frontend del
+ecommerce construido con `Astro`, `Tailwind`, `React` y
+`TypeScript`. El objetivo es mantener una organización clara,
+modular y alineada con los módulos del backend Laravel API.
 
 ## Propósito del documento
 
 Este README sirve para entender:
 
-```text
+```txt
 - Qué carpetas existen en el frontend.
 - Para qué sirve cada sección.
 - Cuántos README conviene crear.
 - Dónde se deben ubicar nuevas páginas.
 - Dónde se deben ubicar nuevos componentes.
-- Cómo se relaciona la estructura visual de Astro con los endpoints de Laravel.
+- Cómo se relaciona la estructura visual de Astro con los
+  endpoints de Laravel.
 ```
 
-El frontend no debe copiar exactamente la estructura de tablas del backend. El frontend representa pantallas, vistas, componentes y flujos de usuario. El backend representa entidades, controladores, modelos, migraciones y endpoints.
+El frontend no debe copiar exactamente la estructura de
+tablas del backend. El frontend representa pantallas, vistas,
+componentes y flujos de usuario. El backend representa
+entidades, controladores, modelos, migraciones y endpoints.
 
 ## Tecnologías principales
 
 El proyecto usa:
 
-```text
+```txt
 Astro
 React
 Tailwind CSS
@@ -32,13 +39,16 @@ Chart.js
 Laravel API como backend
 ```
 
-Astro maneja las páginas y layouts. React se puede usar para componentes interactivos. Tailwind se usa para estilos. TypeScript define contratos de datos y mejora la seguridad del código.
+`Astro` maneja las páginas y layouts. `React` se puede usar
+para componentes interactivos. `Tailwind` se usa para
+estilos. `TypeScript` define contratos de datos y mejora la
+seguridad del código.
 
 ## Estructura general recomendada
 
 La estructura principal del frontend debe mantenerse así:
 
-```text
+```txt
 .
 ├── public/
 ├── src/
@@ -59,17 +69,20 @@ La estructura principal del frontend debe mantenerse así:
 └── README.md
 ```
 
-Esta estructura está bien planteada para un ecommerce modular.
+Esta estructura está bien planteada para un ecommerce
+modular.
 
 ## Cantidad recomendada de README
 
-No conviene crear un README en cada carpeta pequeña porque se vuelve difícil de mantener.
+No conviene crear un README en cada carpeta pequeña porque
+se vuelve difícil de mantener.
 
-La cantidad recomendada es entre 5 y 7 archivos de documentación.
+La cantidad recomendada es entre 5 y 7 archivos de
+documentación.
 
 Documentación mínima recomendada:
 
-```text
+```txt
 1. README.md
 2. DOCUMENTACION_ESTRUCTURA_FRONTEND.md
 3. src/components/README.md
@@ -81,15 +94,16 @@ Documentación mínima recomendada:
 
 Documentación opcional:
 
-```text
+```txt
 8. src/config/README.md
 9. src/layouts/README.md
 10. src/data/README.md
 ```
 
-No es necesario crear README dentro de carpetas pequeñas como:
+No es necesario crear README dentro de carpetas pequeñas
+como:
 
-```text
+```txt
 src/components/admin/sidebar
 src/components/admin/header
 src/pages/admin/catalog/products
@@ -102,13 +116,13 @@ Es mejor documentar esas secciones desde un README superior.
 
 Ubicación:
 
-```text
+```txt
 .
 ```
 
 Archivos importantes:
 
-```text
+```txt
 README.md
 DOCUMENTACION.md
 DOCUMENTACION_ESTRUCTURA_FRONTEND.md
@@ -120,7 +134,7 @@ pnpm-lock.yaml
 
 Responsabilidad:
 
-```text
+```txt
 - Explicar cómo instalar el proyecto.
 - Explicar cómo correr el servidor.
 - Explicar cómo compilar el frontend.
@@ -137,37 +151,39 @@ pnpm build
 pnpm preview
 ```
 
-El README raíz debe ser más general. Este documento debe enfocarse en la estructura interna del frontend.
+El README raíz debe ser más general. Este documento debe
+enfocarse en la estructura interna del frontend.
 
 ## Sección public
 
 Ubicación:
 
-```text
+```txt
 public/
 ```
 
 Contenido actual:
 
-```text
+```txt
 favicon.ico
 favicon.svg
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Archivos públicos servidos directamente.
 - Favicons.
 - Imágenes estáticas globales.
 - Archivos que no necesitan procesamiento de Astro.
 ```
 
-No colocar aquí componentes, páginas ni lógica de TypeScript.
+No colocar aquí componentes, páginas ni lógica de
+`TypeScript`.
 
 Ejemplos válidos:
 
-```text
+```txt
 public/favicon.ico
 public/favicon.svg
 public/images/logo.svg
@@ -178,13 +194,13 @@ public/images/banners/home-banner.webp
 
 Ubicación:
 
-```text
+```txt
 src/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Código fuente principal del frontend.
 - Páginas Astro.
 - Layouts.
@@ -196,26 +212,27 @@ Responsabilidad:
 - Estilos globales.
 ```
 
-Casi todo el trabajo del frontend debe ocurrir dentro de `src`.
+Casi todo el trabajo del frontend debe ocurrir dentro de
+`src`.
 
 ## Sección assets
 
 Ubicación:
 
-```text
+```txt
 src/assets/
 ```
 
 Contenido actual:
 
-```text
+```txt
 astro.svg
 background.svg
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Recursos importados desde componentes o páginas.
 - Imágenes procesadas por Astro o Vite.
 - SVG usados como assets internos.
@@ -223,7 +240,7 @@ Responsabilidad:
 
 Diferencia con `public`:
 
-```text
+```txt
 public/     = archivos servidos directamente por URL.
 src/assets/ = archivos importados desde el código.
 ```
@@ -240,13 +257,13 @@ import background from "../assets/background.svg";
 
 Ubicación:
 
-```text
+```txt
 src/components/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Componentes reutilizables.
 - Componentes visuales.
 - Componentes de módulos.
@@ -257,7 +274,7 @@ Responsabilidad:
 
 Estructura actual:
 
-```text
+```txt
 src/components/
 ├── admin/
 ├── charts/
@@ -269,11 +286,13 @@ src/components/
 └── Welcome.astro
 ```
 
-La estructura es válida, pero se recomienda renombrar `public` a `storefront` para evitar confusión con la carpeta raíz `public`.
+La estructura es válida, pero se recomienda renombrar
+`public` a `storefront` para evitar confusión con la
+carpeta raíz `public`.
 
 Estructura recomendada:
 
-```text
+```txt
 src/components/
 ├── admin/
 ├── charts/
@@ -288,13 +307,13 @@ src/components/
 
 Ubicación:
 
-```text
+```txt
 src/components/admin/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Componentes usados por el panel administrativo.
 - Tarjetas del dashboard.
 - Sidebar administrativo.
@@ -305,7 +324,7 @@ Responsabilidad:
 
 Estructura actual:
 
-```text
+```txt
 src/components/admin/
 ├── cards/
 ├── dashboard/
@@ -319,7 +338,7 @@ Esta estructura está bien.
 
 Ejemplos:
 
-```text
+```txt
 AdminHeader.astro
 AdminSidebar.astro
 AdminSidebarItem.astro
@@ -331,21 +350,22 @@ TopProductsCard.astro
 
 Regla recomendada:
 
-```text
-Si un componente solo se usa dentro de /admin, debe vivir en src/components/admin.
+```txt
+Si un componente solo se usa dentro de /admin, debe vivir
+en src/components/admin.
 ```
 
 ## Sección components ecommerce
 
 Ubicación:
 
-```text
+```txt
 src/components/ecommerce/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Componentes relacionados con compra pública.
 - Carrito.
 - Checkout.
@@ -355,7 +375,7 @@ Responsabilidad:
 
 Contenido actual:
 
-```text
+```txt
 src/components/ecommerce/
 ├── cart/
 └── checkout/
@@ -363,7 +383,7 @@ src/components/ecommerce/
 
 Ejemplos:
 
-```text
+```txt
 CartItem.astro
 CartSummary.astro
 CheckoutForm.astro
@@ -371,33 +391,34 @@ CheckoutForm.astro
 
 Regla recomendada:
 
-```text
-Si el componente pertenece al flujo de compra del cliente, debe vivir en ecommerce.
+```txt
+Si el componente pertenece al flujo de compra del cliente,
+debe vivir en ecommerce.
 ```
 
 ## Sección components storefront
 
 Ubicación recomendada:
 
-```text
+```txt
 src/components/storefront/
 ```
 
 Actualmente existe:
 
-```text
+```txt
 src/components/public/
 ```
 
 Se recomienda renombrar a:
 
-```text
+```txt
 src/components/storefront/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Header público.
 - Footer público.
 - Componentes de home.
@@ -407,7 +428,7 @@ Responsabilidad:
 
 Estructura recomendada:
 
-```text
+```txt
 src/components/storefront/
 ├── footer/
 ├── header/
@@ -417,7 +438,7 @@ src/components/storefront/
 
 Ejemplos:
 
-```text
+```txt
 PublicHeader.astro
 PublicFooter.astro
 ProductCard.astro
@@ -426,7 +447,7 @@ ProductGrid.astro
 
 Motivo del cambio:
 
-```text
+```txt
 public/ ya existe en la raíz del proyecto.
 src/components/public puede confundirse con public/.
 storefront describe mejor la tienda pública.
@@ -436,13 +457,13 @@ storefront describe mejor la tienda pública.
 
 Ubicación:
 
-```text
+```txt
 src/components/ui/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Componentes base reutilizables.
 - Elementos visuales genéricos.
 - Bloques usados por admin y tienda pública.
@@ -450,7 +471,7 @@ Responsabilidad:
 
 Contenido actual:
 
-```text
+```txt
 Alert.astro
 Badge.astro
 Breadcrumb.astro
@@ -468,13 +489,14 @@ Textarea.astro
 
 Regla recomendada:
 
-```text
-Un componente en ui no debe conocer reglas específicas del negocio.
+```txt
+Un componente en ui no debe conocer reglas específicas del
+negocio.
 ```
 
 Ejemplo correcto:
 
-```text
+```txt
 Button.astro
 Input.astro
 Modal.astro
@@ -482,7 +504,7 @@ Modal.astro
 
 Ejemplo incorrecto:
 
-```text
+```txt
 ProductPaymentStatusCard.astro
 InvoiceTotalSummary.astro
 CustomerDebtBadge.astro
@@ -494,20 +516,20 @@ Esos componentes deberían vivir en su módulo correspondiente.
 
 Ubicación:
 
-```text
+```txt
 src/config/
 ```
 
 Contenido actual:
 
-```text
+```txt
 menu.ts
 site.ts
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Configuración del sitio.
 - Configuración del menú lateral.
 - Configuración de navegación.
@@ -516,14 +538,14 @@ Responsabilidad:
 
 Ejemplos:
 
-```text
+```txt
 site.ts = nombre del sitio, descripción, metadata.
 menu.ts = elementos del sidebar administrativo.
 ```
 
 Regla recomendada:
 
-```text
+```txt
 Si es configuración global visual, va en config.
 Si es endpoint de API, va en lib/endpoints.ts.
 ```
@@ -532,30 +554,31 @@ Si es endpoint de API, va en lib/endpoints.ts.
 
 Ubicación:
 
-```text
+```txt
 src/data/
 ```
 
 Contenido actual:
 
-```text
+```txt
 admin-dashboard.ts
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Datos temporales.
 - Datos mock.
 - Datos estáticos para desarrollo.
 - Información de prueba antes de conectar con Laravel.
 ```
 
-Cuando el backend esté conectado, gran parte de esta información debería venir desde la API.
+Cuando el backend esté conectado, gran parte de esta
+información debería venir desde la API.
 
 Regla recomendada:
 
-```text
+```txt
 No dejar datos mock como fuente final de producción.
 ```
 
@@ -563,13 +586,13 @@ No dejar datos mock como fuente final de producción.
 
 Ubicación:
 
-```text
+```txt
 src/layouts/
 ```
 
 Contenido actual:
 
-```text
+```txt
 AdminLayout.astro
 AuthLayout.astro
 Layout.astro
@@ -578,7 +601,7 @@ PublicLayout.astro
 
 Responsabilidad:
 
-```text
+```txt
 - Estructuras base de páginas.
 - Envolver contenido común.
 - Definir layout administrativo.
@@ -588,7 +611,7 @@ Responsabilidad:
 
 Uso recomendado:
 
-```text
+```txt
 AdminLayout.astro  = páginas dentro de /admin
 PublicLayout.astro = tienda pública
 AuthLayout.astro   = login, register, recuperación
@@ -611,13 +634,13 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 
 Ubicación:
 
-```text
+```txt
 src/lib/
 ```
 
 Contenido actual:
 
-```text
+```txt
 api.ts
 auth.ts
 endpoints.ts
@@ -627,7 +650,7 @@ storage.ts
 
 Responsabilidad:
 
-```text
+```txt
 - Cliente HTTP para Laravel API.
 - Endpoints centralizados.
 - Funciones de autenticación.
@@ -635,19 +658,19 @@ Responsabilidad:
 - Utilidades para localStorage o sessionStorage.
 ```
 
-Este módulo es clave para conectar Astro con Laravel.
+Este módulo es clave para conectar `Astro` con Laravel.
 
 ## Archivo lib api
 
 Ubicación:
 
-```text
+```txt
 src/lib/api.ts
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Definir la función base para llamar la API.
 - Agregar headers comunes.
 - Adjuntar token Bearer.
@@ -657,7 +680,7 @@ Responsabilidad:
 
 Recomendación:
 
-```text
+```txt
 PUBLIC_API_URL debe incluir el prefijo /api.
 ```
 
@@ -671,7 +694,7 @@ Los endpoints internos no deben incluir `/api`.
 
 Correcto:
 
-```text
+```txt
 /products
 /auth/login
 /orders
@@ -679,7 +702,7 @@ Correcto:
 
 Incorrecto:
 
-```text
+```txt
 /api/products
 /api/auth/login
 /api/orders
@@ -689,13 +712,13 @@ Incorrecto:
 
 Ubicación:
 
-```text
+```txt
 src/lib/endpoints.ts
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Centralizar rutas de la API.
 - Evitar strings repetidos.
 - Mantener consistencia con Laravel.
@@ -704,7 +727,7 @@ Responsabilidad:
 
 Los endpoints deben seguir la convención REST de Laravel:
 
-```text
+```txt
 /products
 /categories
 /orders
@@ -715,7 +738,7 @@ Los endpoints deben seguir la convención REST de Laravel:
 
 Para módulos complejos, se recomienda agrupar por dominio:
 
-```text
+```txt
 auth
 catalog
 customers
@@ -737,13 +760,13 @@ settings
 
 Ubicación:
 
-```text
+```txt
 src/lib/auth.ts
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Funciones relacionadas con login.
 - Logout.
 - Registro.
@@ -752,19 +775,20 @@ Responsabilidad:
 - Manejo auxiliar del token.
 ```
 
-No debe contener lógica visual ni manipular directamente componentes.
+No debe contener lógica visual ni manipular directamente
+componentes.
 
 ## Archivo lib formatters
 
 Ubicación:
 
-```text
+```txt
 src/lib/formatters.ts
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Formatear moneda.
 - Formatear fechas.
 - Formatear porcentajes.
@@ -773,7 +797,7 @@ Responsabilidad:
 
 Ejemplos recomendados:
 
-```text
+```txt
 formatCurrency()
 formatDate()
 formatPercent()
@@ -784,13 +808,13 @@ formatNumber()
 
 Ubicación:
 
-```text
+```txt
 src/lib/storage.ts
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Leer token del navegador.
 - Guardar token.
 - Eliminar token.
@@ -803,13 +827,13 @@ No debe guardar datos sensibles innecesarios.
 
 Ubicación:
 
-```text
+```txt
 src/pages/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Definir rutas reales de Astro.
 - Crear páginas públicas.
 - Crear páginas de autenticación.
@@ -817,11 +841,12 @@ Responsabilidad:
 - Crear páginas del panel administrativo.
 ```
 
-En Astro, cada archivo dentro de `src/pages` representa una ruta.
+En `Astro`, cada archivo dentro de `src/pages` representa
+una ruta.
 
 Ejemplo:
 
-```text
+```txt
 src/pages/index.astro                = /
 src/pages/products/index.astro       = /products
 src/pages/products/[slug].astro      = /products/:slug
@@ -832,7 +857,7 @@ src/pages/admin/dashboard/index.astro = /admin/dashboard
 
 Ubicaciones actuales:
 
-```text
+```txt
 src/pages/index.astro
 src/pages/products/
 src/pages/categories/
@@ -843,7 +868,7 @@ src/pages/orders/
 
 Responsabilidad:
 
-```text
+```txt
 - Home pública.
 - Catálogo público.
 - Detalle de producto.
@@ -855,7 +880,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /
 /products
 /products/:slug
@@ -869,20 +894,20 @@ Rutas generadas:
 
 Ubicación:
 
-```text
+```txt
 src/pages/auth/
 ```
 
 Contenido actual:
 
-```text
+```txt
 login.astro
 register.astro
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Login público.
 - Registro de usuario.
 - Recuperación de contraseña si se agrega después.
@@ -890,30 +915,31 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /auth/login
 /auth/register
 ```
 
-Estas rutas son visuales del frontend. No son iguales a los endpoints API, aunque tengan nombres parecidos.
+Estas rutas son visuales del frontend. No son iguales a
+los endpoints API, aunque tengan nombres parecidos.
 
 ## Sección pages account
 
 Ubicación:
 
-```text
+```txt
 src/pages/account/
 ```
 
 Contenido actual:
 
-```text
+```txt
 index.astro
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Perfil del usuario autenticado.
 - Datos personales.
 - Seguridad de la cuenta.
@@ -923,7 +949,7 @@ Responsabilidad:
 
 Se recomienda agregar:
 
-```text
+```txt
 src/pages/account/security/index.astro
 src/pages/account/security/two-factor.astro
 src/pages/account/security/recovery-codes.astro
@@ -931,26 +957,27 @@ src/pages/account/security/recovery-codes.astro
 
 Rutas generadas:
 
-```text
+```txt
 /account
 /account/security
 /account/security/two-factor
 /account/security/recovery-codes
 ```
 
-La configuración 2FA pertenece al usuario autenticado, por eso se recomienda ubicarla en `account/security`.
+La configuración 2FA pertenece al usuario autenticado, por
+eso se recomienda ubicarla en `account/security`.
 
 ## Sección pages admin
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Panel administrativo.
 - Dashboard.
 - Gestión de catálogo.
@@ -967,7 +994,7 @@ Responsabilidad:
 
 Rutas principales:
 
-```text
+```txt
 /admin
 /admin/dashboard
 /admin/catalog
@@ -991,13 +1018,13 @@ Rutas principales:
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/catalog/
 ```
 
 Contenido actual:
 
-```text
+```txt
 brands/
 categories/
 products/
@@ -1007,7 +1034,7 @@ index.astro
 
 Responsabilidad:
 
-```text
+```txt
 - Administración de productos.
 - Administración de categorías.
 - Administración de marcas.
@@ -1016,7 +1043,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/catalog
 /admin/catalog/brands
 /admin/catalog/categories
@@ -1026,19 +1053,20 @@ Rutas generadas:
 /admin/catalog/variants
 ```
 
-Esta estructura está bien alineada con el módulo `Catalog` del backend.
+Esta estructura está bien alineada con el módulo `Catalog`
+del backend.
 
 ## Sección pages admin inventory
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/inventory/
 ```
 
 Contenido actual:
 
-```text
+```txt
 index.astro
 movements/
 stock/
@@ -1047,7 +1075,7 @@ warehouses/
 
 Responsabilidad:
 
-```text
+```txt
 - Inventario general.
 - Stock.
 - Movimientos.
@@ -1056,7 +1084,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/inventory
 /admin/inventory/movements
 /admin/inventory/stock
@@ -1065,23 +1093,25 @@ Rutas generadas:
 
 Nota de endpoint:
 
-```text
-La página /admin/inventory/stock puede consumir el endpoint /inventories.
+```txt
+La página /admin/inventory/stock puede consumir el endpoint
+/inventories.
 ```
 
-No es obligatorio que el nombre de la página sea igual al endpoint.
+No es obligatorio que el nombre de la página sea igual al
+endpoint.
 
 ## Sección pages admin purchases
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/purchases/
 ```
 
 Contenido actual:
 
-```text
+```txt
 index.astro
 orders/
 suppliers/
@@ -1089,7 +1119,7 @@ suppliers/
 
 Responsabilidad:
 
-```text
+```txt
 - Compras a proveedores.
 - Proveedores.
 - Órdenes o registros de compra.
@@ -1097,13 +1127,15 @@ Responsabilidad:
 
 Recomendación:
 
-```text
-Renombrar admin/purchases/orders a admin/purchases/purchase-orders si se quiere evitar confusión con sales/orders.
+```txt
+Renombrar admin/purchases/orders a
+admin/purchases/purchase-orders si se quiere evitar
+confusión con sales/orders.
 ```
 
 Rutas actuales:
 
-```text
+```txt
 /admin/purchases
 /admin/purchases/orders
 /admin/purchases/suppliers
@@ -1111,7 +1143,7 @@ Rutas actuales:
 
 Rutas recomendadas:
 
-```text
+```txt
 /admin/purchases
 /admin/purchases/purchase-orders
 /admin/purchases/suppliers
@@ -1119,22 +1151,23 @@ Rutas recomendadas:
 
 Motivo:
 
-```text
+```txt
 /admin/sales/orders representa pedidos de clientes.
-/admin/purchases/orders puede confundirse visualmente con pedidos de venta.
+/admin/purchases/orders puede confundirse visualmente
+con pedidos de venta.
 ```
 
 ## Sección pages admin sales
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/sales/
 ```
 
 Contenido actual:
 
-```text
+```txt
 index.astro
 invoices/
 orders/
@@ -1142,7 +1175,7 @@ orders/
 
 Responsabilidad:
 
-```text
+```txt
 - Pedidos de clientes.
 - Facturas.
 - Historial comercial.
@@ -1150,7 +1183,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/sales
 /admin/sales/orders
 /admin/sales/orders/:id
@@ -1164,13 +1197,13 @@ Esta estructura está bien alineada con el módulo `Sales`.
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/payments/
 ```
 
 Contenido actual:
 
-```text
+```txt
 index.astro
 installments/
 methods/
@@ -1178,7 +1211,7 @@ methods/
 
 Responsabilidad:
 
-```text
+```txt
 - Pagos.
 - Métodos de pago.
 - Cuotas.
@@ -1187,7 +1220,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/payments
 /admin/payments/installments
 /admin/payments/methods
@@ -1195,7 +1228,7 @@ Rutas generadas:
 
 Se puede agregar después:
 
-```text
+```txt
 src/pages/admin/payments/transactions/index.astro
 ```
 
@@ -1203,13 +1236,13 @@ src/pages/admin/payments/transactions/index.astro
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/shipping/
 ```
 
 Contenido actual:
 
-```text
+```txt
 companies/
 index.astro
 zones/
@@ -1217,7 +1250,7 @@ zones/
 
 Responsabilidad:
 
-```text
+```txt
 - Empresas de envío.
 - Zonas de envío.
 - Envíos.
@@ -1226,7 +1259,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/shipping
 /admin/shipping/companies
 /admin/shipping/zones
@@ -1234,7 +1267,7 @@ Rutas generadas:
 
 Se puede agregar después:
 
-```text
+```txt
 src/pages/admin/shipping/shipments/index.astro
 src/pages/admin/shipping/trackings/index.astro
 ```
@@ -1243,13 +1276,13 @@ src/pages/admin/shipping/trackings/index.astro
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/marketing/
 ```
 
 Contenido actual:
 
-```text
+```txt
 coupons/
 index.astro
 promotions/
@@ -1257,7 +1290,7 @@ promotions/
 
 Responsabilidad:
 
-```text
+```txt
 - Cupones.
 - Promociones.
 - Reglas comerciales de descuento.
@@ -1265,7 +1298,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/marketing
 /admin/marketing/coupons
 /admin/marketing/promotions
@@ -1275,13 +1308,13 @@ Rutas generadas:
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/support/
 ```
 
 Contenido actual:
 
-```text
+```txt
 index.astro
 questions/
 reviews/
@@ -1290,7 +1323,7 @@ tickets/
 
 Responsabilidad:
 
-```text
+```txt
 - Tickets.
 - Reseñas.
 - Preguntas de productos.
@@ -1299,7 +1332,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/support
 /admin/support/questions
 /admin/support/reviews
@@ -1310,13 +1343,13 @@ Rutas generadas:
 
 Ubicación:
 
-```text
+```txt
 src/pages/admin/settings/
 ```
 
 Contenido actual:
 
-```text
+```txt
 currencies/
 index.astro
 store/
@@ -1325,7 +1358,7 @@ taxes/
 
 Responsabilidad:
 
-```text
+```txt
 - Configuración general.
 - Monedas.
 - Tipos de cambio.
@@ -1334,7 +1367,7 @@ Responsabilidad:
 
 Rutas generadas:
 
-```text
+```txt
 /admin/settings
 /admin/settings/currencies
 /admin/settings/store
@@ -1343,21 +1376,23 @@ Rutas generadas:
 
 Nota:
 
-```text
-Aunque taxes tenga módulo propio en backend, visualmente puede estar dentro de settings porque para el administrador es configuración.
+```txt
+Aunque taxes tenga módulo propio en backend, visualmente
+puede estar dentro de settings porque para el
+administrador es configuración.
 ```
 
 ## Sección stores
 
 Ubicación:
 
-```text
+```txt
 src/stores/
 ```
 
 Contenido actual:
 
-```text
+```txt
 auth.ts
 cart.ts
 ui.ts
@@ -1365,7 +1400,7 @@ ui.ts
 
 Responsabilidad:
 
-```text
+```txt
 - Estado global o compartido del frontend.
 - Estado de autenticación.
 - Estado del carrito.
@@ -1374,7 +1409,7 @@ Responsabilidad:
 
 Ejemplos de uso:
 
-```text
+```txt
 auth.ts = usuario, token, sesión.
 cart.ts = carrito actual.
 ui.ts = sidebar abierto/cerrado, tema, modales.
@@ -1382,7 +1417,7 @@ ui.ts = sidebar abierto/cerrado, tema, modales.
 
 Regla recomendada:
 
-```text
+```txt
 No guardar en stores datos que solo usa una página.
 ```
 
@@ -1390,19 +1425,19 @@ No guardar en stores datos que solo usa una página.
 
 Ubicación:
 
-```text
+```txt
 src/styles/
 ```
 
 Contenido actual:
 
-```text
+```txt
 global.css
 ```
 
 Responsabilidad:
 
-```text
+```txt
 - Estilos globales.
 - Variables CSS.
 - Configuración base de Tailwind.
@@ -1411,21 +1446,22 @@ Responsabilidad:
 
 Regla recomendada:
 
-```text
-Evitar colocar estilos específicos de una página si pueden resolverse con clases Tailwind.
+```txt
+Evitar colocar estilos específicos de una página si pueden
+resolverse con clases Tailwind.
 ```
 
 ## Sección types
 
 Ubicación:
 
-```text
+```txt
 src/types/
 ```
 
 Contenido actual:
 
-```text
+```txt
 api.ts
 auth.ts
 carts.ts
@@ -1445,24 +1481,25 @@ system.ts
 
 Responsabilidad:
 
-```text
+```txt
 - Tipos TypeScript del frontend.
 - Contratos de datos recibidos desde Laravel.
 - Tipos de formularios.
 - Tipos de respuestas API.
 ```
 
-Esta estructura está bien alineada con los módulos del backend.
+Esta estructura está bien alineada con los módulos del
+backend.
 
 Regla recomendada:
 
-```text
+```txt
 Cada módulo debe tener su propio archivo de tipos.
 ```
 
 Ejemplo:
 
-```text
+```txt
 catalog.ts   = Product, Category, Brand, ProductVariant
 sales.ts     = Order, Invoice, OrderItem, InvoiceItem
 payments.ts  = Payment, PaymentMethod, PaymentTransaction
@@ -1471,11 +1508,12 @@ auth.ts      = User, Role, Permission, AuthResponse
 
 ## Relación entre páginas y endpoints
 
-Las páginas de Astro no tienen que llamarse igual que los endpoints de Laravel.
+Las páginas de `Astro` no tienen que llamarse igual que los
+endpoints de Laravel.
 
 Ejemplo:
 
-```text
+```txt
 Página Astro:
     /admin/inventory/stock
 
@@ -1485,7 +1523,7 @@ Endpoint Laravel:
 
 Ejemplo:
 
-```text
+```txt
 Página Astro:
     /admin/sales/orders
 
@@ -1495,7 +1533,7 @@ Endpoint Laravel:
 
 Ejemplo:
 
-```text
+```txt
 Página Astro:
     /admin/settings/taxes
 
@@ -1505,17 +1543,18 @@ Endpoint Laravel:
 
 Lo importante es que el mapeo esté centralizado en:
 
-```text
+```txt
 src/lib/endpoints.ts
 ```
 
 ## Convención recomendada de endpoints
 
-El archivo `src/lib/endpoints.ts` debe contener endpoints sin el prefijo `/api`.
+El archivo `src/lib/endpoints.ts` debe contener endpoints
+sin el prefijo `/api`.
 
 Correcto:
 
-```text
+```txt
 /products
 /orders
 /auth/login
@@ -1523,7 +1562,7 @@ Correcto:
 
 Incorrecto:
 
-```text
+```txt
 /api/products
 /api/orders
 /api/auth/login
@@ -1531,13 +1570,13 @@ Incorrecto:
 
 El prefijo `/api` debe venir desde:
 
-```text
+```txt
 PUBLIC_API_URL=http://localhost:8000/api
 ```
 
 o:
 
-```text
+```txt
 PUBLIC_API_URL=http://localhost:8080/api
 ```
 
@@ -1547,7 +1586,7 @@ según el puerto donde corra Laravel.
 
 El backend Laravel debe exponer endpoints REST parecidos a:
 
-```text
+```txt
 /api/auth/login
 /api/auth/register
 /api/auth/logout
@@ -1576,7 +1615,7 @@ El backend Laravel debe exponer endpoints REST parecidos a:
 
 El frontend debe consumirlos desde:
 
-```text
+```txt
 src/lib/api.ts
 src/lib/endpoints.ts
 ```
@@ -1585,7 +1624,7 @@ src/lib/endpoints.ts
 
 Crear estos README:
 
-```text
+```txt
 README.md
 DOCUMENTACION_ESTRUCTURA_FRONTEND.md
 src/components/README.md
@@ -1599,7 +1638,7 @@ No crear README en cada carpeta pequeña.
 
 Ejemplo de carpetas que no necesitan README propio:
 
-```text
+```txt
 src/components/admin/sidebar
 src/components/admin/header
 src/pages/admin/catalog/products
@@ -1607,46 +1646,66 @@ src/pages/admin/sales/orders
 src/pages/admin/settings/store
 ```
 
-Esas carpetas ya deben explicarse desde los README superiores.
+Esas carpetas ya deben explicarse desde los README
+superiores.
 
 ## Recomendaciones finales
 
 1. Mantener la estructura modular actual.
-2. Renombrar `src/components/public` a `src/components/storefront`.
-3. Evitar confusión entre `admin/purchases/orders` y `admin/sales/orders`.
-4. Agregar páginas de seguridad en `src/pages/account/security`.
-5. Mantener endpoints centralizados en `src/lib/endpoints.ts`.
+2. Renombrar `src/components/public` a
+   `src/components/storefront`.
+3. Evitar confusión entre `admin/purchases/orders` y
+   `admin/sales/orders`.
+4. Agregar páginas de seguridad en
+   `src/pages/account/security`.
+5. Mantener endpoints centralizados en
+   `src/lib/endpoints.ts`.
 6. Mantener tipos separados por módulo en `src/types`.
 7. Usar layouts para separar admin, auth y tienda pública.
-8. Evitar lógica de negocio compleja dentro de páginas Astro.
-9. Usar componentes UI genéricos en `src/components/ui`.
+8. Evitar lógica de negocio compleja dentro de páginas
+   `Astro`.
+9. Usar componentes UI genéricos en
+   `src/components/ui`.
 10. Usar componentes específicos dentro de su módulo.
 11. No versionar `dist` si el proyecto usa Git.
 12. No versionar `node_modules`.
 13. Mantener `PUBLIC_API_URL` con el prefijo `/api`.
 14. Documentar cada cambio estructural importante.
-15. Mantener nombres en inglés para carpetas, archivos y tipos.
+15. Mantener nombres en inglés para carpetas, archivos
+    y tipos.
 
 ## Estado actual recomendado
 
-La estructura actual está bien planteada y sigue una organización profesional para un ecommerce con Laravel API.
+La estructura actual está bien planteada y sigue una
+organización profesional para un ecommerce multi-tienda
+con Laravel API.
 
 Los cambios mínimos recomendados son:
 
-```text
+```txt
 src/components/public     -> src/components/storefront
 src/pages/account/security -> agregar para 2FA
 src/lib/endpoints.ts       -> mantener alineado con Laravel
+src/config/stores.ts       -> crear para resolución de tienda
+src/lib/store-context.ts   -> crear para helper de contexto
+src/types/stores.ts        -> crear para tipos Store
 ```
 
 Opcionalmente:
 
-```text
-src/pages/admin/purchases/orders -> src/pages/admin/purchases/purchase-orders
+```txt
+src/pages/admin/purchases/orders
+  -> src/pages/admin/purchases/purchase-orders
 ```
 
-Con estos ajustes, el frontend queda correctamente alineado con los módulos y endpoints del backend Laravel.
+Con estos ajustes, el frontend queda correctamente alineado
+con los módulos y endpoints del backend Laravel, y preparado
+para soportar múltiples tiendas (Panda Estampados y Kitsune)
+desde un mismo build.
 
-```
+Ver también:
 
-```
+- [frontend/README.md](README.md "Visión general del frontend")
+- [frontend/storefront.md](storefront.md "Tienda pública multi-tienda")
+- [frontend/admin-panel.md](admin-panel.md "Panel administrativo")
+- [frontend/api-client.md](api-client.md "Cliente API")
