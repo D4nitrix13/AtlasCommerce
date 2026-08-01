@@ -8,6 +8,8 @@ use App\Models\Carts\Cart;
 use App\Models\Carts\CartItem;
 use App\Models\Catalog\Product;
 use App\Models\Customers\CustomerAddress;
+use App\Models\Marketing\Coupon;
+use App\Models\Marketing\CouponUsage;
 use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Invoice;
 use App\Models\Sales\Order;
@@ -63,6 +65,7 @@ final class CheckoutService
         CustomerAddress $shippingAddress,
         PaymentMethod $paymentMethod,
         ?ShippingZone $shippingZone = null,
+        ?Coupon $coupon = null,
         ?string $notes = null,
     ): Order {
         $store = $this->storeContext->getStore();
@@ -85,6 +88,7 @@ final class CheckoutService
             $storeId,
             $store,
             $shippingZone,
+            $coupon,
         ): Order {
             $cart->loadMissing('items.product', 'items.productVariant');
 
@@ -111,7 +115,24 @@ final class CheckoutService
                 storeId: (int) $storeId,
             );
 
-            $totalCents = $subtotalCents + $taxCents + $shippingCents;
+            // Discount: se aplica ANTES de tax y shipping, sobre el subtotal.
+            $discountCents = $this->calculateDiscountCents(
+                subtotalCents: $subtotalCents,
+                coupon: $coupon,
+            );
+
+            $totalCents = $subtotalCents - $discountCents + $taxCents + $shippingCents;
+
+            // Registrar uso del cupón si se aplicó.
+            if ($coupon !== null && $discountCents > 0) {
+                CouponUsage::create([
+                    'coupon_id' => $coupon->id,
+                    'customer_id' => $cart->customer_id,
+                    'order_id' => null, // se actualiza post-insert
+                    'used_at' => now(),
+                ]);
+                $coupon->increment('used_count');
+            }
 
             // Snapshot a order_items.
             $orderItemsPayload = $items->map(function (CartItem $item) {
@@ -140,7 +161,7 @@ final class CheckoutService
                 'user_creator_id' => null,
                 'order_number' => $this->generateOrderNumber(),
                 'subtotal_cents' => $subtotalCents,
-                'discount_cents' => 0,
+                'discount_cents' => $discountCents,
                 'tax_cents' => $taxCents,
                 'shipping_cents' => $shippingCents,
                 'total_cents' => $totalCents,
@@ -165,7 +186,7 @@ final class CheckoutService
                 'currency_id' => $cart->currency_id,
                 'invoice_number' => $this->generateInvoiceNumber(),
                 'subtotal_cents' => $subtotalCents,
-                'discount_cents' => 0,
+                'discount_cents' => $discountCents,
                 'tax_cents' => $taxCents,
                 'shipping_cents' => $shippingCents,
                 'total_cents' => $totalCents,
@@ -257,12 +278,61 @@ final class CheckoutService
 
         $zone = ShippingZone::query()
             ->where('is_active', true)
-            // shipping_zones no tiene store_id (es global); el filtro
-            // por tienda se hace via order.shipping_zone_id en una fase futura.
             ->orderBy('id')
             ->first();
 
         return $zone !== null ? (int) $zone->base_cost_cents : 0;
+    }
+
+    /**
+     * Calcula los centavos de descuento aplicando el cupón sobre el subtotal.
+     *
+     * Reglas:
+     *  - `percentage`: descuento = subtotal * value / 100 (round HALF_EVEN).
+     *  - `fixed`: descuento = value * 100 (cents). El cupón guarda `value`
+     *    como decimal (12,2), por lo que multiplicamos por 100.
+     *  - Si el subtotal es menor al `minimum_amount` del cupón, no aplica.
+     *  - Cupón expirado, inactivo o agotado retorna 0 (no bloquea el
+     *    checkout — solo no aplica descuento).
+     */
+    private function calculateDiscountCents(int $subtotalCents, ?Coupon $coupon): int
+    {
+        if ($coupon === null) {
+            return 0;
+        }
+
+        if (! $coupon->is_active) {
+            return 0;
+        }
+
+        $now = now();
+        if ($coupon->starts_at !== null && $coupon->starts_at->gt($now)) {
+            return 0;
+        }
+        if ($coupon->ends_at !== null && $coupon->ends_at->lt($now)) {
+            return 0;
+        }
+
+        if ($coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit) {
+            return 0;
+        }
+
+        if ((float) $coupon->minimum_amount > 0) {
+            $minimumCents = (int) round((float) $coupon->minimum_amount * 100);
+            if ($subtotalCents < $minimumCents) {
+                return 0;
+            }
+        }
+
+        return match ($coupon->discount_type) {
+            'percentage' => (int) round(
+                $subtotalCents * (float) $coupon->value / 100,
+                0,
+                PHP_ROUND_HALF_EVEN,
+            ),
+            'fixed' => (int) round((float) $coupon->value * 100),
+            default => 0,
+        };
     }
 
     /**
