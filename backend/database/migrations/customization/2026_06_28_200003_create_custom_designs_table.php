@@ -54,8 +54,8 @@ return new class extends Migration
             $table->string(column: 'background_color', length: 20)->default(value: '#ffffff');
 
             // Dimensiones del canvas de diseño en píxeles
-            $table->unsignedInteger('canvas_width_px');
-            $table->unsignedInteger('canvas_height_px');
+            $table->unsignedInteger(column: 'canvas_width_px');
+            $table->unsignedInteger(column: 'canvas_height_px');
 
             // Configuraciones adicionales del canvas en JSON
             $table->json(column: 'canvas_settings')->nullable();

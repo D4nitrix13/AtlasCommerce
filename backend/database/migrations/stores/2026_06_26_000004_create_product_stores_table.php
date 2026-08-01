@@ -45,7 +45,7 @@ return new class extends Migration
             // Marca el producto como destacado en la tienda
             $table->boolean(column: 'is_featured')->default(value: false)->index();
             // Orden de clasificación para mostrar productos en la tienda
-            $table->unsignedInteger('sort_order')->default(value: 0)->index();
+            $table->unsignedInteger(column: 'sort_order')->default(value: 0)->index();
             // Fecha de publicación del producto en la tienda
             $table->timestamp(column: 'published_at')->nullable()->index();
             $table->timestamp(column: 'unpublished_at')->nullable()->index();

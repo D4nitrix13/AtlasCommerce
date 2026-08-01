@@ -54,7 +54,7 @@ return new class extends Migration
             // Clave única de línea: identifica la combinación product+variant+design
             $table->string(column: 'cart_line_key', length: 64);
 
-            $table->unsignedInteger('quantity')->default(value: 1);
+            $table->unsignedInteger(column: 'quantity')->default(value: 1);
             $table->decimal(column: 'unit_price', total: 12, places: 2);
             $table->decimal(column: 'subtotal', total: 12, places: 2);
 

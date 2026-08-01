@@ -38,11 +38,11 @@ return new class extends Migration
                 ->cascadeOnUpdate();
 
             // Stock actual disponible para venta
-            $table->unsignedInteger('current_stock')->default(value: 0);
+            $table->unsignedInteger(column: 'current_stock')->default(value: 0);
             // Nivel mínimo de stock para alertas de reabastecimiento
-            $table->unsignedInteger('minimum_stock')->default(value: 0);
+            $table->unsignedInteger(column: 'minimum_stock')->default(value: 0);
             // Stock reservado por pedidos pendientes, no disponible para nuevas ventas
-            $table->unsignedInteger('reserved_stock')->default(value: 0);
+            $table->unsignedInteger(column: 'reserved_stock')->default(value: 0);
 
             $table->timestamps();
 

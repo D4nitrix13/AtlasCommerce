@@ -46,12 +46,12 @@ return new class extends Migration
             $table->string(column: 'file_path');
 
             // Tamaño del archivo en bytes para validación de límites
-            $table->unsignedBigInteger('size_bytes');
+            $table->unsignedBigInteger(column: 'size_bytes');
 
             // Dimensiones de la imagen (null para archivos no imagen)
-            $table->unsignedInteger('width_px')->nullable();
-            $table->unsignedInteger('height_px')->nullable();
-            $table->unsignedSmallInteger('dpi')->nullable();
+            $table->unsignedInteger(column: 'width_px')->nullable();
+            $table->unsignedInteger(column: 'height_px')->nullable();
+            $table->unsignedSmallInteger(column: 'dpi')->nullable();
 
             // Checksum MD5/SHA para detectar duplicados y verificar integridad
             $table->string(column: 'checksum', length: 128)->nullable()->index();

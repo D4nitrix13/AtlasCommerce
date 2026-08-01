@@ -38,7 +38,7 @@ return new class extends Migration
                 ->cascadeOnUpdate();
 
             // Cantidad de unidades compradas de este ítem
-            $table->unsignedInteger('quantity');
+            $table->unsignedInteger(column: 'quantity');
             // Precio unitario de compra acordado con el proveedor
             $table->decimal(column: 'purchase_price', total: 12, places: 2);
             // Subtotal del ítem (quantity * purchase_price)

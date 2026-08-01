@@ -24,7 +24,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             // Número secuencial de la cuota (1, 2, 3, etc.) para ordenamiento
-            $table->unsignedInteger('installment_number');
+            $table->unsignedInteger(column: 'installment_number');
             // Monto programado para esta cuota
             $table->decimal(column: 'scheduled_amount', total: 12, places: 2);
             // Monto efectivamente pagado de esta cuota, puede ser parcial

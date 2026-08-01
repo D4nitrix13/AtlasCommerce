@@ -28,7 +28,7 @@ return new class extends Migration
             // Clave pública PEM del dispositivo
             $table->text(column: 'public_key');
             // Contador de autenticación para detectar clonación de credenciales
-            $table->unsignedBigInteger('sign_count')->default(value: 0);
+            $table->unsignedBigInteger(column: 'sign_count')->default(value: 0);
             // Transportes soportados (usb, nfc, ble, internal): jsonb para consultas eficientes
             $table->jsonb(column: 'transports')->nullable();
             // AAGUID identifica el fabricante/tipo de autenticador

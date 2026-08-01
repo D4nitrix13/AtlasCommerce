@@ -20,7 +20,7 @@ return new class extends Migration
             // Relación polimórfica: cada medio pertenece a un modelo (producto, categoría, etc.)
             $table->morphs(name: 'model');
             // UUID opcional para acceso público seguro a los archivos
-            $table->uuid()->nullable()->unique();
+            $table->uuid(column: 'uuid')->nullable()->unique();
             // Nombre de la colección agrupadora (ej: 'gallery', 'thumbnail', 'document')
             $table->string(column: 'collection_name');
             // Nombre descriptivo del archivo multimedia
@@ -34,7 +34,7 @@ return new class extends Migration
             // Disco utilizado para conversiones de imagen, nullable si no aplica
             $table->string(column: 'conversions_disk')->nullable();
             // Tamaño del archivo en bytes
-            $table->unsignedBigInteger('size');
+            $table->unsignedBigInteger(column: 'size');
             // Manipulaciones aplicadas al archivo en formato JSON serializado
             $table->json(column: 'manipulations');
             // Propiedades personalizadas del archivo en formato JSON serializado
@@ -44,7 +44,7 @@ return new class extends Migration
             // Imágenes responsivas generadas en formato JSON serializado
             $table->json(column: 'responsive_images');
             // Columna de ordenamiento para ordenar medios dentro de una colección
-            $table->unsignedInteger('order_column')->nullable()->index();
+            $table->unsignedInteger(column: 'order_column')->nullable()->index();
 
             $table->nullableTimestamps();
         });

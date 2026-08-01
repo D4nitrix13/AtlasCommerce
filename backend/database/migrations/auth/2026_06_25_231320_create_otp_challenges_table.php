@@ -36,11 +36,11 @@ return new class extends Migration
             $table->string(column: 'destination')->nullable();
 
             // Contadores de intentos para prevenir fuerza bruta
-            $table->unsignedSmallInteger('attempts')->default(value: 0);
+            $table->unsignedSmallInteger(column: 'attempts')->default(value: 0);
             // Máximo de intentos permitidos antes de bloquear el desafío
-            $table->unsignedSmallInteger('max_attempts')->default(value: 5);
+            $table->unsignedSmallInteger(column: 'max_attempts')->default(value: 5);
             // Contador de reenvíos para rate limiting
-            $table->unsignedSmallInteger('resend_count')->default(value: 0);
+            $table->unsignedSmallInteger(column: 'resend_count')->default(value: 0);
 
             // Timestamps de control: nullable para campos que aún no tienen valor
             // index() en expires_at para limpieza de desafíos expirados
