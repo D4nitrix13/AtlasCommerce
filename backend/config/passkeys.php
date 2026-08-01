@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'relying_party_id' => parse_url(config('app.url'), PHP_URL_HOST),
+    'relying_party_id' => parse_url(url: config('app.url'), component: PHP_URL_HOST),
 
     /*
     |--------------------------------------------------------------------------
@@ -40,7 +40,7 @@ return [
     |
     */
 
-    'user_handle_secret' => env('PASSKEYS_USER_HANDLE_SECRET', config('app.key')),
+    'user_handle_secret' => env(key: 'PASSKEYS_USER_HANDLE_SECRET', default: config('app.key')),
 
     /*
     |--------------------------------------------------------------------------

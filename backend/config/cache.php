@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => env(key: 'CACHE_STORE', default: 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -41,38 +41,38 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => env('DB_CACHE_CONNECTION'),
-            'table' => env('DB_CACHE_TABLE', 'cache'),
-            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
-            'lock_table' => env('DB_CACHE_LOCK_TABLE'),
+            'connection' => env(key: 'DB_CACHE_CONNECTION'),
+            'table' => env(key: 'DB_CACHE_TABLE', default: 'cache'),
+            'lock_connection' => env(key: 'DB_CACHE_LOCK_CONNECTION'),
+            'lock_table' => env(key: 'DB_CACHE_LOCK_TABLE'),
         ],
 
         'file' => [
             'driver' => 'file',
-            'path' => storage_path('framework/cache/data'),
-            'lock_path' => storage_path('framework/cache/data'),
+            'path' => storage_path(path: 'framework/cache/data'),
+            'lock_path' => storage_path(path: 'framework/cache/data'),
         ],
 
         'storage' => [
             'driver' => 'storage',
-            'disk' => env('CACHE_STORAGE_DISK'),
-            'path' => env('CACHE_STORAGE_PATH', 'framework/cache/data'),
+            'disk' => env(key: 'CACHE_STORAGE_DISK'),
+            'path' => env(key: 'CACHE_STORAGE_PATH', default: 'framework/cache/data'),
         ],
 
         'memcached' => [
             'driver' => 'memcached',
-            'persistent_id' => env('MEMCACHED_PERSISTENT_ID'),
+            'persistent_id' => env(key: 'MEMCACHED_PERSISTENT_ID'),
             'sasl' => [
-                env('MEMCACHED_USERNAME'),
-                env('MEMCACHED_PASSWORD'),
+                env(key: 'MEMCACHED_USERNAME'),
+                env(key: 'MEMCACHED_PASSWORD'),
             ],
             'options' => [
                 // Memcached::OPT_CONNECT_TIMEOUT => 2000,
             ],
             'servers' => [
                 [
-                    'host' => env('MEMCACHED_HOST', '127.0.0.1'),
-                    'port' => env('MEMCACHED_PORT', 11211),
+                    'host' => env(key: 'MEMCACHED_HOST', default: '127.0.0.1'),
+                    'port' => env(key: 'MEMCACHED_PORT', default: 11211),
                     'weight' => 100,
                 ],
             ],
@@ -80,17 +80,17 @@ return [
 
         'redis' => [
             'driver' => 'redis',
-            'connection' => env('REDIS_CACHE_CONNECTION', 'cache'),
-            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'),
+            'connection' => env(key: 'REDIS_CACHE_CONNECTION', default: 'cache'),
+            'lock_connection' => env(key: 'REDIS_CACHE_LOCK_CONNECTION', default: 'default'),
         ],
 
         'dynamodb' => [
             'driver' => 'dynamodb',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-            'table' => env('DYNAMODB_CACHE_TABLE', 'cache'),
-            'endpoint' => env('DYNAMODB_ENDPOINT'),
+            'key' => env(key: 'AWS_ACCESS_KEY_ID'),
+            'secret' => env(key: 'AWS_SECRET_ACCESS_KEY'),
+            'region' => env(key: 'AWS_DEFAULT_REGION', default: 'us-east-1'),
+            'table' => env(key: 'DYNAMODB_CACHE_TABLE', default: 'cache'),
+            'endpoint' => env(key: 'DYNAMODB_ENDPOINT'),
         ],
 
         'octane' => [
@@ -118,7 +118,7 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-cache-'),
+    'prefix' => env(key: 'CACHE_PREFIX', default: Str::slug(title: (string) env(key: 'APP_NAME', default: 'laravel')).'-cache-'),
 
     /*
     |--------------------------------------------------------------------------
