@@ -25,6 +25,21 @@ return new class extends Migration
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
+            $table->foreignId('sales_channel_id')
+                ->nullable()
+                ->constrained('sales_channels')
+                ->nullOnDelete();
+
+            $table->foreignId('user_issuer_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             $table->string('invoice_number', 80)->unique();
 
             $table->decimal('subtotal', 12, 2)->default(0);
@@ -48,6 +63,9 @@ return new class extends Migration
 
             $table->index('order_id');
             $table->index('customer_id');
+            $table->index('store_id');
+            $table->index('sales_channel_id');
+            $table->index('user_issuer_id');
             $table->index('invoice_number');
             $table->index('payment_status');
             $table->index('invoice_status');

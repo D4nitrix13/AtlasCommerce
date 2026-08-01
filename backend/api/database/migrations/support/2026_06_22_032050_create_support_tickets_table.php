@@ -19,6 +19,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
             $table->string('subject', 200);
             $table->text('description');
             $table->string('status', 50)->default('open');
@@ -28,6 +33,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index('customer_id');
+            $table->index('store_id');
             $table->index('status');
             $table->index('priority');
         });

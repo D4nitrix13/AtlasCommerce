@@ -25,6 +25,21 @@ return new class extends Migration
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
+            $table->foreignId('sales_channel_id')
+                ->nullable()
+                ->constrained('sales_channels')
+                ->nullOnDelete();
+
+            $table->foreignId('user_creator_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             $table->string('order_number', 80)->unique();
 
             $table->decimal('subtotal', 12, 2)->default(0);
@@ -42,6 +57,9 @@ return new class extends Migration
 
             $table->index('customer_id');
             $table->index('shipping_address_id');
+            $table->index('store_id');
+            $table->index('sales_channel_id');
+            $table->index('user_creator_id');
             $table->index('order_number');
             $table->index('status');
             $table->index('ordered_at');

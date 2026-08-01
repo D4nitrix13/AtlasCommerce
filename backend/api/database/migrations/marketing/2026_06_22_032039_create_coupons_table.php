@@ -14,6 +14,11 @@ return new class extends Migration
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
             $table->string('code', 80)->unique();
             $table->string('discount_type', 50);
             $table->decimal('value', 12, 2);
@@ -27,6 +32,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->index('store_id');
             $table->index('code');
             $table->index('discount_type');
             $table->index('starts_at');

@@ -20,6 +20,11 @@ return new class extends Migration
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
             $table->string('action', 80);
             $table->string('table_name', 100);
             $table->string('record_id', 50)->nullable();
@@ -33,6 +38,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('user_id');
+            $table->index('store_id');
             $table->index('action');
             $table->index('table_name');
             $table->index('record_id');

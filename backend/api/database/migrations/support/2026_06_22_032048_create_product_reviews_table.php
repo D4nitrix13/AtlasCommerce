@@ -24,6 +24,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
             $table->unsignedTinyInteger('rating');
             $table->text('comment')->nullable();
             $table->boolean('is_approved')->default(false);
@@ -34,6 +39,7 @@ return new class extends Migration
 
             $table->index('product_id');
             $table->index('customer_id');
+            $table->index('store_id');
             $table->index('rating');
             $table->index('is_approved');
             $table->index('reviewed_at');
