@@ -168,7 +168,12 @@ final readonly class Money
             return $decimal;
         }
 
-        $amount = number_format((float) $decimal, $this->scale, '.', ',');
+        $amount = number_format(
+            num: (float) $decimal,
+            decimals: $this->scale,
+            decimal_separator: '.',
+            thousands_separator: ',',
+        );
 
         return trim($symbol.' '.$amount.' '.$code);
     }
