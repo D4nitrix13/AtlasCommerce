@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Models\Auth\RecoveryCode;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * Servicio de códigos de recuperación para 2FA.
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Hash;
  *
  * Seguridad:
  * - La regeneración elimina TODOS los códigos anteriores antes de crear nuevos.
- * - Cada código solo puede usarse una vez (campo `used`).
+ * - Cada código solo puede usarse una vez (campo `used_at`).
  * - El hash bcrypt protege los códigos incluso si la BD es comprometida.
  */
 class RecoveryCodeService
@@ -53,6 +54,7 @@ class RecoveryCodeService
             ->delete();
 
         $plainCodes = [];
+        $batchUuid = Str::uuid();
 
         for ($index = 0; $index < $count; $index++) {
             $plainCode = $this->generateCode();
@@ -60,8 +62,8 @@ class RecoveryCodeService
             // Cada código se guarda como hash bcrypt; el texto plano solo se retorna en la respuesta.
             RecoveryCode::create([
                 'user_id' => $user->id,
+                'batch_uuid' => $batchUuid,
                 'code_hash' => Hash::make(value: $plainCode),
-                'used' => false,
             ]);
 
             $plainCodes[] = $plainCode;
@@ -90,7 +92,7 @@ class RecoveryCodeService
     {
         $codes = RecoveryCode::query()
             ->where('user_id', $user->id)
-            ->where('used', false)
+            ->whereNull('used_at')
             ->get();
 
         foreach ($codes as $code) {
@@ -101,7 +103,6 @@ class RecoveryCodeService
 
             // Se marca como usado inmediatamente para prevenir reutilización.
             $code->update([
-                'used' => true,
                 'used_at' => now(),
             ]);
 

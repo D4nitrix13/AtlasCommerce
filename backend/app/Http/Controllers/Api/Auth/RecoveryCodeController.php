@@ -42,7 +42,7 @@ class RecoveryCodeController extends Controller
         $total = $user->recoveryCodes()->count();
 
         $used = $user->recoveryCodes()
-            ->where('used', true)
+            ->whereNotNull('used_at')
             ->count();
 
         return response()->json(data: [
