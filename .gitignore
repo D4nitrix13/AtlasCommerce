@@ -1,0 +1,17 @@
+*.txt
+.env
+.DS_Store
+Thumbs.db
+*.log
+*.zip
+*.tar.gz
+*.bak
+*.erm
+.idea/
+.vscode/
+.phpunit.result.cache
+
+# AI Tools
+.atl/
+**/.atl/
+
