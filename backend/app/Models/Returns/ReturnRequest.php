@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Returns;
 
+use App\Enums\ReturnRequestStatus;
 use App\Models\Concerns\BelongsToStore;
 use App\Models\Concerns\LogsActivity;
 use App\Models\Customers\Customer;
@@ -29,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $order_id
  * @property int $customer_id
  * @property string $reason
- * @property string $status
+ * @property ReturnRequestStatus $status
  * @property Carbon $requested_at
  * @property Carbon|null $resolved_at
  */
@@ -50,6 +53,7 @@ class ReturnRequest extends Model
     ];
 
     protected $casts = [
+        'status' => ReturnRequestStatus::class,
         'requested_at' => 'datetime',
         'resolved_at' => 'datetime',
     ];
@@ -79,33 +83,41 @@ class ReturnRequest extends Model
         return $this->hasMany(Refund::class);
     }
 
+    /**
+     * Monto total solicitado a devolver (suma de items).
+     */
+    public function totalAmountCents(): int
+    {
+        return (int) $this->items()->sum('amount_cents');
+    }
+
     public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', 'pending');
+        return $query->where(column: 'status', operator: '=', value: ReturnRequestStatus::Pending->value);
     }
 
     public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('status', 'approved');
+        return $query->where(column: 'status', operator: '=', value: ReturnRequestStatus::Approved->value);
     }
 
     public function scopeRejected(Builder $query): Builder
     {
-        return $query->where('status', 'rejected');
+        return $query->where(column: 'status', operator: '=', value: ReturnRequestStatus::Rejected->value);
     }
 
     public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where('status', 'completed');
+        return $query->where(column: 'status', operator: '=', value: ReturnRequestStatus::Completed->value);
     }
 
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('customer_id', $customerId);
+        return $query->where(column: 'customer_id', operator: '=', value: $customerId);
     }
 
     public function scopeByOrder(Builder $query, int $orderId): Builder
     {
-        return $query->where('order_id', $orderId);
+        return $query->where(column: 'order_id', operator: '=', value: $orderId);
     }
 }
