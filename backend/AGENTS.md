@@ -162,19 +162,4 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
-## Documentation Style
-
-Toda documentación en `docs/` debe seguir la guía de estilo:
-
-[docs/DOCUMENTATION_STYLEGUIDE.md](../../docs/DOCUMENTATION_STYLEGUIDE.md "docs/DOCUMENTATION_STYLEGUIDE.md")
-
-Reglas clave:
-
-- Máximo 80 caracteres por línea.
-- Todos los bloques de código con lenguaje especificado.
-- Sin encabezados duplicados dentro del mismo archivo.
-- Enlaces internos con título.
-- Nombres técnicos en `código inline`.
-- No presentar funcionalidades pendientes como implementadas.
-
 </laravel-boost-guidelines>
