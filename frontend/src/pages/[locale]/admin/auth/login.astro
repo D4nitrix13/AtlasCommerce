@@ -1,0 +1,90 @@
+---
+import AuthLayout from "../../../../layouts/AuthLayout.astro";
+import LoginForm from "../../../../components/admin/auth/LoginForm";
+import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
+
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+const hasToken =
+  typeof Astro.cookies !== "undefined" && Astro.cookies.has("auth.token");
+const currentYear = new Date().getFullYear();
+---
+
+<AuthLayout title={t["auth.login.title"] + " · Panda Estampados"}>
+  {hasToken ? (
+    <div class="text-sm text-slate-300">{t["auth.login.alreadySignedIn"]}</div>
+    <script define:vars={{ redirectTo: `/${locale}/admin/dashboard` }}>
+      window.location.href = redirectTo;
+    </script>
+  ) : (
+    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-[1.1fr_1fr]">
+      <aside
+        class="relative isolate hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
+        style="background: radial-gradient(circle at 20% 30%, #DC2626 0%, #7F1D1D 35%, #1C1917 80%);"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            src="/images/stores/panda-estampados/brand/logo.webp"
+            alt="Panda Estampados"
+            class="h-12 w-12 rounded-lg bg-white p-1.5 object-contain shadow-lg"
+          />
+          <span class="text-2xl font-bold tracking-tight drop-shadow">
+            {t["auth.brand.name"]}
+          </span>
+        </div>
+
+        <div class="relative z-10 max-w-lg">
+          <h2 class="text-3xl font-bold leading-tight drop-shadow md:text-4xl">
+            {t["auth.login.brand.left.heading"]}
+          </h2>
+          <p class="mt-4 text-base leading-relaxed text-white/90 drop-shadow">
+            {t["auth.login.brand.left.body"]}
+          </p>
+          <a
+            href="#"
+            class="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+          >
+            {t["auth.login.brand.left.cta"]}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+
+        <p class="relative z-10 text-xs text-white/70">
+          {t["auth.login.brand.left.footer"].replace("{year}", String(currentYear))}
+        </p>
+
+        <div
+          aria-hidden="true"
+          class="absolute inset-0 -z-10 opacity-40"
+          style="background: radial-gradient(circle at 80% 80%, rgba(220,38,38,0.6) 0%, transparent 50%);"
+        />
+      </aside>
+
+      <main class="flex items-center justify-center bg-slate-950 px-6 py-12 sm:px-12">
+        <div class="w-full max-w-md">
+          <header class="mb-6 flex items-center gap-3 lg:hidden">
+            <img
+              src="/images/stores/panda-estampados/brand/logo.webp"
+              alt="Panda Estampados"
+              class="h-10 w-10 rounded-md bg-white object-contain p-1"
+            />
+            <span class="text-xl font-bold tracking-tight text-slate-900">
+              {t["auth.brand.name"]}
+            </span>
+          </header>
+
+          <LoginForm client:load />
+        </div>
+      </main>
+    </div>
+  )}
+</AuthLayout>

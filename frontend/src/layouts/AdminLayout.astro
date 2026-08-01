@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import AdminSidebar from "../components/admin/sidebar/AdminSidebar.astro";
 import AdminHeader from "../components/admin/header/AdminHeader.astro";
+import AuthGuard from "../components/admin/auth/AuthGuard";
 
 interface Props {
   title?: string;
@@ -35,6 +36,8 @@ const { title = "Admin" } = Astro.props;
   </head>
 
   <body class="min-h-screen bg-[#f6f7f9] font-sans text-slate-900 antialiased">
+    <AuthGuard client:load />
+
     <div class="min-h-screen">
       <AdminSidebar />
 
