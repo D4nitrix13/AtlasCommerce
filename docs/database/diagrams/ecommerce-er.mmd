@@ -26,6 +26,9 @@ erDiagram
         string nombre
         string slug
         string logo
+        string favicon
+        string imagen_portada
+        string imagen_og
         string correo
         string telefono
         string whatsapp
@@ -43,9 +46,11 @@ erDiagram
     TIENDA_CONFIGURACION {
         int id_tienda_configuracion PK
         int id_tienda FK
+        string grupo
         string clave
         text valor
         string tipo_valor
+        string descripcion
         boolean publico
         datetime fecha_creacion
         datetime fecha_actualizacion
@@ -55,8 +60,12 @@ erDiagram
         int id_tienda_dominio PK
         int id_tienda FK
         string dominio
+        string tipo
+        string ruta_base
+        boolean redirigir_a_principal
         boolean principal
         boolean activo
+        datetime verificado_en
         datetime fecha_creacion
         datetime fecha_actualizacion
     }
@@ -66,6 +75,9 @@ erDiagram
         int id_tienda FK
         string plataforma
         string url
+        string nombre_visible
+        string icono_url
+        int orden
         boolean activa
         datetime fecha_creacion
         datetime fecha_actualizacion
@@ -372,12 +384,17 @@ erDiagram
         int id_producto FK
         int id_tienda FK
         string slug
+        string titulo_publico
         decimal precio_publico
         text descripcion_publica
+        string meta_titulo
+        text meta_descripcion
+        string imagen_og_url
         boolean visible
         boolean destacado
         int orden
         datetime fecha_publicacion
+        datetime fecha_despublicacion
         datetime fecha_creacion
         datetime fecha_actualizacion
     }
@@ -385,6 +402,17 @@ erDiagram
     PRODUCTO_IMAGEN {
         int id_imagen PK
         int id_producto FK
+        string url_imagen
+        string texto_alt
+        boolean principal
+        int orden
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    PRODUCTO_TIENDA_IMAGEN {
+        int id_imagen_tienda PK
+        int id_producto_tienda FK
         string url_imagen
         string texto_alt
         boolean principal
@@ -1205,6 +1233,7 @@ erDiagram
 
     PRODUCTO ||--o{ PRODUCTO_TIENDA : aparece_en
     PRODUCTO ||--o{ PRODUCTO_IMAGEN : tiene
+    PRODUCTO_TIENDA ||--o{ PRODUCTO_TIENDA_IMAGEN : tiene_imagenes
     PRODUCTO ||--o{ PRODUCTO_VARIANTE : tiene
     PRODUCTO ||--o{ PRODUCTO_ATRIBUTO : posee
     PRODUCTO ||--o{ PRODUCTO_PERSONALIZACION : configura
