@@ -10,6 +10,10 @@ return new class extends Migration
     {
         Schema::create('refunds', function (Blueprint $table): void {
             $table->id();
+            $table->foreignId('store_id')
+                ->constrained('stores')
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
             $table->foreignId('return_request_id')
                 ->constrained('return_requests')
                 ->cascadeOnUpdate()
@@ -30,7 +34,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['status', 'refunded_at'], 'refunds_status_date_idx');
+            $table->index(['store_id', 'status'], 'refunds_store_status_idx');
             $table->index('return_request_id', 'refunds_return_request_id_idx');
         });
     }

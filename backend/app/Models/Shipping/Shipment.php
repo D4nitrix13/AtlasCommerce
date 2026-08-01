@@ -2,6 +2,7 @@
 
 namespace App\Models\Shipping;
 
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Sales\Order;
 use App\Models\Settings\Currency;
 use Carbon\Carbon;
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Shipment extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
