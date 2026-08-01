@@ -11,10 +11,14 @@ class StoreSocialLink extends Model
         'store_id',
         'platform',
         'url',
+        'display_name',
+        'icon_url',
+        'sort_order',
         'is_active',
     ];
 
     protected $casts = [
+        'sort_order' => 'integer',
         'is_active' => 'boolean',
     ];
 
