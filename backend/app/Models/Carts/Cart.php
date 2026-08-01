@@ -2,9 +2,9 @@
 
 namespace App\Models\Carts;
 
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Customers\Customer;
 use App\Models\Settings\Currency;
-use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Cart extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
@@ -44,11 +45,6 @@ class Cart extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    public function store(): BelongsTo
-    {
-        return $this->belongsTo(Store::class);
     }
 
     public function currency(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Models\Returns;
 
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Payments\PaymentMethod;
 use App\Models\Settings\Currency;
 use Carbon\Carbon;
@@ -27,9 +28,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Refund extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
+        'store_id',
         'return_request_id',
         'payment_method_id',
         'currency_id',

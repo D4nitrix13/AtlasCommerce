@@ -2,11 +2,10 @@
 
 namespace App\Models\Payments;
 
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Customers\Customer;
 use App\Models\Sales\Invoice;
-use App\Models\Sales\InvoicePayment;
 use App\Models\Settings\Currency;
-use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -36,6 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Payment extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
@@ -65,11 +65,6 @@ class Payment extends Model
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class);
-    }
-
-    public function store(): BelongsTo
-    {
-        return $this->belongsTo(Store::class);
     }
 
     public function currency(): BelongsTo

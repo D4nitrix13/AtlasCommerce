@@ -3,12 +3,11 @@
 namespace App\Models\Sales;
 
 use App\Models\Auth\User;
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Customers\Customer;
 use App\Models\Customers\CustomerAddress;
 use App\Models\Settings\Currency;
-use App\Models\Shipping\Shipment;
 use App\Models\Stores\SalesChannel;
-use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -44,6 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Order extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
@@ -85,11 +85,6 @@ class Order extends Model
     public function shippingAddress(): BelongsTo
     {
         return $this->belongsTo(CustomerAddress::class, 'shipping_address_id');
-    }
-
-    public function store(): BelongsTo
-    {
-        return $this->belongsTo(Store::class);
     }
 
     public function salesChannel(): BelongsTo

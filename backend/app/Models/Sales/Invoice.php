@@ -3,12 +3,11 @@
 namespace App\Models\Sales;
 
 use App\Models\Auth\User;
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Customers\Customer;
 use App\Models\Payments\InvoicePayment;
-use App\Models\Payments\Payment;
 use App\Models\Settings\Currency;
 use App\Models\Stores\SalesChannel;
-use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +49,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Invoice extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
@@ -109,11 +109,6 @@ class Invoice extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    public function store(): BelongsTo
-    {
-        return $this->belongsTo(Store::class);
     }
 
     public function salesChannel(): BelongsTo
