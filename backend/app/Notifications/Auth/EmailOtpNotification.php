@@ -75,16 +75,10 @@ class EmailOtpNotification extends Notification
                     'facebookUrl' => $this->resolveSocialUrl('facebook'),
                     'instagramUrl' => $this->resolveSocialUrl('instagram'),
                     'facebookIconUrl' => asset(
-                        path: (string) config(
-                            key: 'brand.social.facebook_icon_path',
-                            default: 'images/shared/icons/social/facebook.webp',
-                        ),
+                        path: $this->resolveSocialIconPath('facebook'),
                     ),
                     'instagramIconUrl' => asset(
-                        path: (string) config(
-                            key: 'brand.social.instagram_icon_path',
-                            default: 'images/shared/icons/social/instagram.webp',
-                        ),
+                        path: $this->resolveSocialIconPath('instagram'),
                     ),
                 ],
             );
@@ -115,6 +109,28 @@ class EmailOtpNotification extends Notification
             ->where('platform', $platform)
             ->where('is_active', true)
             ->value('url');
+    }
+
+    /**
+     * Resuelve la ruta del icono de una red social.
+     *
+     * Si hay tienda, usa images/stores/{slug}/social/{platform}.webp.
+     * Si no, usa el fallback compartido en images/shared/icons/social/.
+     */
+    private function resolveSocialIconPath(string $platform): string
+    {
+        if ($this->store) {
+            $storeIcon = "images/stores/{$this->store->slug}/social/{$platform}.webp";
+
+            if (storage_path("app/public/{$storeIcon}") || file_exists(public_path($storeIcon))) {
+                return $storeIcon;
+            }
+        }
+
+        return (string) config(
+            key: "brand.social.{$platform}_icon_path",
+            default: "images/shared/icons/social/{$platform}.webp",
+        );
     }
 
     /**
