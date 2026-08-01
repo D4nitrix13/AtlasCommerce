@@ -1,5 +1,25 @@
 erDiagram
 
+    MONEDA {
+        int id_moneda PK
+        string codigo
+        string nombre
+        string simbolo
+        boolean principal
+        boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    TIPO_CAMBIO {
+        int id_tipo_cambio PK
+        int id_moneda FK
+        decimal valor
+        date fecha
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
     TIENDA {
         int id_tienda PK
         int id_moneda FK
@@ -17,6 +37,18 @@ erDiagram
         boolean activa
         datetime fecha_creacion
         datetime fecha_actualizacion
+        datetime fecha_eliminacion
+    }
+
+    TIENDA_CONFIGURACION {
+        int id_tienda_configuracion PK
+        int id_tienda FK
+        string clave
+        text valor
+        string tipo_valor
+        boolean publico
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     TIENDA_DOMINIO {
@@ -26,6 +58,7 @@ erDiagram
         boolean principal
         boolean activo
         datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     TIENDA_RED_SOCIAL {
@@ -34,64 +67,48 @@ erDiagram
         string plataforma
         string url
         boolean activa
-    }
-
-    USUARIO_TIENDA {
-        int id_usuario_tienda PK
-        int id_usuario FK
-        int id_tienda FK
-        int id_rol FK
-        boolean activo
-        datetime fecha_asignacion
-    }
-
-    CLIENTE_TIENDA {
-        int id_cliente_tienda PK
-        int id_cliente FK
-        int id_tienda FK
-        string tipo_cliente
-        boolean activo
-        datetime fecha_registro
-    }
-
-    PRODUCTO_TIENDA {
-        int id_producto_tienda PK
-        int id_producto FK
-        int id_tienda FK
-        string slug
-        decimal precio_publico
-        string descripcion_publica
-        boolean visible
-        boolean destacado
-        int orden
-        datetime fecha_publicacion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     CANAL_VENTA {
         int id_canal_venta PK
+        int id_tienda FK
         string nombre
+        string tipo
         string descripcion
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     ROL {
         int id_rol PK
         string nombre
+        string slug
         string descripcion
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     PERMISO {
         int id_permiso PK
         string nombre
+        string slug
         string modulo
         string descripcion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     ROL_PERMISO {
         int id_rol_permiso PK
         int id_rol FK
         int id_permiso FK
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     USUARIO {
@@ -103,7 +120,27 @@ erDiagram
         string password_hash
         string telefono
         boolean activo
+        datetime correo_verificado
+        datetime password_changed_at
+        datetime ultimo_login
+        string ultimo_login_ip
+        int intentos_fallidos
+        datetime bloqueado_hasta
         datetime fecha_registro
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
+    }
+
+    USUARIO_TIENDA {
+        int id_usuario_tienda PK
+        int id_usuario FK
+        int id_tienda FK
+        int id_rol FK
+        boolean activo
+        datetime fecha_asignacion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     USUARIO_2FA_CONFIGURACION {
@@ -113,6 +150,7 @@ erDiagram
         string metodo_preferido
         boolean requerir_2fa
         datetime fecha_activacion
+        datetime fecha_creacion
         datetime fecha_actualizacion
     }
 
@@ -125,34 +163,40 @@ erDiagram
         string secreto_cifrado
         boolean activo
         boolean verificado
-        datetime fecha_creacion
         datetime fecha_verificacion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     OTP_DESAFIO {
         int id_otp_desafio PK
         int id_usuario FK
+        string challenge_uuid
         string metodo
         string proposito
         string codigo_hash
         string destino
         int intentos
         int max_intentos
-        boolean usado
-        datetime fecha_creacion
+        int reenvios
+        datetime ultimo_envio
         datetime fecha_expiracion
         datetime fecha_uso
+        datetime bloqueado_hasta
         string ip_solicitud
         string user_agent
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     CODIGO_RECUPERACION_2FA {
         int id_codigo_recuperacion PK
         int id_usuario FK
+        string lote_uuid
         string codigo_hash
-        boolean usado
-        datetime fecha_creacion
         datetime fecha_uso
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PASSKEY_CREDENCIAL {
@@ -161,11 +205,81 @@ erDiagram
         string credential_id
         string public_key
         int sign_count
-        string transports
+        json transports
         string aaguid
         string nombre_dispositivo
+        boolean backup_eligible
+        boolean backup_state
         datetime ultimo_uso
+        datetime revocado_en
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    PASSWORD_RESET_TOKEN {
+        int id_password_reset_token PK
+        int id_usuario FK
+        string token_hash
+        datetime fecha_expiracion
+        datetime fecha_uso
+        string ip_solicitud
+        string user_agent
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    DISPOSITIVO_CONFIABLE {
+        int id_dispositivo_confiable PK
+        int id_usuario FK
+        string fingerprint_hash
+        string nombre_dispositivo
+        string ultimo_ip
+        string ultimo_user_agent
+        datetime confiado_en
+        datetime ultimo_uso
+        datetime fecha_expiracion
+        datetime revocado_en
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    INTENTO_LOGIN {
+        int id_intento_login PK
+        int id_usuario FK
+        string correo
+        boolean exitoso
+        string motivo_fallo
+        string ip
+        string user_agent
+        string pais
+        string ciudad
+        boolean sospechoso
+        datetime fecha_intento
+        datetime fecha_creacion
+    }
+
+    EVENTO_SEGURIDAD {
+        int id_evento_seguridad PK
+        int id_usuario FK
+        string correo
+        string tipo_evento
+        string severidad
+        string ip
+        string user_agent
+        json metadata
+        datetime fecha_evento
+        datetime fecha_creacion
+    }
+
+    API_TOKEN {
+        int id_api_token PK
+        int id_usuario FK
+        string nombre
+        string token_hash
+        json abilities
+        datetime ultimo_uso
+        datetime fecha_expiracion
         datetime fecha_creacion
         datetime fecha_actualizacion
     }
@@ -181,6 +295,20 @@ erDiagram
         string telefono
         datetime fecha_registro
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
+    }
+
+    CLIENTE_TIENDA {
+        int id_cliente_tienda PK
+        int id_cliente FK
+        int id_tienda FK
+        string tipo_cliente
+        boolean activo
+        datetime fecha_registro
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     CLIENTE_DIRECCION {
@@ -193,21 +321,33 @@ erDiagram
         string direccion_detallada
         string referencia
         boolean principal
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     CATEGORIA {
         int id_categoria PK
         int id_categoria_padre FK
         string nombre
+        string slug
         string descripcion
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     MARCA {
         int id_marca PK
         string nombre
+        string slug
         string descripcion
+        string logo
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     PRODUCTO {
@@ -215,12 +355,31 @@ erDiagram
         int id_categoria FK
         int id_marca FK
         string nombre
+        string slug
         string descripcion
         string sku
         decimal precio_base
         decimal costo
         boolean activo
+        datetime fecha_publicacion
         datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
+    }
+
+    PRODUCTO_TIENDA {
+        int id_producto_tienda PK
+        int id_producto FK
+        int id_tienda FK
+        string slug
+        decimal precio_publico
+        text descripcion_publica
+        boolean visible
+        boolean destacado
+        int orden
+        datetime fecha_publicacion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PRODUCTO_IMAGEN {
@@ -230,6 +389,8 @@ erDiagram
         string texto_alt
         boolean principal
         int orden
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PRODUCTO_VARIANTE {
@@ -241,12 +402,21 @@ erDiagram
         decimal costo
         string codigo_barras
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     ATRIBUTO {
         int id_atributo PK
         string nombre
+        string slug
         string tipo
+        string descripcion
+        boolean filtrable
+        boolean requerido
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PRODUCTO_ATRIBUTO {
@@ -254,6 +424,8 @@ erDiagram
         int id_producto FK
         int id_atributo FK
         string valor
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     VARIANTE_ATRIBUTO {
@@ -261,6 +433,192 @@ erDiagram
         int id_variante FK
         int id_atributo FK
         string valor
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    PRODUCTO_PERSONALIZACION {
+        int id_producto_personalizacion PK
+        int id_producto FK
+        int id_variante FK
+        boolean personalizable
+        string tipo_personalizacion
+        string editor_tipo
+        string estado
+        text instrucciones
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    AREA_IMPRESION {
+        int id_area_impresion PK
+        int id_producto_personalizacion FK
+        string nombre
+        string codigo
+        string vista
+        decimal ancho_pulgadas
+        decimal alto_pulgadas
+        int ancho_px
+        int alto_px
+        int dpi
+        decimal posicion_x
+        decimal posicion_y
+        decimal ancho_relativo
+        decimal alto_relativo
+        json mascara
+        json zona_segura
+        boolean activa
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    MOCKUP_PRODUCTO {
+        int id_mockup_producto PK
+        int id_producto_personalizacion FK
+        string nombre
+        string vista
+        string tipo_mockup
+        string imagen_base_url
+        string imagen_mascara_url
+        string imagen_sombra_url
+        json configuracion_render
+        boolean principal
+        boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    DISENO_PERSONALIZADO {
+        int id_diseno_personalizado PK
+        int id_cliente FK
+        int id_usuario FK
+        int id_producto FK
+        int id_variante FK
+        int id_producto_personalizacion FK
+        string nombre
+        string estado
+        string fondo_color
+        int canvas_ancho_px
+        int canvas_alto_px
+        json configuracion_canvas
+        string preview_url
+        string archivo_produccion_url
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
+    }
+
+    DISENO_CAPA {
+        int id_diseno_capa PK
+        int id_diseno_personalizado FK
+        int id_area_impresion FK
+        int id_archivo_diseno FK
+        int id_fuente_diseno FK
+        int id_grafico_biblioteca FK
+        string tipo_capa
+        string nombre
+        text contenido_texto
+        string color
+        string color_fondo
+        string alineacion
+        decimal posicion_x
+        decimal posicion_y
+        decimal ancho
+        decimal alto
+        decimal escala_x
+        decimal escala_y
+        decimal rotacion
+        decimal opacidad
+        int orden_z
+        boolean bloqueada
+        boolean visible
+        json estilos
+        json efectos
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    ARCHIVO_DISENO {
+        int id_archivo_diseno PK
+        int id_usuario FK
+        int id_cliente FK
+        string nombre_original
+        string nombre_archivo
+        string mime_type
+        string extension
+        string storage_disk
+        string ruta_archivo
+        int tamano_bytes
+        int ancho_px
+        int alto_px
+        int dpi
+        string checksum
+        string origen
+        string estado
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
+    }
+
+    FUENTE_DISENO {
+        int id_fuente_diseno PK
+        string nombre
+        string familia
+        string estilo
+        string peso
+        string ruta_archivo
+        string licencia
+        boolean activa
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    GRAFICO_BIBLIOTECA {
+        int id_grafico_biblioteca PK
+        string nombre
+        string categoria
+        string tags
+        string tipo
+        string url_archivo
+        string url_preview
+        string licencia
+        boolean gratuito
+        boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    DISENO_MOCKUP_RENDER {
+        int id_diseno_mockup_render PK
+        int id_diseno_personalizado FK
+        int id_mockup_producto FK
+        string vista
+        string imagen_render_url
+        string estado
+        json metadata
+        datetime fecha_render
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    PEDIDO_DISENO_PERSONALIZADO {
+        int id_pedido_diseno_personalizado PK
+        int id_pedido FK
+        int id_detalle_pedido FK
+        int id_diseno_personalizado FK
+        int id_usuario_revisor FK
+        json snapshot_diseno
+        string archivo_produccion_url
+        string estado_produccion
+        text notas_produccion
+        datetime fecha_revision
+        datetime fecha_aprobacion
+        datetime fecha_rechazo
+        text motivo_rechazo
+        datetime fecha_inicio_produccion
+        datetime fecha_finalizacion_produccion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     ALMACEN {
@@ -269,6 +627,9 @@ erDiagram
         string direccion
         string telefono
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     INVENTARIO {
@@ -279,6 +640,8 @@ erDiagram
         int stock_actual
         int stock_minimo
         int stock_reservado
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     MOVIMIENTO_INVENTARIO {
@@ -287,8 +650,12 @@ erDiagram
         int id_usuario FK
         string tipo_movimiento
         int cantidad
+        int stock_anterior
+        int stock_nuevo
         string motivo
         datetime fecha_movimiento
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PROVEEDOR {
@@ -299,15 +666,26 @@ erDiagram
         string correo
         string direccion
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     COMPRA {
         int id_compra PK
         int id_proveedor FK
         int id_usuario FK
+        string numero_compra
+        decimal subtotal
+        decimal impuesto
+        decimal descuento
         decimal total
         string estado
         datetime fecha_compra
+        text notas
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     DETALLE_COMPRA {
@@ -318,6 +696,8 @@ erDiagram
         int cantidad
         decimal precio_compra
         decimal subtotal
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     CARRITO {
@@ -325,8 +705,10 @@ erDiagram
         int id_tienda FK
         int id_cliente FK
         string estado
+        datetime fecha_expiracion
         datetime fecha_creacion
         datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     CARRITO_DETALLE {
@@ -334,16 +716,24 @@ erDiagram
         int id_carrito FK
         int id_producto FK
         int id_variante FK
+        int id_diseno_personalizado FK
+        string cart_line_key
         int cantidad
         decimal precio_unitario
         decimal subtotal
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     WISHLIST {
         int id_wishlist PK
         int id_tienda FK
         int id_cliente FK
+        string nombre
+        boolean principal
         datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     WISHLIST_DETALLE {
@@ -351,6 +741,8 @@ erDiagram
         int id_wishlist FK
         int id_producto FK
         datetime fecha_agregado
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PEDIDO {
@@ -360,12 +752,17 @@ erDiagram
         int id_direccion_envio FK
         int id_canal_venta FK
         int id_usuario_creador FK
+        string numero_pedido
         decimal subtotal
         decimal descuento
         decimal impuesto
         decimal total
         string estado
         datetime fecha_pedido
+        text notas
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     DETALLE_PEDIDO {
@@ -373,10 +770,13 @@ erDiagram
         int id_pedido FK
         int id_producto FK
         int id_variante FK
+        int id_diseno_personalizado FK
         int cantidad
         decimal precio_unitario
         decimal descuento
         decimal subtotal
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PEDIDO_ESTADO_HISTORIAL {
@@ -387,6 +787,8 @@ erDiagram
         string estado_nuevo
         string observacion
         datetime fecha_cambio
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     FACTURA {
@@ -404,7 +806,13 @@ erDiagram
         decimal monto_pagado
         decimal saldo_pendiente
         string estado_pago
+        string estado_factura
         datetime fecha_emision
+        datetime fecha_vencimiento
+        text notas
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     DETALLE_FACTURA {
@@ -415,6 +823,8 @@ erDiagram
         int cantidad
         decimal precio_unitario
         decimal subtotal
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     FACTURA_ESTADO_HISTORIAL {
@@ -425,6 +835,8 @@ erDiagram
         string estado_nuevo
         string observacion
         datetime fecha_cambio
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     METODO_PAGO {
@@ -432,6 +844,9 @@ erDiagram
         string nombre
         string descripcion
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     PAGO {
@@ -443,6 +858,10 @@ erDiagram
         string referencia
         string estado
         datetime fecha_pago
+        text notas
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     FACTURA_PAGO {
@@ -451,6 +870,8 @@ erDiagram
         int id_pago FK
         decimal monto_aplicado
         datetime fecha_aplicacion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     CUOTA_PAGO {
@@ -461,6 +882,9 @@ erDiagram
         decimal monto_pagado
         date fecha_vencimiento
         string estado
+        datetime fecha_pago
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     TRANSACCION_PAGO {
@@ -468,9 +892,11 @@ erDiagram
         int id_pago FK
         string proveedor_pago
         string codigo_transaccion
-        string respuesta
+        text respuesta
         string estado
         datetime fecha_transaccion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     EMPRESA_ENVIO {
@@ -479,6 +905,9 @@ erDiagram
         string telefono
         string correo
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     ZONA_ENVIO {
@@ -487,6 +916,9 @@ erDiagram
         string descripcion
         decimal costo_base
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     ENVIO {
@@ -499,6 +931,9 @@ erDiagram
         string estado
         datetime fecha_envio
         datetime fecha_entrega
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     SEGUIMIENTO_ENVIO {
@@ -508,6 +943,8 @@ erDiagram
         string ubicacion
         string descripcion
         datetime fecha_registro
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     CUPON {
@@ -520,7 +957,11 @@ erDiagram
         date fecha_inicio
         date fecha_fin
         int limite_usos
+        int usos_actuales
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     USO_CUPON {
@@ -529,6 +970,8 @@ erDiagram
         int id_cliente FK
         int id_pedido FK
         datetime fecha_uso
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     PROMOCION {
@@ -541,12 +984,17 @@ erDiagram
         date fecha_inicio
         date fecha_fin
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     PRODUCTO_PROMOCION {
         int id_producto_promocion PK
         int id_producto FK
         int id_promocion FK
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     IMPUESTO {
@@ -554,12 +1002,17 @@ erDiagram
         string nombre
         decimal porcentaje
         boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     PRODUCTO_IMPUESTO {
         int id_producto_impuesto PK
         int id_producto FK
         int id_impuesto FK
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     DEVOLUCION {
@@ -569,6 +1022,10 @@ erDiagram
         string motivo
         string estado
         datetime fecha_solicitud
+        datetime fecha_resolucion
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     DETALLE_DEVOLUCION {
@@ -578,6 +1035,8 @@ erDiagram
         int id_variante FK
         int cantidad
         decimal monto
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     REEMBOLSO {
@@ -587,6 +1046,9 @@ erDiagram
         decimal monto
         string estado
         datetime fecha_reembolso
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     RESENA_PRODUCTO {
@@ -598,6 +1060,9 @@ erDiagram
         string comentario
         boolean aprobado
         datetime fecha_resena
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     PREGUNTA_PRODUCTO {
@@ -609,6 +1074,9 @@ erDiagram
         string respuesta
         datetime fecha_pregunta
         datetime fecha_respuesta
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     TICKET_SOPORTE {
@@ -620,6 +1088,8 @@ erDiagram
         string estado
         string prioridad
         datetime fecha_creacion
+        datetime fecha_actualizacion
+        datetime fecha_eliminacion
     }
 
     TICKET_MENSAJE {
@@ -628,6 +1098,8 @@ erDiagram
         int id_usuario FK
         string mensaje
         datetime fecha_mensaje
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     NOTIFICACION {
@@ -638,7 +1110,9 @@ erDiagram
         string mensaje
         string tipo
         boolean leida
+        datetime fecha_lectura
         datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     AUDITORIA {
@@ -649,29 +1123,22 @@ erDiagram
         string tabla_afectada
         string registro_id
         string descripcion
+        json valores_anteriores
+        json valores_nuevos
+        string ip
+        string user_agent
         datetime fecha_registro
-    }
-
-    MONEDA {
-        int id_moneda PK
-        string codigo
-        string nombre
-        string simbolo
-        boolean principal
-    }
-
-    TIPO_CAMBIO {
-        int id_tipo_cambio PK
-        int id_moneda FK
-        decimal valor
-        date fecha
+        datetime fecha_creacion
+        datetime fecha_actualizacion
     }
 
     MONEDA ||--o{ TIENDA : usa
     MONEDA ||--o{ TIPO_CAMBIO : tiene
 
+    TIENDA ||--o{ TIENDA_CONFIGURACION : configura
     TIENDA ||--o{ TIENDA_DOMINIO : posee
     TIENDA ||--o{ TIENDA_RED_SOCIAL : tiene
+    TIENDA ||--o{ CANAL_VENTA : opera
     TIENDA ||--o{ USUARIO_TIENDA : asigna
     TIENDA ||--o{ CLIENTE_TIENDA : atiende
     TIENDA ||--o{ PRODUCTO_TIENDA : publica
@@ -700,6 +1167,11 @@ erDiagram
     USUARIO ||--o{ OTP_DESAFIO : genera
     USUARIO ||--o{ CODIGO_RECUPERACION_2FA : posee
     USUARIO ||--o{ PASSKEY_CREDENCIAL : registra
+    USUARIO ||--o{ PASSWORD_RESET_TOKEN : solicita
+    USUARIO ||--o{ DISPOSITIVO_CONFIABLE : confia
+    USUARIO ||--o{ INTENTO_LOGIN : registra
+    USUARIO ||--o{ EVENTO_SEGURIDAD : genera
+    USUARIO ||--o{ API_TOKEN : posee
     USUARIO ||--o{ AUDITORIA : genera
     USUARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
     USUARIO ||--o{ COMPRA : realiza
@@ -709,6 +1181,8 @@ erDiagram
     USUARIO ||--o{ FACTURA_ESTADO_HISTORIAL : cambia
     USUARIO ||--o{ TICKET_MENSAJE : escribe
     USUARIO ||--o{ NOTIFICACION : recibe
+    USUARIO ||--o{ DISENO_PERSONALIZADO : administra
+    USUARIO ||--o{ ARCHIVO_DISENO : sube
 
     CLIENTE ||--o{ CLIENTE_TIENDA : pertenece
     CLIENTE ||--o{ CLIENTE_DIRECCION : tiene
@@ -722,6 +1196,8 @@ erDiagram
     CLIENTE ||--o{ RESENA_PRODUCTO : escribe
     CLIENTE ||--o{ PREGUNTA_PRODUCTO : pregunta
     CLIENTE ||--o{ TICKET_SOPORTE : abre
+    CLIENTE ||--o{ DISENO_PERSONALIZADO : crea
+    CLIENTE ||--o{ ARCHIVO_DISENO : sube
 
     CATEGORIA ||--o{ CATEGORIA : subcategoria
     CATEGORIA ||--o{ PRODUCTO : clasifica
@@ -731,6 +1207,7 @@ erDiagram
     PRODUCTO ||--o{ PRODUCTO_IMAGEN : tiene
     PRODUCTO ||--o{ PRODUCTO_VARIANTE : tiene
     PRODUCTO ||--o{ PRODUCTO_ATRIBUTO : posee
+    PRODUCTO ||--o{ PRODUCTO_PERSONALIZACION : configura
     PRODUCTO ||--o{ INVENTARIO : tiene_stock
     PRODUCTO ||--o{ DETALLE_COMPRA : comprado
     PRODUCTO ||--o{ CARRITO_DETALLE : agregado
@@ -742,16 +1219,40 @@ erDiagram
     PRODUCTO ||--o{ DETALLE_DEVOLUCION : devuelto
     PRODUCTO ||--o{ RESENA_PRODUCTO : recibe
     PRODUCTO ||--o{ PREGUNTA_PRODUCTO : recibe
+    PRODUCTO ||--o{ DISENO_PERSONALIZADO : base_diseno
 
     ATRIBUTO ||--o{ PRODUCTO_ATRIBUTO : define
+    ATRIBUTO ||--o{ VARIANTE_ATRIBUTO : define
+
     PRODUCTO_VARIANTE ||--o{ VARIANTE_ATRIBUTO : posee
+    PRODUCTO_VARIANTE ||--o{ PRODUCTO_PERSONALIZACION : configura
     PRODUCTO_VARIANTE ||--o{ INVENTARIO : tiene_stock
     PRODUCTO_VARIANTE ||--o{ DETALLE_COMPRA : comprado
     PRODUCTO_VARIANTE ||--o{ CARRITO_DETALLE : agregado
     PRODUCTO_VARIANTE ||--o{ DETALLE_PEDIDO : vendido
     PRODUCTO_VARIANTE ||--o{ DETALLE_FACTURA : facturado
     PRODUCTO_VARIANTE ||--o{ DETALLE_DEVOLUCION : devuelto
-    ATRIBUTO ||--o{ VARIANTE_ATRIBUTO : define
+    PRODUCTO_VARIANTE ||--o{ DISENO_PERSONALIZADO : variante_diseno
+
+    PRODUCTO_PERSONALIZACION ||--o{ AREA_IMPRESION : define
+    PRODUCTO_PERSONALIZACION ||--o{ MOCKUP_PRODUCTO : tiene
+    PRODUCTO_PERSONALIZACION ||--o{ DISENO_PERSONALIZADO : usa
+
+    AREA_IMPRESION ||--o{ DISENO_CAPA : contiene
+
+    DISENO_PERSONALIZADO ||--o{ DISENO_CAPA : contiene
+    DISENO_PERSONALIZADO ||--o{ DISENO_MOCKUP_RENDER : genera
+    DISENO_PERSONALIZADO ||--o{ PEDIDO_DISENO_PERSONALIZADO : se_compra
+    DISENO_PERSONALIZADO ||--o{ CARRITO_DETALLE : agregado_al_carrito
+    DISENO_PERSONALIZADO ||--o{ DETALLE_PEDIDO : comprado_en
+
+    USUARIO ||--o{ PEDIDO_DISENO_PERSONALIZADO : revisa
+
+    ARCHIVO_DISENO ||--o{ DISENO_CAPA : usa
+    FUENTE_DISENO ||--o{ DISENO_CAPA : aplica
+    GRAFICO_BIBLIOTECA ||--o{ DISENO_CAPA : usa
+
+    MOCKUP_PRODUCTO ||--o{ DISENO_MOCKUP_RENDER : renderiza
 
     ALMACEN ||--o{ INVENTARIO : contiene
     INVENTARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
@@ -773,6 +1274,9 @@ erDiagram
     PEDIDO ||--o| ENVIO : tiene
     PEDIDO ||--o{ USO_CUPON : aplica
     PEDIDO ||--o{ DEVOLUCION : puede_tener
+    PEDIDO ||--o{ PEDIDO_DISENO_PERSONALIZADO : incluye
+
+    DETALLE_PEDIDO ||--o| PEDIDO_DISENO_PERSONALIZADO : referencia
 
     FACTURA ||--o{ DETALLE_FACTURA : contiene
     FACTURA ||--o{ FACTURA_ESTADO_HISTORIAL : historial
