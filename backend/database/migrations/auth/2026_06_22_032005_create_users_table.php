@@ -29,6 +29,12 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamp('registered_at')->useCurrent();
 
+            $table->timestamp('password_changed_at')->nullable()->index();
+            $table->timestamp('last_login_at')->nullable()->index();
+            $table->string('last_login_ip', 45)->nullable();
+            $table->unsignedInteger('failed_login_attempts')->default(0);
+            $table->timestamp('locked_until')->nullable()->index();
+
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
@@ -36,14 +42,6 @@ return new class extends Migration
             $table->index('role_id');
             $table->index('email');
             $table->index('is_active');
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email', 150)->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-
-            $table->index('created_at');
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -69,7 +67,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('sessions');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
     }
 };
