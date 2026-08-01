@@ -5,6 +5,8 @@ namespace App\Models\Support;
 use App\Models\Catalog\Product;
 use App\Models\Customers\Customer;
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +15,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Pregunta de un cliente sobre un producto.
  *
  * Tabla: `product_questions` — relación N:1 con `products`, `customers` y `stores`.
+ *
+ * Las preguntas quedan pendientes hasta que un administrador
+ * proporciona una respuesta.
+ *
+ * @property int $id
+ * @property int $product_id
+ * @property int $customer_id
+ * @property int|null $store_id
+ * @property string $question
+ * @property string|null $answer
+ * @property Carbon $asked_at
+ * @property Carbon|null $answered_at
  */
 class ProductQuestion extends Model
 {
@@ -56,23 +70,49 @@ class ProductQuestion extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function scopeAnswered($query)
+    /**
+     * Filtra preguntas respondidas.
+     *
+     * @param  Builder<ProductQuestion>  $query  Consulta del modelo.
+     * @return Builder<ProductQuestion>
+     */
+    public function scopeAnswered(Builder $query): Builder
     {
-        return $query->whereNotNull('answer');
+        return $query->whereNotNull(column: 'answer');
     }
 
-    public function scopePending($query)
+    /**
+     * Filtra preguntas pendientes de respuesta.
+     *
+     * @param  Builder<ProductQuestion>  $query  Consulta del modelo.
+     * @return Builder<ProductQuestion>
+     */
+    public function scopePending(Builder $query): Builder
     {
-        return $query->whereNull('answer');
+        return $query->whereNull(column: 'answer');
     }
 
-    public function scopeByProduct($query, int $productId)
+    /**
+     * Filtra preguntas por producto específico.
+     *
+     * @param  Builder<ProductQuestion>  $query  Consulta del modelo.
+     * @param  int  $productId  Identificador del producto.
+     * @return Builder<ProductQuestion>
+     */
+    public function scopeByProduct(Builder $query, int $productId): Builder
     {
-        return $query->where('product_id', $productId);
+        return $query->where(column: 'product_id', value: $productId);
     }
 
-    public function scopeByCustomer($query, int $customerId)
+    /**
+     * Filtra preguntas por cliente específico.
+     *
+     * @param  Builder<ProductQuestion>  $query  Consulta del modelo.
+     * @param  int  $customerId  Identificador del cliente.
+     * @return Builder<ProductQuestion>
+     */
+    public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('customer_id', $customerId);
+        return $query->where(column: 'customer_id', value: $customerId);
     }
 }

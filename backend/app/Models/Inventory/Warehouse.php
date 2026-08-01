@@ -2,6 +2,7 @@
 
 namespace App\Models\Inventory;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,6 +11,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Almacén físico o virtual donde se almacenan los productos.
  *
  * Tabla: `warehouses` — relación 1:N con `inventories`.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $address
+ * @property string|null $phone
+ * @property bool $is_active
  */
 class Warehouse extends Model
 {
@@ -34,8 +41,14 @@ class Warehouse extends Model
         return $this->hasMany(Inventory::class);
     }
 
+    /**
+     * Filtra almacenes activos.
+     *
+     * @param  Builder<Warehouse>  $query  Consulta del modelo.
+     * @return Builder<Warehouse>
+     */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where(column: 'is_active', value: true);
     }
 }

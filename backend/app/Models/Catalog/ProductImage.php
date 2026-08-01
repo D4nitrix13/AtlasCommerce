@@ -2,30 +2,38 @@
 
 namespace App\Models\Catalog;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Imagen de un producto del catálogo.
+ * Imagen asociada a un producto.
  *
  * Tabla: `product_images` — relación N:1 con `products`.
  *
- * Permite múltiples imágenes por producto con orden de
- * visualización y una imagen principal marcada con `is_primary`.
+ * Cada producto puede tener múltiples imágenes, una de las cuales
+ * se marca como principal para mostrar en listados y búsquedas.
+ *
+ * @property int $id
+ * @property int $product_id
+ * @property string $url
+ * @property string|null $alt_text
+ * @property int $sort_order
+ * @property bool $is_primary
  */
 class ProductImage extends Model
 {
     protected $fillable = [
         'product_id',
-        'image_url',
+        'url',
         'alt_text',
-        'is_primary',
         'sort_order',
+        'is_primary',
     ];
 
     protected $casts = [
-        'is_primary' => 'boolean',
         'sort_order' => 'integer',
+        'is_primary' => 'boolean',
     ];
 
     /**
@@ -36,13 +44,25 @@ class ProductImage extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function scopePrimary($query)
+    /**
+     * Filtra la imagen principal del producto.
+     *
+     * @param  Builder<ProductImage>  $query  Consulta del modelo.
+     * @return Builder<ProductImage>
+     */
+    public function scopePrimary(Builder $query): Builder
     {
-        return $query->where('is_primary', true);
+        return $query->where(column: 'is_primary', value: true);
     }
 
-    public function scopeOrdered($query)
+    /**
+     * Filtra imágenes ordenadas por su posición.
+     *
+     * @param  Builder<ProductImage>  $query  Consulta del modelo.
+     * @return Builder<ProductImage>
+     */
+    public function scopeOrdered(Builder $query): Builder
     {
-        return $query->orderBy('sort_order');
+        return $query->orderBy(column: 'sort_order', direction: 'asc');
     }
 }

@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Impuesto aplicable a productos.
  *
  * Tabla: `product_tax` — pivote N:N entre `products` y `taxes`.
+ *
+ * @property int $id
+ * @property int $product_id
+ * @property int $tax_id
  */
 class ProductTax extends Model
 {

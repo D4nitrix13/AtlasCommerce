@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Modela la relación many-to-many entre permisos y roles,
  * determinando qué permisos tiene asignados cada rol.
+ *
+ * @property int $id
+ * @property int $role_id
+ * @property int $permission_id
  */
 class PermissionRole extends Model
 {

@@ -2,6 +2,8 @@
 
 namespace App\Models\Auth;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,6 +14,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Cada token se genera cuando el usuario solicita restablecer su contraseña.
  * El token tiene un tiempo de expiración y se invalida después de su uso.
+ * Nunca se almacena el token en texto plano — solo su hash.
+ *
+ * @property int $id
+ * @property int|null $user_id
+ * @property string $email
+ * @property string $token_hash
+ * @property Carbon $expires_at
+ * @property Carbon|null $used_at
+ * @property string|null $request_ip
+ * @property string|null $user_agent
  */
 class PasswordResetToken extends Model
 {
@@ -40,6 +52,8 @@ class PasswordResetToken extends Model
 
     /**
      * Determina si el token es válido (no usado y no expirado).
+     *
+     * @return bool True cuando el token puede usarse para restablecer la contraseña.
      */
     public function isValid(): bool
     {
@@ -48,14 +62,27 @@ class PasswordResetToken extends Model
             && $this->expires_at->isFuture();
     }
 
-    public function scopeValid($query)
+    /**
+     * Filtra tokens válidos (no usados y no expirados).
+     *
+     * @param  Builder<PasswordResetToken>  $query  Consulta del modelo.
+     * @return Builder<PasswordResetToken>
+     */
+    public function scopeValid(Builder $query): Builder
     {
-        return $query->whereNull('used_at')
-            ->where('expires_at', '>', now());
+        return $query->whereNull(column: 'used_at')
+            ->where(column: 'expires_at', operator: '>', value: now());
     }
 
-    public function scopeByEmail($query, string $email)
+    /**
+     * Filtra tokens por correo electrónico específico.
+     *
+     * @param  Builder<PasswordResetToken>  $query  Consulta del modelo.
+     * @param  string  $email  Correo electrónico.
+     * @return Builder<PasswordResetToken>
+     */
+    public function scopeByEmail(Builder $query, string $email): Builder
     {
-        return $query->where('email', $email);
+        return $query->where(column: 'email', value: $email);
     }
 }

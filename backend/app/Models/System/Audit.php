@@ -4,6 +4,8 @@ namespace App\Models\System;
 
 use App\Models\Auth\User;
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,6 +16,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Almacena un registro inmutable de cada acción realizada
  * en el sistema con valores anteriores y nuevos para comparación.
+ * Los registros de auditoría no deben modificarse ni eliminarse.
+ *
+ * @property int $id
+ * @property int|null $user_id
+ * @property int|null $store_id
+ * @property string $action
+ * @property string $table_name
+ * @property string|null $record_id
+ * @property string|null $description
+ * @property array|null $old_values
+ * @property array|null $new_values
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property Carbon $registered_at
  */
 class Audit extends Model
 {
@@ -52,34 +68,76 @@ class Audit extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function scopeByAction($query, string $action)
+    /**
+     * Filtra auditorías por tipo de acción (created, updated, deleted, etc.).
+     *
+     * @param  Builder<Audit>  $query  Consulta del modelo.
+     * @param  string  $action  Tipo de acción realizada.
+     * @return Builder<Audit>
+     */
+    public function scopeByAction(Builder $query, string $action): Builder
     {
-        return $query->where('action', $action);
+        return $query->where(column: 'action', value: $action);
     }
 
-    public function scopeByTable($query, string $tableName)
+    /**
+     * Filtra auditorías por tabla específica.
+     *
+     * @param  Builder<Audit>  $query  Consulta del modelo.
+     * @param  string  $tableName  Nombre de la tabla afectada.
+     * @return Builder<Audit>
+     */
+    public function scopeByTable(Builder $query, string $tableName): Builder
     {
-        return $query->where('table_name', $tableName);
+        return $query->where(column: 'table_name', value: $tableName);
     }
 
-    public function scopeByUser($query, int $userId)
+    /**
+     * Filtra auditorías por usuario específico.
+     *
+     * @param  Builder<Audit>  $query  Consulta del modelo.
+     * @param  int  $userId  Identificador del usuario.
+     * @return Builder<Audit>
+     */
+    public function scopeByUser(Builder $query, int $userId): Builder
     {
-        return $query->where('user_id', $userId);
+        return $query->where(column: 'user_id', value: $userId);
     }
 
-    public function scopeByStore($query, int $storeId)
+    /**
+     * Filtra auditorías por tienda específica.
+     *
+     * @param  Builder<Audit>  $query  Consulta del modelo.
+     * @param  int  $storeId  Identificador de la tienda.
+     * @return Builder<Audit>
+     */
+    public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where('store_id', $storeId);
+        return $query->where(column: 'store_id', value: $storeId);
     }
 
-    public function scopeByRecord($query, string $tableName, int $recordId)
+    /**
+     * Filtra auditorías por registro específico (tabla + ID).
+     *
+     * @param  Builder<Audit>  $query  Consulta del modelo.
+     * @param  string  $tableName  Nombre de la tabla.
+     * @param  int  $recordId  Identificador del registro.
+     * @return Builder<Audit>
+     */
+    public function scopeByRecord(Builder $query, string $tableName, int $recordId): Builder
     {
-        return $query->where('table_name', $tableName)
-            ->where('record_id', $recordId);
+        return $query->where(column: 'table_name', value: $tableName)
+            ->where(column: 'record_id', value: $recordId);
     }
 
-    public function scopeLatest($query)
+    /**
+     * Ordena auditorías de la más reciente a la más antigua.
+     *
+     * @param  Builder<Audit>  $query  Consulta del modelo.
+     * @return Builder<Audit>
+     */
+    public function scopeLatest(Builder $query): Builder
     {
-        return $query->orderBy('registered_at', 'desc');
+        return $query->orderBy(column: 'registered_at', direction: 'desc');
     }
 }
