@@ -11,8 +11,15 @@ export type ApiError = {
   errors: Record<string, string[]> | null;
 };
 
-type RequestOptions = RequestInit & {
+type RequestOptions = Omit<RequestInit, "body"> & {
   token?: string | null;
+  /**
+   * Acepta un objeto plano (se serializa a JSON), FormData, o un
+   * BodyInit nativo de fetch. El `Content-Type` se infiere: si es
+   * FormData se omite (lo pone el browser con boundary), si no se
+   * fuerza a `application/json`.
+   */
+  body?: BodyInit | Record<string, unknown> | null;
 };
 
 function resolveApiUrl(endpoint: string): string {
@@ -64,6 +71,14 @@ export async function apiFetch<T>(
   const { token, headers, body, ...rest } = options;
 
   const isFormData = body instanceof FormData;
+  const isPlainObject =
+    body !== null &&
+    body !== undefined &&
+    typeof body === "object" &&
+    !isFormData;
+
+  const serializedBody: BodyInit | null | undefined =
+    isPlainObject ? JSON.stringify(body) : body;
 
   const requestHeaders: HeadersInit = {
     Accept: "application/json",
@@ -74,7 +89,7 @@ export async function apiFetch<T>(
 
   const response = await fetch(resolveApiUrl(endpoint), {
     ...rest,
-    body,
+    body: serializedBody,
     headers: requestHeaders,
   });
 
