@@ -4,6 +4,8 @@ namespace App\Models\Sales;
 
 use App\Models\Auth\User;
 use App\Models\Customization\CustomDesign;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,6 +17,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Captura un snapshot del diseño al momento del pedido,
  * incluyendo archivo de producción, estado de revisión
  * y seguimiento del proceso productivo.
+ *
+ * @property int $id
+ * @property int $order_id
+ * @property int $order_item_id
+ * @property int|null $custom_design_id
+ * @property array $design_snapshot
+ * @property string|null $production_file_url
+ * @property string $production_status
+ * @property string|null $production_notes
+ * @property int|null $reviewed_by
+ * @property Carbon|null $reviewed_at
+ * @property Carbon|null $approved_at
+ * @property Carbon|null $rejected_at
+ * @property string|null $rejection_reason
+ * @property Carbon|null $production_started_at
+ * @property Carbon|null $production_completed_at
  */
 class OrderCustomDesign extends Model
 {
@@ -73,31 +91,64 @@ class OrderCustomDesign extends Model
      */
     public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(related: User::class, foreignKey: 'reviewed_by');
+        return $this->belongsTo(
+            related: User::class,
+            foreignKey: 'reviewed_by',
+        );
     }
 
-    public function scopePending($query)
+    /**
+     * Filtra diseños pendientes de revisión.
+     *
+     * @param  Builder<OrderCustomDesign>  $query  Consulta del modelo.
+     * @return Builder<OrderCustomDesign>
+     */
+    public function scopePending(Builder $query): Builder
     {
-        return $query->where('production_status', 'pending');
+        return $query->where(column: 'production_status', value: 'pending');
     }
 
-    public function scopeApproved($query)
+    /**
+     * Filtra diseños aprobados para producción.
+     *
+     * @param  Builder<OrderCustomDesign>  $query  Consulta del modelo.
+     * @return Builder<OrderCustomDesign>
+     */
+    public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('production_status', 'approved');
+        return $query->where(column: 'production_status', value: 'approved');
     }
 
-    public function scopeRejected($query)
+    /**
+     * Filtra diseños rechazados.
+     *
+     * @param  Builder<OrderCustomDesign>  $query  Consulta del modelo.
+     * @return Builder<OrderCustomDesign>
+     */
+    public function scopeRejected(Builder $query): Builder
     {
-        return $query->where('production_status', 'rejected');
+        return $query->where(column: 'production_status', value: 'rejected');
     }
 
-    public function scopeInProduction($query)
+    /**
+     * Filtra diseños en proceso de producción.
+     *
+     * @param  Builder<OrderCustomDesign>  $query  Consulta del modelo.
+     * @return Builder<OrderCustomDesign>
+     */
+    public function scopeInProduction(Builder $query): Builder
     {
-        return $query->where('production_status', 'in_production');
+        return $query->where(column: 'production_status', value: 'in_production');
     }
 
-    public function scopeCompleted($query)
+    /**
+     * Filtra diseños con producción completada.
+     *
+     * @param  Builder<OrderCustomDesign>  $query  Consulta del modelo.
+     * @return Builder<OrderCustomDesign>
+     */
+    public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where('production_status', 'completed');
+        return $query->where(column: 'production_status', value: 'completed');
     }
 }

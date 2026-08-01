@@ -11,7 +11,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Artículo individual dentro del carrito de compras.
  *
- * Tabla: `cart_items` — relación N:1 con `carts`.
+ * Tabla: `cart_items` — relación N:1 con `carts`, `products`,
+ * `product_variants`, `custom_designs`.
+ *
+ * @property int $id
+ * @property int $cart_id
+ * @property int $product_id
+ * @property int|null $product_variant_id
+ * @property int|null $custom_design_id
+ * @property string $cart_line_key
+ * @property int $quantity
+ * @property int $unit_price_cents
+ * @property int $subtotal_cents
  */
 class CartItem extends Model
 {
@@ -22,43 +33,31 @@ class CartItem extends Model
         'custom_design_id',
         'cart_line_key',
         'quantity',
-        'unit_price',
-        'subtotal',
+        'unit_price_cents',
+        'subtotal_cents',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
-        'unit_price' => 'decimal:2',
-        'subtotal' => 'decimal:2',
+        'unit_price_cents' => 'integer',
+        'subtotal_cents' => 'integer',
     ];
 
-    /**
-     * Carrito al que pertenece el ítem.
-     */
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
     }
 
-    /**
-     * Producto en el carrito.
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Variante del producto (opcional).
-     */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
     }
 
-    /**
-     * Diseño personalizado asociado (opcional).
-     */
     public function customDesign(): BelongsTo
     {
         return $this->belongsTo(CustomDesign::class);

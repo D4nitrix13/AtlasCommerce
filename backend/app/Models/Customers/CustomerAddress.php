@@ -2,6 +2,7 @@
 
 namespace App\Models\Customers;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Almacena direcciones de envío y facturación. Un cliente puede
  * tener múltiples direcciones, marcando una como principal.
+ *
+ * @property int $id
+ * @property int $customer_id
+ * @property string $address_type
+ * @property string $country
+ * @property string|null $department
+ * @property string|null $municipality
+ * @property string $detailed_address
+ * @property string|null $reference
+ * @property bool $is_primary
  */
 class CustomerAddress extends Model
 {
@@ -41,18 +52,38 @@ class CustomerAddress extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function scopePrimary($query)
+    /**
+     * Filtra la dirección principal del cliente.
+     *
+     * @param  Builder<CustomerAddress>  $query  Consulta del modelo.
+     * @return Builder<CustomerAddress>
+     */
+    public function scopePrimary(Builder $query): Builder
     {
-        return $query->where('is_primary', true);
+        return $query->where(column: 'is_primary', value: true);
     }
 
-    public function scopeByType($query, string $type)
+    /**
+     * Filtra direcciones por tipo específico (billing, shipping).
+     *
+     * @param  Builder<CustomerAddress>  $query  Consulta del modelo.
+     * @param  string  $type  Tipo de dirección.
+     * @return Builder<CustomerAddress>
+     */
+    public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where('address_type', $type);
+        return $query->where(column: 'address_type', value: $type);
     }
 
-    public function scopeByCountry($query, string $country)
+    /**
+     * Filtra direcciones por país específico.
+     *
+     * @param  Builder<CustomerAddress>  $query  Consulta del modelo.
+     * @param  string  $country  País de la dirección.
+     * @return Builder<CustomerAddress>
+     */
+    public function scopeByCountry(Builder $query, string $country): Builder
     {
-        return $query->where('country', $country);
+        return $query->where(column: 'country', value: $country);
     }
 }

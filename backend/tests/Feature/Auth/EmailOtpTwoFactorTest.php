@@ -50,18 +50,18 @@ class EmailOtpTwoFactorTest extends TestCase
 
         $user = User::factory()->create();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs(user: $user);
 
         // Paso 1: Estado inicial — 2FA debe estar deshabilitado.
-        $this->getJson('/api/auth/2fa')
+        $this->getJson(uri: '/api/auth/2fa')
             ->assertOk()
-            ->assertJsonPath('enabled', false)
-            ->assertJsonPath('preferred_method', null);
+            ->assertJsonPath(path: 'enabled', expect: false)
+            ->assertJsonPath(path: 'preferred_method', expect: null);
 
         // Paso 2: Envío de código OTP.
-        $this->postJson('/api/auth/2fa/email/send')
+        $this->postJson(uri: '/api/auth/2fa/email/send')
             ->assertOk()
-            ->assertJsonStructure([
+            ->assertJsonStructure(structure: [
                 'message',
                 'expires_at',
                 'destination',
@@ -73,15 +73,15 @@ class EmailOtpTwoFactorTest extends TestCase
         $otpCode = null;
 
         Notification::assertSentTo(
-            $user,
-            EmailOtpNotification::class,
-            function (EmailOtpNotification $notification) use (&$otpCode): bool {
+            notifiable: $user,
+            notification: EmailOtpNotification::class,
+            callback: function (EmailOtpNotification $notification) use (&$otpCode): bool {
                 $otpCode = $this->readPrivateProperty(
                     object: $notification,
                     property: 'code',
                 );
 
-                return is_string($otpCode) && $otpCode !== '';
+                return is_string(value: $otpCode) && $otpCode !== '';
             },
         );
 
@@ -91,11 +91,11 @@ class EmailOtpTwoFactorTest extends TestCase
         );
 
         // Paso 4: Verificar el código y activar 2FA.
-        $this->postJson('/api/auth/2fa/email/verify', [
+        $this->postJson(uri: '/api/auth/2fa/email/verify', data: [
             'code' => $otpCode,
         ])
             ->assertOk()
-            ->assertJsonPath('message', 'Email OTP enabled successfully.');
+            ->assertJsonPath(path: 'message', expect: 'Email OTP enabled successfully.');
 
         // Paso 5: Validar en BD que 2FA se activó correctamente.
         $this->assertDatabaseHas(table: 'two_factor_settings', data: [
@@ -120,22 +120,22 @@ class EmailOtpTwoFactorTest extends TestCase
         ]);
 
         // Paso 6: Regenerar recovery codes.
-        $this->postJson('/api/auth/2fa/recovery-codes/regenerate')
+        $this->postJson(uri: '/api/auth/2fa/recovery-codes/regenerate')
             ->assertOk()
-            ->assertJsonPath('message', 'Recovery codes regenerated successfully.')
+            ->assertJsonPath(path: 'message', expect: 'Recovery codes regenerated successfully.')
             ->assertJsonCount(count: 8, key: 'codes');
 
         // Paso 7: Consultar estadísticas de recovery codes.
-        $this->getJson('/api/auth/2fa/recovery-codes')
+        $this->getJson(uri: '/api/auth/2fa/recovery-codes')
             ->assertOk()
-            ->assertJsonPath('total', 8)
-            ->assertJsonPath('used', 0)
-            ->assertJsonPath('remaining', 8);
+            ->assertJsonPath(path: 'total', expect: 8)
+            ->assertJsonPath(path: 'used', expect: 0)
+            ->assertJsonPath(path: 'remaining', expect: 8);
 
         // Paso 8: Desactivar 2FA.
-        $this->postJson('/api/auth/2fa/disable')
+        $this->postJson(uri: '/api/auth/2fa/disable')
             ->assertOk()
-            ->assertJsonPath('message', 'Two-factor authentication disabled successfully.');
+            ->assertJsonPath(path: 'message', expect: 'Two-factor authentication disabled successfully.');
 
         // Validar que 2FA quedó deshabilitado en BD.
         $this->assertDatabaseHas(table: 'two_factor_settings', data: [
@@ -158,17 +158,17 @@ class EmailOtpTwoFactorTest extends TestCase
 
         $user = User::factory()->create();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs(user: $user);
 
-        $this->postJson('/api/auth/2fa/email/send')
+        $this->postJson(uri: '/api/auth/2fa/email/send')
             ->assertOk();
 
         // Se envía un código inválido (no coincide con el generado).
-        $this->postJson('/api/auth/2fa/email/verify', [
+        $this->postJson(uri: '/api/auth/2fa/email/verify', data: [
             'code' => '000000',
         ])
-            ->assertStatus(422)
-            ->assertJsonPath('message', 'Invalid or expired security code.');
+            ->assertStatus(status: 422)
+            ->assertJsonPath(path: 'message', expect: 'Invalid or expired security code.');
 
         // 2FA no debe haberse activado.
         $this->assertDatabaseMissing(table: 'two_factor_settings', data: [
@@ -188,8 +188,8 @@ class EmailOtpTwoFactorTest extends TestCase
      */
     private function readPrivateProperty(object $object, string $property): mixed
     {
-        $reflection = new ReflectionProperty($object, $property);
+        $reflection = new ReflectionProperty(class: $object, property: $property);
 
-        return $reflection->getValue($object);
+        return $reflection->getValue(object: $object);
     }
 }

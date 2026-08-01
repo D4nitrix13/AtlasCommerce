@@ -2,6 +2,7 @@
 
 namespace App\Models\Shipping;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,6 +11,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Empresa de mensajería o paquetería.
  *
  * Tabla: `shipping_companies` — relación 1:N con `shipments`.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $phone
+ * @property string|null $email
+ * @property bool $is_active
  */
 class ShippingCompany extends Model
 {
@@ -34,8 +41,14 @@ class ShippingCompany extends Model
         return $this->hasMany(Shipment::class);
     }
 
+    /**
+     * Filtra empresas de envío activas.
+     *
+     * @param  Builder<ShippingCompany>  $query  Consulta del modelo.
+     * @return Builder<ShippingCompany>
+     */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where(column: 'is_active', value: true);
     }
 }

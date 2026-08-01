@@ -4,6 +4,8 @@ namespace App\Models\Returns;
 
 use App\Models\Customers\Customer;
 use App\Models\Sales\Order;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +15,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Solicitud de devolución de un cliente.
  *
  * Tabla: `return_requests` — relación 1:N con `return_request_items` y `refunds`.
+ *
+ * Las devoluciones pasan por estados: pending → approved/rejected → completed.
+ * Solo se procesan reembolsos para devoluciones aprobadas.
+ *
+ * @property int $id
+ * @property int $order_id
+ * @property int $customer_id
+ * @property string $reason
+ * @property string $status
+ * @property Carbon $requested_at
+ * @property Carbon|null $resolved_at
  */
 class ReturnRequest extends Model
 {
@@ -63,33 +76,71 @@ class ReturnRequest extends Model
         return $this->hasMany(Refund::class);
     }
 
-    public function scopePending($query)
+    /**
+     * Filtra devoluciones pendientes de revisión.
+     *
+     * @param  Builder<ReturnRequest>  $query  Consulta del modelo.
+     * @return Builder<ReturnRequest>
+     */
+    public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', 'pending');
+        return $query->where(column: 'status', value: 'pending');
     }
 
-    public function scopeApproved($query)
+    /**
+     * Filtra devoluciones aprobadas.
+     *
+     * @param  Builder<ReturnRequest>  $query  Consulta del modelo.
+     * @return Builder<ReturnRequest>
+     */
+    public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('status', 'approved');
+        return $query->where(column: 'status', value: 'approved');
     }
 
-    public function scopeRejected($query)
+    /**
+     * Filtra devoluciones rechazadas.
+     *
+     * @param  Builder<ReturnRequest>  $query  Consulta del modelo.
+     * @return Builder<ReturnRequest>
+     */
+    public function scopeRejected(Builder $query): Builder
     {
-        return $query->where('status', 'rejected');
+        return $query->where(column: 'status', value: 'rejected');
     }
 
-    public function scopeCompleted($query)
+    /**
+     * Filtra devoluciones completadas.
+     *
+     * @param  Builder<ReturnRequest>  $query  Consulta del modelo.
+     * @return Builder<ReturnRequest>
+     */
+    public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where('status', 'completed');
+        return $query->where(column: 'status', value: 'completed');
     }
 
-    public function scopeByCustomer($query, int $customerId)
+    /**
+     * Filtra devoluciones por cliente específico.
+     *
+     * @param  Builder<ReturnRequest>  $query  Consulta del modelo.
+     * @param  int  $customerId  Identificador del cliente.
+     * @return Builder<ReturnRequest>
+     */
+    public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('customer_id', $customerId);
+        return $query->where(column: 'customer_id', value: $customerId);
     }
 
-    public function scopeByOrder($query, int $orderId)
+    /**
+     * Filtra devoluciones por orden específica.
+     *
+     * @param  Builder<ReturnRequest>  $query  Consulta del modelo.
+     * @param  int  $orderId  Identificador de la orden.
+     * @return Builder<ReturnRequest>
+     */
+    public function scopeByOrder(Builder $query, int $orderId): Builder
     {
-        return $query->where('order_id', $orderId);
+        return $query->where(column: 'order_id', value: $orderId);
     }
 }

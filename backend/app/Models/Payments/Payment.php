@@ -4,9 +4,14 @@ namespace App\Models\Payments;
 
 use App\Models\Customers\Customer;
 use App\Models\Sales\Invoice;
+use App\Models\Sales\InvoicePayment;
+use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -14,7 +19,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Registro de un pago realizado por un cliente.
  *
  * Tabla: `payments` — relación N:1 con `customers`, `payment_methods`,
- * `stores`, y 1:N con `payment_transactions`, `invoice_payments`.
+ * `stores`, `currencies`. 1:N con `payment_transactions`,
+ * `invoice_payments`. N:N con `invoices` vía `invoice_payments`.
+ *
+ * @property int $id
+ * @property int $customer_id
+ * @property int $payment_method_id
+ * @property int $store_id
+ * @property int $currency_id
+ * @property int $amount_cents
+ * @property string $exchange_rate_snapshot
+ * @property string|null $reference
+ * @property string $status
+ * @property Carbon|null $paid_at
+ * @property string|null $notes
  */
 class Payment extends Model
 {
@@ -24,84 +42,75 @@ class Payment extends Model
         'customer_id',
         'payment_method_id',
         'store_id',
-        'amount',
+        'currency_id',
+        'amount_cents',
+        'exchange_rate_snapshot',
         'reference',
         'status',
+        'paid_at',
         'notes',
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2',
+        'amount_cents' => 'integer',
+        'exchange_rate_snapshot' => 'decimal:8',
         'paid_at' => 'datetime',
     ];
 
-    /**
-     * Cliente que realizó el pago.
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * Método de pago utilizado.
-     */
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class);
     }
 
-    /**
-     * Tienda asociada al pago.
-     */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
-    /**
-     * Transacciones enviadas al proveedor de pago.
-     */
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(PaymentTransaction::class);
     }
 
-    /**
-     * Facturas asociadas a este pago.
-     */
     public function invoicePayments(): HasMany
     {
         return $this->hasMany(InvoicePayment::class);
     }
 
-    /**
-     * Facturas aplicadas a este pago.
-     */
     public function invoices(): BelongsToMany
     {
         return $this->belongsToMany(
             related: Invoice::class,
             table: 'invoice_payments',
-        )->withPivot('applied_amount', 'applied_at');
+        )->withPivot(['applied_amount_cents', 'applied_at']);
     }
 
-    public function scopePending($query)
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
 
-    public function scopeCompleted($query)
+    public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', 'completed');
     }
 
-    public function scopeFailed($query)
+    public function scopeFailed(Builder $query): Builder
     {
         return $query->where('status', 'failed');
     }
 
-    public function scopeByCustomer($query, int $customerId)
+    public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
         return $query->where('customer_id', $customerId);
     }
