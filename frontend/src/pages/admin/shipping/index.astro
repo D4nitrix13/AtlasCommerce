@@ -1,0 +1,15 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import ShipmentsAdmin from "../../../components/admin/shipments/ShipmentsAdmin";
+---
+
+<AdminLayout title="Envíos · Admin">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">Envíos</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Despacha, entrega o cancela envíos. El stock ya fue descontado al liquidar la factura.
+    </p>
+  </div>
+
+  <ShipmentsAdmin client:load />
+</AdminLayout>

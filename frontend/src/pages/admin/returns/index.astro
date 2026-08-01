@@ -1,0 +1,15 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import ReturnsAdmin from "../../../components/admin/returns/ReturnsAdmin";
+---
+
+<AdminLayout title="Devoluciones · Admin">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">Solicitudes de devolución</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Aprueba o rechaza devoluciones. Las aprobadas habilitan la creación de refunds.
+    </p>
+  </div>
+
+  <ReturnsAdmin client:load />
+</AdminLayout>
