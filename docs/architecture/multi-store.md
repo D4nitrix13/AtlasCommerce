@@ -83,13 +83,12 @@ Enfoque:    B2C, pedidos individuales, experiencia
 - **Catálogo público** — `product_stores` controla
   qué productos aparecen en cada tienda
 - **Precio público** —
-  `product_stores.public_price` override por
-  tienda (equivalente DER:
-  `product_stores.precio_publico`)
+  `PRODUCTO_TIENDA.precio_publico` →
+  `product_stores.public_price` override por tienda
 - **Descripción pública** —
+  `PRODUCTO_TIENDA.descripcion_publica` →
   `product_stores.public_description` override
-  por tienda (equivalente DER:
-  `product_stores.descripcion_publica`)
+  por tienda
 - **Redes sociales** — `store_social_links` por
   tienda
 - **Dominios** — `store_domains` por tienda

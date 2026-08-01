@@ -170,11 +170,9 @@ backend/api/
   - Descripción: Auditoría y notificaciones
 - **Settings**
   - Controladores: `CurrencyController`,
-    `ExchangeRateController`,
-    `StoreSettingController`
-  - Modelos: `Currency`, `ExchangeRate`,
-    `StoreSetting`
-  - Descripción: Configuración
+    `ExchangeRateController`
+  - Modelos: `Currency`, `ExchangeRate`
+  - Descripción: Configuración general
 - **Stores**
   - Controladores: `StoreSettingController`
   - Modelos: `Store`, `StoreDomain`,
