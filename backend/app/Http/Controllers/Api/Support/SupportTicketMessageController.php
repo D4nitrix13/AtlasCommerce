@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Support;
 
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicketMessage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class SupportTicketMessageController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class SupportTicketMessageController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class SupportTicketMessageController extends Controller
     /**
      * Muestra el mensaje de ticket de soporte especificado.
      */
-    public function show(SupportTicketMessage $supportTicketMessage)
+    public function show(SupportTicketMessage $supportTicketMessage): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class SupportTicketMessageController extends Controller
     /**
      * Actualiza el mensaje de ticket de soporte especificado en la base de datos.
      */
-    public function update(Request $request, SupportTicketMessage $supportTicketMessage)
+    public function update(Request $request, SupportTicketMessage $supportTicketMessage): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class SupportTicketMessageController extends Controller
     /**
      * Elimina el mensaje de ticket de soporte especificado de la base de datos.
      */
-    public function destroy(SupportTicketMessage $supportTicketMessage)
+    public function destroy(SupportTicketMessage $supportTicketMessage): JsonResponse
     {
         //
     }

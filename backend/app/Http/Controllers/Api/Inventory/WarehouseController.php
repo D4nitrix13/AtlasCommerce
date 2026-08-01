@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\Warehouse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class WarehouseController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class WarehouseController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class WarehouseController extends Controller
     /**
      * Muestra el almacén especificado.
      */
-    public function show(Warehouse $warehouse)
+    public function show(Warehouse $warehouse): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class WarehouseController extends Controller
     /**
      * Actualiza el almacén especificado en la base de datos.
      */
-    public function update(Request $request, Warehouse $warehouse)
+    public function update(Request $request, Warehouse $warehouse): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class WarehouseController extends Controller
     /**
      * Elimina el almacén especificado de la base de datos.
      */
-    public function destroy(Warehouse $warehouse)
+    public function destroy(Warehouse $warehouse): JsonResponse
     {
         //
     }

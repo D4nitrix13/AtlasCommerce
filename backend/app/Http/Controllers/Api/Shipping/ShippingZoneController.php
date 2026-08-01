@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Shipping;
 
 use App\Http\Controllers\Controller;
 use App\Models\ShippingZone;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ShippingZoneController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ShippingZoneController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ShippingZoneController extends Controller
     /**
      * Muestra la zona de envío especificada.
      */
-    public function show(ShippingZone $shippingZone)
+    public function show(ShippingZone $shippingZone): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ShippingZoneController extends Controller
     /**
      * Actualiza la zona de envío especificada en la base de datos.
      */
-    public function update(Request $request, ShippingZone $shippingZone)
+    public function update(Request $request, ShippingZone $shippingZone): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ShippingZoneController extends Controller
     /**
      * Elimina la zona de envío especificada de la base de datos.
      */
-    public function destroy(ShippingZone $shippingZone)
+    public function destroy(ShippingZone $shippingZone): JsonResponse
     {
         //
     }

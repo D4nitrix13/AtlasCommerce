@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\Currency;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class CurrencyController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class CurrencyController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class CurrencyController extends Controller
     /**
      * Muestra la moneda especificada.
      */
-    public function show(Currency $currency)
+    public function show(Currency $currency): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class CurrencyController extends Controller
     /**
      * Actualiza la moneda especificada en la base de datos.
      */
-    public function update(Request $request, Currency $currency)
+    public function update(Request $request, Currency $currency): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class CurrencyController extends Controller
     /**
      * Elimina la moneda especificada de la base de datos.
      */
-    public function destroy(Currency $currency)
+    public function destroy(Currency $currency): JsonResponse
     {
         //
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class ProductVariantController extends Controller
     /**
      * Listar todas las variantes de producto disponibles en el catálogo.
      */
-    public function index(): mixed
+    public function index(): JsonResponse
     {
         //
     }
@@ -25,7 +26,7 @@ class ProductVariantController extends Controller
     /**
      * Crear una nueva variante de producto en el catálogo.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -33,7 +34,7 @@ class ProductVariantController extends Controller
     /**
      * Mostrar los detalles de una variante de producto específica.
      */
-    public function show(ProductVariant $productVariant): mixed
+    public function show(ProductVariant $productVariant): JsonResponse
     {
         //
     }
@@ -41,7 +42,7 @@ class ProductVariantController extends Controller
     /**
      * Actualizar la información de una variante de producto existente.
      */
-    public function update(Request $request, ProductVariant $productVariant): mixed
+    public function update(Request $request, ProductVariant $productVariant): JsonResponse
     {
         //
     }
@@ -49,7 +50,7 @@ class ProductVariantController extends Controller
     /**
      * Eliminar una variante de producto del catálogo.
      */
-    public function destroy(ProductVariant $productVariant): mixed
+    public function destroy(ProductVariant $productVariant): JsonResponse
     {
         //
     }

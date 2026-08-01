@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Carts;
 
 use App\Http\Controllers\Controller;
 use App\Models\CartItem;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class CartItemController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class CartItemController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class CartItemController extends Controller
     /**
      * Muestra el artículo del carrito especificado.
      */
-    public function show(CartItem $cartItem)
+    public function show(CartItem $cartItem): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class CartItemController extends Controller
     /**
      * Actualiza el artículo del carrito especificado en la base de datos.
      */
-    public function update(Request $request, CartItem $cartItem)
+    public function update(Request $request, CartItem $cartItem): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class CartItemController extends Controller
     /**
      * Elimina el artículo del carrito especificado de la base de datos.
      */
-    public function destroy(CartItem $cartItem)
+    public function destroy(CartItem $cartItem): JsonResponse
     {
         //
     }

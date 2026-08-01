@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryMovement;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class InventoryMovementController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class InventoryMovementController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class InventoryMovementController extends Controller
     /**
      * Muestra el movimiento de inventario especificado.
      */
-    public function show(InventoryMovement $inventoryMovement)
+    public function show(InventoryMovement $inventoryMovement): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class InventoryMovementController extends Controller
     /**
      * Actualiza el movimiento de inventario especificado en la base de datos.
      */
-    public function update(Request $request, InventoryMovement $inventoryMovement)
+    public function update(Request $request, InventoryMovement $inventoryMovement): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class InventoryMovementController extends Controller
     /**
      * Elimina el movimiento de inventario especificado de la base de datos.
      */
-    public function destroy(InventoryMovement $inventoryMovement)
+    public function destroy(InventoryMovement $inventoryMovement): JsonResponse
     {
         //
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Customers;
 
 use App\Http\Controllers\Controller;
 use App\Models\CustomerAddress;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class CustomerAddressController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class CustomerAddressController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class CustomerAddressController extends Controller
     /**
      * Muestra la dirección de cliente especificada.
      */
-    public function show(CustomerAddress $customerAddress)
+    public function show(CustomerAddress $customerAddress): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class CustomerAddressController extends Controller
     /**
      * Actualiza la dirección de cliente especificada en la base de datos.
      */
-    public function update(Request $request, CustomerAddress $customerAddress)
+    public function update(Request $request, CustomerAddress $customerAddress): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class CustomerAddressController extends Controller
     /**
      * Elimina la dirección de cliente especificada de la base de datos.
      */
-    public function destroy(CustomerAddress $customerAddress)
+    public function destroy(CustomerAddress $customerAddress): JsonResponse
     {
         //
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class BrandController extends Controller
     /**
      * Listar todas las marcas disponibles en el catálogo.
      */
-    public function index(): mixed
+    public function index(): JsonResponse
     {
         //
     }
@@ -25,7 +26,7 @@ class BrandController extends Controller
     /**
      * Crear una nueva marca en el catálogo.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -33,7 +34,7 @@ class BrandController extends Controller
     /**
      * Mostrar los detalles de una marca específica.
      */
-    public function show(Brand $brand): mixed
+    public function show(Brand $brand): JsonResponse
     {
         //
     }
@@ -41,7 +42,7 @@ class BrandController extends Controller
     /**
      * Actualizar la información de una marca existente.
      */
-    public function update(Request $request, Brand $brand): mixed
+    public function update(Request $request, Brand $brand): JsonResponse
     {
         //
     }
@@ -49,7 +50,7 @@ class BrandController extends Controller
     /**
      * Eliminar una marca del catálogo.
      */
-    public function destroy(Brand $brand): mixed
+    public function destroy(Brand $brand): JsonResponse
     {
         //
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Marketing;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductPromotion;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ProductPromotionController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ProductPromotionController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ProductPromotionController extends Controller
     /**
      * Muestra la promoción de producto especificada.
      */
-    public function show(ProductPromotion $productPromotion)
+    public function show(ProductPromotion $productPromotion): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ProductPromotionController extends Controller
     /**
      * Actualiza la promoción de producto especificada en la base de datos.
      */
-    public function update(Request $request, ProductPromotion $productPromotion)
+    public function update(Request $request, ProductPromotion $productPromotion): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ProductPromotionController extends Controller
     /**
      * Elimina la promoción de producto especificada de la base de datos.
      */
-    public function destroy(ProductPromotion $productPromotion)
+    public function destroy(ProductPromotion $productPromotion): JsonResponse
     {
         //
     }

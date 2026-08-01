@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Purchases;
 
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class SupplierController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class SupplierController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class SupplierController extends Controller
     /**
      * Muestra el proveedor especificado.
      */
-    public function show(Supplier $supplier)
+    public function show(Supplier $supplier): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class SupplierController extends Controller
     /**
      * Actualiza el proveedor especificado en la base de datos.
      */
-    public function update(Request $request, Supplier $supplier)
+    public function update(Request $request, Supplier $supplier): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class SupplierController extends Controller
     /**
      * Elimina el proveedor especificado de la base de datos.
      */
-    public function destroy(Supplier $supplier)
+    public function destroy(Supplier $supplier): JsonResponse
     {
         //
     }

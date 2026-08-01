@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\VariantAttributeValue;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class VariantAttributeValueController extends Controller
     /**
      * Listar todos los valores de atributo de variante disponibles en el catálogo.
      */
-    public function index(): mixed
+    public function index(): JsonResponse
     {
         //
     }
@@ -25,7 +26,7 @@ class VariantAttributeValueController extends Controller
     /**
      * Crear un nuevo valor de atributo de variante en el catálogo.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -33,7 +34,7 @@ class VariantAttributeValueController extends Controller
     /**
      * Mostrar los detalles de un valor de atributo de variante específico.
      */
-    public function show(VariantAttributeValue $variantAttributeValue): mixed
+    public function show(VariantAttributeValue $variantAttributeValue): JsonResponse
     {
         //
     }
@@ -41,7 +42,7 @@ class VariantAttributeValueController extends Controller
     /**
      * Actualizar la información de un valor de atributo de variante existente.
      */
-    public function update(Request $request, VariantAttributeValue $variantAttributeValue): mixed
+    public function update(Request $request, VariantAttributeValue $variantAttributeValue): JsonResponse
     {
         //
     }
@@ -49,7 +50,7 @@ class VariantAttributeValueController extends Controller
     /**
      * Eliminar un valor de atributo de variante del catálogo.
      */
-    public function destroy(VariantAttributeValue $variantAttributeValue): mixed
+    public function destroy(VariantAttributeValue $variantAttributeValue): JsonResponse
     {
         //
     }

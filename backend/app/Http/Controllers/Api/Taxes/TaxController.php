@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Taxes;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tax;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class TaxController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class TaxController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class TaxController extends Controller
     /**
      * Muestra el impuesto especificado.
      */
-    public function show(Tax $tax)
+    public function show(Tax $tax): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class TaxController extends Controller
     /**
      * Actualiza el impuesto especificado en la base de datos.
      */
-    public function update(Request $request, Tax $tax)
+    public function update(Request $request, Tax $tax): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class TaxController extends Controller
     /**
      * Elimina el impuesto especificado de la base de datos.
      */
-    public function destroy(Tax $tax)
+    public function destroy(Tax $tax): JsonResponse
     {
         //
     }

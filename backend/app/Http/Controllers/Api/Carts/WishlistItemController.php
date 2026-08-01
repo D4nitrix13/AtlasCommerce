@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Carts;
 
 use App\Http\Controllers\Controller;
 use App\Models\WishlistItem;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class WishlistItemController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class WishlistItemController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class WishlistItemController extends Controller
     /**
      * Muestra el artículo de la lista de deseos especificado.
      */
-    public function show(WishlistItem $wishlistItem)
+    public function show(WishlistItem $wishlistItem): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class WishlistItemController extends Controller
     /**
      * Actualiza el artículo de la lista de deseos especificado en la base de datos.
      */
-    public function update(Request $request, WishlistItem $wishlistItem)
+    public function update(Request $request, WishlistItem $wishlistItem): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class WishlistItemController extends Controller
     /**
      * Elimina el artículo de la lista de deseos especificado de la base de datos.
      */
-    public function destroy(WishlistItem $wishlistItem)
+    public function destroy(WishlistItem $wishlistItem): JsonResponse
     {
         //
     }

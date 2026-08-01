@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExchangeRate;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ExchangeRateController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ExchangeRateController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ExchangeRateController extends Controller
     /**
      * Muestra el tipo de cambio especificado.
      */
-    public function show(ExchangeRate $exchangeRate)
+    public function show(ExchangeRate $exchangeRate): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ExchangeRateController extends Controller
     /**
      * Actualiza el tipo de cambio especificado en la base de datos.
      */
-    public function update(Request $request, ExchangeRate $exchangeRate)
+    public function update(Request $request, ExchangeRate $exchangeRate): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ExchangeRateController extends Controller
     /**
      * Elimina el tipo de cambio especificado de la base de datos.
      */
-    public function destroy(ExchangeRate $exchangeRate)
+    public function destroy(ExchangeRate $exchangeRate): JsonResponse
     {
         //
     }

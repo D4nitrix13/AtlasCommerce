@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductImage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class ProductImageController extends Controller
     /**
      * Listar todas las imágenes de producto disponibles en el catálogo.
      */
-    public function index(): mixed
+    public function index(): JsonResponse
     {
         //
     }
@@ -25,7 +26,7 @@ class ProductImageController extends Controller
     /**
      * Crear una nueva imagen de producto en el catálogo.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -33,7 +34,7 @@ class ProductImageController extends Controller
     /**
      * Mostrar los detalles de una imagen de producto específica.
      */
-    public function show(ProductImage $productImage): mixed
+    public function show(ProductImage $productImage): JsonResponse
     {
         //
     }
@@ -41,7 +42,7 @@ class ProductImageController extends Controller
     /**
      * Actualizar la información de una imagen de producto existente.
      */
-    public function update(Request $request, ProductImage $productImage): mixed
+    public function update(Request $request, ProductImage $productImage): JsonResponse
     {
         //
     }
@@ -49,7 +50,7 @@ class ProductImageController extends Controller
     /**
      * Eliminar una imagen de producto del catálogo.
      */
-    public function destroy(ProductImage $productImage): mixed
+    public function destroy(ProductImage $productImage): JsonResponse
     {
         //
     }

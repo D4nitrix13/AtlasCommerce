@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Shipping;
 
 use App\Http\Controllers\Controller;
 use App\Models\ShippingCompany;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ShippingCompanyController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ShippingCompanyController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ShippingCompanyController extends Controller
     /**
      * Muestra la empresa de envío especificada.
      */
-    public function show(ShippingCompany $shippingCompany)
+    public function show(ShippingCompany $shippingCompany): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ShippingCompanyController extends Controller
     /**
      * Actualiza la empresa de envío especificada en la base de datos.
      */
-    public function update(Request $request, ShippingCompany $shippingCompany)
+    public function update(Request $request, ShippingCompany $shippingCompany): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ShippingCompanyController extends Controller
     /**
      * Elimina la empresa de envío especificada de la base de datos.
      */
-    public function destroy(ShippingCompany $shippingCompany)
+    public function destroy(ShippingCompany $shippingCompany): JsonResponse
     {
         //
     }

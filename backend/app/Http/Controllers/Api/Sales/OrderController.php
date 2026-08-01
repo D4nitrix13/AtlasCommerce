@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class OrderController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class OrderController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class OrderController extends Controller
     /**
      * Muestra el pedido especificado.
      */
-    public function show(Order $order)
+    public function show(Order $order): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class OrderController extends Controller
     /**
      * Actualiza el pedido especificado en la base de datos.
      */
-    public function update(Request $request, Order $order)
+    public function update(Request $request, Order $order): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class OrderController extends Controller
     /**
      * Elimina el pedido especificado de la base de datos.
      */
-    public function destroy(Order $order)
+    public function destroy(Order $order): JsonResponse
     {
         //
     }

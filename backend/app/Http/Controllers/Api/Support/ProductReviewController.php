@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Support;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductReview;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class ProductReviewController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class ProductReviewController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class ProductReviewController extends Controller
     /**
      * Muestra la reseña de producto especificada.
      */
-    public function show(ProductReview $productReview)
+    public function show(ProductReview $productReview): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class ProductReviewController extends Controller
     /**
      * Actualiza la reseña de producto especificada en la base de datos.
      */
-    public function update(Request $request, ProductReview $productReview)
+    public function update(Request $request, ProductReview $productReview): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class ProductReviewController extends Controller
     /**
      * Elimina la reseña de producto especificada de la base de datos.
      */
-    public function destroy(ProductReview $productReview)
+    public function destroy(ProductReview $productReview): JsonResponse
     {
         //
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Payments;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -14,7 +15,7 @@ class PaymentController extends Controller
     /**
      * Obtiene el listado de recursos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
@@ -22,7 +23,7 @@ class PaymentController extends Controller
     /**
      * Almacena un nuevo recurso en la base de datos.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
@@ -30,7 +31,7 @@ class PaymentController extends Controller
     /**
      * Muestra el pago especificado.
      */
-    public function show(Payment $payment)
+    public function show(Payment $payment): JsonResponse
     {
         //
     }
@@ -38,7 +39,7 @@ class PaymentController extends Controller
     /**
      * Actualiza el pago especificado en la base de datos.
      */
-    public function update(Request $request, Payment $payment)
+    public function update(Request $request, Payment $payment): JsonResponse
     {
         //
     }
@@ -46,7 +47,7 @@ class PaymentController extends Controller
     /**
      * Elimina el pago especificado de la base de datos.
      */
-    public function destroy(Payment $payment)
+    public function destroy(Payment $payment): JsonResponse
     {
         //
     }
