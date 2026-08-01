@@ -10,15 +10,22 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "bacon/bacon-qr-code": "^1.0",
         "laravel/framework": "^13.8",
-        "laravel/tinker": "^3.0"
+        "laravel/passkeys": "^0.2.1",
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^3.0",
+        "pragmarx/google2fa": "^9.0",
+        "pragmarx/google2fa-laravel": "^3.0"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.7",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
         "laravel/boost": "^2.2",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
-        "laravel/pint": "^1.27",
+        "laravel/pint": "^1.29",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "phpunit/phpunit": "^12.5.12"
@@ -36,6 +43,17 @@
         }
     },
     "scripts": {
+        "ide-helper": [
+            "@php artisan ide-helper:generate",
+            "@php artisan ide-helper:models -N",
+            "@php artisan ide-helper:meta"
+        ],
+        "format": [
+            "./vendor/bin/pint"
+        ],
+        "analyse": [
+            "./vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
