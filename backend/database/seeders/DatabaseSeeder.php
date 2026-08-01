@@ -34,13 +34,13 @@ class DatabaseSeeder extends Seeder
         $usd = Currency::firstWhere('code', 'USD');
         $nio = Currency::firstWhere('code', 'NIO');
 
-        $storeA = Store::factory()->for($usd, 'currency')->create([
+        $storeA = Store::factory()->for(factory: $usd, relationship: 'currency')->create([
             'name' => 'Panda Estampados',
             'slug' => 'panda-estampados',
             'email' => 'panda@example.com',
         ]);
 
-        Store::factory()->for($nio, 'currency')->create([
+        Store::factory()->for(factory: $nio, relationship: 'currency')->create([
             'name' => 'Kitsune Store',
             'slug' => 'kitsune',
             'email' => 'kitsune@example.com',
@@ -48,11 +48,14 @@ class DatabaseSeeder extends Seeder
 
         $cat = Category::factory()->create(['name' => 'General', 'slug' => 'general']);
 
-        Product::factory()->for($cat, 'category')->for($usd, 'currency')->create([
-            'name' => 'Demo Producto',
-            'slug' => 'demo-producto',
-            'sku' => 'DEMO-001',
-            'base_price_cents' => 19_99,
-        ]);
+        Product::factory()
+            ->for(factory: $cat, relationship: 'category')
+            ->for(factory: $usd, relationship: 'currency')
+            ->create([
+                'name' => 'Demo Producto',
+                'slug' => 'demo-producto',
+                'sku' => 'DEMO-001',
+                'base_price_cents' => 19_99,
+            ]);
     }
 }

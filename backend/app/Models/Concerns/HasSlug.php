@@ -55,7 +55,7 @@ trait HasSlug
      */
     protected function getSlugSource(): string
     {
-        return property_exists($this, 'slugSource')
+        return property_exists(object_or_class: $this, property: 'slugSource')
             ? $this->slugSource
             : 'name';
     }
@@ -96,7 +96,7 @@ trait HasSlug
      */
     protected function getSlugColumn(): string
     {
-        return property_exists($this, 'slugColumn')
+        return property_exists(object_or_class: $this, property: 'slugColumn')
             ? $this->slugColumn
             : 'slug';
     }

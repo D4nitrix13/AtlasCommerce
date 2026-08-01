@@ -91,8 +91,8 @@ final class CartApiTest extends TestCase
 
         $category = Category::factory()->create();
         $product = Product::factory()
-            ->for($category, 'category')
-            ->for($this->currency, 'currency')
+            ->for(factory: $category, relationship: 'category')
+            ->for(factory: $this->currency, relationship: 'currency')
             ->create(['base_price_cents' => 25_00]);
 
         // Agregar 2 unidades.

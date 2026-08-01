@@ -67,7 +67,7 @@ final class MoneyCast implements CastsAttributes
 
     private function resolveCurrency(Model $model): ?Currency
     {
-        if (method_exists($model, 'currency')) {
+        if (method_exists(object_or_class: $model, method: 'currency')) {
             $relation = $model->currency();
 
             return $relation instanceof Relation
