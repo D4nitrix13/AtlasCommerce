@@ -2,6 +2,7 @@
 
 namespace App\Models\Auth;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Los roles agrupan permisos para facilitar la gestión de acceso.
  * Ejemplos: admin, vendedor, cliente.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property bool $is_active
  */
 class Role extends Model
 {
@@ -40,13 +47,26 @@ class Role extends Model
         );
     }
 
-    public function scopeActive($query)
+    /**
+     * Filtra roles activos.
+     *
+     * @param  Builder<Role>  $query  Consulta del modelo.
+     * @return Builder<Role>
+     */
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where(column: 'is_active', value: true);
     }
 
-    public function scopeBySlug($query, string $slug)
+    /**
+     * Filtra roles por slug específico.
+     *
+     * @param  Builder<Role>  $query  Consulta del modelo.
+     * @param  string  $slug  Slug del rol.
+     * @return Builder<Role>
+     */
+    public function scopeBySlug(Builder $query, string $slug): Builder
     {
-        return $query->where('slug', $slug);
+        return $query->where(column: 'slug', value: $slug);
     }
 }

@@ -2,17 +2,22 @@
 
 namespace App\Models\Catalog;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Marca de productos del catálogo.
+ * Marca del catálogo de productos.
  *
  * Tabla: `brands` — relación 1:N con `products`.
  *
- * Cada marca tiene nombre y slug únicos, con soporte para logo
- * y estado de activación.
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $logo
+ * @property string|null $description
+ * @property bool $is_active
  */
 class Brand extends Model
 {
@@ -21,8 +26,8 @@ class Brand extends Model
     protected $fillable = [
         'name',
         'slug',
+        'logo',
         'description',
-        'logo_url',
         'is_active',
     ];
 
@@ -38,8 +43,14 @@ class Brand extends Model
         return $this->hasMany(Product::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * Filtra marcas activas.
+     *
+     * @param  Builder<Brand>  $query  Consulta del modelo.
+     * @return Builder<Brand>
+     */
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where(column: 'is_active', value: true);
     }
 }

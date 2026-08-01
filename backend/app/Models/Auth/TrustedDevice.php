@@ -2,6 +2,8 @@
 
 namespace App\Models\Auth;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,6 +14,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Permite al usuario recordar dispositivos para omitir
  * la verificación de dos factores en futuros inicios de sesión.
+ * Los dispositivos pueden expirar o ser revocados manualmente.
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property string $fingerprint_hash
+ * @property string|null $device_name
+ * @property string|null $last_ip
+ * @property string|null $last_user_agent
+ * @property Carbon|null $trusted_at
+ * @property Carbon|null $last_used_at
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $revoked_at
  */
 class TrustedDevice extends Model
 {
@@ -44,6 +58,8 @@ class TrustedDevice extends Model
 
     /**
      * Determina si el dispositivo está activo (no revocado y no expirado).
+     *
+     * @return bool True cuando el dispositivo puede usarse para autenticación.
      */
     public function isActive(): bool
     {
@@ -51,22 +67,41 @@ class TrustedDevice extends Model
             && ($this->expires_at === null || $this->expires_at->isFuture());
     }
 
-    public function scopeActive($query)
+    /**
+     * Filtra dispositivos activos (no revocados y no expirados).
+     *
+     * @param  Builder<TrustedDevice>  $query  Consulta del modelo.
+     * @return Builder<TrustedDevice>
+     */
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->whereNull('revoked_at')
+        return $query->whereNull(column: 'revoked_at')
             ->where(function ($q) {
-                $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
+                $q->whereNull(column: 'expires_at')
+                    ->orWhere(column: 'expires_at', operator: '>', value: now());
             });
     }
 
-    public function scopeRevoked($query)
+    /**
+     * Filtra dispositivos revocados.
+     *
+     * @param  Builder<TrustedDevice>  $query  Consulta del modelo.
+     * @return Builder<TrustedDevice>
+     */
+    public function scopeRevoked(Builder $query): Builder
     {
-        return $query->whereNotNull('revoked_at');
+        return $query->whereNotNull(column: 'revoked_at');
     }
 
-    public function scopeByUser($query, int $userId)
+    /**
+     * Filtra dispositivos por usuario específico.
+     *
+     * @param  Builder<TrustedDevice>  $query  Consulta del modelo.
+     * @param  int  $userId  Identificador del usuario.
+     * @return Builder<TrustedDevice>
+     */
+    public function scopeByUser(Builder $query, int $userId): Builder
     {
-        return $query->where('user_id', $userId);
+        return $query->where(column: 'user_id', value: $userId);
     }
 }

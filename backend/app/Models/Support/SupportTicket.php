@@ -4,6 +4,7 @@ namespace App\Models\Support;
 
 use App\Models\Customers\Customer;
 use App\Models\Stores\Store;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +14,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Ticket de soporte creado por un cliente.
  *
  * Tabla: `support_tickets` — relación 1:N con `support_ticket_messages`.
+ *
+ * Los tickets tienen estados (open, in_progress, closed) y prioridades
+ * (low, normal, high, urgent) para gestionar el flujo de atención.
+ *
+ * @property int $id
+ * @property int $customer_id
+ * @property int|null $store_id
+ * @property string $subject
+ * @property string $description
+ * @property string $status
+ * @property string $priority
  */
 class SupportTicket extends Model
 {
@@ -51,28 +63,61 @@ class SupportTicket extends Model
         return $this->hasMany(SupportTicketMessage::class);
     }
 
-    public function scopeOpen($query)
+    /**
+     * Filtra tickets abiertos.
+     *
+     * @param  Builder<SupportTicket>  $query  Consulta del modelo.
+     * @return Builder<SupportTicket>
+     */
+    public function scopeOpen(Builder $query): Builder
     {
-        return $query->where('status', 'open');
+        return $query->where(column: 'status', value: 'open');
     }
 
-    public function scopeClosed($query)
+    /**
+     * Filtra tickets cerrados.
+     *
+     * @param  Builder<SupportTicket>  $query  Consulta del modelo.
+     * @return Builder<SupportTicket>
+     */
+    public function scopeClosed(Builder $query): Builder
     {
-        return $query->where('status', 'closed');
+        return $query->where(column: 'status', value: 'closed');
     }
 
-    public function scopeByStatus($query, string $status)
+    /**
+     * Filtra tickets por estado específico.
+     *
+     * @param  Builder<SupportTicket>  $query  Consulta del modelo.
+     * @param  string  $status  Estado del ticket (open, in_progress, closed).
+     * @return Builder<SupportTicket>
+     */
+    public function scopeByStatus(Builder $query, string $status): Builder
     {
-        return $query->where('status', $status);
+        return $query->where(column: 'status', value: $status);
     }
 
-    public function scopeByPriority($query, string $priority)
+    /**
+     * Filtra tickets por prioridad específica.
+     *
+     * @param  Builder<SupportTicket>  $query  Consulta del modelo.
+     * @param  string  $priority  Prioridad del ticket (low, normal, high, urgent).
+     * @return Builder<SupportTicket>
+     */
+    public function scopeByPriority(Builder $query, string $priority): Builder
     {
-        return $query->where('priority', $priority);
+        return $query->where(column: 'priority', value: $priority);
     }
 
-    public function scopeByCustomer($query, int $customerId)
+    /**
+     * Filtra tickets por cliente específico.
+     *
+     * @param  Builder<SupportTicket>  $query  Consulta del modelo.
+     * @param  int  $customerId  Identificador del cliente.
+     * @return Builder<SupportTicket>
+     */
+    public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('customer_id', $customerId);
+        return $query->where(column: 'customer_id', value: $customerId);
     }
 }

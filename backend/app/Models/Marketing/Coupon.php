@@ -3,6 +3,8 @@
 namespace App\Models\Marketing;
 
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +14,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Cupón de descuento aplicable a pedidos.
  *
  * Tabla: `coupons` — relación 1:N con `coupon_usages`.
+ *
+ * Los cupones pueden ser globales o asociados a una tienda específica.
+ * Soportan límites de uso, ventanas de vigencia y montos mínimos.
+ *
+ * @property int $id
+ * @property int|null $store_id
+ * @property string $code
+ * @property string $discount_type
+ * @property string $value
+ * @property string $minimum_amount
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
+ * @property int|null $usage_limit
+ * @property int $used_count
+ * @property bool $is_active
  */
 class Coupon extends Model
 {
@@ -58,6 +75,11 @@ class Coupon extends Model
 
     /**
      * Determina si el cupón es válido actualmente.
+     *
+     * Verifica que esté activo, dentro de la ventana de vigencia
+     * y que no se haya agotado el límite de uso.
+     *
+     * @return bool True cuando el cupón puede aplicarse.
      */
     public function isValid(): bool
     {
@@ -80,29 +102,57 @@ class Coupon extends Model
         return true;
     }
 
-    public function scopeActive($query)
+    /**
+     * Filtra cupones activos.
+     *
+     * @param  Builder<Coupon>  $query  Consulta del modelo.
+     * @return Builder<Coupon>
+     */
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where(column: 'is_active', value: true);
     }
 
-    public function scopeValid($query)
+    /**
+     * Filtra cupones vigentes (activos, no expirados, con usos disponibles).
+     *
+     * @param  Builder<Coupon>  $query  Consulta del modelo.
+     * @return Builder<Coupon>
+     */
+    public function scopeValid(Builder $query): Builder
     {
-        return $query->where('is_active', true)
+        return $query->where(column: 'is_active', value: true)
             ->where(function ($q) {
-                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                $q->whereNull(column: 'starts_at')
+                    ->orWhere(column: 'starts_at', operator: '<=', value: now());
             })
             ->where(function ($q) {
-                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+                $q->whereNull(column: 'ends_at')
+                    ->orWhere(column: 'ends_at', operator: '>=', value: now());
             });
     }
 
-    public function scopeByCode($query, string $code)
+    /**
+     * Filtra cupones por código específico.
+     *
+     * @param  Builder<Coupon>  $query  Consulta del modelo.
+     * @param  string  $code  Código del cupón.
+     * @return Builder<Coupon>
+     */
+    public function scopeByCode(Builder $query, string $code): Builder
     {
-        return $query->where('code', $code);
+        return $query->where(column: 'code', value: $code);
     }
 
-    public function scopeByStore($query, int $storeId)
+    /**
+     * Filtra cupones por tienda específica.
+     *
+     * @param  Builder<Coupon>  $query  Consulta del modelo.
+     * @param  int  $storeId  Identificador de la tienda.
+     * @return Builder<Coupon>
+     */
+    public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where('store_id', $storeId);
+        return $query->where(column: 'store_id', value: $storeId);
     }
 }

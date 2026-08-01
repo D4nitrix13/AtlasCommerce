@@ -5,6 +5,8 @@ namespace App\Models\Support;
 use App\Models\Catalog\Product;
 use App\Models\Customers\Customer;
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +15,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Reseña y calificación de un producto por un cliente.
  *
  * Tabla: `product_reviews` — relación N:1 con `products`, `customers` y `stores`.
+ *
+ * Las reseñas requieren aprobación antes de ser visibles públicamente.
+ * Cada cliente puede leaving solo una reseña por producto.
+ *
+ * @property int $id
+ * @property int $product_id
+ * @property int $customer_id
+ * @property int|null $store_id
+ * @property int $rating
+ * @property string|null $comment
+ * @property bool $is_approved
+ * @property Carbon $reviewed_at
  */
 class ProductReview extends Model
 {
@@ -57,28 +71,61 @@ class ProductReview extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function scopeApproved($query)
+    /**
+     * Filtra reseñas aprobadas (visibles públicamente).
+     *
+     * @param  Builder<ProductReview>  $query  Consulta del modelo.
+     * @return Builder<ProductReview>
+     */
+    public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('is_approved', true);
+        return $query->where(column: 'is_approved', value: true);
     }
 
-    public function scopePending($query)
+    /**
+     * Filtra reseñas pendientes de aprobación.
+     *
+     * @param  Builder<ProductReview>  $query  Consulta del modelo.
+     * @return Builder<ProductReview>
+     */
+    public function scopePending(Builder $query): Builder
     {
-        return $query->where('is_approved', false);
+        return $query->where(column: 'is_approved', value: false);
     }
 
-    public function scopeByProduct($query, int $productId)
+    /**
+     * Filtra reseñas por producto específico.
+     *
+     * @param  Builder<ProductReview>  $query  Consulta del modelo.
+     * @param  int  $productId  Identificador del producto.
+     * @return Builder<ProductReview>
+     */
+    public function scopeByProduct(Builder $query, int $productId): Builder
     {
-        return $query->where('product_id', $productId);
+        return $query->where(column: 'product_id', value: $productId);
     }
 
-    public function scopeByCustomer($query, int $customerId)
+    /**
+     * Filtra reseñas por cliente específico.
+     *
+     * @param  Builder<ProductReview>  $query  Consulta del modelo.
+     * @param  int  $customerId  Identificador del cliente.
+     * @return Builder<ProductReview>
+     */
+    public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('customer_id', $customerId);
+        return $query->where(column: 'customer_id', value: $customerId);
     }
 
-    public function scopeByRating($query, int $rating)
+    /**
+     * Filtra reseñas por calificación específica.
+     *
+     * @param  Builder<ProductReview>  $query  Consulta del modelo.
+     * @param  int  $rating  Calificación (1-5).
+     * @return Builder<ProductReview>
+     */
+    public function scopeByRating(Builder $query, int $rating): Builder
     {
-        return $query->where('rating', $rating);
+        return $query->where(column: 'rating', value: $rating);
     }
 }

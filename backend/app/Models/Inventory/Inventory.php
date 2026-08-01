@@ -4,6 +4,7 @@ namespace App\Models\Inventory;
 
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductVariant;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +14,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * Tabla: `inventories` — relación N:1 con `products`, `product_variants`
  * y `warehouses`, y 1:N con `inventory_movements`.
+ *
+ * Cada registro representa el stock de un producto/variante en un almacén específico.
+ * La restricción unique en (warehouse_id, product_id, product_variant_id) garantiza
+ * un solo registro por combinación.
+ *
+ * @property int $id
+ * @property int $warehouse_id
+ * @property int $product_id
+ * @property int|null $product_variant_id
+ * @property int $current_stock
+ * @property int $minimum_stock
+ * @property int $reserved_stock
  */
 class Inventory extends Model
 {
@@ -64,7 +77,9 @@ class Inventory extends Model
     }
 
     /**
-     * Stock disponible (actual - reservado).
+     * Stock disponible para venta (actual - reservado).
+     *
+     * @return int Cantidad disponible.
      */
     public function getAvailableStockAttribute(): int
     {
@@ -72,25 +87,47 @@ class Inventory extends Model
     }
 
     /**
-     * Determina si el stock está por debajo del mínimo.
+     * Determina si el stock está por debajo del mínimo configurado.
+     *
+     * @return bool True cuando el stock actual es menor o igual al mínimo.
      */
     public function isLow(): bool
     {
         return $this->current_stock <= $this->minimum_stock;
     }
 
-    public function scopeLowStock($query)
+    /**
+     * Filtra registros con stock bajo (actual <= mínimo).
+     *
+     * @param  Builder<Inventory>  $query  Consulta del modelo.
+     * @return Builder<Inventory>
+     */
+    public function scopeLowStock(Builder $query): Builder
     {
-        return $query->whereColumn('current_stock', '<=', 'minimum_stock');
+        return $query->where(column: 'current_stock', operator: '<=', column2: 'minimum_stock');
     }
 
-    public function scopeByWarehouse($query, int $warehouseId)
+    /**
+     * Filtra registros por almacén específico.
+     *
+     * @param  Builder<Inventory>  $query  Consulta del modelo.
+     * @param  int  $warehouseId  Identificador del almacén.
+     * @return Builder<Inventory>
+     */
+    public function scopeByWarehouse(Builder $query, int $warehouseId): Builder
     {
-        return $query->where('warehouse_id', $warehouseId);
+        return $query->where(column: 'warehouse_id', value: $warehouseId);
     }
 
-    public function scopeByProduct($query, int $productId)
+    /**
+     * Filtra registros por producto específico.
+     *
+     * @param  Builder<Inventory>  $query  Consulta del modelo.
+     * @param  int  $productId  Identificador del producto.
+     * @return Builder<Inventory>
+     */
+    public function scopeByProduct(Builder $query, int $productId): Builder
     {
-        return $query->where('product_id', $productId);
+        return $query->where(column: 'product_id', value: $productId);
     }
 }

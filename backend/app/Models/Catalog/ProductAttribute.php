@@ -2,18 +2,25 @@
 
 namespace App\Models\Catalog;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Atributo del catálogo de productos.
+ * Atributo definido para productos del catálogo.
  *
- * Tabla: `attributes` — relación N:N con `products` a través de
- * `attribute_product` y con `product_variants` a través de
- * `attribute_variant`.
+ * Tabla: `attributes` — relación N:N con `products` a través de `attribute_product`
+ * y N:N con `product_variants` a través de `attribute_variant`.
  *
- * Define los tipos de atributos disponibles (color, talla, material)
- * y si son filtrables o requeridos.
+ * Los atributos definen las características variantes (color, talla, material, etc.)
+ * y pueden ser filtrables, requeridos o de tipo específico.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property string $type
+ * @property bool $is_filterable
+ * @property bool $is_required
  */
 class ProductAttribute extends Model
 {
@@ -21,7 +28,6 @@ class ProductAttribute extends Model
         'name',
         'slug',
         'type',
-        'description',
         'is_filterable',
         'is_required',
     ];
@@ -32,39 +38,52 @@ class ProductAttribute extends Model
     ];
 
     /**
-     * Productos que tienen este atributo asignado.
+     * Productos que tienen asignado este atributo.
      */
-    public function products(): BelongsToMany
+    public function products(): HasMany
     {
-        return $this->belongsToMany(
-            related: Product::class,
-            table: 'attribute_product',
-        )->withPivot('value');
+        return $this->hasMany(ProductAttributeValue::class, 'attribute_id');
     }
 
     /**
-     * Variantes que tienen este atributo asignado.
+     * Variantes que tienen valores de este atributo.
      */
-    public function variants(): BelongsToMany
+    public function variants(): HasMany
     {
-        return $this->belongsToMany(
-            related: ProductVariant::class,
-            table: 'attribute_variant',
-        )->withPivot('value');
+        return $this->hasMany(VariantAttributeValue::class, 'attribute_id');
     }
 
-    public function scopeFilterable($query)
+    /**
+     * Filtra atributos utilizables en filtros de búsqueda.
+     *
+     * @param  Builder<ProductAttribute>  $query  Consulta del modelo.
+     * @return Builder<ProductAttribute>
+     */
+    public function scopeFilterable(Builder $query): Builder
     {
-        return $query->where('is_filterable', true);
+        return $query->where(column: 'is_filterable', value: true);
     }
 
-    public function scopeRequired($query)
+    /**
+     * Filtra atributos requeridos para crear productos.
+     *
+     * @param  Builder<ProductAttribute>  $query  Consulta del modelo.
+     * @return Builder<ProductAttribute>
+     */
+    public function scopeRequired(Builder $query): Builder
     {
-        return $query->where('is_required', true);
+        return $query->where(column: 'is_required', value: true);
     }
 
-    public function scopeByType($query, string $type)
+    /**
+     * Filtra atributos por tipo específico (text, select, color, etc.).
+     *
+     * @param  Builder<ProductAttribute>  $query  Consulta del modelo.
+     * @param  string  $type  Tipo de atributo.
+     * @return Builder<ProductAttribute>
+     */
+    public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where('type', $type);
+        return $query->where(column: 'type', value: $type);
     }
 }

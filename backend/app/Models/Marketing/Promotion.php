@@ -4,6 +4,8 @@ namespace App\Models\Marketing;
 
 use App\Models\Catalog\Product;
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,6 +15,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Promoción o campaña de marketing activa.
  *
  * Tabla: `promotions` — relación N:N con `products` a través de `product_promotion`.
+ *
+ * Las promociones pueden ser globales o asociadas a una tienda.
+ * Soportan ventanas de vigencia y tipos de descuento variables.
+ *
+ * @property int $id
+ * @property int|null $store_id
+ * @property string $name
+ * @property string|null $description
+ * @property string $discount_type
+ * @property string $value
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
+ * @property bool $is_active
  */
 class Promotion extends Model
 {
@@ -57,6 +72,8 @@ class Promotion extends Model
 
     /**
      * Determina si la promoción está vigente.
+     *
+     * @return bool True cuando la promoción puede aplicarse.
      */
     public function isActive(): bool
     {
@@ -75,24 +92,45 @@ class Promotion extends Model
         return true;
     }
 
-    public function scopeActive($query)
+    /**
+     * Filtra promociones activas.
+     *
+     * @param  Builder<Promotion>  $query  Consulta del modelo.
+     * @return Builder<Promotion>
+     */
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where(column: 'is_active', value: true);
     }
 
-    public function scopeValid($query)
+    /**
+     * Filtra promociones vigentes (activas y dentro de la ventana temporal).
+     *
+     * @param  Builder<Promotion>  $query  Consulta del modelo.
+     * @return Builder<Promotion>
+     */
+    public function scopeValid(Builder $query): Builder
     {
-        return $query->where('is_active', true)
+        return $query->where(column: 'is_active', value: true)
             ->where(function ($q) {
-                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                $q->whereNull(column: 'starts_at')
+                    ->orWhere(column: 'starts_at', operator: '<=', value: now());
             })
             ->where(function ($q) {
-                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+                $q->whereNull(column: 'ends_at')
+                    ->orWhere(column: 'ends_at', operator: '>=', value: now());
             });
     }
 
-    public function scopeByStore($query, int $storeId)
+    /**
+     * Filtra promociones por tienda específica.
+     *
+     * @param  Builder<Promotion>  $query  Consulta del modelo.
+     * @param  int  $storeId  Identificador de la tienda.
+     * @return Builder<Promotion>
+     */
+    public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where('store_id', $storeId);
+        return $query->where(column: 'store_id', value: $storeId);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Models\System;
 
 use App\Models\Auth\User;
 use App\Models\Stores\Store;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +13,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Notificación enviada a un usuario.
  *
  * Tabla: `notifications` — relación N:1 con `users` y `stores`.
+ *
+ * Las notificaciones se clasifican por tipo (info, warning, error, success)
+ * y pueden marcarse como leídas individualmente.
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property int|null $store_id
+ * @property string $title
+ * @property string $message
+ * @property string $type
+ * @property bool $is_read
+ * @property Carbon|null $read_at
  */
 class Notification extends Model
 {
@@ -46,7 +60,7 @@ class Notification extends Model
     }
 
     /**
-     * Marca la notificación como leída.
+     * Marca la notificación como leída con la fecha y hora actual.
      */
     public function markAsRead(): void
     {
@@ -56,23 +70,50 @@ class Notification extends Model
         ]);
     }
 
-    public function scopeUnread($query)
+    /**
+     * Filtra notificaciones no leídas.
+     *
+     * @param  Builder<Notification>  $query  Consulta del modelo.
+     * @return Builder<Notification>
+     */
+    public function scopeUnread(Builder $query): Builder
     {
-        return $query->where('is_read', false);
+        return $query->where(column: 'is_read', value: false);
     }
 
-    public function scopeByType($query, string $type)
+    /**
+     * Filtra notificaciones por tipo específico.
+     *
+     * @param  Builder<Notification>  $query  Consulta del modelo.
+     * @param  string  $type  Tipo de notificación (info, warning, error, success).
+     * @return Builder<Notification>
+     */
+    public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where('type', $type);
+        return $query->where(column: 'type', value: $type);
     }
 
-    public function scopeByUser($query, int $userId)
+    /**
+     * Filtra notificaciones por usuario específico.
+     *
+     * @param  Builder<Notification>  $query  Consulta del modelo.
+     * @param  int  $userId  Identificador del usuario.
+     * @return Builder<Notification>
+     */
+    public function scopeByUser(Builder $query, int $userId): Builder
     {
-        return $query->where('user_id', $userId);
+        return $query->where(column: 'user_id', value: $userId);
     }
 
-    public function scopeByStore($query, int $storeId)
+    /**
+     * Filtra notificaciones por tienda específica.
+     *
+     * @param  Builder<Notification>  $query  Consulta del modelo.
+     * @param  int  $storeId  Identificador de la tienda.
+     * @return Builder<Notification>
+     */
+    public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where('store_id', $storeId);
+        return $query->where(column: 'store_id', value: $storeId);
     }
 }

@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Asociación entre una promoción y un producto.
  *
  * Tabla: `product_promotion` — pivote N:N entre `promotions` y `products`.
+ *
+ * @property int $id
+ * @property int $product_id
+ * @property int $promotion_id
  */
 class ProductPromotion extends Model
 {
