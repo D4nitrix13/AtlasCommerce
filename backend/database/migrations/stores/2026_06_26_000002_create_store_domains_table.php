@@ -9,9 +9,8 @@ return new class extends Migration
     /**
      * Ejecutar las migraciones.
      *
-     * Crea la tabla 'store_domains' que permite asociar múltiples dominios personalizados
-     * a cada tienda. Cada dominio tiene un flag de primario (el dominio principal de la tienda)
-     * y un estado de actividad. El dominio es único en todo el sistema para evitar duplicados.
+     * Permite asociar múltiples dominios/rutas a cada tienda para resolución
+     * por dominio, subdominio o path. Soporta redirect y verificación.
      */
     public function up(): void
     {
@@ -23,24 +22,29 @@ return new class extends Migration
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            // Dominio único en todo el sistema para evitar conflictos entre tiendas
-            $table->string(column: 'domain', length: 255)->unique();
+            $table->string(column: 'domain', length: 255);
+            $table->string(column: 'type', length: 20)->default(value: 'domain');
+            $table->string(column: 'base_path', length: 255)->default(value: '/');
+            $table->boolean(column: 'redirect_to_primary')->default(value: false);
             // Marca el dominio principal de la tienda
             $table->boolean(column: 'is_primary')->default(value: false);
             $table->boolean(column: 'is_active')->default(value: true);
+            $table->timestamp(column: 'verified_at')->nullable();
 
             $table->timestamps();
 
+            // Combinación única: un dominio+path no puede repetirse
+            $table->unique(columns: ['domain', 'base_path'], name: 'store_domains_domain_path_unique');
+
             $table->index(columns: ['store_id'], name: 'store_domains_store_id_idx');
             $table->index(columns: ['domain'], name: 'store_domains_domain_idx');
+            $table->index(columns: ['type'], name: 'store_domains_type_idx');
             $table->index(columns: ['is_primary'], name: 'store_domains_is_primary_idx');
         });
     }
 
     /**
      * Revertir las migraciones.
-     *
-     * Elimina la tabla 'store_domains' y todas sus restricciones de integridad referencial.
      */
     public function down(): void
     {
