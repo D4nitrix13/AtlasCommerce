@@ -4,7 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+/**
+ * Migración para la tabla `passkey_credentials`.
+ *
+ * Almacena credenciales WebAuthn para autenticación con passkeys.
+ * Preparado para la fase futura de integración con `laravel/passkeys`.
+ *
+ * Cada credencial contiene:
+ * - `credential_id`: identificador único (hasta 1024 bytes para compatibilidad).
+ * - `public_key`: clave pública del authenticator.
+ * - `sign_count`: contador de firmas para detectar clonación.
+ * - `transports`: transportes soportados (usb, nfc, ble, internal).
+ * - `aaguid`: identificador del manufacturer del authenticator.
+ *
+ * Índice [user_id, active]: optimiza la búsqueda de credenciales activas.
+ */
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
