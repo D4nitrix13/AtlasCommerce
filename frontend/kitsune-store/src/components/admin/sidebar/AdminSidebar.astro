@@ -1,97 +1,170 @@
 ---
 import AdminSidebarItem from "./AdminSidebarItem.astro";
 
+const currentPath = Astro.url.pathname;
+
 const menu = [
   {
-    label: "Overview",
+    label: "Resumen",
     items: [
-      { name: "Dashboard", href: "/admin", icon: "grid", active: true },
-      { name: "Analytics", href: "/admin/reports", icon: "chart" },
+      { name: "Dashboard", href: "/admin/dashboard", icon: "squares-2x2" },
+      { name: "Reportes", href: "/admin/reports", icon: "chart-bar" },
     ],
   },
   {
-    label: "Commerce",
+    label: "Comercio",
     items: [
-      { name: "Orders", href: "/admin/sales/orders", icon: "cart", badge: "12" },
-      { name: "Products", href: "/admin/catalog/products", icon: "box" },
-      { name: "Customers", href: "/admin/customers", icon: "users" },
-      { name: "Invoices", href: "/admin/sales/invoices", icon: "file" },
+      { name: "Órdenes", href: "/admin/sales/orders", icon: "shopping-cart", badge: "12" },
+      { name: "Productos", href: "/admin/catalog/products", icon: "cube" },
+      { name: "Clientes", href: "/admin/customers", icon: "users" },
+      { name: "Facturas", href: "/admin/sales/invoices", icon: "document-text" },
     ],
   },
   {
-    label: "Catalog",
+    label: "Catálogo",
     items: [
-      { name: "Categories", href: "/admin/catalog/categories", icon: "folder" },
-      { name: "Brands", href: "/admin/catalog/brands", icon: "tag" },
-      { name: "Variants", href: "/admin/catalog/variants", icon: "layers" },
+      { name: "Categorías", href: "/admin/catalog/categories", icon: "folder" },
+      { name: "Marcas", href: "/admin/catalog/brands", icon: "tag" },
+      { name: "Variantes", href: "/admin/catalog/variants", icon: "square-3-stack-3d" },
     ],
   },
   {
-    label: "Inventory",
+    label: "Inventario",
     items: [
-      { name: "Stock", href: "/admin/inventory/stock", icon: "warehouse" },
-      { name: "Movements", href: "/admin/inventory/movements", icon: "move" },
-      { name: "Warehouses", href: "/admin/inventory/warehouses", icon: "building" },
+      { name: "Stock", href: "/admin/inventory/stock", icon: "archive-box" },
+      { name: "Movimientos", href: "/admin/inventory/movements", icon: "arrow-path" },
+      { name: "Depósitos", href: "/admin/inventory/warehouses", icon: "building-office" },
     ],
   },
   {
-    label: "Purchases",
+    label: "Compras",
     items: [
-      { name: "Suppliers", href: "/admin/purchases/suppliers", icon: "truck" },
-      { name: "Purchases", href: "/admin/purchases/orders", icon: "clipboard" },
+      { name: "Proveedores", href: "/admin/purchases/suppliers", icon: "truck" },
+      { name: "Compras", href: "/admin/purchases/orders", icon: "clipboard-document-list" },
     ],
   },
   {
     label: "Marketing",
     items: [
-      { name: "Coupons", href: "/admin/marketing/coupons", icon: "ticket" },
-      { name: "Promotions", href: "/admin/marketing/promotions", icon: "gift" },
+      { name: "Cupones", href: "/admin/marketing/coupons", icon: "ticket" },
+      { name: "Promociones", href: "/admin/marketing/promotions", icon: "gift" },
     ],
   },
   {
-    label: "Support",
+    label: "Soporte",
     items: [
-      { name: "Tickets", href: "/admin/support/tickets", icon: "headphones" },
-      { name: "Reviews", href: "/admin/support/reviews", icon: "star" },
-      { name: "Questions", href: "/admin/support/questions", icon: "help" },
+      { name: "Tickets", href: "/admin/support/tickets", icon: "chat-bubble-left-right" },
+      { name: "Reseñas", href: "/admin/support/reviews", icon: "star" },
+      { name: "Preguntas", href: "/admin/support/questions", icon: "question-mark-circle" },
     ],
   },
   {
-    label: "System",
+    label: "Sistema",
     items: [
-      { name: "Users", href: "/admin/users", icon: "user" },
-      { name: "Roles", href: "/admin/roles", icon: "shield" },
-      { name: "Audits", href: "/admin/system/audits", icon: "search" },
-      { name: "Settings", href: "/admin/settings", icon: "settings" },
+      { name: "Usuarios", href: "/admin/users", icon: "user" },
+      { name: "Roles", href: "/admin/roles", icon: "shield-check" },
+      { name: "Auditoría", href: "/admin/system/audits", icon: "magnifying-glass" },
+      { name: "Configuración", href: "/admin/settings", icon: "cog-6-tooth" },
     ],
   },
 ];
 ---
 
-<aside class="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-white/10 bg-[#06110c] text-slate-300 lg:flex lg:flex-col">
-  <div class="flex h-16 items-center gap-3 px-5">
-    <div class="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white">
-      ⚡
-    </div>
+<style is:global>
+  /* ── Label collapse: fade + width collapse, no deformation ── */
+  .sidebar-label {
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 300px;
+    opacity: 1;
+    transition: opacity 150ms ease, max-width 200ms ease;
+  }
 
-    <div>
-      <p class="text-sm font-bold text-white">Kitsune</p>
-      <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-        Dashboard
-      </p>
+  aside[data-collapsed="true"] .sidebar-label {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+
+  /* ── Collapsed nav items: center icon, remove gap ── */
+  aside[data-collapsed="true"] nav a {
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* ── Collapsed header: center logo icon ── */
+  aside[data-collapsed="true"] > div:first-child {
+    justify-content: center;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* ── Pre-JS icon state: prevent flash on reload ── */
+  @media (min-width: 1024px) {
+    html.sidebar-collapsed-init [data-sidebar-toggle] [data-icon-expand] {
+      display: block !important;
+    }
+    html.sidebar-collapsed-init [data-sidebar-toggle] [data-icon-collapse] {
+      display: none !important;
+    }
+    html.sidebar-expanded-init [data-sidebar-toggle] [data-icon-expand] {
+      display: none !important;
+    }
+    html.sidebar-expanded-init [data-sidebar-toggle] [data-icon-collapse] {
+      display: block !important;
+    }
+
+    /* ── Pre-JS layout: prevent width/padding flash ── */
+    html.sidebar-collapsed-init #admin-sidebar {
+      width: 72px !important;
+    }
+    html.sidebar-collapsed-init #main-content {
+      padding-left: 72px !important;
+    }
+    html.sidebar-expanded-init #admin-sidebar {
+      width: 260px !important;
+    }
+    html.sidebar-expanded-init #main-content {
+      padding-left: 260px !important;
+    }
+  }
+</style>
+
+<div
+  id="sidebar-overlay"
+  class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"
+></div>
+
+<aside
+  id="admin-sidebar"
+  data-collapsed="false"
+  class="fixed inset-y-0 left-0 z-40 flex w-[260px] -translate-x-full lg:translate-x-0 flex-col overflow-hidden border-r border-white/10 bg-[#06110c] text-slate-300 transition-[width,transform] duration-200"
+>
+  <div class="flex h-16 shrink-0 items-center justify-between px-5">
+    <div class="flex items-center gap-3">
+      <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500 text-white">
+        ⚡
+      </div>
+
+      <div class="sidebar-label">
+        <p class="text-sm font-bold text-white">Kitsune</p>
+        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+          Panel de Control
+        </p>
+      </div>
     </div>
   </div>
 
   <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
     {menu.map((section) => (
       <div>
-        <p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+        <p class="sidebar-label mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
           {section.label}
         </p>
 
         <div class="space-y-1">
           {section.items.map((item) => (
-            <AdminSidebarItem {...item} />
+            <AdminSidebarItem {...item} active={currentPath === item.href || currentPath.startsWith(item.href + "/")} />
           ))}
         </div>
       </div>
@@ -99,17 +172,122 @@ const menu = [
   </nav>
 
   <div class="border-t border-white/10 p-4">
-    <div class="flex items-center gap-3 rounded-2xl px-2 py-2">
-      <div class="grid h-9 w-9 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">
+    <div class="flex items-center gap-3 overflow-hidden rounded-2xl px-2 py-2">
+      <div class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">
         AS
       </div>
 
-      <div class="min-w-0 flex-1">
+      <div class="sidebar-label min-w-0 flex-1">
         <p class="truncate text-sm font-medium text-white">Admin</p>
         <p class="text-xs text-slate-500">Administrador</p>
       </div>
 
-      <span class="text-slate-500">↗</span>
+      <span class="sidebar-label text-slate-500">↗</span>
     </div>
   </div>
 </aside>
+
+<script>
+  (function () {
+    var STORAGE_KEY = "admin-sidebar-collapsed";
+    var sidebar = document.getElementById("admin-sidebar");
+    var overlay = document.getElementById("sidebar-overlay");
+    var mainContent = document.getElementById("main-content");
+    var toggleBtns = document.querySelectorAll("[data-sidebar-toggle]");
+
+    if (!sidebar || !overlay || !mainContent) return;
+
+    function isDesktop() {
+      return window.innerWidth >= 1024;
+    }
+
+    function getCollapsed() {
+      return localStorage.getItem(STORAGE_KEY) === "true";
+    }
+
+    function setCollapsed(value) {
+      localStorage.setItem(STORAGE_KEY, String(value));
+    }
+
+    function updateToggleIcons(collapsed) {
+      toggleBtns.forEach(function (btn) {
+        var expandIcon = btn.querySelector("[data-icon-expand]");
+        var collapseIcon = btn.querySelector("[data-icon-collapse]");
+        if (expandIcon && collapseIcon) {
+          expandIcon.classList.toggle("hidden", !collapsed);
+          collapseIcon.classList.toggle("hidden", collapsed);
+        }
+      });
+    }
+
+    function updateToggleTitle(collapsed) {
+      toggleBtns.forEach(function (btn) {
+        btn.setAttribute("title", collapsed ? "Expandir menú" : "Colapsar menú");
+        btn.setAttribute("aria-label", collapsed ? "Expandir menú" : "Colapsar menú");
+      });
+    }
+
+    function updateAriaState(expanded) {
+      toggleBtns.forEach(function (btn) {
+        btn.setAttribute("aria-expanded", String(expanded));
+      });
+    }
+
+    function applyDesktopState() {
+      var collapsed = getCollapsed();
+
+      sidebar.setAttribute("data-collapsed", String(collapsed));
+
+      if (collapsed) {
+        sidebar.classList.add("w-[72px]");
+        sidebar.classList.remove("w-[260px]");
+        mainContent.classList.add("lg:pl-[72px]");
+        mainContent.classList.remove("lg:pl-[260px]");
+      } else {
+        sidebar.classList.remove("w-[72px]");
+        sidebar.classList.add("w-[260px]");
+        mainContent.classList.remove("lg:pl-[72px]");
+        mainContent.classList.add("lg:pl-[260px]");
+      }
+
+      updateToggleIcons(collapsed);
+      updateToggleTitle(collapsed);
+      updateAriaState(!collapsed);
+
+      document.documentElement.classList.remove("sidebar-collapsed-init", "sidebar-expanded-init");
+    }
+
+    function toggleSidebar() {
+      if (isDesktop()) {
+        setCollapsed(!getCollapsed());
+        applyDesktopState();
+      } else {
+        var isHidden = sidebar.classList.contains("-translate-x-full");
+        if (isHidden) {
+          sidebar.classList.remove("-translate-x-full");
+          overlay.classList.remove("hidden");
+        } else {
+          sidebar.classList.add("-translate-x-full");
+          overlay.classList.add("hidden");
+        }
+        updateAriaState(isHidden);
+      }
+    }
+
+    toggleBtns.forEach(function (btn) {
+      btn.addEventListener("click", toggleSidebar);
+    });
+
+    overlay.addEventListener("click", function () {
+      if (!isDesktop()) {
+        sidebar.classList.add("-translate-x-full");
+        overlay.classList.add("hidden");
+        updateAriaState(false);
+      }
+    });
+
+    if (isDesktop()) {
+      applyDesktopState();
+    }
+  })();
+</script>

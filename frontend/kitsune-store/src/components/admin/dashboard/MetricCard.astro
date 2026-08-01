@@ -1,4 +1,6 @@
 ---
+import Icon from "../../ui/Icon.astro";
+
 interface Props {
   title: string;
   value: string;
@@ -13,7 +15,7 @@ const {
   value,
   change,
   trend = "up",
-  icon = "$",
+  icon = "chart-bar",
   accent = "emerald",
 } = Astro.props;
 
@@ -35,10 +37,10 @@ const accentClasses = {
     </div>
 
     <div class:list={[
-      "grid h-11 w-11 place-items-center rounded-2xl text-lg",
+      "grid h-11 w-11 place-items-center rounded-2xl",
       accentClasses[accent],
     ]}>
-      {icon}
+      <Icon name={icon} class="h-5 w-5" />
     </div>
   </div>
 

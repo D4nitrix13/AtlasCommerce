@@ -14,14 +14,31 @@ const { title = "Admin" } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <title>{title}</title>
+    <script is:inline>
+      (function () {
+        try {
+          var c = localStorage.getItem("admin-sidebar-collapsed") === "true";
+          var isDesktop = window.innerWidth >= 1024;
+          if (isDesktop) {
+            document.documentElement.classList.add(c ? "sidebar-collapsed-init" : "sidebar-expanded-init");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
 
-  <body class="min-h-screen bg-[#f6f7f9] text-slate-900 antialiased">
+  <body class="min-h-screen bg-[#f6f7f9] font-sans text-slate-900 antialiased">
     <div class="min-h-screen">
       <AdminSidebar />
 
-      <div class="min-h-screen lg:pl-[260px]">
+      <div id="main-content" class="min-h-screen transition-[padding] duration-200 lg:pl-[260px]">
         <AdminHeader />
 
         <main class="px-4 py-6 sm:px-6 lg:px-8">

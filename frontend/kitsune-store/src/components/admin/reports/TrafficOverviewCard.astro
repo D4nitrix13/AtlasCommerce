@@ -1,0 +1,102 @@
+---
+const chartId = `traffic-overview-${Math.random().toString(36).slice(2)}`;
+
+const sources = [
+  { label: "Directo", value: 35, color: "#059669", visits: "99,400" },
+  { label: "Orgánico", value: 28, color: "#0ea5e9", visits: "79,520" },
+  { label: "Referido", value: 22, color: "#8b5cf6", visits: "62,480" },
+  { label: "Social", value: 15, color: "#f43f5e", visits: "42,600" },
+];
+
+const topPages = [
+  { path: "/products/kitsune-edicion-limitada", views: 4280 },
+  { path: "/categories/camisetas", views: 3120 },
+  { path: "/", views: 2890 },
+  { path: "/products/sudadera-negra", views: 2340 },
+  { path: "/cart", views: 1870 },
+];
+---
+
+<section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  <div class="mb-6 flex items-start justify-between gap-4">
+    <div>
+      <h2 class="text-lg font-bold text-slate-950">Fuentes de tráfico</h2>
+      <p class="text-sm text-slate-500">Distribución y páginas principales</p>
+    </div>
+  </div>
+
+  <div class="mb-6 grid gap-6 sm:grid-cols-2">
+    <div class="flex items-center gap-6">
+      <div class="relative h-36 w-36 shrink-0">
+        <canvas
+          id={chartId}
+          data-sources={JSON.stringify(sources)}
+        ></canvas>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="text-xl font-bold text-slate-950">284K</span>
+          <span class="text-xs text-slate-500">Visitas</span>
+        </div>
+      </div>
+
+      <div class="flex-1 space-y-3">
+        {sources.map((s) => (
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`}></span>
+              <span class="text-sm text-slate-600">{s.label}</span>
+            </div>
+            <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 class="mb-3 text-sm font-semibold text-slate-700">Páginas más visitadas</h3>
+      <div class="space-y-2.5">
+        {topPages.map((p, i) => (
+          <div class="flex items-center gap-3">
+            <span class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-slate-100 text-xs font-medium text-slate-500">
+              {i + 1}
+            </span>
+            <div class="min-w-0 flex-1">
+              <p class="truncate font-mono text-xs text-slate-600">{p.path}</p>
+            </div>
+            <span class="shrink-0 text-sm font-semibold text-slate-950">{p.views.toLocaleString()}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import Chart from "chart.js/auto";
+
+  document.querySelectorAll<HTMLCanvasElement>("canvas[id^='traffic-overview']").forEach((canvas) => {
+    const sources = JSON.parse(canvas.dataset.sources || "[]");
+
+    new Chart(canvas, {
+      type: "doughnut",
+      data: {
+        labels: sources.map((s: { label: string }) => s.label),
+        datasets: [
+          {
+            data: sources.map((s: { value: number }) => s.value),
+            backgroundColor: sources.map((s: { color: string }) => s.color),
+            borderWidth: 0,
+            cutout: "70%",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false },
+        },
+      },
+    });
+  });
+</script>

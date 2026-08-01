@@ -1,4 +1,6 @@
 ---
+import Icon from "../../ui/Icon.astro";
+
 interface Props {
   name: string;
   href: string;
@@ -7,11 +9,12 @@ interface Props {
   badge?: string;
 }
 
-const { name, href, active = false, badge } = Astro.props;
+const { name, href, icon, active = false, badge } = Astro.props;
 ---
 
 <a
   href={href}
+  title={name}
   class:list={[
     "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
     active
@@ -19,14 +22,20 @@ const { name, href, active = false, badge } = Astro.props;
       : "text-slate-400 hover:bg-white/5 hover:text-white",
   ]}
 >
-  <span class="grid h-5 w-5 place-items-center text-base">
-    •
-  </span>
+  {icon && (
+    <Icon
+      name={icon}
+      class:list={[
+        "h-5 w-5 shrink-0 transition",
+        active ? "text-emerald-400" : "text-slate-500 group-hover:text-slate-300",
+      ]}
+    />
+  )}
 
-  <span class="flex-1">{name}</span>
+  <span class="sidebar-label flex-1">{name}</span>
 
   {badge && (
-    <span class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
+    <span class="sidebar-label rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
       {badge}
     </span>
   )}

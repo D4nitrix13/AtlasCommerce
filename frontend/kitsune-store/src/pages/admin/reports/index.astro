@@ -1,0 +1,79 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import MetricCard from "../../../components/admin/dashboard/MetricCard.astro";
+import RevenueOverviewCard from "../../../components/admin/reports/RevenueOverviewCard.astro";
+import SalesPerformanceCard from "../../../components/admin/reports/SalesPerformanceCard.astro";
+import TopProductsCard from "../../../components/admin/reports/TopProductsCard.astro";
+import CustomerAnalyticsCard from "../../../components/admin/reports/CustomerAnalyticsCard.astro";
+import TrafficOverviewCard from "../../../components/admin/reports/TrafficOverviewCard.astro";
+import LowStockTable from "../../../components/admin/dashboard/LowStockTable.astro";
+---
+
+<AdminLayout title="Reportes | Admin">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      Reportes
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Vista detallada del rendimiento de tu ecommerce.
+    </p>
+  </div>
+
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <MetricCard
+      title="Ingresos totales"
+      value="$48,295"
+      change="+12.5%"
+      icon="banknotes"
+      accent="emerald"
+    />
+    <MetricCard
+      title="Órdenes totales"
+      value="1,432"
+      change="+8.2%"
+      icon="shopping-cart"
+      accent="sky"
+    />
+    <MetricCard
+      title="Ticket promedio"
+      value="$34.20"
+      change="+5.3%"
+      icon="banknotes"
+      accent="amber"
+    />
+    <MetricCard
+      title="Tasa de conversión"
+      value="3.8%"
+      change="-0.4%"
+      trend="down"
+      icon="chart-bar"
+      accent="rose"
+    />
+  </section>
+
+  <section class="mt-5">
+    <RevenueOverviewCard />
+  </section>
+
+  <section class="mt-5 grid gap-5 xl:grid-cols-3">
+    <div class="xl:col-span-2">
+      <SalesPerformanceCard />
+    </div>
+    <div>
+      <TopProductsCard />
+    </div>
+  </section>
+
+  <section class="mt-5 grid gap-5 xl:grid-cols-3">
+    <div class="xl:col-span-2">
+      <TrafficOverviewCard />
+    </div>
+    <div>
+      <CustomerAnalyticsCard />
+    </div>
+  </section>
+
+  <section class="mt-5">
+    <LowStockTable />
+  </section>
+</AdminLayout>
