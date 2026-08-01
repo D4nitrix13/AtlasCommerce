@@ -27,7 +27,7 @@ Gráficas: **Chart.js 4**. Formularios: **react-hook-form** + **Zod 4**.
 ## Estructura del Proyecto
 
 ```txt
-frontend/kitsune-store/
+frontend/
 ├── src/
 │   ├── components/
 │   │   ├── ui/                         # Componentes UI genéricos
