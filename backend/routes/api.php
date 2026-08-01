@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\PermissionController;
 use App\Http\Controllers\Api\Auth\PermissionRoleController;
 use App\Http\Controllers\Api\Auth\RoleController;
@@ -73,6 +74,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/*
+|--------------------------------------------------------------------------
+| Auth (public)
+|--------------------------------------------------------------------------
+|
+| Login es público (devuelve token Sanctum). Logout y /me requieren
+| token válido vía `auth:sanctum` (definidos dentro del grupo más abajo).
+|
+*/
+
+Route::post('auth/login', [AuthController::class, 'login'])
+    ->name('auth.login');
+
 Route::middleware('auth:sanctum')->group(function (): void {
     /*
     |--------------------------------------------------------------------------
@@ -83,6 +97,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
     | These endpoints are part of the internal administration area.
     |
     */
+
+    Route::post('auth/logout', [AuthController::class, 'logout'])
+        ->name('auth.logout');
+
+    Route::get('auth/me', [AuthController::class, 'me'])
+        ->name('auth.me');
 
     Route::apiResource('users', UserController::class);
     Route::apiResource('roles', RoleController::class);
