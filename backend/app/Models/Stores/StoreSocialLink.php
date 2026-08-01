@@ -5,6 +5,14 @@ namespace App\Models\Stores;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Enlace a red social de una tienda.
+ *
+ * Tabla: `store_social_links` — relación N:1 con `stores`.
+ *
+ * Almacena las URLs de las redes sociales de la tienda
+ * con su plataforma, nombre de display y orden de visualización.
+ */
 class StoreSocialLink extends Model
 {
     protected $fillable = [
@@ -22,6 +30,9 @@ class StoreSocialLink extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Tienda propietaria del enlace.
+     */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);

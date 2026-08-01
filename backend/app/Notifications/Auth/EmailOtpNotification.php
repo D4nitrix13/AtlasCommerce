@@ -55,12 +55,12 @@ class EmailOtpNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $appName = $this->store?->name ?? (string) config(key: 'app.name');
+        $appName = $this->store?->name ?? (string) config('app.name');
 
         return (new MailMessage)
-            ->subject(subject: "Código de seguridad - {$appName}")
+            ->subject("Código de seguridad - {$appName}")
             ->view(
-                view: 'emails.auth.email-otp',
+                'emails.auth.email-otp',
                 data: [
                     'appName' => $appName,
                     'code' => $this->code,
@@ -68,17 +68,17 @@ class EmailOtpNotification extends Notification
                     'logoUrl' => $this->resolveLogoUrl(),
                     'userName' => $notifiable->first_name ?? null,
                     'supportEmail' => config(
-                        key: 'brand.support_email',
+                        'brand.support_email',
                         default: 'support@example.test',
                     ),
                     'address' => $this->store?->address ?? '',
                     'facebookUrl' => $this->resolveSocialUrl('facebook'),
                     'instagramUrl' => $this->resolveSocialUrl('instagram'),
                     'facebookIconUrl' => asset(
-                        path: $this->resolveSocialIconPath('facebook'),
+                        $this->resolveSocialIconPath('facebook'),
                     ),
                     'instagramIconUrl' => asset(
-                        path: $this->resolveSocialIconPath('instagram'),
+                        $this->resolveSocialIconPath('instagram'),
                     ),
                 ],
             );
@@ -90,9 +90,9 @@ class EmailOtpNotification extends Notification
     private function resolveLogoUrl(): string
     {
         $path = $this->store?->logo
-            ?? (string) config(key: 'brand.default_logo_path', default: 'images/shared/brand/app-logo.webp');
+            ?? (string) config('brand.default_logo_path', default: 'images/shared/brand/app-logo.webp');
 
-        return asset(path: $path);
+        return asset($path);
     }
 
     /**
@@ -128,7 +128,7 @@ class EmailOtpNotification extends Notification
         }
 
         return (string) config(
-            key: "brand.social.{$platform}_icon_path",
+            "brand.social.{$platform}_icon_path",
             default: "images/shared/icons/social/{$platform}.webp",
         );
     }

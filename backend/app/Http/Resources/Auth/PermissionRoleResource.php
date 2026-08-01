@@ -5,10 +5,16 @@ namespace App\Http\Resources\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para representar la relación entre un permiso y un rol.
+ *
+ * Contiene los datos de la asignación de un permiso a un rol específico
+ * del sistema de control de acceso.
+ */
 class PermissionRoleResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Transforma el resource en un array para la respuesta JSON.
      *
      * @return array<string, mixed>
      */

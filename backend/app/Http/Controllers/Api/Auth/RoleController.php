@@ -4,46 +4,53 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Auth\Role;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para la gestión de roles de usuario.
+ *
+ * Maneja las operaciones CRUD de roles utilizados para el control de acceso
+ * basado en roles (RBAC) dentro del módulo de autenticación.
+ */
 class RoleController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lista todos los roles disponibles.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un nuevo rol en el sistema.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los datos de un rol específico.
      */
-    public function show(Role $role)
+    public function show(Role $role): JsonResponse
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza los datos de un rol existente.
      */
-    public function update(Request $request, Role $role)
+    public function update(Request $request, Role $role): JsonResponse
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un rol del sistema.
      */
-    public function destroy(Role $role)
+    public function destroy(Role $role): JsonResponse
     {
         //
     }

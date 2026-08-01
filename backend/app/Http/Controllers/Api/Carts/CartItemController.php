@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar artículos del carrito.
+ */
 class CartItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class CartItemController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class CartItemController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el artículo del carrito especificado.
      */
     public function show(CartItem $cartItem)
     {
@@ -33,7 +36,7 @@ class CartItemController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el artículo del carrito especificado en la base de datos.
      */
     public function update(Request $request, CartItem $cartItem)
     {
@@ -41,7 +44,7 @@ class CartItemController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina el artículo del carrito especificado de la base de datos.
      */
     public function destroy(CartItem $cartItem)
     {

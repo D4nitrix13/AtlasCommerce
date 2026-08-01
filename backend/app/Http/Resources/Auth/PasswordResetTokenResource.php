@@ -5,9 +5,10 @@ namespace App\Http\Resources\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para tokens de recuperación de contraseña.
+ * Resource para representar un token de recuperación de contraseña.
  *
- * La transformación JSON detallada se implementará en una fase posterior.
+ * Contiene la información del token generado para restablecer
+ * la contraseña de un usuario, incluyendo su estado de expiración.
  */
 class PasswordResetTokenResource extends JsonResource
 {

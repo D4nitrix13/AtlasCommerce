@@ -5,10 +5,11 @@ namespace App\Http\Resources\Stores;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para dominios de tienda.
+ * Resource para representar un dominio personalizado de una tienda.
  *
- * La respuesta JSON detallada se implementará junto con los endpoints
- * del módulo Stores.
+ * Contiene la información de un dominio configurado para una tienda,
+ * incluyendo el nombre de dominio, estado de verificación,
+ * certificado SSL y fecha de expiración.
  */
 class StoreDomainResource extends JsonResource
 {

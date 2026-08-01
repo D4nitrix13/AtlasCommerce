@@ -4,46 +4,53 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Auth\Permission;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para la gestión de permisos.
+ *
+ * Maneja las operaciones CRUD de permisos utilizados para el control de acceso
+ * detallado dentro del módulo de autenticación.
+ */
 class PermissionController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lista todos los permisos disponibles.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un nuevo permiso en el sistema.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los datos de un permiso específico.
      */
-    public function show(Permission $permission)
+    public function show(Permission $permission): JsonResponse
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza los datos de un permiso existente.
      */
-    public function update(Request $request, Permission $permission)
+    public function update(Request $request, Permission $permission): JsonResponse
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un permiso del sistema.
      */
-    public function destroy(Permission $permission)
+    public function destroy(Permission $permission): JsonResponse
     {
         //
     }

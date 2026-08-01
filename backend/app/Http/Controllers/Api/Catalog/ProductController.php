@@ -6,44 +6,50 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para gestionar los productos del catálogo.
+ *
+ * Proporciona operaciones CRUD para el recurso de producto,
+ * permitiendo listar, crear, mostrar, actualizar y eliminar productos.
+ */
 class ProductController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todos los productos disponibles en el catálogo.
      */
-    public function index()
+    public function index(): mixed
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear un nuevo producto en el catálogo.
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar los detalles de un producto específico.
      */
-    public function show(Product $product)
+    public function show(Product $product): mixed
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar la información de un producto existente.
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Product $product): mixed
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar un producto del catálogo.
      */
-    public function destroy(Product $product)
+    public function destroy(Product $product): mixed
     {
         //
     }

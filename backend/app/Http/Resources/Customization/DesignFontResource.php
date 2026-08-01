@@ -5,10 +5,11 @@ namespace App\Http\Resources\Customization;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para fuentes de diseño.
+ * Resource para representar una fuente disponible para diseños.
  *
- * La estructura de respuesta JSON se implementará cuando se creen
- * los endpoints del módulo de personalización.
+ * Contiene la información de una tipografía utilizable en
+ * diseños personalizados, incluyendo nombre, archivo de fuente
+ * y licencia de uso.
  */
 class DesignFontResource extends JsonResource
 {

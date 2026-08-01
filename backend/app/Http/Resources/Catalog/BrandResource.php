@@ -5,10 +5,16 @@ namespace App\Http\Resources\Catalog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para representar una marca de producto.
+ *
+ * Contiene la información de la marca, incluyendo nombre,
+ * logo, descripción y estado de activación.
+ */
 class BrandResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Transforma el resource en un array para la respuesta JSON.
      *
      * @return array<string, mixed>
      */

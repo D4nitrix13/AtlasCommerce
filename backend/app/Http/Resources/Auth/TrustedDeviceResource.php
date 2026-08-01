@@ -5,9 +5,11 @@ namespace App\Http\Resources\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para dispositivos de confianza.
+ * Resource para representar un dispositivo de confianza registrado.
  *
- * La transformación JSON detallada se implementará en una fase posterior.
+ * Contiene los metadatos de un dispositivo que el usuario ha marcado
+ * como seguro, permitiendo omitir verificaciones adicionales
+ * en futuros inicios de sesión.
  */
 class TrustedDeviceResource extends JsonResource
 {

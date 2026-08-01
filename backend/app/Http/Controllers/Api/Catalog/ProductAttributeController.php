@@ -6,44 +6,50 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductAttribute;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para gestionar los atributos de producto del catálogo.
+ *
+ * Proporciona operaciones CRUD para el recurso de atributo de producto,
+ * permitiendo listar, crear, mostrar, actualizar y eliminar atributos.
+ */
 class ProductAttributeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todos los atributos de producto disponibles en el catálogo.
      */
-    public function index()
+    public function index(): mixed
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear un nuevo atributo de producto en el catálogo.
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar los detalles de un atributo de producto específico.
      */
-    public function show(ProductAttribute $productAttribute)
+    public function show(ProductAttribute $productAttribute): mixed
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar la información de un atributo de producto existente.
      */
-    public function update(Request $request, ProductAttribute $productAttribute)
+    public function update(Request $request, ProductAttribute $productAttribute): mixed
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar un atributo de producto del catálogo.
      */
-    public function destroy(ProductAttribute $productAttribute)
+    public function destroy(ProductAttribute $productAttribute): mixed
     {
         //
     }

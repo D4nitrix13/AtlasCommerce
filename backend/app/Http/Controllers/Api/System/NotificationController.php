@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar notificaciones.
+ */
 class NotificationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra la notificación especificada.
      */
     public function show(Notification $notification)
     {
@@ -33,7 +36,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la notificación especificada en la base de datos.
      */
     public function update(Request $request, Notification $notification)
     {
@@ -41,7 +44,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina la notificación especificada de la base de datos.
      */
     public function destroy(Notification $notification)
     {

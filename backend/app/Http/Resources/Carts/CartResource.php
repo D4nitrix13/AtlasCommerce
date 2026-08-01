@@ -5,10 +5,16 @@ namespace App\Http\Resources\Carts;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para representar un carrito de compras.
+ *
+ * Contiene la información del carrito de un usuario, incluyendo
+ * sus artículos, subtotal, impuestos y estado actual.
+ */
 class CartResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Transforma el resource en un array para la respuesta JSON.
      *
      * @return array<string, mixed>
      */

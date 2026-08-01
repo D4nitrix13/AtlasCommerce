@@ -4,46 +4,53 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Auth\PermissionRole;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador para la gestión de la relación permisos-roles.
+ *
+ * Maneja las operaciones CRUD de la tabla pivote que asocia permisos con roles
+ * dentro del sistema de control de acceso basado en roles (RBAC).
+ */
 class PermissionRoleController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lista todas las relaciones permiso-rol registradas.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea una nueva asociación entre un permiso y un rol.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los datos de una relación permiso-rol específica.
      */
-    public function show(PermissionRole $permissionRole)
+    public function show(PermissionRole $permissionRole): JsonResponse
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza una relación permiso-rol existente.
      */
-    public function update(Request $request, PermissionRole $permissionRole)
+    public function update(Request $request, PermissionRole $permissionRole): JsonResponse
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina una relación permiso-rol del sistema.
      */
-    public function destroy(PermissionRole $permissionRole)
+    public function destroy(PermissionRole $permissionRole): JsonResponse
     {
         //
     }

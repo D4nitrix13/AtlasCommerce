@@ -7,6 +7,15 @@ use App\Models\Customization\CustomDesign;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Referencia de un diseño personalizado asociado a un pedido.
+ *
+ * Tabla: `order_custom_designs` — relación N:1 con `orders`, `order_items` y `custom_designs`.
+ *
+ * Captura un snapshot del diseño al momento del pedido,
+ * incluyendo archivo de producción, estado de revisión
+ * y seguimiento del proceso productivo.
+ */
 class OrderCustomDesign extends Model
 {
     protected $fillable = [
@@ -35,24 +44,36 @@ class OrderCustomDesign extends Model
         'production_completed_at' => 'datetime',
     ];
 
+    /**
+     * Pedido al que pertenece el diseño.
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * Artículo del pedido asociado al diseño.
+     */
     public function orderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class);
     }
 
+    /**
+     * Diseño personalizado original.
+     */
     public function customDesign(): BelongsTo
     {
         return $this->belongsTo(CustomDesign::class);
     }
 
+    /**
+     * Usuario que revisó el diseño.
+     */
     public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(related: User::class, foreignKey: 'reviewed_by');
     }
 
     public function scopePending($query)

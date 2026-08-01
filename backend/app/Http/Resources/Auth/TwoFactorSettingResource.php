@@ -5,9 +5,10 @@ namespace App\Http\Resources\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource base para configuraciones de autenticación de dos factores.
+ * Resource para representar la configuración de autenticación de dos factores.
  *
- * La transformación JSON detallada se implementará en una fase posterior.
+ * Contiene el estado y ajustes generales de la verificación en dos pasos
+ * del usuario, incluyendo si está habilitada y el método predeterminado.
  */
 class TwoFactorSettingResource extends JsonResource
 {

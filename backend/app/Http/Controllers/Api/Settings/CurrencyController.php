@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador API para gestionar monedas.
+ */
 class CurrencyController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene el listado de recursos.
      */
     public function index()
     {
@@ -17,7 +20,7 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo recurso en la base de datos.
      */
     public function store(Request $request)
     {
@@ -25,7 +28,7 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra la moneda especificada.
      */
     public function show(Currency $currency)
     {
@@ -33,7 +36,7 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la moneda especificada en la base de datos.
      */
     public function update(Request $request, Currency $currency)
     {
@@ -41,7 +44,7 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina la moneda especificada de la base de datos.
      */
     public function destroy(Currency $currency)
     {
