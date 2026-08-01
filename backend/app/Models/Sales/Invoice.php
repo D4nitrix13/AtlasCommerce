@@ -4,12 +4,14 @@ namespace App\Models\Sales;
 
 use App\Models\Auth\User;
 use App\Models\Concerns\BelongsToStore;
+use App\Models\Concerns\LogsActivity;
 use App\Models\Customers\Customer;
 use App\Models\Payments\InvoicePayment;
 use App\Models\Settings\Currency;
 use App\Models\Stores\SalesChannel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -50,6 +52,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Invoice extends Model
 {
     use BelongsToStore;
+    use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
 
     protected $fillable = [
