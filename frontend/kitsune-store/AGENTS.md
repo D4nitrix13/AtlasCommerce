@@ -1,0 +1,422 @@
+# Frontend Rules — Kitsune Store
+
+**Stack:** Astro 7 + React 19 + Tailwind CSS 4 + TypeScript 6 + Zod 4 + react-hook-form + Chart.js 4
+
+> "Este código lo va a leer otra persona cansada, con prisa y sin contexto. ¿Lo entenderá rápido?"
+
+---
+
+## 1. Tamaño de archivos
+
+| Tipo de archivo    | Líneas máximas |
+| ------------------ | -------------- |
+| Componente simple  | 150            |
+| Componente mediano | 250            |
+| Página completa    | 400            |
+| Función            | 40             |
+| Constantes / types | sin límite     |
+
+Si supera **300-400 líneas**, dividir. La página es composición, no un monolito.
+
+---
+
+## 2. Nomenclatura
+
+### Componentes → PascalCase
+
+ProductCard.astro, AdminSidebar.astro, RecentOrdersTable.astro
+
+Evitar: Card.astro, Component1.astro, NewComponent.astro.
+
+### Variables y funciones → camelCase
+
+```ts
+const totalSales = 1500;
+function formatCurrency(value: number) { ... }
+```
+
+Evitar: TotalSales, total_sales, x.
+
+### Constantes globales → UPPER_SNAKE_CASE
+
+```ts
+const API_BASE_URL = "http://localhost:8000/api";
+const DEFAULT_PAGE_SIZE = 10;
+```
+
+### Booleanos → sonar como pregunta
+
+```ts
+const isOpen = true;
+const hasProducts = products.length > 0;
+const canEditOrder = user.role === "admin";
+```
+
+Evitar: open, productsStatus, edit.
+
+### Funciones de eventos → handle + verbo
+
+```ts
+function handleSubmit() {}
+function handleDeleteProduct() {}
+```
+
+Props de React: onClick, onSubmit, onDelete.
+
+---
+
+## 3. Retorno anticipado
+
+Evitar anidación profunda. Evaluar condiciones negativas primero:
+
+```ts
+// Mal
+if (user) {
+  if (user.role === "admin") {
+    if (products.length > 0) { ... }
+  }
+}
+
+// Bien
+if (!user) return;
+if (user.role !== "admin") return;
+if (products.length === 0) return;
+// lógica
+```
+
+Máximo **2-3 niveles de anidación**.
+
+---
+
+## 4. Un solo responsabilidad
+
+Cada componente responde **una pregunta**. Si la respuesta tiene múltiples partes, dividir.
+
+```txt
+// Mal: dashboard.astro contiene sidebar, header, cards, tabla, gráficos, modal, fetchs
+
+// Bien
+admin/index.astro          → composición
+components/admin/dashboard/
+  MetricCard.astro
+  RevenueChart.astro
+  RecentOrdersTable.astro
+  TrafficSourcesCard.astro
+```
+
+---
+
+## 5. Componentes reutilizables
+
+Si se repite **3+ veces** la misma estructura → extraer componente.
+
+```astro
+<!-- En vez de repetir esto: -->
+<div class="rounded-xl bg-white p-6 shadow-sm">
+  <p class="text-sm text-gray-500">{title}</p>
+  <h3 class="text-2xl font-bold">{value}</h3>
+</div>
+
+<!-- Crear -->
+<StatCard title="Ventas" value="$2,500" />
+<StatCard title="Pedidos" value="128" />
+```
+
+**DRY con criterio:** repetir una vez está bien. Repetir tres veces ya es candidato a abstracción.
+
+---
+
+## 6. Separación UI vs Negocio
+
+### UI genérico → src/components/ui/
+
+Button.astro, Input.astro, Modal.astro, Badge.astro, Card.astro
+
+### Componentes de negocio → src/components/{domain}/
+
+ProductCard.astro, OrderStatusBadge.astro, AdminSidebar.astro
+
+---
+
+## 7. Nombres que expliquen intención
+
+```ts
+// Mal
+const d = products.filter(p => p.s > 0);
+function calc(x) { return x * 1.15; }
+
+// Bien
+const availableProducts = products.filter(product => product.stock > 0);
+function calculatePriceWithTax(price: number) { return price * 1.15; }
+```
+
+No tener miedo de nombres largos si son claros.
+
+---
+
+## 8. Orden interno de componentes Astro
+
+```astro
+---
+// 1. Imports
+import StatCard from "./StatCard.astro";
+
+// 2. Types/Interfaces
+interface Props {
+  user: User;
+}
+
+// 3. Props
+const { user } = Astro.props;
+
+// 4. Constantes
+const stats = [ ... ];
+
+// 5. Funciones auxiliares
+// 6. Datos calculados
+const hasStats = stats.length > 0;
+---
+
+<!-- 7. HTML -->
+<section>
+  {hasStats ? (
+    <div class="grid gap-4 md:grid-cols-3">
+      {stats.map((stat) => <StatCard {...stat} />)}
+    </div>
+  ) : (
+    <p>No hay estadísticas disponibles.</p>
+  )}
+</section>
+```
+
+---
+
+## 9. Tailwind CSS — orden de clases
+
+Ordenar por intención:
+
+```txt
+1. layout:       flex, grid, block, hidden
+2. posición:     relative, absolute, top, left
+3. tamaño:       w, h, min, max
+4. espaciado:    m, p, gap
+5. bordes:       rounded, border
+6. fondo:        bg
+7. texto:        text, font
+8. efectos:      shadow, hover, transition
+9. responsive:   sm, md, lg
+```
+
+```html
+<!-- Mal -->
+<div class="text-white p-4 flex rounded-xl bg-blue-500 justify-between shadow-md items-center mt-4 hover:bg-blue-600">
+
+<!-- Bien -->
+<div class="mt-4 flex items-center justify-between rounded-xl bg-blue-500 p-4 text-white shadow-md hover:bg-blue-600">
+```
+
+---
+
+## 10. Frontend ≠ Backend
+
+El frontend se encarga de:
+
+- Mostrar datos
+- Enviar formularios
+- Validaciones básicas (Zod en cliente)
+- Estados visuales (loading, error, empty)
+- Navegación
+
+Laravel se encarga de:
+
+- Validaciones reales y permisos
+- Queries a BD, cálculo de totales, stock
+- Autenticación, seguridad, pagos
+
+**El cálculo confiable siempre viene del backend.**
+
+---
+
+## 11. Estados de interfaz (obligatorio)
+
+Todo componente con datos debe manejar:
+
+```astro
+{isLoading && <p>Cargando productos...</p>}
+
+{hasError && (
+  <p class="text-red-500">No se pudieron cargar los productos.</p>
+)}
+
+{!isLoading && products.length === 0 && (
+  <p>No hay productos registrados.</p>
+)}
+
+{products.length > 0 && (
+  <ProductTable products={products} />
+)}
+```
+
+Estados mínimos: **loading · empty · error · success · disabled**.
+
+---
+
+## 12. Validar datos antes de mostrar
+
+Nunca asumir que todo viene perfecto del backend:
+
+```ts
+const productName = product.name ?? "Producto sin nombre";
+const productPrice = product.price ?? 0;
+const imageUrl = product.imageUrl || "/images/product-placeholder.png";
+```
+
+---
+
+## 13. Sin valores mágicos
+
+```ts
+// Mal
+if (products.length > 10) { ... }
+
+// Bien
+const MIN_PRODUCTS_FOR_PAGINATION = 10;
+if (products.length > MIN_PRODUCTS_FOR_PAGINATION) { ... }
+```
+
+---
+
+## 14. TypeScript obligatorio
+
+```ts
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+  imageUrl?: string;
+};
+```
+
+- Props tipadas con `interface Props`
+- `as const` para configuración inmutable
+- Types en `src/types/{domain}.ts`
+
+---
+
+## 15. Formateadores reutilizables
+
+Centralizar en `src/lib/formatters.ts`:
+
+```ts
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat("es-NI", {
+    style: "currency",
+    currency: "NIO",
+  }).format(value);
+}
+
+export function formatDate(date: string) {
+  return new Intl.DateTimeFormat("es-NI").format(new Date(date));
+}
+```
+
+---
+
+## 16. Estructura del proyecto
+
+```txt
+src/
+├── components/
+│   ├── ui/                  # Genéricos (Button, Input, Modal, Badge, Card...)
+│   ├── public/              # Tienda pública (header, footer, ProductCard...)
+│   ├── ecommerce/           # Carrito, checkout
+│   └── admin/               # Panel admin (sidebar, header, dashboard, modals, cards, tables, charts)
+├── layouts/                 # Layout.astro, AdminLayout.astro, AuthLayout.astro
+├── pages/                   # File-based routing
+├── lib/                     # api.ts, endpoints.ts, formatters.ts, auth.ts, storage.ts
+├── config/                  # menu.ts, site.ts
+├── data/                    # Datos mock (solo temporal)
+├── stores/                  # Estado React (auth, cart, ui)
+├── types/                   # TypeScript types por dominio
+├── styles/                  # global.css (solo import de Tailwind)
+└── assets/                  # Imágenes, iconos estáticos
+```
+
+---
+
+## 17. HTML semántico y accesibilidad
+
+```html
+<!-- Usar tags semánticos -->
+<header>  <nav>  <main>  <section>  <footer>  <article>
+
+<!-- Botones reales para acciones -->
+<button>Eliminar</button>   <!-- NO: <div onclick="..."> -->
+
+<!-- Imágenes con alt -->
+<img src="/product.jpg" alt="Camisa negra estampada" />
+
+<!-- Inputs con label -->
+<label for="email">Correo</label>
+<input id="email" type="email" />
+```
+
+---
+
+## 18. Performance
+
+- Optimizar imágenes
+- Lazy loading en imágenes y componentes pesados
+- Componentes estáticos (.astro) por defecto; React solo cuando hay interactividad
+- Client directives: client:visible > client:load cuando sea posible
+- No cargar Chart.js u otras librerías pesadas globalmente
+- Paginar tablas grandes
+- Evitar renderizar listas enormes completas
+
+---
+
+## 19. Comentarios
+
+Comentar el **por qué**, no el **qué**:
+
+```ts
+// Mal
+// sumar 1
+count = count + 1;
+
+// Bien
+// Se usa el total calculado por backend para evitar manipulación desde el cliente
+const total = order.serverCalculatedTotal;
+```
+
+---
+
+## 20. Principios
+
+| Principio       | Significado                                                |
+| --------------- | ---------------------------------------------------------- |
+| **KISS**        | No compliques si puede ser simple                          |
+| **YAGNI**       | No crees funcionalidades "por si acaso"                    |
+| **DRY**         | No repitas lógica, pero no abstraigas demasiado pronto     |
+| **SRP**         | Cada archivo = una responsabilidad                         |
+| **SoC**         | Separar UI, lógica, datos, validaciones, servicios, types  |
+| **Composición** | Componer piezas pequeñas > componente gigante configurable |
+
+---
+
+## 21. Checklist pre-commit
+
+- [ ] El nombre del archivo explica qué hace
+- [ ] Una sola responsabilidad
+- [ ] Se entiende en < 1 minuto
+- [ ] Máximo 2-3 niveles de anidación
+- [ ] Sin lógica repetida (3+ veces → abstraer)
+- [ ] Nombres claros en funciones y variables
+- [ ] Loading, error y empty state manejados
+- [ ] Botones son `<button>`, no `<div>`
+- [ ] Inputs tienen `<label>`
+- [ ] Sin valores mágicos
+- [ ] Archivo < 400 líneas
+- [ ] Sin lógica de negocio que deba estar en Laravel
+- [ ] TypeScript en props y tipos
