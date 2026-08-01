@@ -47,7 +47,7 @@ class Warehouse extends Model
      * @param  Builder<Warehouse>  $query  Consulta del modelo.
      * @return Builder<Warehouse>
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where(column: 'is_active', value: true);
     }

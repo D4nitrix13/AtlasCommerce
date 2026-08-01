@@ -47,7 +47,7 @@ class ShippingCompany extends Model
      * @param  Builder<ShippingCompany>  $query  Consulta del modelo.
      * @return Builder<ShippingCompany>
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where(column: 'is_active', value: true);
     }

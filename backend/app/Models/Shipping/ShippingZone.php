@@ -48,7 +48,7 @@ class ShippingZone extends Model
      * @param  Builder<ShippingZone>  $query  Consulta del modelo.
      * @return Builder<ShippingZone>
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where(column: 'is_active', value: true);
     }

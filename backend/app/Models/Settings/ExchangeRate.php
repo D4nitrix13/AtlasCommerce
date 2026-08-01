@@ -51,7 +51,7 @@ class ExchangeRate extends Model
         return $query->where('from_currency_id', $currencyId);
     }
 
-    public function scopeByDate(Builder $query, $date): Builder
+    public function scopeByDate(Builder $query, Carbon|string $date): Builder
     {
         return $query->where('rate_date', $date);
     }
