@@ -184,15 +184,17 @@ backend/api/
     contemplada en el modelo ER. Lógica de negocio
     completa: debe verificarse en el código.
 - **Storefront**
-  - Controladores: (preparado, vacíos)
+  - Controladores: `ProductController` como base
+    inicial; debe verificarse en código
   - Modelos: —
   - Descripción: Endpoints públicos del storefront
 
 ## Autenticación
 
-Todas las rutas en `routes/api.php` están protegidas por
-el middleware `auth:sanctum`. El frontend envía el token
-en el header:
+Las rutas privadas y administrativas en `routes/api.php`
+están protegidas por el middleware `auth:sanctum`. Las
+rutas públicas del storefront no requieren autenticación.
+El frontend envía el token en el header:
 
 ```http
 Authorization: Bearer {token}

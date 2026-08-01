@@ -86,14 +86,18 @@ como grupos separados. Verificar en el código fuente.
 
 ## Rutas protegidas
 
-Todas las rutas en `routes/api.php` están dentro del
-grupo `auth:sanctum`:
+Las rutas privadas y administrativas en `routes/api.php`
+están dentro del grupo `auth:sanctum`:
 
 ```php
 Route::middleware('auth:sanctum')->group(function (): void {
-    // Todas las rutas requieren token válido
+    // Rutas administrativas requieren token válido
 });
 ```
+
+Las rutas públicas del storefront (catálogo, productos)
+no requieren autenticación. Estas rutas resuelven la
+tienda por dominio.
 
 Si un request no incluye un token válido, `Laravel`
 retorna HTTP 401:

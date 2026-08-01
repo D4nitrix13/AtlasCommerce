@@ -28,7 +28,7 @@ Host: kitsune.com
 ```
 
 ```php
-// Middleware conceptual (pendiente de implementar)
+// Ejemplo conceptual — base estructural creada
 class ResolveStoreFromDomain
 {
     public function handle(Request $request, Closure $next)
@@ -116,7 +116,7 @@ class ResolveStoreFromDomain
 Un servicio que encapsula la lógica de resolución:
 
 ```php
-// app/Services/Stores/StoreContextService.php (futuro)
+// Ejemplo conceptual — base estructural creada
 
 class StoreContextService
 {

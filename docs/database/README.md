@@ -64,12 +64,9 @@ La implementación en `Laravel` usa nombres en inglés:
 - `CANAL_VENTA` → `sales_channels`
 - `ROL` → `roles`
 - `PERMISO` → `permissions`
+- `ROL_PERMISO` → `role_permissions`
 - `USUARIO` → `users`
 - `CLIENTE` → `customers`
-- `ROL` → `roles`
-- `PERMISO` → `permissions`
-- `ROL_PERMISO` → `role_permissions`
-- `USUARIO_TIENDA` → `user_stores`
 - `CLIENTE_DIRECCION` → `customer_addresses`
 - `CATEGORIA` → `categories`
 - `MARCA` → `brands`
@@ -90,11 +87,11 @@ La implementación en `Laravel` usa nombres en inglés:
 - `PEDIDO` → `orders`
 - `DETALLE_PEDIDO` → `order_items`
 - `PEDIDO_ESTADO_HISTORIAL` → `order_status_histories`
-- `PEDIDO_USUARIO_CREADOR` → `orders.user_creator_id`
+- `PEDIDO_USUARIO_CREADOR` → `PEDIDO.id_usuario_creador`
 - `FACTURA` → `invoices`
 - `DETALLE_FACTURA` → `invoice_items`
 - `FACTURA_ESTADO_HISTORIAL` → `invoice_status_histories`
-- `FACTURA_USUARIO_EMISOR` → `invoices.user_issuer_id`
+- `FACTURA_USUARIO_EMISOR` → `FACTURA.id_usuario_emisor`
 - `METODO_PAGO` → `payment_methods`
 - `PAGO` → `payments`
 - `FACTURA_PAGO` → `invoice_payments`
