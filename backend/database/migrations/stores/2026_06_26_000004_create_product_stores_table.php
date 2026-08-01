@@ -12,20 +12,30 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('product_id')
-                ->constrained('products')
-                ->restrictOnDelete()
-                ->cascadeOnUpdate();
+                ->constrained()
+                ->restrictOnDelete();
 
             $table->foreignId('store_id')
-                ->constrained('stores')
-                ->restrictOnDelete()
-                ->cascadeOnUpdate();
+                ->constrained()
+                ->restrictOnDelete();
 
-            $table->boolean('is_visible')->default(true);
+            $table->string('slug')->nullable();
+            $table->decimal('public_price', 12, 2)->nullable();
+            $table->text('public_description')->nullable();
+
+            $table->boolean('is_visible')->default(true)->index();
+            $table->boolean('is_featured')->default(false)->index();
+            $table->unsignedInteger('sort_order')->default(0)->index();
+            $table->timestamp('published_at')->nullable()->index();
+
             $table->timestamps();
 
-            $table->unique(['product_id', 'store_id']);
-            $table->index('store_id');
+            $table->unique(['product_id', 'store_id'], 'product_stores_product_store_unique');
+            $table->unique(['store_id', 'slug'], 'product_stores_store_slug_unique');
+
+            $table->index(['store_id', 'is_visible'], 'product_stores_store_visible_idx');
+            $table->index(['store_id', 'is_visible', 'is_featured'], 'product_stores_visible_featured_idx');
+            $table->index(['store_id', 'sort_order'], 'product_stores_store_sort_idx');
         });
     }
 
