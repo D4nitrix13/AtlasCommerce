@@ -145,6 +145,6 @@ final class CartToRefundTest extends TestCase
         $currency->update(['is_primary' => false]);
 
         $order->refresh();
-        $this->assertSame($originalRate, $order->exchange_rate_snapshot);
+        $this->assertSame(expected: $originalRate, actual: $order->exchange_rate_snapshot);
     }
 }

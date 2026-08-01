@@ -70,7 +70,7 @@ trait HasSlug
         $suffix = 1;
         $column = $this->getSlugColumn();
 
-        $query = static::query()->where($column, $slug);
+        $query = static::query()->where(column: $column, operator: '=', value: $slug);
 
         if ($this->exists) {
             $query->where($this->getKeyName(), '!=', $this->getKey());
@@ -79,7 +79,7 @@ trait HasSlug
         while ($query->exists()) {
             $suffix++;
             $candidate = Str::limit($base.'-'.$suffix, 180, '');
-            $query = static::query()->where($column, $candidate);
+            $query = static::query()->where(column: $column, operator: '=', value: $candidate);
 
             if ($this->exists) {
                 $query->where($this->getKeyName(), '!=', $this->getKey());

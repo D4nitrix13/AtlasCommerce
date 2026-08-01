@@ -56,7 +56,7 @@ class CartController extends Controller
     public function show(Request $request, Cart $cart): JsonResponse
     {
         $customer = $this->resolveCustomer($request);
-        $this->assertCartOwnership($cart, $customer);
+        $this->assertCartOwnership(cart: $cart, customer: $customer);
 
         $cart->load(['items.product', 'items.productVariant', 'currency']);
 
@@ -117,7 +117,7 @@ class CartController extends Controller
     public function update(Request $request, Cart $cart): JsonResponse
     {
         $customer = $this->resolveCustomer($request);
-        $this->assertCartOwnership($cart, $customer);
+        $this->assertCartOwnership(cart: $cart, customer: $customer);
 
         $validated = $request->validate([
             'status' => ['sometimes', 'in:active,abandoned'],
@@ -134,7 +134,7 @@ class CartController extends Controller
     public function destroy(Request $request, Cart $cart): JsonResponse
     {
         $customer = $this->resolveCustomer($request);
-        $this->assertCartOwnership($cart, $customer);
+        $this->assertCartOwnership(cart: $cart, customer: $customer);
 
         $cart->delete();
 

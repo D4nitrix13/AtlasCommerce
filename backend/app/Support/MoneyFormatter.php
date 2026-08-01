@@ -25,7 +25,7 @@ final class MoneyFormatter
     {
         $scale ??= $currency?->decimal_places ?? 2;
         $divisor = 10 ** $scale;
-        $whole = intdiv($cents, $divisor);
+        $whole = intdiv(num1: $cents, num2: $divisor);
         $fraction = abs($cents % $divisor);
 
         $decimal = $scale === 0
@@ -51,7 +51,7 @@ final class MoneyFormatter
     {
         return [
             'cents' => $cents,
-            'formatted' => self::format($cents, $currency),
+            'formatted' => self::format(cents: $cents, currency: $currency),
             'currency_code' => $currency?->code,
         ];
     }
