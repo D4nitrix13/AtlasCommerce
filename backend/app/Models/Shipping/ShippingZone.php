@@ -52,6 +52,6 @@ class ShippingZone extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where(column: 'is_active', value: true);
+        return $query->whereRaw('is_active = ?', [1]);
     }
 }

@@ -189,6 +189,7 @@ final class CheckoutService
                 'discount_cents' => $discountCents,
                 'tax_cents' => $taxCents,
                 'shipping_cents' => $shippingCents,
+                'shipping_zone_id' => $shippingZone?->id,
                 'total_cents' => $totalCents,
                 'exchange_rate_snapshot' => $exchangeRate,
                 'payment_status' => 'pending',

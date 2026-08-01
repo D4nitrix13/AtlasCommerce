@@ -2,15 +2,17 @@
 
 namespace App\Models\Shipping;
 
-use App\Models\Concerns\BelongsToStore;
+use App\Enums\ShipmentStatus;
 use App\Models\Concerns\LogsActivity;
 use App\Models\Sales\Order;
 use App\Models\Settings\Currency;
+use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -32,7 +34,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Shipment extends Model
 {
-    use BelongsToStore;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;
@@ -50,6 +51,7 @@ class Shipment extends Model
     ];
 
     protected $casts = [
+        'status' => ShipmentStatus::class,
         'shipping_cost_cents' => 'integer',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
@@ -58,6 +60,25 @@ class Shipment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Tienda del envío, derivada a través de la orden.
+     *
+     * No usamos `BelongsToStore` directo porque `shipments` no tiene
+     * `store_id` (se deriva vía `order.store_id`). El aislamiento
+     * multi-tenant se obtiene filtrando por la orden primero.
+     */
+    public function store(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            related: Store::class,
+            through: Order::class,
+            firstKey: 'id',
+            secondKey: 'id',
+            localKey: 'order_id',
+            secondLocalKey: 'store_id',
+        );
     }
 
     public function shippingCompany(): BelongsTo
@@ -77,21 +98,31 @@ class Shipment extends Model
 
     public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', 'pending');
+        return $query->where(column: 'status', operator: '=', value: ShipmentStatus::Pending->value);
     }
 
     public function scopeShipped(Builder $query): Builder
     {
-        return $query->where('status', 'shipped');
+        return $query->where(column: 'status', operator: '=', value: ShipmentStatus::Shipped->value);
+    }
+
+    public function scopeInTransit(Builder $query): Builder
+    {
+        return $query->where(column: 'status', operator: '=', value: ShipmentStatus::InTransit->value);
     }
 
     public function scopeDelivered(Builder $query): Builder
     {
-        return $query->where('status', 'delivered');
+        return $query->where(column: 'status', operator: '=', value: ShipmentStatus::Delivered->value);
+    }
+
+    public function scopeCancelled(Builder $query): Builder
+    {
+        return $query->where(column: 'status', operator: '=', value: ShipmentStatus::Cancelled->value);
     }
 
     public function scopeByOrder(Builder $query, int $orderId): Builder
     {
-        return $query->where('order_id', $orderId);
+        return $query->where(column: 'order_id', operator: '=', value: $orderId);
     }
 }
