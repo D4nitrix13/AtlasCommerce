@@ -1,5 +1,5 @@
 {
-  "name": "kitsune-store",
+  "name": "frontend",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -30,3 +30,4 @@
     "typescript": "^6.0.3"
   }
 }
+
