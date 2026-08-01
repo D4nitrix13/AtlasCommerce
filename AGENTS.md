@@ -20,8 +20,8 @@ Reglas clave:
 ## Project Structure
 
 ```txt
-├── backend/api/          Laravel 13 API
-├── frontend/kitsune-store/   Astro 7 + React 19
+├── backend/              Laravel 13 API
+├── frontend/             Astro 7 + React 19
 ├── docs/                 Documentación técnica
 ├── docker/               Configuración Docker
 └── database/             Archivos de PostgreSQL

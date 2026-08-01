@@ -53,7 +53,7 @@ redis:
 ```yaml
 backend:
   build:
-    context: ./backend/api
+    context: ./backend
     dockerfile: Dockerfile
   ports:
     - "8000:8000"
@@ -77,7 +77,7 @@ backend:
 ```yaml
 frontend:
   build:
-    context: ./frontend/kitsune-store
+    context: ./frontend
     dockerfile: Dockerfile
   ports:
     - "4173:4173"
@@ -129,7 +129,7 @@ networks:
 Las variables se cargan desde archivos `.env`:
 
 - `docker/dev/.env` — Variables de desarrollo
-- `backend/api/.env` — Variables del backend
+- `backend/.env` — Variables del backend
 - `frontend/.env` — Variables del frontend
 
 Ver [environments.md](environments.md "Variables de entorno")
