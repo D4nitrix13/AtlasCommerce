@@ -201,6 +201,19 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::apiResource('shipping-companies', ShippingCompanyController::class);
     Route::apiResource('shipping-zones', ShippingZoneController::class);
+
+    // PHASE 10: transiciones de estado de shipment (deben ir antes del apiResource
+    // para que las rutas /shipments/{shipment}/... no colisionen con show/update).
+    Route::post('shipments/{shipment}/ship', [ShipmentController::class, 'markAsShipped'])
+        ->middleware('permission:shipping.shipments.ship')
+        ->name('shipments.ship');
+    Route::post('shipments/{shipment}/deliver', [ShipmentController::class, 'markAsDelivered'])
+        ->middleware('permission:shipping.shipments.deliver')
+        ->name('shipments.deliver');
+    Route::post('shipments/{shipment}/cancel', [ShipmentController::class, 'cancel'])
+        ->middleware('permission:shipping.shipments.cancel')
+        ->name('shipments.cancel');
+
     Route::apiResource('shipments', ShipmentController::class);
 
     /*
@@ -237,6 +250,23 @@ Route::middleware('auth:sanctum')->group(function (): void {
     | Return requests, returned items and refunds.
     |
     */
+
+    // PHASE 11: transiciones de return request (deben ir antes del apiResource).
+    Route::post('return-requests/{return_request}/approve', [ReturnRequestController::class, 'approve'])
+        ->middleware('permission:returns.return_requests.approve')
+        ->name('return-requests.approve');
+    Route::post('return-requests/{return_request}/reject', [ReturnRequestController::class, 'reject'])
+        ->middleware('permission:returns.return_requests.reject')
+        ->name('return-requests.reject');
+    Route::post('return-requests/{return_request}/cancel', [ReturnRequestController::class, 'cancel'])
+        ->name('return-requests.cancel');
+
+    // PHASE 11: transiciones de refund.
+    Route::post('refunds/{refund}/process', [RefundController::class, 'process'])
+        ->middleware('permission:payments.refunds.process')
+        ->name('refunds.process');
+    Route::post('refunds/{refund}/fail', [RefundController::class, 'fail'])
+        ->name('refunds.fail');
 
     Route::apiResource('return-requests', ReturnRequestController::class);
     Route::apiResource('return-request-items', ReturnRequestItemController::class);

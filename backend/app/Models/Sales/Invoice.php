@@ -8,6 +8,7 @@ use App\Models\Concerns\LogsActivity;
 use App\Models\Customers\Customer;
 use App\Models\Payments\InvoicePayment;
 use App\Models\Settings\Currency;
+use App\Models\Shipping\ShippingZone;
 use App\Models\Stores\SalesChannel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -68,6 +69,8 @@ class Invoice extends Model
         'discount_cents',
         'tax_cents',
         'shipping_cents',
+        'shipping_zone_id',
+        'refunded_cents',
         'total_cents',
         'exchange_rate_snapshot',
         'payment_status',
@@ -82,6 +85,7 @@ class Invoice extends Model
         'discount_cents' => 'integer',
         'tax_cents' => 'integer',
         'shipping_cents' => 'integer',
+        'refunded_cents' => 'integer',
         'total_cents' => 'integer',
         'exchange_rate_snapshot' => 'decimal:8',
         'issued_at' => 'datetime',
@@ -107,6 +111,17 @@ class Invoice extends Model
         return $this->total_cents - $this->paidAmountCents();
     }
 
+    /**
+     * Saldo aún devoluble = total - ya devuelto.
+     *
+     * Un refund no puede superar este monto. Es la base del chequeo
+     * en `RefundService::process()`.
+     */
+    public function refundableBalanceCents(): int
+    {
+        return $this->total_cents - (int) $this->refunded_cents;
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -130,6 +145,11 @@ class Invoice extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    public function shippingZone(): BelongsTo
+    {
+        return $this->belongsTo(ShippingZone::class);
     }
 
     public function items(): HasMany

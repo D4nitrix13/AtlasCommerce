@@ -10,6 +10,7 @@ use App\Models\Payments\Payment;
 use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Invoice;
 use App\Services\Inventory\StockService;
+use App\Services\Shipping\ShipmentService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -36,6 +37,7 @@ final class PaymentService
 {
     public function __construct(
         private readonly StockService $stock,
+        private readonly ShipmentService $shipments,
     ) {}
 
     /**
@@ -133,6 +135,8 @@ final class PaymentService
                     invoice: $locked,
                     user: auth()->user(),
                 );
+
+                $this->shipments->createForInvoice(invoice: $locked);
             }
 
             return $payment->fresh(['invoicePayments']);
