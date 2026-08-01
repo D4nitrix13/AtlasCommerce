@@ -88,7 +88,10 @@ class OrderController extends Controller
         $customer = $this->resolveCustomer($request);
 
         $cart = $this->resolveOwnedCart(request: $request, customer: $customer);
-        $address = $this->resolveOwnedAddress($customer, (int) $request->integer('shipping_address_id'));
+        $address = $this->resolveOwnedAddress(
+            customer: $customer,
+            addressId: (int) $request->integer('shipping_address_id'),
+        );
         $paymentMethod = PaymentMethod::findOrFail($request->integer('payment_method_id'));
 
         $shippingZone = null;

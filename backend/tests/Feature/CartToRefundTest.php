@@ -30,7 +30,7 @@ final class CartToRefundTest extends TestCase
     public function full_checkout_flow_from_cart_to_refund(): void
     {
         $currency = Currency::factory()->primary()->create();
-        $store = Store::factory()->for($currency, 'currency')->create();
+        $store = Store::factory()->for(factory: $currency, relationship: 'currency')->create();
         $customer = Customer::factory()->create();
 
         $product = Product::factory()->for($store->currency, 'currency')->create([
