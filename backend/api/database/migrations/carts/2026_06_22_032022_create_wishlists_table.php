@@ -19,6 +19,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
             $table->string('name', 100)->default('Default Wishlist');
             $table->boolean('is_default')->default(true);
 
@@ -26,6 +31,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index('customer_id');
+            $table->index('store_id');
             $table->index('is_default');
         });
     }

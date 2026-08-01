@@ -19,6 +19,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
             $table->string('title', 200);
             $table->text('message');
             $table->string('type', 50)->default('info');
@@ -28,6 +33,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('user_id');
+            $table->index('store_id');
             $table->index('type');
             $table->index('is_read');
             $table->index('read_at');

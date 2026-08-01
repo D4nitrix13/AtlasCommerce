@@ -21,10 +21,16 @@ return new class extends Migration
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
+            $table->foreignId('role_id')
+                ->nullable()
+                ->constrained('roles')
+                ->restrictOnDelete();
+
             $table->timestamps();
 
             $table->unique(['user_id', 'store_id']);
             $table->index('store_id');
+            $table->index('role_id');
         });
     }
 

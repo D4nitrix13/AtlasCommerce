@@ -24,6 +24,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+            $table->foreignId('store_id')
+                ->nullable()
+                ->constrained('stores')
+                ->restrictOnDelete();
+
             $table->decimal('amount', 12, 2);
             $table->string('reference', 160)->nullable();
             $table->string('status', 50)->default('pending');
@@ -35,6 +40,7 @@ return new class extends Migration
 
             $table->index('customer_id');
             $table->index('payment_method_id');
+            $table->index('store_id');
             $table->index('reference');
             $table->index('status');
             $table->index('paid_at');
