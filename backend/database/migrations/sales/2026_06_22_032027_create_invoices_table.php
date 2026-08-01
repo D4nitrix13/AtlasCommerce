@@ -7,78 +7,89 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'invoices' que almacena las facturas generadas a partir de órdenes.
+     * Cada factura registra la orden asociada (opcional), cliente, tienda, canal de venta
+     * y el usuario emisor. Incluye montos desglosados (subtotal, descuento, impuesto, total),
+     * saldos de pago (pagado, pendiente), estados de pago e factura, y fechas de emisión y vencimiento.
+     * Se permite soft deletes para mantener historial de facturas anuladas.
      */
     public function up(): void
     {
-        Schema::create('invoices', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'invoices', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('order_id')
+            // La orden es opcional para facturas generadas directamente sin orden previa
+            $table->foreignId(column: 'order_id')
                 ->nullable()
-                ->constrained('orders')
+                ->constrained(table: 'orders')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('customer_id')
-                ->constrained('customers')
+            $table->foreignId(column: 'customer_id')
+                ->constrained(table: 'customers')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('store_id')
+            // La tienda es opcional para facturas emitidas desde el panel administrativo
+            $table->foreignId(column: 'store_id')
                 ->nullable()
-                ->constrained('stores')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete();
 
-            $table->foreignId('sales_channel_id')
+            $table->foreignId(column: 'sales_channel_id')
                 ->nullable()
-                ->constrained('sales_channels')
+                ->constrained(table: 'sales_channels')
                 ->nullOnDelete();
 
-            $table->foreignId('user_issuer_id')
+            // Registro del usuario administrador que emitió la factura
+            $table->foreignId(column: 'user_issuer_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete();
 
-            $table->string('invoice_number', 80)->unique();
+            $table->string(column: 'invoice_number', length: 80)->unique();
 
-            $table->decimal('subtotal', 12, 2)->default(0);
-            $table->decimal('discount', 12, 2)->default(0);
-            $table->decimal('tax', 12, 2)->default(0);
-            $table->decimal('total', 12, 2)->default(0);
+            $table->decimal(column: 'subtotal', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'discount', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'tax', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'total', total: 12, places: 2)->default(value: 0);
 
-            $table->decimal('paid_amount', 12, 2)->default(0);
-            $table->decimal('pending_balance', 12, 2)->default(0);
+            $table->decimal(column: 'paid_amount', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'pending_balance', total: 12, places: 2)->default(value: 0);
 
-            $table->string('payment_status', 50)->default('pending');
-            $table->string('invoice_status', 50)->default('issued');
+            $table->string(column: 'payment_status', length: 50)->default(value: 'pending');
+            $table->string(column: 'invoice_status', length: 50)->default(value: 'issued');
 
-            $table->timestamp('issued_at')->useCurrent();
-            $table->timestamp('due_at')->nullable();
+            $table->timestamp(column: 'issued_at')->useCurrent();
+            $table->timestamp(column: 'due_at')->nullable();
 
-            $table->text('notes')->nullable();
+            $table->text(column: 'notes')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('order_id');
-            $table->index('customer_id');
-            $table->index('store_id');
-            $table->index('sales_channel_id');
-            $table->index('user_issuer_id');
-            $table->index('invoice_number');
-            $table->index('payment_status');
-            $table->index('invoice_status');
-            $table->index('issued_at');
-            $table->index('due_at');
+            $table->index(columns: ['order_id'], name: 'invoices_order_id_idx');
+            $table->index(columns: ['customer_id'], name: 'invoices_customer_id_idx');
+            $table->index(columns: ['store_id'], name: 'invoices_store_id_idx');
+            $table->index(columns: ['sales_channel_id'], name: 'invoices_sales_channel_id_idx');
+            $table->index(columns: ['user_issuer_id'], name: 'invoices_user_issuer_id_idx');
+            $table->index(columns: ['invoice_number'], name: 'invoices_invoice_number_idx');
+            $table->index(columns: ['payment_status'], name: 'invoices_payment_status_idx');
+            $table->index(columns: ['invoice_status'], name: 'invoices_invoice_status_idx');
+            $table->index(columns: ['issued_at'], name: 'invoices_issued_at_idx');
+            $table->index(columns: ['due_at'], name: 'invoices_due_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'invoices' y todas sus restricciones de integridad referencial.
      */
     public function down(): void
     {
-        Schema::dropIfExists('invoices');
+        Schema::dropIfExists(table: 'invoices');
     }
 };

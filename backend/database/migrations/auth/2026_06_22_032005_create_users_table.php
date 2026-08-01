@@ -7,66 +7,90 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
+     *
+     * Crea las tablas `users` y `sessions`.
+     * - `users`: almacena los datos principales de los usuarios del sistema,
+     *   incluyendo autenticación, perfil básico, y estado de cuenta.
+     * - `sessions`: almacena las sesiones activas de los usuarios para
+     *   gestión de sesiones concurrentes y control de acceso.
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'users', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('role_id')
+            // Relación con roles: nullable porque el usuario puede existir sin rol asignado
+            $table->foreignId(column: 'role_id')
                 ->nullable()
-                ->constrained('roles')
+                ->constrained(table: 'roles')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->string('first_name', 80);
-            $table->string('last_name', 80);
-            $table->string('email', 150)->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('phone', 30)->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamp('registered_at')->useCurrent();
+            $table->string(column: 'first_name', length: 80);
+            $table->string(column: 'last_name', length: 80);
+            $table->string(column: 'email', length: 150)->unique();
+            // Timestamp de verificación de email: nullable hasta que el usuario verifique
+            $table->timestamp(column: 'email_verified_at')->nullable();
+            $table->string(column: 'password');
+            // Teléfono opcional para usuarios que no proporcionan uno
+            $table->string(column: 'phone', length: 30)->nullable();
+            $table->boolean(column: 'is_active')->default(value: true);
+            // Fecha de registro automática al crear la cuenta
+            $table->timestamp(column: 'registered_at')->useCurrent();
 
-            $table->timestamp('password_changed_at')->nullable()->index();
-            $table->timestamp('last_login_at')->nullable()->index();
-            $table->string('last_login_ip', 45)->nullable();
-            $table->unsignedInteger('failed_login_attempts')->default(0);
-            $table->timestamp('locked_until')->nullable()->index();
+            // Auditoría de seguridad: campos para rastrear actividad de login
+            // index() para búsquedas frecuentes de usuarios con contraseñas recién cambiadas
+            $table->timestamp(column: 'password_changed_at')->nullable()->index();
+            // index() para ordenar y filtrar por último login
+            $table->timestamp(column: 'last_login_at')->nullable()->index();
+            // IP del último login, max 45 chars para IPv6
+            $table->string(column: 'last_login_ip', length: 45)->nullable();
+            $table->unsignedInteger('failed_login_attempts')->default(value: 0);
+            // Bloqueo temporal tras intentos fallidos: index() para limpieza periódica
+            $table->timestamp(column: 'locked_until')->nullable()->index();
 
             $table->rememberToken();
             $table->timestamps();
+            // Soft deletes para mantener integridad referencial con tablas hijas
             $table->softDeletes();
 
-            $table->index('role_id');
-            $table->index('email');
-            $table->index('is_active');
+            // Índices para joins y filtros frecuentes
+            $table->index(columns: ['role_id'], name: 'users_role_id_idx');
+            $table->index(columns: ['email'], name: 'users_email_idx');
+            $table->index(columns: ['is_active'], name: 'users_is_active_idx');
         });
 
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
+        Schema::create(table: 'sessions', callback: function (Blueprint $table): void {
+            // ID de sesión como string (Laravel usa IDs de sesión aleatorios)
+            $table->string(column: 'id')->primary();
 
-            $table->foreignId('user_id')
+            // Relación con usuarios: nullable para sesiones huérfanas durante limpieza
+            $table->foreignId(column: 'user_id')
                 ->nullable()
                 ->index()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
+            // IP del cliente, max 45 para soportar IPv6
+            $table->string(column: 'ip_address', length: 45)->nullable();
+            // User agent completo del navegador/dispositivo
+            $table->text(column: 'user_agent')->nullable();
+            // Payload serializado de la sesión (datos del usuario, permisos, etc.)
+            $table->longText(column: 'payload');
+            // index() para limpieza de sesiones expiradas por actividad
+            $table->integer(column: 'last_activity')->index();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('sessions');
-        Schema::dropIfExists('users');
+        // Primero sessions porque depende de users (foreign key)
+        Schema::dropIfExists(table: 'sessions');
+        Schema::dropIfExists(table: 'users');
     }
 };

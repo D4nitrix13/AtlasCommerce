@@ -7,40 +7,48 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de mensajes de tickets de soporte para
+     * registrar la conversación entre cliente y soporte.
      */
     public function up(): void
     {
-        Schema::create('support_ticket_messages', function (Blueprint $table) {
+        Schema::create(table: 'support_ticket_messages', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->foreignId('support_ticket_id')
-                ->constrained('support_tickets')
+            // Ticket al que pertenece el mensaje: cascadeOnDelete porque si se elimina el ticket sus mensajes no tienen sentido
+            $table->foreignId(column: 'support_ticket_id')
+                ->constrained(table: 'support_tickets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('user_id')
+            // Usuario que envió el mensaje (puede ser cliente o agente de soporte), nullable si es un mensaje automático del sistema
+            // nullOnDelete: si se elimina el usuario, se conserva el mensaje como registro histórico
+            $table->foreignId(column: 'user_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->text('message');
-            $table->timestamp('messaged_at')->useCurrent();
+            // Contenido del mensaje de la conversación
+            $table->text(column: 'message');
+            // Fecha y hora en que se envió el mensaje, se establece automáticamente
+            $table->timestamp(column: 'messaged_at')->useCurrent();
 
             $table->timestamps();
 
-            $table->index('support_ticket_id');
-            $table->index('user_id');
-            $table->index('messaged_at');
+            $table->index(columns: ['support_ticket_id'], name: 'support_ticket_messages_support_ticket_id_idx');
+            $table->index(columns: ['user_id'], name: 'support_ticket_messages_user_id_idx');
+            $table->index(columns: ['messaged_at'], name: 'support_ticket_messages_messaged_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('support_ticket_messages');
+        Schema::dropIfExists(table: 'support_ticket_messages');
     }
 };

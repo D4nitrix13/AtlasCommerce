@@ -7,53 +7,63 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'order_items' que almacena los productos asociados a cada orden.
+     * Cada ítem registra el producto, variante (opcional), diseño personalizado (opcional),
+     * cantidad, precio unitario, descuento y subtotal calculado.
+     * Se indexan las claves foráneas para optimizar las consultas de búsqueda por orden.
      */
     public function up(): void
     {
-        Schema::create('order_items', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'order_items', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('order_id')
-                ->constrained('orders')
+            $table->foreignId(column: 'order_id')
+                ->constrained(table: 'orders')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('product_id')
-                ->constrained('products')
+            $table->foreignId(column: 'product_id')
+                ->constrained(table: 'products')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('product_variant_id')
+            // La variante es opcional para productos que no tienen variantes
+            $table->foreignId(column: 'product_variant_id')
                 ->nullable()
-                ->constrained('product_variants')
+                ->constrained(table: 'product_variants')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('custom_design_id')
+            // El diseño personalizado es opcional, solo aplica para productos con personalización
+            $table->foreignId(column: 'custom_design_id')
                 ->nullable()
-                ->constrained('custom_designs')
+                ->constrained(table: 'custom_designs')
                 ->nullOnDelete();
 
             $table->unsignedInteger('quantity');
-            $table->decimal('unit_price', 12, 2);
-            $table->decimal('discount', 12, 2)->default(0);
-            $table->decimal('subtotal', 12, 2);
+            $table->decimal(column: 'unit_price', total: 12, places: 2);
+            $table->decimal(column: 'discount', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'subtotal', total: 12, places: 2);
 
             $table->timestamps();
 
-            $table->index('order_id');
-            $table->index('product_id');
-            $table->index('product_variant_id');
-            $table->index(['order_id', 'custom_design_id'], 'order_items_order_design_idx');
+            $table->index(columns: ['order_id'], name: 'order_items_order_id_idx');
+            $table->index(columns: ['product_id'], name: 'order_items_product_id_idx');
+            $table->index(columns: ['product_variant_id'], name: 'order_items_product_variant_id_idx');
+            // Índice compuesto para buscar ítems de una orden que tienen diseño personalizado
+            $table->index(columns: ['order_id', 'custom_design_id'], name: 'order_items_order_design_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'order_items' y todas sus restricciones de integridad referencial.
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_items');
+        Schema::dropIfExists(table: 'order_items');
     }
 };

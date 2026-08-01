@@ -7,50 +7,62 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de compras para gestionar las órdenes
+     * de compra a proveedores del sistema.
      */
     public function up(): void
     {
-        Schema::create('purchases', function (Blueprint $table) {
+        Schema::create(table: 'purchases', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->foreignId('supplier_id')
-                ->constrained('suppliers')
+            // Relación con proveedor: restrictOnDelete porque no se debe eliminar un proveedor que tenga compras registradas
+            $table->foreignId(column: 'supplier_id')
+                ->constrained(table: 'suppliers')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('user_id')
+            // Usuario que registró la compra, nullable si es una compra importada o automática
+            // nullOnDelete: si se elimina el usuario, se conserva el registro de compra
+            $table->foreignId(column: 'user_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->string('purchase_number', 80)->unique();
-            $table->decimal('subtotal', 12, 2)->default(0);
-            $table->decimal('tax', 12, 2)->default(0);
-            $table->decimal('discount', 12, 2)->default(0);
-            $table->decimal('total', 12, 2)->default(0);
+            // Número único de referencia de la compra para identificación interna
+            $table->string(column: 'purchase_number', length: 80)->unique();
+            // Montos financieros con 2 decimales para precisión monetaria
+            $table->decimal(column: 'subtotal', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'tax', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'discount', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'total', total: 12, places: 2)->default(value: 0);
 
-            $table->string('status', 50)->default('pending');
-            $table->timestamp('purchase_date')->useCurrent();
-            $table->text('notes')->nullable();
+            // Estado de la compra: 'pending', 'confirmed', 'received', 'cancelled', etc.
+            $table->string(column: 'status', length: 50)->default(value: 'pending');
+            // Fecha de la compra, se establece automáticamente al crear
+            $table->timestamp(column: 'purchase_date')->useCurrent();
+            // Observaciones o notas adicionales sobre la compra
+            $table->text(column: 'notes')->nullable();
 
             $table->timestamps();
+            // Soft deletes para conservar historial de compras eliminadas
             $table->softDeletes();
 
-            $table->index('supplier_id');
-            $table->index('user_id');
-            $table->index('purchase_number');
-            $table->index('status');
-            $table->index('purchase_date');
+            $table->index(columns: ['supplier_id'], name: 'purchases_supplier_id_idx');
+            $table->index(columns: ['user_id'], name: 'purchases_user_id_idx');
+            $table->index(columns: ['purchase_number'], name: 'purchases_purchase_number_idx');
+            $table->index(columns: ['status'], name: 'purchases_status_idx');
+            $table->index(columns: ['purchase_date'], name: 'purchases_purchase_date_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchases');
+        Schema::dropIfExists(table: 'purchases');
     }
 };

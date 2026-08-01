@@ -7,49 +7,61 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de preguntas de productos para gestionar
+     * las consultas de clientes sobre productos del catálogo.
      */
     public function up(): void
     {
-        Schema::create('product_questions', function (Blueprint $table) {
+        Schema::create(table: 'product_questions', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->foreignId('product_id')
-                ->constrained('products')
+            // Producto preguntado: cascadeOnDelete porque si se elimina el producto sus preguntas no tienen sentido
+            $table->foreignId(column: 'product_id')
+                ->constrained(table: 'products')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('customer_id')
-                ->constrained('customers')
+            // Cliente que realizó la pregunta: cascadeOnDelete porque la pregunta se mantiene en esta tabla
+            $table->foreignId(column: 'customer_id')
+                ->constrained(table: 'customers')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('store_id')
+            // Store asociado al producto, nullable para preguntas de productos globales
+            // restrictOnDelete: no se debe eliminar un store que tenga preguntas asociadas
+            $table->foreignId(column: 'store_id')
                 ->nullable()
-                ->constrained('stores')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete();
 
-            $table->text('question');
-            $table->text('answer')->nullable();
-            $table->timestamp('asked_at')->useCurrent();
-            $table->timestamp('answered_at')->nullable();
+            // Texto de la pregunta del cliente (obligatorio)
+            $table->text(column: 'question');
+            // Respuesta del vendedor u otro cliente, nullable hasta que se responda
+            $table->text(column: 'answer')->nullable();
+            // Fecha y hora en que se realizó la pregunta
+            $table->timestamp(column: 'asked_at')->useCurrent();
+            // Fecha y hora en que se respondió la pregunta
+            $table->timestamp(column: 'answered_at')->nullable();
 
             $table->timestamps();
+            // Soft deletes para conservar historial de preguntas eliminadas
             $table->softDeletes();
 
-            $table->index('product_id');
-            $table->index('customer_id');
-            $table->index('store_id');
-            $table->index('asked_at');
-            $table->index('answered_at');
+            $table->index(columns: ['product_id'], name: 'product_questions_product_id_idx');
+            $table->index(columns: ['customer_id'], name: 'product_questions_customer_id_idx');
+            $table->index(columns: ['store_id'], name: 'product_questions_store_id_idx');
+            $table->index(columns: ['asked_at'], name: 'product_questions_asked_at_idx');
+            $table->index(columns: ['answered_at'], name: 'product_questions_answered_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_questions');
+        Schema::dropIfExists(table: 'product_questions');
     }
 };

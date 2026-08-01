@@ -7,36 +7,42 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de relación entre productos y promociones
+     * para gestionar qué productos participan en cada promoción.
      */
     public function up(): void
     {
-        Schema::create('product_promotion', function (Blueprint $table) {
+        Schema::create(table: 'product_promotion', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->foreignId('product_id')
-                ->constrained('products')
+            // Producto asociado a la promoción: cascadeOnDelete porque si se elimina el producto la relación no tiene sentido
+            $table->foreignId(column: 'product_id')
+                ->constrained(table: 'products')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('promotion_id')
-                ->constrained('promotions')
+            // Promoción asociada al producto: cascadeOnDelete porque si se elimina la promoción la relación no tiene sentido
+            $table->foreignId(column: 'promotion_id')
+                ->constrained(table: 'promotions')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->timestamps();
 
-            $table->unique(['product_id', 'promotion_id']);
-            $table->index('product_id');
-            $table->index('promotion_id');
+            // Evita duplicados de producto-promoción
+            $table->unique(columns: ['product_id', 'promotion_id'], name: 'product_promotion_product_id_promotion_id_unique');
+            $table->index(columns: ['product_id'], name: 'product_promotion_product_id_idx');
+            $table->index(columns: ['promotion_id'], name: 'product_promotion_promotion_id_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_promotion');
+        Schema::dropIfExists(table: 'product_promotion');
     }
 };

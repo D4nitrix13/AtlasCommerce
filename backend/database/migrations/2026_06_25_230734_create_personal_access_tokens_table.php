@@ -4,43 +4,38 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Migración para la tabla `personal_access_tokens` (Laravel Sanctum).
- *
- * Tabla de infraestructura técnica que almacena los tokens de API
- * utilizados por el middleware `auth:sanctum`. No es una entidad
- * del dominio del store, por eso se mantiene en la raíz de
- * `database/migrations/` en lugar de una subcarpeta de módulo.
- *
- * Todas las rutas 2FA están protegidas por este middleware y
- * requieren un token válido en el header `Authorization: Bearer {token}`.
- *
- * @see https://docs.laravel.com/sanctum
- */
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de tokens de acceso personal utilizados
+     * para autenticación de API por parte de Laravel Sanctum.
      */
     public function up(): void
     {
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
+        Schema::create(table: 'personal_access_tokens', callback: function (Blueprint $table): void {
             $table->id();
-            $table->morphs('tokenable');
-            $table->text('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable()->index();
+            // Relación polimórfica: el token puede pertenecer a cualquier modelo (User, etc.)
+            $table->morphs(name: 'tokenable');
+            // Nombre descriptivo del token para identificación en el panel de administración
+            $table->text(column: 'name');
+            // Token hasheado de 64 caracteres, único para evitar duplicados
+            $table->string(column: 'token', length: 64)->unique();
+            // Capacidades/permisos del token en formato JSON serializado, nullable por defecto
+            $table->text(column: 'abilities')->nullable();
+            $table->timestamp(column: 'last_used_at')->nullable();
+            // Fecha de expiración del token, indexada para limpieza periódica
+            $table->timestamp(column: 'expires_at')->nullable()->index();
             $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('personal_access_tokens');
+        Schema::dropIfExists(table: 'personal_access_tokens');
     }
 };

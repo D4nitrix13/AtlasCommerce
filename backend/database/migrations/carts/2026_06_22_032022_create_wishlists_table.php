@@ -7,40 +7,47 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla "wishlists" que almacena las listas de deseos de cada
+     * cliente. Un cliente puede tener múltiples listas (ej: "Favoritos",
+     * "Regalos de Navidad"), siendo una de ellas la predeterminada.
      */
     public function up(): void
     {
-        Schema::create('wishlists', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'wishlists', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('customer_id')
-                ->constrained('customers')
+            $table->foreignId(column: 'customer_id')
+                ->constrained(table: 'customers')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('store_id')
+            // Tienda opcional: permite listas por tienda o listas globales
+            $table->foreignId(column: 'store_id')
                 ->nullable()
-                ->constrained('stores')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete();
 
-            $table->string('name', 100)->default('Default Wishlist');
-            $table->boolean('is_default')->default(true);
+            $table->string(column: 'name', length: 100)->default(value: 'Default Wishlist');
+            $table->boolean(column: 'is_default')->default(value: true);
 
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('customer_id');
-            $table->index('store_id');
-            $table->index('is_default');
+            $table->index(columns: ['customer_id'], name: 'wishlists_customer_id_idx');
+            $table->index(columns: ['store_id'], name: 'wishlists_store_id_idx');
+            $table->index(columns: ['is_default'], name: 'wishlists_is_default_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revierte las migraciones.
+     *
+     * Elimina la tabla "wishlists" y todas sus dependencias.
      */
     public function down(): void
     {
-        Schema::dropIfExists('wishlists');
+        Schema::dropIfExists(table: 'wishlists');
     }
 };

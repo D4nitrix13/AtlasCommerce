@@ -6,29 +6,42 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'store_social_links' que almacena los enlaces a redes sociales
+     * de cada tienda. Permite múltiples plataformas (Facebook, Instagram, TikTok, etc.)
+     * por tienda, con su URL correspondiente y estado de actividad.
+     */
     public function up(): void
     {
-        Schema::create('store_social_links', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'store_social_links', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('store_id')
-                ->constrained('stores')
+            $table->foreignId(column: 'store_id')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->string('platform', 50);
-            $table->string('url', 255);
-            $table->boolean('is_active')->default(true);
+            // Nombre de la plataforma: facebook, instagram, tiktok, twitter, youtube, etc.
+            $table->string(column: 'platform', length: 50);
+            $table->string(column: 'url', length: 255);
+            $table->boolean(column: 'is_active')->default(value: true);
 
             $table->timestamps();
 
-            $table->index('store_id');
-            $table->index('platform');
+            $table->index(columns: ['store_id'], name: 'store_social_links_store_id_idx');
+            $table->index(columns: ['platform'], name: 'store_social_links_platform_idx');
         });
     }
 
+    /**
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'store_social_links' y todas sus restricciones de integridad referencial.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('store_social_links');
+        Schema::dropIfExists(table: 'store_social_links');
     }
 };

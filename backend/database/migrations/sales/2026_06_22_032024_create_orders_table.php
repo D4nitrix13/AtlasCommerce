@@ -7,70 +7,81 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'orders' que almacena las órdenes de compra del sistema de ventas.
+     * Cada orden registra el cliente, dirección de envío, tienda y canal de venta asociados,
+     * junto con los montos desglosados (subtotal, descuento, impuesto, total) y su estado actual.
+     * Se incluyen campos de auditoría para rastrear el usuario que creó la orden y timestamps.
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'orders', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('customer_id')
-                ->constrained('customers')
+            $table->foreignId(column: 'customer_id')
+                ->constrained(table: 'customers')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('shipping_address_id')
+            // La dirección de envío es opcional ya que algunas órdenes pueden ser retiro en tienda
+            $table->foreignId(column: 'shipping_address_id')
                 ->nullable()
-                ->constrained('customer_addresses')
+                ->constrained(table: 'customer_addresses')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('store_id')
+            // La tienda es opcional para órdenes creadas desde el panel de administración
+            $table->foreignId(column: 'store_id')
                 ->nullable()
-                ->constrained('stores')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete();
 
-            $table->foreignId('sales_channel_id')
+            // El canal de venta permite identificar si la orden proviene de la web, POS, teléfono, etc.
+            $table->foreignId(column: 'sales_channel_id')
                 ->nullable()
-                ->constrained('sales_channels')
+                ->constrained(table: 'sales_channels')
                 ->nullOnDelete();
 
-            $table->foreignId('user_creator_id')
+            // Registro del usuario administrador que creó la orden (para órdenes manuales)
+            $table->foreignId(column: 'user_creator_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete();
 
-            $table->string('order_number', 80)->unique();
+            $table->string(column: 'order_number', length: 80)->unique();
 
-            $table->decimal('subtotal', 12, 2)->default(0);
-            $table->decimal('discount', 12, 2)->default(0);
-            $table->decimal('tax', 12, 2)->default(0);
-            $table->decimal('total', 12, 2)->default(0);
+            $table->decimal(column: 'subtotal', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'discount', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'tax', total: 12, places: 2)->default(value: 0);
+            $table->decimal(column: 'total', total: 12, places: 2)->default(value: 0);
 
-            $table->string('status', 50)->default('pending');
-            $table->timestamp('ordered_at')->useCurrent();
+            $table->string(column: 'status', length: 50)->default(value: 'pending');
+            $table->timestamp(column: 'ordered_at')->useCurrent();
 
-            $table->text('notes')->nullable();
+            $table->text(column: 'notes')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('customer_id');
-            $table->index('shipping_address_id');
-            $table->index('store_id');
-            $table->index('sales_channel_id');
-            $table->index('user_creator_id');
-            $table->index('order_number');
-            $table->index('status');
-            $table->index('ordered_at');
+            $table->index(columns: ['customer_id'], name: 'orders_customer_id_idx');
+            $table->index(columns: ['shipping_address_id'], name: 'orders_shipping_address_id_idx');
+            $table->index(columns: ['store_id'], name: 'orders_store_id_idx');
+            $table->index(columns: ['sales_channel_id'], name: 'orders_sales_channel_id_idx');
+            $table->index(columns: ['user_creator_id'], name: 'orders_user_creator_id_idx');
+            $table->index(columns: ['order_number'], name: 'orders_order_number_idx');
+            $table->index(columns: ['status'], name: 'orders_status_idx');
+            $table->index(columns: ['ordered_at'], name: 'orders_ordered_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'orders' y todas sus restricciones de integridad referencial.
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists(table: 'orders');
     }
 };

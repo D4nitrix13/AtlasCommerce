@@ -7,53 +7,65 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea las tablas necesarias para el sistema de colas de Laravel,
+     * incluyendo trabajos individuales, lotes y registros de fallos.
      */
     public function up(): void
     {
-        Schema::create('jobs', function (Blueprint $table) {
+        Schema::create(table: 'jobs', callback: function (Blueprint $table): void {
             $table->id();
-            $table->string('queue')->index();
-            $table->longText('payload');
+            // La cola permite agrupar trabajos por tipo o prioridad
+            $table->string(column: 'queue')->index();
+            $table->longText(column: 'payload');
+            // Número máximo de intentos antes de marcar como fallido
             $table->unsignedSmallInteger('attempts');
+            // TimestampUnix de cuando se reservó el trabajo para procesamiento
             $table->unsignedInteger('reserved_at')->nullable();
+            // TimestampUnix de cuando el trabajo estará disponible para procesar
             $table->unsignedInteger('available_at');
             $table->unsignedInteger('created_at');
         });
 
-        Schema::create('job_batches', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('name');
-            $table->integer('total_jobs');
-            $table->integer('pending_jobs');
-            $table->integer('failed_jobs');
-            $table->longText('failed_job_ids');
-            $table->mediumText('options')->nullable();
-            $table->integer('cancelled_at')->nullable();
-            $table->integer('created_at');
-            $table->integer('finished_at')->nullable();
+        Schema::create(table: 'job_batches', callback: function (Blueprint $table): void {
+            $table->string(column: 'id')->primary();
+            $table->string(column: 'name');
+            $table->integer(column: 'total_jobs');
+            $table->integer(column: 'pending_jobs');
+            $table->integer(column: 'failed_jobs');
+            // IDs de trabajos fallidos en formato JSON serializado
+            $table->longText(column: 'failed_job_ids');
+            // Opciones del lote en formato JSON serializado, nullable por si no se configuran
+            $table->mediumText(column: 'options')->nullable();
+            $table->integer(column: 'cancelled_at')->nullable();
+            $table->integer(column: 'created_at');
+            $table->integer(column: 'finished_at')->nullable();
         });
 
-        Schema::create('failed_jobs', function (Blueprint $table) {
+        Schema::create(table: 'failed_jobs', callback: function (Blueprint $table): void {
             $table->id();
-            $table->string('uuid')->unique();
-            $table->string('connection');
-            $table->string('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
+            // UUID único para identificar cada trabajo de forma inequívoca
+            $table->string(column: 'uuid')->unique();
+            $table->string(column: 'connection');
+            $table->string(column: 'queue');
+            $table->longText(column: 'payload');
+            // Excepción completa serializada para debugging
+            $table->longText(column: 'exception');
+            $table->timestamp(column: 'failed_at')->useCurrent();
 
-            $table->index(['connection', 'queue', 'failed_at']);
+            // Índice compuesto para búsquedas por conexión, cola y fecha de fallo
+            $table->index(columns: ['connection', 'queue', 'failed_at'], name: 'jobs_connection_queue_failed_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('jobs');
-        Schema::dropIfExists('job_batches');
-        Schema::dropIfExists('failed_jobs');
+        Schema::dropIfExists(table: 'failed_jobs');
+        Schema::dropIfExists(table: 'job_batches');
+        Schema::dropIfExists(table: 'jobs');
     }
 };

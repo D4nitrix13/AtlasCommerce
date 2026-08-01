@@ -6,33 +6,53 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta las migraciones.
+     *
+     * Crea la tabla `password_reset_tokens` que gestiona los ciclos de vida
+     * de tokens de restablecimiento de contraseña: generación, uso y expiración.
+     */
     public function up(): void
     {
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'password_reset_tokens', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('user_id')
+            // Nullable porque el usuario puede solicitar reset sin estar autenticado
+            // (solo necesita email). nullOnDelete para preservar tokens si se elimina el usuario.
+            $table->foreignId(column: 'user_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete();
 
-            $table->string('email')->index();
-            $table->string('token_hash');
-            $table->timestamp('expires_at')->index();
-            $table->timestamp('used_at')->nullable()->index();
+            // index() para buscar tokens por email rápidamente
+            $table->string(column: 'email')->index();
+            // Hash del token, nunca se almacena el token en texto plano
+            $table->string(column: 'token_hash');
+            // index() en expires_at para limpiar tokens expirados
+            $table->timestamp(column: 'expires_at')->index();
+            // index() en used_at para identificar tokens ya utilizados
+            $table->timestamp(column: 'used_at')->nullable()->index();
 
-            $table->string('request_ip', 45)->nullable();
-            $table->text('user_agent')->nullable();
+            // Metadatos de la petición para auditoría
+            $table->string(column: 'request_ip', length: 45)->nullable();
+            // User agent del navegador que solicitó el reset
+            $table->text(column: 'user_agent')->nullable();
 
             $table->timestamps();
 
-            $table->index(['email', 'expires_at'], 'password_reset_email_expires_idx');
-            $table->index(['user_id', 'used_at'], 'password_reset_user_used_idx');
+            // Índices compuestos optimizados para las consultas más frecuentes:
+            // Buscar tokens válidos por email antes de expirar
+            $table->index(columns: ['email', 'expires_at'], name: 'password_reset_email_expires_idx');
+            // Consultar historial de resets por usuario
+            $table->index(columns: ['user_id', 'used_at'], name: 'password_reset_user_used_idx');
         });
     }
 
+    /**
+     * Revierte las migraciones.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists(table: 'password_reset_tokens');
     }
 };

@@ -7,44 +7,52 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'order_status_histories' que registra el historial de cambios de estado
+     * de cada orden. Permite rastrear quién realizó el cambio, el estado anterior, el nuevo
+     * estado, una observación opcional y la fecha/hora del cambio.
      */
     public function up(): void
     {
-        Schema::create('order_status_histories', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'order_status_histories', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('order_id')
-                ->constrained('orders')
+            $table->foreignId(column: 'order_id')
+                ->constrained(table: 'orders')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('user_id')
+            // El usuario es opcional cuando el cambio lo realiza el sistema automáticamente
+            $table->foreignId(column: 'user_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->string('previous_status', 50)->nullable();
-            $table->string('new_status', 50);
-            $table->text('observation')->nullable();
-            $table->timestamp('changed_at')->useCurrent();
+            // El estado anterior es nulo cuando se crea la primera entrada del historial
+            $table->string(column: 'previous_status', length: 50)->nullable();
+            $table->string(column: 'new_status', length: 50);
+            $table->text(column: 'observation')->nullable();
+            $table->timestamp(column: 'changed_at')->useCurrent();
 
             $table->timestamps();
 
-            $table->index('order_id');
-            $table->index('user_id');
-            $table->index('previous_status');
-            $table->index('new_status');
-            $table->index('changed_at');
+            $table->index(columns: ['order_id'], name: 'order_status_histories_order_id_idx');
+            $table->index(columns: ['user_id'], name: 'order_status_histories_user_id_idx');
+            $table->index(columns: ['previous_status'], name: 'order_status_histories_previous_status_idx');
+            $table->index(columns: ['new_status'], name: 'order_status_histories_new_status_idx');
+            $table->index(columns: ['changed_at'], name: 'order_status_histories_changed_at_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'order_status_histories' y todas sus restricciones de integridad referencial.
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_status_histories');
+        Schema::dropIfExists(table: 'order_status_histories');
     }
 };

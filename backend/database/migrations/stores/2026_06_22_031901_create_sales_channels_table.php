@@ -6,29 +6,42 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'sales_channels' que representa los canales de venta disponibles
+     * para cada tienda (web, POS, teléfono, redes sociales, etc.). Cada canal pertenece
+     * a una tienda y tiene un tipo que identifica el medio de venta.
+     */
     public function up(): void
     {
-        Schema::create('sales_channels', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'sales_channels', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('store_id')
-                ->constrained('stores')
+            $table->foreignId(column: 'store_id')
+                ->constrained(table: 'stores')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->string('name', 100);
-            $table->string('type', 50);
-            $table->boolean('is_active')->default(true);
+            $table->string(column: 'name', length: 100);
+            // Tipo de canal: web, pos, phone, social, marketplace, etc.
+            $table->string(column: 'type', length: 50);
+            $table->boolean(column: 'is_active')->default(value: true);
 
             $table->timestamps();
 
-            $table->index('store_id');
-            $table->index('type');
+            $table->index(columns: ['store_id'], name: 'sales_channels_store_id_idx');
+            $table->index(columns: ['type'], name: 'sales_channels_type_idx');
         });
     }
 
+    /**
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'sales_channels' y todas sus restricciones de integridad referencial.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('sales_channels');
+        Schema::dropIfExists(table: 'sales_channels');
     }
 };

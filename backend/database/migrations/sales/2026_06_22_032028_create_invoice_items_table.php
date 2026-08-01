@@ -7,46 +7,53 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'invoice_items' que almacena los productos facturados de cada factura.
+     * Cada ítem registra el producto, variante (opcional), cantidad, precio unitario y subtotal.
+     * Se indexan las claves foráneas para optimizar las consultas de búsqueda por factura.
      */
     public function up(): void
     {
-        Schema::create('invoice_items', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'invoice_items', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('invoice_id')
-                ->constrained('invoices')
+            $table->foreignId(column: 'invoice_id')
+                ->constrained(table: 'invoices')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('product_id')
-                ->constrained('products')
+            $table->foreignId(column: 'product_id')
+                ->constrained(table: 'products')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->foreignId('product_variant_id')
+            // La variante es opcional para productos que no tienen variantes
+            $table->foreignId(column: 'product_variant_id')
                 ->nullable()
-                ->constrained('product_variants')
+                ->constrained(table: 'product_variants')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
 
             $table->unsignedInteger('quantity');
-            $table->decimal('unit_price', 12, 2);
-            $table->decimal('subtotal', 12, 2);
+            $table->decimal(column: 'unit_price', total: 12, places: 2);
+            $table->decimal(column: 'subtotal', total: 12, places: 2);
 
             $table->timestamps();
 
-            $table->index('invoice_id');
-            $table->index('product_id');
-            $table->index('product_variant_id');
+            $table->index(columns: ['invoice_id'], name: 'invoice_items_invoice_id_idx');
+            $table->index(columns: ['product_id'], name: 'invoice_items_product_id_idx');
+            $table->index(columns: ['product_variant_id'], name: 'invoice_items_product_variant_id_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'invoice_items' y todas sus restricciones de integridad referencial.
      */
     public function down(): void
     {
-        Schema::dropIfExists('invoice_items');
+        Schema::dropIfExists(table: 'invoice_items');
     }
 };

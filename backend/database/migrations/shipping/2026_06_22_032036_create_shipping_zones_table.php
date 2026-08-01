@@ -7,31 +7,39 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla de zonas de envío para configurar
+     * las tarifas y coberturas geográficas de entrega.
      */
     public function up(): void
     {
-        Schema::create('shipping_zones', function (Blueprint $table) {
+        Schema::create(table: 'shipping_zones', callback: function (Blueprint $table): void {
             $table->id();
 
-            $table->string('name', 160);
-            $table->text('description')->nullable();
-            $table->decimal('base_cost', 12, 2)->default(0);
-            $table->boolean('is_active')->default(true);
+            // Nombre de la zona para identificación (ej: 'Zona Centro', 'Zona Internacional')
+            $table->string(column: 'name', length: 160);
+            // Descripción detallada de la zona geográfica que cubre
+            $table->text(column: 'description')->nullable();
+            // Costo base del envío para esta zona, se suma a costos por peso/distancia
+            $table->decimal(column: 'base_cost', total: 12, places: 2)->default(value: 0);
+            // Estado de activación: permite pausar zonas de envío sin eliminar su configuración
+            $table->boolean(column: 'is_active')->default(value: true);
 
             $table->timestamps();
+            // Soft deletes para conservar historial de envíos realizados a zonas eliminadas
             $table->softDeletes();
 
-            $table->index('name');
-            $table->index('is_active');
+            $table->index(columns: ['name'], name: 'shipping_zones_name_idx');
+            $table->index(columns: ['is_active'], name: 'shipping_zones_is_active_idx');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir las migraciones.
      */
     public function down(): void
     {
-        Schema::dropIfExists('shipping_zones');
+        Schema::dropIfExists(table: 'shipping_zones');
     }
 };

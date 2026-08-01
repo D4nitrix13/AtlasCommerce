@@ -6,66 +6,109 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Tabla que almacena las capas de un diseño personalizado.
+     * Cada capa representa un elemento visual (texto, imagen, gráfico) con su
+     * posición, tamaño, rotación y estilos independientes.
+     */
     public function up(): void
     {
-        Schema::create('design_layers', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'design_layers', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('custom_design_id')
-                ->constrained('custom_designs')
+            // Diseño al que pertenece la capa; se elimina en cascada
+            $table->foreignId(column: 'custom_design_id')
+                ->constrained(table: 'custom_designs')
                 ->cascadeOnDelete();
 
-            $table->foreignId('print_area_id')
-                ->constrained('print_areas')
+            // Área de impresión donde se ubica la capa
+            $table->foreignId(column: 'print_area_id')
+                ->constrained(table: 'print_areas')
                 ->restrictOnDelete();
 
-            $table->foreignId('design_asset_id')
+            // Asset multimedia asociado a la capa (opcional, para capas de imagen)
+            $table->foreignId(column: 'design_asset_id')
                 ->nullable()
-                ->constrained('design_assets')
+                ->constrained(table: 'design_assets')
                 ->nullOnDelete();
 
-            $table->foreignId('design_font_id')
+            // Fuente tipográfica para capas de texto (opcional)
+            $table->foreignId(column: 'design_font_id')
                 ->nullable()
-                ->constrained('design_fonts')
+                ->constrained(table: 'design_fonts')
                 ->nullOnDelete();
 
-            $table->foreignId('design_graphic_id')
+            // Gráfico decorativo asociado a la capa (opcional)
+            $table->foreignId(column: 'design_graphic_id')
                 ->nullable()
-                ->constrained('design_graphics')
+                ->constrained(table: 'design_graphics')
                 ->nullOnDelete();
 
-            $table->string('layer_type', 40)->index();
-            $table->string('name')->nullable();
-            $table->text('text_content')->nullable();
-            $table->string('color', 20)->nullable();
-            $table->string('background_color', 20)->nullable();
-            $table->string('alignment', 30)->nullable();
+            // Tipo de capa: 'text', 'image', 'graphic', 'shape'
+            $table->string(column: 'layer_type', length: 40)->index();
 
-            $table->decimal('position_x', 12, 4)->default(0);
-            $table->decimal('position_y', 12, 4)->default(0);
-            $table->decimal('width', 12, 4)->nullable();
-            $table->decimal('height', 12, 4)->nullable();
-            $table->decimal('scale_x', 10, 4)->default(1);
-            $table->decimal('scale_y', 10, 4)->default(1);
-            $table->decimal('rotation', 8, 3)->default(0);
-            $table->decimal('opacity', 5, 4)->default(1);
+            // Nombre de la capa para identificación en el editor
+            $table->string(column: 'name')->nullable();
 
-            $table->integer('z_index')->default(0)->index();
-            $table->boolean('locked')->default(false);
-            $table->boolean('visible')->default(true)->index();
+            // Contenido de texto (solo para capas de tipo texto)
+            $table->text(column: 'text_content')->nullable();
 
-            $table->json('styles')->nullable();
-            $table->json('effects')->nullable();
+            // Color del texto en formato hexadecimal
+            $table->string(column: 'color', length: 20)->nullable();
+
+            // Color de fondo de la capa
+            $table->string(column: 'background_color', length: 20)->nullable();
+
+            // Alineación del texto: 'left', 'center', 'right'
+            $table->string(column: 'alignment', length: 30)->nullable();
+
+            // Posición de la capa dentro del área de impresión
+            $table->decimal(column: 'position_x', total: 12, places: 4)->default(value: 0);
+            $table->decimal(column: 'position_y', total: 12, places: 4)->default(value: 0);
+
+            // Dimensiones de la capa (null para dimensiones automáticas)
+            $table->decimal(column: 'width', total: 12, places: 4)->nullable();
+            $table->decimal(column: 'height', total: 12, places: 4)->nullable();
+
+            // Escala de la capa (1 = tamaño original)
+            $table->decimal(column: 'scale_x', total: 10, places: 4)->default(value: 1);
+            $table->decimal(column: 'scale_y', total: 10, places: 4)->default(value: 1);
+
+            // Rotación en grados (0-360)
+            $table->decimal(column: 'rotation', total: 8, places: 3)->default(value: 0);
+
+            // Opacidad de la capa (0-1, donde 1 es completamente opaca)
+            $table->decimal(column: 'opacity', total: 5, places: 4)->default(value: 1);
+
+            // Orden de apilamiento de capas (mayor = más arriba)
+            $table->integer(column: 'z_index')->default(value: 0)->index();
+
+            // Indica si la capa está bloqueada para edición
+            $table->boolean(column: 'locked')->default(value: false);
+
+            // Indica si la capa es visible en el canvas
+            $table->boolean(column: 'visible')->default(value: true)->index();
+
+            // Estilos CSS adicionales en JSON (sombras, bordes, etc.)
+            $table->json(column: 'styles')->nullable();
+
+            // Efectos visuales aplicados en JSON (blur, glow, etc.)
+            $table->json(column: 'effects')->nullable();
 
             $table->timestamps();
 
-            $table->index(['custom_design_id', 'print_area_id', 'z_index'], 'design_layers_design_area_z_idx');
-            $table->index(['print_area_id', 'layer_type'], 'design_layers_area_type_idx');
+            // Índice para ordenar capas por diseño, área y z-index
+            $table->index(columns: ['custom_design_id', 'print_area_id', 'z_index'], name: 'design_layers_design_area_z_idx');
+            // Índice para filtrar capas por área y tipo
+            $table->index(columns: ['print_area_id', 'layer_type'], name: 'design_layers_area_type_idx');
         });
     }
 
+    /**
+     * Elimina la tabla de capas de diseño.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('design_layers');
+        Schema::dropIfExists(table: 'design_layers');
     }
 };

@@ -6,53 +6,78 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecutar las migraciones.
+     *
+     * Crea la tabla 'order_custom_designs' que gestiona los diseños personalizados
+     * asociados a los ítems de una orden. Almacena snapshots del diseño en JSON para
+     * preservar el estado en el momento de la orden, archivos de producción, y un
+     * flujo completo de revisión (aprobación/rechazo) y producción con timestamps.
+     * Se usa unique en order_item_id para garantizar un solo diseño por ítem de orden.
+     */
     public function up(): void
     {
-        Schema::create('order_custom_designs', function (Blueprint $table) {
-            $table->id();
+        Schema::create(table: 'order_custom_designs', callback: function (Blueprint $table): void {
+            $table->id(column: 'id');
 
-            $table->foreignId('order_id')
-                ->constrained('orders')
+            $table->foreignId(column: 'order_id')
+                ->constrained(table: 'orders')
                 ->cascadeOnDelete();
 
-            $table->foreignId('order_item_id')
-                ->constrained('order_items')
+            $table->foreignId(column: 'order_item_id')
+                ->constrained(table: 'order_items')
                 ->cascadeOnDelete();
 
-            $table->foreignId('custom_design_id')
+            // El diseño personalizado de catálogo es opcional; el snapshot preserva el diseño real
+            $table->foreignId(column: 'custom_design_id')
                 ->nullable()
-                ->constrained('custom_designs')
+                ->constrained(table: 'custom_designs')
                 ->nullOnDelete();
 
-            $table->json('design_snapshot');
-            $table->string('production_file_url')->nullable();
-            $table->string('production_status', 40)->default('pending')->index();
-            $table->text('production_notes')->nullable();
+            // Snapshot del diseño en JSON para preservar el estado exacto al momento de la orden
+            $table->json(column: 'design_snapshot');
+            // URL del archivo de producción generado a partir del diseño
+            $table->string(column: 'production_file_url')->nullable();
+            // Estado del proceso de producción: pending, in_production, completed, etc.
+            $table->string(column: 'production_status', length: 40)->default(value: 'pending')->index();
+            $table->text(column: 'production_notes')->nullable();
 
-            $table->foreignId('reviewed_by')
+            // Flujo de revisión: el usuario que revisó y cuándo
+            $table->foreignId(column: 'reviewed_by')
                 ->nullable()
-                ->constrained('users')
+                ->constrained(table: 'users')
                 ->nullOnDelete();
 
-            $table->timestamp('reviewed_at')->nullable()->index();
-            $table->timestamp('approved_at')->nullable()->index();
-            $table->timestamp('rejected_at')->nullable()->index();
-            $table->text('rejection_reason')->nullable();
+            // Timestamps del flujo de revisión y producción para auditoría
+            $table->timestamp(column: 'reviewed_at')->nullable()->index();
+            $table->timestamp(column: 'approved_at')->nullable()->index();
+            $table->timestamp(column: 'rejected_at')->nullable()->index();
+            $table->text(column: 'rejection_reason')->nullable();
 
-            $table->timestamp('production_started_at')->nullable()->index();
-            $table->timestamp('production_completed_at')->nullable()->index();
+            // Timestamps del proceso de producción para seguimiento
+            $table->timestamp(column: 'production_started_at')->nullable()->index();
+            $table->timestamp(column: 'production_completed_at')->nullable()->index();
 
             $table->timestamps();
 
+            // Un solo diseño personalizado por ítem de orden
             $table->unique('order_item_id', 'order_custom_design_order_item_unique');
-            $table->index(['order_id', 'production_status'], 'order_custom_design_order_status_idx');
-            $table->index(['production_status', 'approved_at'], 'order_custom_designs_status_approved_idx');
-            $table->index(['reviewed_by', 'reviewed_at'], 'order_custom_designs_reviewer_time_idx');
+            // Índice compuesto para buscar diseños de una orden por estado de producción
+            $table->index(columns: ['order_id', 'production_status'], name: 'order_custom_design_order_status_idx');
+            // Índice compuesto para filtrar por estado y fecha de aprobación
+            $table->index(columns: ['production_status', 'approved_at'], name: 'order_custom_designs_status_approved_idx');
+            // Índice compuesto para filtrar revisiones por revisor y fecha
+            $table->index(columns: ['reviewed_by', 'reviewed_at'], name: 'order_custom_designs_reviewer_time_idx');
         });
     }
 
+    /**
+     * Revertir las migraciones.
+     *
+     * Elimina la tabla 'order_custom_designs' y todas sus restricciones de integridad referencial.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('order_custom_designs');
+        Schema::dropIfExists(table: 'order_custom_designs');
     }
 };
