@@ -1,0 +1,693 @@
+erDiagram
+
+    ROL {
+        int id_rol PK
+        string nombre
+        string descripcion
+        boolean activo
+    }
+
+    PERMISO {
+        int id_permiso PK
+        string nombre
+        string modulo
+        string descripcion
+    }
+
+    ROL_PERMISO {
+        int id_rol_permiso PK
+        int id_rol FK
+        int id_permiso FK
+    }
+
+    USUARIO {
+        int id_usuario PK
+        int id_rol FK
+        string nombres
+        string apellidos
+        string correo
+        string password_hash
+        string telefono
+        boolean activo
+        datetime fecha_registro
+    }
+
+    USUARIO_2FA_CONFIGURACION {
+        int id_2fa_configuracion PK
+        int id_usuario FK
+        boolean habilitado
+        string metodo_preferido
+        boolean requerir_2fa
+        datetime fecha_activacion
+        datetime fecha_actualizacion
+    }
+
+    USUARIO_2FA_METODO {
+        int id_2fa_metodo PK
+        int id_usuario FK
+        string metodo
+        string nombre_visible
+        string destino
+        string secreto_cifrado
+        boolean activo
+        boolean verificado
+        datetime fecha_creacion
+        datetime fecha_verificacion
+    }
+
+    OTP_DESAFIO {
+        int id_otp_desafio PK
+        int id_usuario FK
+        string metodo
+        string proposito
+        string codigo_hash
+        string destino
+        int intentos
+        int max_intentos
+        boolean usado
+        datetime fecha_creacion
+        datetime fecha_expiracion
+        datetime fecha_uso
+        string ip_solicitud
+        string user_agent
+    }
+
+    CODIGO_RECUPERACION_2FA {
+        int id_codigo_recuperacion PK
+        int id_usuario FK
+        string codigo_hash
+        boolean usado
+        datetime fecha_creacion
+        datetime fecha_uso
+    }
+
+    PASSKEY_CREDENCIAL {
+        int id_passkey PK
+        int id_usuario FK
+        string credential_id
+        string public_key
+        int sign_count
+        string transports
+        string aaguid
+        string nombre_dispositivo
+        datetime ultimo_uso
+        boolean activo
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    CLIENTE {
+        int id_cliente PK
+        int id_usuario FK
+        string tipo_cliente
+        string documento_identidad
+        string nombres
+        string apellidos
+        string correo
+        string telefono
+        datetime fecha_registro
+        boolean activo
+    }
+
+    CLIENTE_DIRECCION {
+        int id_direccion PK
+        int id_cliente FK
+        string tipo_direccion
+        string pais
+        string departamento
+        string municipio
+        string direccion_detallada
+        string referencia
+        boolean principal
+    }
+
+    CATEGORIA {
+        int id_categoria PK
+        int id_categoria_padre FK
+        string nombre
+        string descripcion
+        boolean activo
+    }
+
+    MARCA {
+        int id_marca PK
+        string nombre
+        string descripcion
+        boolean activo
+    }
+
+    PRODUCTO {
+        int id_producto PK
+        int id_categoria FK
+        int id_marca FK
+        string nombre
+        string descripcion
+        string sku
+        decimal precio_base
+        decimal costo
+        boolean activo
+        datetime fecha_creacion
+    }
+
+    PRODUCTO_IMAGEN {
+        int id_imagen PK
+        int id_producto FK
+        string url_imagen
+        string texto_alt
+        boolean principal
+        int orden
+    }
+
+    PRODUCTO_VARIANTE {
+        int id_variante PK
+        int id_producto FK
+        string sku_variante
+        string nombre_variante
+        decimal precio
+        decimal costo
+        string codigo_barras
+        boolean activo
+    }
+
+    ATRIBUTO {
+        int id_atributo PK
+        string nombre
+        string tipo
+    }
+
+    PRODUCTO_ATRIBUTO {
+        int id_producto_atributo PK
+        int id_producto FK
+        int id_atributo FK
+        string valor
+    }
+
+    VARIANTE_ATRIBUTO {
+        int id_variante_atributo PK
+        int id_variante FK
+        int id_atributo FK
+        string valor
+    }
+
+    ALMACEN {
+        int id_almacen PK
+        string nombre
+        string direccion
+        string telefono
+        boolean activo
+    }
+
+    INVENTARIO {
+        int id_inventario PK
+        int id_almacen FK
+        int id_producto FK
+        int id_variante FK
+        int stock_actual
+        int stock_minimo
+        int stock_reservado
+    }
+
+    MOVIMIENTO_INVENTARIO {
+        int id_movimiento PK
+        int id_inventario FK
+        int id_usuario FK
+        string tipo_movimiento
+        int cantidad
+        string motivo
+        datetime fecha_movimiento
+    }
+
+    PROVEEDOR {
+        int id_proveedor PK
+        string nombre
+        string ruc
+        string telefono
+        string correo
+        string direccion
+        boolean activo
+    }
+
+    COMPRA {
+        int id_compra PK
+        int id_proveedor FK
+        int id_usuario FK
+        decimal total
+        string estado
+        datetime fecha_compra
+    }
+
+    DETALLE_COMPRA {
+        int id_detalle_compra PK
+        int id_compra FK
+        int id_producto FK
+        int id_variante FK
+        int cantidad
+        decimal precio_compra
+        decimal subtotal
+    }
+
+    CARRITO {
+        int id_carrito PK
+        int id_cliente FK
+        string estado
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    CARRITO_DETALLE {
+        int id_carrito_detalle PK
+        int id_carrito FK
+        int id_producto FK
+        int id_variante FK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+    }
+
+    WISHLIST {
+        int id_wishlist PK
+        int id_cliente FK
+        datetime fecha_creacion
+    }
+
+    WISHLIST_DETALLE {
+        int id_wishlist_detalle PK
+        int id_wishlist FK
+        int id_producto FK
+        datetime fecha_agregado
+    }
+
+    PEDIDO {
+        int id_pedido PK
+        int id_cliente FK
+        int id_direccion_envio FK
+        decimal subtotal
+        decimal descuento
+        decimal impuesto
+        decimal total
+        string estado
+        datetime fecha_pedido
+    }
+
+    DETALLE_PEDIDO {
+        int id_detalle_pedido PK
+        int id_pedido FK
+        int id_producto FK
+        int id_variante FK
+        int cantidad
+        decimal precio_unitario
+        decimal descuento
+        decimal subtotal
+    }
+
+    PEDIDO_ESTADO_HISTORIAL {
+        int id_historial_pedido PK
+        int id_pedido FK
+        int id_usuario FK
+        string estado_anterior
+        string estado_nuevo
+        string observacion
+        datetime fecha_cambio
+    }
+
+    FACTURA {
+        int id_factura PK
+        int id_pedido FK
+        int id_cliente FK
+        string numero_factura
+        decimal subtotal
+        decimal descuento
+        decimal impuesto
+        decimal total
+        decimal monto_pagado
+        decimal saldo_pendiente
+        string estado_pago
+        datetime fecha_emision
+    }
+
+    DETALLE_FACTURA {
+        int id_detalle_factura PK
+        int id_factura FK
+        int id_producto FK
+        int id_variante FK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+    }
+
+    FACTURA_ESTADO_HISTORIAL {
+        int id_historial_factura PK
+        int id_factura FK
+        int id_usuario FK
+        string estado_anterior
+        string estado_nuevo
+        string observacion
+        datetime fecha_cambio
+    }
+
+    METODO_PAGO {
+        int id_metodo_pago PK
+        string nombre
+        string descripcion
+        boolean activo
+    }
+
+    PAGO {
+        int id_pago PK
+        int id_cliente FK
+        int id_metodo_pago FK
+        decimal monto
+        string referencia
+        string estado
+        datetime fecha_pago
+    }
+
+    FACTURA_PAGO {
+        int id_factura_pago PK
+        int id_factura FK
+        int id_pago FK
+        decimal monto_aplicado
+        datetime fecha_aplicacion
+    }
+
+    CUOTA_PAGO {
+        int id_cuota PK
+        int id_factura FK
+        int numero_cuota
+        decimal monto_programado
+        decimal monto_pagado
+        date fecha_vencimiento
+        string estado
+    }
+
+    TRANSACCION_PAGO {
+        int id_transaccion PK
+        int id_pago FK
+        string proveedor_pago
+        string codigo_transaccion
+        string respuesta
+        string estado
+        datetime fecha_transaccion
+    }
+
+    EMPRESA_ENVIO {
+        int id_empresa_envio PK
+        string nombre
+        string telefono
+        string correo
+        boolean activo
+    }
+
+    ZONA_ENVIO {
+        int id_zona_envio PK
+        string nombre
+        string descripcion
+        decimal costo_base
+        boolean activo
+    }
+
+    ENVIO {
+        int id_envio PK
+        int id_pedido FK
+        int id_empresa_envio FK
+        int id_zona_envio FK
+        string codigo_seguimiento
+        decimal costo_envio
+        string estado
+        datetime fecha_envio
+        datetime fecha_entrega
+    }
+
+    SEGUIMIENTO_ENVIO {
+        int id_seguimiento PK
+        int id_envio FK
+        string estado
+        string ubicacion
+        string descripcion
+        datetime fecha_registro
+    }
+
+    CUPON {
+        int id_cupon PK
+        string codigo
+        string tipo_descuento
+        decimal valor
+        decimal monto_minimo
+        date fecha_inicio
+        date fecha_fin
+        int limite_usos
+        boolean activo
+    }
+
+    USO_CUPON {
+        int id_uso_cupon PK
+        int id_cupon FK
+        int id_cliente FK
+        int id_pedido FK
+        datetime fecha_uso
+    }
+
+    PROMOCION {
+        int id_promocion PK
+        string nombre
+        string descripcion
+        string tipo_descuento
+        decimal valor
+        date fecha_inicio
+        date fecha_fin
+        boolean activo
+    }
+
+    PRODUCTO_PROMOCION {
+        int id_producto_promocion PK
+        int id_producto FK
+        int id_promocion FK
+    }
+
+    IMPUESTO {
+        int id_impuesto PK
+        string nombre
+        decimal porcentaje
+        boolean activo
+    }
+
+    PRODUCTO_IMPUESTO {
+        int id_producto_impuesto PK
+        int id_producto FK
+        int id_impuesto FK
+    }
+
+    DEVOLUCION {
+        int id_devolucion PK
+        int id_pedido FK
+        int id_cliente FK
+        string motivo
+        string estado
+        datetime fecha_solicitud
+    }
+
+    DETALLE_DEVOLUCION {
+        int id_detalle_devolucion PK
+        int id_devolucion FK
+        int id_producto FK
+        int id_variante FK
+        int cantidad
+        decimal monto
+    }
+
+    REEMBOLSO {
+        int id_reembolso PK
+        int id_devolucion FK
+        int id_metodo_pago FK
+        decimal monto
+        string estado
+        datetime fecha_reembolso
+    }
+
+    RESENA_PRODUCTO {
+        int id_resena PK
+        int id_producto FK
+        int id_cliente FK
+        int calificacion
+        string comentario
+        boolean aprobado
+        datetime fecha_resena
+    }
+
+    PREGUNTA_PRODUCTO {
+        int id_pregunta PK
+        int id_producto FK
+        int id_cliente FK
+        string pregunta
+        string respuesta
+        datetime fecha_pregunta
+        datetime fecha_respuesta
+    }
+
+    TICKET_SOPORTE {
+        int id_ticket PK
+        int id_cliente FK
+        string asunto
+        string descripcion
+        string estado
+        string prioridad
+        datetime fecha_creacion
+    }
+
+    TICKET_MENSAJE {
+        int id_ticket_mensaje PK
+        int id_ticket FK
+        int id_usuario FK
+        string mensaje
+        datetime fecha_mensaje
+    }
+
+    NOTIFICACION {
+        int id_notificacion PK
+        int id_usuario FK
+        string titulo
+        string mensaje
+        string tipo
+        boolean leida
+        datetime fecha_creacion
+    }
+
+    AUDITORIA {
+        int id_auditoria PK
+        int id_usuario FK
+        string accion
+        string tabla_afectada
+        string registro_id
+        string descripcion
+        datetime fecha_registro
+    }
+
+    CONFIGURACION_TIENDA {
+        int id_configuracion PK
+        string nombre_tienda
+        string logo
+        string correo
+        string telefono
+        string direccion
+        string moneda_principal
+        boolean mantenimiento
+    }
+
+    MONEDA {
+        int id_moneda PK
+        string codigo
+        string nombre
+        string simbolo
+        boolean principal
+    }
+
+    TIPO_CAMBIO {
+        int id_tipo_cambio PK
+        int id_moneda FK
+        decimal valor
+        date fecha
+    }
+
+    ROL ||--o{ USUARIO : asigna
+    ROL ||--o{ ROL_PERMISO : contiene
+    PERMISO ||--o{ ROL_PERMISO : pertenece
+
+    USUARIO ||--o| CLIENTE : puede_ser
+    USUARIO ||--o| USUARIO_2FA_CONFIGURACION : configura
+    USUARIO ||--o{ USUARIO_2FA_METODO : tiene
+    USUARIO ||--o{ OTP_DESAFIO : genera
+    USUARIO ||--o{ CODIGO_RECUPERACION_2FA : posee
+    USUARIO ||--o{ PASSKEY_CREDENCIAL : registra
+    USUARIO ||--o{ AUDITORIA : genera
+    USUARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
+    USUARIO ||--o{ COMPRA : realiza
+    USUARIO ||--o{ PEDIDO_ESTADO_HISTORIAL : cambia
+    USUARIO ||--o{ FACTURA_ESTADO_HISTORIAL : cambia
+    USUARIO ||--o{ TICKET_MENSAJE : escribe
+    USUARIO ||--o{ NOTIFICACION : recibe
+
+    CLIENTE ||--o{ CLIENTE_DIRECCION : tiene
+    CLIENTE ||--o{ CARRITO : posee
+    CLIENTE ||--o{ WISHLIST : posee
+    CLIENTE ||--o{ PEDIDO : realiza
+    CLIENTE ||--o{ FACTURA : recibe
+    CLIENTE ||--o{ PAGO : realiza
+    CLIENTE ||--o{ USO_CUPON : usa
+    CLIENTE ||--o{ DEVOLUCION : solicita
+    CLIENTE ||--o{ RESENA_PRODUCTO : escribe
+    CLIENTE ||--o{ PREGUNTA_PRODUCTO : pregunta
+    CLIENTE ||--o{ TICKET_SOPORTE : abre
+
+    CATEGORIA ||--o{ CATEGORIA : subcategoria
+    CATEGORIA ||--o{ PRODUCTO : clasifica
+    MARCA ||--o{ PRODUCTO : fabrica
+
+    PRODUCTO ||--o{ PRODUCTO_IMAGEN : tiene
+    PRODUCTO ||--o{ PRODUCTO_VARIANTE : tiene
+    PRODUCTO ||--o{ PRODUCTO_ATRIBUTO : posee
+    ATRIBUTO ||--o{ PRODUCTO_ATRIBUTO : define
+    PRODUCTO_VARIANTE ||--o{ VARIANTE_ATRIBUTO : posee
+    ATRIBUTO ||--o{ VARIANTE_ATRIBUTO : define
+
+    ALMACEN ||--o{ INVENTARIO : contiene
+    PRODUCTO ||--o{ INVENTARIO : tiene_stock
+    PRODUCTO_VARIANTE ||--o{ INVENTARIO : tiene_stock
+    INVENTARIO ||--o{ MOVIMIENTO_INVENTARIO : registra
+
+    PROVEEDOR ||--o{ COMPRA : suministra
+    COMPRA ||--o{ DETALLE_COMPRA : incluye
+    PRODUCTO ||--o{ DETALLE_COMPRA : comprado
+    PRODUCTO_VARIANTE ||--o{ DETALLE_COMPRA : comprado
+
+    CARRITO ||--o{ CARRITO_DETALLE : contiene
+    PRODUCTO ||--o{ CARRITO_DETALLE : agregado
+    PRODUCTO_VARIANTE ||--o{ CARRITO_DETALLE : agregado
+
+    WISHLIST ||--o{ WISHLIST_DETALLE : contiene
+    PRODUCTO ||--o{ WISHLIST_DETALLE : guardado
+
+    CLIENTE_DIRECCION ||--o{ PEDIDO : usada_en
+    PEDIDO ||--o{ DETALLE_PEDIDO : contiene
+    PRODUCTO ||--o{ DETALLE_PEDIDO : vendido
+    PRODUCTO_VARIANTE ||--o{ DETALLE_PEDIDO : vendido
+    PEDIDO ||--o{ PEDIDO_ESTADO_HISTORIAL : historial
+
+    PEDIDO ||--o| FACTURA : genera
+    FACTURA ||--o{ DETALLE_FACTURA : contiene
+    PRODUCTO ||--o{ DETALLE_FACTURA : facturado
+    PRODUCTO_VARIANTE ||--o{ DETALLE_FACTURA : facturado
+    FACTURA ||--o{ FACTURA_ESTADO_HISTORIAL : historial
+
+    METODO_PAGO ||--o{ PAGO : usado_en
+    PAGO ||--o{ FACTURA_PAGO : aplicado
+    FACTURA ||--o{ FACTURA_PAGO : recibe
+    FACTURA ||--o{ CUOTA_PAGO : divide
+    PAGO ||--o{ TRANSACCION_PAGO : genera
+
+    EMPRESA_ENVIO ||--o{ ENVIO : transporta
+    ZONA_ENVIO ||--o{ ENVIO : pertenece
+    PEDIDO ||--o| ENVIO : tiene
+    ENVIO ||--o{ SEGUIMIENTO_ENVIO : actualiza
+
+    CUPON ||--o{ USO_CUPON : registra
+    PEDIDO ||--o{ USO_CUPON : aplica
+
+    PROMOCION ||--o{ PRODUCTO_PROMOCION : incluye
+    PRODUCTO ||--o{ PRODUCTO_PROMOCION : participa
+
+    IMPUESTO ||--o{ PRODUCTO_IMPUESTO : aplica
+    PRODUCTO ||--o{ PRODUCTO_IMPUESTO : tiene
+
+    PEDIDO ||--o{ DEVOLUCION : puede_tener
+    DEVOLUCION ||--o{ DETALLE_DEVOLUCION : contiene
+    PRODUCTO ||--o{ DETALLE_DEVOLUCION : devuelto
+    PRODUCTO_VARIANTE ||--o{ DETALLE_DEVOLUCION : devuelto
+    DEVOLUCION ||--o| REEMBOLSO : genera
+    METODO_PAGO ||--o{ REEMBOLSO : usado_en
+
+    PRODUCTO ||--o{ RESENA_PRODUCTO : recibe
+    PRODUCTO ||--o{ PREGUNTA_PRODUCTO : recibe
+
+    TICKET_SOPORTE ||--o{ TICKET_MENSAJE : contiene
+
+    MONEDA ||--o{ TIPO_CAMBIO : tiene

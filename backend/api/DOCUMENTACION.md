@@ -1,9 +1,9 @@
-# Kitsune Store — Documentación del Backend
+# Store — Documentación del Backend
 
 ## Resumen del Proyecto
 
 API REST para un ecommerce completo construida con **Laravel 13** y **PHP 8.3+**.
-Base de datos: **PostgreSQL** (nombre: `pandas_store`).
+Base de datos: **PostgreSQL** (nombre: `store`).
 Autenticación: **Laravel Sanctum** (tokens Bearer).
 
 ---
@@ -354,8 +354,8 @@ En `bootstrap/app.php` se configura que las excepciones se rendericen como JSON 
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_DATABASE=pandas_store
-DB_USERNAME=pandas_store
+DB_DATABASE=store
+DB_USERNAME=postgres
 DB_PASSWORD=
 ```
 
