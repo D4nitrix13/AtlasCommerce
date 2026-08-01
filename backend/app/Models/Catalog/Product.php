@@ -2,6 +2,7 @@
 
 namespace App\Models\Catalog;
 
+use App\Models\Concerns\HasSlug;
 use App\Models\Inventory\Inventory;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
@@ -35,6 +36,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Product extends Model
 {
+    use HasSlug;
     use SoftDeletes;
 
     protected $fillable = [
