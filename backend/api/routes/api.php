@@ -46,11 +46,12 @@ use App\Http\Controllers\Api\Sales\OrderItemController;
 use App\Http\Controllers\Api\Sales\OrderStatusHistoryController;
 use App\Http\Controllers\Api\Settings\CurrencyController;
 use App\Http\Controllers\Api\Settings\ExchangeRateController;
-use App\Http\Controllers\Api\Settings\StoreSettingController;
 use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Shipping\ShipmentTrackingController;
 use App\Http\Controllers\Api\Shipping\ShippingCompanyController;
 use App\Http\Controllers\Api\Shipping\ShippingZoneController;
+use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
+use App\Http\Controllers\Api\Stores\StoreSettingController;
 use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\ProductReviewController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
@@ -97,9 +98,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     | Two-Factor Authentication
     |--------------------------------------------------------------------------
     |
-    | Security endpoints for account protection.
-    | These routes are grouped under /auth/2fa but they are already protected
-    | by the parent auth:sanctum middleware.
+    | Endpoints para gestión de 2FA: estado, envío y verificación de Email OTP,
+    | recovery codes y desactivación. Todos requieren token Sanctum válido.
+    | La lógica de negocio vive en EmailOtpService y RecoveryCodeService.
     |
     */
 
@@ -312,4 +313,19 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::apiResource('currencies', CurrencyController::class);
     Route::apiResource('exchange-rates', ExchangeRateController::class);
     Route::apiResource('store-settings', StoreSettingController::class);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Public Storefront Routes
+|--------------------------------------------------------------------------
+|
+| Endpoints for the public storefront. Resolved by domain via
+| ResolveStoreFromDomain middleware. No authentication required.
+|
+*/
+
+Route::middleware(['store.domain'])->prefix('storefront')->group(function (): void {
+    Route::get('/products', [StorefrontProductController::class, 'index']);
+    Route::get('/products/{slug}', [StorefrontProductController::class, 'show']);
 });
