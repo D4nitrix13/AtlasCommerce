@@ -3,11 +3,13 @@
 namespace App\Models\Returns;
 
 use App\Models\Concerns\BelongsToStore;
+use App\Models\Concerns\LogsActivity;
 use App\Models\Customers\Customer;
 use App\Models\Sales\Order;
 use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,6 +36,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ReturnRequest extends Model
 {
     use BelongsToStore;
+    use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
 
     protected $fillable = [

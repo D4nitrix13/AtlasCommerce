@@ -73,24 +73,6 @@ return new class extends Migration
             $table->index('payment_id', 'invoice_payments_payment_id_idx');
         });
 
-        Schema::create('payment_installments', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('invoice_id')
-                ->constrained('invoices')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-            $table->unsignedInteger('installment_number');
-            $table->unsignedBigInteger('scheduled_amount_cents');
-            $table->unsignedBigInteger('paid_amount_cents')->default(0);
-            $table->date('due_date');
-            $table->string('status', 50)->default('pending');
-            $table->timestamp('paid_at')->nullable();
-            $table->timestamps();
-
-            $table->index(['invoice_id', 'installment_number'], 'payment_installments_invoice_number_idx');
-            $table->index(['status', 'due_date'], 'payment_installments_status_due_idx');
-        });
-
         Schema::create('payment_transactions', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('payment_id')
@@ -113,7 +95,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('payment_transactions');
-        Schema::dropIfExists('payment_installments');
         Schema::dropIfExists('invoice_payments');
         Schema::dropIfExists('payments');
         Schema::dropIfExists('payment_methods');

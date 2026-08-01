@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\Catalog\Product;
 use App\Models\Carts\Cart;
 use App\Models\Carts\CartItem;
+use App\Models\Catalog\Product;
 use App\Models\Customers\Customer;
 use App\Models\Payments\InvoicePayment;
 use App\Models\Payments\Payment;

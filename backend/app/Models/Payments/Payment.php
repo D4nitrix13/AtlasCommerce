@@ -3,6 +3,7 @@
 namespace App\Models\Payments;
 
 use App\Models\Concerns\BelongsToStore;
+use App\Models\Concerns\LogsActivity;
 use App\Models\Customers\Customer;
 use App\Models\Sales\Invoice;
 use App\Models\Settings\Currency;
@@ -38,6 +39,7 @@ class Payment extends Model
 {
     use BelongsToStore;
     use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
 
     protected $fillable = [

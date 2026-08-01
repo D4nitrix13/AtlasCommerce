@@ -4,6 +4,7 @@ namespace App\Models\Sales;
 
 use App\Models\Auth\User;
 use App\Models\Concerns\BelongsToStore;
+use App\Models\Concerns\LogsActivity;
 use App\Models\Customers\Customer;
 use App\Models\Customers\CustomerAddress;
 use App\Models\Settings\Currency;
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 /**
  * Pedido realizado por un cliente.
  *
@@ -40,12 +43,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon $ordered_at
  * @property string|null $notes
  */
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 class Order extends Model
 {
     use BelongsToStore;
     use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
 
     protected $fillable = [
@@ -151,7 +153,7 @@ class Order extends Model
 
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('customer_id', $customerId);
+        return $query->where('custstomer_id', $customerId);
     }
 
     public function scopeByStore(Builder $query, int $storeId): Builder

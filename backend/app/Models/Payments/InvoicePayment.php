@@ -3,25 +3,16 @@
 namespace App\Models\Payments;
 
 use App\Models\Sales\Invoice;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Pago registrado contra una factura (pivot `invoice_payments`).
+ * Pago registrado contra una factura.
  *
  * Tabla: `invoice_payments` — relación N:1 con `invoices` y `payments`.
  *
- * El monto aplicado se almacena en centavos. La suma de
- * `applied_amount_cents` para una factura dada es la única
- * fuente de verdad para el saldo pagado de esa factura
- * (ver {@see Invoice::paidAmountCents()}).
- *
- * @property int $id
- * @property int $invoice_id
- * @property int $payment_id
- * @property int $applied_amount_cents
- * @property Carbon $applied_at
+ * Registra cada abono o pago completo realizado
+ * para saldar el saldo de una factura.
  */
 class InvoicePayment extends Model
 {
@@ -36,11 +27,17 @@ class InvoicePayment extends Model
         'applied_at' => 'datetime',
     ];
 
+    /**
+     * Factura a la que se aplica el pago.
+     */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
+    /**
+     * Pago registrado.
+     */
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);
