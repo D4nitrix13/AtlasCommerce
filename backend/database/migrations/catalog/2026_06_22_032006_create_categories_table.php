@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string(column: 'name', length: 120);
             $table->string(column: 'slug', length: 150)->unique();
             $table->text(column: 'description')->nullable();
+            $table->string(column: 'image_path')->nullable();
             $table->boolean(column: 'is_active')->default(value: true);
 
             $table->timestamps();

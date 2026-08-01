@@ -2,6 +2,7 @@
 
 namespace App\Models\Stores;
 
+use App\Models\Concerns\HasSlug;
 use App\Models\Settings\Currency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Store extends Model
 {
+    use HasSlug;
     use SoftDeletes;
 
     protected $fillable = [

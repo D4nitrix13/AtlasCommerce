@@ -2,6 +2,7 @@
 
 namespace App\Models\Catalog;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,18 +16,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property string $name
  * @property string $slug
- * @property string|null $logo
+ * @property string|null $logo_url
  * @property string|null $description
  * @property bool $is_active
  */
 class Brand extends Model
 {
+    use HasSlug;
     use SoftDeletes;
 
     protected $fillable = [
         'name',
         'slug',
-        'logo',
+        'logo_url',
         'description',
         'is_active',
     ];
