@@ -1,0 +1,115 @@
+---
+import AdminSidebarItem from "./AdminSidebarItem.astro";
+
+const menu = [
+  {
+    label: "Overview",
+    items: [
+      { name: "Dashboard", href: "/admin", icon: "grid", active: true },
+      { name: "Analytics", href: "/admin/reports", icon: "chart" },
+    ],
+  },
+  {
+    label: "Commerce",
+    items: [
+      { name: "Orders", href: "/admin/sales/orders", icon: "cart", badge: "12" },
+      { name: "Products", href: "/admin/catalog/products", icon: "box" },
+      { name: "Customers", href: "/admin/customers", icon: "users" },
+      { name: "Invoices", href: "/admin/sales/invoices", icon: "file" },
+    ],
+  },
+  {
+    label: "Catalog",
+    items: [
+      { name: "Categories", href: "/admin/catalog/categories", icon: "folder" },
+      { name: "Brands", href: "/admin/catalog/brands", icon: "tag" },
+      { name: "Variants", href: "/admin/catalog/variants", icon: "layers" },
+    ],
+  },
+  {
+    label: "Inventory",
+    items: [
+      { name: "Stock", href: "/admin/inventory/stock", icon: "warehouse" },
+      { name: "Movements", href: "/admin/inventory/movements", icon: "move" },
+      { name: "Warehouses", href: "/admin/inventory/warehouses", icon: "building" },
+    ],
+  },
+  {
+    label: "Purchases",
+    items: [
+      { name: "Suppliers", href: "/admin/purchases/suppliers", icon: "truck" },
+      { name: "Purchases", href: "/admin/purchases/orders", icon: "clipboard" },
+    ],
+  },
+  {
+    label: "Marketing",
+    items: [
+      { name: "Coupons", href: "/admin/marketing/coupons", icon: "ticket" },
+      { name: "Promotions", href: "/admin/marketing/promotions", icon: "gift" },
+    ],
+  },
+  {
+    label: "Support",
+    items: [
+      { name: "Tickets", href: "/admin/support/tickets", icon: "headphones" },
+      { name: "Reviews", href: "/admin/support/reviews", icon: "star" },
+      { name: "Questions", href: "/admin/support/questions", icon: "help" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { name: "Users", href: "/admin/users", icon: "user" },
+      { name: "Roles", href: "/admin/roles", icon: "shield" },
+      { name: "Audits", href: "/admin/system/audits", icon: "search" },
+      { name: "Settings", href: "/admin/settings", icon: "settings" },
+    ],
+  },
+];
+---
+
+<aside class="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-white/10 bg-[#06110c] text-slate-300 lg:flex lg:flex-col">
+  <div class="flex h-16 items-center gap-3 px-5">
+    <div class="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white">
+      ⚡
+    </div>
+
+    <div>
+      <p class="text-sm font-bold text-white">Kitsune</p>
+      <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+        Dashboard
+      </p>
+    </div>
+  </div>
+
+  <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+    {menu.map((section) => (
+      <div>
+        <p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+          {section.label}
+        </p>
+
+        <div class="space-y-1">
+          {section.items.map((item) => (
+            <AdminSidebarItem {...item} />
+          ))}
+        </div>
+      </div>
+    ))}
+  </nav>
+
+  <div class="border-t border-white/10 p-4">
+    <div class="flex items-center gap-3 rounded-2xl px-2 py-2">
+      <div class="grid h-9 w-9 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">
+        AS
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-medium text-white">Admin</p>
+        <p class="text-xs text-slate-500">Administrador</p>
+      </div>
+
+      <span class="text-slate-500">↗</span>
+    </div>
+  </div>
+</aside>
