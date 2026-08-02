@@ -17,5 +17,10 @@
     "email": "admin@mm-boutique.com",
     "password_env": "MM_ADMIN_PASSWORD"
   },
-  "features": {}
+  "features": {
+    "wholesale_pricing": false,
+    "instagram_shop": true,
+    "subscription_billing": false
+  }
 }
+

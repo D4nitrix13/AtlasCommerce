@@ -37,21 +37,17 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           █████░░░░░  60%   (esta semana)
-Fase 2 — Feature flags            ░░░░░░░░░░   0%
+Fase 1 — Multi-instance           █████░░░░░  60%   (completa en F1.5)
+Fase 2 — Feature flags            ████░░░░░░  80%   (F2.1-F2.4 + F2.6)
 Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
 Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 5 (F1.1, F1.2, F1.3, F1.4, F1.5)
-**En progreso:** 0
-**Pendientes:** 27
-
-**Fase 1 completa en 60%** — sigue F1.5 ✅ y queda lo que originalmente
-se pensó como parte de F1.3 (seed files ya creados como F1.4) y F1.5
-(doc de deploy, recién completado).
+**Completadas:** 10 (F1.1-F1.5, F2.1-F2.4, F2.6)
+**En progreso:** 1 (F2.5)
+**Pendientes:** 21
 
 ---
 
@@ -287,25 +283,26 @@ condicional hardcoded por tenant.
 
 ---
 
-### F2.1 — Migración `store_features` ⏳
+### F2.1 — Migración `store_features` ✅
 
 **Razón:** Necesitamos persistir qué features están activas por tienda.
 
 **Características:**
 
-- Tabla con FK a `stores`.
+- Tabla con FK a `stores` (cascade on delete).
 - Unique constraint en `(store_id, slug)`.
-- `is_active` boolean.
+- `is_active` boolean, default true.
+- Index en `slug` para queries globales.
 - Timestamps.
 
 **Criterios de aceptación:**
 
-- [ ] Migración corre sin error.
-- [ ] Tabla tiene índice único en `(store_id, slug)`.
+- [x] Migración corre sin error.
+- [x] Tabla tiene índice único en `(store_id, slug)`.
 
 ---
 
-### F2.2 — Modelo `StoreFeature` ⏳
+### F2.2 — Modelo `StoreFeature` ✅
 
 **Razón:** Eloquent model para la tabla.
 
@@ -313,22 +310,23 @@ condicional hardcoded por tenant.
 
 - `$fillable = ['store_id', 'slug', 'is_active']`.
 - Cast `is_active` a boolean.
+- Relación `belongsTo Store`.
 
 ---
 
-### F2.3 — Helper `Store::hasFeature()` ⏳
+### F2.3 — Helper `Store::hasFeature()` ✅
 
 **Razón:** API limpia para chequear features en código.
 
 **Características:**
 
 - `Store::hasFeature('wholesale_pricing'): bool`.
-- Query optimizada (un solo query, usa relación cargada si está).
-- Cacheable a futuro con `Cache::remember()`.
+- Query optimizada (single query, filtra por `is_active = true`).
+- Relación `features()` para queries custom.
 
 ---
 
-### F2.4 — Seeds incluyen `features` ⏳
+### F2.4 — Seeds incluyen `features` ✅
 
 **Razón:** El comando `tenants:bootstrap` debe leer features del JSON
 y crear los registros.
@@ -336,7 +334,12 @@ y crear los registros.
 **Características:**
 
 - `tenants:bootstrap <json>` lee `features: { slug: bool }`.
-- Crea `StoreFeature` por cada entrada.
+- Crea `StoreFeature` por cada entrada × cada tienda.
+- Idempotente (usa `updateOrCreate`).
+- Seeds reales actualizados:
+  - `panda.json`: wholesale_pricing + bulk_import ON
+  - `mm-boutique.json`: instagram_shop ON
+  - `morales-store.json`: subscription_billing ON
 
 ---
 
@@ -363,15 +366,18 @@ las demás.
 
 ---
 
-### F2.6 — Tests del sistema de flags ⏳
+### F2.6 — Tests del sistema de flags ✅
 
 **Razón:** El feature flag system es crítico. Necesita cobertura.
 
 **Criterios de aceptación:**
 
-- [ ] `hasFeature()` retorna true/false correctamente.
-- [ ] `tenants:bootstrap` crea features desde JSON.
-- [ ] Caso edge: feature no declarada retorna false (no error).
+- [x] `hasFeature()` retorna true/false correctamente.
+- [x] `tenants:bootstrap` crea features desde JSON.
+- [x] Caso edge: feature no declarada retorna false (no error).
+- [x] Aislamiento entre stores (misma slug, otra tienda: OK).
+- [x] Unique constraint en (store_id, slug) funciona.
+- [x] Cascade delete desde stores funciona.
 
 ---
 

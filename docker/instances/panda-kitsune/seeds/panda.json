@@ -29,5 +29,10 @@
     "email": "admin@pandas-estampados.test",
     "password_env": "PANDA_ADMIN_PASSWORD"
   },
-  "features": {}
+  "features": {
+    "wholesale_pricing": true,
+    "bulk_import": true,
+    "subscription_billing": false
+  }
 }
+

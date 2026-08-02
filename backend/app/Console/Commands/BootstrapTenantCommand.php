@@ -9,6 +9,7 @@ use App\Models\Auth\User;
 use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
+use App\Models\Stores\StoreFeature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -146,6 +147,10 @@ class BootstrapTenantCommand extends Command
         try {
             $this->ensureBaseCurrencies();
             $storeIds = $this->bootstrapTenants(tenants: $config['tenants']);
+            $this->bootstrapFeatures(
+                storeIds: $storeIds,
+                features: $config['features'] ?? [],
+            );
             $this->bootstrapAdminUser(
                 config: $config['admin_user'],
                 storeIds: $storeIds,
@@ -156,10 +161,12 @@ class BootstrapTenantCommand extends Command
             return self::FAILURE;
         }
 
+        $featureCount = count(value: $config['features'] ?? []);
         $this->info(sprintf(
-            'Bootstrap completo: %d tenant(s), %d dominio(s), admin user %s.',
+            'Bootstrap completo: %d tenant(s), %d dominio(s), %d feature(s), admin user %s.',
             count(value: $config['tenants']),
             array_sum(array_map(fn (array $t): int => count(value: $t['domains']) + count(value: $t['admin_domains'] ?? []), array: $config['tenants'])),
+            $featureCount * count(value: $storeIds),
             $config['admin_user']['email'],
         ));
 
@@ -300,5 +307,38 @@ class BootstrapTenantCommand extends Command
         $user->stores()->sync(ids: $storeIds);
 
         $this->line("  Admin user: {$user->email} (id={$user->id}, ".count(value: $storeIds).' tiendas)');
+    }
+
+    /**
+     * Crea o actualiza los feature flags de cada tienda.
+     *
+     * El JSON declara `features: { slug: bool }`. Para cada feature,
+     * crea un `StoreFeature` por tienda. Features con valor `false`
+     * se crean con `is_active = false` (pueden existir pero no aplican).
+     *
+     * Idempotente: re-correr actualiza el flag en vez de duplicar.
+     *
+     * @param  array<int, int>  $storeIds
+     * @param  array<string, bool>  $features
+     */
+    private function bootstrapFeatures(array $storeIds, array $features): void
+    {
+        if ($features === []) {
+            return;
+        }
+
+        foreach ($storeIds as $storeId) {
+            foreach ($features as $slug => $active) {
+                if (! is_string($slug) || ! is_bool($active)) {
+                    continue;
+                }
+
+                StoreFeature::query()->updateOrCreate(
+                    attributes: ['store_id' => $storeId, 'slug' => $slug],
+                    values: ['is_active' => $active],
+                );
+                $this->line("    Feature: {$storeId}/{$slug} = ".($active ? 'on' : 'off'));
+            }
+        }
     }
 }
