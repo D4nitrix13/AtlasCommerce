@@ -3,11 +3,16 @@ import AuthLayout from "../../../../layouts/AuthLayout.astro";
 import LoginForm from "../../../../components/admin/auth/LoginForm";
 import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
 import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
+import { themeToBrand } from "../../../../lib/theme";
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
 
-const brand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+// Brand base desde config estática (defaults). El theme dinámico de
+// la API los overridee si está disponible.
+const fallbackBrand =
+  getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
 // Tab inicial desde la URL: ?tab=register abre directo en Registrarse.
 // Si no está presente o es cualquier otro valor, defaultea a "login".
