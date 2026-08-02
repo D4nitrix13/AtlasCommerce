@@ -1,121 +1,116 @@
 # Documentación Técnica — Panda Estampados y Kitsune
 
-Plataforma ecommerce multi-tienda administrada desde
-un backend `Laravel` central, con tiendas públicas
-separadas por dominio.
+Plataforma ecommerce multi-tienda administrada desde un backend
+`Laravel` central, con tiendas públicas separadas por dominio.
 
 ## Qué es el proyecto
 
-Panda Estampados y Kitsune opera como una sola
-plataforma técnica con dos marcas comerciales:
+Panda Estampados y Kitsune opera como una sola plataforma técnica
+con dos marcas comerciales:
 
-- **Panda Estampados** — orientada a empresas, clientes
-  mayoristas/corporativos, productos personalizados
-  y merchandising empresarial.
-- **Kitsune Store** — orientada a clientes
-  habituales/minoristas, productos de anime,
-  videojuegos y cultura japonesa.
+- **Panda Estampados** — Empresas, mayoristas, productos
+  personalizados y merchandising.
+- **Kitsune Store** — Anime, videojuegos, cultura japonesa, retail.
 
-Ambas tiendas comparten backend, base de datos,
-inventario y panel administrativo, pero se presentan
-como tiendas independientes para el cliente final.
-
-## Stack tecnológico
-
-- **Frontend** — `Astro` 7, `React` 19,
-  `Tailwind CSS` 4, `TypeScript` 6
-- **Backend** — `Laravel` 13, `PHP` 8.3+,
-  `Sanctum` Bearer tokens
-- **Base de datos** — `PostgreSQL` (`PostGIS`)
-- **Infraestructura** — `Docker`, `Caddy`, VPS
-- **Testing** — `PHPUnit` 12, `Pint`, `Larastan`
+Ambas tiendas comparten backend, base de datos, inventario y panel
+administrativo, pero se presentan como tiendas independientes para
+el cliente final.
 
 ## Cómo leer esta documentación
 
-### 1. Arquitectura general
+### Empezar de cero
 
-Si necesitas entender el sistema a nivel alto:
+```txt
+1. getting-started/README.md        # Setup completo paso a paso
+2. getting-started/prerequisites.md # Instalar PHP, Node, Docker, Caddy
+3. getting-started/installation.md # Clonar repo + composer/pnpm install
+4. getting-started/databases.md    # Levantar Postgres + Redis
+5. getting-started/backend-setup.md # Configurar Laravel
+6. getting-started/frontend-setup.md # Configurar Astro
+7. getting-started/local-domains.md # Hosts locales multi-tienda
+8. getting-started/caddy.md        # Reverse proxy
+9. getting-started/seed.md         # Datos iniciales
+```
 
-- [architecture/overview.md](architecture/overview.md "Arquitectura general")
-  — Arquitectura general del sistema
-- [architecture/multi-store.md](architecture/multi-store.md "Decisión multi-tienda")
-  — Decisión multi-tienda a profundidad
-- [architecture/decisions.md](architecture/decisions.md "Decisiones arquitectónicas")
-  — Decisiones arquitectónicas documentadas (ADR)
+### Ya está todo instalado, quiero desarrollar
 
-### 2. Backend
+```txt
+- development/README.md            # Workflow diario
+- development/backend.md           # Comandos Laravel
+- development/frontend.md          # Comandos Astro
+- development/testing.md            # PHPUnit + Playwright
+- development/linting.md            # Linters
+- development/git-workflow.md      # Commits + PRs
+```
 
-Si vas a trabajar en la API `Laravel`:
+### Quiero entender la arquitectura
 
-- [backend/README.md](backend/README.md "Estructura del backend")
-  — Estructura general del backend
-- [backend/api/routes.md](backend/api/routes.md "Estrategia de rutas")
-  — Estrategia de rutas API
-- [backend/api/authentication.md](backend/api/authentication.md "Autenticación con Sanctum")
-  — Autenticación con `Sanctum`
-- [backend/auth/auth-2fa.md](backend/auth/auth-2fa.md "Autenticación de dos factores")
-  — Autenticación de dos factores
-- [backend/laravel/componentes-arquitectura.md](backend/laravel/componentes-arquitectura.md "Componentes de arquitectura")
-  — Controllers, Services, Models, etc.
-- [backend/laravel/composer-tools.md](backend/laravel/composer-tools.md "Herramientas de composer")
-  — `Pint`, `Larastan`, IDE Helper
-- [backend/stores/stores-module.md](backend/stores/stores-module.md "Módulo Stores")
-  — Módulo Stores (multi-tienda)
-- [backend/stores/store-context.md](backend/stores/store-context.md "Resolución de tienda")
-  — Resolución de tienda actual
-- [backend/stores/permissions-by-store.md](backend/stores/permissions-by-store.md "Permisos por tienda")
-  — Permisos por tienda
+```txt
+- architecture/overview.md          # Arquitectura general
+- architecture/multi-store.md       # Multi-tienda a fondo
+- architecture/flow.md              # Diagramas de flujo
+- architecture/decisions.md         # ADR (decisiones documentadas)
+- architecture/deployment.md        # Despliegue
+```
 
-### 3. Base de datos
+### Stack tecnológico
 
-Si necesitas entender el modelo de datos:
+```txt
+- stack/README.md                   # Vista general
+- stack/backend.md                  # PHP + Laravel
+- stack/frontend.md                 # Astro + React
+- stack/database.md                 # PostgreSQL + Redis
+- stack/infrastructure.md           # Docker + Caddy + K8s
+```
 
-- [database/README.md](database/README.md "Organización de la BD")
-  — Organización de la base de datos
-- [database/data-model.md](database/data-model.md "Modelo de datos multi-tienda")
-  — Modelo de datos multi-tienda
-- [database/diagrams/ecommerce-er.mmd](database/diagrams/ecommerce-er.mmd "DER en Mermaid")
-  — DER en `Mermaid`
+### Detalles por capa
 
-### 4. Frontend
+```txt
+- backend/README.md                 # Estructura del backend
+- backend/api/routes.md             # Rutas API
+- backend/api/authentication.md     # Sanctum
+- backend/auth/auth-2fa.md          # 2FA
+- backend/laravel/componentes-arquitectura.md
+- backend/laravel/composer-tools.md # Pint + Larastan
+- backend/stores/stores-module.md    # Multi-tienda
+- backend/stores/store-context.md
+- backend/stores/permissions-by-store.md
+- backend/TASKS.md                  # Roadmap backend
 
-Si vas a trabajar en `Astro`/`React`:
+- database/README.md                # DB
+- database/data-model.md            # ER
 
-- [frontend/README.md](frontend/README.md "Estructura del frontend")
-  — Estructura general del frontend
-- [frontend/estructura.md](frontend/estructura.md "Estructura detallada")
-  — Estructura detallada de carpetas
-- [frontend/storefront.md](frontend/storefront.md "Tienda pública multi-tienda")
-  — Tienda pública multi-tienda
-- [frontend/admin-panel.md](frontend/admin-panel.md "Panel administrativo")
-  — Panel administrativo
-- [frontend/api-client.md](frontend/api-client.md "Cliente API")
-  — Cliente API (`api.ts`, `endpoints.ts`)
+- frontend/README.md                # Frontend
+- frontend/estructura.md
+- frontend/storefront.md
+- frontend/admin-panel.md
+- frontend/api-client.md
 
-### 5. Operaciones
+- operations/README.md              # Índice
+- operations/docker.md
+- operations/caddy.md
+- operations/deployment.md
+- operations/environments.md
+- operations/backups.md
+```
 
-Si necesitas desplegar o administrar la infraestructura:
+### Estilo de la documentación
 
-- [operations/README.md](operations/README.md "Índice de operaciones")
-  — Índice de operaciones
-- [operations/docker.md](operations/docker.md "Servicios Docker")
-  — Servicios `Docker`
-- [operations/caddy.md](operations/caddy.md "Reverse proxy con Caddy")
-  — Reverse proxy con `Caddy`
-- [operations/deployment.md](operations/deployment.md "Pasos de despliegue")
-  — Pasos de despliegue
-- [operations/environments.md](operations/environments.md "Variables de entorno")
-  — Variables de entorno
-- [operations/backups.md](operations/backups.md "Estrategia de respaldos")
-  — Estrategia de respaldos
+La guía oficial está en
+[DOCUMENTATION_STYLEGUIDE.md](DOCUMENTATION_STYLEGUIDE.md "DOCUMENTATION_STYLEGUIDE.md").
 
-## Convenciones de documentación
+Reglas resumidas:
 
-- Los nombres técnicos (clases, archivos, rutas,
-  endpoints) se mantienen en inglés.
-- La documentación se escribe en español con tono
-  técnico-profesional.
-- Lo implementado se documenta como hecho; lo pendiente
-  se marca explícitamente.
-- Las recomendaciones arquitectónicas se identifican
-  como tales.
+- 80 caracteres por línea.
+- Español con nombres técnicos en inglés.
+- Bloques de código con lenguaje explícito.
+- Encabezados sin saltos de nivel.
+
+## Convenciones
+
+- Los nombres técnicos (clases, archivos, rutas, endpoints) se
+  mantienen en inglés.
+- La documentación se escribe en español con tono técnico.
+- Lo implementado se documenta como hecho; lo pendiente se marca
+  explícitamente.
+- Las recomendaciones arquitectónicas se identifican como tales.
