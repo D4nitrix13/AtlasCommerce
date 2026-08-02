@@ -52,6 +52,7 @@ use App\Http\Controllers\Api\Shipping\ShippingZoneController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use App\Http\Controllers\Api\Stores\StoreSettingController;
+use App\Http\Controllers\Api\Stores\ThemeAdminController;
 use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\ProductReviewController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
@@ -105,6 +106,12 @@ Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
 
     Route::get('auth/me', [AuthController::class, 'me'])
         ->name('auth.me');
+
+    // Theme management (F3.6 del roadmap multi-instance).
+    Route::get('admin/theme', [ThemeAdminController::class, 'show'])
+        ->name('admin.theme.show');
+    Route::patch('admin/theme', [ThemeAdminController::class, 'update'])
+        ->name('admin.theme.update');
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {

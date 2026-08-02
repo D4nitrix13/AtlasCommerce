@@ -39,17 +39,15 @@ familiares son independientes en servers separados.
 ```txt
 Fase 1 — Multi-instance           █████░░░░░  60%   (completa)
 Fase 2 — Feature flags            ██████░░░  100%   (completa)
-Fase 3 — Theme system en DB       ██████░░░  85%   (backend completo, frontend completo, falta admin UI)
+Fase 3 — Theme system en DB       ██████░░░  85%   (backend completo, falta admin UI frontend)
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
 Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
 **Completadas:** 16 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.5, F3.7)
-**En progreso:** 0
+**En progreso:** 1 (F3.6 backend ✅, frontend pendiente)
 **Pendientes:** 16
-
-**Fase 3 al 85%** (backend y frontend completos, falta admin UI).
 
 ---
 
@@ -485,16 +483,32 @@ cada vez.
 
 ---
 
-### F3.6 — Admin UI para editar theme ⏳
+### F3.6 — Admin UI para editar theme ✅ (backend) / 🟡 (frontend)
 
 **Razón:** Mamá quiere editar colores sin deploy.
 
-**Características pendientes:**
+**Backend (✅):**
 
-- Página `/admin/settings/theme`.
-- Form con color pickers (Tailwind palette).
-- Save → `PATCH /api/admin/store-theme`.
-- Preview en tiempo real (opcional, fase posterior).
+- Endpoint `GET /api/admin/theme` — devuelve el theme del store actual.
+- Endpoint `PATCH /api/admin/theme` — actualiza el theme (idempotente).
+- `UpdateThemeRequest` con validación estricta (colores hex, emails, etc).
+- `StoreThemeAdminResource` que expone todos los campos al admin.
+- 8 tests del admin theme endpoint (happy path, defaults, validación,
+  partial updates, idempotencia, 404).
+
+**Frontend (🟡 pendiente):**
+
+- Página `/admin/settings/theme` con form y color pickers.
+- Llamada al endpoint PATCH para guardar.
+
+**Criterios de aceptación:**
+
+- [x] Endpoint GET retorna theme correcto del store actual.
+- [x] Endpoint PATCH actualiza theme correctamente.
+- [x] Validación de colores hex.
+- [x] Validación de formato de email.
+- [x] 404 cuando el host no matchea un store.
+- [ ] Frontend admin UI.
 
 ---
 
