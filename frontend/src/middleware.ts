@@ -9,20 +9,58 @@ import {
 } from "./i18n/config";
 
 /**
- * Middleware de Astro para ruteo de locale en URL.
+ * Middleware de Astro para ruteo de locale + subdominio admin.
  *
  * Reglas:
- *  - Toda URL admin/storefront/account DEBE tener prefijo `/es/` o `/en/`.
- *  - Si no tiene prefijo, redirige a `/es/...` (o `/en/` si el cliente
- *    tiene preferencia guardada en cookie `app.locale`).
- *  - Si tiene prefijo válido, hace `Astro.rewrite()` a la ruta interna
- *    (sin prefijo) y expone `Astro.locals.locale` para que las páginas
- *    lo lean.
- *  - El login page NO requiere locale (es pública). La acepta igual
- *    por consistencia pero no falla.
+ *  - Si el host empieza con `admin.`, activamos el contexto admin y
+ *    reescribimos paths limpios (`/login`, `/dashboard`) a paths internos
+ *    (`/es/admin/auth/login`, `/es/admin/dashboard`). Así, las URLs
+ *    externas son limpias pero el código interno mantiene `/[locale]/admin/`.
+ *  - Para URLs storefront, se exige prefijo `/es/` o `/en/`. Si no lo
+ *    tiene, redirige a `/es/...` (o al locale guardado en cookie).
+ *  - El login admin no requiere locale prefijado en la URL externa
+ *    (`admin.kitsune.com/login`).
  *
  * Single source of truth: `SUPPORTED_LOCALES`.
  */
+
+interface TenantContext {
+  isAdmin: boolean;
+  tenantSlug: string | null;
+}
+
+const ADMIN_HOST_PATTERNS = [
+  /^admin\.(localhost|127\.0\.0\.1)(?::\d+)?$/i,
+  /^admin\.([a-z0-9-]+)\.test$/i,
+  /^admin\.([a-z0-9-]+\.[a-z]{2,})$/i,
+];
+
+function detectTenantFromHost(host: string): TenantContext {
+  const normalizedHost = host.split(":")[0] ?? "";
+
+  for (const pattern of ADMIN_HOST_PATTERNS) {
+    const match = normalizedHost.match(pattern);
+    if (match !== null) {
+      return {
+        isAdmin: true,
+        tenantSlug: match[1] ?? null,
+      };
+    }
+  }
+
+  // Host normal (no admin) → storefront.
+  const parts = normalizedHost.split(".");
+  const firstLabel = parts[0] ?? "";
+  const tenantSlug =
+    firstLabel !== "" && firstLabel !== "www" && firstLabel !== "localhost"
+      ? firstLabel
+      : null;
+
+  return {
+    isAdmin: false,
+    tenantSlug,
+  };
+}
 
 function detectLocalePrefix(pathname: string): Locale | null {
   const match = pathname.match(/^\/(es|en)(\/|$)/);
@@ -36,12 +74,6 @@ function detectLocalePrefix(pathname: string): Locale | null {
   return (SUPPORTED_LOCALES as readonly string[]).includes(candidate ?? "")
     ? (candidate as Locale)
     : null;
-}
-
-function stripLocalePrefix(pathname: string, locale: Locale): string {
-  const stripped = pathname.replace(new RegExp(`^/${locale}`), "");
-
-  return stripped === "" ? "/" : stripped;
 }
 
 function pickDefaultLocale(request: Request): Locale {
@@ -75,13 +107,106 @@ function appendLocaleCookie(response: Response, locale: Locale): void {
   response.headers.append("set-cookie", value);
 }
 
+/**
+ * Mapea paths externos limpios (sin locale ni /admin/) a paths internos
+ * con prefijo `/[locale]/admin/...`.
+ *
+ * El usuario ve `admin.kitsune.com/login`. Astro necesita apuntar a
+ * `/es/admin/auth/login` (page real en `src/pages/[locale]/admin/...`).
+ *
+ * Solo se aplica cuando `isAdmin = true` y la URL no tiene ya prefijo
+ * de locale ni está en assets.
+ */
+function mapAdminPathToInternal(pathname: string, locale: Locale): string {
+  // Ya tiene prefijo de locale → no tocar.
+  if (detectLocalePrefix(pathname) !== null) {
+    return pathname;
+  }
+
+  const cleanPath = pathname === "/" ? "" : pathname;
+
+  // Mapeo explícito de paths limpios a paths internos.
+  // Cualquier path no listado pasa tal cual (será 404 si no existe).
+  const pathMap: Record<string, string> = {
+    "/login": "/admin/auth/login",
+    "/dashboard": "/admin/dashboard",
+    "/users": "/admin/users",
+    "/sales": "/admin/sales",
+    "/purchases": "/admin/purchases",
+    "/inventory": "/admin/inventory",
+    "/catalog": "/admin/catalog",
+    "/customers": "/admin/customers",
+    "/marketing": "/admin/marketing",
+    "/shipping": "/admin/shipping",
+    "/support": "/admin/support",
+    "/settings": "/admin/settings",
+    "/reports": "/admin/reports",
+    "/system": "/admin/system",
+    "/notifications": "/admin/system/notifications",
+    "/sales/orders": "/admin/sales/orders",
+    "/sales/invoices": "/admin/sales/invoices",
+  };
+
+  const mapped = pathMap[cleanPath] ?? cleanPath;
+  return mapped === "" ? `/${locale}/admin` : `/${locale}/admin${mapped}`;
+}
+
+const PUBLIC_PATHS = [
+  "/api/",
+  "/_astro/",
+  "/_actions/",
+  "/_image",
+  "/build/",
+  "/favicon.ico",
+  "/robots.txt",
+];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some((prefix) => pathname.startsWith(prefix));
+}
+
+function isStaticAsset(pathname: string): boolean {
+  return pathname.startsWith("/_") || pathname.startsWith("/build/");
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
-  const pathname = new URL(context.request.url).pathname;
+  const url = new URL(context.request.url);
+  const pathname = url.pathname;
+  const host = context.request.headers.get("host") ?? "";
+
+  const tenant = detectTenantFromHost(host);
+
+  // Exponer tenant context a las páginas.
+  context.locals.tenant = tenant;
+
+  // Hosts admin: rewrite de paths limpios a paths internos.
+  if (tenant.isAdmin) {
+    if (isStaticAsset(pathname)) {
+      return next();
+    }
+
+    const locale = pickDefaultLocale(context.request);
+    const localeFromUrl = detectLocalePrefix(pathname);
+
+    if (localeFromUrl === null) {
+      // URL no tiene locale → rewrite a path interno con locale.
+      const internalPath = mapAdminPathToInternal(pathname, locale);
+      context.locals.locale = locale;
+      const response = await context.rewrite(internalPath);
+      appendLocaleCookie(response, locale);
+      return response;
+    }
+
+    // URL tiene locale → dejar que Astro rutee, solo setear locale.
+    context.locals.locale = localeFromUrl;
+    const response = await next();
+    appendLocaleCookie(response, localeFromUrl);
+    return response;
+  }
+
+  // Host storefront (no admin): behavior original.
   const localeFromUrl = detectLocalePrefix(pathname);
 
-  // Caso 1: URL con prefijo válido → dejamos que Astro rutee por
-  // su i18n config (páginas viven en `[locale]/admin/...`). Solo
-  // seteamos `Astro.locals.locale` y la cookie.
   if (localeFromUrl !== null) {
     context.locals.locale = localeFromUrl;
     const response = await next();
@@ -89,23 +214,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return response;
   }
 
-  // Caso 2: URL sin prefijo en rutas privadas → redirect.
-  const isPublicPath =
-    pathname.startsWith("/api/") ||
-    pathname.startsWith("/_astro/") ||
-    pathname.startsWith("/_actions/") ||
-    pathname.startsWith("/_image") ||
-    pathname === "/_image" ||
-    pathname.startsWith("/build/") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/robots.txt";
-
-  if (isPublicPath) {
+  if (isPublicPath(pathname)) {
     return next();
   }
 
   const targetLocale = pickDefaultLocale(context.request);
-  const redirectTo = `/${targetLocale}${pathname === "/" ? "" : pathname}${context.url.search ?? ""}`;
+  const redirectTo = `/${targetLocale}${pathname === "/" ? "" : pathname}${url.search ?? ""}`;
 
   const redirectResponse = context.redirect(redirectTo, 302);
   appendLocaleCookie(redirectResponse, targetLocale);
@@ -113,11 +227,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   return redirectResponse;
 });
 
-// Tipos para `Astro.locals.locale`.
+// Tipos para `Astro.locals`.
 declare global {
   namespace App {
     interface Locals {
       locale: Locale;
+      tenant: TenantContext;
     }
   }
 }
+
+// Re-exports para tooling que necesita tipos de i18n.
+export { LOCALE_FLAGS, LOCALE_LABELS };

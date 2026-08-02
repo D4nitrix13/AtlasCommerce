@@ -40,6 +40,13 @@ const en: Translations = {
     "Printing, sublimation and embroidery on textiles, ceramics, glass and more. We work with businesses and entrepreneurs that demand consistent quality and on-time delivery.",
   "auth.login.brand.left.cta": "Browse catalog",
   "auth.login.createAccount.heading": "Create your account to get started.",
+  "auth.login.firstName.placeholder": "First name",
+  "auth.login.lastName.placeholder": "Last name",
+  "auth.login.passwordHint":
+    "Your password must be at least 12 characters, contain an uppercase letter, a lowercase letter, and a number.",
+  "auth.login.submit.create": "Create account",
+  "auth.login.marketing.optIn.label":
+    "I would like to occasionally receive updates from Panda Estampados about new features, products, special offers and events.",
   "auth.login.brand.left.footer": "© {year} Panda Estampados · Made with care in Nicaragua.",
   "auth.login.alreadySignedIn": "You already have an active session. Redirecting to dashboard...",
   "auth.logout.button": "Sign out",

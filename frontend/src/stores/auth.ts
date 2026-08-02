@@ -27,6 +27,42 @@ const initialState: AuthState = {
   isHydrating: false,
 };
 
+/**
+ * Lee el store_id activo del localStorage.
+ *
+ * Se persiste en login/register para que el frontend sepa a qué tienda
+ * el usuario está atado sin tener que hidratar `/auth/me` en cada
+ * navegación. Backend sigue siendo la fuente de verdad (validado vía
+ * Sanctum en cada request).
+ */
+const STORE_ID_STORAGE_KEY = "auth.store_id";
+
+export function getActiveStoreId(): number | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const raw = window.localStorage.getItem(STORE_ID_STORAGE_KEY);
+  if (raw === null) {
+    return null;
+  }
+
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function writeActiveStoreId(storeId: number | null): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (storeId === null) {
+    window.localStorage.removeItem(STORE_ID_STORAGE_KEY);
+  } else {
+    window.localStorage.setItem(STORE_ID_STORAGE_KEY, String(storeId));
+  }
+}
+
 let state: AuthState = initialState;
 const listeners = new Set<() => void>();
 
@@ -91,11 +127,11 @@ export function isAuthenticated(): boolean {
 export function setSession(response: LoginResponse): void {
   state = { ...state, token: response.token, user: response.user };
   writeTokenToStorage(response.token);
+  writeActiveStoreId(response.user.store_ids[0] ?? null);
   emit();
 }
 
 async function login(payload: LoginPayload): Promise<LoginResponse> {
-  
   const response = await apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
     body: payload,
@@ -103,14 +139,13 @@ async function login(payload: LoginPayload): Promise<LoginResponse> {
 
   state = { ...state, token: response.token, user: response.user };
   writeTokenToStorage(response.token);
+  writeActiveStoreId(response.user.store_ids[0] ?? null);
   emit();
 
   return response;
 }
 
 async function logout(): Promise<void> {
-  
-
   try {
     if (state.token !== null) {
       await apiFetch("/auth/logout", {
@@ -125,6 +160,7 @@ async function logout(): Promise<void> {
 
   state = { ...state, token: null, user: null };
   writeTokenToStorage(null);
+  writeActiveStoreId(null);
   emit();
 }
 
@@ -147,10 +183,12 @@ async function hydrate(): Promise<void> {
   try {
     const response = await apiFetch<{ user: User }>("/auth/me", { token });
     state = { ...state, user: response.user, isHydrating: false };
+    writeActiveStoreId(response.user.store_ids[0] ?? null);
   } catch {
     // Token expirado o inválido → limpiar.
     state = { token: null, user: null, isHydrating: false };
     writeTokenToStorage(null);
+    writeActiveStoreId(null);
   }
 
   emit();

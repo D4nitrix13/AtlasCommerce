@@ -2,15 +2,19 @@
 import AuthLayout from "../../../../layouts/AuthLayout.astro";
 import LoginForm from "../../../../components/admin/auth/LoginForm";
 import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
+import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
+
+const brand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+
 const hasToken =
   typeof Astro.cookies !== "undefined" && Astro.cookies.has("auth.token");
 const currentYear = new Date().getFullYear();
 ---
 
-<AuthLayout title={t["auth.login.title"] + " · Panda Estampados"}>
+<AuthLayout title={`${t["auth.login.title"]} · ${brand.name}`}>
   {hasToken ? (
     <div class="text-sm text-slate-300">{t["auth.login.alreadySignedIn"]}</div>
     <script define:vars={{ redirectTo: `/${locale}/admin/dashboard` }}>
@@ -20,12 +24,12 @@ const currentYear = new Date().getFullYear();
     <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
       <aside
         class="relative isolate hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
-        style="background: radial-gradient(circle at 20% 30%, #DC2626 0%, #7F1D1D 35%, #1C1917 80%);"
+        style={`background: radial-gradient(circle at 20% 30%, ${brand.accentColor} 0%, #1C1917 80%);`}
       >
         <div class="flex items-center gap-3">
           <img
-            src="/images/stores/panda-estampados/brand/logo.webp"
-            alt="Panda Estampados"
+            src={brand.loginLogoPath}
+            alt={brand.name}
             class="h-12 w-12 rounded-lg bg-white p-1.5 object-contain shadow-lg"
           />
           <span class="text-2xl font-bold tracking-tight drop-shadow">
@@ -67,7 +71,7 @@ const currentYear = new Date().getFullYear();
         <div
           aria-hidden="true"
           class="absolute inset-0 -z-10 opacity-40"
-          style="background: radial-gradient(circle at 80% 80%, rgba(220,38,38,0.6) 0%, transparent 50%);"
+          style={`background: radial-gradient(circle at 80% 80%, ${brand.accentColor}55 0%, transparent 50%);`}
         />
       </aside>
 
@@ -75,8 +79,8 @@ const currentYear = new Date().getFullYear();
         <div class="w-full max-w-3xl">
           <header class="mb-6 flex items-center gap-3 lg:hidden">
             <img
-              src="/images/stores/panda-estampados/brand/logo.webp"
-              alt="Panda Estampados"
+              src={brand.loginLogoPath}
+              alt={brand.name}
               class="h-10 w-10 rounded-md bg-white object-contain p-1"
             />
             <span class="text-xl font-bold tracking-tight text-slate-900">
@@ -84,7 +88,7 @@ const currentYear = new Date().getFullYear();
             </span>
           </header>
 
-          <LoginForm client:load />
+          <LoginForm client:load brand={brand} />
         </div>
       </main>
     </div>

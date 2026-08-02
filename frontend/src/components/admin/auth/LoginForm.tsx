@@ -4,16 +4,21 @@ import { useAuth } from "../../../stores/auth";
 import { useTranslations } from "../../../i18n";
 import { apiFetch } from "../../../lib/api";
 import type { LoginResponse, ValidationErrors } from "../../../types/auth";
+import { DEFAULT_BRAND, type StoreBrand } from "../../../config/stores";
 import LanguageSwitcher from "../../ui/LanguageSwitcher";
-
-const ACCENT = "#DC2626";
-const ACCENT_HOVER = "#B91C1C";
 
 type Tab = "login" | "register";
 
-export default function LoginForm(): ReactElement {
+type LoginFormProps = {
+  brand?: StoreBrand;
+};
+
+export default function LoginForm({ brand = DEFAULT_BRAND }: LoginFormProps): ReactElement {
   const { login, setSession } = useAuth();
-  const { t, locale } = useTranslations();
+  const { t } = useTranslations();
+
+  const accent = brand.accentColor;
+  const accentHover = brand.accentHoverColor;
 
   const [tab, setTab] = useState<Tab>("login");
   const [firstName, setFirstName] = useState("");
@@ -21,6 +26,7 @@ export default function LoginForm(): ReactElement {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({});
@@ -30,6 +36,7 @@ export default function LoginForm(): ReactElement {
     setLastName("");
     setEmail("");
     setPassword("");
+    setMarketingOptIn(false);
     setFieldErrors({});
     setErrorMessage(null);
   };
@@ -61,13 +68,16 @@ export default function LoginForm(): ReactElement {
             last_name: lastName,
             email,
             password,
+            device_name: "web-admin",
           },
         });
         setSession(response);
       }
 
       const params = new URLSearchParams(window.location.search);
-      const fallback = `/${locale}/admin/dashboard`;
+      // Mantenerse en el mismo subdominio admin. La URL del dashboard
+      // se construye SIN locale prefix cuando el usuario está en admin.
+      const fallback = `${window.location.origin}/dashboard`;
       const target = params.get("redirect") ?? fallback;
 
       window.location.href = target;
@@ -90,8 +100,8 @@ export default function LoginForm(): ReactElement {
   };
 
   const isLogin = tab === "login";
+  const isRegister = tab === "register";
 
-  // Mapea errores del backend a keys i18n cuando es posible.
   const emailErrorKey = fieldErrors.email?.[0];
   const passwordErrorKey = fieldErrors.password?.[0];
 
@@ -100,8 +110,8 @@ export default function LoginForm(): ReactElement {
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <img
-            src="/images/stores/panda-estampados/brand/logo.webp"
-            alt="Panda Estampados"
+            src={brand.logoPath}
+            alt={brand.name}
             className="h-12 w-12 rounded-md bg-white object-contain p-1"
           />
           <span className="text-2xl font-bold italic tracking-tight">
@@ -120,13 +130,13 @@ export default function LoginForm(): ReactElement {
       <div
         role="tablist"
         className="relative grid grid-cols-2 items-center overflow-hidden rounded-full border text-base font-semibold tracking-wide"
-        style={{ borderColor: ACCENT }}
+        style={{ borderColor: accent }}
       >
         <span
           aria-hidden="true"
           className="pointer-events-none absolute top-0 bottom-0 w-1/2 rounded-full"
           style={{
-            backgroundColor: ACCENT,
+            backgroundColor: accent,
             transform: tab === "register" ? "translateX(100%)" : "translateX(0%)",
           }}
         />
@@ -138,7 +148,7 @@ export default function LoginForm(): ReactElement {
             handleTabChange("login");
           }}
           className="relative z-10 px-4 py-3 focus:outline-none"
-          style={{ color: tab === "login" ? "#fff" : ACCENT }}
+          style={{ color: tab === "login" ? "#fff" : accent }}
         >
           {t("auth.login.tab.signin")}
         </button>
@@ -150,7 +160,7 @@ export default function LoginForm(): ReactElement {
             handleTabChange("register");
           }}
           className="relative z-10 px-4 py-3 focus:outline-none"
-          style={{ color: tab === "register" ? "#fff" : ACCENT }}
+          style={{ color: tab === "register" ? "#fff" : accent }}
         >
           {t("auth.login.tab.signup")}
         </button>
@@ -180,7 +190,7 @@ export default function LoginForm(): ReactElement {
                 type="text"
                 autoComplete="given-name"
                 required
-                placeholder="Nombre"
+                placeholder={t("auth.login.firstName.placeholder")}
                 value={firstName}
                 onChange={(event) => {
                   setFirstName(event.target.value);
@@ -200,7 +210,7 @@ export default function LoginForm(): ReactElement {
                 type="text"
                 autoComplete="family-name"
                 required
-                placeholder="Apellido"
+                placeholder={t("auth.login.lastName.placeholder")}
                 value={lastName}
                 onChange={(event) => {
                   setLastName(event.target.value);
@@ -237,20 +247,20 @@ export default function LoginForm(): ReactElement {
 
         <div className="flex flex-col gap-1">
           <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                minLength={8}
-                placeholder={t("auth.login.password.placeholder")}
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
-                }}
-                className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 pr-12 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
-              />
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              required
+              minLength={12}
+              placeholder={t("auth.login.password.placeholder")}
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+              }}
+              className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 pr-12 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+            />
             <button
               type="button"
               onClick={() => {
@@ -273,23 +283,56 @@ export default function LoginForm(): ReactElement {
           {passwordErrorKey !== undefined && (
             <p className="px-1 text-xs text-red-300">{passwordErrorKey}</p>
           )}
+          {isRegister && (
+            <p className="mt-1 px-1 text-xs leading-relaxed text-slate-500">
+              {t("auth.login.passwordHint")}
+            </p>
+          )}
         </div>
+
+        {isRegister && (
+          <label className="mt-1 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-slate-300">
+            <span className="relative mt-0.5 inline-block shrink-0">
+              <input
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(event) => {
+                  setMarketingOptIn(event.target.checked);
+                }}
+                className="peer sr-only"
+              />
+              <span
+                aria-hidden="true"
+                className="block h-5 w-9 rounded-full border border-white/15 bg-slate-700 transition peer-checked:border-red-500 peer-checked:bg-red-500"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition peer-checked:translate-x-4"
+              />
+            </span>
+            <span>{t("auth.login.marketing.optIn.label")}</span>
+          </label>
+        )}
 
         <button
           type="submit"
           disabled={isSubmitting}
           className="mt-1 rounded-md px-4 py-4 text-lg font-semibold tracking-wide text-white transition disabled:cursor-not-allowed disabled:opacity-60"
           style={{
-            backgroundColor: isSubmitting ? ACCENT_HOVER : ACCENT,
+            backgroundColor: isSubmitting ? accentHover : accent,
           }}
           onMouseEnter={(event) => {
-            event.currentTarget.style.backgroundColor = ACCENT_HOVER;
+            event.currentTarget.style.backgroundColor = accentHover;
           }}
           onMouseLeave={(event) => {
-            event.currentTarget.style.backgroundColor = ACCENT;
+            event.currentTarget.style.backgroundColor = accent;
           }}
         >
-          {isSubmitting ? t("auth.login.submit.loading") : t("auth.login.submit.idle")}
+          {isSubmitting
+            ? t("auth.login.submit.loading")
+            : isLogin
+              ? t("auth.login.submit.idle")
+              : t("auth.login.submit.create")}
         </button>
       </form>
 
@@ -307,9 +350,9 @@ export default function LoginForm(): ReactElement {
 
       <div className="mt-2 flex flex-col items-center gap-3 pt-2 text-xs text-slate-300">
         <a
-          href="mailto:support@panda-estampados.test"
+          href={`mailto:${brand.supportEmail}`}
           className="font-semibold transition hover:opacity-80"
-          style={{ color: ACCENT }}
+          style={{ color: accent }}
         >
           {t("auth.login.help")}
         </a>
