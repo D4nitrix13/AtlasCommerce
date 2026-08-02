@@ -37,7 +37,7 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           ██░░░░░░░░  10%   (esta semana)
+Fase 1 — Multi-instance           ██░░░░░░░░  20%   (esta semana)
 Fase 2 — Feature flags            ░░░░░░░░░░   0%
 Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
@@ -45,9 +45,9 @@ Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 0
-**En progreso:** 1 (F1.1)
-**Pendientes:** 31
+**Completadas:** 1 (F1.1)
+**En progreso:** 4 (F1.2, F1.3, F1.4, F1.5)
+**Pendientes:** 27
 
 ---
 
@@ -68,7 +68,7 @@ configuración.
 
 ---
 
-### F1.1 — Comando `tenants:bootstrap` 🔄
+### F1.1 — Comando `tenants:bootstrap` ✅
 
 **Razón:** Hoy los tenants (Panda + Kitsune) están hardcoded en
 `DatabaseSeeder`. Necesitamos un comando que cree tenants desde un
@@ -89,16 +89,20 @@ tenants sin tocar código.
 
 **Criterios de aceptación:**
 
-- [ ] Comando corre sin error con `seeds/panda.json`.
-- [ ] Crea 2 stores (Panda + Kitsune) y sus dominios.
-- [ ] Crea el admin user y lo asocia a las 2 tiendas.
-- [ ] Re-correr el comando no duplica stores ni domains.
-- [ ] Tests unitarios del comando (input válido, JSON malformado, idempotencia).
+- [x] Comando corre sin error con `seeds/panda.json`.
+- [x] Crea 2 stores (Panda + Kitsune) y sus dominios.
+- [x] Crea el admin user y lo asocia a las 2 tiendas.
+- [x] Re-correr el comando no duplica stores ni domains.
+- [x] Tests unitarios del comando (input válido, JSON malformado, idempotencia).
 
 **Archivos a crear/modificar:**
 
-- `app/Console/Commands/BootstrapTenantCommand.php` (nuevo)
-- `tests/Feature/Console/BootstrapTenantCommandTest.php` (nuevo)
+- `app/Console/Commands/BootstrapTenantCommand.php` (nuevo) ✅
+- `tests/Feature/Console/BootstrapTenantCommandTest.php` (nuevo) ✅
+
+**Estado:** Completado el 2026-08-02. 10 tests nuevos (idempotencia,
+múltiples tenants, validación de schema, password desde env, etc).
+Total suite: 152 tests passing.
 
 ---
 
