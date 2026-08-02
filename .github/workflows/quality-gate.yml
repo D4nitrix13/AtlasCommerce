@@ -115,6 +115,14 @@ jobs:
         working-directory: frontend
         run: pnpm exec prettier --check 'src/**/*.{ts,tsx,astro,css,md}'
 
+      - name: ESLint
+        working-directory: frontend
+        run: pnpm run lint
+
+      - name: Unit Tests (Vitest)
+        working-directory: frontend
+        run: pnpm run test -- --reporter=verbose
+
   docs-quality:
     name: Docs (Markdown)
     runs-on: ubuntu-latest
