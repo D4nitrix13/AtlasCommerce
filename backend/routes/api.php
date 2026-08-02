@@ -50,6 +50,7 @@ use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Shipping\ShippingCompanyController;
 use App\Http\Controllers\Api\Shipping\ShippingZoneController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
+use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use App\Http\Controllers\Api\Stores\StoreSettingController;
 use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\ProductReviewController;
@@ -363,4 +364,5 @@ Route::middleware(['store.domain'])->prefix('storefront')->group(function (): vo
     Route::get('/products', [StorefrontProductController::class, 'index']);
     Route::get('/products/{slug}', [StorefrontProductController::class, 'show']);
     Route::get('/products/{slug}/price', [StorefrontProductController::class, 'price']);
+    Route::get('/theme', [StorefrontThemeController::class, 'show']);
 });

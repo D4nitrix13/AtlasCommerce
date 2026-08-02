@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * Tienda virtual del ecosistema.
  *
@@ -120,6 +121,16 @@ class Store extends Model
     public function features(): HasMany
     {
         return $this->hasMany(StoreFeature::class);
+    }
+
+    /**
+     * Theme visual de esta tienda (relación 1:1).
+     *
+     * @return HasOne<StoreTheme>
+     */
+    public function theme(): HasOne
+    {
+        return $this->hasOne(StoreTheme::class);
     }
 
     /**
