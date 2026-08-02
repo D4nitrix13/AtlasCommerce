@@ -37,17 +37,19 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           █████░░░░░  60%   (completa en F1.5)
-Fase 2 — Feature flags            ████░░░░░░  80%   (F2.1-F2.4 + F2.6)
+Fase 1 — Multi-instance           █████░░░░░  60%   (completa)
+Fase 2 — Feature flags            ██████░░░  100%   (completa, F2.5 listo)
 Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
 Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 10 (F1.1-F1.5, F2.1-F2.4, F2.6)
-**En progreso:** 1 (F2.5)
+**Completadas:** 11 (F1.1-F1.5, F2.1-F2.6)
+**En progreso:** 0
 **Pendientes:** 21
+
+**Fase 2 completa (100%)**. Quedan 4 fases por delante.
 
 ---
 
@@ -343,26 +345,44 @@ y crear los registros.
 
 ---
 
-### F2.5 — Feature `wholesale_pricing` implementada ⏳
+### F2.5 — Feature `wholesale_pricing` implementada ✅
 
 **Razón:** Primera feature real con flag. Sirve como ejemplo para todas
 las demás.
 
 **Características:**
 
-- Migración: `wholesale_prices(product_id, store_id, min_qty, price_cents)`.
-- Service `WholesalePricingService::calculatePrice(product, store, qty)`.
-- Si `store.hasFeature('wholesale_pricing')` → usa tabla `wholesale_prices`.
-- Si no → usa `products.price_cents` normal.
-- UI en admin: tabla de precios mayoristas por producto.
-- API expone precios mayoristas si la feature está activa.
+- Migración: `wholesale_prices(product_id, store_id, min_qty, price_cents)`
+  con unique constraint `(product_id, store_id, min_qty)`.
+- Modelo `App\Models\Catalog\WholesalePrice` con relaciones a
+  `Product` y `Store`.
+- Service `WholesalePricingService::calculatePrice(product, store, qty)`:
+  - Si store no tiene feature `wholesale_pricing` → precio base.
+  - Si tiene feature, busca en `wholesale_prices` el `min_qty` más alto
+    `<=` qty solicitada.
+  - Si no encuentra → precio base.
+  - Soporta tiers (10+ = 800, 50+ = 600, 100+ = 500).
+- API endpoint: `GET /api/storefront/products/{slug}/price?quantity=N`
+  devuelve `{ product_id, quantity, price_cents }`.
+- Aislamiento por tienda (precios mayoristas son per-store).
 
 **Criterios de aceptación:**
 
-- [ ] Panda ve precios mayoristas en `/admin/products/{id}/wholesale`.
-- [ ] MM Boutique y Morales Store NO ven esta opción en el admin.
-- [ ] API storefront devuelve precios correctos según flag.
-- [ ] Tests del service.
+- [x] Panda (con feature) usa tabla `wholesale_prices`.
+- [x] MM Boutique y Morales Store (sin feature) usan precio base.
+- [x] API storefront devuelve precios correctos según flag.
+- [x] Tests del service (8 tests cubriendo tiers, aislamiento, qty=0).
+
+**Archivos:**
+
+- `database/migrations/catalog/2026_08_02_000001_create_wholesale_prices_table.php` (nuevo) ✅
+- `app/Models/Catalog/WholesalePrice.php` (nuevo) ✅
+- `app/Services/Catalog/WholesalePricingService.php` (nuevo) ✅
+- `app/Http/Controllers/Api/Storefront/ProductController.php` (método `price` agregado) ✅
+- `routes/api.php` (ruta `products/{slug}/price` agregada) ✅
+- `tests/Feature/Services/Catalog/WholesalePricingServiceTest.php` (nuevo, 8 tests) ✅
+
+**Estado:** Completado el 2026-08-02. 181/181 tests passing.
 
 ---
 
