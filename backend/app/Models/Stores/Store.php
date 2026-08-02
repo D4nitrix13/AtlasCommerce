@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Stores;
 
 use App\Models\Concerns\HasSlug;
@@ -108,6 +110,36 @@ class Store extends Model
     public function settings(): HasMany
     {
         return $this->hasMany(StoreSetting::class);
+    }
+
+    /**
+     * Features flags de esta tienda.
+     *
+     * @return HasMany<StoreFeature>
+     */
+    public function features(): HasMany
+    {
+        return $this->hasMany(StoreFeature::class);
+    }
+
+    /**
+     * Helper: chequea si una feature está activa para esta tienda.
+     *
+     * Uso:
+     * ```php
+     * if ($store->hasFeature('wholesale_pricing')) {
+     *     // ...
+     * }
+     * ```
+     *
+     * @param  string  $slug  Slug de la feature (kebab-case).
+     */
+    public function hasFeature(string $slug): bool
+    {
+        return $this->features()
+            ->where(column: 'slug', operator: '=', value: $slug)
+            ->where(column: 'is_active', operator: '=', value: true)
+            ->exists();
     }
 
     public function primaryDomain(): ?StoreDomain
