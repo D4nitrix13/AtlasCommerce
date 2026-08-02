@@ -1,0 +1,33 @@
+{
+  "tenants": [
+    {
+      "slug": "panda-estampados",
+      "name": "Panda Estampados",
+      "currency": "NIO",
+      "domains": [
+        "pandas-estampados.com",
+        "www.pandas-estampados.com"
+      ],
+      "admin_domains": [
+        "admin.pandas-estampados.com"
+      ]
+    },
+    {
+      "slug": "kitsune",
+      "name": "Kitsune Store",
+      "currency": "USD",
+      "domains": [
+        "kitsune.com",
+        "www.kitsune.com"
+      ],
+      "admin_domains": [
+        "admin.kitsune.com"
+      ]
+    }
+  ],
+  "admin_user": {
+    "email": "admin@pandas-estampados.test",
+    "password_env": "PANDA_ADMIN_PASSWORD"
+  },
+  "features": {}
+}
