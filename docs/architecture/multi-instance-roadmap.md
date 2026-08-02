@@ -37,7 +37,7 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           ██░░░░░░░░  20%   (esta semana)
+Fase 1 — Multi-instance           ██░░░░░░░░  30%   (esta semana)
 Fase 2 — Feature flags            ░░░░░░░░░░   0%
 Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
@@ -45,8 +45,8 @@ Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 1 (F1.1)
-**En progreso:** 4 (F1.2, F1.3, F1.4, F1.5)
+**Completadas:** 2 (F1.1, F1.2)
+**En progreso:** 3 (F1.3, F1.4, F1.5)
 **Pendientes:** 27
 
 ---
@@ -106,26 +106,31 @@ Total suite: 152 tests passing.
 
 ---
 
-### F1.2 — Refactorizar `DatabaseSeeder` ⏳
+### F1.2 — Refactorizar `DatabaseSeeder` ✅
 
 **Razón:** El seeder actual crea siempre Panda + Kitsune hardcoded.
 Esto no sirve cuando Morales Store deploya y no quiere esas tiendas.
 
 **Características:**
 
-- `DatabaseSeeder` queda vacío o solo crea la currency base.
+- `DatabaseSeeder` solo crea currencies base (USD, NIO) y permissions/roles.
 - La creación de tenants se delega completamente a `tenants:bootstrap`.
 - Cada instancia corre su propio `tenants:bootstrap` con su JSON.
+- `AdminUserSeeder` eliminado (redundante con `tenants:bootstrap`).
 
 **Criterios de aceptación:**
 
-- [ ] `php artisan db:seed` no crea stores ni users.
-- [ ] Solo crea currencies si no existen (idempotente).
-- [ ] Tests actualizados.
+- [x] `php artisan db:seed` no crea stores ni users.
+- [x] Solo crea currencies si no existen (idempotente).
+- [x] Tests actualizados.
+- [x] AdminUserSeeder eliminado.
 
 **Archivos:**
 
-- `backend/database/seeders/DatabaseSeeder.php` (modificar)
+- `backend/database/seeders/DatabaseSeeder.php` (modificado) ✅
+- `backend/database/seeders/AdminUserSeeder.php` (eliminado) ✅
+
+**Estado:** Completado el 2026-08-02. 152/152 tests passing.
 
 ---
 
