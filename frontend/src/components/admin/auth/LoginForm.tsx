@@ -7,20 +7,45 @@ import type { LoginResponse, ValidationErrors } from "../../../types/auth";
 import { DEFAULT_BRAND, type StoreBrand } from "../../../config/stores";
 import LanguageSwitcher from "../../ui/LanguageSwitcher";
 
-type Tab = "login" | "register";
+export type Tab = "login" | "register";
 
 type LoginFormProps = {
   brand?: StoreBrand;
+  initialTab?: Tab;
 };
 
-export default function LoginForm({ brand = DEFAULT_BRAND }: LoginFormProps): ReactElement {
+function readTabFromUrl(): Tab {
+  if (typeof window === "undefined") {
+    return "login";
+  }
+  const params = new URLSearchParams(window.location.search);
+  return params.get("tab") === "register" ? "register" : "login";
+}
+
+function writeTabToUrl(next: Tab): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const url = new URL(window.location.href);
+  if (next === "login") {
+    url.searchParams.delete("tab");
+  } else {
+    url.searchParams.set("tab", next);
+  }
+  window.history.replaceState({}, "", url);
+}
+
+export default function LoginForm({
+  brand = DEFAULT_BRAND,
+  initialTab,
+}: LoginFormProps): ReactElement {
   const { login, setSession } = useAuth();
   const { t } = useTranslations();
 
   const accent = brand.accentColor;
   const accentHover = brand.accentHoverColor;
 
-  const [tab, setTab] = useState<Tab>("login");
+  const [tab, setTab] = useState<Tab>(initialTab ?? readTabFromUrl());
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,6 +71,7 @@ export default function LoginForm({ brand = DEFAULT_BRAND }: LoginFormProps): Re
       return;
     }
     setTab(next);
+    writeTabToUrl(next);
     resetFields();
   };
 
