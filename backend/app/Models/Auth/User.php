@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Auth;
 
+use App\Models\Stores\Store;
 use Database\Factories\Auth\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -21,6 +25,12 @@ use Laravel\Sanctum\HasApiTokens;
  * La autenticación de API se gestiona mediante Laravel Sanctum (trait HasApiTokens).
  * El cast automático `hashed` en `password` garantiza que la contraseña nunca se
  * almacene en texto plano.
+ *
+ * Multi-tenancy: la asociación usuario↔tienda es N:N vía tabla pivot
+ * `user_stores`. Esto permite que un mismo admin gestione múltiples
+ * tiendas con un rol distinto en cada una. La validación de acceso a
+ * la tienda activa se hace en `AuthController::login` chequeando
+ * contra `StoreContextService`.
  */
 class User extends Authenticatable
 {
@@ -75,6 +85,34 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Tiendas a las que el usuario tiene acceso.
+     *
+     * Relación N:N vía tabla pivot `user_stores`. Permite que un mismo
+     * usuario sea admin de Panda Y de Kitsune simultáneamente, con
+     * roles distintos por tienda.
+     */
+    public function stores(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: Store::class,
+            table: 'user_stores',
+        )->withPivot(columns: 'role_id');
+    }
+
+    /**
+     * Determina si el usuario tiene acceso a la tienda indicada.
+     *
+     * Usado por `AuthController::login` para validar que el usuario
+     * puede autenticarse en la tienda activa resuelta por host.
+     */
+    public function hasAccessToStore(int $storeId): bool
+    {
+        return $this->stores()
+            ->where(column: 'stores.id', operator: '=', value: $storeId)
+            ->exists();
     }
 
     /**

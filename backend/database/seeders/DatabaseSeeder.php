@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Catalog\Category;
@@ -60,5 +62,8 @@ class DatabaseSeeder extends Seeder
 
         // Catálogo de permisos + roles (admin, staff).
         $this->call(class: PermissionsCatalogSeeder::class);
+
+        // User admin inicial con password débil (entorno controlado).
+        $this->call(class: AdminUserSeeder::class);
     }
 }

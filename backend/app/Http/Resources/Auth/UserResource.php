@@ -13,6 +13,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * Shape:
  *  - id, email, full_name (computed)
  *  - role_id (nullable — el user puede no tener rol)
+ *  - store_ids (int[]) — IDs de tiendas a las que el usuario tiene acceso
  *  - is_active
  *  - permissions[] — slugs efectivos del usuario (vacío si es admin
  *    porque el bypass no expone los slugs al frontend; el frontend
@@ -45,6 +46,10 @@ class UserResource extends JsonResource
                 ->all();
         }
 
+        $storeIds = $this->resource->relationLoaded('stores')
+            ? $this->stores->pluck(value: 'id')->all()
+            : [];
+
         return [
             'id' => $this->id,
             'email' => $this->email,
@@ -55,6 +60,7 @@ class UserResource extends JsonResource
                 'name' => $this->role->name,
             ] : null,
             'role_id' => $this->role_id,
+            'store_ids' => $storeIds,
             'is_active' => (bool) $this->is_active,
             'permissions' => $permissions,
         ];
