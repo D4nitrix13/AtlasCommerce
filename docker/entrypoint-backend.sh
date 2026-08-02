@@ -35,12 +35,14 @@ php artisan migrate --force
 echo "[entrypoint] Corriendo seeders base..."
 php artisan db:seed --force
 
-# Si hay archivo de tenants en /tmp, correr el bootstrap.
-if [ -f /tmp/tenants.json ]; then
-    echo "[entrypoint] Corriendo tenants:bootstrap con /tmp/tenants.json..."
-    php artisan tenants:bootstrap /tmp/tenants.json
+# Si hay archivo de tenants declarado, correr el bootstrap.
+# TENANTS_SEED_FILE es la ruta al JSON dentro del container
+# (ej: /tmp/seeds/panda.json).
+if [ -n "${TENANTS_SEED_FILE}" ] && [ -f "${TENANTS_SEED_FILE}" ]; then
+    echo "[entrypoint] Corriendo tenants:bootstrap con ${TENANTS_SEED_FILE}..."
+    php artisan tenants:bootstrap "${TENANTS_SEED_FILE}"
 else
-    echo "[entrypoint] No se encontró /tmp/tenants.json, saltando tenants:bootstrap."
+    echo "[entrypoint] No se encontró TENANTS_SEED_FILE, saltando tenants:bootstrap."
 fi
 
 # Arrancar PHP-FPM.

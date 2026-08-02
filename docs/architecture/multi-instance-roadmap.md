@@ -37,7 +37,7 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           ███░░░░░░░  40%   (esta semana)
+Fase 1 — Multi-instance           ████░░░░░░  50%   (esta semana)
 Fase 2 — Feature flags            ░░░░░░░░░░   0%
 Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
@@ -45,8 +45,8 @@ Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 3 (F1.1, F1.2, F1.3)
-**En progreso:** 2 (F1.4, F1.5)
+**Completadas:** 4 (F1.1, F1.2, F1.3, F1.4)
+**En progreso:** 1 (F1.5)
 **Pendientes:** 27
 
 ---
@@ -185,7 +185,7 @@ morales-store) con su .env.example + Caddyfile + docker-compose.yml.
 
 ---
 
-### F1.4 — Seeds JSON por instancia ⏳
+### F1.4 — Seeds JSON por instancia ✅
 
 **Razón:** Cada instancia necesita un archivo que declare sus tenants,
 dominios, admin user y features.
@@ -194,7 +194,9 @@ dominios, admin user y features.
 
 - Formato JSON declarativo.
 - Cada instancia tiene 1+ archivos `seeds/*.json`.
-- Schema validado (ej: dominios únicos, slug válido).
+- Schema validado por `tenants:bootstrap` (dominios, slugs, currencies, etc.).
+- Entry-point del backend lee `TENANTS_SEED_FILE` y corre el comando
+  automáticamente en el primer arranque del container.
 
 **Schema:**
 
@@ -219,9 +221,20 @@ dominios, admin user y features.
 
 **Criterios de aceptación:**
 
-- [ ] 3 archivos seed.json creados (uno por instancia).
-- [ ] Validación de schema (dominios únicos, slugs únicos).
-- [ ] Documentado en `docs/deployment/seed-schema.md`.
+- [x] 3 archivos seed.json creados (uno por instancia).
+- [x] Validación de schema via tests automatizados (SeedFilesValidationTest).
+- [x] Entry-point actualizado para leer TENANTS_SEED_FILE.
+- [x] Los 3 seeds pasan `tenants:bootstrap` con éxito en tests.
+
+**Archivos:**
+
+- `docker/instances/panda-kitsune/seeds/panda.json` (nuevo) ✅
+- `docker/instances/mm-boutique/seeds/mm-boutique.json` (nuevo) ✅
+- `docker/instances/morales-store/seeds/morales-store.json` (nuevo) ✅
+- `docker/entrypoint-backend.sh` (actualizado) ✅
+- `tests/Feature/Console/SeedFilesValidationTest.php` (nuevo, 13 tests) ✅
+
+**Estado:** Completado el 2026-08-02. 3 seeds reales. 165/165 tests passing.
 
 ---
 

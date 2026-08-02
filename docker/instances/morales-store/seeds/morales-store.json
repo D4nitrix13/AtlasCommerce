@@ -1,0 +1,21 @@
+{
+  "tenants": [
+    {
+      "slug": "morales-store",
+      "name": "Morales Store",
+      "currency": "USD",
+      "domains": [
+        "morales-store.com",
+        "www.morales-store.com"
+      ],
+      "admin_domains": [
+        "admin.morales-store.com"
+      ]
+    }
+  ],
+  "admin_user": {
+    "email": "admin@morales-store.com",
+    "password_env": "MORALES_ADMIN_PASSWORD"
+  },
+  "features": {}
+}

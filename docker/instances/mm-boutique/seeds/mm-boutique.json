@@ -1,0 +1,21 @@
+{
+  "tenants": [
+    {
+      "slug": "mm-boutique",
+      "name": "MM Boutique",
+      "currency": "USD",
+      "domains": [
+        "mm-boutique.com",
+        "www.mm-boutique.com"
+      ],
+      "admin_domains": [
+        "admin.mm-boutique.com"
+      ]
+    }
+  ],
+  "admin_user": {
+    "email": "admin@mm-boutique.com",
+    "password_env": "MM_ADMIN_PASSWORD"
+  },
+  "features": {}
+}
