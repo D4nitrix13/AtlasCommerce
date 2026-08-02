@@ -1,0 +1,134 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-quality:
+    name: Backend (Laravel)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: ecommerce_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pgsql, intl, zip, gd
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: composer install --no-progress --no-interaction --prefer-dist
+
+      - name: Prepare Environment
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Pint — Code Style (dry-run)
+        working-directory: backend
+        run: vendor/bin/pint --test --no-interaction
+
+      - name: PHPStan — Static Analysis
+        working-directory: backend
+        run: composer analyse --no-interaction
+
+      - name: Tests (PHPUnit)
+        working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: ecommerce_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          APP_ENV: testing
+        run: composer test --no-interaction
+
+  frontend-quality:
+    name: Frontend (Astro)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+
+      - name: Cache pnpm
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: pnpm-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Astro Check (TypeScript)
+        working-directory: frontend
+        run: pnpm run astro -- check
+
+      - name: Prettier — Format Check
+        working-directory: frontend
+        run: pnpm exec prettier --check 'src/**/*.{ts,tsx,astro,css,md}'
+
+  docs-quality:
+    name: Docs (Markdown)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli@0.42
+
+      - name: Lint Markdown
+        run: markdownlint '**/*.md' --ignore node_modules --ignore vendor --ignore dist --ignore .astro

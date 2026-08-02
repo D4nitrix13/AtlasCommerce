@@ -2,12 +2,13 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
-    level: 5
+    level: 7
 
     paths:
         - app
         - routes
         - database
+        - config
 
     excludePaths:
         - vendor
@@ -16,3 +17,16 @@ parameters:
         - _ide_helper.php
         - _ide_helper_models.php
         - .phpstorm.meta.php
+        - database/seeders
+        - database/factories
+        - database/migrations
+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # Factories y seeders están excluidos del análisis estricto
+        - identifier: missingType.generics
+          paths:
+              - app/Models
+        # Modelos de Eloquent: las relaciones son inferidas por Larastan
+        - identifier: missingType.iterableValue

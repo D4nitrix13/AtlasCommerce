@@ -48,8 +48,19 @@
         "format": [
             "./vendor/bin/pint"
         ],
+        "lint": [
+            "./vendor/bin/pint --test"
+        ],
+        "lint:dirty": [
+            "./vendor/bin/pint --test --dirty"
+        ],
         "analyse": [
             "./vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
+        ],
+        "precommit": [
+            "@lint:dirty",
+            "@analyse",
+            "@test"
         ],
         "setup": [
             "composer install",
