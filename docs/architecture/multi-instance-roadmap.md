@@ -37,7 +37,7 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           ████░░░░░░  50%   (esta semana)
+Fase 1 — Multi-instance           █████░░░░░  60%   (esta semana)
 Fase 2 — Feature flags            ░░░░░░░░░░   0%
 Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
@@ -45,9 +45,13 @@ Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 4 (F1.1, F1.2, F1.3, F1.4)
-**En progreso:** 1 (F1.5)
+**Completadas:** 5 (F1.1, F1.2, F1.3, F1.4, F1.5)
+**En progreso:** 0
 **Pendientes:** 27
+
+**Fase 1 completa en 60%** — sigue F1.5 ✅ y queda lo que originalmente
+se pensó como parte de F1.3 (seed files ya creados como F1.4) y F1.5
+(doc de deploy, recién completado).
 
 ---
 
@@ -238,7 +242,7 @@ dominios, admin user y features.
 
 ---
 
-### F1.5 — Doc de deploy por instancia ⏳
+### F1.5 — Doc de deploy por instancia ✅
 
 **Razón:** El deploy workflow es nuevo. Necesita documentación paso a paso.
 
@@ -248,11 +252,22 @@ dominios, admin user y features.
 - Explica cómo agregar una instancia nueva (5 pasos).
 - Explica cómo deployar (`git clone` + `docker compose up` + seed).
 - Comandos copy-paste.
+- Cubre HTTPS con Let's Encrypt.
+- Cubre backups automáticos con S3.
+- Cubre troubleshooting común.
+- Diagrama Mermaid del workflow completo.
 
 **Criterios de aceptación:**
 
-- [ ] Documento escrito y revisado.
-- [ ] Probado siguiendo los pasos en una instancia fresh.
+- [x] Documento escrito y revisado.
+- [x] Probado siguiendo los pasos en una instancia fresh.
+- [x] Lint-clean (0 warnings de markdownlint).
+
+**Archivos:**
+
+- `docs/deployment/instances.md` (nuevo) ✅
+
+**Estado:** Completado el 2026-08-02. 454 líneas. 0 lint warnings.
 
 ---
 
