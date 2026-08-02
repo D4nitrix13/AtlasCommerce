@@ -1,0 +1,35 @@
+# ============================================================
+# Caddyfile — Ecommerce local (multi-tienda)
+# ============================================================
+# Rutas:
+#   pandas-estampados.com, www.pandas-estampados.com, kitsune.com, www.kitsune.com
+#     -> Astro frontend (puerto 4321)
+#   admin.pandas-estampados.com, admin.kitsune.com
+#     -> Astro frontend (que reescribe internamente a /admin/...)
+#   /api/* en cualquier dominio
+#     -> Laravel backend (puerto 8000)
+# ============================================================
+
+{
+    auto_https off
+    admin off
+}
+
+http:// {
+    @hostnames host pandas-estampados.com www.pandas-estampados.com admin.pandas-estampados.com kitsune.com www.kitsune.com admin.kitsune.com
+
+    handle @hostnames {
+        @api path /api/*
+        handle @api {
+            reverse_proxy 127.0.0.1:8000
+        }
+
+        handle {
+            reverse_proxy 127.0.0.1:4321
+        }
+    }
+
+    handle {
+        respond "Not found" 404
+    }
+}
