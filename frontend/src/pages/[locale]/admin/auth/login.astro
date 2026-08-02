@@ -9,6 +9,11 @@ const locale = getServerLocale(Astro.locals.locale);
 
 const brand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
 
+// Tab inicial desde la URL: ?tab=register abre directo en Registrarse.
+// Si no está presente o es cualquier otro valor, defaultea a "login".
+const initialTab =
+  Astro.url.searchParams.get("tab") === "register" ? "register" : "login";
+
 const hasToken =
   typeof Astro.cookies !== "undefined" && Astro.cookies.has("auth.token");
 const currentYear = new Date().getFullYear();
@@ -88,7 +93,7 @@ const currentYear = new Date().getFullYear();
             </span>
           </header>
 
-          <LoginForm client:load brand={brand} />
+          <LoginForm client:load brand={brand} initialTab={initialTab} />
         </div>
       </main>
     </div>
