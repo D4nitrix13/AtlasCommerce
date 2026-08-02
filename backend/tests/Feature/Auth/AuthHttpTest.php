@@ -35,7 +35,7 @@ final class AuthHttpTest extends TestCase
 
         $this->user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => Hash::make('secret-password'),
+            'password' => Hash::make(value: 'secret-password'),
             'is_active' => true,
             'role_id' => $this->adminRole->id,
         ]);
@@ -190,7 +190,7 @@ final class AuthHttpTest extends TestCase
 
         $staffUser = User::factory()->create([
             'email' => 'staff@example.com',
-            'password' => Hash::make('secret-password'),
+            'password' => Hash::make(value: 'secret-password'),
             'is_active' => true,
             'role_id' => $staffRole->id,
         ]);
@@ -202,5 +202,65 @@ final class AuthHttpTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('user.role.slug', 'staff');
         $response->assertJsonPath('user.permissions', ['shipping.shipments.ship']);
+    }
+
+    #[Test]
+    public function register_creates_user_and_returns_token(): void
+    {
+        $response = $this->postJson('/api/auth/register', [
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+            'email' => 'ada@example.com',
+            'password' => 'secure-password',
+            'device_name' => 'jest-test',
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonStructure(['token', 'user' => ['id', 'email', 'full_name', 'role']]);
+        $response->assertJsonPath('user.email', 'ada@example.com');
+        $response->assertJsonPath('user.full_name', 'Ada Lovelace');
+        $this->assertNotEmpty($response->json('token'));
+    }
+
+    #[Test]
+    public function register_with_duplicate_email_returns_422(): void
+    {
+        User::factory()->create([
+            'email' => 'taken@example.com',
+            'password' => Hash::make(value: 'existing-password'),
+        ]);
+
+        $response = $this->postJson('/api/auth/register', [
+            'first_name' => 'New',
+            'last_name' => 'User',
+            'email' => 'taken@example.com',
+            'password' => 'new-password',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['email']);
+    }
+
+    #[Test]
+    public function register_validates_required_fields(): void
+    {
+        $response = $this->postJson('/api/auth/register', []);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['first_name', 'last_name', 'email', 'password']);
+    }
+
+    #[Test]
+    public function register_validates_password_min_length(): void
+    {
+        $response = $this->postJson('/api/auth/register', [
+            'first_name' => 'A',
+            'last_name' => 'B',
+            'email' => 'short@example.com',
+            'password' => 'short',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['password']);
     }
 }
