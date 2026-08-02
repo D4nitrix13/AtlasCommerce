@@ -1,0 +1,121 @@
+# Docker Compose — Instancia Panda + Kitsune
+# Sirve las tiendas de Panda Estampados y Kitsune Store en la misma
+# instancia. Ambas comparten base de datos y deployment.
+
+services:
+  app:
+    build:
+      context: ../../..
+      dockerfile: docker/Dockerfile.backend
+    container_name: pandakitsune-app
+    restart: unless-stopped
+    volumes:
+      - ./seeds:/tmp/seeds:ro
+      - storage-app:/var/www/html/storage
+      - bootstrap-app:/var/www/html/bootstrap/cache
+    environment:
+      - INSTANCE_NAME=${INSTANCE_NAME}
+      - APP_NAME=${APP_NAME}
+      - APP_ENV=${APP_ENV}
+      - APP_DEBUG=${APP_DEBUG}
+      - APP_KEY=${APP_KEY}
+      - APP_URL=${APP_URL}
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SESSION_DRIVER=${SESSION_DRIVER}
+      - SESSION_LIFETIME=${SESSION_LIFETIME}
+      - CACHE_STORE=${CACHE_STORE}
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION}
+      - FILESYSTEM_DISK=${FILESYSTEM_DISK}
+      - SANCTUM_STATEFUL_DOMAINS=${SANCTUM_STATEFUL_DOMAINS}
+      - SESSION_DOMAIN=${SESSION_DOMAIN}
+      - PANDA_ADMIN_PASSWORD=${PANDA_ADMIN_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: ../../..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: pandakitsune-frontend
+    restart: unless-stopped
+    environment:
+      - PUBLIC_API_URL=${PUBLIC_API_URL}
+      - PUBLIC_APP_NAME=${PUBLIC_APP_NAME}
+      - HOST=0.0.0.0
+      - PORT=4321
+      - NODE_ENV=production
+    depends_on:
+      - app
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2
+    container_name: pandakitsune-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+      - frontend
+    networks:
+      - internal
+
+  db:
+    image: postgis/postgis:18-3.6
+    container_name: pandakitsune-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql
+      - ../../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: pandakitsune-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:
+  storage-app:
+  bootstrap-app:

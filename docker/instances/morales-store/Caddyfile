@@ -1,0 +1,27 @@
+# Caddyfile — Instancia Morales Store
+# Reverse proxy para la tienda de la tía.
+# Una sola tienda en esta instancia.
+
+{
+    auto_https off
+    admin off
+}
+
+http:// {
+    @hostnames host morales-store.com www.morales-store.com \
+                       admin.morales-store.com
+
+    handle @hostnames {
+        @api path /api/*
+        handle @api {
+            reverse_proxy app:8000
+        }
+        handle {
+            reverse_proxy frontend:4321
+        }
+    }
+
+    handle {
+        respond "Not found" 404
+    }
+}

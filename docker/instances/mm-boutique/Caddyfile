@@ -1,0 +1,27 @@
+# Caddyfile — Instancia MM Boutique
+# Reverse proxy para la tienda de la mamá.
+# Una sola tienda en esta instancia.
+
+{
+    auto_https off
+    admin off
+}
+
+http:// {
+    @hostnames host mm-boutique.com www.mm-boutique.com \
+                       admin.mm-boutique.com
+
+    handle @hostnames {
+        @api path /api/*
+        handle @api {
+            reverse_proxy app:8000
+        }
+        handle {
+            reverse_proxy frontend:4321
+        }
+    }
+
+    handle {
+        respond "Not found" 404
+    }
+}

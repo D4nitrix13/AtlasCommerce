@@ -37,7 +37,7 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           ██░░░░░░░░  30%   (esta semana)
+Fase 1 — Multi-instance           ███░░░░░░░  40%   (esta semana)
 Fase 2 — Feature flags            ░░░░░░░░░░   0%
 Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
@@ -45,8 +45,8 @@ Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 2 (F1.1, F1.2)
-**En progreso:** 3 (F1.3, F1.4, F1.5)
+**Completadas:** 3 (F1.1, F1.2, F1.3)
+**En progreso:** 2 (F1.4, F1.5)
 **Pendientes:** 27
 
 ---
@@ -134,7 +134,7 @@ Esto no sirve cuando Morales Store deploya y no quiere esas tiendas.
 
 ---
 
-### F1.3 — Estructura `docker/instances/` ⏳
+### F1.3 — Estructura `docker/instances/` ✅
 
 **Razón:** Cada instancia necesita su propia configuración (Caddyfile,
 `.env`, seeds, docker-compose). Estructura estándar en el repo.
@@ -173,11 +173,15 @@ docker/instances/
 
 **Criterios de aceptación:**
 
-- [ ] Las 3 instancias creadas con sus archivos base.
-- [ ] Cada `docker-compose.yml` referencia `app` con env vars de la instancia.
-- [ ] Cada Caddyfile apunta a los dominios correctos.
+- [x] Las 3 instancias creadas con sus archivos base.
+- [x] Cada `docker-compose.yml` referencia `app` con env vars de la instancia.
+- [x] Cada Caddyfile apunta a los dominios correctos.
 
-**Archivos:** Directorio nuevo.
+**Archivos:** Directorio nuevo. ✅
+
+**Estado:** Completado el 2026-08-02. 3 instancias (panda-kitsune, mm-boutique,
+morales-store) con su .env.example + Caddyfile + docker-compose.yml.
+2 Dockerfiles (backend, frontend) + entrypoint-backend.sh. README índice.
 
 ---
 

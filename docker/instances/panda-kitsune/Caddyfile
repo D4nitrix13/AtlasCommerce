@@ -1,0 +1,29 @@
+# Caddyfile — Instancia Panda + Kitsune
+# Reverse proxy para ambas tiendas del cliente.
+# Las dos tiendas viven en la misma instancia (mismo deploy).
+
+{
+    auto_https off
+    admin off
+}
+
+http:// {
+    @hostnames host pandas-estampados.com www.pandas-estampados.com \
+                       admin.pandas-estampados.com \
+                       kitsune.com www.kitsune.com \
+                       admin.kitsune.com
+
+    handle @hostnames {
+        @api path /api/*
+        handle @api {
+            reverse_proxy app:8000
+        }
+        handle {
+            reverse_proxy frontend:4321
+        }
+    }
+
+    handle {
+        respond "Not found" 404
+    }
+}
