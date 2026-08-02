@@ -4,6 +4,12 @@
 
 > "Este código lo va a leer otra persona cansada, con prisa y sin contexto. ¿Lo entenderá rápido?"
 
+> **Este archivo es la convención específica del frontend.** Para los principios
+> transversales (SOLID, DRY, KISS, tests, seguridad, workflow de PR), ver
+> [`/CONTRIBUTING.md`](../CONTRIBUTING.md) en la raíz del repo. Las reglas de
+> este archivo **no contradicen** las de CONTRIBUTING.md — las complementan y
+> detallan. Si hay conflicto, manda CONTRIBUTING.md.
+
 ---
 
 ## 1. Tamaño de archivos
