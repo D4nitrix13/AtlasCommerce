@@ -32,7 +32,10 @@ interface TenantContext {
 const ADMIN_HOST_PATTERNS = [
   /^admin\.(localhost|127\.0\.0\.1)(?::\d+)?$/i,
   /^admin\.([a-z0-9-]+)\.test$/i,
-  /^admin\.([a-z0-9-]+\.[a-z]{2,})$/i,
+  // Captura solo el primer label después de `admin.`.
+  //   admin.kitsune.com             -> ["kitsune"]
+  //   admin.pandas-estampados.com   -> ["pandas-estampados"]
+  /^admin\.([a-z0-9-]+)(?:\.[a-z0-9.-]+)?$/i,
 ];
 
 function detectTenantFromHost(host: string): TenantContext {
@@ -125,26 +128,29 @@ function mapAdminPathToInternal(pathname: string, locale: Locale): string {
 
   const cleanPath = pathname === "/" ? "" : pathname;
 
-  // Mapeo explícito de paths limpios a paths internos.
+  // Mapeo explícito de paths limpios a paths relativos al segmento
+  // /admin/. El result final es `/${locale}/admin${mapped}`.
+  //   `/login`     -> `/es/admin/auth/login` (page existe en src/pages/[locale]/admin/auth/login.astro)
+  //   `/dashboard` -> `/es/admin/dashboard`
   // Cualquier path no listado pasa tal cual (será 404 si no existe).
   const pathMap: Record<string, string> = {
-    "/login": "/admin/auth/login",
-    "/dashboard": "/admin/dashboard",
-    "/users": "/admin/users",
-    "/sales": "/admin/sales",
-    "/purchases": "/admin/purchases",
-    "/inventory": "/admin/inventory",
-    "/catalog": "/admin/catalog",
-    "/customers": "/admin/customers",
-    "/marketing": "/admin/marketing",
-    "/shipping": "/admin/shipping",
-    "/support": "/admin/support",
-    "/settings": "/admin/settings",
-    "/reports": "/admin/reports",
-    "/system": "/admin/system",
-    "/notifications": "/admin/system/notifications",
-    "/sales/orders": "/admin/sales/orders",
-    "/sales/invoices": "/admin/sales/invoices",
+    "/login": "/auth/login",
+    "/dashboard": "/dashboard",
+    "/users": "/users",
+    "/sales": "/sales",
+    "/purchases": "/purchases",
+    "/inventory": "/inventory",
+    "/catalog": "/catalog",
+    "/customers": "/customers",
+    "/marketing": "/marketing",
+    "/shipping": "/shipping",
+    "/support": "/support",
+    "/settings": "/settings",
+    "/reports": "/reports",
+    "/system": "/system",
+    "/notifications": "/system/notifications",
+    "/sales/orders": "/sales/orders",
+    "/sales/invoices": "/sales/invoices",
   };
 
   const mapped = pathMap[cleanPath] ?? cleanPath;

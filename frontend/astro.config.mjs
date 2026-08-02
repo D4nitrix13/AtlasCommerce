@@ -8,6 +8,21 @@ import node from "@astrojs/node";
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      // Hosts permitidos para dev con Caddy local + subdominios.
+      // En prod cada subdominio resuelve via DNS real, no hace
+      // falta esta config.
+      allowedHosts: [
+        "pandas-estampados.com",
+        "www.pandas-estampados.com",
+        "admin.pandas-estampados.com",
+        "kitsune.com",
+        "www.kitsune.com",
+        "admin.kitsune.com",
+        "localhost",
+        "admin.localhost",
+      ],
+    },
   },
 
   integrations: [react()],
