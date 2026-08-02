@@ -348,4 +348,146 @@ final class BootstrapTenantCommandTest extends TestCase
 
         putenv('MORALES_PASSWORD');
     }
+
+    #[Test]
+    public function it_creates_theme_from_json_when_provided(): void
+    {
+        $this->writeConfig([
+            'tenants' => [
+                [
+                    'slug' => 'panda-estampados',
+                    'name' => 'Panda Estampados',
+                    'currency' => 'NIO',
+                    'domains' => ['pandas-estampados.com'],
+                    'theme' => [
+                        'short_name' => 'Panda',
+                        'logo_path' => '/images/panda/logo.webp',
+                        'accent_color' => '#DC2626',
+                        'accent_hover_color' => '#B91C1C',
+                        'support_email' => 'support@panda-estampados.test',
+                    ],
+                ],
+            ],
+            'admin_user' => [
+                'email' => 'admin@panda-estampados.test',
+                'password_env' => 'PANDA_PASSWORD',
+            ],
+        ]);
+
+        putenv('PANDA_PASSWORD=test');
+
+        $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('store_themes', [
+            'short_name' => 'Panda',
+            'logo_path' => '/images/panda/logo.webp',
+            'accent_color' => '#DC2626',
+            'accent_hover_color' => '#B91C1C',
+            'support_email' => 'support@panda-estampados.test',
+        ]);
+    }
+
+    #[Test]
+    public function it_skips_theme_when_not_provided_in_json(): void
+    {
+        $this->writeConfig([
+            'tenants' => [
+                [
+                    'slug' => 'no-theme',
+                    'name' => 'No Theme',
+                    'currency' => 'USD',
+                    'domains' => ['no-theme.com'],
+                ],
+            ],
+            'admin_user' => [
+                'email' => 'admin@no-theme.com',
+                'password_env' => 'NO_THEME_PASSWORD',
+            ],
+        ]);
+
+        putenv('NO_THEME_PASSWORD=test');
+
+        $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
+            ->assertSuccessful();
+
+        // Sin theme en el JSON, no se crea StoreTheme.
+        $this->assertDatabaseCount('store_themes', 0);
+
+        putenv('NO_THEME_PASSWORD');
+    }
+
+    #[Test]
+    public function it_creates_one_theme_per_tenant_for_panda_kitsune(): void
+    {
+        $this->writeConfig([
+            'tenants' => [
+                [
+                    'slug' => 'panda-estampados',
+                    'name' => 'Panda Estampados',
+                    'currency' => 'NIO',
+                    'domains' => ['pandas-estampados.com'],
+                    'theme' => [
+                        'short_name' => 'Panda',
+                        'accent_color' => '#DC2626',
+                    ],
+                ],
+                [
+                    'slug' => 'kitsune',
+                    'name' => 'Kitsune Store',
+                    'currency' => 'USD',
+                    'domains' => ['kitsune.com'],
+                    'theme' => [
+                        'short_name' => 'Kitsune',
+                        'accent_color' => '#7C3AED',
+                    ],
+                ],
+            ],
+            'admin_user' => [
+                'email' => 'admin@pandas-estampados.test',
+                'password_env' => 'PK_PASSWORD',
+            ],
+        ]);
+
+        putenv('PK_PASSWORD=test');
+
+        $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
+            ->assertSuccessful();
+
+        $this->assertDatabaseCount('store_themes', 2);
+        $this->assertDatabaseHas('store_themes', ['short_name' => 'Panda', 'accent_color' => '#DC2626']);
+        $this->assertDatabaseHas('store_themes', ['short_name' => 'Kitsune', 'accent_color' => '#7C3AED']);
+    }
+
+    #[Test]
+    public function theme_is_idempotent_on_rerun(): void
+    {
+        $this->writeConfig([
+            'tenants' => [
+                [
+                    'slug' => 'panda-estampados',
+                    'name' => 'Panda Estampados',
+                    'currency' => 'NIO',
+                    'domains' => ['pandas-estampados.com'],
+                    'theme' => [
+                        'short_name' => 'Panda',
+                        'accent_color' => '#DC2626',
+                    ],
+                ],
+            ],
+            'admin_user' => [
+                'email' => 'admin@panda-estampados.test',
+                'password_env' => 'PANDA_PASSWORD',
+            ],
+        ]);
+
+        putenv('PANDA_PASSWORD=test');
+
+        // Correr 2 veces.
+        $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])->assertSuccessful();
+        $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])->assertSuccessful();
+
+        // Un solo theme, no duplicado.
+        $this->assertDatabaseCount('store_themes', 1);
+    }
 }

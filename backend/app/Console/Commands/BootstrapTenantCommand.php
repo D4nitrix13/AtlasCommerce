@@ -10,6 +10,7 @@ use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
 use App\Models\Stores\StoreFeature;
+use App\Models\Stores\StoreTheme;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -126,6 +127,18 @@ class BootstrapTenantCommand extends Command
             'tenants.*.domains.*' => ['required', 'string', 'max:255'],
             'tenants.*.admin_domains' => ['sometimes', 'array'],
             'tenants.*.admin_domains.*' => ['required_with:tenants.*.admin_domains', 'string', 'max:255'],
+            'tenants.*.theme' => ['sometimes', 'array'],
+            'tenants.*.theme.short_name' => ['required_with:tenants.*.theme', 'nullable', 'string', 'max:100'],
+            'tenants.*.theme.logo_path' => ['nullable', 'string', 'max:500'],
+            'tenants.*.theme.login_logo_path' => ['nullable', 'string', 'max:500'],
+            'tenants.*.theme.favicon_path' => ['nullable', 'string', 'max:500'],
+            'tenants.*.theme.accent_color' => ['nullable', 'string', 'max:9'],
+            'tenants.*.theme.accent_hover_color' => ['nullable', 'string', 'max:9'],
+            'tenants.*.theme.primary_color' => ['nullable', 'string', 'max:9'],
+            'tenants.*.theme.support_email' => ['nullable', 'email', 'max:255'],
+            'tenants.*.theme.phone' => ['nullable', 'string', 'max:30'],
+            'tenants.*.theme.whatsapp' => ['nullable', 'string', 'max:30'],
+            'tenants.*.theme.tokens' => ['nullable', 'array'],
             'admin_user' => ['required', 'array'],
             'admin_user.email' => ['required', 'email'],
             'admin_user.password_env' => ['required', 'string', 'max:255'],
@@ -147,6 +160,7 @@ class BootstrapTenantCommand extends Command
         try {
             $this->ensureBaseCurrencies();
             $storeIds = $this->bootstrapTenants(tenants: $config['tenants']);
+            $this->bootstrapThemes(tenants: $config['tenants']);
             $this->bootstrapFeatures(
                 storeIds: $storeIds,
                 features: $config['features'] ?? [],
@@ -307,6 +321,50 @@ class BootstrapTenantCommand extends Command
         $user->stores()->sync(ids: $storeIds);
 
         $this->line("  Admin user: {$user->email} (id={$user->id}, ".count(value: $storeIds).' tiendas)');
+    }
+
+    /**
+     * Crea o actualiza el theme visual de cada tienda.
+     *
+     * El JSON declara `tenants.*.theme: { short_name, logo_path, ... }`.
+     * Si el tenant no tiene bloque `theme`, se omite (el store queda
+     * sin theme en DB y el endpoint devuelve defaults).
+     *
+     * Idempotente: re-correr actualiza el theme via `updateOrCreate`.
+     *
+     * @param  array<int, array<string, mixed>>  $tenants
+     */
+    private function bootstrapThemes(array $tenants): void
+    {
+        foreach ($tenants as $tenantConfig) {
+            $theme = $tenantConfig['theme'] ?? null;
+            if ($theme === null || ! is_array($theme)) {
+                continue;
+            }
+
+            $store = Store::query()
+                ->where(column: 'slug', operator: '=', value: $tenantConfig['slug'])
+                ->firstOrFail();
+
+            StoreTheme::query()->updateOrCreate(
+                attributes: ['store_id' => $store->id],
+                values: [
+                    'short_name' => $theme['short_name'] ?? null,
+                    'logo_path' => $theme['logo_path'] ?? null,
+                    'login_logo_path' => $theme['login_logo_path'] ?? null,
+                    'favicon_path' => $theme['favicon_path'] ?? null,
+                    'accent_color' => $theme['accent_color'] ?? null,
+                    'accent_hover_color' => $theme['accent_hover_color'] ?? null,
+                    'primary_color' => $theme['primary_color'] ?? null,
+                    'support_email' => $theme['support_email'] ?? null,
+                    'phone' => $theme['phone'] ?? null,
+                    'whatsapp' => $theme['whatsapp'] ?? null,
+                    'tokens' => $theme['tokens'] ?? null,
+                ],
+            );
+
+            $this->line("    Theme: {$store->slug} configurado");
+        }
     }
 
     /**

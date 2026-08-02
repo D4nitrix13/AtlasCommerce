@@ -39,17 +39,17 @@ familiares son independientes en servers separados.
 ```txt
 Fase 1 — Multi-instance           █████░░░░░  60%   (completa)
 Fase 2 — Feature flags            ██████░░░  100%   (completa)
-Fase 3 — Theme system en DB       ████░░░░░░  70%   (backend listo, falta frontend)
+Fase 3 — Theme system en DB       ██████░░░  85%   (backend completo, frontend completo, falta admin UI)
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
 Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 15 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.3, F3.7)
+**Completadas:** 16 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.5, F3.7)
 **En progreso:** 0
-**Pendientes:** 17
+**Pendientes:** 16
 
-**Fase 3 al 70%** (backend completo, falta frontend + admin UI).
+**Fase 3 al 85%** (backend y frontend completos, falta admin UI).
 
 ---
 
@@ -467,15 +467,20 @@ cada vez.
 
 ---
 
-### F3.5 — Migrar `STORE_BRANDS` a DB ⏳
+### F3.5 — Migrar `STORE_BRANDS` a DB ✅
 
 **Razón:** Mover el archivo `src/config/stores.ts` a la tabla `store_themes`.
 
-**Criterios de aceptación pendientes:**
+**Criterios de aceptación:**
 
-- [ ] Seed inicial crea el theme Panda desde el config actual.
-- [ ] Seed inicial crea el theme Kitsune desde el config actual.
-- [ ] Crear MM Boutique y Morales Store como themes nuevos en DB.
+- [x] Seed inicial crea el theme Panda desde el config actual.
+- [x] Seed inicial crea el theme Kitsune desde el config actual.
+- [x] Crear MM Boutique y Morales Store como themes nuevos en DB.
+- [x] `tenants:bootstrap` lee `tenants.*.theme` del JSON.
+- [x] Tests del bootstrap con theme (4 tests nuevos).
+
+**Pendiente:**
+
 - [ ] `src/config/stores.ts` queda deprecated o se elimina.
 
 ---
