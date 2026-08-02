@@ -27,7 +27,8 @@ Inventario de tareas priorizadas para el backend de Panda Estampados / Kitsune S
 
 - 88 migraciones con foreign keys, índices y soft deletes
 - Sistema 2FA completo (Email OTP + Recovery Codes)
-- Services: EmailOtpService, RecoveryCodeService, CartLineKeyService, DesignSnapshotService, StoreContextService
+- Services: EmailOtpService, RecoveryCodeService,
+  CartLineKeyService, DesignSnapshotService, StoreContextService
 - Store seeding (Panda Estampados + Kitsune)
 - Design assets seeding (fonts + graphics)
 - Middleware ResolveStoreFromDomain

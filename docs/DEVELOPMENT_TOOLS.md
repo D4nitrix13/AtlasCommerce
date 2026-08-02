@@ -113,8 +113,8 @@ seguros, sin abrir puertos directamente en el router.
 
 ### Enlaces de cloudflared
 
-- **GitHub:** [cloudflare/cloudflared](https://github.com/cloudflare/cloudflared "cloudflare/cloudflared")
-- **Documentación:** [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/ "Cloudflare Tunnel")
+- **GitHub:** [cloudflare/cloudflared][cloudflared]
+- **Documentación:** [Cloudflare Tunnel][cloudflare-tunnel]
 
 ### Uso de cloudflared en el proyecto
 
@@ -206,8 +206,8 @@ gestionar flujos de colaboración sin salir de la terminal.
 
 ### Enlaces de GitHub CLI
 
-- **GitHub:** [cli/cli](https://github.com/cli/cli "cli/cli")
-- **Documentación:** [GitHub CLI Manual](https://cli.github.com/manual/ "GitHub CLI Manual")
+- **GitHub:** [cli/cli][gh-cli]
+- **Documentación:** [GitHub CLI Manual][gh-cli-manual]
 
 ### Uso de GitHub CLI en el proyecto
 
@@ -519,3 +519,8 @@ Antes de guardar cambios relacionados con herramientas, verifica:
 [ ] No se documentan funcionalidades pendientes como implementadas.
 [ ] No se incluyen tokens, claves API ni credenciales.
 ```
+
+[cloudflared]: https://github.com/cloudflare/cloudflared "cloudflare/cloudflared"
+[cloudflare-tunnel]: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/ "Cloudflare Tunnel"
+[gh-cli]: https://github.com/cli/cli "cli/cli"
+[gh-cli-manual]: https://cli.github.com/manual/ "GitHub CLI Manual"

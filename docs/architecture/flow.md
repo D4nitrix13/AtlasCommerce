@@ -1,7 +1,8 @@
 # Flujo Multi-Tienda — Arquitectura Final
 
-> [!IMPORTANT] Última actualización: 2027-08-01
-> Stack: Docker / Kubernetes / Caddy / Laravel 13 / Astro 7 / PostgreSQL 18 / Redis / FTP
+> Última actualización: 2027-08-01
+> Stack: Docker / Kubernetes / Caddy / Laravel 13 / Astro 7 /
+> PostgreSQL 18 / Redis
 
 ---
 
@@ -118,7 +119,10 @@ sequenceDiagram
     CF-->>U: página con productos
 ```
 
-**Punto clave:** la línea `WHERE store_id=1` **no la escribió ningún developer**. La inyecta el global scope del trait `BelongsToStore`. Si olvidás el trait, Laravel no filtra y rompes el aislamiento. Por eso el `MultiTenantHttpIsolationTest` es crítico.
+**Punto clave:** la línea `WHERE store_id=1` **no la escribió ningún
+developer**. La inyecta el global scope del trait `BelongsToStore`. Si
+olvidás el trait, Laravel no filtra y rompes el aislamiento. Por eso
+el `MultiTenantHttpIsolationTest` es crítico.
 
 ---
 
@@ -161,7 +165,11 @@ sequenceDiagram
     BE-->>Admin: dashboard
 ```
 
-**Diferencia con storefront:** el admin fija el `store_id` **dos veces**: una por el dominio (`ResolveStoreFromDomain`) y otra por el usuario logueado (campo `users.store_id`). Si no coinciden, **se rechaza el request**. Esto evita que un operador de Kitsune entre a `admin.pandas-estampados.com`.
+**Diferencia con storefront:** el admin fija el `store_id` **dos
+veces**: una por el dominio (`ResolveStoreFromDomain`) y otra por el
+usuario logueado (campo `users.store_id`). Si no coinciden, **se
+rechaza el request**. Esto evita que un operador de Kitsune entre a
+`admin.pandas-estampados.com`.
 
 ---
 
@@ -224,9 +232,13 @@ flowchart LR
 ## 6. Lo que falta para llegar a producción
 
 1. **Caddyfile** con los virtualhosts para cada dominio real.
-2. **Seeder `store_domains`** cargando `pandas-estampados.com`, `admin.pandas-estampados.com`, `kitsune.com`, `admin.kitsune.com`, `www.*`, etc.
+2. **Seeder `store_domains`** cargando `pandas-estampados.com`,
+   `admin.pandas-estampados.com`, `kitsune.com`,
+   `admin.kitsune.com`, `www.*`, etc.
 3. **Campo `users.store_id`** con FK a `stores.id`.
-4. **Middleware/Policy** que valida que `users.store_id === store_context.store_id` antes de cualquier acción admin.
+4. **Middleware/Policy** que valida que
+   `users.store_id === store_context.store_id` antes de cualquier
+   acción admin.
 5. **Astro middleware** que lee el `Host` del request y expone el tenant al SSR.
 6. **HPA en K8s** para escalar `astro` y `laravel` independientemente.
 7. **Backups automatizados** de Postgres y Redis (cron + S3).
