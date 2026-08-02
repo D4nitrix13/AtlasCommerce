@@ -10,7 +10,15 @@
       ],
       "admin_domains": [
         "admin.pandas-estampados.com"
-      ]
+      ],
+      "theme": {
+        "short_name": "Panda",
+        "logo_path": "/images/stores/panda-estampados/brand/logo.webp",
+        "login_logo_path": "/images/stores/panda-estampados/brand/logo.webp",
+        "accent_color": "#DC2626",
+        "accent_hover_color": "#B91C1C",
+        "support_email": "support@panda-estampados.test"
+      }
     },
     {
       "slug": "kitsune",
@@ -22,7 +30,15 @@
       ],
       "admin_domains": [
         "admin.kitsune.com"
-      ]
+      ],
+      "theme": {
+        "short_name": "Kitsune",
+        "logo_path": "/images/stores/kitsune/brand/logo.svg",
+        "login_logo_path": "/images/stores/kitsune/brand/logo.svg",
+        "accent_color": "#7C3AED",
+        "accent_hover_color": "#6D28D9",
+        "support_email": "support@kitsune.test"
+      }
     }
   ],
   "admin_user": {
@@ -35,4 +51,5 @@
     "subscription_billing": false
   }
 }
+
 

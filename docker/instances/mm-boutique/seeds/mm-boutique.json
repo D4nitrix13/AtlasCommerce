@@ -10,7 +10,15 @@
       ],
       "admin_domains": [
         "admin.mm-boutique.com"
-      ]
+      ],
+      "theme": {
+        "short_name": "MM",
+        "logo_path": "/images/stores/mm-boutique/brand/logo.svg",
+        "login_logo_path": "/images/stores/mm-boutique/brand/logo.svg",
+        "accent_color": "#EC4899",
+        "accent_hover_color": "#DB2777",
+        "support_email": "support@mm-boutique.com"
+      }
     }
   ],
   "admin_user": {
@@ -23,4 +31,5 @@
     "subscription_billing": false
   }
 }
+
 
