@@ -40,6 +40,13 @@ const es: Translations = {
     "Estampados, sublimado y bordados sobre textiles, cerámica, vidrio y más. Trabajamos con empresas y emprendimientos que buscan calidad consistente y entregas puntuales.",
   "auth.login.brand.left.cta": "Ver catálogo",
   "auth.login.createAccount.heading": "Crea tu cuenta para empezar.",
+  "auth.login.firstName.placeholder": "Nombre",
+  "auth.login.lastName.placeholder": "Apellido",
+  "auth.login.passwordHint":
+    "Su contraseña debe tener al menos 12 caracteres, tener una letra mayúscula, una letra minúscula y un número.",
+  "auth.login.submit.create": "Crear cuenta",
+  "auth.login.marketing.optIn.label":
+    "Me gustaría recibir actualizaciones de Panda Estampados de forma ocasional sobre nuevas características, productos, ofertas especiales y eventos.",
   "auth.login.brand.left.footer": "© {year} Panda Estampados · Hecho con cuidado en Nicaragua.",
   "auth.login.alreadySignedIn": "Ya tenés una sesión activa. Redirigiendo al dashboard...",
   "auth.logout.button": "Cerrar sesión",
