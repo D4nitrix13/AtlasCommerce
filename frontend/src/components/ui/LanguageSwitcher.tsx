@@ -1,9 +1,9 @@
 import { useState, type ReactElement } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   LOCALE_FLAGS,
   LOCALE_LABELS,
   SUPPORTED_LOCALES,
-  switchLocalePath,
   useTranslations,
   type Locale,
 } from "../../i18n";
@@ -31,22 +31,12 @@ export default function LanguageSwitcher(): ReactElement {
       }}
     >
       <summary
-        className="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition hover:bg-white/10 focus:outline-none [&::-webkit-details-marker]:hidden"
+        className="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium transition hover:bg-white/10 focus:outline-none [&::-webkit-details-marker]:hidden"
         style={{ color: "inherit" }}
       >
         <span aria-hidden="true">{LOCALE_FLAGS[locale]}</span>
         <span>{LOCALE_LABELS[locale]}</span>
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          aria-hidden="true"
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        <ChevronDown size={14} strokeWidth={2.5} aria-hidden="true" />
       </summary>
 
       <ul
@@ -70,9 +60,9 @@ export default function LanguageSwitcher(): ReactElement {
             >
               <span aria-hidden="true">{LOCALE_FLAGS[candidate]}</span>
               <span>{LOCALE_LABELS[candidate]}</span>
-              <span className="ml-auto text-[10px] text-slate-500">
-                {switchLocalePath("/admin", candidate)}
-              </span>
+              {candidate === locale && (
+                <span aria-hidden="true" className="ml-auto text-[10px]">✓</span>
+              )}
             </button>
           </li>
         ))}

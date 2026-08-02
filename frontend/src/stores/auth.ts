@@ -80,6 +80,20 @@ export function isAuthenticated(): boolean {
   return state.token !== null;
 }
 
+/**
+ * Setea la sesión a partir de una respuesta de auth (login o register).
+ *
+ * Usado por el flujo de register: el endpoint /auth/register ya
+ * devuelve { token, user }, no necesitamos hacer un segundo POST
+ * a /auth/login para obtener el token. Esta función lo guarda
+ * directamente en el store + localStorage.
+ */
+export function setSession(response: LoginResponse): void {
+  state = { ...state, token: response.token, user: response.user };
+  writeTokenToStorage(response.token);
+  emit();
+}
+
 async function login(payload: LoginPayload): Promise<LoginResponse> {
   
   const response = await apiFetch<LoginResponse>("/auth/login", {
@@ -146,6 +160,7 @@ export const authStore = {
   login,
   logout,
   hydrate,
+  setSession,
   subscribe,
   getSnapshot,
 };
@@ -157,6 +172,7 @@ export function useAuth(): {
   isHydrating: boolean;
   login: (payload: LoginPayload) => Promise<LoginResponse>;
   logout: () => Promise<void>;
+  setSession: typeof setSession;
 } {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
@@ -167,5 +183,6 @@ export function useAuth(): {
     isHydrating: snapshot.isHydrating,
     login,
     logout,
+    setSession,
   };
 }

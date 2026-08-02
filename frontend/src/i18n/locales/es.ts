@@ -11,7 +11,7 @@ const es: Translations = {
 
   "auth.brand.name": "Panda Estampados",
   "auth.login.title": "Iniciar sesión",
-  "auth.login.subtitle": "Sign into your account to continue.",
+  "auth.login.subtitle": "Inicia sesión en tu cuenta para continuar.",
   "auth.login.tab.signin": "Iniciar sesión",
   "auth.login.tab.signup": "Registrarse",
   "auth.login.tab.signup.disabledHint": "Registro deshabilitado en este MVP",
@@ -39,6 +39,7 @@ const es: Translations = {
   "auth.login.brand.left.body":
     "Estampados, sublimado y bordados sobre textiles, cerámica, vidrio y más. Trabajamos con empresas y emprendimientos que buscan calidad consistente y entregas puntuales.",
   "auth.login.brand.left.cta": "Ver catálogo",
+  "auth.login.createAccount.heading": "Crea tu cuenta para empezar.",
   "auth.login.brand.left.footer": "© {year} Panda Estampados · Hecho con cuidado en Nicaragua.",
   "auth.login.alreadySignedIn": "Ya tenés una sesión activa. Redirigiendo al dashboard...",
   "auth.logout.button": "Cerrar sesión",
