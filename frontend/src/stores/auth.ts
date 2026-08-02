@@ -73,11 +73,15 @@ function emit(): void {
 }
 
 function readTokenFromStorage(): string | null {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || window.localStorage === undefined) {
     return null;
   }
 
-  return window.localStorage.getItem(TOKEN_STORAGE_KEY);
+  try {
+    return window.localStorage.getItem(TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }
 
 function writeTokenToStorage(token: string | null): void {
@@ -169,13 +173,14 @@ async function logout(): Promise<void> {
  * Llamar al boot de la app para validar que el token sigue vigente.
  */
 async function hydrate(): Promise<void> {
-  const token = state.token;
+  const token = readTokenFromStorage();
 
   if (token === null) {
+    state = { token: null, user: null, isHydrating: false };
     return;
   }
 
-  state = { ...state, isHydrating: true };
+  state = { ...state, token, isHydrating: true };
   emit();
 
   
