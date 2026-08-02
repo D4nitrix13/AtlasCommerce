@@ -55,6 +55,8 @@ export type TranslationKey =
   | "auth.login.brand.left.heading"
   | "auth.login.brand.left.body"
   | "auth.login.brand.left.cta"
+  | "auth.login.brand.left.cta"
+  | "auth.login.createAccount.heading"
   | "auth.login.brand.left.footer"
   | "auth.login.alreadySignedIn"
   | "auth.logout.button"

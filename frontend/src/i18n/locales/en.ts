@@ -39,6 +39,7 @@ const en: Translations = {
   "auth.login.brand.left.body":
     "Printing, sublimation and embroidery on textiles, ceramics, glass and more. We work with businesses and entrepreneurs that demand consistent quality and on-time delivery.",
   "auth.login.brand.left.cta": "Browse catalog",
+  "auth.login.createAccount.heading": "Create your account to get started.",
   "auth.login.brand.left.footer": "© {year} Panda Estampados · Made with care in Nicaragua.",
   "auth.login.alreadySignedIn": "You already have an active session. Redirecting to dashboard...",
   "auth.logout.button": "Sign out",

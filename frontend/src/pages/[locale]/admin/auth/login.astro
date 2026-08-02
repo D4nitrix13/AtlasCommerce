@@ -17,7 +17,7 @@ const currentYear = new Date().getFullYear();
       window.location.href = redirectTo;
     </script>
   ) : (
-    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-[1.1fr_1fr]">
+    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
       <aside
         class="relative isolate hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
         style="background: radial-gradient(circle at 20% 30%, #DC2626 0%, #7F1D1D 35%, #1C1917 80%);"
@@ -52,6 +52,8 @@ const currentYear = new Date().getFullYear();
               fill="none"
               stroke="currentColor"
               stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path d="M5 12h14M13 5l7 7-7 7" />
             </svg>
@@ -69,8 +71,8 @@ const currentYear = new Date().getFullYear();
         />
       </aside>
 
-      <main class="flex items-center justify-center bg-slate-950 px-6 py-12 sm:px-12">
-        <div class="w-full max-w-md">
+      <main class="flex items-center justify-center bg-slate-950 px-4 py-12 sm:px-8">
+        <div class="w-full max-w-3xl">
           <header class="mb-6 flex items-center gap-3 lg:hidden">
             <img
               src="/images/stores/panda-estampados/brand/logo.webp"

@@ -1,7 +1,9 @@
 import { useState, type ReactElement } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../../stores/auth";
 import { useTranslations } from "../../../i18n";
-import type { ValidationErrors } from "../../../types/auth";
+import { apiFetch } from "../../../lib/api";
+import type { LoginResponse, ValidationErrors } from "../../../types/auth";
 import LanguageSwitcher from "../../ui/LanguageSwitcher";
 
 const ACCENT = "#DC2626";
@@ -10,16 +12,35 @@ const ACCENT_HOVER = "#B91C1C";
 type Tab = "login" | "register";
 
 export default function LoginForm(): ReactElement {
-  const { login: loginMutation } = useAuth();
+  const { login, setSession } = useAuth();
   const { t, locale } = useTranslations();
 
   const [tab, setTab] = useState<Tab>("login");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({});
+
+  const resetFields = (): void => {
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setPassword("");
+    setFieldErrors({});
+    setErrorMessage(null);
+  };
+
+  const handleTabChange = (next: Tab): void => {
+    if (next === tab) {
+      return;
+    }
+    setTab(next);
+    resetFields();
+  };
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -28,7 +49,22 @@ export default function LoginForm(): ReactElement {
     setIsSubmitting(true);
 
     try {
-      await loginMutation({ email, password });
+      let response: LoginResponse;
+
+      if (tab === "login") {
+        response = await login({ email, password });
+      } else {
+        response = await apiFetch<LoginResponse>("/auth/register", {
+          method: "POST",
+          body: {
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            password,
+          },
+        });
+        setSession(response);
+      }
 
       const params = new URLSearchParams(window.location.search);
       const fallback = `/${locale}/admin/dashboard`;
@@ -53,42 +89,42 @@ export default function LoginForm(): ReactElement {
     }
   };
 
+  const isLogin = tab === "login";
+
   // Mapea errores del backend a keys i18n cuando es posible.
   const emailErrorKey = fieldErrors.email?.[0];
   const passwordErrorKey = fieldErrors.password?.[0];
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6 text-white">
+    <div className="flex w-full max-w-3xl flex-col gap-5 text-white">
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <img
             src="/images/stores/panda-estampados/brand/logo.webp"
             alt="Panda Estampados"
-            className="h-10 w-10 rounded-md bg-white object-contain p-1"
+            className="h-12 w-12 rounded-md bg-white object-contain p-1"
           />
-          <span className="text-2xl font-bold tracking-tight">
+          <span className="text-2xl font-bold italic tracking-tight">
             {t("auth.brand.name")}
           </span>
         </div>
         <LanguageSwitcher />
       </header>
 
-      <h1 className="text-base font-medium text-slate-300">
+      <h1 className="text-sm font-normal text-slate-300">
         {tab === "login"
           ? t("auth.login.subtitle")
-          : locale === "es"
-            ? "Crea tu cuenta para empezar."
-            : "Create your account to get started."}
+          : t("auth.login.createAccount.heading")}
       </h1>
 
       <div
         role="tablist"
-        className="relative grid grid-cols-2 items-center overflow-hidden rounded-full border text-sm font-semibold"
+        className="relative grid grid-cols-2 items-center overflow-hidden rounded-full border text-base font-semibold tracking-wide"
         style={{ borderColor: ACCENT }}
       >
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute top-0 bottom-0 w-1/2 rounded-full transition-transform duration-300 ease-out"
+          className="pointer-events-none absolute top-0 bottom-0 w-1/2 rounded-full"
           style={{
             backgroundColor: ACCENT,
             transform: tab === "register" ? "translateX(100%)" : "translateX(0%)",
@@ -99,9 +135,9 @@ export default function LoginForm(): ReactElement {
           role="tab"
           aria-selected={tab === "login"}
           onClick={() => {
-            setTab("login");
+            handleTabChange("login");
           }}
-          className="relative z-10 px-4 py-2.5 transition-colors duration-300 focus:outline-none"
+          className="relative z-10 px-4 py-3 focus:outline-none"
           style={{ color: tab === "login" ? "#fff" : ACCENT }}
         >
           {t("auth.login.tab.signin")}
@@ -111,12 +147,10 @@ export default function LoginForm(): ReactElement {
           role="tab"
           aria-selected={tab === "register"}
           onClick={() => {
-            setTab("register");
+            handleTabChange("register");
           }}
-          className="relative z-10 px-4 py-2.5 transition-colors duration-300 focus:outline-none"
+          className="relative z-10 px-4 py-3 focus:outline-none"
           style={{ color: tab === "register" ? "#fff" : ACCENT }}
-          disabled
-          title={t("auth.login.tab.signup.disabledHint")}
         >
           {t("auth.login.tab.signup")}
         </button>
@@ -124,7 +158,7 @@ export default function LoginForm(): ReactElement {
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-4"
         noValidate
         aria-label={t("auth.login.title")}
       >
@@ -134,6 +168,51 @@ export default function LoginForm(): ReactElement {
             className="rounded-md border border-red-400 bg-red-950/40 px-3 py-2 text-sm text-red-200"
           >
             {errorMessage}
+          </div>
+        )}
+
+        {!isLogin && (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <input
+                id="first_name"
+                name="first_name"
+                type="text"
+                autoComplete="given-name"
+                required
+                placeholder="Nombre"
+                value={firstName}
+                onChange={(event) => {
+                  setFirstName(event.target.value);
+                }}
+                className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+              />
+              {fieldErrors.first_name?.[0] !== undefined && (
+                <p className="px-1 text-xs text-red-300">
+                  {fieldErrors.first_name[0]}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <input
+                id="last_name"
+                name="last_name"
+                type="text"
+                autoComplete="family-name"
+                required
+                placeholder="Apellido"
+                value={lastName}
+                onChange={(event) => {
+                  setLastName(event.target.value);
+                }}
+                className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+              />
+              {fieldErrors.last_name?.[0] !== undefined && (
+                <p className="px-1 text-xs text-red-300">
+                  {fieldErrors.last_name[0]}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -149,7 +228,7 @@ export default function LoginForm(): ReactElement {
             onChange={(event) => {
               setEmail(event.target.value);
             }}
-            className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-400 outline-none transition focus:border-white/30 focus:bg-white/10"
+            className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
           />
           {emailErrorKey !== undefined && (
             <p className="px-1 text-xs text-red-300">{emailErrorKey}</p>
@@ -158,20 +237,20 @@ export default function LoginForm(): ReactElement {
 
         <div className="flex flex-col gap-1">
           <div className="relative">
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="current-password"
-              required
-              minLength={8}
-              placeholder={t("auth.login.password.placeholder")}
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-              }}
-              className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 pr-11 text-sm text-white placeholder:text-slate-400 outline-none transition focus:border-white/30 focus:bg-white/10"
-            />
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                required
+                minLength={8}
+                placeholder={t("auth.login.password.placeholder")}
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                }}
+                className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 pr-12 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+              />
             <button
               type="button"
               onClick={() => {
@@ -182,20 +261,12 @@ export default function LoginForm(): ReactElement {
                   ? t("auth.login.password.toggle.hide")
                   : t("auth.login.password.toggle.show")
               }
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition hover:text-white"
+              className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition hover:text-white"
             >
               {showPassword ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 3l18 18" />
-                  <path d="M10.477 10.485a3 3 0 004.038 4.038" />
-                  <path d="M9.88 5.084A10.477 10.477 0 0112 5c6 0 10 7 10 7a13.16 13.16 0 01-1.67 2.32" />
-                  <path d="M6.61 6.61A13.526 13.526 0 002 12s4 7 10 7a10.46 10.46 0 005.39-1.39" />
-                </svg>
+                <EyeOff size={20} strokeWidth={1.75} />
               ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
+                <Eye size={20} strokeWidth={1.75} />
               )}
             </button>
           </div>
@@ -207,7 +278,7 @@ export default function LoginForm(): ReactElement {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 rounded-md px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-1 rounded-md px-4 py-4 text-lg font-semibold tracking-wide text-white transition disabled:cursor-not-allowed disabled:opacity-60"
           style={{
             backgroundColor: isSubmitting ? ACCENT_HOVER : ACCENT,
           }}
@@ -228,7 +299,7 @@ export default function LoginForm(): ReactElement {
         <div className="h-px flex-1 bg-white/15" />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <SocialButton provider="apple">{t("auth.login.social.apple")}</SocialButton>
         <SocialButton provider="facebook">{t("auth.login.social.facebook")}</SocialButton>
         <SocialButton provider="google">{t("auth.login.social.google")}</SocialButton>
@@ -267,10 +338,13 @@ function SocialButton({
     <button
       type="button"
       data-provider={provider}
-      className="flex w-full items-center justify-center gap-3 rounded-full bg-white/5 px-4 py-2.5 text-sm font-medium text-white ring-1 ring-inset ring-white/10 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
+      className="flex w-full items-center gap-5 rounded-xl bg-slate-800/80 px-6 py-3 text-base font-medium text-slate-100 transition hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-white/30"
     >
-      <SocialIcon provider={provider} />
-      <span>{children}</span>
+      <span className="flex w-10 shrink-0 items-center justify-center">
+        <SocialIcon provider={provider} />
+      </span>
+      <span className="flex-1 text-center">{children}</span>
+      <span className="w-10 shrink-0" aria-hidden="true" />
     </button>
   );
 }
@@ -278,26 +352,49 @@ function SocialButton({
 function SocialIcon({ provider }: { provider: Provider }): ReactElement {
   if (provider === "apple") {
     return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M16.365 1.43c0 1.14-.457 2.246-1.222 3.022-.81.823-2.13 1.466-3.241 1.382-.143-1.097.413-2.246 1.2-3.07.815-.85 2.196-1.504 3.263-1.334zM21.5 17.16c-.563 1.297-.83 1.876-1.553 3.024-1.005 1.594-2.421 3.586-4.18 3.605-1.567.02-1.97-1.02-4.097-1.014-2.128.006-2.564 1.036-4.13 1.016-1.76-.02-3.106-1.81-4.112-3.405C.781 16.34-.193 11.7 1.86 8.49c1.46-2.286 3.766-3.62 5.91-3.62 2.179 0 3.546 1.196 5.353 1.196 1.755 0 2.823-1.197 5.342-1.197 1.913 0 3.948 1.04 5.41 2.83-4.755 2.6-3.982 9.41-2.376 9.46z" />
+      <svg
+        width="36"
+        height="36"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
       </svg>
     );
   }
 
   if (provider === "facebook") {
     return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54v2.8h2.54V12h2.54c0-2.8-1.6-4.34-4.13-4.34a4.32 4.32 0 00-1.41.23v2.55a2.71 2.71 0 011.4-.27c1.39 0 2.4.69 2.4 2.05v.51h-2.54v2.42h2.54v6.99A10 10 0 0022 12z" />
+      <svg
+        width="36"
+        height="36"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M9.19795 21.5H13.198V13.4901H16.8021L17.198 9.50977H13.198V7.5C13.198 6.94772 13.6457 6.5 14.198 6.5H17.198V2.5H14.198C11.4365 2.5 9.19795 4.73858 9.19795 7.5V9.50977H7.19795L6.80206 13.4901H9.19795V21.5Z"
+          fill="currentColor"
+        />
       </svg>
     );
   }
 
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.26 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0012 23z" fill="#34A853" />
-      <path d="M5.84 14.1A6.6 6.6 0 015.5 12c0-.73.12-1.44.34-2.1V7.06H2.18A11 11 0 001 12c0 1.78.43 3.46 1.18 4.94l3.66-2.84z" fill="#FBBC05" />
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.65l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 002.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z" fill="#EA4335" />
+    <svg
+      width="36"
+      height="36"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M6 12C6 15.3137 8.68629 18 12 18C14.6124 18 16.8349 16.3304 17.6586 14H12V10H21.8047V14H21.8C20.8734 18.5645 16.8379 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C15.445 2 18.4831 3.742 20.2815 6.39318L17.0039 8.68815C15.9296 7.06812 14.0895 6 12 6C8.68629 6 6 8.68629 6 12Z"
+        fill="currentColor"
+      />
     </svg>
   );
 }
