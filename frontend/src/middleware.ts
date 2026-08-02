@@ -29,6 +29,97 @@ interface TenantContext {
   tenantSlug: string | null;
 }
 
+interface Theme {
+  short_name: string | null;
+  logo_path: string | null;
+  login_logo_path: string | null;
+  favicon_path: string | null;
+  accent_color: string | null;
+  accent_hover_color: string | null;
+  primary_color: string | null;
+  support_email: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  tokens: Record<string, unknown>;
+}
+
+const DEFAULT_THEME: Theme = {
+  short_name: null,
+  logo_path: null,
+  login_logo_path: null,
+  favicon_path: null,
+  accent_color: null,
+  accent_hover_color: null,
+  primary_color: null,
+  support_email: null,
+  phone: null,
+  whatsapp: null,
+  tokens: {},
+};
+
+/**
+ * Resuelve la URL interna del backend para SSR.
+ *
+ * Server-side fetch desde el middleware de Astro usa `INTERNAL_API_URL`
+ * (en Docker network es `http://app:8000/api`). Si no esta seteada,
+ * cae a `PUBLIC_API_URL` o a `http://127.0.0.1:8000/api` por default.
+ */
+function resolveInternalApiUrl(): string {
+  const fromImportMeta = (import.meta.env as Record<string, string | undefined>)
+    .INTERNAL_API_URL;
+  if (typeof fromImportMeta === "string" && fromImportMeta !== "") {
+    return fromImportMeta.replace(/\/$/, "");
+  }
+
+  const fromPublic = (import.meta.env as Record<string, string | undefined>)
+    .PUBLIC_API_URL;
+  if (typeof fromPublic === "string" && fromPublic !== "") {
+    return fromPublic.replace(/\/$/, "");
+  }
+
+  return "http://127.0.0.1:8000/api";
+}
+
+/**
+ * Fetch server-side del theme del tenant actual.
+ *
+ * Llama a `GET {INTERNAL_API_URL}/storefront/theme` pasando el host
+ * para que el backend resuelva el tenant via `store.domain` middleware.
+ *
+ * Si falla (timeout, 404, network), devuelve `DEFAULT_THEME` para
+ * que la pagina no se rompa.
+ */
+async function fetchThemeForHost(host: string): Promise<Theme> {
+  const baseUrl = resolveInternalApiUrl();
+  const url = `${baseUrl}/storefront/theme`;
+
+  try {
+    const response = await fetch(url, {
+      headers: { Host: host, Accept: "application/json" },
+      signal: AbortSignal.timeout(1_000),
+    });
+    if (! response.ok) {
+      return DEFAULT_THEME;
+    }
+    const body = (await response.json()) as { data?: Partial<Theme> };
+    return {
+      short_name: body.data?.short_name ?? null,
+      logo_path: body.data?.logo_path ?? null,
+      login_logo_path: body.data?.login_logo_path ?? null,
+      favicon_path: body.data?.favicon_path ?? null,
+      accent_color: body.data?.accent_color ?? null,
+      accent_hover_color: body.data?.accent_hover_color ?? null,
+      primary_color: body.data?.primary_color ?? null,
+      support_email: body.data?.support_email ?? null,
+      phone: body.data?.phone ?? null,
+      whatsapp: body.data?.whatsapp ?? null,
+      tokens: body.data?.tokens ?? {},
+    };
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
 const ADMIN_HOST_PATTERNS = [
   /^admin\.(localhost|127\.0\.0\.1)(?::\d+)?$/i,
   /^admin\.([a-z0-9-]+)\.test$/i,
@@ -191,6 +282,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return next();
     }
 
+    // Fetch server-side del theme del tenant actual.
+    context.locals.theme = await fetchThemeForHost(host);
+
     const locale = pickDefaultLocale(context.request);
     const localeFromUrl = detectLocalePrefix(pathname);
 
@@ -215,6 +309,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (localeFromUrl !== null) {
     context.locals.locale = localeFromUrl;
+    // Fetch del theme del tenant para storefront.
+    context.locals.theme = await fetchThemeForHost(host);
     const response = await next();
     appendLocaleCookie(response, localeFromUrl);
     return response;
@@ -239,6 +335,7 @@ declare global {
     interface Locals {
       locale: Locale;
       tenant: TenantContext;
+      theme: Theme;
     }
   }
 }
