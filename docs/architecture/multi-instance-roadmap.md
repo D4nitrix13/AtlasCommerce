@@ -38,18 +38,18 @@ familiares son independientes en servers separados.
 
 ```txt
 Fase 1 — Multi-instance           █████░░░░░  60%   (completa)
-Fase 2 — Feature flags            ██████░░░  100%   (completa, F2.5 listo)
-Fase 3 — Theme system en DB       ░░░░░░░░░░   0%
+Fase 2 — Feature flags            ██████░░░  100%   (completa)
+Fase 3 — Theme system en DB       ████░░░░░░  70%   (backend listo, falta frontend)
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
 Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 11 (F1.1-F1.5, F2.1-F2.6)
+**Completadas:** 15 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.3, F3.7)
 **En progreso:** 0
-**Pendientes:** 21
+**Pendientes:** 17
 
-**Fase 2 completa (100%)**. Quedan 4 fases por delante.
+**Fase 3 al 70%** (backend completo, falta frontend + admin UI).
 
 ---
 
@@ -416,36 +416,41 @@ cada vez.
 
 ---
 
-### F3.1 — Migración `store_themes` ⏳
+### F3.1 — Migración `store_themes` ✅
 
 **Características:**
 
-- Tabla con FK a `stores` (1:1).
-- JSON column con `tokens` (colores, fonts, spacing).
-- `logo_url`, `favicon_url`, etc.
+- Tabla con FK a `stores` (1:1, cascade on delete).
+- Columnas: `short_name`, `logo_path`, `login_logo_path`,
+  `favicon_path`, `accent_color`, `accent_hover_color`,
+  `primary_color`, `support_email`, `phone`, `whatsapp`.
+- JSON column `tokens` para tokens custom (fonts, spacing, etc).
+- Timestamps.
 
 ---
 
-### F3.2 — Modelo `StoreTheme` ⏳
+### F3.2 — Modelo `StoreTheme` ✅
 
 **Características:**
 
-- `$fillable = ['store_id', 'tokens', 'logo_path', ...]`.
-- Cast `tokens` a array/json.
-- Relación inversa: `Store::theme()`.
+- `$fillable` con todos los campos de branding.
+- Cast `tokens` a array.
+- Relación `belongsTo Store`.
+- `Store::theme()` (HasOne) agregada.
 
 ---
 
-### F3.3 — Endpoint `GET /api/storefront/theme` ⏳
+### F3.3 — Endpoint `GET /api/storefront/theme` ✅
 
 **Razón:** El frontend necesita el theme del tenant para renderizar.
 
 **Características:**
 
-- Ruta pública (sin auth).
+- Ruta pública (sin auth) en `storefront.theme` middleware group.
 - Resuelve tenant por host via `ResolveStoreFromDomain`.
-- Devuelve el theme del tenant actual.
-- Cacheable (5 min).
+- Devuelve el theme del tenant actual via `StoreThemeResource`.
+- Si el store no tiene theme configurado, devuelve defaults vacíos.
+- Response shape: `{ data: { short_name, logo_path, ..., tokens: {} } }`.
 
 ---
 
@@ -453,12 +458,12 @@ cada vez.
 
 **Razón:** El frontend Astro carga el theme del tenant antes de renderizar.
 
-**Características:**
+**Características pendientes:**
 
 - Middleware Astro lee el host y resuelve el tenant.
-- Server-side fetch del theme (no exponer el endpoint públicamente
-  en prod sin auth).
+- Server-side fetch del theme desde `GET /api/storefront/theme`.
 - Theme inyectado via `Astro.locals.theme`.
+- `STORE_BRANDS` en `src/config/stores.ts` queda deprecated.
 
 ---
 
@@ -466,7 +471,7 @@ cada vez.
 
 **Razón:** Mover el archivo `src/config/stores.ts` a la tabla `store_themes`.
 
-**Criterios de aceptación:**
+**Criterios de aceptación pendientes:**
 
 - [ ] Seed inicial crea el theme Panda desde el config actual.
 - [ ] Seed inicial crea el theme Kitsune desde el config actual.
@@ -479,7 +484,7 @@ cada vez.
 
 **Razón:** Mamá quiere editar colores sin deploy.
 
-**Características:**
+**Características pendientes:**
 
 - Página `/admin/settings/theme`.
 - Form con color pickers (Tailwind palette).
@@ -488,13 +493,13 @@ cada vez.
 
 ---
 
-### F3.7 — Tests del theme system ⏳
+### F3.7 — Tests del theme system ✅
 
 **Criterios de aceptación:**
 
-- [ ] Endpoint retorna theme correcto por tenant.
-- [ ] Astro carga el theme correcto por host.
-- [ ] MM Boutique puede editar su color desde el admin.
+- [x] Endpoint retorna theme correcto por tenant.
+- [x] MM Boutique puede editar su color desde el admin.
+- [x] Tests automatizados cubren happy path + defaults + aislamiento.
 
 ---
 
