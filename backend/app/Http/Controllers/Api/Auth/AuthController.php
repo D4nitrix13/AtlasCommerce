@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\Auth\UserResource;
 use App\Models\Auth\User;
+use App\Services\Stores\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,18 +22,29 @@ use Illuminate\Validation\ValidationException;
  * - POST /auth/login   → crea token + devuelve user resource
  * - POST /auth/logout  → revoca el token actual
  * - GET  /auth/me      → devuelve el user autenticado (valida sesión)
+ *
+ * Multi-tenancy: las rutas auth están envueltas en `store.domain`
+ * middleware (ver `routes/api.php`), por lo que `StoreContextService`
+ * siempre tiene la tienda activa resuelta en login/register/me/logout.
+ * El login valida que el usuario esté asociado a la tienda activa
+ * via tabla pivot `user_stores`.
  */
 class AuthController extends Controller
 {
     /**
      * Autentica al usuario y crea un Sanctum token.
      *
+     * Validaciones:
+     *  - Email + password correctos.
+     *  - Cuenta activa (`is_active = true`).
+     *  - Usuario asociado a la tienda activa via `user_stores`.
+     *
      * Body:
      *   - email (required)
      *   - password (required)
      *   - device_name (optional) — etiqueta para identificar el token
      */
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request, StoreContextService $storeContext): JsonResponse
     {
         $credentials = $request->validated();
 
@@ -53,13 +65,23 @@ class AuthController extends Controller
             ]);
         }
 
+        $currentStoreId = $storeContext->getStoreId();
+
+        if ($currentStoreId !== null && ! $user->hasAccessToStore(storeId: $currentStoreId)) {
+            throw ValidationException::withMessages([
+                'email' => ['No tienes acceso a esta tienda.'],
+            ]);
+        }
+
         $deviceName = $credentials['device_name'] ?? 'web-admin';
 
         $token = $user->createToken(name: $deviceName);
 
         return response()->json(data: [
             'token' => $token->plainTextToken,
-            'user' => new UserResource(resource: $user->load('role')),
+            'user' => new UserResource(
+                resource: $user->load(['role', 'stores']),
+            ),
         ]);
     }
 
@@ -76,16 +98,18 @@ class AuthController extends Controller
      * El user se crea con:
      *   - is_active = true (puede loguearse inmediatamente)
      *   - role_id   = null (sin permisos hasta que admin le asigne uno)
+     *   - Se asocia automaticamente a la tienda activa via `user_stores`.
      *
      * Response 201 con { token, user } igual que login para que el
      * frontend pueda usar el mismo flujo post-auth.
      */
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request, StoreContextService $storeContext): JsonResponse
     {
         $data = $request->validated();
+        $currentStoreId = $storeContext->getStoreId();
 
-        $user = DB::transaction(function () use ($data): User {
-            return User::create([
+        $user = DB::transaction(function () use ($data, $currentStoreId): User {
+            $user = User::create([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'email' => $data['email'],
@@ -93,6 +117,12 @@ class AuthController extends Controller
                 'is_active' => true,
                 'role_id' => null,
             ]);
+
+            if ($currentStoreId !== null) {
+                $user->stores()->attach($currentStoreId);
+            }
+
+            return $user;
         });
 
         $deviceName = $data['device_name'] ?? 'web-admin';
@@ -102,7 +132,9 @@ class AuthController extends Controller
         return response()->json(
             data: [
                 'token' => $token->plainTextToken,
-                'user' => new UserResource(resource: $user->load('role')),
+                'user' => new UserResource(
+                    resource: $user->load(['role', 'stores']),
+                ),
             ],
             status: 201,
         );
@@ -131,7 +163,9 @@ class AuthController extends Controller
         }
 
         return response()->json(data: [
-            'user' => new UserResource(resource: $user->load('role')),
+            'user' => new UserResource(
+                resource: $user->load(['role', 'stores']),
+            ),
         ]);
     }
 }

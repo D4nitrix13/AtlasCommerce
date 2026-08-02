@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\PermissionController;
 use App\Http\Controllers\Api\Auth\PermissionRoleController;
@@ -82,13 +84,27 @@ use Illuminate\Support\Facades\Route;
 | Login es público (devuelve token Sanctum). Logout y /me requieren
 | token válido vía `auth:sanctum` (definidos dentro del grupo más abajo).
 |
+| Todas las rutas auth están envueltas en `store.domain` para resolver
+| la tienda activa y validar que el usuario tenga acceso a ella via
+| tabla pivot `user_stores`.
+|
 */
 
-Route::post('auth/login', [AuthController::class, 'login'])
-    ->name('auth.login');
+Route::middleware(['store.domain'])->group(function (): void {
+    Route::post('auth/login', [AuthController::class, 'login'])
+        ->name('auth.login');
 
-Route::post('auth/register', [AuthController::class, 'register'])
-    ->name('auth.register');
+    Route::post('auth/register', [AuthController::class, 'register'])
+        ->name('auth.register');
+});
+
+Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
+    Route::post('auth/logout', [AuthController::class, 'logout'])
+        ->name('auth.logout');
+
+    Route::get('auth/me', [AuthController::class, 'me'])
+        ->name('auth.me');
+});
 
 Route::middleware('auth:sanctum')->group(function (): void {
     /*
@@ -100,12 +116,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     | These endpoints are part of the internal administration area.
     |
     */
-
-    Route::post('auth/logout', [AuthController::class, 'logout'])
-        ->name('auth.logout');
-
-    Route::get('auth/me', [AuthController::class, 'me'])
-        ->name('auth.me');
 
     Route::apiResource('users', UserController::class);
     Route::apiResource('roles', RoleController::class);
