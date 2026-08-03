@@ -1,0 +1,41 @@
+---
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import ThemeForm from "../../../../components/admin/settings/ThemeForm";
+import type { Theme } from "../../../../lib/theme";
+
+// Theme actual (server-side fetch via middleware auth + store.domain).
+// La API devuelve defaults si el store no tiene theme configurado.
+const themeResponse = await fetch(
+  new URL("/api/admin/theme", Astro.url.origin),
+  {
+    headers: {
+      // Pasar cookie del browser para que Sanctum reconozca al admin.
+      Cookie: Astro.request.headers.get("Cookie") ?? "",
+      Accept: "application/json",
+    },
+  },
+);
+
+if (themeResponse.status === 401 || themeResponse.status === 302) {
+  return Astro.redirect("/login");
+}
+
+if (!themeResponse.ok) {
+  throw new Error(`Error fetching theme: ${themeResponse.status}`);
+}
+
+const themeBody = (await themeResponse.json()) as { data: Theme };
+const theme: Theme = themeBody.data;
+---
+
+<AdminLayout title="Theme | Admin">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">Theme</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Configura el branding visual de tu tienda. Los cambios se ven
+      inmediatamente en el storefront y admin.
+    </p>
+  </div>
+
+  <ThemeForm client:load initialTheme={theme} />
+</AdminLayout>

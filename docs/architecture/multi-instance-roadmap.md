@@ -39,15 +39,17 @@ familiares son independientes en servers separados.
 ```txt
 Fase 1 — Multi-instance           █████░░░░░  60%   (completa)
 Fase 2 — Feature flags            ██████░░░  100%   (completa)
-Fase 3 — Theme system en DB       ██████░░░  85%   (backend completo, falta admin UI frontend)
+Fase 3 — Theme system en DB       ████████░  100%   (completa)
 Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
 Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
 ```
 
 **Total tareas:** 32
-**Completadas:** 16 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.5, F3.7)
-**En progreso:** 1 (F3.6 backend ✅, frontend pendiente)
-**Pendientes:** 16
+**Completadas:** 18 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.6, F3.7)
+**En progreso:** 0
+**Pendientes:** 14
+
+**Fase 3 COMPLETA (100%)**. Quedan 2 fases (4 y 5).
 
 ---
 
@@ -483,7 +485,7 @@ cada vez.
 
 ---
 
-### F3.6 — Admin UI para editar theme ✅ (backend) / 🟡 (frontend)
+### F3.6 — Admin UI para editar theme ✅
 
 **Razón:** Mamá quiere editar colores sin deploy.
 
@@ -491,24 +493,41 @@ cada vez.
 
 - Endpoint `GET /api/admin/theme` — devuelve el theme del store actual.
 - Endpoint `PATCH /api/admin/theme` — actualiza el theme (idempotente).
-- `UpdateThemeRequest` con validación estricta (colores hex, emails, etc).
+- `UpdateThemeRequest` con validación estricta.
 - `StoreThemeAdminResource` que expone todos los campos al admin.
-- 8 tests del admin theme endpoint (happy path, defaults, validación,
-  partial updates, idempotencia, 404).
+- 8 tests del admin theme endpoint.
 
-**Frontend (🟡 pendiente):**
+**Frontend (✅):**
 
-- Página `/admin/settings/theme` con form y color pickers.
-- Llamada al endpoint PATCH para guardar.
+- Página `src/pages/[locale]/admin/settings/theme.astro` que:
+  - Hace SSR fetch a `GET /api/admin/theme` con cookies del admin.
+  - Renderiza form pre-populado con el theme actual.
+  - Incluye color pickers (input type="color") + input text.
+  - Edita nombre corto, logo, email soporte, telefono, whatsapp.
+  - Edita 3 colores: primary, accent, accent_hover.
+  - Edita tokens custom (font_family, font_size_base) en JSON.
+  - Boton "Guardar theme" llama PATCH `/api/admin/theme`.
+  - Estados: idle / saving / success / error con mensajes.
+- Componente `src/components/admin/settings/ThemeForm.tsx` con
+  - ColorField (color picker + input text sincronizados).
+  - TokenField (input monospace para tokens JSON).
+  - StatusMessage (alerts con role="status" o role="alert").
+
+**Tests (5 nuevos en ThemeForm.test.tsx):**
+
+- muestra todos los campos del theme
+- muestra defaults cuando el theme está vacío
+- llama PATCH /api/admin/theme con el theme actualizado
+- muestra mensaje de éxito al guardar correctamente
+- muestra mensaje de error al fallar el guardado
 
 **Criterios de aceptación:**
 
-- [x] Endpoint GET retorna theme correcto del store actual.
-- [x] Endpoint PATCH actualiza theme correctamente.
-- [x] Validación de colores hex.
-- [x] Validación de formato de email.
-- [x] 404 cuando el host no matchea un store.
-- [ ] Frontend admin UI.
+- [x] Frontend SSR-fetch el theme.
+- [x] Form con color pickers y text inputs.
+- [x] Submit hace PATCH con shape correcto.
+- [x] Mensajes de éxito y error.
+- [x] Tests unitarios (5) + E2E (pendiente opcional).
 
 ---
 
