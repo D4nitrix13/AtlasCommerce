@@ -2,8 +2,8 @@
 # ------------------------------------------------------------
 # Cubre las 4 tiendas del roadmap en un solo host:
 #   - panda-kitsune  (Panda Estampados + Kitsune Store, misma instancia)
-#   - mm-boutique    (tienda de tu mamá)
-#   - morales-store  (tienda de tu tía)
+#   - mm-boutique    (single-tenant: solo MM Boutique)
+#   - morales-store  (single-tenant: solo Morales Store)
 #
 # Puertos por instancia (frontend + backend expuestos en 127.0.0.1):
 #   - panda-kitsune:  frontend 4321 / backend 8000

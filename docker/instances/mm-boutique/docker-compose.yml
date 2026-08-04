@@ -1,5 +1,5 @@
 # Docker Compose — Instancia MM Boutique
-# Sirve SOLO la tienda de tu mamá.
+# Sirve SOLO la tienda MM Boutique (single-tenant).
 # Deployment independiente, sin Panda ni Kitsune.
 #
 # Las versiones de imágenes se resuelven desde `docker/versions.env`

@@ -1,5 +1,5 @@
 # Caddyfile — Instancia Morales Store
-# Reverse proxy para la tienda de la tía.
+# Reverse proxy para la tienda Morales Store.
 # Una sola tienda en esta instancia.
 
 {
