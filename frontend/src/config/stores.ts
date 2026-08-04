@@ -10,7 +10,12 @@
  * la config desde la tabla `store_settings`.
  */
 
-export type StoreBrand = {
+import { kitsuneTheme } from '@theme/kitsune';
+import { mmBoutiqueTheme } from '@theme/mm-boutique';
+import { moralesStoreTheme } from '@theme/morales-store';
+import { pandaTheme } from '@theme/panda';
+
+export interface StoreBrand {
   slug: string;
   name: string;
   shortName: string;
@@ -21,53 +26,26 @@ export type StoreBrand = {
   accentColor: string;
   accentHoverColor: string;
   supportEmail: string;
-};
+}
 
 export const STORE_BRANDS: Record<string, StoreBrand> = {
-  panda: {
-    slug: "panda",
-    name: "Panda Estampados",
-    shortName: "Panda",
-    domains: ["pandas-estampados.com", "www.pandas-estampados.com"],
-    adminDomains: [
-      "admin.pandas-estampados.com",
-      "admin.localhost",
-      "admin.127.0.0.1",
-    ],
-    logoPath: "/images/stores/panda-estampados/brand/logo.webp",
-    loginLogoPath: "/images/stores/panda-estampados/brand/logo.webp",
-    accentColor: "#DC2626",
-    accentHoverColor: "#B91C1C",
-    supportEmail: "support@panda-estampados.test",
-  },
-  kitsune: {
-    slug: "kitsune",
-    name: "Kitsune Store",
-    shortName: "Kitsune",
-    domains: ["kitsune.com", "www.kitsune.com"],
-    adminDomains: [
-      "admin.kitsune.com",
-      "admin.kitsune.test",
-    ],
-    logoPath: "/images/stores/kitsune/brand/logo.svg",
-    loginLogoPath: "/images/stores/kitsune/brand/logo.svg",
-    accentColor: "#7C3AED",
-    accentHoverColor: "#6D28D9",
-    supportEmail: "support@kitsune.test",
-  },
-} as const;
+  panda: pandaTheme.brand,
+  kitsune: kitsuneTheme.brand,
+  'mm-boutique': mmBoutiqueTheme.brand,
+  'morales-store': moralesStoreTheme.brand,
+};
 
 export const DEFAULT_BRAND: StoreBrand = STORE_BRANDS.panda ?? {
-  slug: "default",
-  name: "Kitsune Store",
-  shortName: "Kitsune",
+  slug: 'default',
+  name: 'Kitsune Store',
+  shortName: 'Kitsune',
   domains: [],
   adminDomains: [],
-  logoPath: "/images/stores/kitsune/brand/logo.svg",
-  loginLogoPath: "/images/stores/kitsune/brand/logo.svg",
-  accentColor: "#7C3AED",
-  accentHoverColor: "#6D28D9",
-  supportEmail: "support@example.com",
+  logoPath: '/images/stores/kitsune/brand/logo.svg',
+  loginLogoPath: '/images/stores/kitsune/brand/logo.svg',
+  accentColor: '#7C3AED',
+  accentHoverColor: '#6D28D9',
+  supportEmail: 'support@example.com',
 };
 
 export function getBrandBySlug(slug: string | null): StoreBrand {
