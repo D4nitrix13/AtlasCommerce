@@ -9,6 +9,8 @@ services:
       dockerfile: docker/Dockerfile.backend
     container_name: pandakitsune-app
     restart: unless-stopped
+    ports:
+      - "8000:8000"
     volumes:
       - ./seeds:/tmp/seeds:ro
       - storage-app:/var/www/html/storage
@@ -51,6 +53,8 @@ services:
       dockerfile: docker/Dockerfile.frontend
     container_name: pandakitsune-frontend
     restart: unless-stopped
+    ports:
+      - "4321:4321"
     environment:
       - PUBLIC_API_URL=${PUBLIC_API_URL}
       - PUBLIC_APP_NAME=${PUBLIC_APP_NAME}
@@ -66,16 +70,10 @@ services:
     image: caddy:2
     container_name: pandakitsune-caddy
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
-    depends_on:
-      - app
-      - frontend
     networks:
       - internal
 

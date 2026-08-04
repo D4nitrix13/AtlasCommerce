@@ -9,6 +9,8 @@ services:
       dockerfile: docker/Dockerfile.backend
     container_name: moralesstore-app
     restart: unless-stopped
+    ports:
+      - "8200:8000"
     volumes:
       - ./seeds:/tmp/seeds:ro
       - storage-app:/var/www/html/storage
@@ -51,6 +53,8 @@ services:
       dockerfile: docker/Dockerfile.frontend
     container_name: moralesstore-frontend
     restart: unless-stopped
+    ports:
+      - "4323:4321"
     environment:
       - PUBLIC_API_URL=${PUBLIC_API_URL}
       - PUBLIC_APP_NAME=${PUBLIC_APP_NAME}
@@ -59,23 +63,6 @@ services:
       - NODE_ENV=production
     depends_on:
       - app
-    networks:
-      - internal
-
-  caddy:
-    image: caddy:2
-    container_name: moralesstore-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      - app
-      - frontend
     networks:
       - internal
 
@@ -115,7 +102,5 @@ networks:
 
 volumes:
   db-data:
-  caddy-data:
-  caddy-config:
   storage-app:
   bootstrap-app:
