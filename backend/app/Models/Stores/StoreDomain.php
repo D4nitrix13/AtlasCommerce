@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Stores;
 
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +37,8 @@ class StoreDomain extends Model
 
     /**
      * Tienda propietaria del dominio.
+     *
+     * @return BelongsTo<Store, StoreDomain>
      */
     public function store(): BelongsTo
     {

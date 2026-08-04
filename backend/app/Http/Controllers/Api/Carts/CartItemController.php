@@ -13,7 +13,7 @@ use App\Models\Carts\CartItem;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductVariant;
 use App\Models\Customers\Customer;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

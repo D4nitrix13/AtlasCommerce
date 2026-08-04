@@ -21,7 +21,7 @@ use App\Models\Shipping\Shipment;
 use App\Models\Shipping\ShippingZone;
 use App\Models\Stores\Store;
 use App\Services\Payments\PaymentService;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;

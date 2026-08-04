@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -39,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
         foreach (
             glob(
                 pattern: database_path(path: 'migrations/*'),
-                flags: GLOB_ONLYDIR
+                flags: GLOB_ONLYDIR,
             ) ?: [] as $directory
         ) {
             // Permite que Laravel cargue migraciones desde esa subcarpeta

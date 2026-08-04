@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Models\Stores\StoreDomain;
-use App\Services\Stores\StoreContextService;
 use Closure;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 

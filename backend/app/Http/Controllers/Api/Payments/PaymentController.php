@@ -13,7 +13,7 @@ use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Invoice;
 use App\Services\Payments\OverpaymentException;
 use App\Services\Payments\PaymentService;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

@@ -23,7 +23,7 @@ use App\Models\Shipping\ShippingZone;
 use App\Models\Stores\Store;
 use App\Services\Payments\PaymentService;
 use App\Services\Shipping\ShipmentService;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\Group;

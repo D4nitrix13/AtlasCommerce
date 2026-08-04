@@ -15,7 +15,7 @@ use App\Models\Sales\Invoice;
 use App\Models\Sales\Order;
 use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;

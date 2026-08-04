@@ -22,7 +22,7 @@ use App\Services\Inventory\InventoryRecordNotFoundException;
 use App\Services\Inventory\StockService;
 use App\Services\Payments\OverpaymentException;
 use App\Services\Payments\PaymentService;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;

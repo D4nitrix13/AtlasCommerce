@@ -28,7 +28,7 @@ use App\Services\Payments\PaymentService;
 use App\Services\Returns\RefundService;
 use App\Services\Returns\ReturnRequestService;
 use App\Services\Shipping\ShipmentService;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
