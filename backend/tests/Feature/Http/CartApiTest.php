@@ -12,7 +12,7 @@ use App\Models\Catalog\ProductVariant;
 use App\Models\Customers\Customer;
 use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;

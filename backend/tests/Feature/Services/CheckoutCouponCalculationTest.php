@@ -16,7 +16,7 @@ use App\Models\Settings\Currency;
 use App\Models\Shipping\ShippingZone;
 use App\Models\Stores\Store;
 use App\Services\Sales\CheckoutService;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;

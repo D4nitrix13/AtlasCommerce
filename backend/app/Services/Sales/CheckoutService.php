@@ -15,7 +15,7 @@ use App\Models\Sales\Invoice;
 use App\Models\Sales\Order;
 use App\Models\Settings\ExchangeRate;
 use App\Models\Shipping\ShippingZone;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -95,7 +95,7 @@ final class CheckoutService
             $items = $cart->items;
             if ($items->isEmpty()) {
                 throw new RuntimeException(
-                    'El carrito está vacío. Agrega productos antes de hacer checkout.'
+                    'El carrito está vacío. Agrega productos antes de hacer checkout.',
                 );
             }
 
@@ -167,7 +167,7 @@ final class CheckoutService
                 'total_cents' => $totalCents,
                 'exchange_rate_snapshot' => $exchangeRate,
                 'total_in_base_currency_cents' => (int) round(
-                    $subtotalCents * (float) $exchangeRate
+                    $subtotalCents * (float) $exchangeRate,
                 ),
                 'status' => 'pending',
                 'notes' => $notes,

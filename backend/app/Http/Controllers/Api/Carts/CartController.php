@@ -9,7 +9,7 @@ use App\Http\Resources\Carts\CartResource;
 use App\Models\Carts\Cart;
 use App\Models\Customers\Customer;
 use App\Models\Settings\Currency;
-use App\Services\Stores\StoreContextService;
+use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
