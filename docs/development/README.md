@@ -34,6 +34,7 @@ composer dev
 | [backend.md](backend.md "backend.md")                | Comandos Laravel + tests + linter |
 | [frontend.md](frontend.md "frontend.md")              | Comandos Astro + dev server       |
 | [testing.md](testing.md "testing.md")                 | PHPUnit + Playwright               |
+| [plugins.md](plugins.md "plugins.md")                 | Plugins Composer + feature flags  |
 | [linting.md](linting.md "linting.md")                 | Pint + PHPStan + ESLint + Prettier |
 | [git-workflow.md](git-workflow.md "git-workflow.md")    | Commits + branches + PRs          |
 
