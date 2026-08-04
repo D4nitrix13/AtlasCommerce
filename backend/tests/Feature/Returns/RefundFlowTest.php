@@ -31,6 +31,7 @@ use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Tests\TestCase;
 
 #[Group('returns')]
@@ -122,7 +123,7 @@ final class RefundFlowTest extends TestCase
     {
         $otherProduct = Product::factory()->create();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->returnRequests->create(
             order: $this->order,
             reason: 'Test',
@@ -135,7 +136,7 @@ final class RefundFlowTest extends TestCase
     #[Test]
     public function return_request_cannot_be_empty(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->returnRequests->create(
             order: $this->order,
             reason: 'Test',
@@ -199,7 +200,7 @@ final class RefundFlowTest extends TestCase
             items: [['product_id' => $this->product->id, 'quantity' => 1]],
         );
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->refunds->create(
             returnRequest: $pending,
             amountCents: 25_00,
@@ -211,7 +212,7 @@ final class RefundFlowTest extends TestCase
     {
         $returnRequest = $this->createApprovedReturnRequest(quantity: 1);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->refunds->create(
             returnRequest: $returnRequest,
             amountCents: 0,
@@ -314,7 +315,7 @@ final class RefundFlowTest extends TestCase
         $returnRequest = $this->createApprovedReturnRequest(quantity: 2);
 
         // Intentar refundar más que el total de la invoice.
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('supera el saldo devoluble');
 
         $refund = $this->refunds->create(
