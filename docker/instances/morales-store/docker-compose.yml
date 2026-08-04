@@ -36,6 +36,13 @@ services:
       - CACHE_STORE=${CACHE_STORE}
       - QUEUE_CONNECTION=${QUEUE_CONNECTION}
       - FILESYSTEM_DISK=${FILESYSTEM_DISK}
+      - FTP_HOST=${FTP_HOST:-ftp}
+      - FTP_PORT=${FTP_PORT:-21}
+      - FTP_USERNAME=${FTP_USERNAME}
+      - FTP_PASSWORD=${FTP_PASSWORD}
+      - FTP_ROOT=${FTP_ROOT:-/srv/ftp}
+      - FTP_PASSIVE=${FTP_PASSIVE:-true}
+      - FTP_SSL=${FTP_SSL:-false}
       - SANCTUM_STATEFUL_DOMAINS=${SANCTUM_STATEFUL_DOMAINS}
       - SESSION_DOMAIN=${SESSION_DOMAIN}
       - MORALES_ADMIN_PASSWORD=${MORALES_ADMIN_PASSWORD}
@@ -44,6 +51,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ftp:
+        condition: service_started
     networks:
       - internal
 
@@ -77,6 +86,11 @@ services:
     volumes:
       - db-data:/var/lib/postgresql
       - ../../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
+      - ../../../docker/conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
       interval: 10s
@@ -89,11 +103,36 @@ services:
     image: redis:7-alpine
     container_name: moralesstore-redis
     restart: unless-stopped
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+    volumes:
+      - ../../../docker/conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
+
+  ftp:
+    image: fauria/vsftpd
+    container_name: moralesstore-ftp
+    restart: unless-stopped
+    ports:
+      - "${FTP_PORT:-21}:21"
+      - "40000-40100:40000-40100"
+    environment:
+      - FTP_USER=${FTP_USERNAME}
+      - FTP_PASS=${FTP_PASSWORD}
+      - FTP_HOME=${FTP_ROOT:-/srv/ftp}
+      - PASV_ENABLE=YES
+      - PASV_MIN_PORT=40000
+      - PASV_MAX_PORT=40100
+      - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
+    volumes:
+      - ftp-data:${FTP_ROOT:-/srv/ftp}
     networks:
       - internal
 
@@ -104,3 +143,5 @@ volumes:
   db-data:
   storage-app:
   bootstrap-app:
+  ftp-data:
+    name: moralesstore-ftp-data
