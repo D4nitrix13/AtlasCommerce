@@ -11,6 +11,8 @@ use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
 use App\Models\Stores\StoreFeature;
 use App\Models\Stores\StoreTheme;
+use Closure;
+use Core\Tenant\Application\RlsContextService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -79,6 +81,12 @@ class BootstrapTenantCommand extends Command
      * @var string
      */
     protected $description = 'Crea o actualiza tenants, dominios y admin user desde un archivo JSON declarativo';
+
+    public function __construct(
+        private readonly RlsContextService $rlsContext,
+    ) {
+        parent::__construct();
+    }
 
     /**
      * Ejecuta el comando.
@@ -318,7 +326,11 @@ class BootstrapTenantCommand extends Command
             ],
         );
 
-        $user->stores()->sync(ids: $storeIds);
+        foreach ($storeIds as $storeId) {
+            $this->forStore(storeId: $storeId, callback: function () use ($user, $storeId): void {
+                $user->stores()->syncWithoutDetaching(ids: [$storeId]);
+            });
+        }
 
         $this->line("  Admin user: {$user->email} (id={$user->id}, ".count(value: $storeIds).' tiendas)');
     }
@@ -346,24 +358,26 @@ class BootstrapTenantCommand extends Command
                 ->where(column: 'slug', operator: '=', value: $tenantConfig['slug'])
                 ->firstOrFail();
 
-            StoreTheme::query()->updateOrCreate(
-                attributes: ['store_id' => $store->id],
-                values: [
-                    'short_name' => $theme['short_name'] ?? null,
-                    'logo_path' => $theme['logo_path'] ?? null,
-                    'login_logo_path' => $theme['login_logo_path'] ?? null,
-                    'favicon_path' => $theme['favicon_path'] ?? null,
-                    'accent_color' => $theme['accent_color'] ?? null,
-                    'accent_hover_color' => $theme['accent_hover_color'] ?? null,
-                    'primary_color' => $theme['primary_color'] ?? null,
-                    'support_email' => $theme['support_email'] ?? null,
-                    'phone' => $theme['phone'] ?? null,
-                    'whatsapp' => $theme['whatsapp'] ?? null,
-                    'tokens' => $theme['tokens'] ?? null,
-                ],
-            );
+            $this->forStore(storeId: $store->id, callback: function () use ($store, $theme): void {
+                StoreTheme::query()->updateOrCreate(
+                    attributes: ['store_id' => $store->id],
+                    values: [
+                        'short_name' => $theme['short_name'] ?? null,
+                        'logo_path' => $theme['logo_path'] ?? null,
+                        'login_logo_path' => $theme['login_logo_path'] ?? null,
+                        'favicon_path' => $theme['favicon_path'] ?? null,
+                        'accent_color' => $theme['accent_color'] ?? null,
+                        'accent_hover_color' => $theme['accent_hover_color'] ?? null,
+                        'primary_color' => $theme['primary_color'] ?? null,
+                        'support_email' => $theme['support_email'] ?? null,
+                        'phone' => $theme['phone'] ?? null,
+                        'whatsapp' => $theme['whatsapp'] ?? null,
+                        'tokens' => $theme['tokens'] ?? null,
+                    ],
+                );
 
-            $this->line("    Theme: {$store->slug} configurado");
+                $this->line("    Theme: {$store->slug} configurado");
+            });
         }
     }
 
@@ -386,17 +400,30 @@ class BootstrapTenantCommand extends Command
         }
 
         foreach ($storeIds as $storeId) {
-            foreach ($features as $slug => $active) {
-                if (! is_string($slug) || ! is_bool($active)) {
-                    continue;
-                }
+            $this->forStore(storeId: $storeId, callback: function () use ($features, $storeId): void {
+                foreach ($features as $slug => $active) {
+                    if (! is_string($slug) || ! is_bool($active)) {
+                        continue;
+                    }
 
-                StoreFeature::query()->updateOrCreate(
-                    attributes: ['store_id' => $storeId, 'slug' => $slug],
-                    values: ['is_active' => $active],
-                );
-                $this->line("    Feature: {$storeId}/{$slug} = ".($active ? 'on' : 'off'));
-            }
+                    StoreFeature::query()->updateOrCreate(
+                        attributes: ['store_id' => $storeId, 'slug' => $slug],
+                        values: ['is_active' => $active],
+                    );
+                    $this->line("    Feature: {$storeId}/{$slug} = ".($active ? 'on' : 'off'));
+                }
+            });
+        }
+    }
+
+    private function forStore(int $storeId, Closure $callback): void
+    {
+        $this->rlsContext->setStoreId(storeId: $storeId);
+
+        try {
+            $callback();
+        } finally {
+            $this->rlsContext->clear();
         }
     }
 }

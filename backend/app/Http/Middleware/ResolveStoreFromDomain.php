@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Stores\StoreDomain;
 use Closure;
+use Core\Tenant\Application\RlsContextService;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,6 +31,7 @@ class ResolveStoreFromDomain
 {
     public function __construct(
         private readonly StoreContextService $storeContext,
+        private readonly RlsContextService $rlsContext,
     ) {}
 
     /**
@@ -56,9 +58,14 @@ class ResolveStoreFromDomain
         }
 
         $this->storeContext->setStore($domain->store);
+        $this->rlsContext->setStoreId($domain->store->id);
 
         $request->attributes->set('store', $domain->store);
 
-        return $next($request);
+        try {
+            return $next($request);
+        } finally {
+            $this->rlsContext->clear();
+        }
     }
 }
