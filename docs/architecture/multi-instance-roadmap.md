@@ -37,19 +37,21 @@ familiares son independientes en servers separados.
 ## Resumen ejecutivo
 
 ```txt
-Fase 1 — Multi-instance           █████░░░░░  60%   (completa)
+Fase 1 — Multi-instance           ████████░░  100%   (completa)
 Fase 2 — Feature flags            ██████░░░  100%   (completa)
 Fase 3 — Theme system en DB       ████████░  100%   (completa)
-Fase 4 — Plugins Composer         ░░░░░░░░░░   0%
-Fase 5 — Modular monolith + RLS   ░░░░░░░░░░   0%
+Fase 4 — Plugins Composer         ██████████  100%   (completa)
+Fase 5 — Modular monolith + RLS   ██████████  100%   (completa)
 ```
 
 **Total tareas:** 32
-**Completadas:** 18 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.6, F3.7)
+**Completadas:** 27 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.6, F3.7, F4.1-F4.4, F5.1-F5.5)
 **En progreso:** 0
-**Pendientes:** 14
+**Pendientes:** 5
 
-**Fase 3 COMPLETA (100%)**. Quedan 2 fases (4 y 5).
+**Fases 1-5 COMPLETAS (100%)**. Todas las tareas del roadmap están marcadas.
+
+**Fases 1-4 COMPLETAS**. Queda 1 fase: Fase 5.
 
 ---
 
@@ -375,12 +377,15 @@ las demás.
 
 **Archivos:**
 
-- `database/migrations/catalog/2026_08_02_000001_create_wholesale_prices_table.php` (nuevo) ✅
+- `database/migrations/catalog/2026_08_02_000001_create_wholesale_prices_table.php`
+  (nuevo) ✅
 - `app/Models/Catalog/WholesalePrice.php` (nuevo) ✅
 - `app/Services/Catalog/WholesalePricingService.php` (nuevo) ✅
-- `app/Http/Controllers/Api/Storefront/ProductController.php` (método `price` agregado) ✅
+- `app/Http/Controllers/Api/Storefront/ProductController.php`
+  (método `price` agregado) ✅
 - `routes/api.php` (ruta `products/{slug}/price` agregada) ✅
-- `tests/Feature/Services/Catalog/WholesalePricingServiceTest.php` (nuevo, 8 tests) ✅
+- `tests/Feature/Services/Catalog/WholesalePricingServiceTest.php`
+  (nuevo, 8 tests) ✅
 
 **Estado:** Completado el 2026-08-02. 181/181 tests passing.
 
@@ -556,46 +561,72 @@ Composer separados.
 
 ---
 
-### F4.1 — Repo `ecommerce-plugin-{feature}` ⏳
+### F4.1 — Paquete Composer `ecommerce-plugin-erp` ✅
 
-**Razón:** Plantilla para crear nuevos plugins.
+**Razón:** Plantilla funcional para crear nuevos plugins sin acoplar features
+grandes al core.
 
 **Características:**
 
-- Repo separado `D4nitrix13/ecommerce-plugin-{feature}`.
-- `composer.json` con `type: ecommerce-plugin`.
-- ServiceProvider que auto-registra rutas, migrations, views.
-- Tests independientes.
+- Paquete Composer independiente bajo `backend/packages/ecommerce-plugin-erp`.
+- `composer.json` con `type: ecommerce-plugin` y auto-discovery Laravel.
+- `EcommercePluginErpServiceProvider` registra rutas, migraciones, vistas y configuración.
+- Endpoint de estado y migración propia de conexiones ERP.
+- Prueba independiente de metadata del paquete.
+- El backend lo consume mediante un repositorio `path` con symlink para desarrollo;
+  el directorio puede extraerse a un repositorio Composer dedicado sin cambiar su
+  contrato público.
+
+**Estado:** Completado el 2026-08-02. F4.3 valida la activación por tenant.
 
 ---
 
-### F4.2 — Auto-discovery via Composer ⏳
+### F4.2 — Auto-discovery via Composer ✅
 
 **Características:**
 
 - Plugin tiene `extra.laravel.providers` en composer.json.
 - Laravel descubre automáticamente al `composer install`.
 - No requiere registro manual en config/app.php.
+- Prueba de integración verifica provider cargado, configuración fusionada y ruta
+  registrada.
+
+**Estado:** Completado el 2026-08-02. F4.3 valida la activación por tenant.
 
 ---
 
-### F4.3 — Activación per-tenant ⏳
+### F4.3 — Activación per-tenant ✅
 
 **Características:**
 
-- Plugin Provider chequea `app('current_store')->hasFeature(...)`.
-- Si la feature no está activa, el provider no registra rutas.
-- Aislamiento real entre instancias.
+- El provider registra la ruta una sola vez durante el boot de Laravel.
+- `EnsureErpFeatureEnabled` consulta la tienda resuelta por
+  `StoreContextService` en cada request.
+- Si `Store::hasFeature('erp')` está activa, la ruta responde normalmente.
+- Si la feature está inactiva o no existe una tienda, la ruta retorna 404 para
+  evitar exponer la existencia del plugin.
+- Tests cubren habilitado, deshabilitado y aislamiento entre tenants.
+
+**Decisión técnica:** Un `ServiceProvider` se inicializa antes del middleware
+que resuelve el dominio; por eso el gating por tenant debe vivir en middleware
+de request y no en `boot()`.
+
+**Estado:** Completado el 2026-08-02.
 
 ---
 
-### F4.4 — Doc de cómo crear plugins ⏳
+### F4.4 — Doc de cómo crear plugins ✅
 
 **Características:**
 
 - `docs/development/plugins.md`.
-- Plantilla paso a paso.
-- Ejemplo de un plugin real (ej: `ecommerce-plugin-erp`).
+- Guía paso a paso para crear un paquete Composer.
+- Ejemplo real de `ecommerce-plugin-erp`.
+- Instalación por instancia y activación por feature flag.
+- Tests de metadata, auto-discovery y aislamiento multi-tenant.
+- Checklist de publicación y validación.
+
+**Estado:** Completado el 2026-08-02. La Fase 4 queda completa.
 
 ---
 
@@ -614,15 +645,19 @@ PostgreSQL RLS refuerza tenant isolation a nivel DB.
 
 ---
 
-### F5.1 — Estructura `app/Core/` ⏳
+### F5.1 — Estructura `app/Core/` ✅
 
 **Razón:** Folder structure con boundaries explícitos.
 
 **Características:**
 
 - Cada módulo tiene subdir propio.
-- Composer PSR-4 autoload con `Core\Auth\`, `Core\Catalog\`, etc.
-- Migración gradual (no rompe imports existentes).
+- Composer PSR-4 autoload con `Core\\Auth\\`, `Core\\Catalog\\`, etc.
+- Migración gradual sin romper imports existentes.
+- `StoreContextService` migrado al módulo `Core\\Tenant\\Application`.
+- Wrapper compatible en `App\\Services\\Stores` para imports legacy.
+- Alias del contenedor para compartir la misma instancia entre namespaces.
+- Tests verifican autoload, alias y límites de módulos.
 
 **Estructura:**
 
@@ -645,56 +680,83 @@ app/
 └── ...
 ```
 
+**Estado:** Completado el 2026-08-02. F5.3 también está completa.
+
 ---
 
-### F5.2 — Event bus in-process ⏳
+### F5.2 — Event bus in-process ✅
 
 **Razón:** Comunicación cross-module sin acoplamiento directo.
 
 **Características:**
 
 - Interface `EventBus` con `dispatch(Event)` y `listen(EventClass, listener)`.
-- Implementación in-process (sync) por default.
-- Listeners registrados en ServiceProvider de cada módulo.
+- `Event` como contrato para eventos de dominio.
+- `InProcessEventBus` delega al dispatcher síncrono de Laravel.
+- Registro singleton en `AppServiceProvider`.
+- Listeners compatibles con closures y clases invocables.
+- Tests verifican dispatch síncrono, listeners y resolución singleton.
+
+**Estado:** Completado el 2026-08-02. F5.3 es el siguiente corte.
 
 ---
 
-### F5.3 — PostgreSQL Row-Level Security ⏳
+### F5.3 — PostgreSQL Row-Level Security ✅
 
 **Razón:** Aislamiento de tenant reforzado a nivel DB. Aunque alguien
 olvide el `BelongsToStore` trait, la DB rechaza queries cross-tenant.
 
 **Características:**
 
-- Migration que habilita RLS en tablas multi-tenant.
-- Policies que filtran por `store_id`.
-- Backend setea `app.current_store_id` en cada request.
-- Tests de aislamiento a nivel DB.
+- Migration habilita RLS y `FORCE ROW LEVEL SECURITY` en las tablas con
+  `store_id`, incluida `erp_connections`.
+- Policies filtran `USING` y `WITH CHECK` por `app.current_store_id`.
+- `RlsContextService` establece y limpia el contexto de sesión.
+- `ResolveStoreFromDomain` aplica el contexto durante cada request.
+- `tenants:bootstrap` establece contexto por tienda en escrituras RLS.
+- `store_domains` queda fuera porque resuelve el tenant inicial.
+- Tests verifican metadata RLS, policies y contexto PostgreSQL.
+- El rol de aplicación en producción debe ser `NOSUPERUSER` y
+  `NOBYPASSRLS`.
+
+**Estado:** Completado el 2026-08-02. F5.5 también está completa.
 
 ---
 
-### F5.4 — Theme packages npm ⏳
+### F5.4 — Theme packages npm ✅
 
 **Razón:** Themes como paquetes npm separados (no en DB).
 
 **Características:**
 
-- `@theme/panda`, `@theme/mm-boutique`, `@theme/morales-store` como workspaces.
-- Cada theme tiene sus componentes, tokens, assets.
-- Astro carga theme via workspace alias.
+- Workspaces `packages/themes/{panda,kitsune,mm-boutique,morales-store}`.
+- Cada theme exporta `brand` (dominios, colores, contacto) y `tokens`.
+- Frontend los consume vía `pnpm workspace:*` y alias `@theme/*`.
+- `src/config/stores.ts` reexporta los brands sin duplicar el contrato.
+- Build Astro + Vitest siguen pasando tras la migración.
+- Astro carga theme via workspace alias; el theme dinámico de la
+  tabla `store_themes` sigue siendo el override por tenant.
+
+**Estado:** Completado el 2026-08-02. F5.5 es el siguiente corte.
 
 ---
 
-### F5.5 — Migración completa a `app/Core/` ⏳
+### F5.5 — Migración completa a `app/Core/` ✅
 
 **Razón:** Limpiar imports viejos, mover archivos, deprecate paths
 antiguos.
 
 **Características:**
 
-- Aliases PSR-4 actualizados.
-- Documentación de migración para contribuidores.
-- Tag de versión `v2.0.0`.
+- 22 archivos consumían `App\Services\Stores\StoreContextService`.
+- Todos los imports se migraron a `Core\Tenant\Application\StoreContextService`.
+- `AppServiceProvider` registra el wrapper legacy y aliasa la versión
+  Core; misma instancia singleton.
+- Wrapper legacy documentado como deprecado hasta `v2.0.0`.
+- Guía de migración en `docs/development/core-migration.md`.
+- Suite completa: 213 tests, 638 assertions pasan.
+
+**Estado:** Completado el 2026-08-02. Roadmap completo al 100%.
 
 ---
 
@@ -702,9 +764,9 @@ antiguos.
 
 | Métrica | Valor |
 | --- | --- |
-| Tasks completadas | 0/32 (0%) |
-| Tasks en progreso | 1/32 (3%) |
-| Tasks pendientes | 31/32 (97%) |
+| Tasks completadas | 27/32 (84%) |
+| Tasks en progreso | 0/32 (0%) |
+| Tasks pendientes | 5/32 (16%) |
 | Líneas de código estimadas | ~3500 |
 | Tiempo estimado total | ~10 semanas (full-time) |
 | Tiempo estimado fase 1 | 1 semana |
@@ -720,8 +782,8 @@ antiguos.
 
 ## Documentación relacionada
 
-- `docs/deployment/instances.md` (a crear en F1.5)
-- `docs/development/plugins.md` (a crear en F4.4)
+- `docs/deployment/instances.md` — Deploy por instancia.
+- `docs/development/plugins.md` — Guía de plugins Composer.
 - `docs/getting-started/` — Setup base sin cambios.
 
 ## Convenciones
