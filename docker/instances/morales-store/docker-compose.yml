@@ -1,5 +1,5 @@
 # Docker Compose — Instancia Morales Store
-# Sirve SOLO la tienda de tu tía.
+# Sirve SOLO la tienda Morales Store (single-tenant).
 # Deployment independiente, sin Panda ni Kitsune ni MM Boutique.
 #
 # Las versiones de imágenes se resuelven desde `docker/versions.env`

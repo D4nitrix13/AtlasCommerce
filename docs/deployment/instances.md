@@ -12,9 +12,9 @@ Cada instancia se deploya independientemente:
 
 | Instancia | Servidor | Tiendas |
 | --------- | -------- | ------- |
-| `panda-kitsune/` | Server A (cliente) | Panda + Kitsune |
-| `mm-boutique/` | Server B (mamá) | MM Boutique |
-| `morales-store/` | Server C (tía) | Morales Store |
+| `panda-kitsune/` | Server A (multi-tenant) | Panda + Kitsune |
+| `mm-boutique/` | Server B (single-tenant) | MM Boutique |
+| `morales-store/` | Server C (single-tenant) | Morales Store |
 
 Cada servidor corre un único `docker compose up` con la instancia
 correspondiente. La base de código es la misma; lo que cambia es el

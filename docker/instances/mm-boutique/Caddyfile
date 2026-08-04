@@ -1,5 +1,5 @@
 # Caddyfile — Instancia MM Boutique
-# Reverse proxy para la tienda de la mamá.
+# Reverse proxy para la tienda MM Boutique.
 # Una sola tienda en esta instancia.
 
 {

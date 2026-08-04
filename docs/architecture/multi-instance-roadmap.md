@@ -14,8 +14,8 @@
 | ------ | ----- | --------------- | ------------- | --------- |
 | Cliente | Panda Estampados | `pandas-estampados.com` | `admin.pandas-estampados.com` | `panda-kitsune` |
 | Cliente | Kitsune Store | `kitsune.com` | `admin.kitsune.com` | `panda-kitsune` |
-| Mamá | MM Boutique | `mm-boutique.com` | `admin.mm-boutique.com` | `mm-boutique` |
-| Tía | Morales Store | `morales-store.com` | `admin.morales-store.com` | `morales-store` |
+| MM Boutique owner | MM Boutique | `mm-boutique.com` | `admin.mm-boutique.com` | `mm-boutique` |
+| Morales Store owner | Morales Store | `morales-store.com` | `admin.morales-store.com` | `morales-store` |
 
 Las primeras 2 tiendas viven juntas (mismo dueño). Las tiendas de los
 familiares son independientes en servers separados.
@@ -161,13 +161,13 @@ docker/instances/
 │   ├── docker-compose.yml
 │   └── seeds/
 │       └── panda.json            # Panda + Kitsune
-├── mm-boutique/                  # Mamá
+├── mm-boutique/                  # MM Boutique
 │   ├── .env.example
 │   ├── Caddyfile                 # Dominio mm-boutique.com
 │   ├── docker-compose.yml
 │   └── seeds/
 │       └── mm-boutique.json      # MM Boutique
-└── morales-store/                # Tía
+└── morales-store/                # Morales Store
     ├── .env.example
     ├── Caddyfile                 # Dominio morales-store.com
     ├── docker-compose.yml
@@ -408,9 +408,9 @@ las demás.
 
 ## Fase 3 — Theme system en DB
 
-**Razón:** Branding por tienda debe ser editable sin tocar código. Tu
-mamá quiere su color rosa para MM Boutique, no quiere pedirte un deploy
-cada vez.
+**Razón:** Branding por tienda debe ser editable sin tocar código. El
+owner de MM Boutique quiere editar el branding sin pedir un deploy cada
+vez.
 
 **Características:**
 
@@ -492,7 +492,7 @@ cada vez.
 
 ### F3.6 — Admin UI para editar theme ✅
 
-**Razón:** Mamá quiere editar colores sin deploy.
+**Razón:** Los owners de tienda quieren editar colores sin deploy.
 
 **Backend (✅):**
 
