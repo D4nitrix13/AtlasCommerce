@@ -1,35 +1,107 @@
-# ============================================================
-# Caddyfile — Ecommerce local (multi-tienda)
-# ============================================================
-# Rutas:
-#   pandas-estampados.com, www.pandas-estampados.com, kitsune.com, www.kitsune.com
-#     -> Astro frontend (puerto 4321)
-#   admin.pandas-estampados.com, admin.kitsune.com
-#     -> Astro frontend (que reescribe internamente a /admin/...)
-#   /api/* en cualquier dominio
-#     -> Laravel backend (puerto 8000)
-# ============================================================
-
+# Caddyfile — Ecommerce local (multi-instancia, single host)
+# ------------------------------------------------------------
+# Cubre las 4 tiendas del roadmap en un solo host:
+#   - panda-kitsune  (Panda Estampados + Kitsune Store, misma instancia)
+#   - mm-boutique    (tienda de tu mamá)
+#   - morales-store  (tienda de tu tía)
+#
+# Puertos por instancia (frontend + backend expuestos en 127.0.0.1):
+#   - panda-kitsune:  frontend 4321 / backend 8000
+#   - mm-boutique:    frontend 4322 / backend 8100
+#   - morales-store:  frontend 4323 / backend 8200
+#
+# Reglas:
+#   *.pandas-estampados.com -> backend/frontend panda-kitsune
+#   *.kitsune.com           -> backend/frontend panda-kitsune
+#   *.mm-boutique.com       -> backend/frontend mm-boutique
+#   *.morales-store.com     -> backend/frontend morales-store
+#   /api/* en cualquier host -> backend de la instancia correspondiente
+#   cualquier otro host -> 404
+#
+# Antes de usar:
+#   1) sudo cp Caddyfile /etc/caddy/Caddyfile
+#   2) Agregar entradas en /etc/hosts (ver bloque al final).
+#   3) Levantar las tres instancias con docker compose en sus carpetas.
+#   4) sudo caddy validate --config /etc/caddy/Caddyfile
+#      sudo systemctl reload caddy
 {
-    auto_https off
-    admin off
+	auto_https off
+	admin off
 }
+# IMPORTANTE: `admin off` deshabilita la admin API de Caddy
+# (http://localhost:2019/load). Por eso NO usamos `systemctl reload`
+# (ExecReload llama a /load y falla). Ver scripts/setup-local.sh:
+# después de cambiar este archivo hay que hacer
+#   sudo systemctl restart caddy.service
+# NUNCA `sudo systemctl reload caddy` con esta config.
 
+# ===============================================================
+# 1) Panda + Kitsune (mismo deploy: backend 8000, frontend 4321)
+# ===============================================================
 http:// {
-    @hostnames host pandas-estampados.com www.pandas-estampados.com admin.pandas-estampados.com kitsune.com www.kitsune.com admin.kitsune.com
+	@panda_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	handle @panda_api {
+		reverse_proxy 127.0.0.1:8000
+	}
 
-    handle @hostnames {
-        @api path /api/*
-        handle @api {
-            reverse_proxy 127.0.0.1:8000
-        }
+	@panda host pandas-estampados.com www.pandas-estampados.com admin.pandas-estampados.com
+	handle @panda {
+		reverse_proxy 127.0.0.1:4321
+	}
 
-        handle {
-            reverse_proxy 127.0.0.1:4321
-        }
-    }
+	@kitsune host kitsune.com www.kitsune.com admin.kitsune.com
+	handle @kitsune {
+		reverse_proxy 127.0.0.1:4321
+	}
 
-    handle {
-        respond "Not found" 404
-    }
+	# -----------------------------------------------------------
+	# 2) MM Boutique (instancia propia: backend 8100, frontend 4322)
+	# -----------------------------------------------------------
+	@mm_boutique_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	handle @mm_boutique_api {
+		reverse_proxy 127.0.0.1:8100
+	}
+
+	@mm_boutique host mm-boutique.com www.mm-boutique.com admin.mm-boutique.com
+	handle @mm_boutique {
+		reverse_proxy 127.0.0.1:4322
+	}
+
+	# -----------------------------------------------------------
+	# 3) Morales Store (instancia propia: backend 8200, frontend 4323)
+	# -----------------------------------------------------------
+	@morales_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	handle @morales_api {
+		reverse_proxy 127.0.0.1:8200
+	}
+
+	@morales host morales-store.com www.morales-store.com admin.morales-store.com
+	handle @morales {
+		reverse_proxy 127.0.0.1:4323
+	}
+
+	# Catch-all
+	respond "Not found" 404
 }
+
+# ===============================================================
+# Entradas /etc/hosts
+# ===============================================================
+# Pegar este bloque al final de /etc/hosts con sudo:
+#
+#   127.0.0.1  pandas-estampados.com
+#   127.0.0.1  www.pandas-estampados.com
+#   127.0.0.1  admin.pandas-estampados.com
+#   127.0.0.1  kitsune.com
+#   127.0.0.1  www.kitsune.com
+#   127.0.0.1  admin.kitsune.com
+#   127.0.0.1  mm-boutique.com
+#   127.0.0.1  www.mm-boutique.com
+#   127.0.0.1  admin.mm-boutique.com
+#   127.0.0.1  morales-store.com
+#   127.0.0.1  www.morales-store.com
+#   127.0.0.1  admin.morales-store.com
+#
+# Después:
+#   sudo caddy validate --config /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
