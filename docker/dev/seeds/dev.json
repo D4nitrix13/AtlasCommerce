@@ -1,0 +1,51 @@
+{
+  "tenants": [
+    {
+      "slug": "panda-dev",
+      "name": "Panda Estampados (dev)",
+      "currency": "USD",
+      "domains": [
+        "panda.localhost",
+        "www.panda.localhost"
+      ],
+      "admin_domains": [
+        "admin.panda.localhost"
+      ],
+      "theme": {
+        "short_name": "Panda Dev",
+        "accent_color": "#DC2626",
+        "accent_hover_color": "#B91C1C",
+        "support_email": "dev@panda.localhost"
+      }
+    },
+    {
+      "slug": "kitsune-dev",
+      "name": "Kitsune Store (dev)",
+      "currency": "USD",
+      "domains": [
+        "kitsune.localhost",
+        "www.kitsune.localhost"
+      ],
+      "admin_domains": [
+        "admin.kitsune.localhost"
+      ],
+      "theme": {
+        "short_name": "Kitsune Dev",
+        "accent_color": "#7C3AED",
+        "accent_hover_color": "#6D28D9",
+        "support_email": "dev@kitsune.localhost"
+      }
+    }
+  ],
+  "admin_user": {
+    "email": "admin@localhost",
+    "password_env": "DEV_ADMIN_PASSWORD"
+  },
+  "features": {
+    "wholesale_pricing": true,
+    "bulk_import": true,
+    "instagram_shop": true,
+    "subscription_billing": true,
+    "erp": false
+  }
+}
