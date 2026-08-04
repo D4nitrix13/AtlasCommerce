@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Core\Shared\Events\EventBus;
+use Core\Shared\Events\InProcessEventBus;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
         // El contexto de tienda debe ser único por request para que el
         // global scope `BelongsToStore` y el middleware vean la misma instancia.
         $this->app->singleton(StoreContextService::class);
+        $this->app->singleton(EventBus::class, InProcessEventBus::class);
     }
 
     /**
