@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cedadbb0ecbe6ae8e57287166f3aa9ec",
+    "content-hash": "13ec6b43fefad653d034955518c728c7",
     "packages": [
         {
             "name": "brick/math",
@@ -211,6 +211,48 @@
                 }
             ],
             "time": "2025-08-20T19:15:30+00:00"
+        },
+        {
+            "name": "d4nitrix13/ecommerce-plugin-erp",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "packages/ecommerce-plugin-erp",
+                "reference": "0b070cb3f2780d384de3a9824e29349fb2b63508"
+            },
+            "require": {
+                "laravel/framework": "^13.8",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^12.5"
+            },
+            "type": "ecommerce-plugin",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "D4nitrix13\\EcommercePluginErp\\EcommercePluginErpServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "D4nitrix13\\EcommercePluginErp\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "D4nitrix13\\EcommercePluginErp\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "ERP integration plugin for the Ecommerce platform.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "dflydev/dot-access-data",
@@ -9624,7 +9666,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "d4nitrix13/ecommerce-plugin-erp": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
