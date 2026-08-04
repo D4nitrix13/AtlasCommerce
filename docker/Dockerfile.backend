@@ -1,9 +1,10 @@
-# Imagen Docker del backend Laravel
+# Imagen Docker del backend Laravel (producción).
 # Construye la imagen core del backend que se usa en cada instancia.
+# La configuración de PHP se monta vía COPY desde docker/conf/php/.
 
 FROM php:8.3-fpm-alpine
 
-# Extensiones PHP requeridas por Laravel
+# Extensiones PHP requeridas por Laravel + integraciones (S3, FTP, Redis, IMAP opcional).
 RUN apk add --no-cache \
         postgresql-dev \
         postgresql-client \
@@ -19,14 +20,22 @@ RUN apk add --no-cache \
         zip \
         intl \
         bcmath \
-        opcache
+        opcache \
+    && docker-php-ext-install ftp \
+    && docker-php-ext-enable opcache
 
-# Composer
+# Composer (imagen multi-stage).
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copiar composer files primero (cache de layers)
+# Configuración de PHP: php.ini base + opcache.ini.
+# El prefijo `zz-` en php.ini fuerza a que pise a los archivos por
+# defecto de la imagen oficial (orden alfabético en conf.d).
+COPY docker/conf/php/php.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/conf/php/opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
+
+# Copiar composer files primero (cache de layers).
 COPY backend/composer.json backend/composer.lock ./
 RUN composer install \
         --no-dev \
@@ -34,27 +43,19 @@ RUN composer install \
         --no-autoloader \
         --prefer-dist
 
-# Copiar el resto del código
+# Copiar el resto del código.
 COPY backend/ .
 
-# Generar autoloader optimizado
+# Generar autoloader optimizado.
 RUN composer dump-autoload --optimize --no-dev
 
-# Permisos correctos
+# Permisos correctos.
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Configuración de PHP
-RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/app.ini \
-    && echo "upload_max_filesize = 50M" >> /usr/local/etc/php/conf.d/app.ini \
-    && echo "post_max_size = 50M" >> /usr/local/etc/php/conf.d/app.ini \
-    && echo "opcache.enable = 1" >> /usr/local/etc/php/conf.d/app.ini \
-    && echo "opcache.memory_consumption = 192" >> /usr/local/etc/php/conf.d/app.ini \
-    && echo "opcache.max_accelerated_files = 20000" >> /usr/local/etc/php/conf.d/app.ini
-
 EXPOSE 8000
 
-# Script de entrypoint que corre migraciones y opcionalmente el bootstrap
+# Script de entrypoint que corre migraciones y opcionalmente el bootstrap.
 COPY docker/entrypoint-backend.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
