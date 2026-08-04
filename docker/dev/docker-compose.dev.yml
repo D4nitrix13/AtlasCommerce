@@ -18,14 +18,18 @@
 #
 # Tear down completo (BORRA DB, Redis y FTP):
 #   docker compose -f docker/dev/docker-compose.dev.yml --env-file docker/dev/.env down -v
+#
+# Las versiones de imágenes se resuelven desde `docker/versions.env`
+# (con defaults embebidos en cada `image:`).
 
 services:
   postgres:
-    image: postgis/postgis:${POSTGRES_VERSION:-18-3.6}
+    image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
     container_name: ecommerce-dev-postgres
     restart: unless-stopped
     env_file:
       - .env
+      - ../versions.env
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     command:
@@ -45,9 +49,11 @@ services:
       - dev
 
   redis:
-    image: redis:${REDIS_VERSION:-7-alpine}
+    image: ${REDIS_IMAGE:-redis:7-alpine}
     container_name: ecommerce-dev-redis
     restart: unless-stopped
+    env_file:
+      - ../versions.env
     command:
       - redis-server
       - /usr/local/etc/redis/redis.conf
@@ -64,11 +70,12 @@ services:
       - dev
 
   ftp:
-    image: fauria/vsftpd
+    image: ${VSFTPD_IMAGE:-fauria/vsftpd}
     container_name: ecommerce-dev-ftp
     restart: unless-stopped
     env_file:
       - .env
+      - ../versions.env
     ports:
       - "${FTP_PORT:-21}:21"
       - "40000-40100:40000-40100"
