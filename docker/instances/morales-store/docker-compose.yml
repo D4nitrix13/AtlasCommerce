@@ -1,6 +1,9 @@
 # Docker Compose — Instancia Morales Store
 # Sirve SOLO la tienda de tu tía.
 # Deployment independiente, sin Panda ni Kitsune ni MM Boutique.
+#
+# Las versiones de imágenes se resuelven desde `docker/versions.env`
+# con defaults embebidos. Si el archivo no existe, igual funciona.
 
 services:
   app:
@@ -76,9 +79,11 @@ services:
       - internal
 
   db:
-    image: postgis/postgis:18-3.6
+    image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
     container_name: moralesstore-db
     restart: unless-stopped
+    env_file:
+      - ../../versions.env
     environment:
       - POSTGRES_DB=${DB_DATABASE}
       - POSTGRES_USER=${DB_USERNAME}
@@ -100,9 +105,11 @@ services:
       - internal
 
   redis:
-    image: redis:7-alpine
+    image: ${REDIS_IMAGE:-redis:7-alpine}
     container_name: moralesstore-redis
     restart: unless-stopped
+    env_file:
+      - ../../versions.env
     command:
       - redis-server
       - /usr/local/etc/redis/redis.conf
@@ -117,9 +124,11 @@ services:
       - internal
 
   ftp:
-    image: fauria/vsftpd
+    image: ${VSFTPD_IMAGE:-fauria/vsftpd}
     container_name: moralesstore-ftp
     restart: unless-stopped
+    env_file:
+      - ../../versions.env
     ports:
       - "${FTP_PORT:-21}:21"
       - "40000-40100:40000-40100"

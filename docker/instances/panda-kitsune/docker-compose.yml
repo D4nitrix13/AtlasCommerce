@@ -1,6 +1,9 @@
 # Docker Compose — Instancia Panda + Kitsune
 # Sirve las tiendas de Panda Estampados y Kitsune Store en la misma
 # instancia. Ambas comparten base de datos y deployment.
+#
+# Las versiones de imágenes se resuelven desde `docker/versions.env`
+# con defaults embebidos. Si el archivo no existe, igual funciona.
 
 services:
   app:
@@ -76,9 +79,11 @@ services:
       - internal
 
   caddy:
-    image: caddy:2
+    image: caddy:${CADDY_VERSION:-2}
     container_name: pandakitsune-caddy
     restart: unless-stopped
+    env_file:
+      - ../../versions.env
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
@@ -87,9 +92,11 @@ services:
       - internal
 
   db:
-    image: postgis/postgis:18-3.6
+    image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
     container_name: pandakitsune-db
     restart: unless-stopped
+    env_file:
+      - ../../versions.env
     environment:
       - POSTGRES_DB=${DB_DATABASE}
       - POSTGRES_USER=${DB_USERNAME}
@@ -111,9 +118,11 @@ services:
       - internal
 
   redis:
-    image: redis:7-alpine
+    image: ${REDIS_IMAGE:-redis:7-alpine}
     container_name: pandakitsune-redis
     restart: unless-stopped
+    env_file:
+      - ../../versions.env
     command:
       - redis-server
       - /usr/local/etc/redis/redis.conf
@@ -128,9 +137,11 @@ services:
       - internal
 
   ftp:
-    image: fauria/vsftpd
+    image: ${VSFTPD_IMAGE:-fauria/vsftpd}
     container_name: pandakitsune-ftp
     restart: unless-stopped
+    env_file:
+      - ../../versions.env
     ports:
       - "${FTP_PORT:-21}:21"
       - "40000-40100:40000-40100"
