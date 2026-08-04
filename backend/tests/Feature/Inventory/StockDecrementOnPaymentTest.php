@@ -23,9 +23,11 @@ use App\Services\Inventory\StockService;
 use App\Services\Payments\OverpaymentException;
 use App\Services\Payments\PaymentService;
 use Core\Tenant\Application\StoreContextService;
+use DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Tests\TestCase;
 
 #[Group('inventory')]
@@ -200,7 +202,7 @@ final class StockDecrementOnPaymentTest extends TestCase
         $this->assertSame(0, Payment::query()->count());
 
         // La invoice sigue pending.
-        $raw = \DB::table(table: 'invoices')->where('id', $this->invoice->id)->first();
+        $raw = DB::table(table: 'invoices')->where('id', $this->invoice->id)->first();
         $this->assertNotNull($raw);
         $this->assertSame('pending', $raw->payment_status);
 
@@ -228,7 +230,7 @@ final class StockDecrementOnPaymentTest extends TestCase
         } finally {
             // El payment NO se creó (rollback).
             $this->assertSame(0, Payment::query()->count());
-            $raw = \DB::table(table: 'invoices')->where('id', $this->invoice->id)->first();
+            $raw = DB::table(table: 'invoices')->where('id', $this->invoice->id)->first();
             $this->assertNotNull($raw);
             $this->assertSame('pending', $raw->payment_status);
         }
@@ -325,7 +327,7 @@ final class StockDecrementOnPaymentTest extends TestCase
             ->withStock(current: 100, minimum: 5)
             ->create();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No hay almacén activo');
 
         $this->stock->decrementForInvoice(invoice: $this->invoice);
