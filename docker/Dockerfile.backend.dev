@@ -1,0 +1,62 @@
+# Imagen Docker del backend Laravel (desarrollo).
+# Variante de Dockerfile.backend con xdebug, dev extensions y mounts
+# pensados para iterar sin rebuilds. Se usa desde
+# `docker/dev/docker-compose.dev.yml`.
+
+FROM php:8.3-fpm-alpine
+
+# Extensiones PHP de producción + debugging/development.
+RUN apk add --no-cache \
+        postgresql-dev \
+        postgresql-client \
+        libzip-dev \
+        zip \
+        unzip \
+        git \
+        icu-dev \
+        oniguruma-dev \
+        linux-headers \
+        $PHPIZE_DEPS \
+    && docker-php-ext-install \
+        pdo_pgsql \
+        pgsql \
+        zip \
+        intl \
+        bcmath \
+        opcache \
+        ftp \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug opcache
+
+# Composer.
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Configuración PHP: dev (errores visibles + xdebug) + opcache off.
+COPY docker/conf/php/php.dev.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/conf/php/opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
+
+# Directorios de logs que xdebug y php_error.log esperan.
+RUN mkdir -p /var/log/php && chown -R www-data:www-data /var/log/php
+
+# Permisos para que el usuario www-data pueda escribir en storage.
+RUN chown -R www-data:www-data /var/www/html
+
+# Composer install con dev dependencies (Pint, PHPStan, IDE Helper).
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install \
+        --no-scripts \
+        --no-autoloader \
+        --prefer-dist
+
+COPY backend/ .
+
+RUN composer dump-autoload --optimize
+
+EXPOSE 8000
+
+COPY docker/entrypoint-backend.dev.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
+CMD ["entrypoint"]
