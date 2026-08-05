@@ -136,35 +136,64 @@ instance_env_file() {
     fi
 }
 
-# resolve_targets <instancia> [servicio]
+# resolve_targets <stage|instancia> [servicio]
 # Variante de resolve_instances que también captura un servicio
 # opcional. Imprime líneas "<instancia>\t<servicio>". Si servicio
 # está vacío, opera sobre todo el stack. Esto permite que cada
 # comando (start, stop, build, restart, down, nuke) opere a nivel
 # de stack completo o de un servicio individual.
 #
+# Scopes soportados:
+#   all                  → todas las instancias (3 prod + 3 dev)
+#   production / prod    → todas las instancias de production
+#   development / dev    → todas las instancias de development
+#   production:<store>   → 1 instancia de prod con scope explícito
+#   development:<store>  → 1 instancia de dev con scope explícito
+#   <store>              → 1 instancia, default = production
+#
 # Ejemplos:
-#   resolve_targets all            → "panda-kitsune\t" "mm-boutique\t" ...
-#   resolve_targets dev backend    → "dev\tbackend"
-#   resolve_targets panda-kitsune → "panda-kitsune\t"
+#   resolve_targets all                  → 6 instancias
+#   resolve_targets development          → 3 dev
+#   resolve_targets dev backend          → 3 dev con servicio backend
+#   resolve_targets production           → 3 prod
+#   resolve_targets development:mm-boutique → 1 dev específica
+#   resolve_targets mm-boutique          → 1 prod (default)
 resolve_targets() {
     local arg="${1:-all}"
     local svc="${2:-}"
     if [[ -z "$arg" ]]; then
-        log_err "Falta la instancia. Usá 'all' o una de: ${ALL_INSTANCES[*]}"
+        log_err "Falta la instancia o stage. Usá 'all', 'development', 'production', o una de: ${ALL_INSTANCES[*]}"
         exit 1
     fi
-    if [[ "$arg" == "all" ]]; then
-        for inst in "${ALL_INSTANCES[@]}"; do
-            printf "%s\t%s\n" "$inst" "$svc"
-        done
-        return
-    fi
+    case "$arg" in
+        all)
+            for inst in "${ALL_INSTANCES[@]}"; do
+                printf "%s\t%s\n" "$inst" "$svc"
+            done
+            return
+            ;;
+        production|prod)
+            for inst in "${PROD_INSTANCES[@]}"; do
+                printf "%s\t%s\n" "$inst" "$svc"
+            done
+            return
+            ;;
+        development|dev)
+            # Dev comparte puertos shifted entre los 3 stacks (todos
+            # usan 6432/7379/9000/5321/2121). Solo uno puede estar
+            # activo a la vez. Levantamos solo el primero.
+            # Para los otros, usar scope explícito:
+            #   start development:mm-boutique
+            #   start development:morales-store
+            printf "%s\t%s\n" "${DEV_INSTANCES[0]}" "$svc"
+            return
+            ;;
+    esac
     if is_valid_instance "$arg"; then
         printf "%s\t%s\n" "$arg" "$svc"
         return
     fi
-    log_err "Instancia desconocida: $arg. Válidas: ${ALL_INSTANCES[*]}"
+    log_err "Instancia o stage desconocido: $arg. Válidas: all, production|prod, development|dev, o: ${ALL_INSTANCES[*]}"
     exit 1
 }
 
@@ -488,21 +517,32 @@ cmd_help() {
 
 Ejemplos:
   ${C_CYAN}$0 start all${C_RESET}                       # levanta las 6 instancias (3 prod + 3 dev)
-  ${C_CYAN}$0 start mm-boutique${C_RESET}               # levanta solo MM Boutique
-  ${C_CYAN}$0 start dev${C_RESET}                       # levanta solo el dev compose
+  ${C_CYAN}$0 start production${C_RESET}                # levanta las 3 prod
+  ${C_CYAN}$0 start development${C_RESET}               # levanta SOLO panda-and-kitsune-dev (la 1° dev)
+  ${C_CYAN}$0 start dev${C_RESET}                       # atajo de development
+  ${C_CYAN}$0 start production:mm-boutique${C_RESET}    # levanta solo MM Boutique prod
+  ${C_CYAN}$0 start development:mm-boutique${C_RESET}   # levanta solo MM Boutique dev
   ${C_CYAN}$0 stop all${C_RESET}                        # detiene todas las instancias
-  ${C_CYAN}$0 stop dev${C_RESET}                        # detiene solo el dev compose
+  ${C_CYAN}$0 stop development${C_RESET}                # detiene las 3 dev
   ${C_CYAN}$0 b panda-kitsune frontend${C_RESET}         # alias de build: rebuild del frontend de Panda
   ${C_CYAN}$0 build dev backend${C_RESET}                # rebuild solo del backend de dev
   ${C_CYAN}$0 restart panda-kitsune app${C_RESET}        # reinicia solo el servicio app
-  ${C_CYAN}$0 logs mm-boutique frontend${C_RESET}        # tail logs del frontend
-  ${C_CYAN}$0 exec morales-store app bash${C_RESET}       # bash dentro del container app
+  ${C_CYAN}$0 logs development:mm-boutique frontend${C_RESET}  # tail logs del frontend dev
+  ${C_CYAN}$0 exec development:morales-store app bash${C_RESET} # bash dentro del app dev
   ${C_CYAN}$0 status all${C_RESET}                       # estado de los servicios
   ${C_CYAN}$0 info${C_RESET}                             # tabla detallada de todos los containers
-  ${C_CYAN}$0 info dev backend${C_RESET}                 # tabla detallada de un servicio
+  ${C_CYAN}$0 info development:mm-boutique${C_RESET}      # tabla detallada de un stack dev
   ${C_CYAN}$0 nuke panda-kitsune${C_RESET}               # ⚠ BORRA la BD de Panda
   ${C_CYAN}$0 setup${C_RESET}                            # primera instalación (all)
-  ${C_CYAN}$0 setup dev${C_RESET}                        # primera instalación solo dev
+  ${C_CYAN}$0 setup development${C_RESET}                # primera instalación solo dev
+
+Nota sobre dev:
+  Los 3 stacks dev (panda-and-kitsune, mm-boutique, morales-store)
+  comparten los puertos shifted del host (6432/7379/9000/5321/2121).
+  Solo uno puede estar activo a la vez. Para cambiar de tienda dev:
+    start development                    # levanta la 1° dev
+    stop development                     # detiene las 3 dev
+    start development:<otra-tienda>      # levanta otra específica
 
 EOF
 }
