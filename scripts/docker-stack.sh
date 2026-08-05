@@ -10,6 +10,7 @@
 #   ./scripts/docker-stack.sh <comando> [args...]
 #
 # Comandos (aceptan [instancia|all] y, casi todos, [servicio] opcional):
+#   up      [instancia|all] [svc] build + start (convenio docker compose)
 #   start   [instancia|all] [svc] Levantar containers (preserva volúmenes)
 #   stop    [instancia|all] [svc] Detener containers (preserva volúmenes)
 #   restart [instancia|all] [svc] Reiniciar containers
@@ -31,8 +32,6 @@
 #   help                         Muestra esta ayuda
 #
 # Aliases cortos: b=build, rs=restart, ls=ps, psv=info.
-# (No hay alias `up` a propósito: docker compose usa `up` para
-# build + start, no solo start, y un alias acá confundiría).
 #
 # Instancias válidas:
 #   panda-kitsune  (multi-tenant: Panda + Kitsune)
@@ -211,6 +210,26 @@ docker_compose() {
 }
 
 # --- Comandos --------------------------------------------------------------
+
+cmd_up() {
+    # Equivalente a `docker compose up -d --build`: rebuildea las
+    # imágenes que cambiaron y levanta los containers en background.
+    # Convención de docker compose: `up` = build + start. Útil
+    # cuando uno quiere iterar sobre cambios en un Dockerfile
+    # sin tener que correr `build` y `start` por separado.
+    while IFS=$'\t' read -r inst svc; do
+        ensure_env_file "$inst"
+        if [[ -n "$svc" ]]; then
+            log_info "Building + levantando ${C_BOLD}${inst}/${svc}${C_RESET}…"
+            docker_compose "$inst" up -d --build --remove-orphans "$svc"
+            log_ok "${inst}/${svc} arriba."
+        else
+            log_info "Building + levantando ${C_BOLD}${inst}${C_RESET}…"
+            docker_compose "$inst" up -d --build --remove-orphans
+            log_ok "${inst} arriba."
+        fi
+    done < <(resolve_targets "$@")
+}
 
 cmd_start() {
     while IFS=$'\t' read -r inst svc; do
@@ -492,6 +511,7 @@ case "$cmd" in
     ls)       cmd_ps "$@" ;;
     psv|info) cmd_info "$@" ;;
 
+    up)       cmd_up "$@" ;;
     start)    cmd_start "$@" ;;
     stop)     cmd_stop "$@" ;;
     restart)  cmd_restart "$@" ;;
