@@ -146,7 +146,7 @@ ensure_env_file() {
         if [[ -f "${dir}/.env.example" ]]; then
             log_warn "${name}: .env no existe — copiando .env.example (editá los secretos antes de producción)."
             cp "${dir}/.env.example" "${dir}/.env"
-            chmod 600 "${dir}/.env"
+            chmod 644 "${dir}/.env"
         else
             log_err "${name}: no hay .env ni .env.example en ${dir}"
             exit 1
