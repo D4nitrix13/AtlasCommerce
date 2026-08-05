@@ -41,17 +41,18 @@ la respuesta la da **el frontend**, no Laravel. Esto es por diseño:
 // frontend/packages/themes/<slug>/src/index.ts
 export const <slug>Theme = {
   brand: {
-    logoPath: '/images/stores/<slug>/brand/logo.svg', // <-- ojo con la extensión
+    logoPath: '/images/stores/<slug>/brand/logo.webp',
+    loginLogoPath: '/images/stores/<slug>/brand/logo.webp',
     // ...
   },
 };
 ```
 
-⚠️ **Inconsistencia conocida:** los themes de `kitsune`, `mm-boutique` y
-`morales-store` apuntan a `logo.svg`, pero los archivos en disco son
-`logo.webp`. Mientras no haya un `.svg` correspondiente, esos slugs van
-a tirar 404 en el storefront. Hay que unificar la convención (todo a
-`.webp`, recomendado) o generar los `.svg` faltantes.
+Todos los themes apuntan a `.webp`. Si en el futuro se generan versiones
+`.svg` optimizadas (para favicons, OG images que escalen en retina, o
+casos que necesiten `currentColor`), se agregan como segundo `logoPath`
+opcional y el componente consumidor decide cuál servir según el
+contexto.
 
 ## ¿Por qué entonces también en backend/public/images/stores/?
 
