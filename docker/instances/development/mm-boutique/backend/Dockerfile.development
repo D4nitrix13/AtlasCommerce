@@ -48,8 +48,8 @@ WORKDIR /var/www/html
 
 # Configuración PHP: dev (errores visibles + xdebug) + opcache off.
 # Ojo: NO copiamos opcache.ini porque activaría OPcache en dev. La
-# sección [opcache] de php.dev.ini lo deja en `enable=0`.
-COPY docker/instances/development/mm-boutique/conf/php/php.dev.ini /usr/local/etc/php/conf.d/zz-app.ini
+# sección [opcache] de php.development.ini lo deja en `enable=0`.
+COPY docker/instances/development/mm-boutique/conf/php/php.development.ini /usr/local/etc/php/conf.d/zz-app.ini
 
 # Directorios de logs que xdebug y php_error.log esperan.
 RUN mkdir -p /var/log/php && chown -R www-data:www-data /var/log/php

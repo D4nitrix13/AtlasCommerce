@@ -1,0 +1,9 @@
+# Artefactos locales de Docker que se crean como bind mounts en
+# docker/instances/{backend,database,frontend}/ cuando se levantan
+# los stacks. Son propiedad de root y deben limpiarse con:
+#   sudo rm -rf docker/instances/{backend,database,frontend}
+# No son parte del repo; los volumes del compose los re-crean al
+# arrancar.
+/backend
+/database
+/frontend
