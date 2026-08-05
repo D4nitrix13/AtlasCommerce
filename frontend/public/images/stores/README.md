@@ -1,0 +1,62 @@
+# Assets por tienda — Frontend
+
+Logos, social icons y assets de branding servidos por el **frontend**
+(Astro) al browser del usuario final.
+
+## Estructura
+
+```txt
+stores/
+├── <slug>/
+│   ├── brand/
+│   │   └── logo.webp       # logo principal del storefront
+│   ├── social/
+│   │   ├── facebook.webp   # icono para link a Facebook
+│   │   └── instagram.webp  # icono para link a Instagram
+│   ├── banners/.gitkeep    # banners del home (vacío por ahora)
+│   └── products/.gitkeep   # imágenes de productos por defecto
+└── README.md (este archivo)
+```
+
+`<slug>` matchea `STORE_BRANDS` en `src/config/stores.ts`:
+`panda-estampados`, `kitsune`, `mm-boutique`, `morales-store`.
+
+## ¿Por qué estos archivos están acá y no solo en el backend?
+
+El frontend (Astro) sirve `public/` como raíz estática. Cuando el browser
+pide `https://pandas-estampados.com/images/stores/panda-estampados/brand/logo.webp`,
+la respuesta la da **el frontend**, no Laravel. Esto es por diseño:
+
+- El logo aparece en cada página del storefront público (header,
+  footer, favicon, OG image). Pedirlo al backend en cada page load
+  sería un round-trip a Laravel solo para devolver un archivo estático.
+- Astro resuelve los assets en build-time cuando se referencian desde
+  componentes. Menos latencia, menos carga sobre el backend.
+- En el admin panel se hace lo mismo: los componentes de Astro
+  consumen los assets directamente de `public/`.
+
+## Cómo se referencia desde el código
+
+```ts
+// frontend/packages/themes/<slug>/src/index.ts
+export const <slug>Theme = {
+  brand: {
+    logoPath: '/images/stores/<slug>/brand/logo.svg', // <-- ojo con la extensión
+    // ...
+  },
+};
+```
+
+⚠️ **Inconsistencia conocida:** los themes de `kitsune`, `mm-boutique` y
+`morales-store` apuntan a `logo.svg`, pero los archivos en disco son
+`logo.webp`. Mientras no haya un `.svg` correspondiente, esos slugs van
+a tirar 404 en el storefront. Hay que unificar la convención (todo a
+`.webp`, recomendado) o generar los `.svg` faltantes.
+
+## ¿Por qué entonces también en backend/public/images/stores/?
+
+Para el **envío de emails** y para los endpoints de API. Ver
+[`backend/public/images/stores/README.md`](../../../../../backend/public/images/stores/README.md)
+para esa parte. La regla corta: si el consumidor final es el browser del
+usuario → frontend. Si el consumidor es un cliente de correo, un script
+externo, o un `<img src>` absoluto embebido en otro sistema → backend.
