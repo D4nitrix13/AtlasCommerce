@@ -135,9 +135,10 @@ services:
     restart: unless-stopped
     env_file:
       - ../../versions.env
-    ports:
-      - "${FTP_PORT:-21}:21"
-      - "40000-40100:40000-40100"
+    # Sin `ports:`: el FTP single-tenant no se expone al host para
+    # evitar colisión con panda-kitsune en port 21. Accesible vía
+    # `docker exec -it mmboutique-ftp bash` o desde otros containers
+    # de la red `mm-boutique` (Laravel usa FTP_HOST=ftp internamente).
     environment:
       - FTP_USER=${FTP_USERNAME}
       - FTP_PASS=${FTP_PASSWORD}
