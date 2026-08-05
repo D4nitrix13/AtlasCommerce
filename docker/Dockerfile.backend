@@ -11,6 +11,7 @@ RUN apk add --no-cache \
         libzip-dev \
         libxml2-dev \
         oniguruma-dev \
+        redis \  # solo redis-cli para debug; el cliente de la app es predis (PHP package)
         zip \
         unzip \
         git \
@@ -26,7 +27,6 @@ RUN apk add --no-cache \
         exif \
         xml \
         mbstring \
-        redis \
     && docker-php-ext-enable opcache
 
 # Composer (imagen multi-stage).
