@@ -30,7 +30,9 @@
 #   caddy                        Imprime el Caddyfile a usar
 #   help                         Muestra esta ayuda
 #
-# Aliases cortos: up=start, b=build, rs=restart, ls=ps, psv=info.
+# Aliases cortos: b=build, rs=restart, ls=ps, psv=info.
+# (No hay alias `up` a propósito: docker compose usa `up` para
+# build + start, no solo start, y un alias acá confundiría).
 #
 # Instancias válidas:
 #   panda-kitsune  (multi-tenant: Panda + Kitsune)
@@ -454,20 +456,22 @@ cmd_help() {
     cat <<EOF
 
 Ejemplos:
-  ${C_CYAN}$0 up all${C_RESET}                       # alias de start all: levanta las 4 instancias
-  ${C_CYAN}$0 start mm-boutique${C_RESET}           # levanta solo MM Boutique
-  ${C_CYAN}$0 stop dev${C_RESET}                   # detiene el dev compose
-  ${C_CYAN}$0 b panda-kitsune frontend${C_RESET}    # alias de build: rebuild del frontend de Panda
-  ${C_CYAN}$0 restart panda-kitsune app${C_RESET}   # reinicia solo el servicio app
-  ${C_CYAN}$0 build dev backend${C_RESET}           # rebuild solo del backend de dev
-  ${C_CYAN}$0 logs mm-boutique frontend${C_RESET}   # tail logs del frontend
-  ${C_CYAN}$0 exec morales-store app bash${C_RESET}  # bash dentro del app
-  ${C_CYAN}$0 status all${C_RESET}                  # estado de los servicios
-  ${C_CYAN}$0 info${C_RESET}                        # tabla detallada de todos los containers
-  ${C_CYAN}$0 info dev backend${C_RESET}            # tabla detallada de un servicio
-  ${C_CYAN}$0 nuke panda-kitsune${C_RESET}          # ⚠ BORRA la BD de Panda
-  ${C_CYAN}$0 setup${C_RESET}                       # primera instalación (all)
-  ${C_CYAN}$0 setup dev${C_RESET}                   # primera instalación solo dev
+  ${C_CYAN}$0 start all${C_RESET}                       # levanta las 4 instancias (3 prod + dev)
+  ${C_CYAN}$0 start mm-boutique${C_RESET}               # levanta solo MM Boutique
+  ${C_CYAN}$0 start dev${C_RESET}                       # levanta solo el dev compose
+  ${C_CYAN}$0 stop all${C_RESET}                        # detiene todas las instancias
+  ${C_CYAN}$0 stop dev${C_RESET}                        # detiene solo el dev compose
+  ${C_CYAN}$0 b panda-kitsune frontend${C_RESET}         # alias de build: rebuild del frontend de Panda
+  ${C_CYAN}$0 build dev backend${C_RESET}                # rebuild solo del backend de dev
+  ${C_CYAN}$0 restart panda-kitsune app${C_RESET}        # reinicia solo el servicio app
+  ${C_CYAN}$0 logs mm-boutique frontend${C_RESET}        # tail logs del frontend
+  ${C_CYAN}$0 exec morales-store app bash${C_RESET}       # bash dentro del container app
+  ${C_CYAN}$0 status all${C_RESET}                       # estado de los servicios
+  ${C_CYAN}$0 info${C_RESET}                             # tabla detallada de todos los containers
+  ${C_CYAN}$0 info dev backend${C_RESET}                 # tabla detallada de un servicio
+  ${C_CYAN}$0 nuke panda-kitsune${C_RESET}               # ⚠ BORRA la BD de Panda
+  ${C_CYAN}$0 setup${C_RESET}                            # primera instalación (all)
+  ${C_CYAN}$0 setup dev${C_RESET}                        # primera instalación solo dev
 
 EOF
 }
@@ -483,7 +487,6 @@ cmd="$1"; shift || true
 
 case "$cmd" in
     # Aliases cortos para uso frecuente.
-    up)       cmd_start "$@" ;;
     b)        cmd_build "$@" ;;
     rs)       cmd_restart "$@" ;;
     ls)       cmd_ps "$@" ;;
