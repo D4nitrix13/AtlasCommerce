@@ -687,7 +687,7 @@ PUBLIC_API_URL debe incluir el prefijo /api.
 Ejemplo:
 
 ```env
-PUBLIC_API_URL=http://localhost:8000/api
+PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 Los endpoints internos no deben incluir `/api`.
@@ -1571,7 +1571,7 @@ Incorrecto:
 El prefijo `/api` debe venir desde:
 
 ```txt
-PUBLIC_API_URL=http://localhost:8000/api
+PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 o:

@@ -41,6 +41,13 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `pnpm astro -- --help` | Get help using the Astro CLI                     |
 
+> **Nota sobre el puerto `4321`:** es la convención de Astro (`astro dev`)
+> y no es configurable desde este repo. En el entorno Docker de
+> desarrollo, el frontend se publica en el host en `:5321` (mapeo al
+> `:4321` interno del container). Ver
+> [`docs/operations/ports.md`](../../docs/operations/ports.md) para el
+> mapa completo de puertos por instancia.
+
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

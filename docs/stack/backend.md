@@ -168,7 +168,7 @@ APP_NAME=Ecommerce
 APP_ENV=local
 APP_KEY=base64:GENERAR_CON_php_artisan_key:generate
 APP_DEBUG=true
-APP_URL=http://localhost:8000
+APP_URL=http://localhost:9000
 
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1

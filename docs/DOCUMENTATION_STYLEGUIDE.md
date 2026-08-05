@@ -313,7 +313,7 @@ Las variables de entorno deben usar bloque `env`.
 Correcto:
 
 ```env
-PUBLIC_API_URL=http://localhost:8000/api
+PUBLIC_API_URL=http://localhost:9000/api
 APP_ENV=local
 APP_DEBUG=true
 ```
@@ -616,7 +616,7 @@ Reglas importantes:
 Correcto:
 
 ```env
-PUBLIC_API_URL=http://localhost:8000/api
+PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 Correcto:

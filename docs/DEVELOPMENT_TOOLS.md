@@ -145,21 +145,21 @@ cloudflared --version
 Para exponer un servicio local de forma temporal:
 
 ```bash
-cloudflared tunnel --url http://localhost:4321
+cloudflared tunnel --url http://localhost:5321
 ```
 
 Ejemplo para un frontend `Astro`:
 
 ```bash
 pnpm dev --host 0.0.0.0
-cloudflared tunnel --url http://localhost:4321
+cloudflared tunnel --url http://localhost:5321
 ```
 
 Ejemplo para una API `Laravel`:
 
 ```bash
 php artisan serve --host=0.0.0.0 --port=8000
-cloudflared tunnel --url http://localhost:8000
+cloudflared tunnel --url http://localhost:9000
 ```
 
 ### Túnel autenticado con cloudflared
