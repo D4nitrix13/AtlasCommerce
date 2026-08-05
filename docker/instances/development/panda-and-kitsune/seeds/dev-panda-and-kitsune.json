@@ -1,0 +1,53 @@
+{
+  "tenants": [
+    {
+      "slug": "panda-estampados",
+      "name": "Panda Estampados (DEV)",
+      "currency": "NIO",
+      "domains": [
+        "pandas-estampados.com",
+        "www.pandas-estampados.com"
+      ],
+      "admin_domains": [
+        "admin.pandas-estampados.com"
+      ],
+      "theme": {
+        "short_name": "Panda DEV",
+        "logo_path": "/images/stores/panda-estampados/brand/logo.webp",
+        "login_logo_path": "/images/stores/panda-estampados/brand/logo.webp",
+        "accent_color": "#DC2626",
+        "accent_hover_color": "#B91C1C",
+        "support_email": "support@dev.panda-estampados.test"
+      }
+    },
+    {
+      "slug": "kitsune",
+      "name": "Kitsune Store (DEV)",
+      "currency": "USD",
+      "domains": [
+        "kitsune.com",
+        "www.kitsune.com"
+      ],
+      "admin_domains": [
+        "admin.kitsune.com"
+      ],
+      "theme": {
+        "short_name": "Kitsune DEV",
+        "logo_path": "/images/stores/kitsune/brand/logo.svg",
+        "login_logo_path": "/images/stores/kitsune/brand/logo.svg",
+        "accent_color": "#7C3AED",
+        "accent_hover_color": "#6D28D9",
+        "support_email": "support@dev.kitsune.test"
+      }
+    }
+  ],
+  "admin_user": {
+    "email": "admin@dev.panda-estampados.test",
+    "password_env": "DEV_ADMIN_PASSWORD"
+  },
+  "features": {
+    "wholesale_pricing": true,
+    "bulk_import": true,
+    "subscription_billing": true
+  }
+}

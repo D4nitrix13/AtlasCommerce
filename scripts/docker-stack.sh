@@ -33,12 +33,18 @@
 #
 # Aliases cortos: b=build, rs=restart, ls=ps, psv=info.
 #
-# Instancias válidas:
-#   panda-kitsune  (multi-tenant: Panda + Kitsune)
-#   mm-boutique    (single-tenant)
-#   morales-store  (single-tenant)
-#   dev           (entorno local con bind mounts + xdebug)
-#   all           = todas las de producción + dev
+# Instancias válidas (todas con scope `production:` o `development:`):
+#   production:panda-and-kitsune  (multi-tenant: Panda + Kitsune)
+#   production:mm-boutique        (single-tenant)
+#   production:morales-store      (single-tenant)
+#   development:panda-and-kitsune (entorno local, BD aislada, bind mounts + xdebug)
+#   development:mm-boutique       (entorno local, BD aislada, bind mounts + xdebug)
+#   development:morales-store     (entorno local, BD aislada, bind mounts + xdebug)
+#   all                           = las 6 (3 production + 3 development)
+#
+# Sin scope, default = production. Equivalencias:
+#   start panda-and-kitsune       → start production:panda-and-kitsune
+#   start development:panda-and-kitsune → start dev:panda-and-kitsune
 #
 # Requiere: docker compose v2 (>= 5.x), bash 4+.
 # ------------------------------------------------------------
@@ -50,8 +56,15 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INSTANCES_DIR="${ROOT_DIR}/docker/instances"
 DEV_DIR="${ROOT_DIR}/docker/dev"
 
-PROD_INSTANCES=(panda-kitsune mm-boutique morales-store)
-ALL_INSTANCES=(panda-kitsune mm-boutique morales-store dev)
+# Las instancias se identifican con un scope: `production:<store>` o
+# `development:<store>`. Sin scope, se asume `production:` (default).
+# Esto permite que el mismo nombre de tienda exista en prod y dev
+# (panda-and-kitsune es el multi-tenant de Pandas Estampados + Kitsune
+# en ambos mundos, pero vive en carpetas distintas y con compose /
+# Dockerfiles distintos).
+PROD_INSTANCES=(production:panda-and-kitsune production:mm-boutique production:morales-store)
+DEV_INSTANCES=(development:panda-and-kitsune development:mm-boutique development:morales-store)
+ALL_INSTANCES=("${PROD_INSTANCES[@]}" "${DEV_INSTANCES[@]}")
 
 # Color helpers (TTY-aware)
 if [[ -t 1 ]]; then
@@ -88,34 +101,36 @@ is_valid_instance() {
 }
 
 # instance_compose_dir <name>
+# Resuelve la ruta al directorio de la instancia según el scope.
+# Scope explícito (production:<store> / development:<store>) tiene
+# prioridad. Sin scope, default = production.
 instance_compose_dir() {
     local name="$1"
-    if [[ "$name" == "dev" ]]; then
-        echo "${DEV_DIR}"
-    else
-        echo "${INSTANCES_DIR}/${name}"
-    fi
+    case "$name" in
+        production:*) echo "${INSTANCES_DIR}/production/${name#production:}" ;;
+        development:*) echo "${INSTANCES_DIR}/development/${name#development:}" ;;
+        *)
+            # Sin scope: default production.
+            echo "${INSTANCES_DIR}/production/${name}"
+            ;;
+    esac
 }
 
 # instance_compose_file <name>
-# Dev usa docker-compose.dev.yml; las instancias usan docker-compose.yml.
+# Todas las instancias usan `docker-compose.yml` en su carpeta.
 instance_compose_file() {
     local name="$1"
-    if [[ "$name" == "dev" ]]; then
-        echo "docker-compose.dev.yml"
-    else
-        echo "docker-compose.yml"
-    fi
+    echo "docker-compose.yml"
 }
 
 # instance_env_file <name>
-# Dev usa .env; las instancias usan el .env del directorio de la instancia.
+# Cada instancia tiene su .env en environment/ dentro de su carpeta.
 instance_env_file() {
     local name="$1"
     local dir
     dir="$(instance_compose_dir "$name")"
-    if [[ -f "${dir}/.env" ]]; then
-        echo "--env-file ${dir}/.env"
+    if [[ -f "${dir}/environment/.env" ]]; then
+        echo "--env-file ${dir}/environment/.env"
     else
         echo ""
     fi
@@ -175,21 +190,18 @@ resolve_instances() {
 }
 
 # ensure_env_file <instance>
-# Si la instancia no tiene .env (solo .env.example), lo copia y avisa.
+# Si la instancia no tiene environment/.env (solo .env.example), lo copia y avisa.
 ensure_env_file() {
     local name="$1"
     local dir
     dir="$(instance_compose_dir "$name")"
-    if [[ "$name" == "dev" ]]; then
-        return 0
-    fi
-    if [[ ! -f "${dir}/.env" ]]; then
-        if [[ -f "${dir}/.env.example" ]]; then
-            log_warn "${name}: .env no existe — copiando .env.example (editá los secretos antes de producción)."
-            cp "${dir}/.env.example" "${dir}/.env"
-            chmod 644 "${dir}/.env"
+    if [[ ! -f "${dir}/environment/.env" ]]; then
+        if [[ -f "${dir}/environment/.env.example" ]]; then
+            log_warn "${name}: environment/.env no existe — copiando .env.example (editá los secretos antes de producción)."
+            cp "${dir}/environment/.env.example" "${dir}/environment/.env"
+            chmod 644 "${dir}/environment/.env"
         else
-            log_err "${name}: no hay .env ni .env.example en ${dir}"
+            log_err "${name}: no hay environment/.env ni environment/.env.example en ${dir}"
             exit 1
         fi
     fi
@@ -415,8 +427,8 @@ cmd_setup() {
             log_info "Scope: prod (${PROD_INSTANCES[*]})"
             ;;
         dev)
-            instances_to_start=(dev)
-            log_info "Scope: dev"
+            instances_to_start=("${DEV_INSTANCES[@]}")
+            log_info "Scope: dev (${DEV_INSTANCES[*]})"
             ;;
         all)
             instances_to_start=("${ALL_INSTANCES[@]}")
@@ -475,7 +487,7 @@ cmd_help() {
     cat <<EOF
 
 Ejemplos:
-  ${C_CYAN}$0 start all${C_RESET}                       # levanta las 4 instancias (3 prod + dev)
+  ${C_CYAN}$0 start all${C_RESET}                       # levanta las 6 instancias (3 prod + 3 dev)
   ${C_CYAN}$0 start mm-boutique${C_RESET}               # levanta solo MM Boutique
   ${C_CYAN}$0 start dev${C_RESET}                       # levanta solo el dev compose
   ${C_CYAN}$0 stop all${C_RESET}                        # detiene todas las instancias

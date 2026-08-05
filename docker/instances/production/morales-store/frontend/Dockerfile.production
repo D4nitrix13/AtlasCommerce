@@ -1,0 +1,64 @@
+# Imagen Docker del frontend Astro (producción).
+# Construye el bundle SSR de Astro que se sirve en cada instancia.
+
+# ===========================================================================
+# Stage 1: builder. Compila el bundle SSR.
+# ===========================================================================
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Habilitar pnpm vía corepack, pineado por lockfile.
+RUN corepack enable \
+    && corepack prepare pnpm@9 --activate
+
+# Layer de cache de dependencias: package.json + lockfile primero.
+# `pnpm fetch` descarga las deps a un store local sin tocar el FS de la
+# app, así el siguiente `COPY` (solo código fuente) no invalida este
+# layer. Equivale a un --mount=type=cache pero portable.
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
+COPY frontend/pnpm-workspace.yaml* ./
+RUN pnpm fetch --frozen-lockfile \
+    && pnpm install --frozen-lockfile --offline
+
+# Build del bundle SSR. Solo después de instalar deps copiamos el
+# resto del código — cualquier cambio en el código invalida SOLO este
+# layer, no el de deps.
+COPY frontend/ .
+RUN pnpm run build
+
+# Limpia devDependencies del node_modules. El bundle SSR compilado
+# sigue funcionando porque los imports que hace apuntan a deps de
+# producción (react, astro, etc.). `rm -rf node_modules` directo NO
+# funciona: el bundle tiene imports a paquetes npm que Node resuelve
+# en runtime buscando en node_modules/.
+RUN pnpm prune --prod
+
+# ===========================================================================
+# Stage 2: runtime. Solo el bundle compilado + deps de producción.
+# ===========================================================================
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Solo el bundle compilado + node_modules con deps de producción.
+# Sin devDependencies (testing, linters, types), sin código fuente
+# completo, sin .git.
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+
+# Variables de entorno agrupadas en un solo layer.
+ENV HOST=0.0.0.0 \
+    PORT=4321 \
+    NODE_ENV=production
+
+EXPOSE 4321
+
+# Healthcheck: chequea que el server responda HTTP. Usa wget que
+# viene en alpine, no agrega dependencia extra.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget -q --spider http://localhost:4321/ || exit 1
+
+CMD ["node", "./dist/server/entry.mjs"]

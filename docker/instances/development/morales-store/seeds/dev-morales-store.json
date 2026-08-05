@@ -1,0 +1,33 @@
+{
+  "tenants": [
+    {
+      "slug": "morales-store",
+      "name": "Morales Store (DEV)",
+      "currency": "USD",
+      "domains": [
+        "morales-store.com",
+        "www.morales-store.com"
+      ],
+      "admin_domains": [
+        "admin.morales-store.com"
+      ],
+      "theme": {
+        "short_name": "Morales DEV",
+        "logo_path": "/images/stores/morales-store/brand/logo.webp",
+        "login_logo_path": "/images/stores/morales-store/brand/logo.webp",
+        "accent_color": "#2563EB",
+        "accent_hover_color": "#1D4ED8",
+        "support_email": "support@dev.morales-store.test"
+      }
+    }
+  ],
+  "admin_user": {
+    "email": "admin@dev.morales-store.test",
+    "password_env": "DEV_ADMIN_PASSWORD"
+  },
+  "features": {
+    "wholesale_pricing": true,
+    "bulk_import": true,
+    "subscription_billing": true
+  }
+}
