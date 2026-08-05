@@ -5,6 +5,12 @@
 FROM php:8.4-fpm-alpine
 
 # Extensiones PHP requeridas por Laravel + integraciones (S3, FTP, Redis, IMAP opcional).
+#
+# Tres RUNs separados para que Docker pueda cachearlos de forma
+# granular. Si solo cambia la lista de extensiones PHP, el `apk add`
+# queda cacheado y no se re-descargan paquetes. Si cambia solo el
+# `docker-php-ext-enable`, no se re-compila nada.
+
 RUN apk add --no-cache \
         postgresql-dev \
         postgresql-client \
@@ -15,8 +21,9 @@ RUN apk add --no-cache \
         zip \
         unzip \
         git \
-        icu-dev \
-    && docker-php-ext-install \
+        icu-dev
+
+RUN docker-php-ext-install \
         pdo_pgsql \
         pgsql \
         zip \
@@ -26,8 +33,9 @@ RUN apk add --no-cache \
         ftp \
         exif \
         xml \
-        mbstring \
-    && docker-php-ext-enable opcache
+        mbstring
+
+RUN docker-php-ext-enable opcache
 
 # Composer (imagen multi-stage).
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
