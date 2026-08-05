@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Aísla una查询 por la tienda activa resuelta por el middleware.
+ * Aísla una consulta por la tienda activa resuelta por el middleware.
  *
  * Modelos que tienen `store_id` deben usar este trait. El scope global
  * agrega el filtro `store_id = <tienda actual>` automáticamente cuando

@@ -4,6 +4,12 @@
 #
 # Las versiones de imágenes se resuelven desde `docker/versions.env`
 # con defaults embebidos. Si el archivo no existe, igual funciona.
+#
+# Networking:
+#   - Red dedicada `morales-store` (subnet 172.23.0.0/24).
+#   - Cada servicio tiene IP fija (ver bloque networks al final).
+#   - El host Caddy enruta `morales-store.com` a
+#     172.23.0.20:8000 (API) y 172.23.0.21:4321 (frontend).
 
 services:
   app:
@@ -12,8 +18,6 @@ services:
       dockerfile: docker/Dockerfile.backend
     container_name: moralesstore-app
     restart: unless-stopped
-    ports:
-      - "8200:8000"
     volumes:
       - ./seeds:/tmp/seeds:ro
       - storage-app:/var/www/html/storage
@@ -57,7 +61,8 @@ services:
       ftp:
         condition: service_started
     networks:
-      - internal
+      morales-store:
+        ipv4_address: 172.23.0.20
 
   frontend:
     build:
@@ -65,8 +70,6 @@ services:
       dockerfile: docker/Dockerfile.frontend
     container_name: moralesstore-frontend
     restart: unless-stopped
-    ports:
-      - "4323:4321"
     environment:
       - PUBLIC_API_URL=${PUBLIC_API_URL}
       - PUBLIC_APP_NAME=${PUBLIC_APP_NAME}
@@ -76,7 +79,8 @@ services:
     depends_on:
       - app
     networks:
-      - internal
+      morales-store:
+        ipv4_address: 172.23.0.21
 
   db:
     image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
@@ -102,7 +106,8 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - internal
+      morales-store:
+        ipv4_address: 172.23.0.10
 
   redis:
     image: ${REDIS_IMAGE:-redis:7-alpine}
@@ -121,7 +126,8 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - internal
+      morales-store:
+        ipv4_address: 172.23.0.11
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
@@ -143,10 +149,16 @@ services:
     volumes:
       - ftp-data:${FTP_ROOT:-/srv/ftp}
     networks:
-      - internal
+      morales-store:
+        ipv4_address: 172.23.0.12
 
 networks:
-  internal:
+  morales-store:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.23.0.0/24
+          gateway: 172.23.0.1
 
 volumes:
   db-data:

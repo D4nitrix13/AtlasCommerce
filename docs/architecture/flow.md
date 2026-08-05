@@ -219,11 +219,11 @@ flowchart LR
 
 | Decisión                                   | Por qué                                                                                                                 |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| **1 backend, 1 frontend, N tiendas**       | El 95% del código es idéntico. Multi-instance es duplicar运维, no valor.                                                |
+| **1 backend, 1 frontend, N tiendas**       | El 95% del código es idéntico. Multi-instance es duplicar operaciones, no valor.                                                |
 | **Subdominio admin por tienda**            | Cookies aisladas, deploy independiente, branding distinto, seguridad reforzada.                                         |
 | **PostgreSQL compartido con `store_id`**   | Una sola fuente de verdad. El global scope del trait aísla los datos.                                                   |
 | **Redis compartido con namespaces**        | `panda:cart:123` y `kitsune:cart:123` conviven sin colisión. Invalidación cross-tenant no es problema porque no existe. |
-| **FTP único con prefijos**                 | Los assets son archivos. El servidor no sabe de tiendas. Los nombres de archivo携带 la tienda.                          |
+| **FTP único con prefijos**                 | Los assets son archivos. El servidor no sabe de tiendas. Los nombres de archivo lleva la tienda.                          |
 | **Middleware resuelve tienda por host**    | Single source of truth para el store activo en cada request.                                                            |
 | **Wildcard TLS `*.pandas-estampados.com`** | Un cert cubre storefront + admin. Renovación automática con Caddy + Cloudflare.                                         |
 
