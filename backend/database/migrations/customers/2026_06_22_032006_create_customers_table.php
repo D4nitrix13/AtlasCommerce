@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,7 +13,7 @@ return new class extends Migration
      *
      * Crea la tabla "customers" que almacena la información de los clientes
      * de la tienda. Un cliente puede estar vinculado a un usuario (user_id)
-     * o existir como cliente独立 (compras como invitado). El campo
+     * o existir como cliente independiente (compras como invitado). El campo
      * "customer_type" permite diferenciar entre tipos de cliente:
      * - retail: cliente final / consumidor
      * - wholesale: cliente mayorista

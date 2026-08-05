@@ -1,14 +1,20 @@
 # Caddyfile — Ecommerce local (multi-instancia, single host)
 # ------------------------------------------------------------
-# Cubre las 4 tiendas del roadmap en un solo host:
+# Cubre las 4 tiendas del roadmap en un solo host. Cada instancia
+# Docker corre con IPs fijas en su red dedicada:
 #   - panda-kitsune  (Panda Estampados + Kitsune Store, misma instancia)
-#   - mm-boutique    (single-tenant: solo MM Boutique)
-#   - morales-store  (single-tenant: solo Morales Store)
+#     red panda-kitsune (172.21.0.0/24)
+#     app=172.21.0.20:8000  frontend=172.21.0.21:4321
+#   - mm-boutique    (single-tenant: MM Boutique)
+#     red mm-boutique  (172.22.0.0/24)
+#     app=172.22.0.20:8000  frontend=172.22.0.21:4321
+#   - morales-store  (single-tenant: Morales Store)
+#     red morales-store (172.23.0.0/24)
+#     app=172.23.0.20:8000  frontend=172.23.0.21:4321
 #
-# Puertos por instancia (frontend + backend expuestos en 127.0.0.1):
-#   - panda-kitsune:  frontend 4321 / backend 8000
-#   - mm-boutique:    frontend 4322 / backend 8100
-#   - morales-store:  frontend 4323 / backend 8200
+# El host Linux alcanza esas IPs porque Docker bridge networks
+# exponen el rango al host (mismo NIC). No usamos los puertos
+# publicados (8000/8100/8200) — van directo a la IP interna.
 #
 # Reglas:
 #   *.pandas-estampados.com -> backend/frontend panda-kitsune
@@ -21,9 +27,9 @@
 # Antes de usar:
 #   1) sudo cp Caddyfile /etc/caddy/Caddyfile
 #   2) Agregar entradas en /etc/hosts (ver bloque al final).
-#   3) Levantar las tres instancias con docker compose en sus carpetas.
+#   3) Levantar las tres instancias con scripts/docker-stack.sh start
 #   4) sudo caddy validate --config /etc/caddy/Caddyfile
-#      sudo systemctl reload caddy
+#      sudo systemctl restart caddy
 {
 	auto_https off
 	admin off
@@ -36,48 +42,48 @@
 # NUNCA `sudo systemctl reload caddy` con esta config.
 
 # ===============================================================
-# 1) Panda + Kitsune (mismo deploy: backend 8000, frontend 4321)
+# 1) Panda + Kitsune (mismo deploy: red 172.21.0.0/24)
 # ===============================================================
 http:// {
 	@panda_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	handle @panda_api {
-		reverse_proxy 127.0.0.1:8000
+		reverse_proxy 172.21.0.20:8000
 	}
 
 	@panda host pandas-estampados.com www.pandas-estampados.com admin.pandas-estampados.com
 	handle @panda {
-		reverse_proxy 127.0.0.1:4321
+		reverse_proxy 172.21.0.21:4321
 	}
 
 	@kitsune host kitsune.com www.kitsune.com admin.kitsune.com
 	handle @kitsune {
-		reverse_proxy 127.0.0.1:4321
+		reverse_proxy 172.21.0.21:4321
 	}
 
 	# -----------------------------------------------------------
-	# 2) MM Boutique (instancia propia: backend 8100, frontend 4322)
+	# 2) MM Boutique (instancia propia: red 172.22.0.0/24)
 	# -----------------------------------------------------------
 	@mm_boutique_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	handle @mm_boutique_api {
-		reverse_proxy 127.0.0.1:8100
+		reverse_proxy 172.22.0.20:8000
 	}
 
 	@mm_boutique host mm-boutique.com www.mm-boutique.com admin.mm-boutique.com
 	handle @mm_boutique {
-		reverse_proxy 127.0.0.1:4322
+		reverse_proxy 172.22.0.21:4321
 	}
 
 	# -----------------------------------------------------------
-	# 3) Morales Store (instancia propia: backend 8200, frontend 4323)
+	# 3) Morales Store (instancia propia: red 172.23.0.0/24)
 	# -----------------------------------------------------------
 	@morales_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	handle @morales_api {
-		reverse_proxy 127.0.0.1:8200
+		reverse_proxy 172.23.0.20:8000
 	}
 
 	@morales host morales-store.com www.morales-store.com admin.morales-store.com
 	handle @morales {
-		reverse_proxy 127.0.0.1:4323
+		reverse_proxy 172.23.0.21:4321
 	}
 
 	# Catch-all
@@ -104,4 +110,4 @@ http:// {
 #
 # Después:
 #   sudo caddy validate --config /etc/caddy/Caddyfile
-#   sudo systemctl reload caddy
+#   sudo systemctl restart caddy

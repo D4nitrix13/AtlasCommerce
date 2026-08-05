@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -29,7 +31,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            // Pedido en el que se aplicó el cupón, nullable para usos de prueba o杯ones sin pedido asociado
+            // Pedido en el que se aplicó el cupón, nullable para usos de prueba ocupones sin pedido asociado
             // nullOnDelete: si se elimina el pedido, se conserva el registro de uso del cupón
             $table->foreignId(column: 'order_id')
                 ->nullable()
