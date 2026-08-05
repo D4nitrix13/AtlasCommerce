@@ -1,0 +1,37 @@
+# Imagen Docker del frontend Astro (desarrollo).
+# Levanta `astro dev` con HMR. El código se monta como bind mount
+# desde el host para iterar sin rebuild. Se usa desde
+# `docker/dev/docker-compose.dev.yml`.
+
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Activar pnpm vía corepack.
+RUN corepack enable \
+    && corepack prepare pnpm@9 --activate
+
+# Layer de cache de dependencias. `pnpm fetch` descarga deps a un
+# store local sin instalar en el FS de la app; el siguiente `pnpm
+# install --offline` las materializa. Esto desacopla el cache de deps
+# del código fuente: cualquier cambio en `frontend/src/` no invalida
+# este layer.
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
+COPY frontend/pnpm-workspace.yaml* ./
+RUN pnpm fetch --frozen-lockfile \
+    && pnpm install --frozen-lockfile --offline
+
+# Variables de entorno: el dev server escucha en 0.0.0.0 para ser
+# accesible desde Caddy del host o del contenedor vecino.
+ENV HOST=0.0.0.0 \
+    PORT=4321 \
+    NODE_ENV=development \
+    ASTRO_TELEMETRY_DISABLED=1
+
+EXPOSE 4321
+
+# Healthcheck: en dev el server responde rápido.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD wget -q --spider http://localhost:4321/ || exit 1
+
+CMD ["pnpm", "run", "dev"]

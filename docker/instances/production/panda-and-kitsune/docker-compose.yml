@@ -1,0 +1,168 @@
+# Docker Compose — Instancia Panda + Kitsune
+# Sirve las tiendas de Panda Estampados y Kitsune Store en la misma
+# instancia. Ambas comparten base de datos y deployment.
+#
+# Las versiones de imágenes se resuelven desde `docker/versions.env`
+# con defaults embebidos. Si el archivo no existe, igual funciona.
+#
+# Networking:
+#   - Red dedicada `panda-kitsune` (subnet 172.21.0.0/24).
+#   - Cada servicio tiene IP fija (ver bloque networks al final).
+#   - El host Caddy enruta `pandas-estampados.com` y `kitsune.com`
+#     a 172.21.0.20:8000 (API) y 172.21.0.21:4321 (frontend).
+
+services:
+  app:
+    build:
+      context: ../../../..
+      dockerfile: docker/instances/production/panda-and-kitsune/backend/Dockerfile.production
+    container_name: pandakitsune-app
+    restart: unless-stopped
+    volumes:
+      - ./seeds:/tmp/seeds:ro
+      - storage-app:/var/www/html/storage
+      - bootstrap-app:/var/www/html/bootstrap/cache
+    environment:
+      - INSTANCE_NAME=${INSTANCE_NAME}
+      - APP_NAME=${APP_NAME}
+      - APP_ENV=${APP_ENV}
+      - APP_DEBUG=${APP_DEBUG}
+      - APP_KEY=${APP_KEY}
+      - APP_URL=${APP_URL}
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SESSION_DRIVER=${SESSION_DRIVER}
+      - SESSION_LIFETIME=${SESSION_LIFETIME}
+      - CACHE_STORE=${CACHE_STORE}
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION}
+      - FILESYSTEM_DISK=${FILESYSTEM_DISK}
+      - FTP_HOST=${FTP_HOST:-ftp}
+      - FTP_PORT=${FTP_PORT:-21}
+      - FTP_USERNAME=${FTP_USERNAME}
+      - FTP_PASSWORD=${FTP_PASSWORD}
+      - FTP_ROOT=${FTP_ROOT:-/srv/ftp}
+      - FTP_PASSIVE=${FTP_PASSIVE:-true}
+      - FTP_SSL=${FTP_SSL:-false}
+      - SANCTUM_STATEFUL_DOMAINS=${SANCTUM_STATEFUL_DOMAINS}
+      - SESSION_DOMAIN=${SESSION_DOMAIN}
+      - PANDA_ADMIN_PASSWORD=${PANDA_ADMIN_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ftp:
+        condition: service_started
+    networks:
+      panda-kitsune:
+        ipv4_address: 172.21.0.20
+
+  frontend:
+    build:
+      context: ../../../..
+      dockerfile: frontend/Dockerfile.production
+    container_name: pandakitsune-frontend
+    restart: unless-stopped
+    environment:
+      - PUBLIC_API_URL=${PUBLIC_API_URL}
+      - PUBLIC_APP_NAME=${PUBLIC_APP_NAME}
+      - HOST=0.0.0.0
+      - PORT=4321
+      - NODE_ENV=production
+    depends_on:
+      - app
+    networks:
+      panda-kitsune:
+        ipv4_address: 172.21.0.21
+
+  db:
+    image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
+    container_name: pandakitsune-db
+    restart: unless-stopped
+    env_file:
+      - ../../../versions.env
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql
+      - ../../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
+      - conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      panda-kitsune:
+        ipv4_address: 172.21.0.10
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    container_name: pandakitsune-redis
+    restart: unless-stopped
+    env_file:
+      - ../../../versions.env
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+    volumes:
+      - conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      panda-kitsune:
+        ipv4_address: 172.21.0.11
+
+  ftp:
+    image: ${VSFTPD_IMAGE:-fauria/vsftpd}
+    container_name: pandakitsune-ftp
+    restart: unless-stopped
+    env_file:
+      - ../../../versions.env
+    ports:
+      - "${FTP_PORT:-21}:21"
+      - "40000-40100:40000-40100"
+    environment:
+      - FTP_USER=${FTP_USERNAME}
+      - FTP_PASS=${FTP_PASSWORD}
+      - FTP_HOME=${FTP_ROOT:-/srv/ftp}
+      - PASV_ENABLE=YES
+      - PASV_MIN_PORT=40000
+      - PASV_MAX_PORT=40100
+      - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
+    volumes:
+      - ftp-data:${FTP_ROOT:-/srv/ftp}
+    networks:
+      panda-kitsune:
+        ipv4_address: 172.21.0.12
+
+networks:
+  panda-kitsune:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
+          gateway: 172.21.0.1
+
+volumes:
+  db-data:
+  storage-app:
+  bootstrap-app:
+  ftp-data:
+    name: pandakitsune-ftp-data

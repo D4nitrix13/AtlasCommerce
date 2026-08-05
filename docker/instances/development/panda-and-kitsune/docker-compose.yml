@@ -1,0 +1,178 @@
+# Docker Compose — Dev stack para Panda Estampados + Kitsune (multi-tenant).
+# Stack independiente con su propia BD, Redis, FTP, backend y frontend.
+# Pensado para iterar el código del backend/frontend (bind mounts)
+# con datos aislados de los otros stores.
+#
+# Puertos shifted +1000 sobre defaults (iguales que el dev genérico):
+#   postgres  6432  (5432 + 1000)
+#   redis     7379  (6379 + 1000)
+#   backend   9000  (8000 + 1000)
+#   frontend  5321  (4321 + 1000)
+#   ftp        21   (sin shift; cambia con FTP_PORT en .env)
+#
+# Solo un stack de dev puede estar corriendo a la vez (todos usan
+# los mismos puertos del host). Para correr varios a la vez, override
+# los *_PORT en el .env correspondiente.
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
+    container_name: panda-kitsune-dev-postgres
+    restart: unless-stopped
+    env_file:
+      - environment/.env
+      - ../../../versions.env
+    ports:
+      - "${POSTGRES_PORT:-6432}:5432"
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+    volumes:
+      - conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ecommerce_panda_kitsune_dev_postgres_data:/var/lib/postgresql
+      - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - panda-kitsune-dev
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    container_name: panda-kitsune-dev-redis
+    restart: unless-stopped
+    env_file:
+      - ../../../versions.env
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+    volumes:
+      - conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "${REDIS_PORT:-7379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - panda-kitsune-dev
+
+  ftp:
+    image: ${VSFTPD_IMAGE:-fauria/vsftpd}
+    container_name: panda-kitsune-dev-ftp
+    restart: unless-stopped
+    env_file:
+      - environment/.env
+      - ../../../versions.env
+    ports:
+      - "${FTP_PORT:-2121}:21"
+      - "40000-40100:40000-40100"
+    environment:
+      - FTP_USER=${FTP_USERNAME}
+      - FTP_PASS=${FTP_PASSWORD}
+      - FTP_HOME=/srv/ftp
+      - PASV_ENABLE=YES
+      - PASV_MIN_PORT=40000
+      - PASV_MAX_PORT=40100
+      - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
+    volumes:
+      - ecommerce_panda_kitsune_dev_ftp_data:/srv/ftp
+    networks:
+      - panda-kitsune-dev
+
+  backend:
+    build:
+      context: ../../../..
+      dockerfile: docker/instances/development/panda-and-kitsune/backend/Dockerfile.development
+    container_name: panda-kitsune-dev-backend
+    restart: unless-stopped
+    env_file:
+      - environment/.env
+    ports:
+      - "${BACKEND_PORT:-9000}:8000"
+    volumes:
+      - ../../backend:/var/www/html
+      - ecommerce_panda_kitsune_dev_storage:/var/www/html/storage
+      - ecommerce_panda_kitsune_dev_bootstrap:/var/www/html/bootstrap/cache
+      - ecommerce_panda_kitsune_dev_logs:/var/log/php
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:${BACKEND_PORT:-9000}
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=${POSTGRES_DB}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SESSION_DRIVER=file
+      - CACHE_STORE=file
+      - QUEUE_CONNECTION=sync
+      - FILESYSTEM_DISK=local
+      - FTP_HOST=ftp
+      - FTP_PORT=21
+      - FTP_USERNAME=${FTP_USERNAME}
+      - FTP_PASSWORD=${FTP_PASSWORD}
+      - FTP_ROOT=/srv/ftp
+      - LOG_CHANNEL=stderr
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - panda-kitsune-dev
+
+  frontend:
+    build:
+      context: ../../../..
+      dockerfile: frontend/Dockerfile.development
+    container_name: panda-kitsune-dev-frontend
+    restart: unless-stopped
+    env_file:
+      - environment/.env
+    ports:
+      - "${FRONTEND_PORT:-5321}:4321"
+    volumes:
+      - ../../frontend:/app
+      - ../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ecommerce_panda_kitsune_dev_node_modules:/app/node_modules
+      - ecommerce_panda_kitsune_dev_pnpm_store:/app/.pnpm-store
+    environment:
+      - NODE_ENV=development
+      - HOST=0.0.0.0
+      - PORT=4321
+      - PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-9000}/api
+      - ASTRO_TELEMETRY_DISABLED=1
+    depends_on:
+      - backend
+    networks:
+      - panda-kitsune-dev
+
+networks:
+  panda-kitsune-dev:
+    name: ecommerce-panda-kitsune-dev
+
+volumes:
+  ecommerce_panda_kitsune_dev_postgres_data:
+    name: ecommerce_panda_kitsune_dev_postgres_data
+  ecommerce_panda_kitsune_dev_storage:
+    name: ecommerce_panda_kitsune_dev_storage
+  ecommerce_panda_kitsune_dev_bootstrap:
+    name: ecommerce_panda_kitsune_dev_bootstrap
+  ecommerce_panda_kitsune_dev_logs:
+    name: ecommerce_panda_kitsune_dev_logs
+  ecommerce_panda_kitsune_dev_ftp_data:
+    name: ecommerce_panda_kitsune_dev_ftp_data
+  ecommerce_panda_kitsune_dev_node_modules:
+    name: ecommerce_panda_kitsune_dev_node_modules
+  ecommerce_panda_kitsune_dev_pnpm_store:
+    name: ecommerce_panda_kitsune_dev_pnpm_store

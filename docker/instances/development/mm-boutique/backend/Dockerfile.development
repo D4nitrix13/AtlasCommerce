@@ -1,0 +1,81 @@
+# Imagen Docker del backend Laravel (desarrollo).
+# Variante de Dockerfile.backend con xdebug, dev extensions y mounts
+# pensados para iterar sin rebuilds. Se usa desde
+# `docker/dev/docker-compose.dev.yml`.
+
+FROM php:8.4-fpm-alpine
+
+# Extensiones PHP de producción + debugging/development.
+#
+# Tres RUNs separados para que Docker pueda cachearlos de forma
+# granular. Si solo cambia la lista de extensiones PHP, el `apk add`
+# queda cacheado y no se re-descargan paquetes. Si cambia solo el
+# `docker-php-ext-enable`, no se re-compila nada. Si cambia solo la
+# lista de pecl, se re-compila solo eso.
+
+RUN apk add --no-cache \
+        postgresql-dev \
+        postgresql-client \
+        libzip-dev \
+        libxml2-dev \
+        oniguruma-dev \
+        zip \
+        unzip \
+        git \
+        icu-dev \
+        linux-headers \
+        $PHPIZE_DEPS
+
+RUN docker-php-ext-install \
+        pdo_pgsql \
+        pgsql \
+        zip \
+        intl \
+        bcmath \
+        opcache \
+        ftp \
+        exif \
+        xml \
+        mbstring
+
+RUN pecl install redis xdebug \
+    && docker-php-ext-enable redis xdebug opcache
+
+# Composer.
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Configuración PHP: dev (errores visibles + xdebug) + opcache off.
+# Ojo: NO copiamos opcache.ini porque activaría OPcache en dev. La
+# sección [opcache] de php.dev.ini lo deja en `enable=0`.
+COPY docker/instances/development/mm-boutique/conf/php/php.dev.ini /usr/local/etc/php/conf.d/zz-app.ini
+
+# Directorios de logs que xdebug y php_error.log esperan.
+RUN mkdir -p /var/log/php && chown -R www-data:www-data /var/log/php
+
+# Permisos para que el usuario www-data pueda escribir en storage.
+RUN chown -R www-data:www-data /var/www/html
+
+# Composer install con dev dependencies (Pint, PHPStan, IDE Helper).
+COPY backend/composer.json backend/composer.lock ./
+# El plugin `d4nitrix13/ecommerce-plugin-erp` está como repositorio
+# `path` en composer.json → necesita `packages/ecommerce-plugin-erp`
+# en el WORKDIR antes del install.
+COPY backend/packages ./packages
+
+RUN composer install \
+        --no-scripts \
+        --no-autoloader \
+        --prefer-dist
+
+COPY backend/ .
+
+RUN composer dump-autoload --optimize
+
+EXPOSE 8000
+
+COPY docker/instances/development/mm-boutique/backend/entrypoint.development.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
+CMD ["entrypoint"]

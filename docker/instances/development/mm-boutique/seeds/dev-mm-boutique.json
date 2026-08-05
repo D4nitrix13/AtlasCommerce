@@ -1,0 +1,33 @@
+{
+  "tenants": [
+    {
+      "slug": "mm-boutique",
+      "name": "MM Boutique (DEV)",
+      "currency": "USD",
+      "domains": [
+        "mm-boutique.com",
+        "www.mm-boutique.com"
+      ],
+      "admin_domains": [
+        "admin.mm-boutique.com"
+      ],
+      "theme": {
+        "short_name": "MM DEV",
+        "logo_path": "/images/stores/mm-boutique/brand/logo.webp",
+        "login_logo_path": "/images/stores/mm-boutique/brand/logo.webp",
+        "accent_color": "#DB2777",
+        "accent_hover_color": "#BE185D",
+        "support_email": "support@dev.mm-boutique.test"
+      }
+    }
+  ],
+  "admin_user": {
+    "email": "admin@dev.mm-boutique.test",
+    "password_env": "DEV_ADMIN_PASSWORD"
+  },
+  "features": {
+    "wholesale_pricing": true,
+    "bulk_import": true,
+    "subscription_billing": true
+  }
+}
