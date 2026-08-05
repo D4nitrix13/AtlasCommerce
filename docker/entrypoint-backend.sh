@@ -45,6 +45,18 @@ else
     echo "[entrypoint] No se encontró TENANTS_SEED_FILE, saltando tenants:bootstrap."
 fi
 
-# Arrancar PHP-FPM.
-echo "[entrypoint] Iniciando PHP-FPM..."
-exec php-fpm
+# Arrancar PHP-FPM + servidor HTTP en :8000.
+#
+# Para dev local multi-instancia usamos `php artisan serve` (built-in
+# PHP server, single-threaded pero suficiente para este caso). En
+# producción real hace falta un front-end HTTP (nginx + php-fpm en
+# containers separados, o Apache con mod_php).
+#
+# FPM queda corriendo en background por si algún worker lo necesita
+# (artisan queue:work, scheduler, etc.). Sirve en :9000 dentro del
+# container, no expuesto al host.
+echo "[entrypoint] Iniciando PHP-FPM en background..."
+php-fpm -D
+
+echo "[entrypoint] Iniciando php artisan serve en 0.0.0.0:8000..."
+exec php artisan serve --host=0.0.0.0 --port=8000
