@@ -1,138 +1,189 @@
-# Panda Estampados / Kitsune Store
+# Ecommerce
 
-Sistema web de gestión empresarial para la comercialización de merchandising personalizado, productos de cultura japonesa, videojuegos, anime, artículos textiles, cerámica, vidrio, madera, aluminio y regalos corporativos.
+Sistema web de gestión empresarial multi-tienda para la comercialización de
+merchandising personalizado, productos de cultura japonesa, videojuegos, anime,
+artículos textiles, cerámica, vidrio, madera, aluminio y regalos corporativos.
 
 ## Descripción
 
 La plataforma funciona como:
 
-- **Vitrina digital** — catálogo público de productos con precios, disponibilidad e interacción por WhatsApp.
-- **Panel administrativo** — gestión de clientes, productos, categorías, proveedores, compras, facturas, reportes, respaldos, auditoría, logs y notificaciones internas.
+- **Vitrina digital** — catálogo público de productos con precios, disponibilidad
+  e interacción por WhatsApp.
+- **Panel administrativo** — gestión de clientes, productos, categorías,
+  proveedores, compras, facturas, reportes, respaldos, auditoría, logs y
+  notificaciones internas.
 
 Soporta **multi-tienda** con resolución por dominio:
 
-| Tienda | Enfoque |
-| --- | --- |
-| **Panda Estampados** | B2B / corporativo — estampados personalizados |
-| **Kitsune Store** | B2C — cultura anime, manga y japonesa |
+| Tienda | Dominio | Enfoque |
+| --- | --- | --- |
+| **Panda Estampados** | `pandas-estampados.com` | B2B / corporativo — estampados personalizados |
+| **Kitsune Store** | `kitsune.com` | B2C — cultura anime, manga y japonesa |
+| **MM Boutique** | `mm-boutique.com` | Single-tenant |
+| **Morales Store** | `morales-store.com` | Single-tenant |
+
+Las 4 tiendas se ejecutan como **instancias Docker independientes** que
+comparten código y configuración, pero tienen su propia DB, sus volúmenes y
+su dominio.
 
 ## Stack Tecnológico
 
 | Capa | Tecnología |
 | --- | --- |
-| Backend | PHP 8.3, Laravel 13, Sanctum |
+| Backend | PHP 8.4, Laravel 13.8, Sanctum |
 | Frontend | Astro 7, React 19, Tailwind CSS 4, TypeScript |
-| Base de datos | PostgreSQL 18, PostGIS |
-| Infraestructura | Docker Compose |
+| Base de datos | PostgreSQL 18 + PostGIS |
+| Cache / Colas | Redis 7 |
+| Storage | Volúmenes Docker (bind mount en dev) |
+| Reverse proxy | Caddy |
+| Infraestructura | Docker Compose v2 |
+| Package manager | Composer (PHP), pnpm (Node) |
 | Testing | PHPUnit 12 |
-| Reportes | PhpSpreadsheet, Chart.js |
 
 ## Estructura del Proyecto
 
 ```txt
 Ecommerce/
-├── backend/          # API REST — Laravel 13
-├── frontend/         # Interfaz web — Astro 7 + React 19
-├── docs/             # Documentación técnica y de diseño
-├── docker/           # Docker Compose (dev, tools)
-└── database/         # Migraciones, seeds, esquemas
+├── backend/                  # API REST — Laravel 13
+│   ├── app/                  # Lógica de aplicación
+│   ├── database/             # Migraciones, seeds, factories
+│   ├── packages/             # Plugins Composer locales (path repos)
+│   └── ...
+├── frontend/                 # Interfaz web — Astro 7 + React 19
+│   ├── src/
+│   └── ...
+├── docker/
+│   ├── dev/                  # Compose + env del entorno de desarrollo
+│   ├── instances/            # Compose por instancia de prod (1 carpeta c/u)
+│   │   ├── panda-kitsune/    # Multi-tenant (Panda + Kitsune)
+│   │   ├── mm-boutique/      # Single-tenant
+│   │   └── morales-store/    # Single-tenant
+│   ├── conf/                 # Configs montados (postgres, redis, php, etc.)
+│   ├── Dockerfile.backend    # Imagen backend producción
+│   ├── Dockerfile.backend.dev # Imagen backend dev (xdebug + bind mounts)
+│   ├── Dockerfile.frontend   # Imagen frontend producción
+│   ├── Dockerfile.frontend.dev # Imagen frontend dev
+│   ├── entrypoint-backend*.sh
+│   └── versions.env          # Pinea versiones de imágenes
+├── database/                 # Migraciones iniciales, seeds, init SQL
+├── docs/                     # Documentación técnica y de diseño
+│   ├── architecture/
+│   ├── backend/
+│   ├── frontend/
+│   ├── deployment/
+│   ├── operations/           # Runbooks, puertos, etc.
+│   └── ...
+├── scripts/
+│   ├── docker-stack.sh       # Orquestador de las 4 instancias
+│   └── setup-local.sh
+└── Caddyfile                 # Configuración Caddy (prod)
 ```
 
 ## Requisitos
 
-- PHP 8.3+
-- PostgreSQL 18+
-- Node.js 20+
-- Docker Compose (opcional, para entorno reproducible)
+- Docker Engine 24+ con Compose v2
+- Bash 4+ (para los scripts)
+- Node.js 20+ y pnpm 9+ (solo si vas a tocar el frontend fuera de Docker)
+- PHP 8.4+ (solo si vas a tocar el backend fuera de Docker)
 
 ## Instalación
 
-### Con Docker (recomendado)
+La primera vez, el orquestador `docker-stack.sh` se encarga de crear los
+`.env` desde los `.env.example`, generar `docker/versions.env` y levantar
+todo.
 
 ```bash
-# Clonar el repositorio
-git clone <url-del-repositorio>
-cd Ecommerce
+# 1. Levantar todo (prod + dev si docker/dev/.env existe):
+./scripts/docker-stack.sh setup
 
-# Levantar servicios
-cd docker/dev
-docker compose -f docker-compose.dev.yml up -d
+# 2. Agregar los hosts al /etc/hosts (para que los dominios resuelvan local):
+sudo ./scripts/docker-stack.sh hosts >> /etc/hosts
 
-# Ejecutar migraciones
-cd ../../backend
-php artisan migrate
+# 3. (Opcional) Instalar el Caddyfile del repo:
+sudo cp Caddyfile /etc/caddy/Caddyfile
+sudo systemctl restart caddy
 
-# Ejecutar seeders (datos iniciales)
-php artisan db:seed
+# 4. Verificar:
+curl -sI http://pandas-estampados.com/api/storefront/theme
 ```
 
-### Sin Docker
+### Sólo el entorno de desarrollo
+
+Si solo querés dev (sin las 3 instancias de prod):
 
 ```bash
-# Instalar dependencias PHP
-cd backend
-composer install
+cp docker/dev/.env.example docker/dev/.env
+$EDITOR docker/dev/.env   # completá POSTGRES_PASSWORD, FTP_PASSWORD, etc.
 
-# Configurar base de datos
-cp .env.example .env
-php artisan key:generate
-
-# Editar .env con tus credenciales de PostgreSQL
-# DB_CONNECTION=pgsql
-# DB_HOST=127.0.0.1
-# DB_PORT=5432
-# DB_DATABASE=ecommerce
-# DB_USERNAME=tu_usuario
-# DB_PASSWORD=tu_contraseña
-
-# Ejecutar migraciones
-php artisan migrate
-
-# Instalar dependencias del frontend
-cd ../frontend
-npm install
+./scripts/docker-stack.sh setup dev
 ```
 
-## Comandos de Desarrollo
+### Destruir y empezar de cero
+
+```bash
+./scripts/docker-stack.sh nuke all   # ⚠ borra DB y volúmenes
+./scripts/docker-stack.sh setup
+```
+
+## Comandos útiles del orquestador
+
+```bash
+./scripts/docker-stack.sh help                       # todos los comandos
+./scripts/docker-stack.sh start dev                  # levantar solo dev
+./scripts/docker-stack.sh start panda-kitsune        # levantar solo Panda
+./scripts/docker-stack.sh stop all                   # detener todas
+./scripts/docker-stack.sh restart dev backend        # reiniciar un servicio
+./scripts/docker-stack.sh build dev                  # rebuild (no cache)
+./scripts/docker-stack.sh logs dev backend           # tail logs
+./scripts/docker-stack.sh exec dev backend bash      # shell dentro de un container
+./scripts/docker-stack.sh status all                 # estado de servicios
+./scripts/docker-stack.sh ps                         # containers corriendo
+./scripts/docker-stack.sh down dev                   # bajar containers (preserva datos)
+./scripts/docker-stack.sh nuke dev                   # ⚠ bajar + borrar volúmenes
+```
+
+## Comandos de desarrollo (dentro de los containers)
 
 ### Backend
 
 ```bash
-cd backend
-
-# Instalar dependencias
-composer install
-
-# Servidor de desarrollo
-composer run dev
-
-# Migraciones
+./scripts/docker-stack.sh exec dev backend bash
+# ya dentro del container:
 php artisan migrate
-
-# Pruebas
+php artisan db:seed
 php artisan test
-
-# Formateo de código
 vendor/bin/pint
-
-# Análisis estático
 vendor/bin/phpstan analyse
 ```
 
 ### Frontend
 
 ```bash
-cd frontend
-
-# Instalar dependencias
-npm install
-
-# Desarrollo
-npm run dev
-
-# Build de producción
-npm run build
+./scripts/docker-stack.sh exec dev frontend sh
+# ya dentro del container:
+pnpm dev
+pnpm build
+pnpm typecheck
+pnpm format
 ```
+
+## Puertos del entorno de desarrollo
+
+Ver [`docs/operations/ports.md`](docs/operations/ports.md) para el detalle
+completo. Resumen:
+
+| Servicio | URL |
+| --- | --- |
+| Frontend | http://localhost:5321 |
+| API | http://localhost:9000/api |
+| Postgres | `localhost:6432` |
+| Redis | `localhost:7379` |
+| FTP | `localhost:2121` |
+
+Los puertos están **shifted +1000** (excepto FTP, +2100) respecto a los
+defaults del servicio, para no chocar con un Postgres/Redis/Astro/php
+artisan/vsftpd local en tu host.
 
 ## Módulos del Sistema
 
@@ -157,40 +208,17 @@ npm run build
 | **Reportes** | Dashboard, métricas, exportación a Excel |
 | **Sistema** | Auditoría, logs, respaldos, notificaciones |
 
-## Infraestructura Docker
-
-```yaml
-Servicios:
-  postgres:    PostgreSQL 18 + PostGIS
-  pgadmin:     Administración visual de BD
-  backups:     Scheduler de respaldos automáticos
-```
-
-## Base de datos
-
-La lógica de negocio se apoya en:
-
-- Funciones almacenadas y procedimientos
-- Triggers para auditoría e historial de estados
-- Vistas para reportes
-- Índices para optimización de consultas
-- Restricciones de integridad referencial
-
-## Seguridad
-
-- Autenticación con tokens Bearer (Sanctum)
-- 2FA: email OTP, TOTP, Passkeys (preparado)
-- Roles y permisos por módulo
-- Auditoría de eliminaciones
-- Logs de actividad
-- Respaldos automáticos y restauración
-
 ## Documentación
 
-La documentación detallada se encuentra en:
-
 - [`docs/`](docs/) — Arquitectura, diseño, operaciones
-- [`backend/DOCUMENTACION.md`](backend/DOCUMENTACION.md) — Documentación técnica del backend
+  - [`docs/operations/ports.md`](docs/operations/ports.md) — Mapa de puertos
+  - [`docs/operations/docker.md`](docs/operations/docker.md) — Detalle de los
+    servicios Docker
+  - [`docs/operations/environments.md`](docs/operations/environments.md) — Ambientes
+  - [`docs/operations/caddy.md`](docs/operations/caddy.md) — Reverse proxy
+  - [`docs/operations/backups.md`](docs/operations/backups.md) — Respaldos
+- [`backend/DOCUMENTACION.md`](backend/DOCUMENTACION.md) — Documentación técnica
+  del backend
 - [`backend/docs/`](backend/docs/) — Docs internos del backend
 
 ## Licencia

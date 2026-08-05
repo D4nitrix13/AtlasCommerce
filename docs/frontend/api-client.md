@@ -176,7 +176,7 @@ API_ENDPOINTS.settings.currencies  → /currencies
 ## Variables de entorno
 
 ```env
-PUBLIC_API_URL=http://localhost:8000/api
+PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 - `PUBLIC_API_URL` debe incluir el prefijo `/api`

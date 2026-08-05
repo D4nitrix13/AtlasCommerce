@@ -18,7 +18,7 @@ APP_NAME=Ecommerce
 APP_ENV=local
 APP_KEY=base64:GENERADO_POR_KEY:GENERATE
 APP_DEBUG=true
-APP_URL=http://localhost:8000
+APP_URL=http://localhost:9000
 
 # Base de datos (Postgres local)
 DB_CONNECTION=pgsql
@@ -34,7 +34,7 @@ REDIS_PORT=6379
 REDIS_PASSWORD=null
 
 # Sanctum — dominios permitidos
-SANCTUM_STATEFUL_DOMAINS=pandas-estampados.com:8080,kitsune.com:8080,localhost:4321
+SANCTUM_STATEFUL_DOMAINS=pandas-estampados.com:8080,kitsune.com:8080,localhost:5321
 SESSION_DOMAIN=localhost
 ```
 

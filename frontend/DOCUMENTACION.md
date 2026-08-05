@@ -416,7 +416,7 @@ export default defineConfig({
 ### Variable de entorno requerida
 
 ```env
-PUBLIC_API_URL=http://localhost:8000/api   # URL del backend Laravel
+PUBLIC_API_URL=http://localhost:9000/api   # URL del backend Laravel
 ```
 
 ---

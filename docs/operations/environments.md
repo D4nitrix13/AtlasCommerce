@@ -16,7 +16,7 @@
 - `APP_KEY` — Clave de cifrado generada con
   `php artisan key:generate` (ej. `base64:...`)
 - `APP_URL` — URL base del backend
-  (ej. `http://localhost:8000`)
+  (ej. `http://localhost:9000`)
 - `APP_DEBUG` — Modo debug
   (`true` en local, `false` en producción)
 
@@ -36,7 +36,7 @@
 
 - `SANCTUM_STATEFUL_DOMAINS` — Dominios que usan
   sesiones stateful
-  (ej. `localhost:4321,localhost:8080`)
+  (ej. `localhost:5321,localhost:8080`)
 
 ### 2FA
 
@@ -72,7 +72,7 @@
 ## Frontend — Astro
 
 - `PUBLIC_API_URL` — URL base de la API `Laravel`
-  (con `/api`, ej. `http://localhost:8000/api`)
+  (con `/api`, ej. `http://localhost:9000/api`)
 
 ### Notas
 

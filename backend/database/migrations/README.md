@@ -1141,7 +1141,7 @@ PUBLIC_API_URL
 Ejemplo:
 
 ```env
-PUBLIC_API_URL=http://localhost:8000/api
+PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 Los endpoints internos de `src/lib/endpoints.ts` no deben incluir `/api`.

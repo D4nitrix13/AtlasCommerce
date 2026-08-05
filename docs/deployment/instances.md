@@ -141,6 +141,17 @@ curl -I http://localhost/
 # HTTP/1.1 200 OK
 ```
 
+> **Nota sobre los puertos `8000` y `4321`:** estos son los puertos
+> **internos de los containers** (donde Laravel y Astro escuchan
+> dentro de la red de docker). Las instancias de prod **no публицan
+> estos puertos al host**; el tráfico HTTP entra por Caddy vía dominio
+> (`pandas-estampados.com`, etc.). Los `curl` de arriba asumen que se
+> ejecutan **dentro del container de la app** (ej. `docker compose exec
+> app curl -I http://localhost:8000/up`) o desde un host donde estos
+> puertos están mapeados. Ver
+> [`docs/operations/ports.md`](../operations/ports.md) para el mapa
+> completo.
+
 ### 5. Configurar DNS
 
 Para cada dominio de la instancia, apuntar al servidor:
@@ -350,6 +361,10 @@ El backend no está respondiendo:
 docker compose logs app
 curl -I http://localhost:8000/up
 ```
+
+> El `curl` apunta al `:8000` interno del container. Ejecutalo desde
+> dentro del container (`docker compose exec app curl ...`) o desde
+> un host donde el puerto esté mapeado.
 
 Si Caddy arranca antes que el backend, va a fallar. El `depends_on`
 con `condition: service_healthy` debería prevenir esto, pero si el

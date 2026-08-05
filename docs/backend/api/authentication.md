@@ -166,7 +166,7 @@ En `config/sanctum.php`:
 En `.env`:
 
 ```env
-SANCTUM_STATEFUL_DOMAINS=localhost:4321,localhost:8080,pandas-estampados.com
+SANCTUM_STATEFUL_DOMAINS=localhost:5321,localhost:8080,pandas-estampados.com
 ```
 
 ## Errores comunes
