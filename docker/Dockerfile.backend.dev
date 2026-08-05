@@ -6,6 +6,13 @@
 FROM php:8.4-fpm-alpine
 
 # Extensiones PHP de producción + debugging/development.
+#
+# Tres RUNs separados para que Docker pueda cachearlos de forma
+# granular. Si solo cambia la lista de extensiones PHP, el `apk add`
+# queda cacheado y no se re-descargan paquetes. Si cambia solo el
+# `docker-php-ext-enable`, no se re-compila nada. Si cambia solo la
+# lista de pecl, se re-compila solo eso.
+
 RUN apk add --no-cache \
         postgresql-dev \
         postgresql-client \
@@ -17,8 +24,9 @@ RUN apk add --no-cache \
         git \
         icu-dev \
         linux-headers \
-        $PHPIZE_DEPS \
-    && docker-php-ext-install \
+        $PHPIZE_DEPS
+
+RUN docker-php-ext-install \
         pdo_pgsql \
         pgsql \
         zip \
@@ -28,8 +36,9 @@ RUN apk add --no-cache \
         ftp \
         exif \
         xml \
-        mbstring \
-    && pecl install redis xdebug \
+        mbstring
+
+RUN pecl install redis xdebug \
     && docker-php-ext-enable redis xdebug opcache
 
 # Composer.

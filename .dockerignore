@@ -1,0 +1,87 @@
+# .dockerignore del repo (raíz).
+# Aplicado a todos los docker build del proyecto.
+# Reduce el context enviado al Docker daemon, lo que baja
+# tiempos de build y previene leaks de secretos.
+
+# --- Git ---
+.git
+.gitignore
+.gitattributes
+.github
+
+# --- Node / Frontend ---
+**/node_modules
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/pnpm-store
+**/.pnpm-store
+**/.astro
+**/.next
+**/.nuxt
+**/.cache
+**/dist
+**/.vite
+**/coverage
+**/.eslintcache
+
+# --- PHP / Composer / Laravel ---
+**/vendor
+**/composer.phar
+backend/.phpunit.cache
+backend/.phpunit.result.cache
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+!backend/bootstrap/cache/.gitkeep
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# --- IDEs / Editor / OS ---
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*~
+*.bak
+
+# --- Documentación / Meta ---
+README.md
+LICENSE
+LICENSE.*
+CONTRIBUTING.md
+docs/
+.claude/
+.opencode/
+
+# --- Docker / CI ---
+Dockerfile*
+docker-compose*.yml
+**/docker-compose*.yml
+Caddyfile
+
+# --- Archivos de AI / Memoria ---
+.mcp_config*
+.claude/
+.opencode/
+.cursor/
+.aider*
+AGENTS.md
+AGENTS.local.md
+
+# --- Logs ---
+*.log
+logs/
+**/logs
+
+# --- Tests / Coverage ---
+**/test-results
+**/playwright-report
+**/playwright/.cache
+**/.nyc_output
