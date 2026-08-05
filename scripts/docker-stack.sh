@@ -13,6 +13,7 @@
 #   start   [instancia|all]      Levantar containers (preserva volúmenes)
 #   stop    [instancia|all]      Detener containers (preserva volúmenes)
 #   restart [instancia|all]      Reiniciar containers
+#   build   [instancia|all]      Reconstruir imágenes (--no-cache)
 #   status  [instancia|all]      Estado de cada servicio
 #   ps      [instancia|all]      Lista de containers
 #   logs    [instancia] [svc]    Tail de logs (default: todos)
@@ -20,7 +21,8 @@
 #                                Ejecuta <cmd> dentro del container
 #   down    [instancia|all]      Detener y eliminar containers (preserva volúmenes)
 #   nuke    [instancia|all]      down + eliminar volúmenes (BORRA DATOS)
-#   setup                        Primera vez: copia .env.example, levanta todo
+#   setup   [prod|dev|all]       Primera vez: copia .env.example, levanta
+#                                (default: all)
 #   hosts                        Imprime el bloque para /etc/hosts
 #   caddy                        Imprime el Caddyfile a usar
 #   help                         Muestra esta ayuda
@@ -262,7 +264,18 @@ cmd_exec() {
     docker_compose "$inst" exec "$svc" "$@"
 }
 
+cmd_build() {
+    local arg="${1:-all}"
+    while read -r inst; do
+        ensure_env_file "$inst"
+        log_info "Building ${C_BOLD}${inst}${C_RESET} (no cache)…"
+        docker_compose "$inst" build --no-cache
+        log_ok "${inst} construido."
+    done < <(resolve_instances "$arg")
+}
+
 cmd_setup() {
+    local scope="${1:-all}"
     log_bold "Primera instalación de las instancias."
     # 1. docker/versions.env (centraliza versiones de imágenes)
     if [[ ! -f "${ROOT_DIR}/docker/versions.env" ]]; then
@@ -274,18 +287,41 @@ cmd_setup() {
             exit 1
         fi
     fi
-    # 2. .env por instancia de producción
-    for inst in "${PROD_INSTANCES[@]}"; do
+    # 2. Resolver qué instancias levanta este setup según el scope.
+    local -a instances_to_start=()
+    case "$scope" in
+        prod)
+            instances_to_start=("${PROD_INSTANCES[@]}")
+            log_info "Scope: prod (${PROD_INSTANCES[*]})"
+            ;;
+        dev)
+            instances_to_start=(dev)
+            log_info "Scope: dev"
+            ;;
+        all)
+            instances_to_start=("${ALL_INSTANCES[@]}")
+            log_info "Scope: all (prod + dev)"
+            ;;
+        *)
+            log_err "Scope inválido: $scope. Usá: prod | dev | all"
+            exit 1
+            ;;
+    esac
+    # 3. Asegurar .env de cada instancia (para dev, ensure_env_file es no-op;
+    #    el chequeo real se hace abajo).
+    for inst in "${instances_to_start[@]}"; do
         ensure_env_file "$inst"
     done
-    # 3. Levantar todas las de producción
-    cmd_start all
-    # 4. Dev (opcional, sólo si .env existe)
-    if [[ -f "${DEV_DIR}/.env" ]]; then
-        cmd_start dev
-    else
-        log_warn "dev: .env no existe, omitido. Copiá docker/dev/.env.example cuando lo necesites."
-    fi
+    # 4. Levantar.
+    for inst in "${instances_to_start[@]}"; do
+        if [[ "$inst" == "dev" && ! -f "${DEV_DIR}/.env" ]]; then
+            log_warn "dev: .env no existe, omitido. Copiá docker/dev/.env.example cuando lo necesites."
+            continue
+        fi
+        log_info "Levantando ${C_BOLD}${inst}${C_RESET}…"
+        docker_compose "$inst" up -d --remove-orphans
+        log_ok "${inst} levantado."
+    done
     log_ok "Setup completo. Próximos pasos:"
     echo "  1. sudo ./scripts/docker-stack.sh hosts >>/etc/hosts"
     echo "  2. sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl restart caddy"
@@ -323,11 +359,13 @@ Ejemplos:
   ${C_CYAN}$0 start mm-boutique${C_RESET}          # levanta solo MM Boutique
   ${C_CYAN}$0 stop dev${C_RESET}                  # detiene el dev compose
   ${C_CYAN}$0 restart panda-kitsune app${C_RESET}  # reinicia solo el servicio app
+  ${C_CYAN}$0 build dev${C_RESET}                  # rebuild de dev (no cache)
   ${C_CYAN}$0 logs mm-boutique frontend${C_RESET}  # tail logs del frontend
   ${C_CYAN}$0 exec morales-store app bash${C_RESET} # bash dentro del app
   ${C_CYAN}$0 status all${C_RESET}                 # estado de los servicios
   ${C_CYAN}$0 nuke panda-kitsune${C_RESET}         # ⚠ BORRA la BD de Panda
-  ${C_CYAN}$0 setup${C_RESET}                      # primera instalación
+  ${C_CYAN}$0 setup${C_RESET}                      # primera instalación (all)
+  ${C_CYAN}$0 setup dev${C_RESET}                  # primera instalación solo dev
 
 EOF
 }
@@ -345,6 +383,7 @@ case "$cmd" in
     start)    cmd_start "$@" ;;
     stop)     cmd_stop "$@" ;;
     restart)  cmd_restart "$@" ;;
+    build)    cmd_build "$@" ;;
     down)     cmd_down "$@" ;;
     nuke)     cmd_nuke "$@" ;;
     status)   cmd_status "$@" ;;
