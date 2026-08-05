@@ -9,23 +9,28 @@
 # Uso:
 #   ./scripts/docker-stack.sh <comando> [args...]
 #
-# Comandos:
-#   start   [instancia|all]      Levantar containers (preserva volúmenes)
-#   stop    [instancia|all]      Detener containers (preserva volúmenes)
-#   restart [instancia|all]      Reiniciar containers
-#   build   [instancia|all]      Reconstruir imágenes (--no-cache)
-#   status  [instancia|all]      Estado de cada servicio
-#   ps      [instancia|all]      Lista de containers
+# Comandos (aceptan [instancia|all] y, casi todos, [servicio] opcional):
+#   start   [instancia|all] [svc] Levantar containers (preserva volúmenes)
+#   stop    [instancia|all] [svc] Detener containers (preserva volúmenes)
+#   restart [instancia|all] [svc] Reiniciar containers
+#   build   [instancia|all] [svc] Reconstruir imágenes (--no-cache)
+#   down    [instancia|all] [svc] Detener y eliminar containers (preserva volúmenes)
+#   nuke    [instancia|all] [svc] down + eliminar volúmenes (BORRA DATOS)
+#   status  [instancia|all] [svc] Estado de cada servicio
+#   ps                            Lista de containers (vista rápida)
+#   info / psv                    Tabla detallada: instancia, servicio,
+#                                  estado, puertos y comando del container.
+#                                  [instancia|all] [svc] opcional.
 #   logs    [instancia] [svc]    Tail de logs (default: todos)
 #   exec    <instancia> <svc> <cmd...>
 #                                Ejecuta <cmd> dentro del container
-#   down    [instancia|all]      Detener y eliminar containers (preserva volúmenes)
-#   nuke    [instancia|all]      down + eliminar volúmenes (BORRA DATOS)
 #   setup   [prod|dev|all]       Primera vez: copia .env.example, levanta
 #                                (default: all)
 #   hosts                        Imprime el bloque para /etc/hosts
 #   caddy                        Imprime el Caddyfile a usar
 #   help                         Muestra esta ayuda
+#
+# Aliases cortos: up=start, b=build, rs=restart, ls=ps, psv=info.
 #
 # Instancias válidas:
 #   panda-kitsune  (multi-tenant: Panda + Kitsune)
@@ -115,8 +120,41 @@ instance_env_file() {
     fi
 }
 
+# resolve_targets <instancia> [servicio]
+# Variante de resolve_instances que también captura un servicio
+# opcional. Imprime líneas "<instancia>\t<servicio>". Si servicio
+# está vacío, opera sobre todo el stack. Esto permite que cada
+# comando (start, stop, build, restart, down, nuke) opere a nivel
+# de stack completo o de un servicio individual.
+#
+# Ejemplos:
+#   resolve_targets all            → "panda-kitsune\t" "mm-boutique\t" ...
+#   resolve_targets dev backend    → "dev\tbackend"
+#   resolve_targets panda-kitsune → "panda-kitsune\t"
+resolve_targets() {
+    local arg="${1:-all}"
+    local svc="${2:-}"
+    if [[ -z "$arg" ]]; then
+        log_err "Falta la instancia. Usá 'all' o una de: ${ALL_INSTANCES[*]}"
+        exit 1
+    fi
+    if [[ "$arg" == "all" ]]; then
+        for inst in "${ALL_INSTANCES[@]}"; do
+            printf "%s\t%s\n" "$inst" "$svc"
+        done
+        return
+    fi
+    if is_valid_instance "$arg"; then
+        printf "%s\t%s\n" "$arg" "$svc"
+        return
+    fi
+    log_err "Instancia desconocida: $arg. Válidas: ${ALL_INSTANCES[*]}"
+    exit 1
+}
+
 # resolve_instances <arg>
-# "all" → todas; un nombre → esa; vacío → error.
+# Deprecated: mantener por retrocompatibilidad interna (cmd_setup).
+# Devuelve solo el nombre de instancia, una por línea.
 resolve_instances() {
     local arg="${1:-}"
     if [[ -z "$arg" ]]; then
@@ -173,66 +211,122 @@ docker_compose() {
 # --- Comandos --------------------------------------------------------------
 
 cmd_start() {
-    local arg="${1:-all}"
-    while read -r inst; do
+    while IFS=$'\t' read -r inst svc; do
         ensure_env_file "$inst"
-        log_info "Levantando ${C_BOLD}${inst}${C_RESET}…"
-        docker_compose "$inst" up -d --remove-orphans
-        log_ok "${inst} levantado."
-    done < <(resolve_instances "$arg")
+        if [[ -n "$svc" ]]; then
+            log_info "Levantando ${C_BOLD}${inst}/${svc}${C_RESET}…"
+            docker_compose "$inst" up -d --remove-orphans "$svc"
+            log_ok "${inst}/${svc} levantado."
+        else
+            log_info "Levantando ${C_BOLD}${inst}${C_RESET}…"
+            docker_compose "$inst" up -d --remove-orphans
+            log_ok "${inst} levantado."
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_stop() {
-    local arg="${1:-all}"
-    while read -r inst; do
-        log_info "Deteniendo ${C_BOLD}${inst}${C_RESET}…"
-        docker_compose "$inst" stop
-        log_ok "${inst} detenido (containers preservados)."
-    done < <(resolve_instances "$arg")
+    while IFS=$'\t' read -r inst svc; do
+        if [[ -n "$svc" ]]; then
+            log_info "Deteniendo ${C_BOLD}${inst}/${svc}${C_RESET}…"
+            docker_compose "$inst" stop "$svc"
+            log_ok "${inst}/${svc} detenido (container preservado)."
+        else
+            log_info "Deteniendo ${C_BOLD}${inst}${C_RESET}…"
+            docker_compose "$inst" stop
+            log_ok "${inst} detenido (containers preservados)."
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_restart() {
-    local arg="${1:-all}"
-    while read -r inst; do
-        ensure_env_file "$inst"
-        log_info "Reiniciando ${C_BOLD}${inst}${C_RESET}…"
-        docker_compose "$inst" restart
-        log_ok "${inst} reiniciado."
-    done < <(resolve_instances "$arg")
+    while IFS=$'\t' read -r inst svc; do
+        if [[ -n "$svc" ]]; then
+            log_info "Reiniciando ${C_BOLD}${inst}/${svc}${C_RESET}…"
+            docker_compose "$inst" restart "$svc"
+            log_ok "${inst}/${svc} reiniciado."
+        else
+            ensure_env_file "$inst"
+            log_info "Reiniciando ${C_BOLD}${inst}${C_RESET}…"
+            docker_compose "$inst" restart
+            log_ok "${inst} reiniciado."
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_down() {
-    local arg="${1:-all}"
-    while read -r inst; do
-        log_info "Bajando containers de ${C_BOLD}${inst}${C_RESET} (preserva volúmenes)…"
-        docker_compose "$inst" down --remove-orphans
-        log_ok "${inst} abajo."
-    done < <(resolve_instances "$arg")
+    while IFS=$'\t' read -r inst svc; do
+        if [[ -n "$svc" ]]; then
+            log_info "Bajando container ${C_BOLD}${inst}/${svc}${C_RESET}…"
+            docker_compose "$inst" rm -f -s "$svc"
+            log_ok "${inst}/${svc} bajado."
+        else
+            log_info "Bajando containers de ${C_BOLD}${inst}${C_RESET} (preserva volúmenes)…"
+            docker_compose "$inst" down --remove-orphans
+            log_ok "${inst} abajo."
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_nuke() {
-    local arg="${1:-all}"
     log_warn "⚠  nuke ELIMINA VOLÚMENES. Esto borra la base de datos completa."
     read -rp "¿Confirmás? escribí 'yes' para continuar: " confirm
     [[ "$confirm" == "yes" ]] || { log_info "Cancelado."; exit 0; }
-    while read -r inst; do
-        log_info "Nuke de ${C_BOLD}${inst}${C_RESET} (containers + volúmenes)…"
-        docker_compose "$inst" down --volumes --remove-orphans
-        log_ok "${inst} nuked."
-    done < <(resolve_instances "$arg")
+    while IFS=$'\t' read -r inst svc; do
+        if [[ -n "$svc" ]]; then
+            log_info "Nuke de ${C_BOLD}${inst}/${svc}${C_RESET} (container + volumen)…"
+            docker_compose "$inst" rm -f -s -v "$svc"
+            log_ok "${inst}/${svc} nuked."
+        else
+            log_info "Nuke de ${C_BOLD}${inst}${C_RESET} (containers + volúmenes)…"
+            docker_compose "$inst" down --volumes --remove-orphans
+            log_ok "${inst} nuked."
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_status() {
-    local arg="${1:-all}"
-    while read -r inst; do
+    while IFS=$'\t' read -r inst svc; do
         printf "\n${C_BOLD}==[ %s ]==${C_RESET}\n" "$inst"
-        docker_compose "$inst" ps
-    done < <(resolve_instances "$arg")
+        if [[ -n "$svc" ]]; then
+            docker_compose "$inst" ps "$svc"
+        else
+            docker_compose "$inst" ps
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_ps() {
     docker ps --filter "label=com.docker.compose.project" \
-        --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+        --format "table {{.Label \"com.docker.compose.project\"}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"
+}
+
+# Tabla detallada con instancia, servicio, estado, puertos y comando
+# del container. Útil para diagnóstico rápido: a simple vista se ve
+# qué container de qué instancia está corriendo qué binario y qué
+# puertos tiene publicados al host.
+#
+# Uso:
+#   info            # todas las instancias y servicios
+#   info dev        # solo dev
+#   info dev backend # solo un servicio
+cmd_info() {
+    # docker ps --filter label=foo solo soporta AND, no OR entre
+    # instancias. Iteramos por fuera y emitimos un único header
+    # al inicio (con `tail -n +2` saltamos el header de las
+    # llamadas siguientes).
+    local header_printed=0
+    local format_row='{{.Label "com.docker.compose.project"}}\t{{.Label "com.docker.compose.service"}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.Command}}'
+    while IFS=$'\t' read -r inst svc; do
+        local filter_args=(--filter "label=com.docker.compose.project=$inst")
+        [[ -n "$svc" ]] && filter_args+=(--filter "label=com.docker.compose.service=$svc")
+        if [[ $header_printed -eq 0 ]]; then
+            docker ps -a "${filter_args[@]}" --format "table $format_row"
+            header_printed=1
+        else
+            docker ps -a "${filter_args[@]}" --format "$format_row" | tail -n +2
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_logs() {
@@ -265,13 +359,18 @@ cmd_exec() {
 }
 
 cmd_build() {
-    local arg="${1:-all}"
-    while read -r inst; do
+    while IFS=$'\t' read -r inst svc; do
         ensure_env_file "$inst"
-        log_info "Building ${C_BOLD}${inst}${C_RESET} (no cache)…"
-        docker_compose "$inst" build --no-cache
-        log_ok "${inst} construido."
-    done < <(resolve_instances "$arg")
+        if [[ -n "$svc" ]]; then
+            log_info "Building ${C_BOLD}${inst}/${svc}${C_RESET} (no cache)…"
+            docker_compose "$inst" build --no-cache "$svc"
+            log_ok "${inst}/${svc} construido."
+        else
+            log_info "Building ${C_BOLD}${inst}${C_RESET} (no cache)…"
+            docker_compose "$inst" build --no-cache
+            log_ok "${inst} construido."
+        fi
+    done < <(resolve_targets "$@")
 }
 
 cmd_setup() {
@@ -355,17 +454,20 @@ cmd_help() {
     cat <<EOF
 
 Ejemplos:
-  ${C_CYAN}$0 start all${C_RESET}                  # levanta las 4 instancias
-  ${C_CYAN}$0 start mm-boutique${C_RESET}          # levanta solo MM Boutique
-  ${C_CYAN}$0 stop dev${C_RESET}                  # detiene el dev compose
-  ${C_CYAN}$0 restart panda-kitsune app${C_RESET}  # reinicia solo el servicio app
-  ${C_CYAN}$0 build dev${C_RESET}                  # rebuild de dev (no cache)
-  ${C_CYAN}$0 logs mm-boutique frontend${C_RESET}  # tail logs del frontend
-  ${C_CYAN}$0 exec morales-store app bash${C_RESET} # bash dentro del app
-  ${C_CYAN}$0 status all${C_RESET}                 # estado de los servicios
-  ${C_CYAN}$0 nuke panda-kitsune${C_RESET}         # ⚠ BORRA la BD de Panda
-  ${C_CYAN}$0 setup${C_RESET}                      # primera instalación (all)
-  ${C_CYAN}$0 setup dev${C_RESET}                  # primera instalación solo dev
+  ${C_CYAN}$0 up all${C_RESET}                       # alias de start all: levanta las 4 instancias
+  ${C_CYAN}$0 start mm-boutique${C_RESET}           # levanta solo MM Boutique
+  ${C_CYAN}$0 stop dev${C_RESET}                   # detiene el dev compose
+  ${C_CYAN}$0 b panda-kitsune frontend${C_RESET}    # alias de build: rebuild del frontend de Panda
+  ${C_CYAN}$0 restart panda-kitsune app${C_RESET}   # reinicia solo el servicio app
+  ${C_CYAN}$0 build dev backend${C_RESET}           # rebuild solo del backend de dev
+  ${C_CYAN}$0 logs mm-boutique frontend${C_RESET}   # tail logs del frontend
+  ${C_CYAN}$0 exec morales-store app bash${C_RESET}  # bash dentro del app
+  ${C_CYAN}$0 status all${C_RESET}                  # estado de los servicios
+  ${C_CYAN}$0 info${C_RESET}                        # tabla detallada de todos los containers
+  ${C_CYAN}$0 info dev backend${C_RESET}            # tabla detallada de un servicio
+  ${C_CYAN}$0 nuke panda-kitsune${C_RESET}          # ⚠ BORRA la BD de Panda
+  ${C_CYAN}$0 setup${C_RESET}                       # primera instalación (all)
+  ${C_CYAN}$0 setup dev${C_RESET}                   # primera instalación solo dev
 
 EOF
 }
@@ -380,6 +482,13 @@ fi
 cmd="$1"; shift || true
 
 case "$cmd" in
+    # Aliases cortos para uso frecuente.
+    up)       cmd_start "$@" ;;
+    b)        cmd_build "$@" ;;
+    rs)       cmd_restart "$@" ;;
+    ls)       cmd_ps "$@" ;;
+    psv|info) cmd_info "$@" ;;
+
     start)    cmd_start "$@" ;;
     stop)     cmd_stop "$@" ;;
     restart)  cmd_restart "$@" ;;
