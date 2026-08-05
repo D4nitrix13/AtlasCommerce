@@ -459,6 +459,126 @@ test("muestra la página principal", async ({ page }) => {
 });
 ```
 
+## vtracer
+
+`vtracer` es una herramienta CLI para **vectorizar imágenes raster** (PNG,
+JPEG, WebP) a SVG. Está escrita en Rust por visioncortex y usa algoritmos
+de clustering de color para reconstruir formas geométricas a partir de
+píxeles.
+
+### Enlaces de vtracer
+
+- **GitHub:** [visioncortex/vtracer](https://github.com/visioncortex/vtracer)
+- **Crate:** [vtracer en crates.io](https://crates.io/crates/vtracer)
+
+### Uso de vtracer en el proyecto
+
+En este proyecto, `vtracer` se usa para generar las versiones SVG de los
+logos de las tiendas a partir de los `.webp` originales. El SVG resultante
+sirve para:
+
+- **Favicon del navegador** — el icono de la pestaña escala bien en
+  cualquier tamaño (16×16, 32×32, retina, HiDPI) sin perder nitidez.
+- **OG images y meta-imágenes** — para compartir en redes sociales o
+  messengers, donde se renderizan a múltiples resoluciones.
+- **Zoom en mobile** — el storefront responsive hace zoom sobre el logo
+  en el admin preview; el SVG no pixela.
+- **Animaciones CSS con `currentColor`** — el SVG puede tomar el color
+  del tema (`fill: currentColor`), algo que el WebP no puede.
+
+Los `.webp` siguen siendo la **fuente de verdad** para el storefront y
+los emails transaccionales (Laravel usa `asset()` para servirlos desde
+`backend/public/`). El SVG es un asset complementario.
+
+### Calidad esperada según tipo de imagen
+
+| Tipo de logo | Resultado con vtracer |
+| --- | --- |
+| Formas planas, colores sólidos, texto claro | Excelente — nodos limpios, archivo chico |
+| Gradientes sutiles, sombras suaves | Bueno — puede requerir ajuste de parámetros |
+| Fotos o imágenes con mucho detalle | Malo — el SVG queda con miles de nodos; no usar |
+
+Para los logos de este repo (vectoriales simples exportados a `.webp`)
+los resultados son muy buenos.
+
+### Instalación de vtracer
+
+Con **Cargo** (recomendado si tenés Rust):
+
+```bash
+cargo install vtracer
+```
+
+Esto instala el binario en `~/.cargo/bin/vtracer`. Asegurate de tener
+esa ruta en tu `PATH` (suele estar por defecto con `rustup`).
+
+Sin Cargo, bajar el binario precompilado desde la página de releases:
+
+```txt
+https://github.com/visioncortex/vtracer/releases
+```
+
+Elegí el archivo correspondiente a tu plataforma (`vtracer-x86_64-linux-gnu`,
+`vtracer-aarch64-apple-darwin`, etc.), descomprimirlo y mover el binario a
+un directorio del `PATH`, por ejemplo:
+
+```bash
+sudo install -m 755 vtracer /usr/local/bin/vtracer
+```
+
+Verifica la instalación:
+
+```bash
+vtracer --version
+# visioncortex VTracer 0.6.5
+```
+
+### Vectorizar un logo con vtracer
+
+Para vectorizar un `.webp` a `.svg` con parámetros optimizados para logos
+con formas planas:
+
+```bash
+vtracer \
+    --input frontend/public/images/stores/panda-estampados/brand/logo.webp \
+    --output frontend/public/images/stores/panda-estampados/brand/logo.svg \
+    --color_precision 6 \
+    --filter_speckle 4 \
+    --mode polygon
+```
+
+### Parámetros útiles
+
+| Parámetro | Default | Qué hace | Para logos |
+| --- | --- | --- | --- |
+| `--color_precision` | 6 | Bits de cuantización de color. Mayor = más colores preservados, más nodos | `6` está bien para logos con 4-10 colores |
+| `--filter_speckle` | 4 | Tamaño mínimo de mancha a ignorar (en píxeles). Mayor = ignora más ruido | `4` elimina ruido JPEG/WebP sin perder detalles del logo |
+| `--mode` | spline | `polygon` da bordes rectos, `spline` da curvas suaves | `polygon` para logos geométricos planos; `spline` para logos orgánicos |
+| `--corner_threshold` | 60 | Umbral de detección de esquinas | subir a `80-90` para logos con curvas pronunciadas |
+
+Para todos los logos del repo de una vez (los 4 stores):
+
+```bash
+cd /home/d4nitrix13/Code/Ecommerce
+for slug in panda-estampados kitsune mm-boutique morales-store; do
+    vtracer \
+        --input "frontend/public/images/stores/$slug/brand/logo.webp" \
+        --output "frontend/public/images/stores/$slug/brand/logo.svg" \
+        --color_precision 6 \
+        --filter_speckle 4 \
+        --mode polygon
+done
+```
+
+### Otras herramientas de vectorización (alternativas)
+
+| Herramienta | Tipo | Cuándo conviene |
+| --- | --- | --- |
+| [Vectorizer.io](https://vectorizer.io) | Web con IA | Resultado más limpio sin instalar nada, free tier con límites |
+| [Inkscape](https://inkscape.org) | Desktop UI | Cuando necesitás ajustar a mano (limpiar nodos, cambiar colores) |
+| [SVGcode](https://svgco.de) | PWA client-side | Conversión en el browser, nada se sube a un server |
+| `potrace` (CLI) | CLI | Solo blanco/negro — útil para iconos de una sola tinta |
+
 ## Flujo recomendado
 
 Antes de trabajar en una nueva funcionalidad:
