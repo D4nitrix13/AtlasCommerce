@@ -3,7 +3,7 @@
 # pensados para iterar sin rebuilds. Se usa desde
 # `docker/dev/docker-compose.dev.yml`.
 
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Extensiones PHP de producción + debugging/development.
 RUN apk add --no-cache \
@@ -25,6 +25,9 @@ RUN apk add --no-cache \
         bcmath \
         opcache \
         ftp \
+        exif \
+        xml \
+        mbstring \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug opcache
 
