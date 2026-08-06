@@ -179,13 +179,15 @@ resolve_targets() {
             return
             ;;
         development|dev)
-            # Dev comparte puertos shifted entre los 3 stacks (todos
-            # usan 6432/7379/9000/5321/2121). Solo uno puede estar
-            # activo a la vez. Levantamos solo el primero.
-            # Para los otros, usar scope explícito:
-            #   start development:mm-boutique
-            #   start development:morales-store
-            printf "%s\t%s\n" "${DEV_INSTANCES[0]}" "$svc"
+            # Cada tienda dev usa puertos shifted distintos para que las
+            # 3 puedan correr en paralelo sin conflicto:
+            #   panda-and-kitsune-dev: 6432/7379/9000/5321/2121 (+1000)
+            #   mm-boutique-dev:       7432/8379/10000/6321/3121 (+2000)
+            #   morals-store-dev:     8432/9379/11000/7321/4121 (+3000)
+            # Ver docker/instances/development/<store>/environment/.env
+            for inst in "${DEV_INSTANCES[@]}"; do
+                printf "%s\t%s\n" "$inst" "$svc"
+            done
             return
             ;;
     esac
@@ -537,12 +539,13 @@ Ejemplos:
   ${C_CYAN}$0 setup development${C_RESET}                # primera instalación solo dev
 
 Nota sobre dev:
-  Los 3 stacks dev (panda-and-kitsune, mm-boutique, morales-store)
-  comparten los puertos shifted del host (6432/7379/9000/5321/2121).
-  Solo uno puede estar activo a la vez. Para cambiar de tienda dev:
-    start development                    # levanta la 1° dev
-    stop development                     # detiene las 3 dev
-    start development:<otra-tienda>      # levanta otra específica
+  Cada tienda dev usa puertos shifted DISTINTOS para que las 3
+  puedan correr en paralelo sin conflicto:
+    panda-and-kitsune-dev: 6432/7379/9000/5321/2121 (+1000)
+    mm-boutique-dev:       7432/8379/10000/6321/3121 (+2000)
+    morals-store-dev:     8432/9379/11000/7321/4121 (+3000)
+  Definidos en docker/instances/development/<store>/environment/.env
+  Para operar una sola: start development:<store>.
 
 EOF
 }

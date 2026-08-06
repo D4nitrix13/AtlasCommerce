@@ -67,7 +67,7 @@ services:
   frontend:
     build:
       context: ../../../..
-      dockerfile: frontend/Dockerfile.production
+      dockerfile: docker/instances/production/mm-boutique/frontend/Dockerfile.production
     container_name: mmboutique-frontend
     restart: unless-stopped
     environment:
@@ -95,7 +95,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql
       - ../../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
-      - conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
     command:
       - postgres
       - -c
@@ -119,7 +119,7 @@ services:
       - redis-server
       - /usr/local/etc/redis/redis.conf
     volumes:
-      - conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

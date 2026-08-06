@@ -70,14 +70,14 @@ services:
       - ../../../versions.env
     ports:
       - "${FTP_PORT:-2121}:21"
-      - "40000-40100:40000-40100"
+      - "${FTP_PASV_MIN_PORT:-40000}-${FTP_PASV_MAX_PORT:-40100}:${FTP_PASV_MIN_PORT:-40000}-${FTP_PASV_MAX_PORT:-40100}"
     environment:
       - FTP_USER=${FTP_USERNAME}
       - FTP_PASS=${FTP_PASSWORD}
       - FTP_HOME=/srv/ftp
       - PASV_ENABLE=YES
-      - PASV_MIN_PORT=40000
-      - PASV_MAX_PORT=40100
+      - PASV_MIN_PORT=${FTP_PASV_MIN_PORT:-40000}
+      - PASV_MAX_PORT=${FTP_PASV_MAX_PORT:-40100}
       - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
     volumes:
       - ecommerce_mmboutique_dev_ftp_data:/srv/ftp
@@ -95,7 +95,7 @@ services:
     ports:
       - "${BACKEND_PORT:-9000}:8000"
     volumes:
-      - ../../backend:/var/www/html
+      - ../../../../backend:/var/www/html
       - ecommerce_mmboutique_dev_storage:/var/www/html/storage
       - ecommerce_mmboutique_dev_bootstrap:/var/www/html/bootstrap/cache
       - ecommerce_mmboutique_dev_logs:/var/log/php
@@ -134,7 +134,7 @@ services:
   frontend:
     build:
       context: ../../../..
-      dockerfile: frontend/Dockerfile.development
+      dockerfile: docker/instances/development/mm-boutique/frontend/Dockerfile.development
     container_name: mm-boutique-dev-frontend
     restart: unless-stopped
     env_file:
@@ -142,8 +142,8 @@ services:
     ports:
       - "${FRONTEND_PORT:-5321}:4321"
     volumes:
-      - ../../frontend:/app
-      - ../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ../../../../frontend:/app
+      - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
       - ecommerce_mmboutique_dev_node_modules:/app/node_modules
       - ecommerce_mmboutique_dev_pnpm_store:/app/.pnpm-store
     environment:
