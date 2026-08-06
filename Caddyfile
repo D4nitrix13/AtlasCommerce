@@ -1,7 +1,10 @@
 # Caddyfile — Ecommerce local (multi-instancia, single host)
 # ------------------------------------------------------------
-# Cubre las 4 tiendas del roadmap en un solo host. Cada instancia
-# Docker corre con IPs fijas en su red dedicada:
+# Cubre las 6 instancias (3 prod + 3 dev). Cada instancia Docker
+# corre con IPs fijas en su red dedicada (prod) o con bind mounts
+# publicando puertos en el host (dev).
+#
+# Producción (IPs fijas en redes Docker bridge):
 #   - panda-kitsune  (Panda Estampados + Kitsune Store, misma instancia)
 #     red panda-kitsune (172.21.0.0/24)
 #     app=172.21.0.20:8000  frontend=172.21.0.21:4321
@@ -12,23 +15,34 @@
 #     red morales-store (172.23.0.0/24)
 #     app=172.23.0.20:8000  frontend=172.23.0.21:4321
 #
-# El host Linux alcanza esas IPs porque Docker bridge networks
-# exponen el rango al host (mismo NIC). No usamos los puertos
-# publicados (8000/8100/8200) — van directo a la IP interna.
+# Development (puertos publicados en el host):
+#   - panda-and-kitsune-dev: frontend=5321 (5321→4321)
+#   - mm-boutique-dev:       frontend=6321 (6321→4321)
+#   - morals-store-dev:      frontend=7321 (7321→4321)
+#   Los dev usan bind mounts + xdebug, con BD aislada por tienda.
+#   Los puertos son distintos entre sí (y entre los prod) para que las
+#   3 dev puedan correr en paralelo sin conflicto.
 #
 # Reglas:
-#   *.pandas-estampados.com -> backend/frontend panda-kitsune
+#   *.pandas-estampados.com -> backend/frontend panda-kitsune (prod)
+#                                o panda-and-kitsune-dev según cual esté Up
 #   *.kitsune.com           -> backend/frontend panda-kitsune
-#   *.mm-boutique.com       -> backend/frontend mm-boutique
-#   *.morales-store.com     -> backend/frontend morales-store
+#   *.mm-boutique.com       -> backend/frontend mm-boutique (prod)
+#                                o mm-boutique-dev según cual esté Up
+#   *.morales-store.com     -> backend/frontend morales-store (prod)
+#                                o morals-store-dev según cual esté Up
 #   /api/* en cualquier host -> backend de la instancia correspondiente
 #   cualquier otro host -> 404
+#
+# Para activar dev:
+#   1) ./scripts/docker-stack.sh start development (o start dev)
+#   2) Los handles dev abajo enrutarán a localhost:<puerto_publicado>
+#   Para parar dev y volver a prod: ./scripts/docker-stack.sh stop development
 #
 # Antes de usar:
 #   1) sudo cp Caddyfile /etc/caddy/Caddyfile
 #   2) Agregar entradas en /etc/hosts (ver bloque al final).
-#   3) Levantar las tres instancias con scripts/docker-stack.sh start
-#   4) sudo caddy validate --config /etc/caddy/Caddyfile
+#   3) sudo caddy validate --config /etc/caddy/Caddyfile
 #      sudo systemctl restart caddy
 {
 	auto_https off
@@ -42,15 +56,59 @@
 # NUNCA `sudo systemctl reload caddy` con esta config.
 
 # ===============================================================
-# 1) Panda + Kitsune (mismo deploy: red 172.21.0.0/24)
+# Listener único en :80 con TODOS los handles (prod + dev)
 # ===============================================================
+# Orden importante: los handles más específicos (dev) van primero
+# para que no queden atrapados por los matchers más generales (prod).
+# Si tenés prod y dev corriendo al mismo tiempo, ganará dev.
+# Si solo tenés prod corriendo, los handles de dev fallarán con 502
+# hasta que levantes dev.
 http:// {
+
+	# -----------------------------------------------------------
+	# DEVELOPMENT — puertos publicados en el host
+	# -----------------------------------------------------------
+
+	# Panda + Kitsune dev (mismo stack dev multi-tenant)
+	@panda_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@panda_dev host admin.pandas-estampados.com www.pandas-estampados.com pandas-estampados.com admin.kitsune.com www.kitsune.com kitsune.com
+	handle @panda_dev_api {
+		reverse_proxy localhost:9000
+	}
+	handle @panda_dev {
+		reverse_proxy localhost:5321
+	}
+
+	# MM Boutique dev
+	@mm_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@mm_dev host admin.mm-boutique.com www.mm-boutique.com mm-boutique.com
+	handle @mm_dev_api {
+		reverse_proxy localhost:10000
+	}
+	handle @mm_dev {
+		reverse_proxy localhost:6321
+	}
+
+	# Morales Store dev
+	@morales_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@morales_dev host admin.morales-store.com www.morales-store.com morales-store.com
+	handle @morales_dev_api {
+		reverse_proxy localhost:11000
+	}
+	handle @morales_dev {
+		reverse_proxy localhost:7321
+	}
+
+	# -----------------------------------------------------------
+	# PRODUCCIÓN — IPs fijas en redes Docker bridge
+	# -----------------------------------------------------------
+
+	# Panda + Kitsune (mismo deploy: red 172.21.0.0/24)
 	@panda_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@panda host pandas-estampados.com www.pandas-estampados.com admin.pandas-estampados.com
 	handle @panda_api {
 		reverse_proxy 172.21.0.20:8000
 	}
-
-	@panda host pandas-estampados.com www.pandas-estampados.com admin.pandas-estampados.com
 	handle @panda {
 		reverse_proxy 172.21.0.21:4321
 	}
@@ -60,28 +118,22 @@ http:// {
 		reverse_proxy 172.21.0.21:4321
 	}
 
-	# -----------------------------------------------------------
-	# 2) MM Boutique (instancia propia: red 172.22.0.0/24)
-	# -----------------------------------------------------------
+	# MM Boutique (instancia propia: red 172.22.0.0/24)
 	@mm_boutique_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@mm_boutique host mm-boutique.com www.mm-boutique.com admin.mm-boutique.com
 	handle @mm_boutique_api {
 		reverse_proxy 172.22.0.20:8000
 	}
-
-	@mm_boutique host mm-boutique.com www.mm-boutique.com admin.mm-boutique.com
 	handle @mm_boutique {
 		reverse_proxy 172.22.0.21:4321
 	}
 
-	# -----------------------------------------------------------
-	# 3) Morales Store (instancia propia: red 172.23.0.0/24)
-	# -----------------------------------------------------------
+	# Morales Store (instancia propia: red 172.23.0.0/24)
 	@morales_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@morales host morales-store.com www.morales-store.com admin.morales-store.com
 	handle @morales_api {
 		reverse_proxy 172.23.0.20:8000
 	}
-
-	@morales host morales-store.com www.morales-store.com admin.morales-store.com
 	handle @morales {
 		reverse_proxy 172.23.0.21:4321
 	}
