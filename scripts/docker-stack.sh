@@ -1,50 +1,14 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------
-# scripts/docker-stack.sh — gestor de las 4 instancias Docker
+# scripts/docker-stack.sh — orquestador de las 6 instancias Docker
 # ------------------------------------------------------------
-# Levanta, detiene, reinicia, lista, loguea y ejecuta comandos
-# dentro de las instancias configuradas en docker/instances/<nombre>/
-# y del dev compose en docker/dev/.
+# Gestiona las 3 instancias de producción + las 3 instancias de
+# desarrollo. Cada instancia vive en su propia carpeta bajo
+# docker/instances/{production,development}/<store>/ y es 100%
+# auto-contenida (Dockerfile, entrypoint, compose, .env, seeds).
 #
 # Uso:
 #   ./scripts/docker-stack.sh <comando> [args...]
-#
-# Comandos (aceptan [instancia|all] y, casi todos, [servicio] opcional):
-#   up      [instancia|all] [svc] build + start (convenio docker compose)
-#   start   [instancia|all] [svc] Levantar containers (preserva volúmenes)
-#   stop    [instancia|all] [svc] Detener containers (preserva volúmenes)
-#   restart [instancia|all] [svc] Reiniciar containers
-#   build   [instancia|all] [svc] Reconstruir imágenes (--no-cache)
-#   down    [instancia|all] [svc] Detener y eliminar containers (preserva volúmenes)
-#   nuke    [instancia|all] [svc] down + eliminar volúmenes (BORRA DATOS)
-#   status  [instancia|all] [svc] Estado de cada servicio
-#   ps                            Lista de containers (vista rápida)
-#   info / psv                    Tabla detallada: instancia, servicio,
-#                                  estado, puertos y comando del container.
-#                                  [instancia|all] [svc] opcional.
-#   logs    [instancia] [svc]    Tail de logs (default: todos)
-#   exec    <instancia> <svc> <cmd...>
-#                                Ejecuta <cmd> dentro del container
-#   setup   [prod|dev|all]       Primera vez: copia .env.example, levanta
-#                                (default: all)
-#   hosts                        Imprime el bloque para /etc/hosts
-#   caddy                        Imprime el Caddyfile a usar
-#   help                         Muestra esta ayuda
-#
-# Aliases cortos: b=build, rs=restart, ls=ps, psv=info.
-#
-# Instancias válidas (todas con scope `production:` o `development:`):
-#   production:panda-and-kitsune  (multi-tenant: Panda + Kitsune)
-#   production:mm-boutique        (single-tenant)
-#   production:morales-store      (single-tenant)
-#   development:panda-and-kitsune (entorno local, BD aislada, bind mounts + xdebug)
-#   development:mm-boutique       (entorno local, BD aislada, bind mounts + xdebug)
-#   development:morales-store     (entorno local, BD aislada, bind mounts + xdebug)
-#   all                           = las 6 (3 production + 3 development)
-#
-# Sin scope, default = production. Equivalencias:
-#   start panda-and-kitsune       → start production:panda-and-kitsune
-#   start development:panda-and-kitsune → start dev:panda-and-kitsune
 #
 # Requiere: docker compose v2 (>= 5.x), bash 4+.
 # ------------------------------------------------------------
@@ -74,9 +38,11 @@ if [[ -t 1 ]]; then
     C_GREEN=$'\033[32m'
     C_YELLOW=$'\033[33m'
     C_BLUE=$'\033[34m'
+    C_MAGENTA=$'\033[35m'
     C_CYAN=$'\033[36m'
+    C_DIM=$'\033[2m'
 else
-    C_RESET=""; C_BOLD=""; C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""; C_CYAN=""
+    C_RESET=""; C_BOLD=""; C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""; C_MAGENTA=""; C_CYAN=""; C_DIM=""
 fi
 
 # --- Funciones -------------------------------------------------------------
@@ -88,7 +54,7 @@ log_err()   { printf "${C_RED}[error]${C_RESET} %s\n" "$*" >&2; }
 log_bold()  { printf "${C_BOLD}%s${C_RESET}\n" "$*"; }
 
 usage() {
-    sed -n '3,38p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '3,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
 # is_valid_instance <name>
@@ -514,40 +480,131 @@ cmd_caddy() {
 }
 
 cmd_help() {
-    usage
-    cat <<EOF
+    cat <<'SEPARATOR'
 
-Ejemplos:
-  ${C_CYAN}$0 start all${C_RESET}                       # levanta las 6 instancias (3 prod + 3 dev)
-  ${C_CYAN}$0 start production${C_RESET}                # levanta las 3 prod
-  ${C_CYAN}$0 start development${C_RESET}               # levanta SOLO panda-and-kitsune-dev (la 1° dev)
-  ${C_CYAN}$0 start dev${C_RESET}                       # atajo de development
-  ${C_CYAN}$0 start production:mm-boutique${C_RESET}    # levanta solo MM Boutique prod
-  ${C_CYAN}$0 start development:mm-boutique${C_RESET}   # levanta solo MM Boutique dev
-  ${C_CYAN}$0 stop all${C_RESET}                        # detiene todas las instancias
-  ${C_CYAN}$0 stop development${C_RESET}                # detiene las 3 dev
-  ${C_CYAN}$0 b panda-kitsune frontend${C_RESET}         # alias de build: rebuild del frontend de Panda
-  ${C_CYAN}$0 build dev backend${C_RESET}                # rebuild solo del backend de dev
-  ${C_CYAN}$0 restart panda-kitsune app${C_RESET}        # reinicia solo el servicio app
-  ${C_CYAN}$0 logs development:mm-boutique frontend${C_RESET}  # tail logs del frontend dev
-  ${C_CYAN}$0 exec development:morales-store app bash${C_RESET} # bash dentro del app dev
-  ${C_CYAN}$0 status all${C_RESET}                       # estado de los servicios
-  ${C_CYAN}$0 info${C_RESET}                             # tabla detallada de todos los containers
-  ${C_CYAN}$0 info development:mm-boutique${C_RESET}      # tabla detallada de un stack dev
-  ${C_CYAN}$0 nuke panda-kitsune${C_RESET}               # ⚠ BORRA la BD de Panda
-  ${C_CYAN}$0 setup${C_RESET}                            # primera instalación (all)
-  ${C_CYAN}$0 setup development${C_RESET}                # primera instalación solo dev
+SEPARATOR
 
-Nota sobre dev:
-  Cada tienda dev usa puertos shifted DISTINTOS para que las 3
-  puedan correr en paralelo sin conflicto:
-    panda-and-kitsune-dev: 6432/7379/9000/5321/2121 (+1000)
-    mm-boutique-dev:       7432/8379/10000/6321/3121 (+2000)
-    morals-store-dev:     8432/9379/11000/7321/4121 (+3000)
-  Definidos en docker/instances/development/<store>/environment/.env
-  Para operar una sola: start development:<store>.
+    printf "${C_BOLD}${C_CYAN}══════════════════════════════════════════════════════════════════════════${C_RESET}\n"
+    printf "${C_BOLD}  scripts/docker-stack.sh${C_RESET}  —  orquestador de las 6 instancias Docker\n"
+    printf "${C_BOLD}${C_CYAN}══════════════════════════════════════════════════════════════════════════${C_RESET}\n"
+    printf "\n"
+    printf "${C_BOLD}Uso${C_RESET}\n"
+    printf "  ${C_CYAN}$0${C_RESET} ${C_YELLOW}<comando>${C_RESET} ${C_GREEN}[args...]${C_RESET}\n"
+    printf "\n"
+    printf "${C_BOLD}Comandos principales${C_RESET}  (todos aceptan scope + servicio opcional)\n"
+    printf "  ${C_GREEN}%-10s${C_RESET} ${C_GREEN}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "start"   "[scope] [svc]"      "Levantar containers (preserva volúmenes)"
+    printf "  ${C_GREEN}%-10s${C_RESET} ${C_GREEN}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "stop"    "[scope] [svc]"      "Detener containers (preserva volúmenes)"
+    printf "  ${C_GREEN}%-10s${C_RESET} ${C_GREEN}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "restart" "[scope] [svc]"      "Reiniciar containers"
+    printf "  ${C_GREEN}%-10s${C_RESET} ${C_GREEN}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "up"      "[scope] [svc]"      "build + start (convenio docker compose)"
+    printf "  ${C_GREEN}%-10s${C_RESET} ${C_GREEN}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "build"   "[scope] [svc]"      "Reconstruir imágenes (--no-cache)"
+    printf "  ${C_GREEN}%-10s${C_RESET} ${C_GREEN}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "down"    "[scope] [svc]"      "Detener y eliminar containers (preserva volúmenes)"
+    printf "  ${C_RED}%-10s${C_RESET} ${C_RED}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "nuke"    "[scope] [svc]"      "⚠ down + eliminar volúmenes (BORRA DATOS)"
+    printf "\n"
+    printf "${C_BOLD}Información${C_RESET}\n"
+    printf "  ${C_BLUE}%-10s${C_RESET} ${C_BLUE}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "status"  "[scope]"            "Estado de cada servicio (compose ps)"
+    printf "  ${C_BLUE}%-10s${C_RESET} ${C_BLUE}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "ps"      ""                   "Lista de containers (vista rápida)"
+    printf "  ${C_BLUE}%-10s${C_RESET} ${C_BLUE}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "info"    "[scope] [svc]"      "Tabla detallada: instancia, servicio, estado,"
+    printf "  ${C_BLUE}%-10s${C_RESET} ${C_BLUE}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "psv"     ""                   "  puertos y comando del container"
+    printf "\n"
+    printf "${C_BOLD}Logs y ejecución${C_RESET}\n"
+    printf "  ${C_MAGENTA}%-10s${C_RESET} ${C_MAGENTA}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "logs"    "[instancia] [svc]" "Tail de logs (default: todas las instancias)"
+    printf "  ${C_MAGENTA}%-10s${C_RESET} ${C_MAGENTA}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "exec"    "<inst> <svc> <cmd>" "Ejecuta <cmd> dentro del container"
+    printf "\n"
+    printf "${C_BOLD}Setup y ayuda${C_RESET}\n"
+    printf "  ${C_YELLOW}%-10s${C_RESET} ${C_YELLOW}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "setup"   "[prod|dev|all]"    "Primera instalación: copia .env.example, levanta"
+    printf "  ${C_YELLOW}%-10s${C_RESET} ${C_YELLOW}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "hosts"   ""                   "Imprime el bloque para /etc/hosts"
+    printf "  ${C_YELLOW}%-10s${C_RESET} ${C_YELLOW}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "caddy"   ""                   "Imprime el Caddyfile a usar"
+    printf "  ${C_YELLOW}%-10s${C_RESET} ${C_YELLOW}%-25s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "help"    ""                   "Muestra esta ayuda"
+    printf "\n"
+    printf "${C_BOLD}Aliases cortos${C_RESET}\n"
+    printf "  ${C_CYAN}b${C_RESET}=build   ${C_CYAN}rs${C_RESET}=restart   ${C_CYAN}ls${C_RESET}=ps   ${C_CYAN}psv${C_RESET}=info\n"
+    printf "\n"
 
-EOF
+    printf "${C_BOLD}Scopes${C_RESET} (operan sobre múltiples instancias a la vez)\n"
+    printf "  ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "all"                   "las 6 instancias (3 prod + 3 dev)"
+    printf "  ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "production / prod"     "las 3 instancias de production"
+    printf "  ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "development / dev"     "las 3 instancias de development"
+    printf "  ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "<store>"               "1 instancia, default = production"
+    printf "  ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "production:<store>"    "1 instancia de prod con scope explícito"
+    printf "  ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "development:<store>"   "1 instancia de dev con scope explícito"
+    printf "\n"
+
+    printf "${C_BOLD}Instancias${C_RESET} (6 totales, separadas por scope)\n"
+    printf "  ${C_BOLD}production${C_RESET} (3 prod, auto-contenidas)\n"
+    printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "production:panda-and-kitsune" "multi-tenant: Pandas Estampados + Kitsune"
+    printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "production:mm-boutique"       "single-tenant"
+    printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "production:morales-store"     "single-tenant"
+    printf "  ${C_BOLD}development${C_RESET} (3 dev, con bind mounts + xdebug)\n"
+    printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "development:panda-and-kitsune" "BD aislada, puertos shifted +1000"
+    printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "development:mm-boutique"       "BD aislada, puertos shifted +2000"
+    printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "development:morales-store"     "BD aislada, puertos shifted +3000"
+    printf "\n"
+
+    printf "${C_BOLD}Ejemplos${C_RESET} (los más comunes)\n"
+    printf "  ${C_CYAN}$0 start all${C_RESET}\n"
+    printf "    ${C_DIM}levanta las 6 instancias (3 prod + 3 dev)${C_RESET}\n"
+    printf "  ${C_CYAN}$0 start production${C_RESET}\n"
+    printf "    ${C_DIM}levanta las 3 prod${C_RESET}\n"
+    printf "  ${C_CYAN}$0 start development${C_RESET}\n"
+    printf "    ${C_DIM}levanta las 3 dev en paralelo (puertos distintos)${C_RESET}\n"
+    printf "  ${C_CYAN}$0 start dev${C_RESET}\n"
+    printf "    ${C_DIM}atajo de 'start development'${C_RESET}\n"
+    printf "  ${C_CYAN}$0 start development:mm-boutique${C_RESET}\n"
+    printf "    ${C_DIM}levanta solo MM Boutique dev${C_RESET}\n"
+    printf "  ${C_CYAN}$0 build dev backend${C_RESET}\n"
+    printf "    ${C_DIM}rebuild solo del backend de dev${C_RESET}\n"
+    printf "  ${C_CYAN}$0 restart panda-kitsune app${C_RESET}\n"
+    printf "    ${C_DIM}reinicia solo el servicio 'app' de Panda prod${C_RESET}\n"
+    printf "  ${C_CYAN}$0 logs development:mm-boutique frontend${C_RESET}\n"
+    printf "    ${C_DIM}tail logs del frontend dev de mm-boutique${C_RESET}\n"
+    printf "  ${C_CYAN}$0 exec development:morales-store app bash${C_RESET}\n"
+    printf "    ${C_DIM}bash dentro del app dev de morales-store${C_RESET}\n"
+    printf "  ${C_CYAN}$0 info${C_RESET}\n"
+    printf "    ${C_DIM}tabla detallada de todos los containers${C_RESET}\n"
+    printf "  ${C_CYAN}$0 setup${C_RESET}\n"
+    printf "    ${C_DIM}primera instalación (copia .env.example + levanta)${C_RESET}\n"
+    printf "\n"
+
+    printf "${C_BOLD}Puertos dev${C_RESET} (cada tienda usa puertos shifted distintos para correr las 3 en paralelo)\n"
+    printf "  ${C_BOLD}%-22s %6s %6s %8s %6s %5s %13s${C_RESET}\n" \
+        "Tienda" "PG" "Redis" "Backend" "Front" "FTP" "PASV"
+    printf "  ${C_DIM}%-22s %6s %6s %8s %6s %5s %13s${C_RESET}\n" \
+        "panda-and-kitsune-dev" "6432" "7379" "9000" "5321" "2121" "40000-40099"
+    printf "  ${C_DIM}%-22s %6s %6s %8s %6s %5s %13s${C_RESET}\n" \
+        "mm-boutique-dev"       "7432" "8379" "10000" "6321" "3121" "40100-40199"
+    printf "  ${C_DIM}%-22s %6s %6s %8s %6s %5s %13s${C_RESET}\n" \
+        "morales-store-dev"     "8432" "9379" "11000" "7321" "4121" "40200-40299"
+    printf "\n"
+    printf "  ${C_DIM}Definidos en docker/instances/development/<store>/environment/.env${C_RESET}\n"
 }
 
 # --- Dispatcher ------------------------------------------------------------
