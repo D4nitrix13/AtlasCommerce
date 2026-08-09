@@ -18,8 +18,13 @@ import {
  *    externas son limpias pero el código interno mantiene `/[locale]/admin/`.
  *  - Para URLs storefront, se exige prefijo `/es/` o `/en/`. Si no lo
  *    tiene, redirige a `/es/...` (o al locale guardado en cookie).
- *  - El login admin no requiere locale prefijado en la URL externa
- *    (`admin.kitsune.com/login`).
+ *  - El login admin **requiere** locale prefijado en la URL externa
+ *    (`admin.kitsune.com/es/admin/auth/login`). Si la URL no tiene
+ *    locale, el middleware hace REDIRECT (302) a la forma canónica.
+ *    Convention: la locale siempre va inmediatamente después del dominio.
+ *    Esto simplifica el LanguageSwitcher (siempre ve URLs canónicas)
+ *    y elimina ambigüedad con URLs tipo `/es/auth/login` (404) vs
+ *    `/es/admin/auth/login` (200).
  *
  * Single source of truth: `SUPPORTED_LOCALES`.
  */
@@ -309,13 +314,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const localeFromUrl = detectLocalePrefix(pathname);
 
     if (localeFromUrl === null) {
-      // URL no tiene locale → rewrite a path interno con locale.
-      // Preservar query string (ej: ?tab=register en /auth/login).
-      const internalPath = mapAdminPathToInternal(pathname, locale) + url.search;
+      // URL no tiene locale → REDIRECT (302) a la forma canónica
+      // con prefijo /[locale]/admin/.... Convention: la locale va
+      // inmediatamente después del dominio para que:
+      //   - El LanguageSwitcher siempre vea URLs canónicas
+      //     (`/[locale]/admin/...`) y genere URLs válidas al cambiar.
+      //   - Compartir/bookmarkear una URL siempre incluya la locale
+      //     (evita que el receptor vea otro idioma por Accept-Language).
+      //   - Sea imposible terminar en URLs inválidas como `/en/auth/login`
+      //     (que 404 porque el page real vive en `/en/admin/auth/login`).
+      // Preservar query string (ej: ?tab=register en /login).
+      const canonicalPath = mapAdminPathToInternal(pathname, locale) + url.search;
       context.locals.locale = locale;
-      const response = await context.rewrite(internalPath);
-      appendLocaleCookie(response, locale);
-      return response;
+      const redirectResponse = context.redirect(canonicalPath, 302);
+      appendLocaleCookie(redirectResponse, locale);
+      return redirectResponse;
     }
 
     // URL tiene locale → dejar que Astro rutee, solo setear locale.
