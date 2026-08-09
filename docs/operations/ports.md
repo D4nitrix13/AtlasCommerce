@@ -22,7 +22,7 @@ cambiarlo.
 
 `—` significa que **no se publica al host**. Esa decisión es deliberada:
 las instancias de prod resuelven HTTP/HTTPS por Caddy vía dominio
-(`pandas-estampados.com`, etc.) y los servicios internos se hablan por la
+(`panda-estampados.com`, etc.) y los servicios internos se hablan por la
 red de docker. Publicarlos al host sumaría superficie de ataque sin
 beneficio.
 

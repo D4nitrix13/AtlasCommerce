@@ -34,7 +34,7 @@ REDIS_PORT=6379
 REDIS_PASSWORD=null
 
 # Sanctum — dominios permitidos
-SANCTUM_STATEFUL_DOMAINS=pandas-estampados.com:8080,kitsune.com:8080,localhost:5321
+SANCTUM_STATEFUL_DOMAINS=panda-estampados.com:8080,kitsune.com:8080,localhost:5321
 SESSION_DOMAIN=localhost
 ```
 

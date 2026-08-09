@@ -65,11 +65,11 @@ curl -sI http://127.0.0.1:4321/
 # HTTP/1.1 302 Found (redirect a /es)
 
 # Caddy
-curl -sI http://pandas-estampados.com/login
+curl -sI http://panda-estampados.com/login
 # HTTP/1.1 200 OK
 
 # API auth
-curl -s -X POST http://pandas-estampados.com/api/auth/login \
+curl -s -X POST http://panda-estampados.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@panda-estampados.test","password":"password"}'
 # {"token":"...","user":{...}}

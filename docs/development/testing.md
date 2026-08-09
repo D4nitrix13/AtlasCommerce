@@ -160,7 +160,7 @@ tests/
 import { test, expect } from "@playwright/test";
 
 test("admin login en Admin Panda", async ({ page }) => {
-  await page.goto("http://admin.pandas-estampados.com/login");
+  await page.goto("http://admin.panda-estampados.com/login");
 
   await expect(page).toHaveTitle(/Panda Estampados/);
 

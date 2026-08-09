@@ -99,14 +99,14 @@ docker compose ps
 docker compose logs -f
 
 # Verificar API
-curl -I https://api.pandas-estampados.com/api/products
+curl -I https://api.panda-estampados.com/api/products
 
 # Verificar storefront
-curl -I https://pandas-estampados.com
+curl -I https://panda-estampados.com
 curl -I https://kitsune.com
 
 # Verificar admin
-curl -I https://admin.pandas-estampados.com
+curl -I https://admin.panda-estampados.com
 ```
 
 ## Despliegue de actualizaciones
@@ -132,8 +132,8 @@ docker compose restart backend frontend
 - **Logs sin errores** —
   `docker compose logs --tail=50`
 - **API responde** —
-  `curl https://api.pandas-estampados.com/api/products`
+  `curl https://api.panda-estampados.com/api/products`
 - **TLS funciona** —
-  `curl -I https://pandas-estampados.com`
+  `curl -I https://panda-estampados.com`
 - **Admin accesible** — Abrir
-  `admin.pandas-estampados.com`
+  `admin.panda-estampados.com`

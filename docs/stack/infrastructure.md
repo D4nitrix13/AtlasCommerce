@@ -156,9 +156,9 @@ kubectl port-forward svc/backend 8000:8000 -n ecommerce
 
 ```dns
 Tipo    Nombre                              Valor
-A       pandas-estampados.com               <VPS_IP>
-A       www.pandas-estampados.com           <VPS_IP>
-A       admin.pandas-estampados.com         <VPS_IP>
+A       panda-estampados.com               <VPS_IP>
+A       www.panda-estampados.com           <VPS_IP>
+A       admin.panda-estampados.com         <VPS_IP>
 A       kitsune.com                         <VPS_IP>
 A       www.kitsune.com                     <VPS_IP>
 A       admin.kitsune.com                   <VPS_IP>

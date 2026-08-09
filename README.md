@@ -18,7 +18,7 @@ Soporta **multi-tienda** con resolución por dominio:
 
 | Tienda | Dominio | Enfoque |
 | --- | --- | --- |
-| **Panda Estampados** | `pandas-estampados.com` | B2B / corporativo — estampados personalizados |
+| **Panda Estampados** | `panda-estampados.com` | B2B / corporativo — estampados personalizados |
 | **Kitsune Store** | `kitsune.com` | B2C — cultura anime, manga y japonesa |
 | **MM Boutique** | `mm-boutique.com` | Single-tenant |
 | **Morales Store** | `morales-store.com` | Single-tenant |
@@ -105,7 +105,7 @@ sudo cp Caddyfile /etc/caddy/Caddyfile
 sudo systemctl restart caddy
 
 # 4. Verificar:
-curl -sI http://pandas-estampados.com/api/storefront/theme
+curl -sI http://panda-estampados.com/api/storefront/theme
 ```
 
 ### Sólo el entorno de desarrollo

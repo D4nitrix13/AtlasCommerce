@@ -172,8 +172,8 @@ PUBLIC_APP_NAME="Kitsune Store"
 El middleware en `src/middleware.ts` hace dos cosas:
 
 1. **Detecta el tenant** por `Host` header:
-   - `pandas-estampados.com` → tenant `panda`
-   - `admin.pandas-estampados.com` → tenant `panda`, contexto admin
+   - `panda-estampados.com` → tenant `panda`
+   - `admin.panda-estampados.com` → tenant `panda`, contexto admin
    - `kitsune.com` → tenant `kitsune`
 2. **Rewrite de URLs admin** limpias:
    - `admin.kitsune.com/login` → `/es/admin/auth/login` (interno)

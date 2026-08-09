@@ -12,7 +12,7 @@
 
 | Tenant | Marca | Dominio público | Dominio admin | Instancia |
 | ------ | ----- | --------------- | ------------- | --------- |
-| Cliente | Panda Estampados | `pandas-estampados.com` | `admin.pandas-estampados.com` | `panda-kitsune` |
+| Cliente | Panda Estampados | `panda-estampados.com` | `admin.panda-estampados.com` | `panda-kitsune` |
 | Cliente | Kitsune Store | `kitsune.com` | `admin.kitsune.com` | `panda-kitsune` |
 | MM Boutique owner | MM Boutique | `mm-boutique.com` | `admin.mm-boutique.com` | `mm-boutique` |
 | Morales Store owner | Morales Store | `morales-store.com` | `admin.morales-store.com` | `morales-store` |

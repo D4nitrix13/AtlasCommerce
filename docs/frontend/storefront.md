@@ -10,7 +10,7 @@ dominio de origen.
 ## Resolución de tienda por dominio
 
 ```txt
-pandas-estampados.com → Store{id: 1, name: "Panda Estampados"}
+panda-estampados.com → Store{id: 1, name: "Panda Estampados"}
 kitsune.com           → Store{id: 2, name: "Kitsune Store"}
 ```
 
@@ -33,7 +33,7 @@ configuración de tienda:
 // src/config/stores.ts (conceptual)
 
 export const stores = {
-    "pandas-estampados.com": {
+    "panda-estampados.com": {
         id: 1,
         name: "Panda Estampados",
         slug: "panda-estampados",

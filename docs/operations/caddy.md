@@ -19,7 +19,7 @@ hacia el servicio correspondiente.
 
 ```caddyfile
 # Tienda Panda Estampados
-pandas-estampados.com {
+panda-estampados.com {
     reverse_proxy frontend:4173
 }
 
@@ -29,24 +29,24 @@ kitsune.com {
 }
 
 # Panel administrativo
-admin.pandas-estampados.com {
+admin.panda-estampados.com {
     reverse_proxy frontend:4173
 }
 
 # API Backend
-api.pandas-estampados.com {
+api.panda-estampados.com {
     reverse_proxy backend:8000
 }
 ```
 
 ## Dominios
 
-- `pandas-estampados.com` → Frontend `Astro`
+- `panda-estampados.com` → Frontend `Astro`
   (Tienda Panda)
 - `kitsune.com` → Frontend `Astro` (Tienda Kitsune)
-- `admin.pandas-estampados.com` → Frontend `Astro`
+- `admin.panda-estampados.com` → Frontend `Astro`
   (Panel administrativo)
-- `api.pandas-estampados.com` → Backend `Laravel`
+- `api.panda-estampados.com` → Backend `Laravel`
   (API REST)
 
 ## TLS / HTTPS
@@ -60,7 +60,7 @@ api.pandas-estampados.com {
 4. Las peticiones HTTP (puerto 80) se redirigen a HTTPS.
 
 ```txt
-http://pandas-estampados.com → https://pandas-estampados.com
+http://panda-estampados.com → https://panda-estampados.com
 ```
 
 ## Puertos
@@ -83,7 +83,7 @@ header {
 ## CORS para la API
 
 ```caddyfile
-api.pandas-estampados.com {
+api.panda-estampados.com {
     header {
         Access-Control-Allow-Origin *
         Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"

@@ -10,7 +10,7 @@ como estructura base.
 ## Acceso
 
 ```txt
-URL: admin.pandas-estampados.com
+URL: admin.panda-estampados.com
 Layout: AdminLayout.astro
 Autenticación: Requiere login + token Sanctum
 ```

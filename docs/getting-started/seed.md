@@ -51,7 +51,7 @@ Users: 1 (admin@panda-estampados.test)
 ## 4. Login de prueba
 
 ```bash
-curl -s -X POST http://pandas-estampados.com/api/auth/login \
+curl -s -X POST http://panda-estampados.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@panda-estampados.test","password":"password"}'
 ```

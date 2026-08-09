@@ -33,13 +33,13 @@ El sistema se despliega en un VPS único con
 
 ## Dominios
 
-- `pandas-estampados.com` → Frontend `Astro`
+- `panda-estampados.com` → Frontend `Astro`
   (storefront Panda) — `Caddy` → `Astro` :4173
 - `kitsune.com` → Frontend `Astro`
   (storefront Kitsune) — `Caddy` → `Astro` :4173
-- `admin.pandas-estampados.com` → Panel
+- `admin.panda-estampados.com` → Panel
   administrativo — `Caddy` → `Astro` :4173
-- `api.pandas-estampados.com` → Backend
+- `api.panda-estampados.com` → Backend
   `Laravel` API — `Caddy` → `Laravel` :8000
 
 ## Puertos expuestos
@@ -99,7 +99,7 @@ services:
 5. Caddy proxea a Frontend Astro (:4173)
 6. Astro renderiza la página (SSG o SSR)
 7. Frontend necesita datos → llama a API
-8. GET https://api.pandas-estampados.com/api/products?store_id=2
+8. GET https://api.panda-estampados.com/api/products?store_id=2
 9. Caddy recibe petición API
 10. Caddy proxea a Backend Laravel (:8000)
 11. Laravel consulta PostgreSQL
@@ -116,7 +116,7 @@ manual de certificados.
 
 ```caddyfile
 # Ejemplo conceptual de Caddyfile
-pandas-estampados.com {
+panda-estampados.com {
     reverse_proxy frontend:4173
 }
 
@@ -124,11 +124,11 @@ kitsune.com {
     reverse_proxy frontend:4173
 }
 
-admin.pandas-estampados.com {
+admin.panda-estampados.com {
     reverse_proxy frontend:4173
 }
 
-api.pandas-estampados.com {
+api.panda-estampados.com {
     reverse_proxy backend:8000
 }
 ```

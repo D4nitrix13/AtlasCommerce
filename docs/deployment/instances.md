@@ -145,7 +145,7 @@ curl -I http://localhost/
 > **internos de los containers** (donde Laravel y Astro escuchan
 > dentro de la red de docker). Las instancias de prod **no публицan
 > estos puertos al host**; el tráfico HTTP entra por Caddy vía dominio
-> (`pandas-estampados.com`, etc.). Los `curl` de arriba asumen que se
+> (`panda-estampados.com`, etc.). Los `curl` de arriba asumen que se
 > ejecutan **dentro del container de la app** (ej. `docker compose exec
 > app curl -I http://localhost:8000/up`) o desde un host donde estos
 > puertos están mapeados. Ver

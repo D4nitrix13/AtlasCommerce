@@ -109,7 +109,7 @@ class StoreDomain extends Model
 
 - `store_id` — FK — Tienda asociada
 - `domain` — string — Dominio
-  (pandas-estampados.com)
+  (panda-estampados.com)
 - `primary` — boolean — Si es el dominio principal
 - `active` — boolean — Si el dominio está activo
 
