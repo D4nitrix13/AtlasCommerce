@@ -8,7 +8,7 @@ FROM node:22-alpine
 WORKDIR /app
 
 # Activar pnpm vía corepack.
-RUN corepack enable \
+RUN /usr/local/bin/corepack enable \
     && corepack prepare pnpm@9 --activate
 
 # Layer de cache de dependencias. `pnpm fetch` descarga deps a un
@@ -18,8 +18,8 @@ RUN corepack enable \
 # este layer.
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 COPY frontend/pnpm-workspace.yaml* ./
-RUN pnpm fetch --frozen-lockfile \
-    && pnpm install --frozen-lockfile --offline
+RUN /usr/local/bin/pnpm fetch --frozen-lockfile \
+    && /usr/local/bin/pnpm install --frozen-lockfile --offline
 
 # Variables de entorno: el dev server escucha en 0.0.0.0 para ser
 # accesible desde Caddy del host o del contenedor vecino.
@@ -32,6 +32,13 @@ EXPOSE 4321
 
 # Healthcheck: en dev el server responde rápido.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD wget -q --spider http://localhost:4321/ || exit 1
+    CMD /usr/bin/wget -q --spider http://localhost:4321/ || exit 1
 
-CMD ["pnpm", "run", "dev", "--host", "0.0.0.0", "--force"]
+# Drop privilegios: el contenedor corre como `node` (UID 1000) en vez de
+# root. La build necesita root (instalar paquetes, copiar archivos al FS
+# de la imagen) pero el runtime no. El bind-mount del compose dev mapea
+# archivos del host (típicamente UID 1000) al container, así que usar
+# `node` (también UID 1000) matchea sin chowns extra.
+USER node
+
+CMD ["/usr/local/bin/pnpm", "run", "dev", "--host", "0.0.0.0", "--force"]

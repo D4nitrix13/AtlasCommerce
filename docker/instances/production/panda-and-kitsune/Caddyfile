@@ -8,8 +8,8 @@
 }
 
 http:// {
-    @hostnames host pandas-estampados.com www.pandas-estampados.com \
-                       admin.pandas-estampados.com \
+    @hostnames host panda-estampados.com www.panda-estampados.com \
+                       admin.panda-estampados.com \
                        kitsune.com www.kitsune.com \
                        admin.kitsune.com
 

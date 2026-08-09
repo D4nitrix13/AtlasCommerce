@@ -9,12 +9,12 @@ FROM php:8.4-fpm-alpine
 # Tres RUNs separados para que Docker pueda cachearlos de forma
 # granular. Si solo cambia la lista de extensiones PHP, el `apk add`
 # queda cacheado y no se re-descargan paquetes. Si cambia solo el
-# `docker-php-ext-enable`, no se re-compila nada.
+# `/usr/local/bin/docker-php-ext-enable`, no se re-compila nada.
 
 # El paquete `redis` (apk) es solo para tener redis-cli dentro del
 # container en sesiones de debug. El cliente PHP de la app es
 # `predis/predis` (composer package), no la extensión PHP.
-RUN apk add --no-cache \
+RUN /sbin/apk add --no-cache \
         postgresql-dev \
         postgresql-client \
         libzip-dev \
@@ -26,7 +26,7 @@ RUN apk add --no-cache \
         git \
         icu-dev
 
-RUN docker-php-ext-install \
+RUN /usr/local/bin/docker-php-ext-install \
         pdo_pgsql \
         pgsql \
         zip \
@@ -38,7 +38,7 @@ RUN docker-php-ext-install \
         xml \
         mbstring
 
-RUN docker-php-ext-enable opcache
+RUN /usr/local/bin/docker-php-ext-enable opcache
 
 # Composer (imagen multi-stage).
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -61,7 +61,7 @@ COPY backend/composer.json backend/composer.lock ./
 # is not found". Lo copiamos ANTES del install.
 COPY backend/packages ./packages
 
-RUN composer install \
+RUN /usr/bin/composer install \
         --no-dev \
         --no-scripts \
         --no-autoloader \
@@ -71,16 +71,23 @@ RUN composer install \
 COPY backend/ .
 
 # Generar autoloader optimizado.
-RUN composer dump-autoload --optimize --no-dev
+RUN /usr/bin/composer dump-autoload --optimize --no-dev
 
 # Permisos correctos.
-RUN chown -R www-data:www-data /var/www/html \
+RUN /bin/chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 8000
 
 # Script de entrypoint que corre migraciones y opcionalmente el bootstrap.
 COPY docker/instances/production/mm-boutique/backend/entrypoint.production.sh /usr/local/bin/entrypoint
-RUN chmod +x /usr/local/bin/entrypoint
+RUN /bin/chmod +x /usr/local/bin/entrypoint
 
-CMD ["entrypoint"]
+# Drop privilegios: el contenedor corre como `www-data` (UID 33) en vez
+# de root. La build necesita root (instalar paquetes del sistema,
+# composer install, chowns) pero el runtime solo necesita escribir en
+# storage/ y bootstrap/cache/ (que ya están chown'd a www-data en el
+# layer anterior).
+USER www-data
+
+CMD ["/usr/local/bin/entrypoint"]

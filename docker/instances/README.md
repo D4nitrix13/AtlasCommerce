@@ -12,7 +12,7 @@ misma base de código (este repo) pero tienen:
 
 | Instancia | Tiendas | Dominios | Archivo de seed |
 | --------- | ------- | -------- | ---------------- |
-| `panda-kitsune/` | Panda + Kitsune | `pandas-estampados.com`, `kitsune.com` | `seeds/panda.json` |
+| `panda-kitsune/` | Panda + Kitsune | `panda-estampados.com`, `kitsune.com` | `seeds/panda.json` |
 | `mm-boutique/` | MM Boutique | `mm-boutique.com` | `seeds/mm-boutique.json` |
 | `morales-store/` | Morales Store | `morales-store.com` | `seeds/morales-store.json` |
 
@@ -105,7 +105,7 @@ cliente. El JSON de seed declara ambos tenants:
 ```json
 {
   "tenants": [
-    { "slug": "panda-estampados", "domains": ["pandas-estampados.com"] },
+    { "slug": "panda-estampados", "domains": ["panda-estampados.com"] },
     { "slug": "kitsune", "domains": ["kitsune.com"] }
   ],
   "admin_user": { "email": "...", "password_env": "..." }

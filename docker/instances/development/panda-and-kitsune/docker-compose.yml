@@ -25,7 +25,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-6432}:5432"
     command:
-      - postgres
+      - /usr/lib/postgresql/18/bin/postgres
       - -c
       - config_file=/etc/postgresql/postgresql.conf
     volumes:
@@ -47,7 +47,7 @@ services:
     env_file:
       - ../../../versions.env
     command:
-      - redis-server
+      - /usr/bin/redis-server
       - /usr/local/etc/redis/redis.conf
     volumes:
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
@@ -90,6 +90,14 @@ services:
       dockerfile: docker/instances/development/panda-and-kitsune/backend/Dockerfile.development
     container_name: panda-and-kitsune-dev-backend
     restart: unless-stopped
+    # Run as host UID (typically 1000) so bind-mounted backend code is
+    # readable/writable. The Dockerfile's USER www-data would otherwise
+    # be overridden by the compose file's `user:` directive. In dev the
+    # host UID is exported automatically by docker-stack.sh.
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    # tini: PID 1 = init, reaps zombies, forwards signals. Needed for
+    # proper shutdown of php-fpm and child processes.
+    init: true
     env_file:
       - environment/.env
     ports:
@@ -137,6 +145,11 @@ services:
       dockerfile: docker/instances/development/panda-and-kitsune/frontend/Dockerfile.development
     container_name: panda-and-kitsune-dev-frontend
     restart: unless-stopped
+    # Run as host UID so bind-mounted frontend code is readable/writable.
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    # tini: PID 1 = init, reaps zombies, forwards signals. Needed for
+    # proper shutdown of astro dev and vite child processes.
+    init: true
     env_file:
       - environment/.env
     ports:
@@ -146,6 +159,13 @@ services:
       - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
       - ecommerce_panda_and_kitsune_dev_node_modules:/app/node_modules
       - ecommerce_panda_and_kitsune_dev_pnpm_store:/app/.pnpm-store
+      # Volúmenes anónimos sobre el bind-mount: enmascaran los
+      # caches locales (Astro + Vite) que arrastran el host. Sin esto,
+      # un .astro/dev.json stale o un node_modules/.vite desactualizado
+      # del host rompe el arranque del dev server. Al ser anónimos, se
+      # recrean vacíos en cada up del container.
+      - /app/.astro
+      - /app/node_modules/.vite
     environment:
       - NODE_ENV=development
       - HOST=0.0.0.0
