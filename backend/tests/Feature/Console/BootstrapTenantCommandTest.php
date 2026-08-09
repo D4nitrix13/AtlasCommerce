@@ -134,8 +134,8 @@ final class BootstrapTenantCommandTest extends TestCase
                     'slug' => 'panda-estampados',
                     'name' => 'Panda Estampados',
                     'currency' => 'NIO',
-                    'domains' => ['pandas-estampados.com'],
-                    'admin_domains' => ['admin.pandas-estampados.com'],
+                    'domains' => ['panda-estampados.com'],
+                    'admin_domains' => ['admin.panda-estampados.com'],
                 ],
                 [
                     'slug' => 'kitsune',
@@ -146,7 +146,7 @@ final class BootstrapTenantCommandTest extends TestCase
                 ],
             ],
             'admin_user' => [
-                'email' => 'admin@pandas-estampados.test',
+                'email' => 'admin@panda-estampados.test',
                 'password_env' => 'PANDA_ADMIN_PASSWORD',
             ],
         ]);
@@ -161,7 +161,7 @@ final class BootstrapTenantCommandTest extends TestCase
         $this->assertDatabaseHas('stores', ['slug' => 'kitsune']);
 
         // El admin user queda asociado a AMBAS tiendas.
-        $user = User::query()->where(column: 'email', operator: '=', value: 'admin@pandas-estampados.test')->firstOrFail();
+        $user = User::query()->where(column: 'email', operator: '=', value: 'admin@panda-estampados.test')->firstOrFail();
         $this->assertSame(expected: 2, actual: $user->stores->count());
 
         putenv('PANDA_ADMIN_PASSWORD');
@@ -358,7 +358,7 @@ final class BootstrapTenantCommandTest extends TestCase
                     'slug' => 'panda-estampados',
                     'name' => 'Panda Estampados',
                     'currency' => 'NIO',
-                    'domains' => ['pandas-estampados.com'],
+                    'domains' => ['panda-estampados.com'],
                     'theme' => [
                         'short_name' => 'Panda',
                         'logo_path' => '/images/panda/logo.webp',
@@ -426,7 +426,7 @@ final class BootstrapTenantCommandTest extends TestCase
                     'slug' => 'panda-estampados',
                     'name' => 'Panda Estampados',
                     'currency' => 'NIO',
-                    'domains' => ['pandas-estampados.com'],
+                    'domains' => ['panda-estampados.com'],
                     'theme' => [
                         'short_name' => 'Panda',
                         'accent_color' => '#DC2626',
@@ -444,7 +444,7 @@ final class BootstrapTenantCommandTest extends TestCase
                 ],
             ],
             'admin_user' => [
-                'email' => 'admin@pandas-estampados.test',
+                'email' => 'admin@panda-estampados.test',
                 'password_env' => 'PK_PASSWORD',
             ],
         ]);
@@ -468,7 +468,7 @@ final class BootstrapTenantCommandTest extends TestCase
                     'slug' => 'panda-estampados',
                     'name' => 'Panda Estampados',
                     'currency' => 'NIO',
-                    'domains' => ['pandas-estampados.com'],
+                    'domains' => ['panda-estampados.com'],
                     'theme' => [
                         'short_name' => 'Panda',
                         'accent_color' => '#DC2626',
