@@ -47,7 +47,7 @@ final class StorefrontThemeTest extends TestCase
 
         StoreDomain::query()->create([
             'store_id' => $this->store->id,
-            'domain' => 'pandas-estampados.com',
+            'domain' => 'panda-estampados.com',
             'type' => 'domain',
             'is_primary' => true,
             'is_active' => true,
@@ -65,7 +65,7 @@ final class StorefrontThemeTest extends TestCase
             'support_email' => 'support@panda-estampados.test',
         ]);
 
-        $response = $this->getJson(uri: 'http://pandas-estampados.com/api/storefront/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.short_name', expect: 'Panda');
@@ -77,7 +77,7 @@ final class StorefrontThemeTest extends TestCase
     #[Test]
     public function returns_defaults_when_store_has_no_theme(): void
     {
-        $response = $this->getJson(uri: 'http://pandas-estampados.com/api/storefront/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.short_name', expect: null);
@@ -98,7 +98,7 @@ final class StorefrontThemeTest extends TestCase
             ],
         ]);
 
-        $response = $this->getJson(uri: 'http://pandas-estampados.com/api/storefront/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.tokens.font_family', expect: 'Inter');
@@ -138,7 +138,7 @@ final class StorefrontThemeTest extends TestCase
             'accent_color' => '#7C3AED',
         ]);
 
-        $panda = $this->getJson(uri: 'http://pandas-estampados.com/api/storefront/theme');
+        $panda = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
         $panda->assertJsonPath(path: 'data.short_name', expect: 'Panda');
         $panda->assertJsonPath(path: 'data.accent_color', expect: '#DC2626');
 
