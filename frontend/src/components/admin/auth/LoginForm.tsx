@@ -6,7 +6,6 @@ import { apiFetch } from "../../../lib/api";
 import type { LoginResponse, ValidationErrors } from "../../../types/auth";
 import { DEFAULT_BRAND, type StoreBrand } from "../../../config/stores";
 import LanguageSwitcher from "../../ui/LanguageSwitcher";
-import HelpLoginModal from "./HelpLoginModal";
 
 export type Tab = "login" | "register";
 
@@ -43,6 +42,16 @@ export default function LoginForm({
   const { login, setSession } = useAuth();
   const { t } = useTranslations();
 
+  // Locale para construir URLs de la app. Se toma del URL actual
+  // (sigue la convención /[locale]/admin/...).
+  const locale = (() => {
+    if (typeof window === "undefined") {
+      return "es";
+    }
+    const match = window.location.pathname.match(/^\/(es|en)(\/|$)/);
+    return match?.[1] ?? "es";
+  })();
+
   const accent = brand.accentColor;
   const accentHover = brand.accentHoverColor;
   const palette = brand.loginTheme;
@@ -73,7 +82,6 @@ export default function LoginForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({});
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   const resetFields = (): void => {
     setFirstName("");
@@ -451,16 +459,13 @@ export default function LoginForm({
       </div>
 
       <div className="mt-2 flex flex-col items-center gap-3 pt-2 text-xs text-[var(--login-text-muted)]">
-        <button
-          type="button"
-          onClick={() => {
-            setIsHelpModalOpen(true);
-          }}
+        <a
+          href={`/${locale}/admin/auth/forgot-password`}
           className="font-semibold transition hover:opacity-80"
           style={{ color: accent }}
         >
           {t("auth.login.help")}
-        </button>
+        </a>
         <p className="text-center">
           {t("auth.login.termsPrefix")}{" "}
           <a
@@ -473,15 +478,6 @@ export default function LoginForm({
           .
         </p>
       </div>
-
-      {isHelpModalOpen && (
-        <HelpLoginModal
-          brand={brand}
-          onClose={() => {
-            setIsHelpModalOpen(false);
-          }}
-        />
-      )}
     </div>
   );
 }
