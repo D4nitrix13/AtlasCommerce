@@ -8,7 +8,7 @@ describe('config/stores', () => {
       const brand = getBrandBySlug('panda-estampados');
       expect(brand.slug).toBe('panda-estampados');
       expect(brand.name).toBe('Panda Estampados');
-      expect(brand.accentColor).toBe('#0A0A0A');
+      expect(brand.accentColor).toBe('#7CB342');
       expect(brand.logoPath).toContain('panda-estampados');
     });
 
