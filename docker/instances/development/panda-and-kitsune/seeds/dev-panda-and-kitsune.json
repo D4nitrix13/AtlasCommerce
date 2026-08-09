@@ -5,11 +5,11 @@
       "name": "Panda Estampados (DEV)",
       "currency": "NIO",
       "domains": [
-        "pandas-estampados.com",
-        "www.pandas-estampados.com"
+        "panda-estampados.com",
+        "www.panda-estampados.com"
       ],
       "admin_domains": [
-        "admin.pandas-estampados.com"
+        "admin.panda-estampados.com"
       ],
       "theme": {
         "short_name": "Panda DEV",

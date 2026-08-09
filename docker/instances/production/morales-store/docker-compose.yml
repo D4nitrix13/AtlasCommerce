@@ -18,6 +18,10 @@ services:
       dockerfile: docker/instances/production/morales-store/backend/Dockerfile.production
     container_name: moralesstore-app
     restart: unless-stopped
+    # Run as www-data (UID 33) — never root.
+    user: "33:33"
+    # tini: PID 1 = init, reaps zombies, forwards signals.
+    init: true
     volumes:
       - ./seeds:/tmp/seeds:ro
       - storage-app:/var/www/html/storage
@@ -70,6 +74,10 @@ services:
       dockerfile: docker/instances/production/morales-store/frontend/Dockerfile.production
     container_name: moralesstore-frontend
     restart: unless-stopped
+    # Run as node (UID 1000) — never root.
+    user: "1000:1000"
+    # tini: PID 1 = init, reaps zombies, forwards signals.
+    init: true
     environment:
       - PUBLIC_API_URL=${PUBLIC_API_URL}
       - PUBLIC_APP_NAME=${PUBLIC_APP_NAME}
@@ -97,7 +105,7 @@ services:
       - ../../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
     command:
-      - postgres
+      - /usr/lib/postgresql/18/bin/postgres
       - -c
       - config_file=/etc/postgresql/postgresql.conf
     healthcheck:
@@ -116,7 +124,7 @@ services:
     env_file:
       - ../../../versions.env
     command:
-      - redis-server
+      - /usr/bin/redis-server
       - /usr/local/etc/redis/redis.conf
     volumes:
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
