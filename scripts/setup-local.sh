@@ -19,9 +19,9 @@ fi
 
 # Hosts a mapear a 127.0.0.1
 HOSTS=(
-    pandas-estampados.com
-    www.pandas-estampados.com
-    admin.pandas-estampados.com
+    panda-estampados.com
+    www.panda-estampados.com
+    admin.panda-estampados.com
     kitsune.com
     www.kitsune.com
     admin.kitsune.com
@@ -76,9 +76,9 @@ cat <<'NOTE'
 
 ✅ Setup completo. Verificaciones sugeridas:
 
-  curl -sI http://pandas-estampados.com/api/storefront/theme
+  curl -sI http://panda-estampados.com/api/storefront/theme
   curl -sI http://kitsune.com/api/storefront/theme
-  curl -sI http://admin.pandas-estampados.com/login
+  curl -sI http://admin.panda-estampados.com/login
   curl -sI http://mm-boutique.com/api/storefront/theme
   curl -sI http://morales-store.com/api/storefront/theme
 

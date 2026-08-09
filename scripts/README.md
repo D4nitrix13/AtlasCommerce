@@ -1,0 +1,182 @@
+# Scripts de Ecommerce
+
+Este directorio contiene todos los scripts operativos del proyecto.
+Cada script debe ser **corto, de una sola responsabilidad, y usar
+rutas absolutas para los binarios** (ver "Pautas" más abajo).
+
+## Índice
+
+- [`docker-stack.sh`](docker-stack.sh) — entry point del orquestador
+  Docker. Dispatcher delgado que delega a archivos de acción.
+- [`docker/`](docker/) — submódulos del orquestador Docker.
+- [`docker/_lib/`](docker/_lib/) — librería compartida entre los
+  archivos de acción (colores, logging, resolve, docker_compose).
+
+## Estructura de `docker/`
+
+```
+docker/
+├── _lib/                        # Librería compartida (prefijo _ = interna)
+│   ├── colors.sh                # Constantes ANSI para logs
+│   ├── logging.sh               # log_info, log_ok, log_warn, log_err, log_cmd
+│   ├── resolve.sh               # Resolución de instancias / scopes / servicios
+│   ├── docker_compose.sh        # Wrapper de `docker compose` + helpers de volumen
+│   └── all.sh                   # Source order: colors → logging → resolve → docker_compose
+├── lifecycle/                   # Ciclo de vida de containers
+│   ├── up.sh                    # cmd_up
+│   ├── start.sh                 # cmd_start
+│   ├── stop.sh                  # cmd_stop
+│   ├── restart.sh               # cmd_restart
+│   ├── down.sh                  # cmd_down
+│   ├── build.sh                 # cmd_build
+│   └── nuke.sh                  # cmd_nuke (⚠ borra volúmenes)
+├── inspection/                  # Comandos de solo lectura
+│   ├── ps.sh                    # cmd_ps (vista rápida)
+│   ├── info.sh                  # cmd_info (tabla detallada)
+│   ├── status.sh                # cmd_status (compose ps)
+│   └── logs.sh                  # cmd_logs
+├── volumes/                     # Gestión de volúmenes Docker
+│   ├── list.sh                  # cmd_volumes
+│   └── remove.sh                # cmd_rm_volumes (⚠)
+├── exec/                        # Ejecución dentro de containers
+│   └── cmd.sh                   # cmd_exec
+├── setup/                       # Setup y helpers de configuración
+│   ├── first-install.sh         # cmd_setup
+│   ├── hosts.sh                 # cmd_hosts (imprime bloque /etc/hosts)
+│   └── caddy.sh                 # cmd_caddy (imprime Caddyfile)
+└── help/                        # Ayuda
+    └── show.sh                  # cmd_help
+```
+
+Cada carpeta tiene UN archivo `<acción>.sh` que define UNA función
+`cmd_<acción>()`. El dispatcher en `docker-stack.sh` hace source
+del archivo correspondiente y llama la función.
+
+## Pautas para nuevos scripts
+
+### 1. Tamaño y responsabilidad
+
+- **~100 líneas máximo** por archivo. Si excede, partir en varios.
+- **Una responsabilidad por archivo**. Si el script hace "start"
+  y "stop" y "logs", son 3 archivos.
+- Nombres descriptivos: `up.sh` mejor que `container.sh`.
+
+### 2. Rutas absolutas para binarios (PATH hijacking)
+
+**REGLA CRÍTICA**: usar SIEMPRE la ruta absoluta de los binarios
+externos. Si alguien compromete el sistema y mete un binario falso
+en `/usr/local/bin` o en el cwd, el script sigue ejecutando el
+binario legítimo.
+
+```bash
+# ✅ Correcto
+readonly DOCKER_BIN="/usr/bin/docker"
+${DOCKER_BIN} compose ps
+
+# ❌ Incorrecto
+docker compose ps
+```
+
+Excepción: los **built-ins** del shell (`echo`, `printf`, `cd`, `pwd`,
+`source`, `[[ ]]`) no son binarios externos, no les aplica PATH
+hijacking y se pueden usar directos.
+
+### 3. Imports vía `_lib/all.sh`
+
+Los archivos de acción NO deben redefinir colores, logging o
+resolución de instancias. Hacen source del lib:
+
+```bash
+# El dispatcher ya hace source de _lib/all.sh antes de cargar la
+# acción, así que las funciones de logging y resolve ya están en
+# scope. No repetir el source aquí.
+cmd_up() {
+    while IFS=$'\t' read -r inst svc; do
+        log_info "Building + levantando ${inst}…"
+        docker_compose "$inst" up -d --build
+    done < <(resolve_targets "$@")
+}
+```
+
+### 4. Path resolution centralizada
+
+Las únicas funciones que saben dónde vive cada instancia en el FS
+son `instance_compose_dir`, `instance_compose_file` y
+`instance_env_file` en `_lib/resolve.sh`. Si necesitás referenciar
+un path, usá estas funciones, no hardcodees paths.
+
+### 5. Logging con colores
+
+Usá siempre las funciones de `_lib/logging.sh`:
+
+```bash
+log_info  "mensaje informativo"
+log_ok    "operación exitosa"
+log_warn  "advertencia"
+log_err   "error"        # va a stderr
+log_cmd   "comando ejecutado"   # prefijo [cmd] dim/gris
+log_bold  "texto destacado"
+```
+
+### 6. Errores con exit codes
+
+```bash
+if [[ $# -lt 3 ]]; then
+    log_err "exec requiere: <instancia> <servicio> <comando...>"
+    exit 1
+fi
+```
+
+### 7. Comentarios al inicio del archivo
+
+Cada script empieza con:
+
+```bash
+#!/usr/bin/env bash
+# scripts/docker/<carpeta>/<archivo>.sh
+# <descripción de una línea de qué hace>
+# <más contexto si hace falta>
+```
+
+### 8. Verificar sintaxis antes de commitear
+
+```bash
+bash -n scripts/docker-stack.sh
+bash -n scripts/docker/_lib/*.sh
+bash -n scripts/docker/lifecycle/*.sh
+# ...
+```
+
+## Convención de commits
+
+Ver ejemplos en `git log --no-pager -n5`. Formato:
+
+```
+<tipo>(<scope>): <descripción corta imperativa>
+
+<body detallado con:
+- Qué se cambió y por qué
+- Paths específicos a archivos o líneas
+- Snippets before/after cuando aplique
+- Lo que NO se cambió y por qué
+- Cómo verificar>
+```
+
+Tipos comunes: `feat`, `fix`, `refactor`, `docs`, `chore`. Idiomas:
+español para descripciones narrativas, inglés para términos técnicos.
+
+## Añadir un comando nuevo
+
+1. Identificar la categoría (`lifecycle/`, `inspection/`, `volumes/`,
+   `exec/`, `setup/`). Si no encaja, crear nueva carpeta.
+2. Crear `docker/<carpeta>/<acción>.sh` siguiendo las pautas de
+   arriba.
+3. Agregar dispatch en `docker-stack.sh`:
+   ```bash
+   <acción>)    source "${DOCKER_DIR}/<carpeta>/<acción>.sh";   cmd_<acción> "$@" ;;
+   ```
+4. Agregar entrada en `cmd_help` (categoría correspondiente).
+5. Si tiene alias corto, agregar también.
+6. Probar manualmente: `./scripts/docker-stack.sh <acción> ...`
+7. `bash -n` sobre el archivo nuevo.
+8. Commit siguiendo la convención.
