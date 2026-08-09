@@ -4,11 +4,11 @@ import { getBrandBySlug, DEFAULT_BRAND, STORE_BRANDS } from '../../../src/config
 
 describe('config/stores', () => {
   describe('getBrandBySlug', () => {
-    it("retorna la marca panda cuando el slug es 'panda'", () => {
-      const brand = getBrandBySlug('panda');
-      expect(brand.slug).toBe('panda');
+    it("retorna la marca panda cuando el slug es 'panda-estampados'", () => {
+      const brand = getBrandBySlug('panda-estampados');
+      expect(brand.slug).toBe('panda-estampados');
       expect(brand.name).toBe('Panda Estampados');
-      expect(brand.accentColor).toBe('#DC2626');
+      expect(brand.accentColor).toBe('#0A0A0A');
       expect(brand.logoPath).toContain('panda-estampados');
     });
 
@@ -38,12 +38,12 @@ describe('config/stores', () => {
 
   describe('STORE_BRANDS', () => {
     it('incluye Panda y Kitsune', () => {
-      expect(STORE_BRANDS.panda).toBeDefined();
+      expect(STORE_BRANDS['panda-estampados']).toBeDefined();
       expect(STORE_BRANDS.kitsune).toBeDefined();
     });
 
     it('incluye los cuatro paquetes de themes', () => {
-      expect(STORE_BRANDS.panda?.name).toBe('Panda Estampados');
+      expect(STORE_BRANDS['panda-estampados']?.name).toBe('Panda Estampados');
       expect(STORE_BRANDS.kitsune?.name).toBe('Kitsune Store');
       expect(STORE_BRANDS['mm-boutique']?.name).toBe('MM Boutique');
       expect(STORE_BRANDS['morales-store']?.name).toBe('Morales Store');
@@ -61,6 +61,7 @@ describe('config/stores', () => {
         'accentColor',
         'accentHoverColor',
         'supportEmail',
+        'loginTheme',
       ];
 
       for (const brand of Object.values(STORE_BRANDS)) {
@@ -101,6 +102,7 @@ describe('config/stores', () => {
         'accentColor',
         'accentHoverColor',
         'supportEmail',
+        'loginTheme',
       ];
 
       for (const field of requiredFields) {
