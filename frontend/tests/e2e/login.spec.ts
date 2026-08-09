@@ -8,11 +8,11 @@ import { test, expect } from "@playwright/test";
  * página. Ahora el tab vive en la URL como query param (?tab=register).
  *
  * Pre-requisito: backend, frontend y Caddy corriendo localmente.
- * Las URLs usan admin.pandas-estampados.com (Panda Estampados)
+ * Las URLs usan admin.panda-estampados.com (Panda Estampados)
  * mapeado en /etc/hosts.
  */
 
-const ADMIN_PANDA = "http://admin.pandas-estampados.com";
+const ADMIN_PANDA = "http://admin.panda-estampados.com";
 const ADMIN_KITSUNE = "http://admin.kitsune.com";
 const LOGIN_PATH = "/es/admin/auth/login";
 
