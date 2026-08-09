@@ -29,6 +29,23 @@ interface TenantContext {
   tenantSlug: string | null;
 }
 
+interface LoginTheme {
+  bg: string;
+  surface: string;
+  surfaceHover: string;
+  border: string;
+  borderStrong: string;
+  text: string;
+  textMuted: string;
+  textSubtle: string;
+  inputBg: string;
+  inputBgFocus: string;
+  danger: string;
+  dangerText: string;
+  dangerBg: string;
+  divider: string;
+}
+
 interface Theme {
   short_name: string | null;
   logo_path: string | null;
@@ -40,6 +57,7 @@ interface Theme {
   support_email: string | null;
   phone: string | null;
   whatsapp: string | null;
+  login_theme: LoginTheme | null;
   tokens: Record<string, unknown>;
 }
 
@@ -54,6 +72,7 @@ const DEFAULT_THEME: Theme = {
   support_email: null,
   phone: null,
   whatsapp: null,
+  login_theme: null,
   tokens: {},
 };
 
@@ -113,6 +132,7 @@ async function fetchThemeForHost(host: string): Promise<Theme> {
       support_email: body.data?.support_email ?? null,
       phone: body.data?.phone ?? null,
       whatsapp: body.data?.whatsapp ?? null,
+      login_theme: body.data?.login_theme ?? null,
       tokens: body.data?.tokens ?? {},
     };
   } catch {
@@ -124,8 +144,8 @@ const ADMIN_HOST_PATTERNS = [
   /^admin\.(localhost|127\.0\.0\.1)(?::\d+)?$/i,
   /^admin\.([a-z0-9-]+)\.test$/i,
   // Captura solo el primer label después de `admin.`.
-  //   admin.kitsune.com             -> ["kitsune"]
-  //   admin.pandas-estampados.com   -> ["pandas-estampados"]
+  //   admin.kitsune.com           -> ["kitsune"]
+  //   admin.panda-estampados.com  -> ["panda-estampados"]
   /^admin\.([a-z0-9-]+)(?:\.[a-z0-9.-]+)?$/i,
 ];
 
@@ -290,7 +310,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     if (localeFromUrl === null) {
       // URL no tiene locale → rewrite a path interno con locale.
-      const internalPath = mapAdminPathToInternal(pathname, locale);
+      // Preservar query string (ej: ?tab=register en /auth/login).
+      const internalPath = mapAdminPathToInternal(pathname, locale) + url.search;
       context.locals.locale = locale;
       const response = await context.rewrite(internalPath);
       appendLocaleCookie(response, locale);

@@ -85,7 +85,10 @@ const currentYear = new Date().getFullYear();
         />
       </aside>
 
-      <main class="flex items-center justify-center bg-slate-950 px-4 py-12 sm:px-8">
+      <main
+        class="flex items-center justify-center px-4 py-12 sm:px-8"
+        style={`background-color: ${brand.loginTheme.bg};`}
+      >
         <div class="w-full max-w-3xl">
           <header class="mb-6 flex items-center gap-3 lg:hidden">
             <img
@@ -93,7 +96,10 @@ const currentYear = new Date().getFullYear();
               alt={brand.name}
               class="h-10 w-10 rounded-md bg-white object-contain p-1"
             />
-            <span class="text-xl font-bold tracking-tight text-slate-900">
+            <span
+              class="text-xl font-bold tracking-tight"
+              style={`color: ${brand.loginTheme.text};`}
+            >
               {t["auth.brand.name"]}
             </span>
           </header>
