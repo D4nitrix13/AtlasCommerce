@@ -17,11 +17,13 @@ import { DEFAULT_BRAND, type StoreBrand } from "../../../config/stores";
 type ForgotPasswordFormProps = {
   brand?: StoreBrand;
   callbackPath?: string;
+  locale?: string;
 };
 
 export default function ForgotPasswordForm({
   brand = DEFAULT_BRAND,
   callbackPath = "/admin/auth/forgot-password",
+  locale = "es",
 }: ForgotPasswordFormProps): ReactElement {
   const { t } = useTranslations();
 
@@ -79,9 +81,7 @@ export default function ForgotPasswordForm({
         email: email.trim(),
         callback: callbackPath,
       });
-      window.location.href = `${
-        window.location.pathname.match(/^\/(es|en)/)?.[0] ?? ""
-      }/admin/auth/reset-password?${params.toString()}`;
+      window.location.href = `/${locale}/admin/auth/reset-password?${params.toString()}`;
     } catch (error_) {
       const apiError = error_ as { message?: string };
       setErrorMessage(apiError.message ?? t("auth.passwordReset.error.generic"));
@@ -186,10 +186,7 @@ export default function ForgotPasswordForm({
 
       <p className="text-center text-xs text-[var(--login-text-muted)]">
         <a
-          href={(() => {
-            const locale = window.location.pathname.match(/^\/(es|en)/)?.[0] ?? "/es";
-            return `${locale}/admin/auth/login`;
-          })()}
+          href={`/${locale}/admin/auth/login`}
           className="font-semibold transition hover:opacity-80"
           style={{ color: "var(--login-text)" }}
         >
