@@ -70,8 +70,8 @@ class PasswordResetToken extends Model
      */
     public function scopeValid(Builder $query): Builder
     {
-        return $query->whereNull(column: 'used_at')
-            ->where(column: 'expires_at', operator: '>', value: now());
+        return $query->whereNull('used_at')
+            ->where('expires_at', '>', now());
     }
 
     /**
@@ -83,6 +83,6 @@ class PasswordResetToken extends Model
      */
     public function scopeByEmail(Builder $query, string $email): Builder
     {
-        return $query->where(column: 'email', value: $email);
+        return $query->where('email', $email);
     }
 }
