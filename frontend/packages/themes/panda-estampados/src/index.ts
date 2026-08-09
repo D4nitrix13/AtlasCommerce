@@ -12,8 +12,15 @@ export const pandaTheme = {
     // estrictamente negro/blanco, así que los acentos de la web
     // expanden la paleta sin romper la identidad.
     //   60% blanco · 30% negro · 10% color de acento
-    accentColor: '#0A0A0A',        // negro profundo (acento principal, CTAs)
-    accentHoverColor: '#262626',   // gris muy oscuro (hover)
+    //
+    // Verde bambú (#7CB342) es el color de marca de Panda Estampados.
+    // Decisión revertida desde el negro monocromo (#0A0A0A) tras
+    // feedback visual: el login admin con aside en negro absoluto
+    // resultaba visualmente plano y desconectado del universo de
+    // marca. El verde bambú mantiene el logo B/N como protagonista
+    // y suma vida sin saturar.
+    accentColor: '#7CB342',        // verde bambú (acento principal, CTAs)
+    accentHoverColor: '#5a9a30',   // verde bambú oscuro (hover)
     // Acentos secundarios reservados para badges / highlights:
     //   - Rosa chicle:    #FF6B9D  (estampados, badges "nuevo")
     //   - Amarillo sol:   #FFD93D  (sellos, ofertas)
