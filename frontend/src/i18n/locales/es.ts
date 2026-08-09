@@ -54,6 +54,35 @@ const es: Translations = {
   "auth.userMenu.loading": "Cargando...",
   "auth.guard.redirecting": "Redirigiendo...",
 
+  "auth.passwordReset.title": "Ayuda para iniciar sesión",
+  "auth.passwordReset.bodyEmail":
+    "Ingrese su dirección de correo electrónico. Si tiene una cuenta de Fenderer, le enviaremos instrucciones sobre cómo iniciar sesión o restablecer su contraseña.",
+  "auth.passwordReset.email.label": "Cuenta de email",
+  "auth.passwordReset.email.submit": "Obtener ayuda para iniciar sesión",
+  "auth.passwordReset.bodyCode":
+    "Ingrese el código que recibió y su nueva contraseña.",
+  "auth.passwordReset.code.label": "Código",
+  "auth.passwordReset.code.placeholder": "Código de 6 dígitos",
+  "auth.passwordReset.newPassword.label": "Nueva contraseña",
+  "auth.passwordReset.confirmPassword.label": "Confirmar nueva contraseña",
+  "auth.passwordReset.password.show": "Mostrar contraseña",
+  "auth.passwordReset.password.hide": "Ocultar contraseña",
+  "auth.passwordReset.passwordHint":
+    "Su contraseña debe tener al menos 12 caracteres, tener una letra mayúscula, una letra minúscula y un número.",
+  "auth.passwordReset.submit": "Enviar",
+  "auth.passwordReset.close": "Cerrar",
+  "auth.passwordReset.error.emailEmpty": "Ingrese su dirección de correo electrónico.",
+  "auth.passwordReset.error.emailInvalid": "El email debe tener formato válido.",
+  "auth.passwordReset.error.codeEmpty": "Ingrese el código de 6 dígitos.",
+  "auth.passwordReset.error.codeInvalid": "El código es inválido o ha expirado.",
+  "auth.passwordReset.error.passwordEmpty": "Ingrese una nueva contraseña.",
+  "auth.passwordReset.error.passwordMismatch": "Las contraseñas no coinciden.",
+  "auth.passwordReset.error.passwordWeak":
+    "Su contraseña debe tener al menos 12 caracteres, tener una letra mayúscula, una letra minúscula y un número.",
+  "auth.passwordReset.error.generic": "Algo salió mal. Por favor intente de nuevo.",
+  "auth.passwordReset.success":
+    "Su contraseña fue restablecida. Ya tiene una sesión activa.",
+
   "admin.shipments.title": "Envíos",
   "admin.shipments.subtitle":
     "Despacha, entrega o cancela envíos. El stock ya fue descontado al liquidar la factura.",
