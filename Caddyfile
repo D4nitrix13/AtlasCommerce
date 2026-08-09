@@ -24,7 +24,7 @@
 #   3 dev puedan correr en paralelo sin conflicto.
 #
 # Reglas:
-#   *.pandas-estampados.com -> backend/frontend panda-kitsune (prod)
+#   *.panda-estampados.com -> backend/frontend panda-kitsune (prod)
 #                                o panda-and-kitsune-dev según cual esté Up
 #   *.kitsune.com           -> backend/frontend panda-kitsune
 #   *.mm-boutique.com       -> backend/frontend mm-boutique (prod)
@@ -71,7 +71,7 @@ http:// {
 
 	# Panda + Kitsune dev (mismo stack dev multi-tenant)
 	@panda_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
-	@panda_dev host admin.pandas-estampados.com www.pandas-estampados.com pandas-estampados.com admin.kitsune.com www.kitsune.com kitsune.com
+	@panda_dev host admin.panda-estampados.com www.panda-estampados.com panda-estampados.com admin.kitsune.com www.kitsune.com kitsune.com
 	handle @panda_dev_api {
 		reverse_proxy localhost:9000
 	}
@@ -105,7 +105,7 @@ http:// {
 
 	# Panda + Kitsune (mismo deploy: red 172.21.0.0/24)
 	@panda_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
-	@panda host pandas-estampados.com www.pandas-estampados.com admin.pandas-estampados.com
+	@panda host panda-estampados.com www.panda-estampados.com admin.panda-estampados.com
 	handle @panda_api {
 		reverse_proxy 172.21.0.20:8000
 	}
@@ -147,9 +147,9 @@ http:// {
 # ===============================================================
 # Pegar este bloque al final de /etc/hosts con sudo:
 #
-#   127.0.0.1  pandas-estampados.com
-#   127.0.0.1  www.pandas-estampados.com
-#   127.0.0.1  admin.pandas-estampados.com
+#   127.0.0.1  panda-estampados.com
+#   127.0.0.1  www.panda-estampados.com
+#   127.0.0.1  admin.panda-estampados.com
 #   127.0.0.1  kitsune.com
 #   127.0.0.1  www.kitsune.com
 #   127.0.0.1  admin.kitsune.com
