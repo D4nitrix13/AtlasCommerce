@@ -13,9 +13,9 @@ export default defineConfig({
       // En prod cada subdominio resuelve via DNS real, no hace
       // falta esta config.
       allowedHosts: [
-        "pandas-estampados.com",
-        "www.pandas-estampados.com",
-        "admin.pandas-estampados.com",
+        "panda-estampados.com",
+        "www.panda-estampados.com",
+        "admin.panda-estampados.com",
         "kitsune.com",
         "www.kitsune.com",
         "admin.kitsune.com",

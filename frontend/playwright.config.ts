@@ -9,7 +9,7 @@ import { defineConfig, devices } from "@playwright/test";
  *   - Frontend Astro (pnpm run dev)
  *   - Caddy (sudo systemctl start caddy) en puerto 80
  *
- * Las URLs base usan `pandas-estampados.com` que debe estar en /etc/hosts.
+ * Las URLs base usan `panda-estampados.com` que debe estar en /etc/hosts.
  * Si los servicios no están corriendo, los tests fallan con error
  * claro de conexión.
  */
@@ -24,7 +24,7 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
 
   use: {
-    baseURL: "http://pandas-estampados.com",
+    baseURL: "http://panda-estampados.com",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -44,7 +44,7 @@ export default defineConfig({
   //
   // webServer: {
   //   command: "pnpm run dev:e2e",
-  //   url: "http://pandas-estampados.com",
+  //   url: "http://panda-estampados.com",
   //   reuseExistingServer: !process.env.CI,
   //   timeout: 60_000,
   // },

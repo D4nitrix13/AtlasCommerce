@@ -1,4 +1,4 @@
-import { DEFAULT_BRAND, type StoreBrand } from "../config/stores";
+import { DEFAULT_BRAND, type LoginTheme, type StoreBrand } from "../config/stores";
 
 /**
  * Theme visual de una tienda tal como lo consume el frontend.
@@ -20,6 +20,7 @@ export type Theme = {
   support_email: string | null;
   phone: string | null;
   whatsapp: string | null;
+  login_theme: LoginTheme | null;
   tokens: Record<string, unknown>;
 };
 
@@ -40,6 +41,7 @@ export const DEFAULT_THEME: Theme = {
   support_email: null,
   phone: null,
   whatsapp: null,
+  login_theme: null,
   tokens: {},
 };
 
@@ -68,6 +70,7 @@ export function themeToBrand(theme: Theme, fallback: StoreBrand): StoreBrand {
     accentColor: theme.accent_color ?? fallback.accentColor,
     accentHoverColor: theme.accent_hover_color ?? fallback.accentHoverColor,
     supportEmail: theme.support_email ?? fallback.supportEmail,
+    loginTheme: theme.login_theme ?? fallback.loginTheme,
   };
 }
 
