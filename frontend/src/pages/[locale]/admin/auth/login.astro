@@ -33,15 +33,10 @@ const currentYear = new Date().getFullYear();
   ) : (
     <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
       <aside
-        class="relative isolate hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
-        style={`background: radial-gradient(circle at 20% 30%, ${brand.accentColor} 0%, #1C1917 80%);`}
+        class="relative isolate hidden flex-col justify-between overflow-hidden p-12 text-white lg:sticky lg:top-0 lg:h-screen lg:flex"
+        style={`background: radial-gradient(circle at 20% 30%, ${brand.accentColor} 0%, ${brand.accentHoverColor} 80%);`}
       >
         <div class="flex items-center gap-3">
-          <img
-            src={brand.loginLogoPath}
-            alt={brand.name}
-            class="h-12 w-12 rounded-lg bg-white p-1.5 object-contain shadow-lg"
-          />
           <span class="text-2xl font-bold tracking-tight drop-shadow">
             {t["auth.brand.name"]}
           </span>
