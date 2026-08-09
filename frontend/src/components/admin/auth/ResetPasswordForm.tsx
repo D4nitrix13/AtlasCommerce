@@ -24,12 +24,14 @@ type ResetPasswordFormProps = {
   brand?: StoreBrand;
   email: string;
   callbackPath?: string;
+  locale?: string;
 };
 
 export default function ResetPasswordForm({
   brand = DEFAULT_BRAND,
   email,
   callbackPath = "/admin/dashboard",
+  locale = "es",
 }: ResetPasswordFormProps): ReactElement {
   const { t } = useTranslations();
   const { setSession } = useAuth();
@@ -361,10 +363,7 @@ export default function ResetPasswordForm({
 
       <p className="text-center text-xs text-[var(--login-text-muted)]">
         <a
-          href={(() => {
-            const locale = window.location.pathname.match(/^\/(es|en)/)?.[0] ?? "/es";
-            return `${locale}/admin/auth/forgot-password`;
-          })()}
+          href={`/${locale}/admin/auth/forgot-password`}
           className="font-semibold transition hover:opacity-80"
           style={{ color: "var(--login-text)" }}
         >
