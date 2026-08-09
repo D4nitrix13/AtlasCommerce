@@ -92,6 +92,10 @@ services:
 
   db:
     image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
+    # Run as postgres user (UID 999). El command: con ruta absoluta
+    # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
+    # setear user: explícito. Sin esto, postgres rehúsa correr como root.
+    user: "999:999"
     container_name: moralesstore-db
     restart: unless-stopped
     env_file:
@@ -124,7 +128,7 @@ services:
     env_file:
       - ../../../versions.env
     command:
-      - /usr/bin/redis-server
+      - /usr/local/bin/redis-server
       - /usr/local/etc/redis/redis.conf
     volumes:
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro

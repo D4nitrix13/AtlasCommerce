@@ -34,11 +34,17 @@ EXPOSE 4321
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD /usr/bin/wget -q --spider http://localhost:4321/ || exit 1
 
-# Drop privilegios: el contenedor corre como `node` (UID 1000) en vez de
-# root. La build necesita root (instalar paquetes, copiar archivos al FS
-# de la imagen) pero el runtime no. El bind-mount del compose dev mapea
-# archivos del host (típicamente UID 1000) al container, así que usar
-# `node` (también UID 1000) matchea sin chowns extra.
-USER node
+# Entrypoint: arregla ownership de los volúmenes (node_modules,
+# .pnpm-store, .astro) que docker compose crea como root y que el
+# usuario `node` (UID 1000) necesita escribir. Después del chown,
+# hace setpriv para correr pnpm como node (mínimo privilegio).
+COPY docker/instances/development/panda-and-kitsune/frontend/entrypoint.development.sh /usr/local/bin/entrypoint
+RUN /bin/chmod +x /usr/local/bin/entrypoint
 
-CMD ["/usr/local/bin/pnpm", "run", "dev", "--host", "0.0.0.0", "--force"]
+# El entrypoint hace el drop de privilegios via setpriv, así que la
+# imagen NO declara USER. Mantener root hasta el setpriv es necesario
+# para que el chown funcione.
+# USER node
+
+ENTRYPOINT ["/usr/local/bin/entrypoint"]
+CMD []
