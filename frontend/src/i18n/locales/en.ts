@@ -54,6 +54,35 @@ const en: Translations = {
   "auth.userMenu.loading": "Loading...",
   "auth.guard.redirecting": "Redirecting...",
 
+  "auth.passwordReset.title": "Help signing in",
+  "auth.passwordReset.bodyEmail":
+    "Enter your email address. If you have a Fenderer account, we'll send you instructions on how to sign in or reset your password.",
+  "auth.passwordReset.email.label": "Email account",
+  "auth.passwordReset.email.submit": "Get sign-in help",
+  "auth.passwordReset.bodyCode":
+    "Enter the code you received and your new password.",
+  "auth.passwordReset.code.label": "Code",
+  "auth.passwordReset.code.placeholder": "6-digit code",
+  "auth.passwordReset.newPassword.label": "New Password",
+  "auth.passwordReset.confirmPassword.label": "Confirm New Password",
+  "auth.passwordReset.password.show": "Show password",
+  "auth.passwordReset.password.hide": "Hide password",
+  "auth.passwordReset.passwordHint":
+    "Your password must be at least 12 characters, contain an uppercase letter, a lowercase letter, and a number.",
+  "auth.passwordReset.submit": "Send",
+  "auth.passwordReset.close": "Close",
+  "auth.passwordReset.error.emailEmpty": "Enter your email address.",
+  "auth.passwordReset.error.emailInvalid": "Email must be a valid address.",
+  "auth.passwordReset.error.codeEmpty": "Enter the 6-digit code.",
+  "auth.passwordReset.error.codeInvalid": "The code is invalid or has expired.",
+  "auth.passwordReset.error.passwordEmpty": "Enter a new password.",
+  "auth.passwordReset.error.passwordMismatch": "The passwords do not match.",
+  "auth.passwordReset.error.passwordWeak":
+    "Your password must be at least 12 characters, contain an uppercase letter, a lowercase letter, and a number.",
+  "auth.passwordReset.error.generic": "Something went wrong. Please try again.",
+  "auth.passwordReset.success":
+    "Your password was reset. You are now signed in.",
+
   "admin.shipments.title": "Shipments",
   "admin.shipments.subtitle":
     "Ship, deliver or cancel orders. Stock was already decremented at invoice settlement.",

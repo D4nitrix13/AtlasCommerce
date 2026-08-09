@@ -6,6 +6,7 @@ import { apiFetch } from "../../../lib/api";
 import type { LoginResponse, ValidationErrors } from "../../../types/auth";
 import { DEFAULT_BRAND, type StoreBrand } from "../../../config/stores";
 import LanguageSwitcher from "../../ui/LanguageSwitcher";
+import HelpLoginModal from "./HelpLoginModal";
 
 export type Tab = "login" | "register";
 
@@ -72,6 +73,7 @@ export default function LoginForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({});
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   const resetFields = (): void => {
     setFirstName("");
@@ -449,13 +451,16 @@ export default function LoginForm({
       </div>
 
       <div className="mt-2 flex flex-col items-center gap-3 pt-2 text-xs text-[var(--login-text-muted)]">
-        <a
-          href={`mailto:${brand.supportEmail}`}
+        <button
+          type="button"
+          onClick={() => {
+            setIsHelpModalOpen(true);
+          }}
           className="font-semibold transition hover:opacity-80"
           style={{ color: accent }}
         >
           {t("auth.login.help")}
-        </a>
+        </button>
         <p className="text-center">
           {t("auth.login.termsPrefix")}{" "}
           <a
@@ -468,6 +473,15 @@ export default function LoginForm({
           .
         </p>
       </div>
+
+      {isHelpModalOpen && (
+        <HelpLoginModal
+          brand={brand}
+          onClose={() => {
+            setIsHelpModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
