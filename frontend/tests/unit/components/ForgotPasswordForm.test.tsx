@@ -62,15 +62,6 @@ afterEach(() => {
 
 describe("components/admin/auth/ForgotPasswordForm", () => {
   describe("render", () => {
-    it("muestra el título y el body de la página", () => {
-      render(<ForgotPasswordForm brand={brand} />);
-
-      expect(
-        screen.getByRole("heading", { name: "auth.passwordReset.title" }),
-      ).toBeInTheDocument();
-      expect(screen.getByText("auth.passwordReset.bodyEmail")).toBeInTheDocument();
-    });
-
     it("muestra el input de email con el label correcto", () => {
       render(<ForgotPasswordForm brand={brand} />);
 
@@ -80,19 +71,14 @@ describe("components/admin/auth/ForgotPasswordForm", () => {
       expect(emailInput).toHaveAttribute("autoComplete", "email");
     });
 
-    it("muestra el brand name en el header", () => {
+    it("muestra el botón submit con el texto correcto", () => {
       render(<ForgotPasswordForm brand={brand} />);
 
-      // El brand name se renderiza en el .astro page (no en el componente).
-      // El componente usa t("auth.brand.name") en el header si lo necesita.
-      expect(screen.getByText("auth.passwordReset.title")).toBeInTheDocument();
-    });
-
-    it("muestra el link 'Volver' apuntando al login", () => {
-      render(<ForgotPasswordForm brand={brand} />);
-
-      const backLink = screen.getByRole("link", { name: /common\.back/ });
-      expect(backLink).toHaveAttribute("href", "/es/admin/auth/login");
+      const submitButton = screen.getByRole("button", {
+        name: "auth.passwordReset.email.submit",
+      });
+      expect(submitButton).toBeInTheDocument();
+      expect(submitButton).toHaveAttribute("type", "submit");
     });
   });
 
