@@ -80,6 +80,8 @@ const es: Translations = {
   "auth.passwordReset.error.passwordWeak":
     "Su contraseña debe tener al menos 12 caracteres, tener una letra mayúscula, una letra minúscula y un número.",
   "auth.passwordReset.error.generic": "Algo salió mal. Por favor intente de nuevo.",
+  "auth.passwordReset.error.missingEmail":
+    "Falta el email para continuar. Volvé a empezar el flujo de recuperación.",
   "auth.passwordReset.success":
     "Su contraseña fue restablecida. Ya tiene una sesión activa.",
 

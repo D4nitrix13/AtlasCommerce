@@ -80,6 +80,8 @@ const en: Translations = {
   "auth.passwordReset.error.passwordWeak":
     "Your password must be at least 12 characters, contain an uppercase letter, a lowercase letter, and a number.",
   "auth.passwordReset.error.generic": "Something went wrong. Please try again.",
+  "auth.passwordReset.error.missingEmail":
+    "Email is missing to continue. Please restart the recovery flow.",
   "auth.passwordReset.success":
     "Your password was reset. You are now signed in.",
 
