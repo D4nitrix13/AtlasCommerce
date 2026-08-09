@@ -92,6 +92,7 @@ export type TranslationKey =
   | "auth.passwordReset.error.passwordMismatch"
   | "auth.passwordReset.error.passwordWeak"
   | "auth.passwordReset.error.generic"
+  | "auth.passwordReset.error.missingEmail"
   | "auth.passwordReset.success"
 
   // ─── admin: shipments ───────────────────────────────────────────────
