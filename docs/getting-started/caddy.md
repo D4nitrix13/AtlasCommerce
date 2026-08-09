@@ -17,8 +17,8 @@ Crear `Caddyfile` en la raíz del proyecto (ya existe):
 }
 
 http:// {
-    @hostnames host pandas-estampados.com www.pandas-estampados.com \
-                       admin.pandas-estampados.com \
+    @hostnames host panda-estampados.com www.panda-estampados.com \
+                       admin.panda-estampados.com \
                        kitsune.com www.kitsune.com admin.kitsune.com
 
     handle @hostnames {
@@ -89,13 +89,13 @@ ps aux | grep -v grep | grep "caddy run"
 
 ```bash
 # Storefront Panda → frontend
-curl -sI http://pandas-estampados.com/
+curl -sI http://panda-estampados.com/
 
 # Admin Panda → frontend (rewrite a /es/admin/auth/login)
-curl -sI http://admin.pandas-estampados.com/login
+curl -sI http://admin.panda-estampados.com/login
 
 # API → backend
-curl -sI http://pandas-estampados.com/api/auth/login
+curl -sI http://panda-estampados.com/api/auth/login
 
 # Host desconocido → 404
 curl -sI http://example.com/
@@ -127,8 +127,8 @@ los dominios reales:
     email ops@example.com
 }
 
-pandas-estampados.com, www.pandas-estampados.com,
-admin.pandas-estampados.com {
+panda-estampados.com, www.panda-estampados.com,
+admin.panda-estampados.com {
     reverse_proxy backend:8000
 }
 

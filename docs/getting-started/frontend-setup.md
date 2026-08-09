@@ -35,9 +35,9 @@ Ya están configurados en `astro.config.mjs`:
 vite: {
   server: {
     allowedHosts: [
-      "pandas-estampados.com",
-      "www.pandas-estampados.com",
-      "admin.pandas-estampados.com",
+      "panda-estampados.com",
+      "www.panda-estampados.com",
+      "admin.panda-estampados.com",
       "kitsune.com",
       "www.kitsune.com",
       "admin.kitsune.com",

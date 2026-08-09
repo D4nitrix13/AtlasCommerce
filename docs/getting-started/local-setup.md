@@ -1,6 +1,6 @@
 # Setup local — 4 tiendas en un solo host
 
-Esta guía te deja **pandas-estampados.com**, **kitsune.com**,
+Esta guía te deja **panda-estampados.com**, **kitsune.com**,
 **mm-boutique.com** y **morales-store.com** (con sus subdominios
 `admin.*` y `www.*`) respondiendo en `127.0.0.1` contra tres
 instancias Docker independientes.
@@ -40,9 +40,9 @@ El script:
 Pegar al final de `/etc/hosts` (usar `sudo`):
 
 ```txt
-127.0.0.1  pandas-estampados.com
-127.0.0.1  www.pandas-estampados.com
-127.0.0.1  admin.pandas-estampados.com
+127.0.0.1  panda-estampados.com
+127.0.0.1  www.panda-estampados.com
+127.0.0.1  admin.panda-estampados.com
 127.0.0.1  kitsune.com
 127.0.0.1  www.kitsune.com
 127.0.0.1  admin.kitsune.com
@@ -92,16 +92,16 @@ docker compose up -d
 
 ```bash
 # API
-curl -sI http://pandas-estampados.com/api/storefront/theme
+curl -sI http://panda-estampados.com/api/storefront/theme
 curl -sI http://mm-boutique.com/api/storefront/theme
 curl -sI http://morales-store.com/api/storefront/theme
 
 # Storefront
-curl -sI http://pandas-estampados.com/
+curl -sI http://panda-estampados.com/
 curl -sI http://kitsune.com/
 
 # Admin (rewrite interno a /es/admin/...)
-curl -sI http://admin.pandas-estampados.com/login
+curl -sI http://admin.panda-estampados.com/login
 curl -sI http://admin.kitsune.com/login
 curl -sI http://admin.mm-boutique.com/login
 curl -sI http://admin.morales-store.com/login

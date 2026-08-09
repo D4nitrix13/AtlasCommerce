@@ -63,7 +63,7 @@ store_domains
 
 Ejemplo:
 
-- `store_id: 1` — `pandas-estampados.com` (primary: true)
+- `store_id: 1` — `panda-estampados.com` (primary: true)
 - `store_id: 2` — `kitsune.com` (primary: true)
 - `store_id: 2` — `kitsune-store.com` (redirect, primary: false)
 

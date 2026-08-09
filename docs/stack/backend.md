@@ -185,7 +185,7 @@ REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=null
 
-SANCTUM_STATEFUL_DOMAINS=pandas-estampados.com,kitsune.com
+SANCTUM_STATEFUL_DOMAINS=panda-estampados.com,kitsune.com
 SESSION_DOMAIN=.localhost
 ```
 

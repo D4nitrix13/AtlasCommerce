@@ -14,9 +14,9 @@ Agregar al final:
 
 ```txt
 # Ecommerce local — multi-tienda
-127.0.0.1   pandas-estampados.com
-127.0.0.1   www.pandas-estampados.com
-127.0.0.1   admin.pandas-estampados.com
+127.0.0.1   panda-estampados.com
+127.0.0.1   www.panda-estampados.com
+127.0.0.1   admin.panda-estampados.com
 127.0.0.1   kitsune.com
 127.0.0.1   www.kitsune.com
 127.0.0.1   admin.kitsune.com
@@ -28,9 +28,9 @@ One-liner:
 sudo bash -c 'cat >> /etc/hosts <<EOF
 
 # Ecommerce local — multi-tienda
-127.0.0.1   pandas-estampados.com
-127.0.0.1   www.pandas-estampados.com
-127.0.0.1   admin.pandas-estampados.com
+127.0.0.1   panda-estampados.com
+127.0.0.1   www.panda-estampados.com
+127.0.0.1   admin.panda-estampados.com
 127.0.0.1   kitsune.com
 127.0.0.1   www.kitsune.com
 127.0.0.1   admin.kitsune.com
@@ -40,8 +40,8 @@ EOF'
 ## 2. Verificar resolución DNS
 
 ```bash
-getent hosts admin.pandas-estampados.com
-# 127.0.0.1      admin.pandas-estampados.com
+getent hosts admin.panda-estampados.com
+# 127.0.0.1      admin.panda-estampados.com
 
 getent hosts admin.kitsune.com
 # 127.0.0.1      admin.kitsune.com
@@ -68,8 +68,8 @@ Caddyfile mínimo (copiar a `/etc/caddy/Caddyfile`):
 }
 
 http:// {
-    @hostnames host pandas-estampados.com www.pandas-estampados.com \
-                       admin.pandas-estampados.com \
+    @hostnames host panda-estampados.com www.panda-estampados.com \
+                       admin.panda-estampados.com \
                        kitsune.com www.kitsune.com admin.kitsune.com
 
     handle @hostnames {
@@ -107,23 +107,23 @@ sudo caddy run --config /etc/caddy/Caddyfile &
 
 ```bash
 # Storefronts
-curl -sI http://pandas-estampados.com/
+curl -sI http://panda-estampados.com/
 curl -sI http://kitsune.com/
 
 # Admin
-curl -sI http://admin.pandas-estampados.com/login
+curl -sI http://admin.panda-estampados.com/login
 curl -sI http://admin.kitsune.com/login
 
 # API
-curl -s -X POST http://pandas-estampados.com/api/auth/login \
+curl -s -X POST http://panda-estampados.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@panda-estampados.test","password":"password"}'
 ```
 
 En el browser:
 
-- `http://pandas-estampados.com` → storefront Panda.
-- `http://admin.pandas-estampados.com/login` → login rojo (Panda).
+- `http://panda-estampados.com` → storefront Panda.
+- `http://admin.panda-estampados.com/login` → login rojo (Panda).
 - `http://admin.kitsune.com/login` → login violeta (Kitsune).
 
 ## 6. Resolución de problemas

@@ -53,8 +53,8 @@ El middleware Astro detecta el tenant por `Host`. Ver
 
 URLs de trabajo:
 
-- `http://pandas-estampados.com` → storefront Panda.
-- `http://admin.pandas-estampados.com/login` → admin Panda.
+- `http://panda-estampados.com` → storefront Panda.
+- `http://admin.panda-estampados.com/login` → admin Panda.
 - `http://kitsune.com` → storefront Kitsune.
 - `http://admin.kitsune.com/login` → admin Kitsune.
 

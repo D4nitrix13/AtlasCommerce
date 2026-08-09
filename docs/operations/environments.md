@@ -80,7 +80,7 @@
 - Los endpoints en `src/lib/endpoints.ts` **no**
   incluyen `/api`.
 - En producción:
-  `PUBLIC_API_URL=https://api.pandas-estampados.com/api`
+  `PUBLIC_API_URL=https://api.panda-estampados.com/api`
 
 ## Docker
 
@@ -99,10 +99,10 @@ Para desarrollo local con múltiples dominios,
 agregar en `/etc/hosts`:
 
 ```txt
-127.0.0.1  pandas-estampados.test
+127.0.0.1  panda-estampados.test
 127.0.0.1  kitsune.test
-127.0.0.1  admin.pandas-estampados.test
-127.0.0.1  api.pandas-estampados.test
+127.0.0.1  admin.panda-estampados.test
+127.0.0.1  api.panda-estampados.test
 ```
 
 ## Producción
@@ -112,6 +112,6 @@ agregar en `/etc/hosts`:
 - `DB_HOST` — `postgres` (`Docker`)
 - `REDIS_HOST` — `redis` (`Docker`)
 - `PUBLIC_API_URL` —
-  `https://api.pandas-estampados.com/api`
+  `https://api.panda-estampados.com/api`
 - `SANCTUM_STATEFUL_DOMAINS` —
-  `pandas-estampados.com,kitsune.com,admin.pandas-estampados.com`
+  `panda-estampados.com,kitsune.com,admin.panda-estampados.com`

@@ -39,7 +39,7 @@ el dueño.
 ### Panda Estampados
 
 ```txt
-Dominio:    pandas-estampados.com
+Dominio:    panda-estampados.com
 Público:    Empresas, clientes mayoristas
             /corporativos
 Productos:  Personalizados, merchandising
@@ -125,7 +125,7 @@ El frontend resuelve la tienda actual a partir del
 dominio de origen:
 
 ```txt
-pandas-estampados.com → Store{id: 1, name: "Panda Estampados"}
+panda-estampados.com → Store{id: 1, name: "Panda Estampados"}
 kitsune.com           → Store{id: 2, name: "Kitsune Store"}
 ```
 
