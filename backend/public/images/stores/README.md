@@ -46,7 +46,7 @@ Y los social icons del footer usan la misma mecánica:
 
 `asset()` resuelve a `APP_URL + path relativo a public/`. El `<img>` que
 termina en el HTML del email queda como
-`https://pandas-estampados.com/images/shared/brand/app-logo.webp`.
+`https://panda-estampados.com/images/shared/brand/app-logo.webp`.
 
 **¿Por qué el backend y no el frontend?** Los clientes de correo
 (Gmail, Outlook, Apple Mail) son consumidores externos: hacen una

@@ -24,7 +24,7 @@ stores/
 ## ¿Por qué estos archivos están acá y no solo en el backend?
 
 El frontend (Astro) sirve `public/` como raíz estática. Cuando el browser
-pide `https://pandas-estampados.com/images/stores/panda-estampados/brand/logo.webp`,
+pide `https://panda-estampados.com/images/stores/panda-estampados/brand/logo.webp`,
 la respuesta la da **el frontend**, no Laravel. Esto es por diseño:
 
 - El logo aparece en cada página del storefront público (header,
