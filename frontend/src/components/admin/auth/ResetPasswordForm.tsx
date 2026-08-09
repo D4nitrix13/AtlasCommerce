@@ -122,7 +122,6 @@ export default function ResetPasswordForm({
       });
       setSession(response);
       setSuccessMessage(t("auth.passwordReset.success"));
-      // Redirigir al destino después de mostrar el mensaje.
       window.setTimeout(() => {
         window.location.href = callbackPath;
       }, 1200);
@@ -145,31 +144,25 @@ export default function ResetPasswordForm({
 
   return (
     <div
-      className="flex w-full max-w-md flex-col gap-5 text-[var(--login-text)]"
+      className="flex w-full max-w-xl flex-col gap-6 text-[var(--login-text)]"
       style={themeVars}
     >
-      <header className="flex items-center gap-3">
-        <img
-          src={brand.logoPath}
-          alt={brand.name}
-          className="h-10 w-10 rounded-md bg-white object-contain p-1"
-        />
-        <span className="text-xl font-bold italic tracking-tight">
-          {brand.name}
-        </span>
-      </header>
-
-      <h1 className="text-2xl font-bold tracking-tight">
-        {t("auth.passwordReset.title")}
-      </h1>
-      <p className="text-sm text-[var(--login-text-muted)]">
-        {t("auth.passwordReset.bodyCode")}
-      </p>
+      <div className="space-y-2 text-center lg:text-left">
+        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+          {t("auth.passwordReset.title")}
+        </h1>
+        <p className="text-base leading-relaxed text-[var(--login-text-muted)]">
+          {t("auth.passwordReset.bodyCode")}
+        </p>
+        <p className="text-xs text-[var(--login-text-subtle)]">
+          {t("auth.passwordReset.email.label")}: <span className="font-mono">{email}</span>
+        </p>
+      </div>
 
       {errorMessage !== null && (
         <div
           role="alert"
-          className="rounded-md border px-3 py-2 text-sm"
+          className="rounded-lg border px-4 py-3 text-sm"
           style={{
             borderColor: "var(--login-danger)",
             backgroundColor: "var(--login-danger-bg)",
@@ -183,7 +176,7 @@ export default function ResetPasswordForm({
       {successMessage !== null && (
         <div
           role="status"
-          className="rounded-md border border-green-500 bg-green-50 px-3 py-2 text-sm text-green-700"
+          className="rounded-lg border border-green-500 bg-green-50 px-4 py-3 text-sm text-green-700"
         >
           {successMessage}
         </div>
@@ -191,14 +184,14 @@ export default function ResetPasswordForm({
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-5"
         noValidate
         aria-label={t("auth.passwordReset.title")}
       >
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <label
             htmlFor="code"
-            className="text-xs font-medium text-[var(--login-text-muted)]"
+            className="text-sm font-medium text-[var(--login-text)]"
           >
             {t("auth.passwordReset.code.label")}
           </label>
@@ -216,7 +209,7 @@ export default function ResetPasswordForm({
             onChange={(event) => {
               setCode(event.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH));
             }}
-            className="w-full rounded-md border-2 bg-[var(--login-input-bg)] px-4 py-3 font-mono text-base tracking-[0.5em] text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+            className="w-full rounded-lg border-2 bg-[var(--login-input-bg)] px-5 py-4 text-center font-mono text-2xl tracking-[0.5em] text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
             style={{ borderColor: "var(--login-border)" }}
             onFocus={(event) => {
               event.currentTarget.style.borderColor = "var(--login-border-strong)";
@@ -227,10 +220,10 @@ export default function ResetPasswordForm({
           />
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <label
             htmlFor="password"
-            className="text-xs font-medium text-[var(--login-text-muted)]"
+            className="text-sm font-medium text-[var(--login-text)]"
           >
             {t("auth.passwordReset.newPassword.label")}
           </label>
@@ -246,7 +239,7 @@ export default function ResetPasswordForm({
               onChange={(event) => {
                 setPassword(event.target.value);
               }}
-              className="w-full rounded-md border-2 bg-[var(--login-input-bg)] px-4 py-3 pr-12 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+              className="w-full rounded-lg border-2 bg-[var(--login-input-bg)] px-5 py-4 pr-14 text-lg text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
               style={{ borderColor: "var(--login-border)" }}
               onFocus={(event) => {
                 event.currentTarget.style.borderColor = "var(--login-border-strong)";
@@ -265,21 +258,21 @@ export default function ResetPasswordForm({
                   ? t("auth.passwordReset.password.hide")
                   : t("auth.passwordReset.password.show")
               }
-              className="absolute inset-y-0 right-0 flex items-center px-4 text-[var(--login-text-muted)] transition hover:text-[var(--login-text)]"
+              className="absolute inset-y-0 right-0 flex items-center px-5 text-[var(--login-text-muted)] transition hover:text-[var(--login-text)]"
             >
               {showPassword ? (
-                <EyeOff size={18} strokeWidth={1.75} />
+                <EyeOff size={20} strokeWidth={1.75} />
               ) : (
-                <Eye size={18} strokeWidth={1.75} />
+                <Eye size={20} strokeWidth={1.75} />
               )}
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <label
             htmlFor="confirmPassword"
-            className="text-xs font-medium text-[var(--login-text-muted)]"
+            className="text-sm font-medium text-[var(--login-text)]"
           >
             {t("auth.passwordReset.confirmPassword.label")}
           </label>
@@ -294,7 +287,7 @@ export default function ResetPasswordForm({
             onChange={(event) => {
               setConfirmPassword(event.target.value);
             }}
-            className="w-full rounded-md border-2 bg-[var(--login-input-bg)] px-4 py-3 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+            className="w-full rounded-lg border-2 bg-[var(--login-input-bg)] px-5 py-4 text-lg text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
             style={{ borderColor: "var(--login-border)" }}
             onFocus={(event) => {
               event.currentTarget.style.borderColor = "var(--login-border-strong)";
@@ -305,7 +298,7 @@ export default function ResetPasswordForm({
           />
         </div>
 
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-[var(--login-text-muted)]">
+        <label className="flex cursor-pointer items-center gap-3 text-sm text-[var(--login-text-muted)]">
           <span className="relative inline-block shrink-0">
             <input
               type="checkbox"
@@ -317,7 +310,7 @@ export default function ResetPasswordForm({
             />
             <span
               aria-hidden="true"
-              className="block h-5 w-9 rounded-full border transition peer-checked:border-[var(--login-border-strong)] peer-checked:bg-[var(--login-border-strong)]"
+              className="block h-6 w-11 rounded-full border transition peer-checked:border-[var(--login-border-strong)] peer-checked:bg-[var(--login-border-strong)]"
               style={{
                 borderColor: "var(--login-border)",
                 backgroundColor: "var(--login-surface)",
@@ -325,7 +318,7 @@ export default function ResetPasswordForm({
             />
             <span
               aria-hidden="true"
-              className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-[var(--login-text)] shadow transition peer-checked:translate-x-4"
+              className="absolute top-1 left-1 h-4 w-4 rounded-full bg-[var(--login-text)] shadow transition peer-checked:translate-x-5"
             />
           </span>
           <span>
@@ -335,14 +328,21 @@ export default function ResetPasswordForm({
           </span>
         </label>
 
-        <p className="text-xs leading-relaxed text-[var(--login-text-subtle)]">
-          {t("auth.passwordReset.passwordHint")}
-        </p>
+        <div className="flex items-start gap-3 rounded-lg border border-[var(--login-border)] bg-[var(--login-surface)] p-3 text-xs leading-relaxed text-[var(--login-text-muted)]">
+          <span
+            aria-hidden="true"
+            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-bold"
+            style={{ borderColor: "var(--login-danger)", color: "var(--login-danger)" }}
+          >
+            i
+          </span>
+          <p>{t("auth.passwordReset.passwordHint")}</p>
+        </div>
 
         <button
           type="submit"
           disabled={isSubmitting || successMessage !== null}
-          className="mt-2 rounded-md px-4 py-4 text-lg font-semibold tracking-wide text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-2 rounded-lg px-5 py-4 text-lg font-bold tracking-wide text-white transition disabled:cursor-not-allowed disabled:opacity-60"
           style={{
             backgroundColor: isSubmitting ? accentHover : accent,
           }}
@@ -361,7 +361,7 @@ export default function ResetPasswordForm({
         </button>
       </form>
 
-      <p className="text-center text-xs text-[var(--login-text-muted)]">
+      <p className="text-center text-sm text-[var(--login-text-muted)]">
         <a
           href={`/${locale}/admin/auth/forgot-password`}
           className="font-semibold transition hover:opacity-80"

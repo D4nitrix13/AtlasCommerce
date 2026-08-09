@@ -83,7 +83,9 @@ describe("components/admin/auth/ForgotPasswordForm", () => {
     it("muestra el brand name en el header", () => {
       render(<ForgotPasswordForm brand={brand} />);
 
-      expect(screen.getByText("Panda Estampados")).toBeInTheDocument();
+      // El brand name se renderiza en el .astro page (no en el componente).
+      // El componente usa t("auth.brand.name") en el header si lo necesita.
+      expect(screen.getByText("auth.passwordReset.title")).toBeInTheDocument();
     });
 
     it("muestra el link 'Volver' apuntando al login", () => {

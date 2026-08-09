@@ -56,7 +56,7 @@ const en: Translations = {
 
   "auth.passwordReset.title": "Help signing in",
   "auth.passwordReset.bodyEmail":
-    "Enter your email address. If you have a Fenderer account, we'll send you instructions on how to sign in or reset your password.",
+    "Enter your email address. If you have an account, we'll send you instructions on how to sign in or reset your password.",
   "auth.passwordReset.email.label": "Email account",
   "auth.passwordReset.email.submit": "Get sign-in help",
   "auth.passwordReset.bodyCode":
