@@ -17,6 +17,10 @@
 services:
   postgres:
     image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
+    # Run as postgres user (UID 999). El command: con ruta absoluta
+    # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
+    # setear user: explícito. Sin esto, postgres rehúsa correr como root.
+    user: "999:999"
     container_name: panda-and-kitsune-dev-postgres
     restart: unless-stopped
     env_file:
@@ -47,7 +51,7 @@ services:
     env_file:
       - ../../../versions.env
     command:
-      - /usr/bin/redis-server
+      - /usr/local/bin/redis-server
       - /usr/local/etc/redis/redis.conf
     volumes:
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
@@ -145,8 +149,11 @@ services:
       dockerfile: docker/instances/development/panda-and-kitsune/frontend/Dockerfile.development
     container_name: panda-and-kitsune-dev-frontend
     restart: unless-stopped
-    # Run as host UID so bind-mounted frontend code is readable/writable.
-    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    # El entrypoint del Dockerfile hace chown de los volúmenes (root) y
+    # después setpriv para correr pnpm como node (UID 1000, mismo que
+    # el host user). NO usar `user: HOST_UID:HOST_GID` aquí: eso
+    # bypasea el chown del entrypoint y el container arranca como node
+    # con volúmenes owned by root → EACCES en /app/.pnpm-store.
     # tini: PID 1 = init, reaps zombies, forwards signals. Needed for
     # proper shutdown of astro dev and vite child processes.
     init: true
@@ -172,6 +179,11 @@ services:
       - PORT=4321
       - PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-9000}/api
       - ASTRO_TELEMETRY_DISABLED=1
+      # Pnpm pide confirmación interactiva si node_modules/.pnpm está
+      # en estado inválido (ej. residuos de un run anterior con owner
+      # incorrecto). Sin TTY aborta. CI=true evita la pregunta y
+      # deja a pnpm purgar el módulo dir y reinstalar.
+      - CI=true
     depends_on:
       - backend
     networks:
