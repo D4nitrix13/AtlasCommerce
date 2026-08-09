@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from "react";
+import { useState, type CSSProperties, type ReactElement } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../../stores/auth";
 import { useTranslations } from "../../../i18n";
@@ -44,6 +44,23 @@ export default function LoginForm({
 
   const accent = brand.accentColor;
   const accentHover = brand.accentHoverColor;
+  const palette = brand.loginTheme;
+  const themeVars = {
+    "--login-bg": palette.bg,
+    "--login-surface": palette.surface,
+    "--login-surface-hover": palette.surfaceHover,
+    "--login-border": palette.border,
+    "--login-border-strong": palette.borderStrong,
+    "--login-text": palette.text,
+    "--login-text-muted": palette.textMuted,
+    "--login-text-subtle": palette.textSubtle,
+    "--login-input-bg": palette.inputBg,
+    "--login-input-bg-focus": palette.inputBgFocus,
+    "--login-danger": palette.danger,
+    "--login-danger-text": palette.dangerText,
+    "--login-danger-bg": palette.dangerBg,
+    "--login-divider": palette.divider,
+  } as CSSProperties;
 
   const [tab, setTab] = useState<Tab>(initialTab ?? readTabFromUrl());
   const [firstName, setFirstName] = useState("");
@@ -132,7 +149,10 @@ export default function LoginForm({
   const passwordErrorKey = fieldErrors.password?.[0];
 
   return (
-    <div className="flex w-full max-w-3xl flex-col gap-5 text-white">
+    <div
+      className="flex w-full max-w-3xl flex-col gap-5 text-[var(--login-text)]"
+      style={themeVars}
+    >
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <img
@@ -144,10 +164,17 @@ export default function LoginForm({
             {t("auth.brand.name")}
           </span>
         </div>
-        <LanguageSwitcher />
+        <LanguageSwitcher
+          theme={{
+            surface: palette.surface,
+            text: palette.text,
+            activeText: accent,
+            border: palette.border,
+          }}
+        />
       </header>
 
-      <h1 className="text-sm font-normal text-slate-300">
+      <h1 className="text-sm font-normal text-[var(--login-text-muted)]">
         {tab === "login"
           ? t("auth.login.subtitle")
           : t("auth.login.createAccount.heading")}
@@ -201,7 +228,12 @@ export default function LoginForm({
         {errorMessage !== null && (
           <div
             role="alert"
-            className="rounded-md border border-red-400 bg-red-950/40 px-3 py-2 text-sm text-red-200"
+            className="rounded-md border px-3 py-2 text-sm"
+            style={{
+              borderColor: "var(--login-danger)",
+              backgroundColor: "var(--login-danger-bg)",
+              color: "var(--login-danger-text)",
+            }}
           >
             {errorMessage}
           </div>
@@ -221,10 +253,18 @@ export default function LoginForm({
                 onChange={(event) => {
                   setFirstName(event.target.value);
                 }}
-                className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+                className="w-full rounded-md border-2 bg-[var(--login-input-bg)] px-4 py-4 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+                style={{ borderColor: "var(--login-border)" }}
+                onFocus={(event) => {
+                  event.currentTarget.style.borderColor =
+                    "var(--login-border-strong)";
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.style.borderColor = "var(--login-border)";
+                }}
               />
               {fieldErrors.first_name?.[0] !== undefined && (
-                <p className="px-1 text-xs text-red-300">
+                <p className="px-1 text-xs text-[var(--login-danger-text)]">
                   {fieldErrors.first_name[0]}
                 </p>
               )}
@@ -241,10 +281,18 @@ export default function LoginForm({
                 onChange={(event) => {
                   setLastName(event.target.value);
                 }}
-                className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+                className="w-full rounded-md border-2 bg-[var(--login-input-bg)] px-4 py-4 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+                style={{ borderColor: "var(--login-border)" }}
+                onFocus={(event) => {
+                  event.currentTarget.style.borderColor =
+                    "var(--login-border-strong)";
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.style.borderColor = "var(--login-border)";
+                }}
               />
               {fieldErrors.last_name?.[0] !== undefined && (
-                <p className="px-1 text-xs text-red-300">
+                <p className="px-1 text-xs text-[var(--login-danger-text)]">
                   {fieldErrors.last_name[0]}
                 </p>
               )}
@@ -264,10 +312,20 @@ export default function LoginForm({
             onChange={(event) => {
               setEmail(event.target.value);
             }}
-            className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+            className="w-full rounded-md border-2 bg-[var(--login-input-bg)] px-4 py-4 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+            style={{ borderColor: "var(--login-border)" }}
+            onFocus={(event) => {
+              event.currentTarget.style.borderColor =
+                "var(--login-border-strong)";
+            }}
+            onBlur={(event) => {
+              event.currentTarget.style.borderColor = "var(--login-border)";
+            }}
           />
           {emailErrorKey !== undefined && (
-            <p className="px-1 text-xs text-red-300">{emailErrorKey}</p>
+            <p className="px-1 text-xs text-[var(--login-danger-text)]">
+              {emailErrorKey}
+            </p>
           )}
         </div>
 
@@ -285,7 +343,15 @@ export default function LoginForm({
               onChange={(event) => {
                 setPassword(event.target.value);
               }}
-              className="w-full rounded-md border-2 border-white/15 bg-white/[0.05] px-4 py-4 pr-12 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-white/40 focus:bg-white/10"
+              className="w-full rounded-md border-2 bg-[var(--login-input-bg)] px-4 py-4 pr-12 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+              style={{ borderColor: "var(--login-border)" }}
+              onFocus={(event) => {
+                event.currentTarget.style.borderColor =
+                  "var(--login-border-strong)";
+              }}
+              onBlur={(event) => {
+                event.currentTarget.style.borderColor = "var(--login-border)";
+              }}
             />
             <button
               type="button"
@@ -297,7 +363,7 @@ export default function LoginForm({
                   ? t("auth.login.password.toggle.hide")
                   : t("auth.login.password.toggle.show")
               }
-              className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition hover:text-white"
+              className="absolute inset-y-0 right-0 flex items-center px-4 text-[var(--login-text-muted)] transition hover:text-[var(--login-text)]"
             >
               {showPassword ? (
                 <EyeOff size={20} strokeWidth={1.75} />
@@ -307,17 +373,19 @@ export default function LoginForm({
             </button>
           </div>
           {passwordErrorKey !== undefined && (
-            <p className="px-1 text-xs text-red-300">{passwordErrorKey}</p>
+            <p className="px-1 text-xs text-[var(--login-danger-text)]">
+              {passwordErrorKey}
+            </p>
           )}
           {isRegister && (
-            <p className="mt-1 px-1 text-xs leading-relaxed text-slate-500">
+            <p className="mt-1 px-1 text-xs leading-relaxed text-[var(--login-text-subtle)]">
               {t("auth.login.passwordHint")}
             </p>
           )}
         </div>
 
         {isRegister && (
-          <label className="mt-1 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-slate-300">
+          <label className="mt-1 flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-[var(--login-text-muted)]">
             <span className="relative mt-0.5 inline-block shrink-0">
               <input
                 type="checkbox"
@@ -329,11 +397,15 @@ export default function LoginForm({
               />
               <span
                 aria-hidden="true"
-                className="block h-5 w-9 rounded-full border border-white/15 bg-slate-700 transition peer-checked:border-red-500 peer-checked:bg-red-500"
+                className="block h-5 w-9 rounded-full border transition peer-checked:border-[var(--login-danger)] peer-checked:bg-[var(--login-danger)]"
+                style={{
+                  borderColor: "var(--login-border)",
+                  backgroundColor: "var(--login-surface)",
+                }}
               />
               <span
                 aria-hidden="true"
-                className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition peer-checked:translate-x-4"
+                className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-[var(--login-text)] shadow transition peer-checked:translate-x-4"
               />
             </span>
             <span>{t("auth.login.marketing.optIn.label")}</span>
@@ -363,9 +435,11 @@ export default function LoginForm({
       </form>
 
       <div className="flex items-center gap-3 py-1">
-        <div className="h-px flex-1 bg-white/15" />
-        <span className="text-xs text-slate-400">{t("auth.login.divider")}</span>
-        <div className="h-px flex-1 bg-white/15" />
+        <div className="h-px flex-1 bg-[var(--login-divider)]" />
+        <span className="text-xs text-[var(--login-text-muted)]">
+          {t("auth.login.divider")}
+        </span>
+        <div className="h-px flex-1 bg-[var(--login-divider)]" />
       </div>
 
       <div className="flex flex-col gap-3">
@@ -374,7 +448,7 @@ export default function LoginForm({
         <SocialButton provider="google">{t("auth.login.social.google")}</SocialButton>
       </div>
 
-      <div className="mt-2 flex flex-col items-center gap-3 pt-2 text-xs text-slate-300">
+      <div className="mt-2 flex flex-col items-center gap-3 pt-2 text-xs text-[var(--login-text-muted)]">
         <a
           href={`mailto:${brand.supportEmail}`}
           className="font-semibold transition hover:opacity-80"
@@ -382,9 +456,13 @@ export default function LoginForm({
         >
           {t("auth.login.help")}
         </a>
-        <p className="text-center text-slate-400">
+        <p className="text-center">
           {t("auth.login.termsPrefix")}{" "}
-          <a href="#" className="underline transition hover:text-white">
+          <a
+            href="#"
+            className="underline transition"
+            style={{ color: "var(--login-text)" }}
+          >
             {t("auth.login.termsLink")}
           </a>
           .
@@ -407,13 +485,12 @@ function SocialButton({
     <button
       type="button"
       data-provider={provider}
-      className="flex w-full items-center gap-5 rounded-xl bg-slate-800/80 px-6 py-3 text-base font-medium text-slate-100 transition hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-white/30"
+      className="flex w-full items-center gap-5 rounded-xl bg-[var(--login-surface)] px-6 py-3 text-base font-medium text-[var(--login-text)] transition hover:bg-[var(--login-surface-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--login-border-strong)]"
     >
       <span className="flex w-10 shrink-0 items-center justify-center">
         <SocialIcon provider={provider} />
       </span>
       <span className="flex-1 text-center">{children}</span>
-      <span className="w-10 shrink-0" aria-hidden="true" />
     </button>
   );
 }
