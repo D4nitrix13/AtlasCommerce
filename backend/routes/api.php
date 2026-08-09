@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Auth\PasswordResetTokenController;
 use App\Http\Controllers\Api\Auth\PermissionController;
 use App\Http\Controllers\Api\Auth\PermissionRoleController;
 use App\Http\Controllers\Api\Auth\RoleController;
@@ -98,6 +99,15 @@ Route::middleware(['store.domain'])->group(function (): void {
 
     Route::post('auth/register', [AuthController::class, 'register'])
         ->name('auth.register');
+
+    // Recuperación de contraseña (F del roadmap multi-tenant).
+    // Ambas rutas son públicas (no requieren auth) y operan sobre la
+    // tienda activa resuelta por store.domain.
+    Route::post('auth/forgot-password', [PasswordResetTokenController::class, 'forgot'])
+        ->name('auth.forgot-password');
+
+    Route::post('auth/reset-password', [PasswordResetTokenController::class, 'reset'])
+        ->name('auth.reset-password');
 });
 
 Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
