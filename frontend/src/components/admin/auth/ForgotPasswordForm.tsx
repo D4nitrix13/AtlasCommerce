@@ -91,22 +91,13 @@ export default function ForgotPasswordForm({
 
   return (
     <div
-      className="flex w-full max-w-xl flex-col gap-6 text-[var(--login-text)]"
+      className="flex w-full flex-col gap-4 text-[var(--login-text)]"
       style={themeVars}
     >
-      <div className="space-y-2 text-center lg:text-left">
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-          {t("auth.passwordReset.title")}
-        </h1>
-        <p className="text-base leading-relaxed text-[var(--login-text-muted)]">
-          {t("auth.passwordReset.bodyEmail")}
-        </p>
-      </div>
-
       {errorMessage !== null && (
         <div
           role="alert"
-          className="rounded-lg border px-4 py-3 text-sm"
+          className="rounded-md border px-3 py-2 text-sm"
           style={{
             borderColor: "var(--login-danger)",
             backgroundColor: "var(--login-danger-bg)",
@@ -119,11 +110,11 @@ export default function ForgotPasswordForm({
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-3"
         noValidate
         aria-label={t("auth.passwordReset.title")}
       >
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <label
             htmlFor="email"
             className="text-sm font-medium text-[var(--login-text)]"
@@ -137,11 +128,12 @@ export default function ForgotPasswordForm({
             inputMode="email"
             autoComplete="email"
             required
+            placeholder="nombre@ejemplo.com"
             value={email}
             onChange={(event) => {
               setEmail(event.target.value);
             }}
-            className="w-full rounded-lg border-2 bg-[var(--login-input-bg)] px-5 py-4 text-lg text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
+            className="w-full rounded-md border bg-[var(--login-input-bg)] px-3 py-2 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
             style={{ borderColor: "var(--login-border)" }}
             onFocus={(event) => {
               event.currentTarget.style.borderColor = "var(--login-border-strong)";
@@ -155,7 +147,7 @@ export default function ForgotPasswordForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 rounded-lg px-5 py-4 text-lg font-bold tracking-wide text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
           style={{
             backgroundColor: isSubmitting ? accentHover : accent,
           }}
@@ -173,16 +165,6 @@ export default function ForgotPasswordForm({
             : t("auth.passwordReset.email.submit")}
         </button>
       </form>
-
-      <p className="text-center text-sm text-[var(--login-text-muted)]">
-        <a
-          href={`/${locale}/admin/auth/login`}
-          className="font-semibold transition hover:opacity-80"
-          style={{ color: "var(--login-text)" }}
-        >
-          ← {t("common.back")}
-        </a>
-      </p>
     </div>
   );
 }

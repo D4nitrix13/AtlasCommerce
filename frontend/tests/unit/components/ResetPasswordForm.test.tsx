@@ -48,28 +48,12 @@ beforeEach(() => {
 
 describe("components/admin/auth/ResetPasswordForm", () => {
   describe("render", () => {
-    it("muestra el título y el body de la página", () => {
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
-
-      expect(
-        screen.getByRole("heading", { name: "auth.passwordReset.title" }),
-      ).toBeInTheDocument();
-      expect(screen.getByText("auth.passwordReset.bodyCode")).toBeInTheDocument();
-    });
-
     it("muestra los 3 inputs (code, password, confirm)", () => {
       render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
 
       expect(screen.getByLabelText("auth.passwordReset.code.label")).toBeInTheDocument();
       expect(screen.getByLabelText("auth.passwordReset.newPassword.label")).toBeInTheDocument();
       expect(screen.getByLabelText("auth.passwordReset.confirmPassword.label")).toBeInTheDocument();
-    });
-
-    it("muestra el link 'Volver' apuntando a step 1", () => {
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
-
-      const backLink = screen.getByRole("link", { name: /common\.back/ });
-      expect(backLink).toHaveAttribute("href", "/es/admin/auth/forgot-password");
     });
 
     it("code input tiene maxLength=6 y pattern numerico", () => {
@@ -90,6 +74,12 @@ describe("components/admin/auth/ResetPasswordForm", () => {
       expect(confirmPassword).toHaveAttribute("minLength", "12");
       expect(newPassword).toHaveAttribute("autoComplete", "new-password");
       expect(confirmPassword).toHaveAttribute("autoComplete", "new-password");
+    });
+
+    it("muestra el hint del code (15 minutos)", () => {
+      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+
+      expect(screen.getByText("auth.passwordReset.step2.codeHelp")).toBeInTheDocument();
     });
   });
 

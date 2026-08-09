@@ -69,11 +69,19 @@ export type TranslationKey =
   | "auth.userMenu.loading"
   | "auth.guard.redirecting"
 
-  // ─── auth: password reset modal (Fender-style 2-step) ───────────────
+  // ─── auth: password reset (Fender-style 2-step) ─────────────────────
   | "auth.passwordReset.title"
+  | "auth.passwordReset.step1.label"
+  | "auth.passwordReset.step1.heading"
+  | "auth.passwordReset.step1.intro"
+  | "auth.passwordReset.step1.emailHelp"
   | "auth.passwordReset.bodyEmail"
   | "auth.passwordReset.email.label"
   | "auth.passwordReset.email.submit"
+  | "auth.passwordReset.step2.label"
+  | "auth.passwordReset.step2.heading"
+  | "auth.passwordReset.step2.intro"
+  | "auth.passwordReset.step2.codeHelp"
   | "auth.passwordReset.bodyCode"
   | "auth.passwordReset.code.label"
   | "auth.passwordReset.code.placeholder"
@@ -83,6 +91,7 @@ export type TranslationKey =
   | "auth.passwordReset.password.hide"
   | "auth.passwordReset.passwordHint"
   | "auth.passwordReset.submit"
+  | "auth.passwordReset.requestNewCode"
   | "auth.passwordReset.close"
   | "auth.passwordReset.error.emailEmpty"
   | "auth.passwordReset.error.emailInvalid"

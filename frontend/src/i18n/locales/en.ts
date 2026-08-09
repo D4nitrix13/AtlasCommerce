@@ -55,21 +55,34 @@ const en: Translations = {
   "auth.guard.redirecting": "Redirecting...",
 
   "auth.passwordReset.title": "Help signing in",
+  "auth.passwordReset.step1.label": "Step 1 of 2 · Enter your email",
+  "auth.passwordReset.step1.heading": "Recover access to your account",
+  "auth.passwordReset.step1.intro":
+    "If you have an account on {brand}, we'll send a 6-digit code by email so you can reset your password.",
+  "auth.passwordReset.step1.emailHelp":
+    "Enter the email address you signed up with. If you don't see the email within a few minutes, please also check your spam folder.",
   "auth.passwordReset.bodyEmail":
     "Enter your email address. If you have an account, we'll send you instructions on how to sign in or reset your password.",
   "auth.passwordReset.email.label": "Email account",
-  "auth.passwordReset.email.submit": "Get sign-in help",
+  "auth.passwordReset.email.submit": "Send recovery code",
+  "auth.passwordReset.step2.label": "Step 2 of 2 · Create your new password",
+  "auth.passwordReset.step2.heading": "Reset your password",
+  "auth.passwordReset.step2.intro":
+    "We sent a 6-digit code to {email}. Enter the code and choose a new password for your account.",
+  "auth.passwordReset.step2.codeHelp":
+    "The code expires in 15 minutes. If you can't find it, go back to step 1 to request a new one.",
   "auth.passwordReset.bodyCode":
     "Enter the code you received and your new password.",
-  "auth.passwordReset.code.label": "Code",
-  "auth.passwordReset.code.placeholder": "6-digit code",
-  "auth.passwordReset.newPassword.label": "New Password",
-  "auth.passwordReset.confirmPassword.label": "Confirm New Password",
+  "auth.passwordReset.code.label": "Verification code",
+  "auth.passwordReset.code.placeholder": "000000",
+  "auth.passwordReset.newPassword.label": "New password",
+  "auth.passwordReset.confirmPassword.label": "Confirm new password",
   "auth.passwordReset.password.show": "Show password",
   "auth.passwordReset.password.hide": "Hide password",
   "auth.passwordReset.passwordHint":
     "Your password must be at least 12 characters, contain an uppercase letter, a lowercase letter, and a number.",
-  "auth.passwordReset.submit": "Send",
+  "auth.passwordReset.submit": "Reset password",
+  "auth.passwordReset.requestNewCode": "Request a new code",
   "auth.passwordReset.close": "Close",
   "auth.passwordReset.error.emailEmpty": "Enter your email address.",
   "auth.passwordReset.error.emailInvalid": "Email must be a valid address.",

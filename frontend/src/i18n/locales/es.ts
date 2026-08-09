@@ -55,21 +55,34 @@ const es: Translations = {
   "auth.guard.redirecting": "Redirigiendo...",
 
   "auth.passwordReset.title": "Ayuda para iniciar sesión",
+  "auth.passwordReset.step1.label": "Paso 1 de 2 · Ingresá tu email",
+  "auth.passwordReset.step1.heading": "Recuperá el acceso a tu cuenta",
+  "auth.passwordReset.step1.intro":
+    "Si tenés una cuenta en {brand}, te enviaremos un código de 6 dígitos por correo electrónico para que puedas restablecer tu contraseña.",
+  "auth.passwordReset.step1.emailHelp":
+    "Ingresá la dirección de email con la que te registraste. Revisá también la carpeta de spam si no ves el correo en los próximos minutos.",
   "auth.passwordReset.bodyEmail":
     "Ingrese su dirección de correo electrónico. Si tiene una cuenta, le enviaremos instrucciones sobre cómo iniciar sesión o restablecer su contraseña.",
   "auth.passwordReset.email.label": "Cuenta de email",
-  "auth.passwordReset.email.submit": "Obtener ayuda para iniciar sesión",
+  "auth.passwordReset.email.submit": "Enviar código de recuperación",
+  "auth.passwordReset.step2.label": "Paso 2 de 2 · Creá tu nueva contraseña",
+  "auth.passwordReset.step2.heading": "Restablecé tu contraseña",
+  "auth.passwordReset.step2.intro":
+    "Te enviamos un código de 6 dígitos a {email}. Ingresá el código y elegí una nueva contraseña para tu cuenta.",
+  "auth.passwordReset.step2.codeHelp":
+    "El código vence en 15 minutos. Si no lo encontrás, volvé al paso 1 para pedir uno nuevo.",
   "auth.passwordReset.bodyCode":
     "Ingrese el código que recibió y su nueva contraseña.",
-  "auth.passwordReset.code.label": "Código",
-  "auth.passwordReset.code.placeholder": "Código de 6 dígitos",
+  "auth.passwordReset.code.label": "Código de verificación",
+  "auth.passwordReset.code.placeholder": "000000",
   "auth.passwordReset.newPassword.label": "Nueva contraseña",
   "auth.passwordReset.confirmPassword.label": "Confirmar nueva contraseña",
   "auth.passwordReset.password.show": "Mostrar contraseña",
   "auth.passwordReset.password.hide": "Ocultar contraseña",
   "auth.passwordReset.passwordHint":
-    "Su contraseña debe tener al menos 12 caracteres, tener una letra mayúscula, una letra minúscula y un número.",
-  "auth.passwordReset.submit": "Enviar",
+    "La contraseña debe tener al menos 12 caracteres, una letra mayúscula, una letra minúscula y un número.",
+  "auth.passwordReset.submit": "Restablecer contraseña",
+  "auth.passwordReset.requestNewCode": "Solicitar un nuevo código",
   "auth.passwordReset.close": "Cerrar",
   "auth.passwordReset.error.emailEmpty": "Ingrese su dirección de correo electrónico.",
   "auth.passwordReset.error.emailInvalid": "El email debe tener formato válido.",
