@@ -1,11 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E tests para el flujo de autenticación admin.
+ * E2E tests para el flujo de autenticación admin con el nuevo design
+ * system (Storyset Amico).
  *
- * Cobertura: persistencia del tab login/register en URL. El bug
- * original era que el useState volvía a "login" al recargar la
- * página. Ahora el tab vive en la URL como query param (?tab=register).
+ * El admin NO tiene registro público. Solo login + forgot-password.
  *
  * Pre-requisito: backend, frontend y Caddy corriendo localmente.
  * Las URLs usan admin.panda-estampados.com (Panda Estampados)
@@ -16,103 +15,102 @@ const ADMIN_PANDA = "http://admin.panda-estampados.com";
 const ADMIN_KITSUNE = "http://admin.kitsune.com";
 const LOGIN_PATH = "/es/admin/auth/login";
 
-test.describe("Login: tab persistence via URL", () => {
-  test("default: muestra tab login cuando no hay query param", async ({
+test.describe("Login: solo login (sin register)", () => {
+  test("muestra el form de login con email + password + submit", async ({
     page,
   }) => {
     await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
 
-    const loginTab = page.getByRole("tab", { name: /Iniciar sesión/i });
-    const registerTab = page.getByRole("tab", { name: /Registrarse/i });
+    await expect(page.locator("#email")).toBeVisible();
+    await expect(page.locator("#password")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Iniciar sesión", exact: true }),
+    ).toBeVisible();
 
-    await expect(loginTab).toHaveAttribute("aria-selected", "true");
-    await expect(registerTab).toHaveAttribute("aria-selected", "false");
+    // No debe haber tab de Registrarse.
+    await expect(
+      page.getByRole("tab", { name: /Registrarse/i }),
+    ).toHaveCount(0);
   });
 
-  test("URL con ?tab=register abre directo en Registrarse", async ({
-    page,
-  }) => {
-    await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}?tab=register`);
-
-    const loginTab = page.getByRole("tab", { name: /Iniciar sesión/i });
-    const registerTab = page.getByRole("tab", { name: /Registrarse/i });
-
-    await expect(registerTab).toHaveAttribute("aria-selected", "true");
-    await expect(loginTab).toHaveAttribute("aria-selected", "false");
-  });
-
-  test("click en Registrarse actualiza la URL sin navegación", async ({
+  test("muestra el link '¿Olvidaste tu contraseña?' apuntando al forgot-password", async ({
     page,
   }) => {
     await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
-    await page.getByRole("tab", { name: /Registrarse/i }).click();
 
-    expect(page.url()).toContain("tab=register");
-    // Sin recargar: el estado del navegador se mantiene.
-    await expect(page.getByRole("tab", { name: /Registrarse/i })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    const forgotLink = page.locator("[data-auth-link='forgot']");
+    await expect(forgotLink).toBeVisible();
+    await expect(forgotLink).toContainText(/Olvidaste/i);
   });
 
-  test("recargar la página con tab=register preserva el tab", async ({
-    page,
-  }) => {
-    await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}?tab=register`);
-    await page.getByRole("tab", { name: /Iniciar sesión/i }).click();
-
-    // Cambio a login para verificar el flujo bidireccional.
-    await page.reload();
-
-    const loginTab = page.getByRole("tab", { name: /Iniciar sesión/i });
-    await expect(loginTab).toHaveAttribute("aria-selected", "true");
-  });
-
-  test("compartir link con ?tab=register: el receptor ve Registrarse", async ({
-    page,
-    context,
-  }) => {
-    // Simular "compartir" el link: ir a la URL en un contexto nuevo
-    // (equivalente a abrir el link en otra ventana/incógnito).
-    const page2 = await context.newPage();
-    await page2.goto(`${ADMIN_PANDA}${LOGIN_PATH}?tab=register`);
-
-    const registerTab = page2.getByRole("tab", { name: /Registrarse/i });
-    await expect(registerTab).toHaveAttribute("aria-selected", "true");
-
-    await page2.close();
-  });
-
-  test("botón atrás del browser respeta el tab en URL", async ({ page }) => {
+  test("el checkbox 'Recuérdame' está visible", async ({ page }) => {
     await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
-    await page.getByRole("tab", { name: /Registrarse/i }).click();
-    expect(page.url()).toContain("tab=register");
 
-    // Push a fake history entry (sin navegar) para que `goBack` funcione
-    // sin depender de una página real que cargue.
-    await page.evaluate(() => {
-      window.history.pushState({}, "", "/es/admin/users");
+    await expect(page.getByLabel(/Recuérdame/i)).toBeVisible();
+  });
+
+  test("no muestra botones sociales (Google/GitHub) en admin", async ({
+    page,
+  }) => {
+    await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
+
+    await expect(
+      page.getByRole("button", { name: /Google/i }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /GitHub/i }),
+    ).toHaveCount(0);
+  });
+
+  test("muestra el selector de idioma (ES/EN)", async ({ page }) => {
+    await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
+
+    const switcher = page.locator("details summary").first();
+    await expect(switcher).toBeVisible();
+    await expect(switcher).toContainText(/ES|EN|Español|English/i);
+  });
+
+  test("el brand name se muestra en cursiva y sin logo (solo texto)", async ({
+    page,
+  }) => {
+    await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
+
+    const brand = page.locator("span.italic").filter({ hasText: "Panda" }).first();
+    await expect(brand).toBeVisible();
+
+    // El header NO debe tener un div con icono de rayo (era el icono viejo).
+    await expect(
+      page.locator(".bg-\\[\\#2D9D8E\\].rounded-xl").first(),
+    ).toHaveCount(0);
+  });
+
+  test("muestra la ilustración de login en el panel izquierdo", async ({
+    page,
+  }) => {
+    await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
+
+    const illustration = page.locator("img[alt='Ilustración']").first();
+    await expect(illustration).toBeVisible();
+  });
+
+  test("POST /api/auth/register devuelve 404 (no existe en admin)", async ({
+    request,
+  }) => {
+    const response = await request.post(`${ADMIN_PANDA}/api/auth/register`, {
+      data: {
+        first_name: "New",
+        last_name: "User",
+        email: "new-admin@panda-estampados.com",
+        password: "Secure-Pass-2026",
+      },
     });
-    await page.goBack();
 
-    const registerTab = page.getByRole("tab", { name: /Registrarse/i });
-    await expect(registerTab).toHaveAttribute("aria-selected", "true");
-  });
-
-  test("URL sin tab param después de click vuelve a URL limpia", async ({
-    page,
-  }) => {
-    await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}?tab=register`);
-
-    // Click en Iniciar sesión (debería borrar el query param).
-    await page.getByRole("tab", { name: /Iniciar sesión/i }).click();
-
-    expect(page.url()).not.toContain("tab=");
+    expect(response.status()).toBe(404);
   });
 });
 
 test.describe("Login: branding por tienda", () => {
-  test("Panda muestra color rojo y logo de Panda", async ({ page }) => {
+  test("Panda muestra logo de Panda", async ({ page }) => {
     await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
 
     await expect(page).toHaveTitle(/Panda Estampados/i);
@@ -121,7 +119,7 @@ test.describe("Login: branding por tienda", () => {
     await expect(logo).toBeVisible();
   });
 
-  test("Kitsune muestra color violeta y logo de Kitsune", async ({ page }) => {
+  test("Kitsune muestra logo de Kitsune", async ({ page }) => {
     await page.goto(`${ADMIN_KITSUNE}${LOGIN_PATH}`);
 
     await expect(page).toHaveTitle(/Kitsune Store/i);
@@ -132,21 +130,19 @@ test.describe("Login: branding por tienda", () => {
 });
 
 test.describe("Login: autenticación", () => {
-  test("login con credenciales válidas redirige al dashboard", async ({
+  test("login con credenciales default redirige al dashboard", async ({
     page,
   }) => {
     await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
 
-    await page.locator("#email").fill("admin@panda-estampados.test");
+    await page.locator("#email").fill("admin@panda-estampados.com");
     await page.locator("#password").fill("password");
 
     await page
       .getByRole("button", { name: "Iniciar sesión", exact: true })
       .click();
 
-    // Espera al redirect al dashboard.
     await page.waitForURL(/\/dashboard/, { timeout: 10_000 });
-
     await expect(page).toHaveURL(/dashboard/);
   });
 
@@ -160,8 +156,101 @@ test.describe("Login: autenticación", () => {
       .getByRole("button", { name: "Iniciar sesión", exact: true })
       .click();
 
-    // No debe redirigir — debe mostrar el error.
     await expect(page.getByRole("alert")).toBeVisible({ timeout: 5_000 });
     await expect(page).toHaveURL(/\/es\/admin\/auth\/login/);
+  });
+});
+
+test.describe("Forgot Password: nuevo design system", () => {
+  test("muestra heading 'Recuperar acceso' + email + helper + submit", async ({
+    page,
+  }) => {
+    await page.goto(`${ADMIN_PANDA}/es/admin/auth/forgot-password`);
+
+    await expect(
+      page.getByRole("heading", { name: "Recuperar acceso" }),
+    ).toBeVisible();
+    await expect(page.locator("#email")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Enviar enlace de recuperación/i }),
+    ).toBeVisible();
+    await expect(page.getByText(/válido por 30 minutos/i)).toBeVisible();
+  });
+
+  test("muestra link 'Volver a iniciar sesión'", async ({ page }) => {
+    await page.goto(`${ADMIN_PANDA}/es/admin/auth/forgot-password`);
+
+    const backLink = page.locator("[data-auth-link='back']");
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toContainText(/Volver a iniciar sesión/i);
+  });
+
+  test("muestra el alert info '¿No recibes el correo?'", async ({ page }) => {
+    await page.goto(`${ADMIN_PANDA}/es/admin/auth/forgot-password`);
+
+    await expect(page.getByText(/No recibes el correo/i)).toBeVisible();
+  });
+
+  test("submit con email válido llama al backend y redirige a reset-password", async ({
+    page,
+  }) => {
+    await page.goto(`${ADMIN_PANDA}/es/admin/auth/forgot-password`);
+    await page.locator("#email").fill("admin@panda-estampados.com");
+    await page
+      .getByRole("button", { name: /Enviar enlace de recuperación/i })
+      .click();
+
+    await page.waitForURL(/\/reset-password/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/reset-password/);
+  });
+});
+
+test.describe("Storefront (cliente): login + register", () => {
+  test("login del cliente muestra CTA signup + selector de idioma", async ({
+    page,
+  }) => {
+    await page.goto(`${ADMIN_PANDA}/es/account/auth/login`);
+
+    await expect(page.locator("#email")).toBeVisible();
+    await expect(page.locator("#password")).toBeVisible();
+
+    // Sin social buttons.
+    await expect(
+      page.getByRole("button", { name: /Google/i }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /GitHub/i }),
+    ).toHaveCount(0);
+
+    const signupLink = page.locator("[data-auth-link='signup']");
+    await expect(signupLink).toBeVisible();
+    await expect(signupLink).toContainText(/Regístrate/i);
+
+    // Language switcher presente.
+    const switcher = page.locator("details summary").first();
+    await expect(switcher).toBeVisible();
+  });
+
+  test("register del cliente muestra nombre + apellido + email + password + strength bar", async ({
+    page,
+  }) => {
+    await page.goto(`${ADMIN_PANDA}/es/account/auth/signup`);
+
+    await expect(page.locator("#firstName")).toBeVisible();
+    await expect(page.locator("#lastName")).toBeVisible();
+    await expect(page.locator("#email")).toBeVisible();
+    await expect(page.locator("#password")).toBeVisible();
+
+    // CTA para volver a login.
+    const loginLink = page.locator("[data-auth-link='login']");
+    await expect(loginLink).toBeVisible();
+
+    // Ilustración a la DERECHA (el signup invierte el orden).
+    const illustration = page.locator("img[alt='Ilustración']").first();
+    await expect(illustration).toBeVisible();
+
+    // Strength bar (4 barras).
+    const bars = page.locator(".bg-slate-200, .bg-\\[\\#2D9D8E\\]").first();
+    await expect(bars).toBeVisible();
   });
 });
