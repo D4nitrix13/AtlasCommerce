@@ -22,8 +22,8 @@
     }
   ],
   "admin_user": {
-    "email": "admin@dev.mm-boutique.test",
-    "password_env": "DEV_ADMIN_PASSWORD"
+    "email": "admin@mm-boutique.com",
+    "password": "password"
   },
   "features": {
     "wholesale_pricing": true,
