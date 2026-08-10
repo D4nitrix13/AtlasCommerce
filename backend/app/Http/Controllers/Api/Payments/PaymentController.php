@@ -123,12 +123,12 @@ class PaymentController extends Controller
      */
     public function update(Payment $payment): JsonResponse
     {
-        return response()->json(['message' => 'Pagos son inmutables.'], 405);
+        return response()->json(data: ['message' => 'Pagos son inmutables.'], status: 405);
     }
 
     public function destroy(Payment $payment): JsonResponse
     {
-        return response()->json(['message' => 'Pagos son inmutables.'], 405);
+        return response()->json(data: ['message' => 'Pagos son inmutables.'], status: 405);
     }
 
     private function resolveCustomer(Request $request): Customer

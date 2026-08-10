@@ -64,7 +64,7 @@ final class PaymentService
             );
         }
 
-        return DB::transaction(function () use (
+        return DB::transaction(callback: function () use (
             $customer,
             $invoice,
             $paymentMethod,

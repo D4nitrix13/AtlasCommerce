@@ -198,7 +198,7 @@ class CartItemController extends Controller
 
         $item->delete();
 
-        return response()->json(null, 204);
+        return response()->json(data: null, status: 204);
     }
 
     private function resolveCustomer(Request $request): Customer

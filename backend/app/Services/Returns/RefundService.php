@@ -81,7 +81,7 @@ final class RefundService
         $returnRequest = $refund->returnRequest;
         $invoice = $this->latestInvoiceForOrder(orderId: (int) $returnRequest->order_id);
 
-        return DB::transaction(function () use ($refund, $returnRequest, $invoice): Refund {
+        return DB::transaction(callback: function () use ($refund, $returnRequest, $invoice): Refund {
             // Validar la transición de estado ANTES de tocar datos.
             // Si el refund ya está completado/fallido, esto lanza
             // InvalidRefundTransitionException sin alterar nada.

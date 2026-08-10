@@ -82,7 +82,7 @@ final class ResourceShapeHttpTest extends TestCase
             values: ['name' => 'Administrador', 'is_active' => true],
         );
         $this->user = User::factory()->create([
-            'password' => Hash::make('secret'),
+            'password' => Hash::make(value: 'secret'),
             'role_id' => $adminRole->id,
         ]);
         $this->customer = Customer::factory()->create(['user_id' => $this->user->id]);
