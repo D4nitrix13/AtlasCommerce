@@ -94,7 +94,7 @@ Env:      [`docker/instances/mm-boutique/.env`](../../docker/instances/mm-boutiq
 | (ninguno) | — | Nada se publica al host. |
 
 El FTP está **deliberadamente no publicado** para no colisionar con el
-`21` de pandakitsune en el mismo host. Si el deploy lo requiere expuesto,
+`21` de panda-and-kitsune en el mismo host. Si el deploy lo requiere expuesto,
 agregar `ports:` al servicio `ftp` en el compose y setear `FTP_PORT=2121`
 (o el que esté libre) en el `.env`.
 
