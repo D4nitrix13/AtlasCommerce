@@ -22,13 +22,13 @@ WebP es ideal para **fotos** (muchos colores, gradientes suaves, fotos
 de productos). Para **ilustraciones flat** (vectoriales, pocos colores,
 líneas limpias) WebP es peor porque:
 
-| Métrica | SVG (vector) | WebP (raster) |
-|---------|--------------|---------------|
-| Tamaño archivo | ~10-30 KB | ~30-100 KB (a 2x resolution) |
-| Resolución | Infinita (sharp a cualquier zoom) | Fija (pixelado al escalar) |
-| Modificable en runtime | Sí (`currentColor`, CSS) | No |
-| Costo de re-tamaños | Cero (re-render) | Vuelves a exportar o generas @1x, @2x, @3x |
-| Animaciones | Sí (SMIL, CSS) | No |
+| Métrica                | SVG (vector)                      | WebP (raster)                              |
+| ---------------------- | --------------------------------- | ------------------------------------------ |
+| Tamaño archivo         | ~10-30 KB                         | ~30-100 KB (a 2x resolution)               |
+| Resolución             | Infinita (sharp a cualquier zoom) | Fija (pixelado al escalar)                 |
+| Modificable en runtime | Sí (`currentColor`, CSS)          | No                                         |
+| Costo de re-tamaños    | Cero (re-render)                  | Vuelves a exportar o generas @1x, @2x, @3x |
+| Animaciones            | Sí (SMIL, CSS)                    | No                                         |
 
 Las ilustraciones `forgot-password-amico.svg`, `login-amico.svg`,
 `signup-amico.svg` pesan **~20-95 KB cada una** sin optimizar y **~20-85 KB**
@@ -94,14 +94,14 @@ que el típico 30-50% que se ve en SVGs hechos a mano.
 
 ## Cuándo usar cada formato
 
-| Contenido | Formato | Optimizador | Comando |
-|-----------|---------|-------------|---------|
-| **Ilustraciones flat** (Storyset, iconos) | **SVG** | SVGO | `pnpm run optimize:svgs` (auto) |
-| **Iconos UI** (botones, controles) | **SVG** o **Lucide React** | SVGO o tree-shaking de lucide-react | Ya manejado por Vite |
-| **Logos con transparencia** | **SVG** o **WebP lossless** | SVGO o `cwebp -z 9` | Manual |
-| **Fotos de productos** | **WebP q=80** | `cwebp -q 80 input.jpg -o output.webp` | Manual al subir asset |
-| **Screenshots** | **WebP q=85** | `cwebp -q 85` | Manual |
-| **Banners marketing** | **WebP** o AVIF moderno | `cwebp` o `avifenc` | Manual |
+| Contenido                                 | Formato                     | Optimizador                            | Comando                         |
+| ----------------------------------------- | --------------------------- | -------------------------------------- | ------------------------------- |
+| **Ilustraciones flat** (Storyset, iconos) | **SVG**                     | SVGO                                   | `pnpm run optimize:svgs` (auto) |
+| **Iconos UI** (botones, controles)        | **SVG** o **Lucide React**  | SVGO o tree-shaking de lucide-react    | Ya manejado por Vite            |
+| **Logos con transparencia**               | **SVG** o **WebP lossless** | SVGO o `cwebp -z 9`                    | Manual                          |
+| **Fotos de productos**                    | **WebP q=80**               | `cwebp -q 80 input.jpg -o output.webp` | Manual al subir asset           |
+| **Screenshots**                           | **WebP q=85**               | `cwebp -q 85`                          | Manual                          |
+| **Banners marketing**                     | **WebP** o AVIF moderno     | `cwebp` o `avifenc`                    | Manual                          |
 
 ## Estructura de assets
 
@@ -161,12 +161,12 @@ pnpm run build
 
 SVGs en `frontend/public/images/auth/` (Storyset Amico, 3 archivos):
 
-| Archivo | Sin optimizar | Optimizado (SVGO) | Ahorro |
-|---------|---------------|-------------------|--------|
-| `forgot-password-amico.svg` | 22.5 KB | 20.2 KB | 10.5% |
-| `login-amico.svg` | 26.9 KB | 23.5 KB | 12.4% |
-| `signup-amico.svg` | 97.5 KB | 84.8 KB | 13.0% |
-| **Total** | **146.9 KB** | **128.5 KB** | **~18 KB (12.5%)** |
+| Archivo                     | Sin optimizar | Optimizado (SVGO) | Ahorro             |
+| --------------------------- | ------------- | ----------------- | ------------------ |
+| `forgot-password-amico.svg` | 22.5 KB       | 20.2 KB           | 10.5%              |
+| `login-amico.svg`           | 26.9 KB       | 23.5 KB           | 12.4%              |
+| `signup-amico.svg`          | 97.5 KB       | 84.8 KB           | 13.0%              |
+| **Total**                   | **146.9 KB**  | **128.5 KB**      | **~18 KB (12.5%)** |
 
 La reducción no es dramática porque los SVGs de Storyset ya están bien
 optimizados. El principal ahorro está en la **compresión gzip en
