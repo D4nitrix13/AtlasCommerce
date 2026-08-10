@@ -104,8 +104,6 @@ services:
     init: true
     env_file:
       - environment/.env
-    ports:
-      - "${BACKEND_PORT:-9000}:8000"
     volumes:
       - ../../../../backend:/var/www/html
       - ecommerce_panda_and_kitsune_dev_storage:/var/www/html/storage
@@ -142,6 +140,35 @@ services:
         condition: service_healthy
     networks:
       - panda-kitsune-dev
+
+  # Sidecar nginx para exponer HTTP en puerto 8000 del container
+  # backend. Caddy (en host) hace `reverse_proxy localhost:9000` con
+  # transporte HTTP, no FastCGI — necesita un HTTP server entre
+  # Caddy y FPM. Este sidecar comparte el volume `/var/www/html`
+  # con el backend y habla con FPM via `backend:9000` en la red
+  # interna.
+  #
+  # Si en el futuro se replica el setup en prod, este mismo sidecar
+  # + nginx.conf se pueden reutilizar; solo cambia el contexto del
+  # `build`/`image` y el port mapping.
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: panda-and-kitsune-dev-nginx
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${BACKEND_PORT:-9000}:8000"
+    volumes:
+      - ./conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../../../backend:/var/www/html:ro
+    depends_on:
+      - backend
+    networks:
+      - panda-kitsune-dev
+    # Cadena de requests (host → Caddy → nginx → FPM):
+    #   curl host:5321              → frontend (Astro en container)
+    #   curl host:9000              → nginx:8000 (sidecar, vía port mapping)
+    #                              → backend:9000 (FPM, vía Docker DNS)
 
   frontend:
     build:
