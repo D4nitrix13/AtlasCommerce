@@ -10,8 +10,8 @@ import {
 
 /**
  * Tokens opcionales para que el dropdown no rompa el look del padre.
- * Defaults oscuros para mantener compatibilidad con AdminUserMenu
- * (panel admin, fondo slate). El LoginForm pasa los tokens claros.
+ * - `dark` (default) → AdminUserMenu en panel admin (fondo slate).
+ * - `light` → pantallas de auth (fondo blanco, brand green activo).
  */
 export type LanguageSwitcherTheme = {
   /** Fondo del dropdown abierto (y hover del summary/items). */
@@ -22,18 +22,38 @@ export type LanguageSwitcherTheme = {
   activeText: string;
   /** Borde sutil del dropdown. */
   border: string;
+  /** Color del summary en estado cerrado (header del form). */
+  summaryColor?: string;
+  /** Color del summary en hover. */
+  summaryHoverColor?: string;
 };
 
-const DEFAULT_THEME: LanguageSwitcherTheme = {
+const DARK_THEME: LanguageSwitcherTheme = {
   surface: "#0F172A",
   text: "#FFFFFF",
   activeText: "#DC2626",
   border: "rgba(255, 255, 255, 0.10)",
 };
 
-type LanguageSwitcherProps = {
-  theme?: LanguageSwitcherTheme;
+const LIGHT_THEME: LanguageSwitcherTheme = {
+  surface: "#FFFFFF",
+  text: "#0F172A",
+  activeText: "#2D9D8E",
+  border: "#E5E7EB",
+  summaryColor: "#475569",
+  summaryHoverColor: "#0F172A",
 };
+
+type LanguageSwitcherProps = {
+  theme?: "dark" | "light" | LanguageSwitcherTheme;
+  /** Layout: "dropdown" (default) | "inline" (botones planos ES/EN). */
+  variant?: "dropdown" | "inline";
+};
+
+const THEME_MAP = {
+  dark: DARK_THEME,
+  light: LIGHT_THEME,
+} as const;
 
 /**
  * Selector de idioma. Al elegir otro locale, navega a la URL
@@ -41,15 +61,45 @@ type LanguageSwitcherProps = {
  * `/en/admin/shipping`). El middleware se encarga del resto.
  */
 export default function LanguageSwitcher({
-  theme = DEFAULT_THEME,
+  theme = "dark",
+  variant = "dropdown",
 }: LanguageSwitcherProps): ReactElement {
   const { locale, setLocale } = useTranslations();
   const [open, setOpen] = useState(false);
+
+  const resolvedTheme: LanguageSwitcherTheme =
+    typeof theme === "string" ? THEME_MAP[theme] : theme;
 
   const handleSelect = (next: Locale): void => {
     setOpen(false);
     setLocale(next);
   };
+
+  if (variant === "inline") {
+    return (
+      <div className="flex items-center gap-2 text-xs font-medium">
+        {SUPPORTED_LOCALES.map((candidate) => (
+          <button
+            key={candidate}
+            type="button"
+            onClick={() => {
+              handleSelect(candidate);
+            }}
+            aria-pressed={candidate === locale}
+            className="rounded px-2 py-1 transition focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/30"
+            style={{
+              color: candidate === locale ? resolvedTheme.activeText : resolvedTheme.text,
+              backgroundColor:
+                candidate === locale ? "#E6F7F4" : "transparent",
+              fontWeight: candidate === locale ? 600 : 400,
+            }}
+          >
+            {LOCALE_FLAGS[candidate]} {LOCALE_LABELS[candidate]}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <details
@@ -61,7 +111,11 @@ export default function LanguageSwitcher({
     >
       <summary
         className="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium transition focus:outline-none [&::-webkit-details-marker]:hidden"
-        style={{ color: theme.text }}
+        style={{
+          color: open
+            ? (resolvedTheme.summaryHoverColor ?? resolvedTheme.text)
+            : (resolvedTheme.summaryColor ?? resolvedTheme.text),
+        }}
       >
         <span aria-hidden="true">{LOCALE_FLAGS[locale]}</span>
         <span>{LOCALE_LABELS[locale]}</span>
@@ -72,9 +126,9 @@ export default function LanguageSwitcher({
         role="menu"
         className="absolute right-0 z-20 mt-1 min-w-[8rem] overflow-hidden rounded-md py-1 text-xs shadow-lg"
         style={{
-          backgroundColor: theme.surface,
-          border: `1px solid ${theme.border}`,
-          color: theme.text,
+          backgroundColor: resolvedTheme.surface,
+          border: `1px solid ${resolvedTheme.border}`,
+          color: resolvedTheme.text,
         }}
       >
         {SUPPORTED_LOCALES.map((candidate) => (
@@ -86,9 +140,12 @@ export default function LanguageSwitcher({
               onClick={() => {
                 handleSelect(candidate);
               }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition hover:bg-slate-50"
               style={{
-                color: candidate === locale ? theme.activeText : theme.text,
+                color:
+                  candidate === locale
+                    ? resolvedTheme.activeText
+                    : resolvedTheme.text,
                 fontWeight: candidate === locale ? 600 : 400,
               }}
             >

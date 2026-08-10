@@ -1,56 +1,44 @@
-import { useState, type CSSProperties, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { apiFetch } from "../../../lib/api";
 import { useTranslations } from "../../../i18n";
-import { DEFAULT_BRAND, type StoreBrand } from "../../../config/stores";
 
 /**
- * Form para Step 1 del reset de password: ingresar email.
+ * Step 1 del reset de password: ingresar email.
  *
  * Llama a POST /auth/forgot-password (siempre 200 OK con mensaje
  * genérico). En éxito, redirige a la página de Step 2 con el email
  * como query param (deep-linkable, sobrevive a refresh).
- *
- * Multi-tenant: usa la tienda activa resuelta por el middleware del
- * backend (no necesita pasar store explícito).
  */
 
 type ForgotPasswordFormProps = {
-  brand?: StoreBrand;
   callbackPath?: string;
   locale?: string;
+  emailPlaceholder?: string;
+  emailLabel?: string;
+  helperText?: string;
+  submitLabel?: string;
+  submittingLabel?: string;
 };
 
 export default function ForgotPasswordForm({
-  brand = DEFAULT_BRAND,
-  callbackPath = "/admin/auth/forgot-password",
+  callbackPath = "/admin/dashboard",
   locale = "es",
+  emailPlaceholder = "tu@correo.com",
+  emailLabel,
+  helperText,
+  submitLabel,
+  submittingLabel,
 }: ForgotPasswordFormProps): ReactElement {
   const { t } = useTranslations();
 
-  const accent = brand.accentColor;
-  const accentHover = brand.accentHoverColor;
-  const palette = brand.loginTheme;
+  const resolvedEmailLabel = emailLabel ?? t("auth.forgot.shell.emailLabel");
+  const resolvedHelperText = helperText ?? t("auth.forgot.shell.helper");
+  const resolvedSubmitLabel = submitLabel ?? t("auth.forgot.shell.submit");
+  const resolvedSubmittingLabel = submittingLabel ?? t("auth.forgot.shell.submitLoading");
 
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const themeVars: CSSProperties = {
-    "--login-bg": palette.bg,
-    "--login-surface": palette.surface,
-    "--login-surface-hover": palette.surfaceHover,
-    "--login-border": palette.border,
-    "--login-border-strong": palette.borderStrong,
-    "--login-text": palette.text,
-    "--login-text-muted": palette.textMuted,
-    "--login-text-subtle": palette.textSubtle,
-    "--login-input-bg": palette.inputBg,
-    "--login-input-bg-focus": palette.inputBgFocus,
-    "--login-danger": palette.danger,
-    "--login-danger-text": palette.dangerText,
-    "--login-danger-bg": palette.dangerBg,
-    "--login-divider": palette.divider,
-  } as CSSProperties;
 
   const validateEmail = (value: string): string | null => {
     if (value.trim() === "") {
@@ -90,81 +78,62 @@ export default function ForgotPasswordForm({
   };
 
   return (
-    <div
-      className="flex w-full flex-col gap-4 text-[var(--login-text)]"
-      style={themeVars}
-    >
+    <form onSubmit={handleSubmit} className="space-y-5" noValidate aria-label={t("auth.passwordReset.title")}>
       {errorMessage !== null && (
         <div
           role="alert"
-          className="rounded-md border px-3 py-2 text-sm"
-          style={{
-            borderColor: "var(--login-danger)",
-            backgroundColor: "var(--login-danger-bg)",
-            color: "var(--login-danger-text)",
-          }}
+          className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
         >
           {errorMessage}
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-3"
-        noValidate
-        aria-label={t("auth.passwordReset.title")}
-      >
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="email"
-            className="text-sm font-medium text-[var(--login-text)]"
-          >
-            {t("auth.passwordReset.email.label")}
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            required
-            placeholder="nombre@ejemplo.com"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-            }}
-            className="w-full rounded-md border bg-[var(--login-input-bg)] px-3 py-2 text-base text-[var(--login-text)] placeholder:text-[var(--login-text-subtle)] outline-none transition focus:bg-[var(--login-input-bg-focus)]"
-            style={{ borderColor: "var(--login-border)" }}
-            onFocus={(event) => {
-              event.currentTarget.style.borderColor = "var(--login-border-strong)";
-            }}
-            onBlur={(event) => {
-              event.currentTarget.style.borderColor = "var(--login-border)";
-            }}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-md px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-          style={{
-            backgroundColor: isSubmitting ? accentHover : accent,
-          }}
-          onMouseEnter={(event) => {
-            event.currentTarget.style.backgroundColor = accentHover;
-          }}
-          onMouseLeave={(event) => {
-            event.currentTarget.style.backgroundColor = isSubmitting
-              ? accentHover
-              : accent;
-          }}
+      <div>
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-slate-700 mb-1.5"
         >
-          {isSubmitting
-            ? t("common.loading")
-            : t("auth.passwordReset.email.submit")}
-        </button>
-      </form>
-    </div>
+          {resolvedEmailLabel}
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          required
+          placeholder={emailPlaceholder}
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+          }}
+          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+        />
+        <p className="text-xs text-slate-400 mt-1.5">{resolvedHelperText}</p>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 flex items-center justify-center gap-2"
+      >
+        {isSubmitting ? (
+          <>
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            {resolvedSubmittingLabel}
+          </>
+        ) : (
+          <>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            {resolvedSubmitLabel}
+          </>
+        )}
+      </button>
+    </form>
   );
 }
