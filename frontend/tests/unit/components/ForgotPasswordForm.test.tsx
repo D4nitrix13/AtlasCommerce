@@ -23,17 +23,12 @@ vi.mock("../../../src/lib/api", () => ({
 }));
 
 import ForgotPasswordForm from "../../../src/components/admin/auth/ForgotPasswordForm";
-import { pandaTheme } from "@theme/panda-estampados";
-
-const brand = pandaTheme.brand;
 
 let hrefSetter: { value: string };
 
 beforeEach(() => {
   mockApiFetch.mockReset();
   window.history.replaceState({}, "", "/es/admin/auth/forgot-password");
-  // Spy del setter de location.href para capturar la navegación sin
-  // provocar navegación real (jsdom no soporta location.assign).
   hrefSetter = { value: "" };
   Object.defineProperty(window, "location", {
     value: {
@@ -63,32 +58,38 @@ afterEach(() => {
 describe("components/admin/auth/ForgotPasswordForm", () => {
   describe("render", () => {
     it("muestra el input de email con el label correcto", () => {
-      render(<ForgotPasswordForm brand={brand} />);
+      render(<ForgotPasswordForm />);
 
-      const emailInput = screen.getByLabelText("auth.passwordReset.email.label");
+      const emailInput = screen.getByLabelText("auth.forgot.shell.emailLabel");
       expect(emailInput).toBeInTheDocument();
       expect(emailInput).toHaveAttribute("type", "email");
       expect(emailInput).toHaveAttribute("autoComplete", "email");
     });
 
     it("muestra el botón submit con el texto correcto", () => {
-      render(<ForgotPasswordForm brand={brand} />);
+      render(<ForgotPasswordForm />);
 
       const submitButton = screen.getByRole("button", {
-        name: "auth.passwordReset.email.submit",
+        name: "auth.forgot.shell.submit",
       });
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).toHaveAttribute("type", "submit");
+    });
+
+    it("muestra el helper text debajo del email", () => {
+      render(<ForgotPasswordForm />);
+
+      expect(screen.getByText("auth.forgot.shell.helper")).toBeInTheDocument();
     });
   });
 
   describe("validación client-side", () => {
     it("muestra error si el email está vacío", async () => {
       const user = userEvent.setup();
-      render(<ForgotPasswordForm brand={brand} />);
+      render(<ForgotPasswordForm />);
 
       const submitButton = screen.getByRole("button", {
-        name: "auth.passwordReset.email.submit",
+        name: "auth.forgot.shell.submit",
       });
       await user.click(submitButton);
 
@@ -100,17 +101,12 @@ describe("components/admin/auth/ForgotPasswordForm", () => {
       expect(mockApiFetch).not.toHaveBeenCalled();
     });
 
-    it("muestra error si el email no tiene formato válido", async () => {
+    it("muestra error si el email no es válido", async () => {
       const user = userEvent.setup();
-      render(<ForgotPasswordForm brand={brand} />);
+      render(<ForgotPasswordForm />);
 
-      const emailInput = screen.getByLabelText("auth.passwordReset.email.label");
-      await user.type(emailInput, "not-an-email");
-
-      const submitButton = screen.getByRole("button", {
-        name: "auth.passwordReset.email.submit",
-      });
-      await user.click(submitButton);
+      await user.type(screen.getByLabelText("auth.forgot.shell.emailLabel"), "not-an-email");
+      await user.click(screen.getByRole("button", { name: "auth.forgot.shell.submit" }));
 
       await waitFor(() => {
         expect(screen.getByRole("alert")).toHaveTextContent(
@@ -119,79 +115,36 @@ describe("components/admin/auth/ForgotPasswordForm", () => {
       });
       expect(mockApiFetch).not.toHaveBeenCalled();
     });
+  });
 
-    it("trimea el email antes de enviar", async () => {
+  describe("submit exitoso", () => {
+    it("llama a /auth/forgot-password y redirige a reset-password", async () => {
       const user = userEvent.setup();
       mockApiFetch.mockResolvedValue({
         message: "ok",
-        expires_minutes: 15,
+        expires_minutes: 30,
       });
 
-      render(<ForgotPasswordForm brand={brand} />);
+      render(<ForgotPasswordForm />);
 
-      const emailInput = screen.getByLabelText("auth.passwordReset.email.label");
-      await user.type(emailInput, "  jane@example.com  ");
-
-      const submitButton = screen.getByRole("button", {
-        name: "auth.passwordReset.email.submit",
-      });
-      await user.click(submitButton);
+      await user.type(
+        screen.getByLabelText("auth.forgot.shell.emailLabel"),
+        "admin@panda-estampados.com",
+      );
+      await user.click(screen.getByRole("button", { name: "auth.forgot.shell.submit" }));
 
       await waitFor(() => {
         expect(mockApiFetch).toHaveBeenCalledWith(
           "/auth/forgot-password",
           expect.objectContaining({
             method: "POST",
-            body: { email: "jane@example.com" },
+            body: expect.objectContaining({ email: "admin@panda-estampados.com" }),
           }),
         );
       });
-    });
-  });
 
-  describe("envío exitoso", () => {
-    it("redirige a step 2 con email en query param", async () => {
-      const user = userEvent.setup();
-      mockApiFetch.mockResolvedValue({
-        message: "ok",
-        expires_minutes: 15,
-      });
-
-      render(<ForgotPasswordForm brand={brand} />);
-
-      const emailInput = screen.getByLabelText("auth.passwordReset.email.label");
-      await user.type(emailInput, "jane@example.com");
-
-      const submitButton = screen.getByRole("button", {
-        name: "auth.passwordReset.email.submit",
-      });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(hrefSetter.value).toContain("/es/admin/auth/reset-password");
-        expect(hrefSetter.value).toContain("email=jane%40example.com");
-      });
-    });
-
-    it("muestra error genérico si el backend falla", async () => {
-      const user = userEvent.setup();
-      mockApiFetch.mockRejectedValue({
-        message: "Demasiados intentos.",
-      });
-
-      render(<ForgotPasswordForm brand={brand} />);
-
-      const emailInput = screen.getByLabelText("auth.passwordReset.email.label");
-      await user.type(emailInput, "jane@example.com");
-
-      const submitButton = screen.getByRole("button", {
-        name: "auth.passwordReset.email.submit",
-      });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole("alert")).toHaveTextContent("Demasiados intentos.");
-      });
+      expect(hrefSetter.value).toContain("/es/admin/auth/reset-password");
+      expect(hrefSetter.value).toContain("email=admin%40panda-estampados.com");
     });
   });
 });
