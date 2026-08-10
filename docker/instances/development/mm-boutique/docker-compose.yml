@@ -34,7 +34,7 @@ services:
       - config_file=/etc/postgresql/postgresql.conf
     volumes:
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
-      - ecommerce_mmboutique_dev_postgres_data:/var/lib/postgresql
+      - ecommerce_mm_boutique_dev_postgres_data:/var/lib/postgresql
       - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -63,7 +63,6 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - mm-boutique-dev
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
@@ -84,9 +83,8 @@ services:
       - PASV_MAX_PORT=${FTP_PASV_MAX_PORT:-40100}
       - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
     volumes:
-      - ecommerce_mmboutique_dev_ftp_data:/srv/ftp
+      - ecommerce_mm_boutique_dev_ftp_data:/srv/ftp
     networks:
-      - mm-boutique-dev
 
   backend:
     build:
@@ -104,13 +102,11 @@ services:
     init: true
     env_file:
       - environment/.env
-    ports:
-      - "${BACKEND_PORT:-9000}:8000"
     volumes:
       - ../../../../backend:/var/www/html
-      - ecommerce_mmboutique_dev_storage:/var/www/html/storage
-      - ecommerce_mmboutique_dev_bootstrap:/var/www/html/bootstrap/cache
-      - ecommerce_mmboutique_dev_logs:/var/log/php
+      - ecommerce_mm_boutique_dev_storage:/var/www/html/storage
+      - ecommerce_mm_boutique_dev_bootstrap:/var/www/html/bootstrap/cache
+      - ecommerce_mm_boutique_dev_logs:/var/log/php
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -141,7 +137,31 @@ services:
       redis:
         condition: service_healthy
     networks:
+
+  # Sidecar nginx — agrega capa HTTP para que Caddy (en host) pueda
+  # hacer `reverse_proxy localhost:${BACKEND_PORT}` con transporte HTTP
+  # y no FastCGI. Mismo patrón que en panda-and-kitsune y morales-store.
+  #
+  # Cadena de requests:
+  #   curl host:${BACKEND_PORT} → nginx:8000 (sidecar, vía port mapping)
+  #                          → FPM:9000 (vía Docker DNS `backend`)
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: mm-boutique-dev-nginx
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${BACKEND_PORT:-9000}:8000"
+    volumes:
+      - ./conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../../../backend:/var/www/html:ro
+    depends_on:
+      - backend
+    networks:
       - mm-boutique-dev
+    # Cadena de requests (host → Caddy → nginx → FPM):
+    #   curl host:${BACKEND_PORT:-9000}  → nginx:8000 (sidecar, vía port mapping)
+    #                                 → backend:9000 (FPM, vía Docker DNS)
 
   frontend:
     build:
@@ -161,8 +181,8 @@ services:
     volumes:
       - ../../../../frontend:/app
       - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
-      - ecommerce_mmboutique_dev_node_modules:/app/node_modules
-      - ecommerce_mmboutique_dev_pnpm_store:/app/.pnpm-store
+      - ecommerce_mm_boutique_dev_node_modules:/app/node_modules
+      - ecommerce_mm_boutique_dev_pnpm_store:/app/.pnpm-store
       # Anonymous volumes shadow the bind-mount so stale .astro/ or
       # .vite/ caches from the host don't break the dev server with
       # phantom lock files. Destroyed on each `up`.
@@ -177,24 +197,23 @@ services:
     depends_on:
       - backend
     networks:
-      - mm-boutique-dev
 
 networks:
   mm-boutique-dev:
     name: ecommerce-mm-boutique-dev
 
 volumes:
-  ecommerce_mmboutique_dev_postgres_data:
-    name: ecommerce_mmboutique_dev_postgres_data
-  ecommerce_mmboutique_dev_storage:
-    name: ecommerce_mmboutique_dev_storage
-  ecommerce_mmboutique_dev_bootstrap:
-    name: ecommerce_mmboutique_dev_bootstrap
-  ecommerce_mmboutique_dev_logs:
-    name: ecommerce_mmboutique_dev_logs
-  ecommerce_mmboutique_dev_ftp_data:
-    name: ecommerce_mmboutique_dev_ftp_data
-  ecommerce_mmboutique_dev_node_modules:
-    name: ecommerce_mmboutique_dev_node_modules
-  ecommerce_mmboutique_dev_pnpm_store:
-    name: ecommerce_mmboutique_dev_pnpm_store
+  ecommerce_mm_boutique_dev_postgres_data:
+    name: ecommerce_mm_boutique_dev_postgres_data
+  ecommerce_mm_boutique_dev_storage:
+    name: ecommerce_mm_boutique_dev_storage
+  ecommerce_mm_boutique_dev_bootstrap:
+    name: ecommerce_mm_boutique_dev_bootstrap
+  ecommerce_mm_boutique_dev_logs:
+    name: ecommerce_mm_boutique_dev_logs
+  ecommerce_mm_boutique_dev_ftp_data:
+    name: ecommerce_mm_boutique_dev_ftp_data
+  ecommerce_mm_boutique_dev_node_modules:
+    name: ecommerce_mm_boutique_dev_node_modules
+  ecommerce_mm_boutique_dev_pnpm_store:
+    name: ecommerce_mm_boutique_dev_pnpm_store

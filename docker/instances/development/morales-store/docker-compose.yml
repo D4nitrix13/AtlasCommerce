@@ -34,7 +34,7 @@ services:
       - config_file=/etc/postgresql/postgresql.conf
     volumes:
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
-      - ecommerce_moralesstore_dev_postgres_data:/var/lib/postgresql
+      - ecommerce_morales_store_dev_postgres_data:/var/lib/postgresql
       - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -63,7 +63,6 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - morales-store-dev
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
@@ -84,9 +83,8 @@ services:
       - PASV_MAX_PORT=${FTP_PASV_MAX_PORT:-40100}
       - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
     volumes:
-      - ecommerce_moralesstore_dev_ftp_data:/srv/ftp
+      - ecommerce_morales_store_dev_ftp_data:/srv/ftp
     networks:
-      - morales-store-dev
 
   backend:
     build:
@@ -104,13 +102,11 @@ services:
     init: true
     env_file:
       - environment/.env
-    ports:
-      - "${BACKEND_PORT:-9000}:8000"
     volumes:
       - ../../../../backend:/var/www/html
-      - ecommerce_moralesstore_dev_storage:/var/www/html/storage
-      - ecommerce_moralesstore_dev_bootstrap:/var/www/html/bootstrap/cache
-      - ecommerce_moralesstore_dev_logs:/var/log/php
+      - ecommerce_morales_store_dev_storage:/var/www/html/storage
+      - ecommerce_morales_store_dev_bootstrap:/var/www/html/bootstrap/cache
+      - ecommerce_morales_store_dev_logs:/var/log/php
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -141,7 +137,31 @@ services:
       redis:
         condition: service_healthy
     networks:
+
+  # Sidecar nginx — agrega capa HTTP para que Caddy (en host) pueda
+  # hacer `reverse_proxy localhost:${BACKEND_PORT}` con transporte HTTP
+  # y no FastCGI. Mismo patrón que en panda-and-kitsune y mm-boutique.
+  #
+  # Cadena de requests:
+  #   curl host:${BACKEND_PORT} → nginx:8000 (sidecar, vía port mapping)
+  #                          → FPM:9000 (vía Docker DNS `backend`)
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: morales-store-dev-nginx
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${BACKEND_PORT:-9000}:8000"
+    volumes:
+      - ./conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../../../backend:/var/www/html:ro
+    depends_on:
+      - backend
+    networks:
       - morales-store-dev
+    # Cadena de requests (host → Caddy → nginx → FPM):
+    #   curl host:${BACKEND_PORT:-9000}  → nginx:8000 (sidecar, vía port mapping)
+    #                                 → backend:9000 (FPM, vía Docker DNS)
 
   frontend:
     build:
@@ -161,8 +181,8 @@ services:
     volumes:
       - ../../../../frontend:/app
       - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
-      - ecommerce_moralesstore_dev_node_modules:/app/node_modules
-      - ecommerce_moralesstore_dev_pnpm_store:/app/.pnpm-store
+      - ecommerce_morales_store_dev_node_modules:/app/node_modules
+      - ecommerce_morales_store_dev_pnpm_store:/app/.pnpm-store
       # Anonymous volumes shadow the bind-mount so stale .astro/ or
       # .vite/ caches from the host don't break the dev server with
       # phantom lock files. Destroyed on each `up`.
@@ -177,24 +197,23 @@ services:
     depends_on:
       - backend
     networks:
-      - morales-store-dev
 
 networks:
   morales-store-dev:
     name: ecommerce-morales-store-dev
 
 volumes:
-  ecommerce_moralesstore_dev_postgres_data:
-    name: ecommerce_moralesstore_dev_postgres_data
-  ecommerce_moralesstore_dev_storage:
-    name: ecommerce_moralesstore_dev_storage
-  ecommerce_moralesstore_dev_bootstrap:
-    name: ecommerce_moralesstore_dev_bootstrap
-  ecommerce_moralesstore_dev_logs:
-    name: ecommerce_moralesstore_dev_logs
-  ecommerce_moralesstore_dev_ftp_data:
-    name: ecommerce_moralesstore_dev_ftp_data
-  ecommerce_moralesstore_dev_node_modules:
-    name: ecommerce_moralesstore_dev_node_modules
-  ecommerce_moralesstore_dev_pnpm_store:
-    name: ecommerce_moralesstore_dev_pnpm_store
+  ecommerce_morales_store_dev_postgres_data:
+    name: ecommerce_morales_store_dev_postgres_data
+  ecommerce_morales_store_dev_storage:
+    name: ecommerce_morales_store_dev_storage
+  ecommerce_morales_store_dev_bootstrap:
+    name: ecommerce_morales_store_dev_bootstrap
+  ecommerce_morales_store_dev_logs:
+    name: ecommerce_morales_store_dev_logs
+  ecommerce_morales_store_dev_ftp_data:
+    name: ecommerce_morales_store_dev_ftp_data
+  ecommerce_morales_store_dev_node_modules:
+    name: ecommerce_morales_store_dev_node_modules
+  ecommerce_morales_store_dev_pnpm_store:
+    name: ecommerce_morales_store_dev_pnpm_store
