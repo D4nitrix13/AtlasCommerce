@@ -3,20 +3,15 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// Mocks hoisted: vi.mock corre antes del import, asi que las variables
-// tienen que estar disponibles en la fase de hoisting.
-const { mockLogin, mockSetSession, mockApiFetch } = vi.hoisted(() => ({
+const { mockLogin } = vi.hoisted(() => ({
   mockLogin: vi.fn(),
-  mockSetSession: vi.fn(),
-  mockApiFetch: vi.fn(),
 }));
 
 vi.mock("../../../src/stores/auth", () => ({
   useAuth: () => ({
     login: mockLogin,
-    setSession: mockSetSession,
   }),
-  authStore: { login: mockLogin, setSession: mockSetSession },
+  authStore: { login: mockLogin },
 }));
 
 vi.mock("../../../src/i18n", async (importOriginal) => {
@@ -30,298 +25,125 @@ vi.mock("../../../src/i18n", async (importOriginal) => {
   };
 });
 
-vi.mock("../../../src/lib/api", () => ({
-  apiFetch: mockApiFetch,
-}));
-
 import LoginForm from "../../../src/components/admin/auth/LoginForm";
 
 const loginPath = "/es/admin/auth/login";
 
-beforeEach(() => {
-  mockLogin.mockReset();
-  mockSetSession.mockReset();
-  mockApiFetch.mockReset();
-  window.history.replaceState({}, "", loginPath);
-});
-
 describe("components/admin/auth/LoginForm", () => {
-  describe("tab inicial", () => {
-    it("muestra tab=login por defecto cuando no hay query param", () => {
-      render(<LoginForm />);
-
-      const loginTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signin",
-      });
-      expect(loginTab).toHaveAttribute("aria-selected", "true");
-    });
-
-    it("muestra tab=register cuando la URL tiene ?tab=register", async () => {
-      window.history.replaceState({}, "", `${loginPath}?tab=register`);
-
-      render(<LoginForm />);
-
-      await waitFor(() => {
-        const registerTab = screen.getByRole("tab", {
-          name: "auth.login.tab.signup",
-        });
-        expect(registerTab).toHaveAttribute("aria-selected", "true");
-      });
-
-      const loginTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signin",
-      });
-      expect(loginTab).toHaveAttribute("aria-selected", "false");
-    });
-
-    it("respeta initialTab prop pasado desde el padre", () => {
-      render(<LoginForm initialTab="register" />);
-
-      const registerTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signup",
-      });
-      expect(registerTab).toHaveAttribute("aria-selected", "true");
-    });
+  beforeEach(() => {
+    mockLogin.mockReset();
+    window.history.replaceState({}, "", loginPath);
   });
 
-  describe("cambio de tab", () => {
-    it("click en Registrarse actualiza la URL sin recargar", async () => {
-      const user = userEvent.setup();
-      render(<LoginForm />);
+  it("muestra el form de login sin tabs de register", () => {
+    render(<LoginForm />);
 
-      const registerTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signup",
-      });
-      await user.click(registerTab);
+    expect(screen.getByLabelText("auth.login.shell.emailLabel")).toBeInTheDocument();
+    expect(screen.getByLabelText("auth.login.shell.passwordLabel")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "auth.login.shell.submit" })).toBeInTheDocument();
+    expect(screen.getByText("auth.login.shell.rememberMe")).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /Registrarse/i })).toBeNull();
+  });
 
-      expect(window.location.search).toContain("tab=register");
+  it("muestra el link '¿Olvidaste tu contraseña?' apuntando al forgot-password", () => {
+    render(<LoginForm />);
+
+    const forgotLink = screen.getByText("auth.login.shell.forgotLink");
+    expect(forgotLink).toBeInTheDocument();
+  });
+
+  it("login exitoso llama a authStore.login", async () => {
+    const user = userEvent.setup();
+    mockLogin.mockResolvedValue({
+      token: "tok",
+      user: {
+        id: 1,
+        email: "admin@panda-estampados.com",
+        full_name: "Admin",
+        role: { id: 1, slug: "admin", name: "Administrador" },
+        role_id: 1,
+        store_ids: [1],
+        is_active: true,
+        permissions: [],
+      },
     });
 
-    it("click en Iniciar sesión borra el query param", async () => {
-      const user = userEvent.setup();
-      window.history.replaceState({}, "", `${loginPath}?tab=register`);
-      render(<LoginForm />);
+    render(<LoginForm />);
 
-      const loginTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signin",
-      });
-      await user.click(loginTab);
+    await user.type(
+      screen.getByLabelText("auth.login.shell.emailLabel"),
+      "admin@panda-estampados.com",
+    );
+    await user.type(
+      screen.getByLabelText("auth.login.shell.passwordLabel"),
+      "password",
+    );
+    await user.click(screen.getByRole("button", { name: "auth.login.shell.submit" }));
 
-      expect(window.location.search).not.toContain("tab=");
-    });
-
-    it("no actualiza URL si clickeas el tab activo", async () => {
-      const user = userEvent.setup();
-      render(<LoginForm />);
-
-      const loginTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signin",
-      });
-      await user.click(loginTab);
-
-      expect(window.location.search).not.toContain("tab=");
-    });
-
-    it("cambia aria-selected al cambiar de tab", async () => {
-      const user = userEvent.setup();
-      render(<LoginForm />);
-
-      const loginTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signin",
-      });
-      const registerTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signup",
-      });
-
-      expect(loginTab).toHaveAttribute("aria-selected", "true");
-      expect(registerTab).toHaveAttribute("aria-selected", "false");
-
-      await user.click(registerTab);
-
-      await waitFor(() => {
-        expect(registerTab).toHaveAttribute("aria-selected", "true");
-        expect(loginTab).toHaveAttribute("aria-selected", "false");
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith({
+        email: "admin@panda-estampados.com",
+        password: "password",
+        remember: false,
       });
     });
   });
 
-  describe("reset de campos al cambiar de tab", () => {
-    it("limpia email/password al cambiar de tab", async () => {
-      const user = userEvent.setup();
-      render(<LoginForm />);
-
-      const emailInput = screen.getByPlaceholderText(
-        "auth.login.email.placeholder",
-      );
-      const passwordInput = screen.getByPlaceholderText(
-        "auth.login.password.placeholder",
-      );
-
-      await user.type(emailInput, "user@example.com");
-      await user.type(passwordInput, "secretpassword");
-
-      const registerTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signup",
-      });
-      await user.click(registerTab);
-
-      expect(emailInput).toHaveValue("");
-      expect(passwordInput).toHaveValue("");
+  it("login fallido muestra alert", async () => {
+    const user = userEvent.setup();
+    mockLogin.mockRejectedValue({
+      status: 422,
+      message: "Las credenciales no son válidas.",
     });
 
-    it("muestra campos first_name/last_name solo en tab=register", async () => {
-      const user = userEvent.setup();
-      render(<LoginForm />);
+    render(<LoginForm />);
 
-      expect(
-        screen.queryByPlaceholderText("auth.login.firstName.placeholder"),
-      ).toBeNull();
+    await user.type(screen.getByLabelText("auth.login.shell.emailLabel"), "bad@example.com");
+    await user.type(screen.getByLabelText("auth.login.shell.passwordLabel"), "wrong");
+    await user.click(screen.getByRole("button", { name: "auth.login.shell.submit" }));
 
-      const registerTab = screen.getByRole("tab", {
-        name: "auth.login.tab.signup",
-      });
-      await user.click(registerTab);
-
-      await waitFor(() => {
-        expect(
-          screen.getByPlaceholderText("auth.login.firstName.placeholder"),
-        ).toBeInTheDocument();
-      });
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/credenciales no son válidas/i);
     });
   });
 
-  describe("submit", () => {
-    it("login exitoso llama a authStore.login", async () => {
-      const user = userEvent.setup();
-      const fakeResponse = {
-        token: "tok123",
-        user: {
-          id: 1,
-          email: "test@example.com",
-          full_name: "Test",
-          role: null,
-          role_id: null,
-          store_ids: [1],
-          is_active: true,
-          permissions: [],
-        },
-      };
-      mockLogin.mockResolvedValue(fakeResponse);
+  it("muestra botones sociales Google + Facebook con divider", () => {
+    render(<LoginForm />);
 
-      render(<LoginForm />);
+    expect(screen.getByRole("button", { name: /Google/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Facebook/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /GitHub/i })).toBeNull();
+    expect(screen.getByText("auth.login.shell.divider")).toBeInTheDocument();
+  });
 
-      const emailInput = screen.getByPlaceholderText(
-        "auth.login.email.placeholder",
-      );
-      const passwordInput = screen.getByPlaceholderText(
-        "auth.login.password.placeholder",
-      );
-
-      await user.type(emailInput, "test@example.com");
-      await user.type(passwordInput, "secret-password");
-
-      const submitButton = screen.getByRole("button", {
-        name: "auth.login.submit.idle",
-      });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockLogin).toHaveBeenCalledWith({
-          email: "test@example.com",
-          password: "secret-password",
-        });
-      });
+  it("el checkbox rememberMe se propaga al login()", async () => {
+    const user = userEvent.setup();
+    mockLogin.mockResolvedValue({
+      token: "tok",
+      user: {
+        id: 1,
+        email: "admin@panda-estampados.com",
+        full_name: "Admin",
+        role: { id: 1, slug: "admin", name: "Administrador" },
+        role_id: 1,
+        store_ids: [1],
+        is_active: true,
+        permissions: [],
+      },
     });
 
-    it("register exitoso llama a /auth/register y setSession", async () => {
-      const user = userEvent.setup();
-      const fakeResponse = {
-        token: "tok456",
-        user: {
-          id: 2,
-          email: "new@example.com",
-          full_name: "New User",
-          role: null,
-          role_id: null,
-          store_ids: [1],
-          is_active: true,
-          permissions: [],
-        },
-      };
-      mockApiFetch.mockResolvedValue(fakeResponse);
+    render(<LoginForm />);
 
-      window.history.replaceState({}, "", `${loginPath}?tab=register`);
-      render(<LoginForm />);
+    await user.type(screen.getByLabelText("auth.login.shell.emailLabel"), "admin@panda-estampados.com");
+    await user.type(screen.getByLabelText("auth.login.shell.passwordLabel"), "password");
+    await user.click(screen.getByLabelText("auth.login.shell.rememberMe"));
+    await user.click(screen.getByRole("button", { name: "auth.login.shell.submit" }));
 
-      const firstNameInput = screen.getByPlaceholderText(
-        "auth.login.firstName.placeholder",
-      );
-      const lastNameInput = screen.getByPlaceholderText(
-        "auth.login.lastName.placeholder",
-      );
-      const emailInput = screen.getByPlaceholderText(
-        "auth.login.email.placeholder",
-      );
-      const passwordInput = screen.getByPlaceholderText(
-        "auth.login.password.placeholder",
-      );
-
-      await user.type(firstNameInput, "New");
-      await user.type(lastNameInput, "User");
-      await user.type(emailInput, "new@example.com");
-      await user.type(passwordInput, "StrongPass2026");
-
-      const submitButton = screen.getByRole("button", {
-        name: "auth.login.submit.create",
-      });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockApiFetch).toHaveBeenCalledWith(
-          "/auth/register",
-          expect.objectContaining({
-            method: "POST",
-            body: expect.objectContaining({
-              first_name: "New",
-              last_name: "User",
-              email: "new@example.com",
-              password: "StrongPass2026",
-            }),
-          }),
-        );
-        expect(mockSetSession).toHaveBeenCalledWith(fakeResponse);
-      });
-    });
-
-    it("login fallido muestra mensaje de error", async () => {
-      const user = userEvent.setup();
-      mockLogin.mockRejectedValue({
-        status: 422,
-        message: "Las credenciales no son válidas.",
-        errors: null,
-      });
-
-      render(<LoginForm />);
-
-      const emailInput = screen.getByPlaceholderText(
-        "auth.login.email.placeholder",
-      );
-      const passwordInput = screen.getByPlaceholderText(
-        "auth.login.password.placeholder",
-      );
-
-      await user.type(emailInput, "bad@example.com");
-      await user.type(passwordInput, "wrong");
-
-      const submitButton = screen.getByRole("button", {
-        name: "auth.login.submit.idle",
-      });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole("alert")).toHaveTextContent(
-          /credenciales no son válidas/i,
-        );
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith({
+        email: "admin@panda-estampados.com",
+        password: "password",
+        remember: true,
       });
     });
   });
