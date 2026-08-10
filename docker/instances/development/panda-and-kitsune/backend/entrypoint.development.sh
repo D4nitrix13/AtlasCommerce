@@ -6,24 +6,24 @@
 
 set -eu
 
-cd /var/www/html
+/bin/cd /var/www/html
 
 # Esperar a Postgres si está configurado (default 60s).
 if [ -n "${DB_HOST:-}" ]; then
-    echo "[dev] Esperando a Postgres en ${DB_HOST}:${DB_PORT:-5432}…"
-    for _ in $(seq 1 60); do
-        if /usr/local/bin/php -r "fsockopen('${DB_HOST}', ${DB_PORT:-5432}, \$errno, \$errstr, 2) || exit(1);" 2>/dev/null; then
-            echo "[dev] Postgres reachable."
-            break
-        fi
-        sleep 1
-    done
+  /bin/echo "[dev] Esperando a Postgres en ${DB_HOST}:${DB_PORT:-5432}…"
+  for _ in $(seq 1 60); do
+    if /usr/local/bin/php -r "fsockopen('${DB_HOST}', ${DB_PORT:-5432}, \$errno, \$errstr, 2) || exit(1);" 2>/dev/null; then
+      /bin/echo "[dev] Postgres reachable."
+      break
+    fi
+    sleep 1
+  done
 fi
 
 # Generar autoloader si no existe (después de un bind mount nuevo).
 if [ ! -f vendor/autoload.php ]; then
-    echo "[dev] vendor/ no existe, corriendo composer install…"
-    /usr/bin/composer install --no-interaction --prefer-dist
+  echo "[dev] vendor/ no existe, corriendo composer install…"
+  /usr/bin/composer install --no-interaction --prefer-dist
 fi
 
 # Cache de configuración limpio al arrancar (evita configs viejas
@@ -34,10 +34,10 @@ fi
 
 # Generar APP_KEY si falta.
 if [ -z "${APP_KEY:-}" ] && [ -f .env ]; then
-    if ! grep -q "^APP_KEY=base64" .env; then
-        echo "[dev] APP_KEY no definida, generando…"
-        /usr/local/bin/php artisan key:generate --force
-    fi
+  if ! grep -q "^APP_KEY=base64" .env; then
+    echo "[dev] APP_KEY no definida, generando…"
+    /usr/local/bin/php artisan key:generate --force
+  fi
 fi
 
 # Permisos runtime para el usuario www-data (que es el que corre php-fpm).
@@ -46,7 +46,7 @@ fi
 # Dockerfile) o con un user: override, el chown no se puede aplicar —
 # no es necesario porque los archivos ya están bien owner'd al inicio.
 if [ "$(id -u)" = "0" ]; then
-    /bin/chown -R www-data:www-data storage bootstrap/cache
+  /bin/chown -R www-data:www-data storage bootstrap/cache
 fi
 
 exec /usr/local/sbin/php-fpm
