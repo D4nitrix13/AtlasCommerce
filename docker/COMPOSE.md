@@ -194,8 +194,8 @@ Ejemplos (dev):
 - `ecommerce-panda-kitsune-dev`
 
 Ejemplos (prod):
-- `pandakitsune-frontend`
-- `pandakitsune-db-data`
+- `panda-and-kitsune-frontend`
+- `panda-and-kitsune-db-data`
 
 Naming consistente permite filtrar por label con un solo comando:
 ```bash

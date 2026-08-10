@@ -16,7 +16,7 @@ services:
     build:
       context: ../../../..
       dockerfile: docker/instances/production/morales-store/backend/Dockerfile.production
-    container_name: moralesstore-app
+    container_name: morals_store-app
     restart: unless-stopped
     # Run as www-data (UID 33) — never root.
     user: "33:33"
@@ -72,7 +72,7 @@ services:
     build:
       context: ../../../..
       dockerfile: docker/instances/production/morales-store/frontend/Dockerfile.production
-    container_name: moralesstore-frontend
+    container_name: morals_store-frontend
     restart: unless-stopped
     # Run as node (UID 1000) — never root.
     user: "1000:1000"
@@ -96,7 +96,7 @@ services:
     # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
     # setear user: explícito. Sin esto, postgres rehúsa correr como root.
     user: "999:999"
-    container_name: moralesstore-db
+    container_name: morals_store-db
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -123,7 +123,7 @@ services:
 
   redis:
     image: ${REDIS_IMAGE:-redis:7-alpine}
-    container_name: moralesstore-redis
+    container_name: morals_store-redis
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -143,7 +143,7 @@ services:
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
-    container_name: moralesstore-ftp
+    container_name: morals_store-ftp
     restart: unless-stopped
     env_file:
       - ../../../versions.env
