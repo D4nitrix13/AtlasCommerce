@@ -1,6 +1,8 @@
 ---
 import AuthLayout from "../../../../layouts/AuthLayout.astro";
 import LoginForm from "../../../../components/admin/auth/LoginForm";
+import AuthShell from "../../../../components/auth/AuthShell.astro";
+import LanguageSwitcher from "../../../../components/ui/LanguageSwitcher";
 import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
 import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
 import { themeToBrand } from "../../../../lib/theme";
@@ -8,124 +10,40 @@ import { themeToBrand } from "../../../../lib/theme";
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
 
-// Brand base desde config estática (defaults). El theme dinámico de
-// la API los overridee si está disponible.
 const fallbackBrand =
   getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
 const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
-// Tab inicial desde la URL: ?tab=register abre directo en Registrarse.
-// Si no está presente o es cualquier otro valor, defaultea a "login".
-const initialTab =
-  Astro.url.searchParams.get("tab") === "register" ? "register" : "login";
-
-const hasToken =
-  typeof Astro.cookies !== "undefined" && Astro.cookies.has("auth.token");
-const currentYear = new Date().getFullYear();
+const forgotPath = `/${locale}/admin/auth/forgot-password`;
 ---
 
-<AuthLayout title={`${t["auth.login.title"]} · ${brand.name}`}>
-  {hasToken ? (
-    <div class="text-sm text-slate-300">{t["auth.login.alreadySignedIn"]}</div>
-    <script define:vars={{ redirectTo: `/${locale}/admin/dashboard` }}>
-      window.location.href = redirectTo;
-    </script>
-  ) : (
-    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
-      <aside
-        class="relative isolate hidden flex-col justify-between overflow-hidden p-12 text-white lg:sticky lg:top-0 lg:h-screen lg:flex"
-        style={`background:
-          /* Highlight difuminado arriba-izquierda (luz desde arriba) */
-          radial-gradient(ellipse 70% 50% at 20% 10%, rgba(255,255,255,0.22) 0%, transparent 60%),
-          /* Sombra abajo-derecha (profundidad) */
-          radial-gradient(ellipse 60% 50% at 85% 100%, rgba(0,0,0,0.30) 0%, transparent 65%),
-          /* Color base diagonal: verde bambú → verde oscuro */
-          linear-gradient(140deg, ${brand.accentColor} 0%, ${brand.accentHoverColor} 100%);
-        `}
-      >
-        {/* Textura: patrón sutil de puntos blancos para dar textura
-            sin saturar. opacity-[0.07] = apenas visible pero aporta
-            textura al hacer hover/foco. */}
-        <div
-          aria-hidden="true"
-          class="pointer-events-none absolute inset-0 opacity-[0.07]"
-          style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 18px 18px;"
-        />
+<AuthLayout title={`${t["auth.login.shell.heading"]} · ${brand.name}`}>
+  <AuthShell
+    illustration="/images/auth/login-amico.svg"
+    illustrationAlt={t["auth.shell.illustration.alt"]}
+    leftHeading={t["auth.login.shell.leftHeading"]}
+    leftBody={t["auth.login.shell.leftBody"]}
+    brandName={brand.name}
+    brandLogo={brand.logoPath}
+    topRightLink="none"
+    side="left"
+  >
+    <LanguageSwitcher slot="topRightExtra" client:load theme="light" />
 
-        {/* Glow decorativo arriba-izquierda (luz extra sobre el highlight) */}
-        <div
-          aria-hidden="true"
-          class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full opacity-30 blur-3xl"
-          style="background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);"
-        />
-
-        {/* Glow decorativo abajo-derecha (sombra extra) */}
-        <div
-          aria-hidden="true"
-          class="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full opacity-40 blur-3xl"
-          style="background: radial-gradient(circle, rgba(0,0,0,0.55) 0%, transparent 70%);"
-        />
-
-        <div class="relative z-10 flex items-center gap-3">
-          <span class="text-2xl font-bold tracking-tight drop-shadow">
-            {t["auth.brand.name"]}
-          </span>
-        </div>
-
-        <div class="relative z-10 max-w-lg">
-          <h2 class="text-3xl font-bold leading-tight drop-shadow md:text-4xl">
-            {t["auth.login.brand.left.heading"]}
-          </h2>
-          <p class="mt-4 text-base leading-relaxed text-white/90 drop-shadow">
-            {t["auth.login.brand.left.body"]}
-          </p>
-          <a
-            href="#"
-            class="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
-          >
-            {t["auth.login.brand.left.cta"]}
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M5 12h14M13 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
-
-        <p class="relative z-10 text-xs text-white/70">
-          {t["auth.login.brand.left.footer"].replace("{year}", String(currentYear))}
-        </p>
-      </aside>
-
-      <main
-        class="flex items-center justify-center px-4 py-12 sm:px-8"
-        style={`background-color: ${brand.loginTheme.bg};`}
-      >
-        <div class="w-full max-w-3xl">
-          <header class="mb-6 flex items-center gap-3 lg:hidden">
-            <img
-              src={brand.loginLogoPath}
-              alt={brand.name}
-              class="h-10 w-10 rounded-md bg-white object-contain p-1"
-            />
-            <span
-              class="text-xl font-bold tracking-tight"
-              style={`color: ${brand.loginTheme.text};`}
-            >
-              {t["auth.brand.name"]}
-            </span>
-          </header>
-
-          <LoginForm client:load brand={brand} initialTab={initialTab} />
-        </div>
-      </main>
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-slate-900">
+        {t["auth.login.shell.heading"]}
+      </h1>
+      <p class="mt-2 text-slate-500">{t["auth.login.shell.subtitle"]}</p>
     </div>
-  )}
+
+    <LoginForm client:load forgotHref={forgotPath} />
+
+    <p class="text-center text-xs text-slate-400 mt-8" slot="terms">
+      {t["auth.shell.termsPrefix"]}{" "}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.termsLink"]}</a>
+      {" "}{t["auth.shell.termsAnd"] ?? "y"}{" "}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.privacyLink"]}</a>.
+    </p>
+  </AuthShell>
 </AuthLayout>
