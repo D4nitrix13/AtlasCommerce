@@ -12,6 +12,7 @@ Thumbs.db
 .phpunit.result.cache
 
 # AI Tools
+.playwright-cli/
 .atl/
 **/.atl/
 
