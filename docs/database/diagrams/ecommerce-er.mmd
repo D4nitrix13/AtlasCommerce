@@ -12,9 +12,11 @@ erDiagram
     %% visibility is controlled via `product_stores` pivot.
     %%
     %% Auth: minimal in MVP — users, roles, permissions, password_reset_tokens.
+    %% password_reset_tokens is the OTP-based recovery flow (6-digit code,
+    %% 15 min TTL, consumed atomically). The only password recovery method.
     %% 2FA / passkeys / otp_challenges / recovery_codes / trusted_devices /
     %% login_attempts / security_events are deferred to a future phase
-    %% (table is dropped from the schema).
+    %% (no tables or migrations exist for them in the codebase).
     %%
     %% Customization: minimal in MVP — only `custom_designs` (file upload
     %% per order item) + `order_custom_designs` bridge. The full design
@@ -115,6 +117,33 @@ erDiagram
         datetime updated_at
     }
 
+    STORE_FEATURE {
+        int id PK
+        int store_id FK
+        string slug "e.g. 'wholesale_pricing', 'bulk_import'"
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    STORE_THEME {
+        int id PK
+        int store_id FK,UK "1:1 with stores"
+        string short_name
+        string logo_path
+        string login_logo_path
+        string favicon_path
+        string accent_color "hex"
+        string accent_hover_color "hex"
+        string primary_color "hex"
+        string support_email
+        string phone
+        string whatsapp
+        json tokens "fonts, spacing, etc."
+        datetime created_at
+        datetime updated_at
+    }
+
     SALES_CHANNEL {
         int id PK
         int store_id FK
@@ -154,8 +183,22 @@ erDiagram
         datetime updated_at
     }
 
+    PASSWORD_RESET_TOKEN {
+        int id PK
+        int user_id FK "nullable, preserves history on user delete"
+        string email
+        string token_hash "bcrypt, never plain text"
+        timestamp expires_at
+        timestamp used_at "nullable, indexed for usage queries"
+        string request_ip "nullable, IP que solicitó el reset"
+        text user_agent "nullable, navegador del solicitante"
+        datetime created_at
+        datetime updated_at
+    }
+
     USER {
         int id PK
+        int role_id FK "nullable, global role from ROLES"
         string first_name
         string last_name
         string email UK
@@ -167,6 +210,7 @@ erDiagram
         string last_login_ip
         int failed_login_attempts
         timestamp locked_until
+        timestamp password_changed_at
         datetime registered_at
         string remember_token
         datetime created_at
@@ -768,6 +812,16 @@ erDiagram
         datetime updated_at
     }
 
+    WHOLESALE_PRICE {
+        int id PK
+        int product_id FK
+        int store_id FK
+        int min_qty "default 1 — base wholesale price"
+        bigint price_cents
+        datetime created_at
+        datetime updated_at
+    }
+
     RETURN_REQUEST {
         int id PK
         int store_id FK
@@ -917,6 +971,8 @@ erDiagram
     STORE ||--o{ STORE_DOMAIN : owns
     STORE ||--o{ STORE_SOCIAL_LINK : has
     STORE ||--o{ STORE_SETTING : configures
+    STORE ||--o| STORE_THEME : "1:1 branding"
+    STORE ||--o{ STORE_FEATURE : "N:1 enables flags"
     STORE ||--o{ SALES_CHANNEL : operates
     STORE ||--o{ USER_STORE : assigns
     STORE ||--o{ CUSTOMER_STORE : serves
@@ -936,12 +992,14 @@ erDiagram
     STORE ||--o{ NOTIFICATION : generates
     STORE ||--o{ AUDIT : scopes
     STORE ||--o{ CART : holds
+    STORE ||--o{ WHOLESALE_PRICE : "tier prices"
 
     %% ---- Auth ----
     ROLE ||--o{ USER : global_role
     ROLE ||--o{ USER_STORE : per_store_role
     ROLE ||--o{ ROLE_PERMISSION : grants
     PERMISSION ||--o{ ROLE_PERMISSION : belongs_to
+    USER ||--o{ PASSWORD_RESET_TOKEN : requests_recovery
 
     %% ---- User fan-out ----
     USER ||--o| CUSTOMER : linked_to
@@ -998,6 +1056,7 @@ erDiagram
     PRODUCT ||--o{ PRODUCT_REVIEW : receives
     PRODUCT ||--o{ PRODUCT_QUESTION : receives
     PRODUCT ||--o{ CUSTOM_DESIGN : base_of
+    PRODUCT ||--o{ WHOLESALE_PRICE : "tier prices"
 
     PRODUCT_VARIANT ||--o{ CART_ITEM : variant_in
     PRODUCT_VARIANT ||--o{ ORDER_ITEM : variant_in
