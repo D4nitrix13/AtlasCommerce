@@ -23,7 +23,8 @@
   ],
   "admin_user": {
     "email": "admin@morales-store.com",
-    "password_env": "MORALES_ADMIN_PASSWORD"
+    "password_env": "MORALES_ADMIN_PASSWORD",
+    "password": "password"
   },
   "features": {
     "wholesale_pricing": false,

@@ -42,8 +42,8 @@
     }
   ],
   "admin_user": {
-    "email": "admin@dev.panda-estampados.test",
-    "password_env": "DEV_ADMIN_PASSWORD"
+    "email": "admin@panda-estampados.com",
+    "password": "password"
   },
   "features": {
     "wholesale_pricing": true,
