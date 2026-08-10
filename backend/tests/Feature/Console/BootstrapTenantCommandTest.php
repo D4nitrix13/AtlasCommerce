@@ -263,8 +263,10 @@ final class BootstrapTenantCommandTest extends TestCase
     }
 
     #[Test]
-    public function it_returns_failure_when_password_env_is_not_set(): void
+    public function it_falls_back_to_default_password_when_password_env_is_not_set(): void
     {
+        // Cambio de contrato: antes fallaba si el env var no estaba
+        // seteado. Ahora cae al default "password" (dev/test convenience).
         $this->writeConfig([
             'tenants' => [
                 [
@@ -280,11 +282,16 @@ final class BootstrapTenantCommandTest extends TestCase
             ],
         ]);
 
-        // La variable NO está definida.
         putenv('NEVER_SET_PASSWORD');
 
         $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
-            ->assertFailed();
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', ['email' => 'admin@no-password.com']);
+        $user = User::query()
+            ->where('email', 'admin@no-password.com')
+            ->firstOrFail();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check(value: 'password', hashedValue: $user->password));
     }
 
     #[Test]
