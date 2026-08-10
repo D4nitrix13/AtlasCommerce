@@ -1,0 +1,47 @@
+---
+import AuthLayout from "../../../../layouts/AuthLayout.astro";
+import AuthShell from "../../../../components/auth/AuthShell.astro";
+import StorefrontLoginForm from "../../../../components/storefront/auth/StorefrontLoginForm";
+import LanguageSwitcher from "../../../../components/ui/LanguageSwitcher";
+import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
+import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
+import { themeToBrand } from "../../../../lib/theme";
+
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+
+const fallbackBrand =
+  getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
+---
+
+<AuthLayout title={`${t["auth.login.shell.heading"]} · ${brand.name}`}>
+  <AuthShell
+    illustration="/images/auth/login-amico.svg"
+    illustrationAlt={t["auth.shell.illustration.alt"]}
+    leftHeading={t["auth.login.shell.leftHeading"]}
+    leftBody={t["auth.login.shell.leftBody"]}
+    brandName={brand.name}
+    brandLogo={brand.logoPath}
+    topRightLink="signup"
+    side="left"
+  >
+    <LanguageSwitcher slot="topRightExtra" client:load theme="light" />
+
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-slate-900">
+        {t["auth.login.shell.heading"]}
+      </h1>
+      <p class="mt-2 text-slate-500">{t["auth.login.shell.subtitle"]}</p>
+    </div>
+
+    <StorefrontLoginForm client:load />
+
+    <p class="text-center text-xs text-slate-400 mt-8" slot="terms">
+      {t["auth.shell.termsPrefix"]}{" "}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.termsLink"]}</a>
+      {" "}{t["auth.shell.termsAnd"] ?? "y"}{" "}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.privacyLink"]}</a>.
+    </p>
+  </AuthShell>
+</AuthLayout>
