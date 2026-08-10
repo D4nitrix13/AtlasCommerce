@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Activar pnpm vía corepack.
 RUN /usr/local/bin/corepack enable \
-    && corepack prepare pnpm@9 --activate
+  && corepack prepare pnpm@9 --activate
 
 # Layer de cache de dependencias. `pnpm fetch` descarga deps a un
 # store local sin instalar en el FS de la app; el siguiente `pnpm
@@ -19,20 +19,20 @@ RUN /usr/local/bin/corepack enable \
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 COPY frontend/pnpm-workspace.yaml* ./
 RUN /usr/local/bin/pnpm fetch --frozen-lockfile \
-    && /usr/local/bin/pnpm install --frozen-lockfile --offline
+  && /usr/local/bin/pnpm install --frozen-lockfile --offline
 
 # Variables de entorno: el dev server escucha en 0.0.0.0 para ser
 # accesible desde Caddy del host o del contenedor vecino.
 ENV HOST=0.0.0.0 \
-    PORT=4321 \
-    NODE_ENV=development \
-    ASTRO_TELEMETRY_DISABLED=1
+  PORT=4321 \
+  NODE_ENV=development \
+  ASTRO_TELEMETRY_DISABLED=1
 
 EXPOSE 4321
 
 # Healthcheck: en dev el server responde rápido.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD /usr/bin/wget -q --spider http://localhost:4321/ || exit 1
+  CMD /usr/bin/wget -q --spider http://localhost:4321/ || exit 1
 
 # Entrypoint: arregla ownership de los volúmenes (node_modules,
 # .pnpm-store, .astro) que docker compose crea como root y que el
