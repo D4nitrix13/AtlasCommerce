@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\PasswordResetTokenController;
+use App\Http\Controllers\Api\Auth\SocialAuthController;
 use App\Http\Controllers\Api\Auth\PermissionController;
 use App\Http\Controllers\Api\Auth\PermissionRoleController;
 use App\Http\Controllers\Api\Auth\RoleController;
@@ -97,9 +98,6 @@ Route::middleware(['store.domain'])->group(function (): void {
     Route::post('auth/login', [AuthController::class, 'login'])
         ->name('auth.login');
 
-    Route::post('auth/register', [AuthController::class, 'register'])
-        ->name('auth.register');
-
     // Recuperación de contraseña (F del roadmap multi-tenant).
     // Ambas rutas son públicas (no requieren auth) y operan sobre la
     // tienda activa resuelta por store.domain.
@@ -108,6 +106,13 @@ Route::middleware(['store.domain'])->group(function (): void {
 
     Route::post('auth/reset-password', [PasswordResetTokenController::class, 'reset'])
         ->name('auth.reset-password');
+
+    // Social login (Google + Facebook) — stub que devuelve 501 mientras
+    // no esté instalado laravel/socialite. Ver SocialAuthController.
+    Route::get('auth/social/{provider}/redirect', [SocialAuthController::class, 'redirect'])
+        ->name('auth.social.redirect');
+    Route::get('auth/social/{provider}/callback', [SocialAuthController::class, 'callback'])
+        ->name('auth.social.callback');
 });
 
 Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
