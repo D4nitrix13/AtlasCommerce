@@ -6,13 +6,11 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\Auth\UserResource;
 use App\Models\Auth\User;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -83,61 +81,6 @@ class AuthController extends Controller
                 resource: $user->load(['role', 'stores']),
             ),
         ]);
-    }
-
-    /**
-     * Registra un nuevo usuario y le devuelve un token Sanctum.
-     *
-     * Body:
-     *   - first_name (required)
-     *   - last_name  (required)
-     *   - email      (required, unique en users)
-     *   - password   (required, min 8)
-     *   - device_name (optional)
-     *
-     * El user se crea con:
-     *   - is_active = true (puede loguearse inmediatamente)
-     *   - role_id   = null (sin permisos hasta que admin le asigne uno)
-     *   - Se asocia automaticamente a la tienda activa via `user_stores`.
-     *
-     * Response 201 con { token, user } igual que login para que el
-     * frontend pueda usar el mismo flujo post-auth.
-     */
-    public function register(RegisterRequest $request, StoreContextService $storeContext): JsonResponse
-    {
-        $data = $request->validated();
-        $currentStoreId = $storeContext->getStoreId();
-
-        $user = DB::transaction(function () use ($data, $currentStoreId): User {
-            $user = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'email' => $data['email'],
-                'password' => $data['password'],
-                'is_active' => true,
-                'role_id' => null,
-            ]);
-
-            if ($currentStoreId !== null) {
-                $user->stores()->attach($currentStoreId);
-            }
-
-            return $user;
-        });
-
-        $deviceName = $data['device_name'] ?? 'web-admin';
-
-        $token = $user->createToken(name: $deviceName);
-
-        return response()->json(
-            data: [
-                'token' => $token->plainTextToken,
-                'user' => new UserResource(
-                    resource: $user->load(['role', 'stores']),
-                ),
-            ],
-            status: 201,
-        );
     }
 
     /**

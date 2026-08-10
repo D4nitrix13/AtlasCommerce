@@ -286,68 +286,18 @@ final class AuthHttpTest extends TestCase
     }
 
     #[Test]
-    public function register_creates_user_and_returns_token(): void
+    public function register_endpoint_is_not_exposed(): void
     {
-        $response = $this->postJson('/api/auth/register', [
-            'first_name' => 'Ada',
-            'last_name' => 'Lovelace',
-            'email' => 'ada@example.com',
-            'password' => 'Secure-Pass-2026',
-            'device_name' => 'jest-test',
-        ]);
-
-        $response->assertCreated();
-        $response->assertJsonStructure(['token', 'user' => ['id', 'email', 'full_name', 'role']]);
-        $response->assertJsonPath('user.email', 'ada@example.com');
-        $response->assertJsonPath('user.full_name', 'Ada Lovelace');
-        $this->assertNotEmpty($response->json('token'));
-
-        // El nuevo user queda asociado a la tienda activa.
-        $newUser = User::query()->withTrashed()
-            ->where(column: 'email', operator: '=', value: 'ada@example.com')
-            ->firstOrFail();
-        $this->assertTrue($newUser->hasAccessToStore(storeId: $this->store->id));
-    }
-
-    #[Test]
-    public function register_with_duplicate_email_returns_422(): void
-    {
-        User::factory()->create([
-            'email' => 'taken@example.com',
-            'password' => Hash::make(value: 'existing-password'),
-        ]);
-
+        // El admin NO tiene registro público. Los admins se crean
+        // desde el seeder backend (admin@<slug>.com / password) o
+        // desde el dashboard por otro admin via UserController.
         $response = $this->postJson('/api/auth/register', [
             'first_name' => 'New',
             'last_name' => 'User',
-            'email' => 'taken@example.com',
-            'password' => 'New-Pass-2026',
+            'email' => 'new-admin@example.com',
+            'password' => 'Secure-Pass-2026',
         ]);
 
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['email']);
-    }
-
-    #[Test]
-    public function register_validates_required_fields(): void
-    {
-        $response = $this->postJson('/api/auth/register', []);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['first_name', 'last_name', 'email', 'password']);
-    }
-
-    #[Test]
-    public function register_validates_password_min_length(): void
-    {
-        $response = $this->postJson('/api/auth/register', [
-            'first_name' => 'A',
-            'last_name' => 'B',
-            'email' => 'short@example.com',
-            'password' => 'short',
-        ]);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['password']);
+        $response->assertStatus(404);
     }
 }
