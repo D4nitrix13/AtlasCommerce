@@ -16,7 +16,7 @@ services:
     build:
       context: ../../../..
       dockerfile: docker/instances/production/panda-and-kitsune/backend/Dockerfile.production
-    container_name: pandakitsune-app
+    container_name: panda-and-kitsune-app
     restart: unless-stopped
     # Run as www-data (UID 33) — never root. The build chowns
     # /var/www/html to www-data so the runtime has full access.
@@ -74,7 +74,7 @@ services:
     build:
       context: ../../../..
       dockerfile: docker/instances/production/panda-and-kitsune/frontend/Dockerfile.production
-    container_name: pandakitsune-frontend
+    container_name: panda-and-kitsune-frontend
     restart: unless-stopped
     # Run as node (UID 1000) — never root. The bundle SSR only reads
     # files and writes logs to stdout.
@@ -100,7 +100,7 @@ services:
     # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
     # setear user: explícito. Sin esto, postgres rehúsa correr como root.
     user: "999:999"
-    container_name: pandakitsune-db
+    container_name: panda-and-kitsune-db
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -127,7 +127,7 @@ services:
 
   redis:
     image: ${REDIS_IMAGE:-redis:7-alpine}
-    container_name: pandakitsune-redis
+    container_name: panda-and-kitsune-redis
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -147,7 +147,7 @@ services:
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
-    container_name: pandakitsune-ftp
+    container_name: panda-and-kitsune-ftp
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -181,4 +181,4 @@ volumes:
   storage-app:
   bootstrap-app:
   ftp-data:
-    name: pandakitsune-ftp-data
+    name: panda-and-kitsune-ftp-data

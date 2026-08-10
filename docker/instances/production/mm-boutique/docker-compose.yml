@@ -16,7 +16,7 @@ services:
     build:
       context: ../../../..
       dockerfile: docker/instances/production/mm-boutique/backend/Dockerfile.production
-    container_name: mmboutique-app
+    container_name: mm_boutique-app
     restart: unless-stopped
     # Run as www-data (UID 33) — never root.
     user: "33:33"
@@ -72,7 +72,7 @@ services:
     build:
       context: ../../../..
       dockerfile: docker/instances/production/mm-boutique/frontend/Dockerfile.production
-    container_name: mmboutique-frontend
+    container_name: mm_boutique-frontend
     restart: unless-stopped
     # Run as node (UID 1000) — never root.
     user: "1000:1000"
@@ -96,7 +96,7 @@ services:
     # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
     # setear user: explícito. Sin esto, postgres rehúsa correr como root.
     user: "999:999"
-    container_name: mmboutique-db
+    container_name: mm_boutique-db
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -123,7 +123,7 @@ services:
 
   redis:
     image: ${REDIS_IMAGE:-redis:7-alpine}
-    container_name: mmboutique-redis
+    container_name: mm_boutique-redis
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -143,13 +143,13 @@ services:
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
-    container_name: mmboutique-ftp
+    container_name: mm_boutique-ftp
     restart: unless-stopped
     env_file:
       - ../../../versions.env
     # Sin `ports:`: el FTP single-tenant no se expone al host para
     # evitar colisión con panda-kitsune en port 21. Accesible vía
-    # `docker exec -it mmboutique-ftp bash` o desde otros containers
+    # `docker exec -it mm_boutique-ftp bash` o desde otros containers
     # de la red `mm-boutique` (Laravel usa FTP_HOST=ftp internamente).
     environment:
       - FTP_USER=${FTP_USERNAME}
@@ -178,4 +178,4 @@ volumes:
   storage-app:
   bootstrap-app:
   ftp-data:
-    name: mmboutique-ftp-data
+    name: mm_boutique-ftp-data
