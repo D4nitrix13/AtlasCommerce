@@ -170,3 +170,101 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
+
+---
+
+# Project conventions — Panda Estampados / Kitsune Backend
+
+> **Reglas de estilo y arquitectura propias de este repo.** Se aplican
+> **encima** de las Laravel Boost Guidelines de arriba. Si hay conflicto,
+> estas reglas del proyecto ganan.
+
+## 1. Parámetros nombrados — siempre que sea posible
+
+Usá **argumentos nombrados** en toda llamada a función o método que
+reciba 2 o más argumentos donde el orden o el tipo no sea
+autoexplicativo. Esto mejora la legibilidad y previene bugs por
+argumentos mal ordenados.
+
+```php
+// ❌ Mal — el lector tiene que contar la posición para entender qué hace
+User::query()->where('email', $email)->where('is_active', true)->first();
+
+// ✅ Bien — el nombre del argumento documenta la intención
+User::query()
+    ->where(column: 'email', operator: '=', value: $email)
+    ->where(column: 'is_active', operator: '=', value: true)
+    ->first();
+```
+
+### Cuándo SÍ usar named arguments
+
+| Caso                                                                                  | Ejemplo                                                          |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Métodos Eloquent con varios parámetros (`where`, `orWhere`, `whereHas`, `orderBy`)    | `->where(column: 'x', operator: '=', value: 1)`                  |
+| `Hash::check(value:, hashedValue:)`                                                   | `Hash::check(value: $plain, hashedValue: $hash)`                 |
+| `Validator::make(data:, rules:, messages:)`                                           | `Validator::make(data: $req->all(), rules: [...], messages: [...])` |
+| `env(key, default)` cuando se quiere distinguir del default                           | `env(key: 'APP_DEBUG', default: false)`                          |
+| `config(key, default)` cuando se quiere distinguir del default                        | `config(key: 'app.timezone', default: 'UTC')`                    |
+| `DB::transaction(callback, attempts, lockFor)` cuando hay más de 1 arg                | `DB::transaction(callback: fn () => ..., attempts: 3)`           |
+| Aserciones PHPUnit multi-argumento que se confunden (`assertSame(expected, actual)`)  | `assertSame(expected: 0, actual: $count)`                        |
+| `updateOrCreate(attributes, values)`                                                   | `updateOrCreate(attributes: [...], values: [...])`               |
+| `firstOrCreate(attributes, values)`                                                   | `firstOrCreate(attributes: [...], values: [...])`                |
+| `findOrFail(id, columns)` cuando se especifican columnas                             | `findOrFail(id: 1, columns: ['id', 'name'])`                     |
+| Constructor property promotion con tipos no triviales                                 | `new User(email: $e, password: $p)`                              |
+
+### Cuándo NO usar named arguments
+
+| Caso                                                                                  | Razón                                                       |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Llamadas con un solo argumento                                                        | No agrega valor: `find($id)` es claro                       |
+| Arrays asociativos ya auto-documentados                                                | Las keys hacen el trabajo: `updateOrCreate(['email' => $e], [...])` |
+| Fluent chains donde el método se llama solo con la closure o array                    | `->with(['relation'])` no necesita `relations:`             |
+| Callbacks donde el orden es semántico (e.g. `array_map($fn, $array)`)                 | Cambiar el orden rompería la semántica                      |
+| String de SQL crudo en `DB::raw(...)`                                                  | Un solo argumento string                                    |
+| Strings de migration: `$table->string('email')`                                        | Un solo argumento                                           |
+| Aserciones PHPUnit donde los args son self-evident (`assertSame(2, 1+1)`)              | Contexto trivial                                             |
+
+### Regla de oro
+
+> Si tenés que mirar la firma del método para entender qué representa
+> el segundo argumento, usá named args.
+
+## 2. Tipado estricto
+
+- `declare(strict_types=1);` al inicio de **todo** archivo PHP nuevo.
+- Type hints en parámetros y return types explícitos en **todo** método.
+- Sin `mixed` salvo justificación documentada con PHPDoc.
+
+## 3. Constructor property promotion
+
+- Sin `__construct()` vacío. Si no hay lógica, no declares el constructor.
+- Si hay DI, usá promotion: `public function __construct(public Service $svc) {}`.
+
+## 4. Single quotes
+
+- Comillas simples por defecto en strings sin interpolación.
+- Double quotes solo cuando hay `\n`, `\t` o interpolación de variables.
+
+## 5. Trailing commas
+
+- En arrays, argumentos y parámetros multilínea.
+- Single-line: trailing comma opcional.
+
+## 6. Imports ordenados
+
+- Alfabéticamente por nombre de clase.
+- Grupos: `App\*`, luego `Illuminate\*`, luego `Core\*`, luego resto.
+
+## 7. Comentarios
+
+- PHPDoc sobre inline.
+- Solo el **por qué**, nunca el **qué**.
+- Sin `// TODO` sin ticket linked.
+
+## 8. Tests
+
+- Cobertura mínima: happy path + cada failure path documentado en PHPDoc.
+- Nombre del test: `it_does_x_when_y` o `testX`.
+- Cada test debe poder correr en isolation (`RefreshDatabase` cuando toca DB).
+- Una aserción lógica por test cuando sea posible.
