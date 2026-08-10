@@ -6,6 +6,7 @@ namespace Tests\Feature\Console;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -14,9 +15,6 @@ use Tests\TestCase;
 /**
  * Verifica que los archivos seeds/*.json de cada instancia estén bien
  * formados y pasen la validacion del comando tenants:bootstrap.
- *
- * Esto evita que un commit rompa los deployments por un JSON mal
- * formado o con schema invalido.
  */
 #[Group('console')]
 #[Group('tenants')]
@@ -25,30 +23,33 @@ final class SeedFilesValidationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Path a la raiz del repo desde el directorio de tests.
-     */
     private const REPO_ROOT = __DIR__.'/../../../..';
 
     /**
-     * Instancias que deben tener archivo seeds/*.json.
-     *
-     * @return array<string, array{string, string}>
+     * @return array<string, array{string, string, string}>
      */
     public static function instanceProvider(): array
     {
         return [
-            'panda-kitsune' => ['panda-kitsune', 'panda.json'],
-            'mm-boutique' => ['mm-boutique', 'mm-boutique.json'],
-            'morales-store' => ['morales-store', 'morales-store.json'],
+            'panda-kitsune-dev' => ['development/panda-and-kitsune', 'dev-panda-and-kitsune.json', 'DEV_ADMIN_PASSWORD'],
+            'panda-kitsune-prod' => ['production/panda-and-kitsune', 'panda.json', 'PANDA_ADMIN_PASSWORD'],
+            'mm-boutique-dev' => ['development/mm-boutique', 'dev-mm-boutique.json', 'DEV_ADMIN_PASSWORD'],
+            'mm-boutique-prod' => ['production/mm-boutique', 'mm-boutique.json', 'MM_ADMIN_PASSWORD'],
+            'morales-store-dev' => ['development/morales-store', 'dev-morales-store.json', 'DEV_ADMIN_PASSWORD'],
+            'morales-store-prod' => ['production/morales-store', 'morales-store.json', 'MORALES_ADMIN_PASSWORD'],
         ];
+    }
+
+    private function seedPath(string $instanceFolder, string $filename): string
+    {
+        return self::REPO_ROOT."/docker/instances/{$instanceFolder}/seeds/{$filename}";
     }
 
     #[Test]
     #[DataProvider('instanceProvider')]
-    public function seed_file_exists_and_is_readable(string $instance, string $filename): void
+    public function seed_file_exists_and_is_readable(string $instanceFolder, string $filename, string $passwordEnv): void
     {
-        $path = self::REPO_ROOT."/docker/instances/{$instance}/seeds/{$filename}";
+        $path = $this->seedPath($instanceFolder, $filename);
 
         $this->assertFileExists($path, "Seed file not found: {$path}");
         $this->assertFileIsReadable($path, "Seed file not readable: {$path}");
@@ -56,21 +57,21 @@ final class SeedFilesValidationTest extends TestCase
 
     #[Test]
     #[DataProvider('instanceProvider')]
-    public function seed_file_has_valid_json(string $instance, string $filename): void
+    public function seed_file_has_valid_json(string $instanceFolder, string $filename, string $passwordEnv): void
     {
-        $path = self::REPO_ROOT."/docker/instances/{$instance}/seeds/{$filename}";
+        $path = $this->seedPath($instanceFolder, $filename);
         $content = File::get($path);
         $decoded = json_decode($content, associative: true);
 
         $this->assertIsArray($decoded, "Seed file is not valid JSON: {$path}");
-        $this->assertNotNull(json_last_error_msg(), 'JSON decode error');
+        $this->assertSame(JSON_ERROR_NONE, json_last_error(), 'JSON decode error: '.json_last_error_msg());
     }
 
     #[Test]
     #[DataProvider('instanceProvider')]
-    public function seed_file_contains_at_least_one_tenant(string $instance, string $filename): void
+    public function seed_file_contains_at_least_one_tenant(string $instanceFolder, string $filename, string $passwordEnv): void
     {
-        $path = self::REPO_ROOT."/docker/instances/{$instance}/seeds/{$filename}";
+        $path = $this->seedPath($instanceFolder, $filename);
         $config = json_decode(File::get($path), associative: true);
 
         $this->assertArrayHasKey('tenants', $config);
@@ -78,36 +79,52 @@ final class SeedFilesValidationTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('instanceProvider')]
+    public function seed_file_admin_email_follows_admin_at_slug_dot_com_pattern(string $instanceFolder, string $filename, string $passwordEnv): void
+    {
+        $path = $this->seedPath($instanceFolder, $filename);
+        $config = json_decode(File::get($path), associative: true);
+        $email = $config['admin_user']['email'];
+
+        $this->assertMatchesRegularExpression(
+            '/^admin@[a-z0-9-]+\.com$/',
+            $email,
+            "Admin email debe seguir el patrón admin@<slug>.com, encontré: {$email} en {$path}",
+        );
+    }
+
+    #[Test]
     public function all_seed_files_can_be_processed_by_tenants_bootstrap(): void
     {
-        foreach (self::instanceProvider() as [$instance, $filename]) {
-            $path = self::REPO_ROOT."/docker/instances/{$instance}/seeds/{$filename}";
+        foreach (self::instanceProvider() as [$instanceFolder, $filename, $passwordEnv]) {
+            $path = $this->seedPath($instanceFolder, $filename);
 
-            // Copiar a un tmp file y setear el env var del password.
             $tmpPath = tempnam(sys_get_temp_dir(), 'seed-');
             copy($path, $tmpPath);
 
             $config = json_decode(File::get($path), associative: true);
-            $passwordEnv = $config['admin_user']['password_env'];
-            putenv("{$passwordEnv}=test-password");
+            if (isset($config['admin_user']['password_env'])) {
+                putenv("{$passwordEnv}=test-password");
+            }
 
             try {
                 $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
                     ->assertSuccessful();
             } finally {
-                putenv($passwordEnv);
+                if (isset($config['admin_user']['password_env'])) {
+                    putenv($passwordEnv);
+                }
                 @unlink($tmpPath);
             }
         }
     }
 
     #[Test]
-    public function panda_seed_creates_two_tenants(): void
+    public function panda_seed_creates_two_tenants_and_admin_with_default_password(): void
     {
-        $path = self::REPO_ROOT.'/docker/instances/panda-kitsune/seeds/panda.json';
+        $path = $this->seedPath('development/panda-and-kitsune', 'dev-panda-and-kitsune.json');
         $tmpPath = tempnam(sys_get_temp_dir(), 'seed-');
         copy($path, $tmpPath);
-        putenv('PANDA_ADMIN_PASSWORD=test-123');
 
         try {
             $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
@@ -116,20 +133,30 @@ final class SeedFilesValidationTest extends TestCase
             $this->assertDatabaseCount('stores', 2);
             $this->assertDatabaseHas('stores', ['slug' => 'panda-estampados']);
             $this->assertDatabaseHas('stores', ['slug' => 'kitsune']);
-            $this->assertDatabaseCount('store_domains', 6);  // 2 + 2 + 1 + 1
+
+            $this->assertDatabaseHas('users', [
+                'email' => 'admin@panda-estampados.com',
+                'is_active' => true,
+            ]);
+
+            $user = \App\Models\Auth\User::query()
+                ->where('email', 'admin@panda-estampados.com')
+                ->firstOrFail();
+            $this->assertTrue(
+                Hash::check(value: 'password', hashedValue: $user->password),
+                'Admin de panda-estampados debe tener password default "password".',
+            );
         } finally {
-            putenv('PANDA_ADMIN_PASSWORD');
             @unlink($tmpPath);
         }
     }
 
     #[Test]
-    public function mm_boutique_seed_creates_one_tenant(): void
+    public function mm_boutique_seed_creates_one_tenant_with_admin_at_slug_com(): void
     {
-        $path = self::REPO_ROOT.'/docker/instances/mm-boutique/seeds/mm-boutique.json';
+        $path = $this->seedPath('development/mm-boutique', 'dev-mm-boutique.json');
         $tmpPath = tempnam(sys_get_temp_dir(), 'seed-');
         copy($path, $tmpPath);
-        putenv('MM_ADMIN_PASSWORD=test-123');
 
         try {
             $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
@@ -140,19 +167,21 @@ final class SeedFilesValidationTest extends TestCase
             $this->assertDatabaseHas('store_domains', ['domain' => 'mm-boutique.com']);
             $this->assertDatabaseHas('store_domains', ['domain' => 'www.mm-boutique.com']);
             $this->assertDatabaseHas('store_domains', ['domain' => 'admin.mm-boutique.com']);
+
+            $this->assertDatabaseHas('users', [
+                'email' => 'admin@mm-boutique.com',
+            ]);
         } finally {
-            putenv('MM_ADMIN_PASSWORD');
             @unlink($tmpPath);
         }
     }
 
     #[Test]
-    public function morales_store_seed_creates_one_tenant(): void
+    public function morales_store_seed_creates_one_tenant_with_admin_at_slug_com(): void
     {
-        $path = self::REPO_ROOT.'/docker/instances/morales-store/seeds/morales-store.json';
+        $path = $this->seedPath('development/morales-store', 'dev-morales-store.json');
         $tmpPath = tempnam(sys_get_temp_dir(), 'seed-');
         copy($path, $tmpPath);
-        putenv('MORALES_ADMIN_PASSWORD=test-123');
 
         try {
             $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
@@ -161,8 +190,87 @@ final class SeedFilesValidationTest extends TestCase
             $this->assertDatabaseCount('stores', 1);
             $this->assertDatabaseHas('stores', ['slug' => 'morales-store']);
             $this->assertDatabaseHas('store_domains', ['domain' => 'morales-store.com']);
+            $this->assertDatabaseHas('users', [
+                'email' => 'admin@morales-store.com',
+            ]);
         } finally {
-            putenv('MORALES_ADMIN_PASSWORD');
+            @unlink($tmpPath);
+        }
+    }
+
+    #[Test]
+    public function password_env_takes_priority_over_literal_password(): void
+    {
+        $json = [
+            'tenants' => [
+                [
+                    'slug' => 'custom-store',
+                    'name' => 'Custom Store',
+                    'currency' => 'USD',
+                    'domains' => ['custom-store.com'],
+                ],
+            ],
+            'admin_user' => [
+                'email' => 'admin@custom-store.com',
+                'password_env' => 'CUSTOM_ADMIN_PASSWORD',
+                'password' => 'should-be-ignored',
+            ],
+            'features' => [],
+        ];
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'seed-');
+        file_put_contents($tmpPath, json_encode($json));
+        putenv('CUSTOM_ADMIN_PASSWORD=from-env-var');
+
+        try {
+            $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
+                ->assertSuccessful();
+
+            $user = \App\Models\Auth\User::query()
+                ->where('email', 'admin@custom-store.com')
+                ->firstOrFail();
+            $this->assertTrue(Hash::check(value: 'from-env-var', hashedValue: $user->password));
+            $this->assertFalse(Hash::check(value: 'should-be-ignored', hashedValue: $user->password));
+            $this->assertFalse(Hash::check(value: 'password', hashedValue: $user->password));
+        } finally {
+            putenv('CUSTOM_ADMIN_PASSWORD');
+            @unlink($tmpPath);
+        }
+    }
+
+    #[Test]
+    public function falls_back_to_default_password_when_neither_env_nor_literal_provided(): void
+    {
+        $json = [
+            'tenants' => [
+                [
+                    'slug' => 'fallback-store',
+                    'name' => 'Fallback Store',
+                    'currency' => 'USD',
+                    'domains' => ['fallback-store.com'],
+                ],
+            ],
+            'admin_user' => [
+                'email' => 'admin@fallback-store.com',
+            ],
+            'features' => [],
+        ];
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'seed-');
+        file_put_contents($tmpPath, json_encode($json));
+
+        try {
+            $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
+                ->assertSuccessful();
+
+            $user = \App\Models\Auth\User::query()
+                ->where('email', 'admin@fallback-store.com')
+                ->firstOrFail();
+            $this->assertTrue(
+                Hash::check(value: 'password', hashedValue: $user->password),
+                'Sin password_env ni password literal, debe usar default "password".',
+            );
+        } finally {
             @unlink($tmpPath);
         }
     }

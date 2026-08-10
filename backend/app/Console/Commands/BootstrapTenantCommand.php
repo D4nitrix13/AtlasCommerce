@@ -16,7 +16,6 @@ use Core\Tenant\Application\RlsContextService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -149,7 +148,8 @@ class BootstrapTenantCommand extends Command
             'tenants.*.theme.tokens' => ['nullable', 'array'],
             'admin_user' => ['required', 'array'],
             'admin_user.email' => ['required', 'email'],
-            'admin_user.password_env' => ['required', 'string', 'max:255'],
+            'admin_user.password_env' => ['sometimes', 'string', 'max:255'],
+            'admin_user.password' => ['sometimes', 'string', 'min:8', 'max:255'],
             'features' => ['sometimes', 'array'],
         ], messages: [
             'tenants.*.slug.regex' => 'El slug debe ser kebab-case (solo letras minúsculas, números y guiones).',
@@ -300,15 +300,7 @@ class BootstrapTenantCommand extends Command
      */
     private function bootstrapAdminUser(array $config, array $storeIds): void
     {
-        $passwordEnvKey = $config['password_env'];
-        $password = env($passwordEnvKey);
-
-        if ($password === null || $password === '') {
-            throw new RuntimeException(
-                "Variable de entorno {$passwordEnvKey} no está definida o está vacía. "
-                .'Define el password del admin antes de correr el bootstrap.',
-            );
-        }
+        $password = $this->resolveAdminPassword($config);
 
         $adminRole = Role::query()->updateOrCreate(
             attributes: ['slug' => 'admin'],
@@ -333,6 +325,23 @@ class BootstrapTenantCommand extends Command
         }
 
         $this->line("  Admin user: {$user->email} (id={$user->id}, ".count(value: $storeIds).' tiendas)');
+    }
+
+    private function resolveAdminPassword(array $config): string
+    {
+        $passwordEnvKey = $config['password_env'] ?? null;
+        if ($passwordEnvKey !== null && $passwordEnvKey !== '') {
+            $fromEnv = env(key: $passwordEnvKey);
+            if ($fromEnv !== null && $fromEnv !== '') {
+                return $fromEnv;
+            }
+        }
+
+        if (isset($config['password']) && $config['password'] !== '') {
+            return (string) $config['password'];
+        }
+
+        return 'password';
     }
 
     /**
