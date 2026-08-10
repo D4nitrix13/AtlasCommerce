@@ -146,12 +146,17 @@ const isReversed = side === "right";
 
       <slot />
 
-      <p class="text-center text-xs text-slate-400 mt-8">
-        {t["auth.shell.termsPrefix"]}
-        <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.termsLink"]}</a>
-        {" "}{t["auth.shell.termsAnd"] ?? "y"}{" "}
-        <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.privacyLink"]}</a>.
-      </p>
+      {/* Footer terms con spacing correcto. El <p> wrapper está DENTRO del slot default
+          para que las páginas puedan override con su propio <p slot="terms"> sin generar
+          un <p> anidado (que el navegador cierra automáticamente, dejando wrapper vacío). */}
+      <slot name="terms">
+        <p class="text-center text-xs text-slate-400 mt-8">
+          {t["auth.shell.termsPrefix"]}{" "}
+          <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.termsLink"]}</a>
+          {" "}{t["auth.shell.termsAnd"] ?? "y"}{" "}
+          <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.privacyLink"]}</a>.
+        </p>
+      </slot>
     </div>
   </main>
 </div>
