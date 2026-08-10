@@ -14,7 +14,8 @@ stores/
 │   │   ├── facebook.webp   # icono para link a Facebook
 │   │   └── instagram.webp  # icono para link a Instagram
 │   ├── banners/.gitkeep    # banners del home (vacío por ahora)
-│   └── products/.gitkeep   # imágenes de productos por defecto
+│   ├── products/.gitkeep   # imágenes de productos por defecto
+│   └── auth/               # ilustraciones para pantallas de auth
 └── README.md (este archivo)
 ```
 
@@ -53,6 +54,18 @@ Todos los themes apuntan a `.webp`. Si en el futuro se generan versiones
 casos que necesiten `currentColor`), se agregan como segundo `logoPath`
 opcional y el componente consumidor decide cuál servir según el
 contexto.
+
+## Subcarpeta `auth/`
+
+Cada tienda puede tener ilustraciones propias para las pantallas de
+autenticación del admin (`/admin/auth/login`, `forgot-password`,
+`reset-password`, etc.). Conviven con los assets de marca porque
+también se sirven estáticamente desde el frontend.
+
+Detalles y atribuciones de los archivos viven en
+[`<slug>/auth/README.md`](panda-estampados/auth/README.md). Los
+assets de auth suelen venir de terceros (ej. [Storyset](https://storyset.com)),
+así que cada uno mantiene su propio README de créditos.
 
 ## ¿Por qué entonces también en backend/public/images/stores/?
 
