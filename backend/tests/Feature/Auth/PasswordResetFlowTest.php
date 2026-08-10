@@ -12,7 +12,6 @@ use App\Models\Stores\StoreDomain;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\RateLimiter;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -156,7 +155,7 @@ final class PasswordResetFlowTest extends TestCase
         PasswordResetToken::query()->create([
             'user_id' => $this->user->id,
             'email' => $this->user->email,
-            'token_hash' => Hash::make('111111'),
+            'token_hash' => Hash::make(value: '111111'),
             'expires_at' => now()->addMinutes(15),
         ]);
 
@@ -177,7 +176,7 @@ final class PasswordResetFlowTest extends TestCase
         $previous = PasswordResetToken::query()
             ->where('user_id', $this->user->id)
             ->get()
-            ->first(fn (PasswordResetToken $t): bool => Hash::check('111111', $t->token_hash));
+            ->first(fn (PasswordResetToken $t): bool => Hash::check(value: '111111', hashedValue: $t->token_hash));
 
         $this->assertNotNull($previous);
         $this->assertNotNull($previous->used_at);
@@ -195,7 +194,7 @@ final class PasswordResetFlowTest extends TestCase
         $this->postJson('/api/auth/forgot-password', [
             'email' => 'jane@example.com',
         ])->assertStatus(422)
-          ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email']);
     }
 
     #[Test]
@@ -204,7 +203,7 @@ final class PasswordResetFlowTest extends TestCase
         $this->postJson('/api/auth/forgot-password', [
             'email' => 'not-an-email',
         ])->assertStatus(422)
-          ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email']);
     }
 
     #[Test]
@@ -214,7 +213,7 @@ final class PasswordResetFlowTest extends TestCase
         $token = PasswordResetToken::query()->create([
             'user_id' => $this->user->id,
             'email' => $this->user->email,
-            'token_hash' => Hash::make($code),
+            'token_hash' => Hash::make(value: $code),
             'expires_at' => now()->addMinutes(15),
         ]);
 
@@ -231,7 +230,7 @@ final class PasswordResetFlowTest extends TestCase
 
         // Password actualizado.
         $this->user->refresh();
-        $this->assertTrue(Hash::check('NewPassword1234', $this->user->password));
+        $this->assertTrue(Hash::check(value: 'NewPassword1234', hashedValue: $this->user->password));
 
         // Token marcado como usado.
         $this->assertNotNull($token->fresh()->used_at);
@@ -243,7 +242,7 @@ final class PasswordResetFlowTest extends TestCase
         PasswordResetToken::query()->create([
             'user_id' => $this->user->id,
             'email' => $this->user->email,
-            'token_hash' => Hash::make('654321'),
+            'token_hash' => Hash::make(value: '654321'),
             'expires_at' => now()->addMinutes(15),
         ]);
 
@@ -264,7 +263,7 @@ final class PasswordResetFlowTest extends TestCase
         PasswordResetToken::query()->create([
             'user_id' => $this->user->id,
             'email' => $this->user->email,
-            'token_hash' => Hash::make('654321'),
+            'token_hash' => Hash::make(value: '654321'),
             'expires_at' => now()->subMinute(),
         ]);
 
@@ -286,7 +285,7 @@ final class PasswordResetFlowTest extends TestCase
         PasswordResetToken::query()->create([
             'user_id' => $this->user->id,
             'email' => $this->user->email,
-            'token_hash' => Hash::make($code),
+            'token_hash' => Hash::make(value: $code),
             'expires_at' => now()->addMinutes(15),
             'used_at' => now()->subMinute(),
         ]);
@@ -309,7 +308,7 @@ final class PasswordResetFlowTest extends TestCase
         PasswordResetToken::query()->create([
             'user_id' => $this->user->id,
             'email' => $this->user->email,
-            'token_hash' => Hash::make($code),
+            'token_hash' => Hash::make(value: $code),
             'expires_at' => now()->addMinutes(15),
         ]);
 
