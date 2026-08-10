@@ -5,6 +5,13 @@ import react from "@astrojs/react";
 import node from "@astrojs/node";
 
 // https://astro.build/config
+//
+// NOTA: vite-plugin-svgo no se usa porque los SVGs de este proyecto
+// viven en `public/images/**/*.svg` y se referencian con `<img src=...>`
+// desde componentes Astro/React. SVGO como plugin de Vite solo optimiza
+// los SVGs que se importan via `import` (no los referenciados por URL).
+// Para SVGs en /public/, el script `pnpm run optimize:svgs` (wired al
+// prebuild) cubre todo. Ver /docs/IMAGE_OPTIMIZATION.md para detalles.
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
