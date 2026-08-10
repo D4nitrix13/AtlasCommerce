@@ -80,7 +80,7 @@ final class CheckoutService
             toCurrencyId: $storeCurrencyId,
         );
 
-        return DB::transaction(function () use (
+        return DB::transaction(callback: function () use (
             $cart,
             $shippingAddress,
             $notes,

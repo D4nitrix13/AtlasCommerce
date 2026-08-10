@@ -138,7 +138,7 @@ class CartController extends Controller
 
         $cart->delete();
 
-        return response()->json(null, 204);
+        return response()->json(data: null, status: 204);
     }
 
     /**

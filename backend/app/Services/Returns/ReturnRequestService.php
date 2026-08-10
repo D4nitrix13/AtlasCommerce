@@ -52,7 +52,7 @@ final class ReturnRequestService
 
         $orderItemsByKey = $this->loadOrderItemsIndex(order: $order);
 
-        return DB::transaction(function () use ($order, $reason, $items, $customerId, $orderItemsByKey): ReturnRequest {
+        return DB::transaction(callback: function () use ($order, $reason, $items, $customerId, $orderItemsByKey): ReturnRequest {
             $returnRequest = ReturnRequest::create([
                 'store_id' => $order->store_id,
                 'order_id' => $order->id,
