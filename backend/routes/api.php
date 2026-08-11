@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\PasswordResetTokenController;
+use App\Http\Controllers\Api\Auth\RecoveryCodeController;
 use App\Http\Controllers\Api\Auth\SocialAuthController;
+use App\Http\Controllers\Api\Auth\TotpController;
 use App\Http\Controllers\Api\Auth\PermissionController;
 use App\Http\Controllers\Api\Auth\PermissionRoleController;
 use App\Http\Controllers\Api\Auth\RoleController;
@@ -121,6 +123,25 @@ Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
 
     Route::get('auth/me', [AuthController::class, 'me'])
         ->name('auth.me');
+
+    // 2FA / TOTP — gestión de la config TOTP del user autenticado.
+    // El flujo de verify-during-login es AuthController::login (lo
+    // maneja en el commit siguiente con preferred_recovery_method).
+    Route::get('auth/2fa/totp', [TotpController::class, 'status'])
+        ->name('auth.2fa.totp.status');
+    Route::post('auth/2fa/totp/setup', [TotpController::class, 'setup'])
+        ->name('auth.2fa.totp.setup');
+    Route::post('auth/2fa/totp/verify', [TotpController::class, 'verify'])
+        ->name('auth.2fa.totp.verify');
+    Route::delete('auth/2fa/totp', [TotpController::class, 'destroy'])
+        ->name('auth.2fa.totp.destroy');
+
+    // Recovery codes — códigos de un solo uso para cuando el user
+    // pierde acceso a 2FA / email.
+    Route::get('auth/recovery-codes', [RecoveryCodeController::class, 'index'])
+        ->name('auth.recovery-codes.index');
+    Route::post('auth/recovery-codes/regenerate', [RecoveryCodeController::class, 'regenerate'])
+        ->name('auth.recovery-codes.regenerate');
 
     // Theme management (F3.6 del roadmap multi-instance).
     Route::get('admin/theme', [ThemeAdminController::class, 'show'])
