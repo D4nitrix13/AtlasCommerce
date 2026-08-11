@@ -21,7 +21,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install chromium",
-    "optimize:svgs": "svgo --multipass public/images/**/*.svg",
+    "optimize:svgs": "node scripts/optimize-svgs.mjs",
+    "optimize:svgs:report": "node scripts/optimize-svgs.mjs --report",
     "prebuild": "pnpm run optimize:svgs"
   },
   "dependencies": {
