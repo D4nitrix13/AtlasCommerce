@@ -73,6 +73,71 @@ class AuthController extends Controller
 
         $deviceName = $credentials['device_name'] ?? 'web-admin';
 
+        // Si el user tiene 2FA habilitada, NO emitimos token todavía.
+        // Devolvemos un 200 con 'status: 2fa_required' y un challenge
+        // token que el frontend envía en /auth/2fa/verify-totp-login
+        // (endpoint que se implementa en un commit posterior). Esto
+        // evita emitir tokens si el user no completa 2FA.
+        if ($user->hasTwoFactorEnabled()) {
+            $challenge = \App\Models\Auth\OtpChallenge::create([
+                'user_id' => $user->id,
+                'type' => \App\Models\Auth\OtpChallenge::TYPE_TOTP,
+                'code_hash' => password_hash(random_bytes(16), PASSWORD_BCRYPT),
+                'context' => ['action' => 'login_2fa', 'device_name' => $deviceName],
+                'expires_at' => now()->addMinutes(value: 5),
+            ]);
+            return response()->json(data: [
+                'status' => '2fa_required',
+                'challenge_token' => $challenge->id,
+                'method' => 'totp',
+                'expires_at' => $challenge->expires_at,
+            ]);
+        }
+
+        $token = $user->createToken(name: $deviceName);
+
+        return response()->json(data: [
+            'token' => $token->plainTextToken,
+            'user' => new UserResource(
+                resource: $user->load(['role', 'stores']),
+            ),
+        ]);
+    }
+
+    /**
+     * Verifica el TOTP code durante el login cuando el user tiene 2FA.
+     * Valida el challenge token y el code, emite el Sanctum token.
+     */
+    public function verifyTotpLogin(Request $request): JsonResponse
+    {
+        $request->validate(rules: [
+            'challenge_token' => ['required', 'integer'],
+            'code' => ['required', 'string', 'size:6'],
+        ]);
+
+        $challenge = \App\Models\Auth\OtpChallenge::query()
+            ->where(column: 'id', operator: '=', value: $request->integer(key: 'challenge_token'))
+            ->where(column: 'type', operator: '=', value: \App\Models\Auth\OtpChallenge::TYPE_TOTP)
+            ->whereNull(column: 'consumed_at')
+            ->first();
+
+        if ($challenge === null || ! $challenge->isUsable()) {
+            return response()->json(data: ['message' => 'Challenge inválido o expirado.'], status: 422);
+        }
+
+        $user = $challenge->user;
+        $totp = app(\App\Services\Auth\TotpService::class);
+        if (! $totp->verify($user, $request->input(key: 'code'))) {
+            $challenge->attempts++;
+            $challenge->save();
+            return response()->json(data: ['message' => 'Código inválido.'], status: 422);
+        }
+
+        // Challenge consumido
+        $challenge->consumed_at = now();
+        $challenge->save();
+
+        $deviceName = data_get($challenge->context, 'device_name', 'web-admin') ?? 'web-admin';
         $token = $user->createToken(name: $deviceName);
 
         return response()->json(data: [
