@@ -115,6 +115,12 @@ Route::middleware(['store.domain'])->group(function (): void {
         ->name('auth.social.redirect');
     Route::get('auth/social/{provider}/callback', [SocialAuthController::class, 'callback'])
         ->name('auth.social.callback');
+
+    // Verificación TOTP cuando el login retorna '2fa_required'.
+    // Acepta el challenge_token devuelto por /auth/login + el code de
+    // 6 dígitos del authenticator app. Emite el Sanctum token.
+    Route::post('auth/2fa/verify-totp-login', [AuthController::class, 'verifyTotpLogin'])
+        ->name('auth.2fa.verify-totp-login');
 });
 
 Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
