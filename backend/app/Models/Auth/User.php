@@ -140,6 +140,68 @@ class User extends Authenticatable
     }
 
     /**
+     * Configuración 2FA / TOTP del usuario (one-to-one).
+     *
+     * Si la relación no existe, 2FA no está habilitada. Si existe,
+     * TwoFactorSetting::isEnabled() indica si está activa.
+     */
+    public function twoFactorSetting(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TwoFactorSetting::class);
+    }
+
+    /**
+     * Recovery codes del usuario (one-to-many).
+     *
+     * Solo los codes no usados (used_at IS NULL) están disponibles
+     * para recovery. Usar el scope `unused()` del modelo.
+     */
+    public function recoveryCodes(): HasMany
+    {
+        return $this->hasMany(RecoveryCode::class);
+    }
+
+    /**
+     * Challenges OTP activos del usuario (one-to-many).
+     *
+     * Solo los vigentes (consumed_at IS NULL, expires_at > now(),
+     * attempts < max). Usar el scope `usable()` del modelo.
+     */
+    public function otpChallenges(): HasMany
+    {
+        return $this->hasMany(OtpChallenge::class);
+    }
+
+    /**
+     * ¿Tiene 2FA habilitada?
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        $setting = $this->twoFactorSetting;
+        return $setting !== null && $setting->isEnabled();
+    }
+
+    /**
+     * ¿Tiene al menos un recovery code disponible?
+     */
+    public function hasAvailableRecoveryCode(): bool
+    {
+        return $this->recoveryCodes()
+            ->whereNull(column: 'used_at')
+            ->exists();
+    }
+
+    /**
+     * Cuenta de recovery codes no usados.
+     */
+    public function unusedRecoveryCodesCount(): int
+    {
+        return $this->recoveryCodes()
+            ->whereNull(column: 'used_at')
+            ->count();
+    }
+
+    /**
      * Nombre completo del usuario.
      */
     public function getFullNameAttribute(): string
