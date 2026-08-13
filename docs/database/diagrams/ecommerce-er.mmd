@@ -196,6 +196,39 @@ erDiagram
         datetime updated_at
     }
 
+    TWO_FACTOR_SETTING {
+        int id PK
+        int user_id FK,UK "1:1 — cada user tiene a lo sumo una config 2FA"
+        string secret "TOTP secret encryptado con Laravel Crypt (AES-256+HMAC). Nunca se persiste en texto plano."
+        timestamp enabled_at "null = 2FA deshabilitado. Index para queries de users con 2FA activa."
+        timestamp last_used_at "null hasta primer uso. Para rate limiting y audit."
+        timestamp recovery_codes_generated_at "null = no hay codes generados."
+        datetime created_at
+        datetime updated_at
+    }
+
+    OTP_CHALLENGE {
+        int id PK
+        int user_id FK "cascadeOnDelete"
+        string type "totp | email_otp | recovery_code"
+        string code_hash "bcrypt del challenge (TOTP code / email code / recovery code). Nunca plain text."
+        json context "metadata opcional (action, device_name, etc.)"
+        timestamp expires_at "TTL. Index para limpieza de challenges expirados."
+        timestamp consumed_at "null = no consumido todavía"
+        int attempts "rate limit counter. Max 5 antes de invalidar."
+        datetime created_at
+        datetime updated_at
+    }
+
+    RECOVERY_CODE {
+        int id PK
+        int user_id FK "cascadeOnDelete"
+        string code_hash "bcrypt del código alfanumérico de 10 chars (sin 0/O/1/I/L)"
+        timestamp used_at "null = code disponible. Index para queries de codes disponibles."
+        datetime created_at
+        datetime updated_at
+    }
+
     USER {
         int id PK
         int role_id FK "nullable, global role from ROLES"
@@ -211,6 +244,7 @@ erDiagram
         int failed_login_attempts
         timestamp locked_until
         timestamp password_changed_at
+        string preferred_recovery_method "email | 2fa | recovery_codes. Default email. Define qué método usa el user."
         datetime registered_at
         string remember_token
         datetime created_at
@@ -1000,6 +1034,9 @@ erDiagram
     ROLE ||--o{ ROLE_PERMISSION : grants
     PERMISSION ||--o{ ROLE_PERMISSION : belongs_to
     USER ||--o{ PASSWORD_RESET_TOKEN : requests_recovery
+    USER ||--o| TWO_FACTOR_SETTING : "1:1 optional (0..1)"
+    USER ||--o{ OTP_CHALLENGE : consumes
+    USER ||--o{ RECOVERY_CODE : "owns. Cascade on user delete."
 
     %% ---- User fan-out ----
     USER ||--o| CUSTOMER : linked_to
