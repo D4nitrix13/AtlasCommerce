@@ -37,7 +37,7 @@ final class TotpServiceTest extends TestCase
     public function test_generate_secret_returns_base32_string(): void
     {
         $secret = $this->service->generateSecret();
-        $this->assertSame(52, strlen($secret));
+        $this->assertSame(expected: 52, actual: strlen($secret));
         $this->assertMatchesRegularExpression('/^[A-Z2-7]+$/', $secret);
     }
 
@@ -45,75 +45,82 @@ final class TotpServiceTest extends TestCase
     {
         $a = $this->service->generateSecret();
         $b = $this->service->generateSecret();
-        $this->assertNotSame($a, $b);
+        $this->assertNotSame(expected: $a, actual: $b);
     }
 
     public function test_verify_returns_false_when_2fa_not_configured(): void
     {
         $user = User::factory()->create();
-        $this->assertFalse($this->service->verify($user, '123456'));
+        $this->assertFalse(condition: $this->service->verify(user: $user, code: '123456'));
     }
 
     public function test_verify_returns_true_for_current_code(): void
     {
         $user = $this->factoryUserWith2fa();
 
-        $secret = app(\Illuminate\Contracts\Encryption\Encrypter::class)
-            ->decrypt($user->twoFactorSetting->secret);
-        $step = intdiv(time(), TotpService::STEP_SECONDS);
-        $code = $this->generateCodeForStep($secret, $step);
+        $secret = \Illuminate\Support\Facades\Crypt::decryptString(
+            payload: $user->twoFactorSetting->secret,
+        );
+        $step = intdiv(num1: time(), num2: TotpService::STEP_SECONDS);
+        $code = $this->generateCodeForStep(base32Secret: $secret, step: $step);
 
-        $this->assertTrue($this->service->verify($user, $code));
+        $this->assertTrue(condition: $this->service->verify(user: $user, code: $code));
     }
 
     public function test_verify_returns_true_for_previous_step(): void
     {
         $user = $this->factoryUserWith2fa();
-        $secret = app(\Illuminate\Contracts\Encryption\Encrypter::class)
-            ->decrypt($user->twoFactorSetting->secret);
-        $step = intdiv(time(), TotpService::STEP_SECONDS) - 1;
-        $code = $this->generateCodeForStep($secret, $step);
+        $secret = \Illuminate\Support\Facades\Crypt::decryptString(
+            payload: $user->twoFactorSetting->secret,
+        );
+        $step = intdiv(num1: time(), num2: TotpService::STEP_SECONDS) - 1;
+        $code = $this->generateCodeForStep(base32Secret: $secret, step: $step);
 
-        $this->assertTrue($this->service->verify($user, $code));
+        $this->assertTrue(condition: $this->service->verify(user: $user, code: $code));
     }
 
     public function test_verify_returns_true_for_next_step(): void
     {
         $user = $this->factoryUserWith2fa();
-        $secret = app(\Illuminate\Contracts\Encryption\Encrypter::class)
-            ->decrypt($user->twoFactorSetting->secret);
-        $step = intdiv(time(), TotpService::STEP_SECONDS) + 1;
-        $code = $this->generateCodeForStep($secret, $step);
+        $secret = \Illuminate\Support\Facades\Crypt::decryptString(
+            payload: $user->twoFactorSetting->secret,
+        );
+        $step = intdiv(num1: time(), num2: TotpService::STEP_SECONDS) + 1;
+        $code = $this->generateCodeForStep(base32Secret: $secret, step: $step);
 
-        $this->assertTrue($this->service->verify($user, $code));
+        $this->assertTrue(condition: $this->service->verify(user: $user, code: $code));
     }
 
     public function test_verify_returns_false_for_code_outside_window(): void
     {
         $user = $this->factoryUserWith2fa();
-        $secret = app(\Illuminate\Contracts\Encryption\Encrypter::class)
-            ->decrypt($user->twoFactorSetting->secret);
-        $step = intdiv(time(), TotpService::STEP_SECONDS) - 5;
-        $code = $this->generateCodeForStep($secret, $step);
+        $secret = \Illuminate\Support\Facades\Crypt::decryptString(
+            payload: $user->twoFactorSetting->secret,
+        );
+        $step = intdiv(num1: time(), num2: TotpService::STEP_SECONDS) - 5;
+        $code = $this->generateCodeForStep(base32Secret: $secret, step: $step);
 
-        $this->assertFalse($this->service->verify($user, $code));
+        $this->assertFalse(condition: $this->service->verify(user: $user, code: $code));
     }
 
     public function test_verify_rejects_non_numeric_code(): void
     {
         $user = $this->factoryUserWith2fa();
-        $this->assertFalse($this->service->verify($user, 'abcdef'));
-        $this->assertFalse($this->service->verify($user, '12345'));
-        $this->assertFalse($this->service->verify($user, '1234567'));
-        $this->assertFalse($this->service->verify($user, '12 34 56'));
+        $this->assertFalse(condition: $this->service->verify(user: $user, code: 'abcdef'));
+        $this->assertFalse(condition: $this->service->verify(user: $user, code: '12345'));
+        $this->assertFalse(condition: $this->service->verify(user: $user, code: '1234567'));
+        $this->assertFalse(condition: $this->service->verify(user: $user, code: '12 34 56'));
     }
 
     public function test_provisioning_uri_format(): void
     {
         $user = $this->factoryUserWith2fa();
-        $uri = $this->service->provisioningUri($user, $user->twoFactorSetting->secret);
+        $uri = $this->service->provisioningUri(
+            user: $user,
+            encryptedSecret: $user->twoFactorSetting->secret,
+        );
         $this->assertStringStartsWith('otpauth://totp/', $uri);
-        $this->assertStringContainsString(rawurlencode($user->email), $uri);
+        $this->assertStringContainsString(needle: rawurlencode($user->email), haystack: $uri);
         $this->assertStringContainsString('issuer=', $uri);
         $this->assertStringContainsString('digits=6', $uri);
         $this->assertStringContainsString('period=30', $uri);
@@ -126,9 +133,10 @@ final class TotpServiceTest extends TestCase
     private function factoryUserWith2fa(): User
     {
         $user = User::factory()->create();
-        $user->twoFactorSetting()->create([
-            'secret' => app(\Illuminate\Contracts\Encryption\Encrypter::class)
-                ->encrypt($this->service->generateSecret()),
+        $user->twoFactorSetting()->create(attributes: [
+            'secret' => \Illuminate\Support\Facades\Crypt::encryptString(
+                value: $this->service->generateSecret(),
+            ),
             'enabled_at' => now(),
         ]);
         $user->refresh();
@@ -141,9 +149,9 @@ final class TotpServiceTest extends TestCase
      */
     private function generateCodeForStep(string $base32Secret, int $step): string
     {
-        $key = $this->base32Decode($base32Secret);
+        $key = $this->base32Decode(base32: $base32Secret);
         $counter = pack('N*', 0, $step);
-        $hash = hash_hmac('sha1', $counter, $key, true);
+        $hash = hash_hmac(algo: 'sha1', data: $counter, key: $key, binary: true);
         $offset = ord($hash[19]) & 0xf;
         $code = (
             ((ord($hash[$offset]) & 0x7f) << 24)
@@ -151,7 +159,12 @@ final class TotpServiceTest extends TestCase
             | ((ord($hash[$offset + 2]) & 0xff) << 8)
             | (ord($hash[$offset + 3]) & 0xff)
         ) % (10 ** TotpService::DIGITS);
-        return str_pad((string) $code, TotpService::DIGITS, '0', STR_PAD_LEFT);
+        return str_pad(
+            string: (string) $code,
+            length: TotpService::DIGITS,
+            pad_string: '0',
+            pad_type: STR_PAD_LEFT,
+        );
     }
 
     private function base32Decode(string $base32): string

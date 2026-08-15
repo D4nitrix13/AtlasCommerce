@@ -11,6 +11,7 @@ use App\Http\Resources\Auth\UserResource;
 use App\Models\Auth\PasswordResetToken;
 use App\Models\Auth\User;
 use App\Notifications\Auth\PasswordResetCodeNotification;
+use App\Services\Auth\RecoveryCodeService;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -46,6 +47,17 @@ use Illuminate\Validation\ValidationException;
  * Dev mode: cuando APP_ENV !== 'production', el código OTP se incluye
  * en la respuesta JSON de `forgot-password` para que el dev pueda
  * testear el flujo sin SMTP. En prod NO se incluye (solo va por email).
+ *
+ * preferred_recovery_method: la columna `users.preferred_recovery_method`
+ * define qué flow usa el user para recuperar la cuenta. El controller
+ * dispatcha según ese valor:
+ *  - 'email' (default) → flow OTP estándar (este controller).
+ *  - '2fa' → 422 en forgot-password (el user debe usar el flow 2FA
+ *    en login: POST /login + /auth/2fa/verify-totp-login, y cambiar
+ *    la contraseña desde su perfil autenticado).
+ *  - 'recovery_codes' → 422 en forgot-password (el user debe usar
+ *    reset-password con `method=recovery_codes` y uno de sus códigos
+ *    de respaldo — RecoveryCodeService::verifyAndConsume).
  */
 class PasswordResetTokenController extends Controller
 {
@@ -68,8 +80,15 @@ class PasswordResetTokenController extends Controller
      * o la cuenta está inactiva, NO se genera nada — la respuesta
      * es idéntica para no filtrar información.
      *
+     * Si el user tiene `preferred_recovery_method = '2fa'` o
+     * 'recovery_codes', devuelve 422 con un mensaje indicando qué
+     * flow alternativo usar (no se envía OTP en estos casos).
+     *
      * Body:
      *   - email (required)
+     *   - method (optional, default 'email'): 'email' | '2fa' | 'recovery_codes'.
+     *     Default 'email'. Si el user existe y su preferred_recovery_method
+     *     no coincide con method, devuelve 422.
      *
      * Response 200:
      *   - message: "Si el email existe, te enviamos un código."
@@ -81,6 +100,7 @@ class PasswordResetTokenController extends Controller
         StoreContextService $storeContext,
     ): JsonResponse {
         $email = strtolower(trim($request->validated('email')));
+        $method = $request->validated('method') ?? 'email';
 
         // Throttle por email: max 3 attempts cada 5 minutos.
         $throttleKey = 'forgot-password:' . $email;
@@ -98,9 +118,6 @@ class PasswordResetTokenController extends Controller
         $currentStoreId = $storeContext->getStoreId();
         $ttlMinutes = (int) env(key: 'PASSWORD_RESET_TTL_MINUTES', default: self::DEFAULT_TTL_MINUTES);
 
-        // Buscar el user en la tienda actual. Si no existe o no tiene
-        // acceso a la tienda, devolvemos el mensaje genérico sin
-        // generar token (no se filtra información).
         /** @var User|null $user */
         $user = User::query()
             ->where(column: 'email', operator: '=', value: $email)
@@ -110,13 +127,27 @@ class PasswordResetTokenController extends Controller
             && $user->is_active
             && ($currentStoreId === null || $user->hasAccessToStore(storeId: $currentStoreId));
 
+        // Dispatch según preferred_recovery_method. Solo válido 'email'
+        // en este endpoint; los otros métodos devuelven 422 con un
+        // mensaje explicando qué flow alternativo usar.
+        if ($shouldSend && $user->preferred_recovery_method === '2fa') {
+            throw ValidationException::withMessages([
+                'method' => ['Tu cuenta usa autenticación de dos factores (2FA). Iniciá sesión con tu authenticator app y cambiá la contraseña desde tu perfil.'],
+            ]);
+        }
+
+        if ($shouldSend && $user->preferred_recovery_method === 'recovery_codes') {
+            throw ValidationException::withMessages([
+                'method' => ['Tu cuenta usa recovery codes como método de recuperación. Usá POST /auth/reset-password con method=recovery_codes y uno de tus códigos de respaldo.'],
+            ]);
+        }
+
         $response = [
             'message' => 'Si el email existe, te enviamos un código.',
             'expires_minutes' => $ttlMinutes,
         ];
 
         if (! $shouldSend) {
-            // Logueamos internamente para debugging sin exponer al cliente.
             Log::info(
                 message: 'forgot-password: email no asociado a tienda activa o cuenta inactiva',
                 context: ['email' => $email, 'store_id' => $currentStoreId],
@@ -157,8 +188,6 @@ class PasswordResetTokenController extends Controller
             ),
         );
 
-        // Dev mode: incluir el código en la respuesta para que el dev
-        // pueda testear sin SMTP. En prod esto queda excluido.
         if (! app()->environment('production')) {
             Log::info(
                 message: 'forgot-password: código OTP generado',
@@ -175,14 +204,27 @@ class PasswordResetTokenController extends Controller
     /**
      * Restablece la contraseña del usuario validando email + código.
      *
-     * Si el código coincide con un token válido (no expirado, no
-     * usado, del mismo email, dentro de la tienda), cambia la
-     * contraseña, marca el token como usado y devuelve el mismo shape
-     * que /auth/login para auto-login.
+     * Soporta dos métodos de recovery:
+     *  - method=email (default): code es un OTP de 6 dígitos hasheado en
+     *    `password_reset_tokens` (enviado por email en forgot-password).
+     *  - method=recovery_codes: code es un recovery code alfanumérico
+     *    de 10 chars, validado contra `recovery_codes` vía
+     *    RecoveryCodeService::verifyAndConsume (que también lo marca
+     *    como usado).
+     *
+     * Para method=recovery_codes, el user DEBE tener
+     * `preferred_recovery_method = 'recovery_codes'`. Si no coincide,
+     * devuelve 422.
+     *
+     * Si el código es válido, cambia la contraseña del user, marca el
+     * token/recovery code como usado y emite un Sanctum token
+     * (auto-login), devolviendo el mismo shape que /auth/login.
      *
      * Body:
      *   - email (required)
-     *   - code (required, 6 dígitos)
+     *   - method (optional, default 'email'): 'email' | 'recovery_codes'
+     *   - code (required): 6 dígitos si method=email, 10 chars alfanuméricos
+     *     si method=recovery_codes
      *   - password (required, min 12, may/min/núm, confirmed)
      *   - password_confirmation (required)
      *   - device_name (optional)
@@ -191,8 +233,11 @@ class PasswordResetTokenController extends Controller
      *
      * Errores 422:
      *   - email o code faltantes / formato inválido (form request).
-     *   - "El código es inválido o ha expirado." si el token no
-     *     existe, expiró, ya fue usado o no matchea el código.
+     *   - method inválido (form request).
+     *   - "El código es inválido o ha expirado." (method=email).
+     *   - "El recovery code es inválido o ya fue usado." (method=recovery_codes).
+     *   - "Tu cuenta no usa recovery_codes como método de recuperación."
+     *     (method=recovery_codes pero preferred_recovery_method != 'recovery_codes').
      */
     public function reset(
         ResetPasswordRequest $request,
@@ -201,6 +246,7 @@ class PasswordResetTokenController extends Controller
         $email = strtolower(trim($request->validated('email')));
         $code = $request->validated('code');
         $password = $request->validated('password');
+        $method = $request->validated('method') ?? 'email';
 
         // Throttle por IP: max 5 attempts cada 15 minutos.
         $throttleKey = 'reset-password:' . $request->ip();
@@ -215,38 +261,10 @@ class PasswordResetTokenController extends Controller
 
         RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
 
-        // Buscar tokens válidos para este email.
-        /** @var PasswordResetToken|null $token */
-        $token = PasswordResetToken::query()
-            ->byEmail($email)
-            ->valid()
-            ->orderByDesc('expires_at')
-            ->first();
-
-        // No hay token válido (no existe, expiró, ya fue usado).
-        // Mensaje genérico para no filtrar cuál es el problema.
-        if ($token === null) {
-            RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
-
-            throw ValidationException::withMessages([
-                'code' => ['El código es inválido o ha expirado.'],
-            ]);
-        }
-
-        // Verificar código con hash.
-        if (! Hash::check(value: $code, hashedValue: $token->token_hash)) {
-            RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
-
-            throw ValidationException::withMessages([
-                'code' => ['El código es inválido o ha expirado.'],
-            ]);
-        }
-
-        // Multi-tenant: el user debe seguir activo y tener acceso a la
-        // tienda actual. Esto evita que un token generado en otra tienda
-        // pueda usarse acá.
         /** @var User|null $user */
-        $user = $token->user;
+        $user = User::query()
+            ->where(column: 'email', operator: '=', value: $email)
+            ->first();
 
         $currentStoreId = $storeContext->getStoreId();
 
@@ -262,26 +280,120 @@ class PasswordResetTokenController extends Controller
             ]);
         }
 
-        // Aplicar cambio de password y marcar token usado, atómicamente.
         $deviceName = $request->validated('device_name') ?? 'web-admin';
 
-        [$tokenRecord] = DB::transaction(function () use ($token, $user, $password): array {
-            $user->update(['password' => $password]);
+        // Dispatch según método.
+        if ($method === 'recovery_codes') {
+            $this->resetWithRecoveryCode($user, $code, $password, $deviceName, $throttleKey);
 
-            $token->update(['used_at' => now()]);
+            $sanctumToken = $user->createToken(name: $deviceName)->plainTextToken;
 
-            return [$token];
-        });
+            return response()->json(data: [
+                'token' => $sanctumToken,
+                'user' => new UserResource(
+                    resource: $user->load(['role', 'stores']),
+                ),
+            ]);
+        }
 
-        // Crear Sanctum token para auto-login.
-        $sanctumToken = $user->createToken(name: $deviceName);
+        // Default: email OTP flow.
+        $sanctumToken = $this->resetWithEmailOtp(
+            $user,
+            $email,
+            $code,
+            $password,
+            $deviceName,
+            $throttleKey,
+            $currentStoreId,
+        );
 
         return response()->json(data: [
-            'token' => $sanctumToken->plainTextToken,
+            'token' => $sanctumToken,
             'user' => new UserResource(
                 resource: $user->load(['role', 'stores']),
             ),
         ]);
+    }
+
+    /**
+     * Resetea password usando un recovery code de un solo uso.
+     *
+     * Valida que el user efectivamente use recovery_codes como método
+     * preferido. Verifica el code contra `recovery_codes` vía el
+     * service (que también lo marca como usado) y cambia la password.
+     */
+    private function resetWithRecoveryCode(
+        User $user,
+        string $code,
+        string $password,
+        string $deviceName,
+        string $throttleKey,
+    ): void {
+        if ($user->preferred_recovery_method !== 'recovery_codes') {
+            RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
+
+            throw ValidationException::withMessages([
+                'method' => ['Tu cuenta no usa recovery_codes como método de recuperación.'],
+            ]);
+        }
+
+        $service = app(abstract: RecoveryCodeService::class);
+
+        if (! $service->verifyAndConsume($user, $code)) {
+            RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
+
+            throw ValidationException::withMessages([
+                'code' => ['El recovery code es inválido o ya fue usado.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($user, $password): void {
+            $user->update(attributes: ['password' => $password]);
+        });
+    }
+
+    /**
+     * Resetea password usando el OTP de email (flujo legacy).
+     * Devuelve el Sanctum token creado para auto-login.
+     */
+    private function resetWithEmailOtp(
+        User $user,
+        string $email,
+        string $code,
+        string $password,
+        string $deviceName,
+        string $throttleKey,
+        ?int $currentStoreId,
+    ): string {
+        /** @var PasswordResetToken|null $token */
+        $token = PasswordResetToken::query()
+            ->byEmail($email)
+            ->valid()
+            ->orderByDesc('expires_at')
+            ->first();
+
+        if ($token === null) {
+            RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
+
+            throw ValidationException::withMessages([
+                'code' => ['El código es inválido o ha expirado.'],
+            ]);
+        }
+
+        if (! Hash::check(value: $code, hashedValue: $token->token_hash)) {
+            RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
+
+            throw ValidationException::withMessages([
+                'code' => ['El código es inválido o ha expirado.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($token, $user, $password): void {
+            $user->update(attributes: ['password' => $password]);
+            $token->update(attributes: ['used_at' => now()]);
+        });
+
+        return $user->createToken(name: $deviceName)->plainTextToken;
     }
 
     /**

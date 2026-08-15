@@ -32,7 +32,7 @@ final class SocialAuthControllerTest extends TestCase
         // dentro de ese grupo en routes/api.php).
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
-        StoreDomain::query()->create([
+        StoreDomain::query()->create(attributes: [
             'store_id' => $store->id,
             'domain' => 'localhost',
             'type' => 'domain',

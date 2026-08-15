@@ -43,7 +43,7 @@ final class AuthHttpTest extends TestCase
         // host por defecto de TestCase.
         $currency = Currency::factory()->primary()->create();
         $this->store = Store::factory()->for($currency, 'currency')->create();
-        StoreDomain::query()->create([
+        StoreDomain::query()->create(attributes: [
             'store_id' => $this->store->id,
             'domain' => 'localhost',
             'type' => 'domain',
@@ -52,7 +52,7 @@ final class AuthHttpTest extends TestCase
             'is_primary' => true,
         ]);
 
-        $this->user = User::factory()->create([
+        $this->user = User::factory()->create(attributes: [
             'email' => 'test@example.com',
             'password' => Hash::make(value: 'secret-password'),
             'is_active' => true,
@@ -66,11 +66,11 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_with_valid_credentials_returns_token_and_user(): void
     {
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
             'device_name' => 'jest-test',
-        ]);
+            ]);
 
         $response->assertOk();
         $response->assertJsonStructure([
@@ -96,10 +96,10 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_with_wrong_password_returns_422_with_validation_error(): void
     {
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'wrong-password',
-        ]);
+            ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
@@ -108,10 +108,10 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_with_unknown_email_returns_422_with_validation_error(): void
     {
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'unknown@example.com',
             'password' => 'secret-password',
-        ]);
+            ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
@@ -122,10 +122,10 @@ final class AuthHttpTest extends TestCase
     {
         $this->user->update(['is_active' => false]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
-        ]);
+            ]);
 
         $response->assertStatus(422);
         $response->assertJsonPath('errors.email.0', fn (string $m): bool => str_contains($m, 'desactivada'));
@@ -134,10 +134,10 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_validates_email_format(): void
     {
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'not-an-email',
             'password' => 'secret-password',
-        ]);
+            ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
@@ -146,10 +146,10 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_validates_password_min_length(): void
     {
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'short',
-        ]);
+            ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['password']);
@@ -176,7 +176,7 @@ final class AuthHttpTest extends TestCase
         // Crear otra tienda con su dominio.
         $currency = Currency::factory()->primary()->create();
         $otherStore = Store::factory()->for($currency, 'currency')->create();
-        StoreDomain::query()->create([
+        StoreDomain::query()->create(attributes: [
             'store_id' => $otherStore->id,
             'domain' => 'other.example.com',
             'type' => 'domain',
@@ -201,10 +201,10 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_from_store_user_belongs_to_succeeds(): void
     {
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
-        ]);
+            ]);
 
         $response->assertOk();
         $this->assertNotEmpty($response->json('token'));
@@ -267,7 +267,7 @@ final class AuthHttpTest extends TestCase
 
         $staffRole->permissions()->sync([$permission->id]);
 
-        $staffUser = User::factory()->create([
+        $staffUser = User::factory()->create(attributes: [
             'email' => 'staff@example.com',
             'password' => Hash::make(value: 'secret-password'),
             'is_active' => true,
@@ -291,12 +291,12 @@ final class AuthHttpTest extends TestCase
         // El admin NO tiene registro público. Los admins se crean
         // desde el seeder backend (admin@<slug>.com / password) o
         // desde el dashboard por otro admin via UserController.
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson(uri: '/api/auth/register', data: [
             'first_name' => 'New',
             'last_name' => 'User',
             'email' => 'new-admin@example.com',
             'password' => 'Secure-Pass-2026',
-        ]);
+            ]);
 
         $response->assertStatus(404);
     }

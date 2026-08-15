@@ -82,7 +82,9 @@ class AuthController extends Controller
             $challenge = \App\Models\Auth\OtpChallenge::create([
                 'user_id' => $user->id,
                 'type' => \App\Models\Auth\OtpChallenge::TYPE_TOTP,
-                'code_hash' => password_hash(random_bytes(16), PASSWORD_BCRYPT),
+                // bin2hex(random_bytes(...)) garantiza string sin null bytes
+                // (PHP 8+ rechaza null chars en password_hash).
+                'code_hash' => password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT),
                 'context' => ['action' => 'login_2fa', 'device_name' => $deviceName],
                 'expires_at' => now()->addMinutes(value: 5),
             ]);
@@ -118,7 +120,7 @@ class AuthController extends Controller
         $challenge = \App\Models\Auth\OtpChallenge::query()
             ->where(column: 'id', operator: '=', value: $request->integer(key: 'challenge_token'))
             ->where(column: 'type', operator: '=', value: \App\Models\Auth\OtpChallenge::TYPE_TOTP)
-            ->whereNull(column: 'consumed_at')
+            ->whereNull(columns: 'consumed_at')
             ->first();
 
         if ($challenge === null || ! $challenge->isUsable()) {
