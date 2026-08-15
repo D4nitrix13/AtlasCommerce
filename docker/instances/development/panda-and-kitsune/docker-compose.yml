@@ -116,9 +116,6 @@ services:
       - DB_CONNECTION=pgsql
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_DATABASE=${POSTGRES_DB}
-      - DB_USERNAME=${POSTGRES_USER}
-      - DB_PASSWORD=${POSTGRES_PASSWORD}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SESSION_DRIVER=file
@@ -127,8 +124,8 @@ services:
       - FILESYSTEM_DISK=local
       - FTP_HOST=ftp
       - FTP_PORT=21
-      - FTP_USERNAME=${FTP_USERNAME}
-      - FTP_PASSWORD=${FTP_PASSWORD}
+      - FTP_USERNAME=${FTP_USERNAME:-dev-ftp}
+      - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
       - FTP_ROOT=/srv/ftp
       - LOG_CHANNEL=stderr
     extra_hosts:
@@ -204,7 +201,12 @@ services:
       - NODE_ENV=development
       - HOST=0.0.0.0
       - PORT=4321
-      - PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-9000}/api
+      # PUBLIC_API_URL debe ser RELATIVO (/api) para que el browser
+      # use el origin actual (admin.panda-estampados.com) y Caddy
+      # rutee con el Host header correcto. Si se setea absoluto a
+      # localhost, el browser lo reemplaza y el backend no puede
+      # resolver la tienda via ResolveStoreFromDomain middleware.
+      - PUBLIC_API_URL=/api
       - ASTRO_TELEMETRY_DISABLED=1
       # Pnpm pide confirmación interactiva si node_modules/.pnpm está
       # en estado inválido (ej. residuos de un run anterior con owner
@@ -213,6 +215,22 @@ services:
       - CI=true
     depends_on:
       - backend
+    networks:
+      - panda-kitsune-dev
+
+  # Mailpit: SMTP catcher para dev. Captura los emails que Laravel envía
+  # (forgot-password, notifications varias) y los muestra en una UI web.
+  # Levanta dos listeners:
+  #   - :1025  SMTP (Laravel backend usa `MAIL_HOST=mailpit`)
+  #   - :8025  Web UI (http://localhost:8025)
+  # Se expone :8025 al host para inspección desde el browser del dev.
+  mailpit:
+    image: ${MAILPIT_IMAGE:-axllent/mailpit:latest}
+    container_name: ${MAILPIT_NAME:-panda-and-kitsune-dev-mailpit}
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
     networks:
       - panda-kitsune-dev
 
