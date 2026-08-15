@@ -33,7 +33,7 @@ final class CartToRefundTest extends TestCase
         $store = Store::factory()->for(factory: $currency, relationship: 'currency')->create();
         $customer = Customer::factory()->create();
 
-        $product = Product::factory()->for($store->currency, 'currency')->create([
+        $product = Product::factory()->for($store->currency, 'currency')->create(attributes: [
             'base_price_cents' => 25_00,
         ]);
 
@@ -58,7 +58,7 @@ final class CartToRefundTest extends TestCase
             ->for($customer)
             ->for($store)
             ->for($currency)
-            ->create([
+            ->create(attributes: [
                 'subtotal_cents' => $product->base_price_cents * 2,
                 'total_cents' => $product->base_price_cents * 2,
             ]);

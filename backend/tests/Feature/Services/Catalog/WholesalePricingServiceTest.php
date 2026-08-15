@@ -52,11 +52,11 @@ final class WholesalePricingServiceTest extends TestCase
 
         $this->store = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['slug' => 'test-store', 'name' => 'Test Store']);
+            ->create(attributes: ['slug' => 'test-store', 'name' => 'Test Store']);
 
         $this->product = Product::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create([
+            ->create(attributes: [
                 'name' => 'Test Product',
                 'base_price_cents' => 1000,
             ]);
@@ -81,7 +81,7 @@ final class WholesalePricingServiceTest extends TestCase
     public function returns_base_price_when_feature_active_but_no_wholesale_prices_defined(): void
     {
         // Activar la feature pero no definir precios mayoristas.
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
@@ -100,12 +100,12 @@ final class WholesalePricingServiceTest extends TestCase
     #[Test]
     public function returns_wholesale_price_when_quantity_meets_min_qty(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 10,
@@ -124,12 +124,12 @@ final class WholesalePricingServiceTest extends TestCase
     #[Test]
     public function returns_base_price_when_quantity_below_min_qty(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 10,
@@ -152,24 +152,24 @@ final class WholesalePricingServiceTest extends TestCase
         // Tier 1: 10+ unidades = 800
         // Tier 2: 50+ unidades = 600
         // Tier 3: 100+ unidades = 500
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 10,
             'price_cents' => 800,
         ]);
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 50,
             'price_cents' => 600,
         ]);
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 100,
@@ -206,15 +206,15 @@ final class WholesalePricingServiceTest extends TestCase
     {
         $otherStore = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['slug' => 'other-store', 'name' => 'Other Store']);
+            ->create(attributes: ['slug' => 'other-store', 'name' => 'Other Store']);
 
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
         // Wholesale price SOLO para $this->store.
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 10,
@@ -235,12 +235,12 @@ final class WholesalePricingServiceTest extends TestCase
     #[Test]
     public function quantity_zero_or_negative_returns_base_price(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 1,
@@ -264,12 +264,12 @@ final class WholesalePricingServiceTest extends TestCase
     public function inactive_feature_acts_as_if_not_present(): void
     {
         // Feature existe pero está inactiva.
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => false,
         ]);
-        WholesalePrice::query()->create([
+        WholesalePrice::query()->create(attributes: [
             'product_id' => $this->product->id,
             'store_id' => $this->store->id,
             'min_qty' => 10,

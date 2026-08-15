@@ -98,7 +98,7 @@ final class CheckoutCouponCalculationTest extends TestCase
     {
         $store = Store::factory()->for($this->currency, 'currency')->create();
         app(StoreContextService::class)->setStore($store);
-        $coupon = Coupon::factory()->percentage(20.0)->create([
+        $coupon = Coupon::factory()->percentage(20.0)->create(attributes: [
             'minimum_amount' => 50.0, // 5000 cents
         ]);
         $cart = $this->makeCartWithItems($store, totalCents: 30_00); // < 5000
@@ -117,7 +117,7 @@ final class CheckoutCouponCalculationTest extends TestCase
     {
         $store = Store::factory()->for($this->currency, 'currency')->create();
         app(StoreContextService::class)->setStore($store);
-        $coupon = Coupon::factory()->percentage(50.0)->create([
+        $coupon = Coupon::factory()->percentage(50.0)->create(attributes: [
             'starts_at' => now()->subDays(30)->toDateString(),
             'ends_at' => now()->subDays(1)->toDateString(),
         ]);
@@ -153,7 +153,7 @@ final class CheckoutCouponCalculationTest extends TestCase
     {
         $store = Store::factory()->for($this->currency, 'currency')->create();
         app(StoreContextService::class)->setStore($store);
-        $coupon = Coupon::factory()->percentage(50.0)->create([
+        $coupon = Coupon::factory()->percentage(50.0)->create(attributes: [
             'usage_limit' => 1,
             'used_count' => 1,
         ]);
@@ -171,12 +171,12 @@ final class CheckoutCouponCalculationTest extends TestCase
     {
         $store = Store::factory()
             ->for($this->currency, 'currency')
-            ->create(['tax_rate' => 10.0]);
+            ->create(attributes: ['tax_rate' => 10.0]);
         app(StoreContextService::class)->setStore($store);
 
         // Crear una zona de envío.
         $zone = ShippingZone::factory()
-            ->create(['base_cost_cents' => 5_00, 'is_active' => true]);
+            ->create(attributes: ['base_cost_cents' => 5_00, 'is_active' => true]);
 
         $coupon = Coupon::factory()->percentage(20.0)->create(); // 20%
         $cart = $this->makeCartWithItems($store, totalCents: 10_000);
@@ -202,9 +202,9 @@ final class CheckoutCouponCalculationTest extends TestCase
         $product = Product::factory()
             ->for(Category::factory(), 'category')
             ->for($this->currency, 'currency')
-            ->create(['base_price_cents' => $totalCents]);
+            ->create(attributes: ['base_price_cents' => $totalCents]);
 
-        $cart->items()->create([
+        $cart->items()->create(attributes: [
             'product_id' => $product->id,
             'cart_line_key' => 'k',
             'quantity' => 1,

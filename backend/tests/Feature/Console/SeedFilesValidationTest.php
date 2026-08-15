@@ -130,11 +130,11 @@ final class SeedFilesValidationTest extends TestCase
             $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
                 ->assertSuccessful();
 
-            $this->assertDatabaseCount('stores', 2);
-            $this->assertDatabaseHas('stores', ['slug' => 'panda-estampados']);
-            $this->assertDatabaseHas('stores', ['slug' => 'kitsune']);
+            $this->assertDatabaseCount(table: 'stores', count: 2);
+            $this->assertDatabaseHas(table: 'stores', data: ['slug' => 'panda-estampados']);
+            $this->assertDatabaseHas(table: 'stores', data: ['slug' => 'kitsune']);
 
-            $this->assertDatabaseHas('users', [
+            $this->assertDatabaseHas(table: 'users', data: [
                 'email' => 'admin@panda-estampados.com',
                 'is_active' => true,
             ]);
@@ -162,13 +162,13 @@ final class SeedFilesValidationTest extends TestCase
             $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
                 ->assertSuccessful();
 
-            $this->assertDatabaseCount('stores', 1);
-            $this->assertDatabaseHas('stores', ['slug' => 'mm-boutique']);
-            $this->assertDatabaseHas('store_domains', ['domain' => 'mm-boutique.com']);
-            $this->assertDatabaseHas('store_domains', ['domain' => 'www.mm-boutique.com']);
-            $this->assertDatabaseHas('store_domains', ['domain' => 'admin.mm-boutique.com']);
+            $this->assertDatabaseCount(table: 'stores', count: 1);
+            $this->assertDatabaseHas(table: 'stores', data: ['slug' => 'mm-boutique']);
+            $this->assertDatabaseHas(table: 'store_domains', data: ['domain' => 'mm-boutique.com']);
+            $this->assertDatabaseHas(table: 'store_domains', data: ['domain' => 'www.mm-boutique.com']);
+            $this->assertDatabaseHas(table: 'store_domains', data: ['domain' => 'admin.mm-boutique.com']);
 
-            $this->assertDatabaseHas('users', [
+            $this->assertDatabaseHas(table: 'users', data: [
                 'email' => 'admin@mm-boutique.com',
             ]);
         } finally {
@@ -187,10 +187,10 @@ final class SeedFilesValidationTest extends TestCase
             $this->artisan('tenants:bootstrap', ['path' => $tmpPath])
                 ->assertSuccessful();
 
-            $this->assertDatabaseCount('stores', 1);
-            $this->assertDatabaseHas('stores', ['slug' => 'morales-store']);
-            $this->assertDatabaseHas('store_domains', ['domain' => 'morales-store.com']);
-            $this->assertDatabaseHas('users', [
+            $this->assertDatabaseCount(table: 'stores', count: 1);
+            $this->assertDatabaseHas(table: 'stores', data: ['slug' => 'morales-store']);
+            $this->assertDatabaseHas(table: 'store_domains', data: ['domain' => 'morales-store.com']);
+            $this->assertDatabaseHas(table: 'users', data: [
                 'email' => 'admin@morales-store.com',
             ]);
         } finally {

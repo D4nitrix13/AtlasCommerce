@@ -43,9 +43,9 @@ final class StorefrontThemeTest extends TestCase
 
         $this->store = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['slug' => 'panda-estampados', 'name' => 'Panda Estampados']);
+            ->create(attributes: ['slug' => 'panda-estampados', 'name' => 'Panda Estampados']);
 
-        StoreDomain::query()->create([
+        StoreDomain::query()->create(attributes: [
             'store_id' => $this->store->id,
             'domain' => 'panda-estampados.com',
             'type' => 'domain',
@@ -57,7 +57,7 @@ final class StorefrontThemeTest extends TestCase
     #[Test]
     public function returns_theme_when_configured(): void
     {
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $this->store->id,
             'short_name' => 'Panda',
             'logo_path' => '/images/panda/logo.webp',
@@ -89,7 +89,7 @@ final class StorefrontThemeTest extends TestCase
     #[Test]
     public function returns_tokens_json_array(): void
     {
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $this->store->id,
             'tokens' => [
                 'font_family' => 'Inter',
@@ -119,20 +119,20 @@ final class StorefrontThemeTest extends TestCase
     {
         $otherStore = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['slug' => 'kitsune', 'name' => 'Kitsune Store']);
+            ->create(attributes: ['slug' => 'kitsune', 'name' => 'Kitsune Store']);
 
-        StoreDomain::query()->create([
+        StoreDomain::query()->create(attributes: [
             'store_id' => $otherStore->id,
             'domain' => 'kitsune.com',
             'is_active' => true,
         ]);
 
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $this->store->id,
             'short_name' => 'Panda',
             'accent_color' => '#DC2626',
         ]);
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $otherStore->id,
             'short_name' => 'Kitsune',
             'accent_color' => '#7C3AED',
@@ -150,7 +150,7 @@ final class StorefrontThemeTest extends TestCase
     #[Test]
     public function deleting_store_cascades_to_theme(): void
     {
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $this->store->id,
             'short_name' => 'Panda',
         ]);

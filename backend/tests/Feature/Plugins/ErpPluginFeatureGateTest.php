@@ -74,12 +74,12 @@ final class ErpPluginFeatureGateTest extends TestCase
     {
         $store = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create([
+            ->create(attributes: [
                 'name' => $domain,
                 'slug' => str_replace(search: '.', replace: '-', subject: $domain),
             ]);
 
-        StoreDomain::query()->create([
+        StoreDomain::query()->create(attributes: [
             'store_id' => $store->id,
             'domain' => $domain,
             'type' => 'domain',
@@ -87,7 +87,7 @@ final class ErpPluginFeatureGateTest extends TestCase
             'is_active' => true,
         ]);
 
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $store->id,
             'slug' => 'erp',
             'is_active' => $erpActive,

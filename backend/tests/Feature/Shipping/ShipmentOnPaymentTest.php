@@ -71,10 +71,10 @@ final class ShipmentOnPaymentTest extends TestCase
             ->for(factory: $this->currency, relationship: 'currency')
             ->create();
         $this->user = User::factory()->create();
-        $this->customer = Customer::factory()->create(['user_id' => $this->user->id]);
+        $this->customer = Customer::factory()->create(attributes: ['user_id' => $this->user->id]);
         $address = CustomerAddress::factory()->for($this->customer)->create();
-        $this->warehouse = Warehouse::factory()->create(['is_active' => true]);
-        $this->zone = ShippingZone::factory()->create([
+        $this->warehouse = Warehouse::factory()->create(attributes: ['is_active' => true]);
+        $this->zone = ShippingZone::factory()->create(attributes: [
             'base_cost_cents' => 5_00,
             'is_active' => true,
         ]);
@@ -82,7 +82,7 @@ final class ShipmentOnPaymentTest extends TestCase
 
         $this->product = Product::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['base_price_cents' => 25_00]);
+            ->create(attributes: ['base_price_cents' => 25_00]);
 
         // Stock suficiente para que el decremento no falle.
         Inventory::factory()
