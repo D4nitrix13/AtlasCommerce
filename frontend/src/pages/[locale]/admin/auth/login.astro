@@ -19,7 +19,7 @@ const forgotPath = `/${locale}/admin/auth/forgot-password`;
 
 <AuthLayout title={`${t["auth.login.shell.heading"]} · ${brand.name}`}>
   <AuthShell
-    illustration="/images/auth/login-amico.svg"
+    illustration=`/images/stores/${Astro.locals.tenant?.tenantSlug ?? "panda-estampados"}/amico/auth/login-amico.svg`
     illustrationAlt={t["auth.shell.illustration.alt"]}
     leftHeading={t["auth.login.shell.leftHeading"]}
     leftBody={t["auth.login.shell.leftBody"]}

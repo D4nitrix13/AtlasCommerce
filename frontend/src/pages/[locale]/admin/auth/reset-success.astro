@@ -1,0 +1,147 @@
+---
+import AuthLayout from "../../../../layouts/AuthLayout.astro";
+import AuthShell from "../../../../components/auth/AuthShell.astro";
+import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
+import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
+import { themeToBrand } from "../../../../lib/theme";
+import { AUTH_ACCENT } from "../../../../lib/auth-accent";
+
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+
+const fallbackBrand =
+  getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
+
+const resetEmail = Astro.url.searchParams.get("email") ?? "";
+
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? "panda-estampados";
+const illustration = `/images/stores/${tenantSlug}/amico/auth/success-amico.svg`;
+
+const loginHref = `/${locale}/admin/auth/login`;
+
+const successBody = t["auth.passwordReset.success.body"];
+const changeAppliedAt = resetEmail !== ""
+  ? t["auth.passwordReset.success.changeAppliedAt"].replace("{email}", resetEmail)
+  : "";
+const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium underline text-[#2D9D8E] hover:text-[#1E6F62]">${brand.supportEmail}</a>`;
+---
+
+<AuthLayout title={`${t["auth.passwordReset.success.title"]} · ${brand.name}`}>
+  <AuthShell
+    illustration={illustration}
+    illustrationAlt={t["auth.passwordReset.success.title"]}
+    leftHeading={t["auth.passwordReset.success.title"]}
+    leftBody={successBody}
+    brandName={brand.name}
+    brandLogo={brand.logoPath}
+    topRightLink="login"
+    loginHref={loginHref}
+    side="left"
+  >
+    {/* Checkmark grande — usa la paleta auth universal (mismo verde-azulado
+        que login, forgot-password y reset-password). */}
+    <div class="mb-6 flex justify-center">
+      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#2D9D8E]">
+        <svg
+          class="h-9 w-9 text-white"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="mb-3 text-center text-3xl font-bold text-slate-900">
+      {t["auth.passwordReset.success.title"]}
+    </h1>
+    <p class="mb-8 text-center text-slate-500">{successBody}</p>
+
+    {/* Confirmation card — fondo suave + borde suave de la paleta auth */}
+    {resetEmail !== "" && (
+      <div
+        class="mb-8 flex items-center gap-3 rounded-lg border p-4"
+        style={{
+          backgroundColor: AUTH_ACCENT.softBg,
+          borderColor: AUTH_ACCENT.softBorder,
+        }}
+      >
+        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2D9D8E]">
+          <svg
+            class="h-5 w-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-900">
+            {t["auth.passwordReset.success.changeApplied"]}
+          </p>
+          <p class="mt-0.5 text-xs text-slate-600">{changeAppliedAt}</p>
+        </div>
+      </div>
+    )}
+
+    {/* Warning box ("¿No fuiste vos?") */}
+    <div
+      class="mb-6 flex items-start gap-3 rounded-lg border p-4"
+      style={{
+        backgroundColor: "#FFFBEB",
+        borderColor: "#FDE68A",
+      }}
+    >
+      <svg
+        class="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+        />
+      </svg>
+      <div class="text-sm text-slate-700">
+        <strong class="font-semibold">{t["auth.passwordReset.success.didntDoThis"]}</strong>{" "}
+        <span set:html={
+          t["auth.passwordReset.success.didntDoThisBody"].replace(
+            "{supportEmail}",
+            supportLink,
+          )
+        } />
+      </div>
+    </div>
+
+    <a
+      href={loginHref}
+      class="mb-6 flex w-full items-center justify-center rounded-lg bg-[#2D9D8E] hover:bg-[#258777] px-4 py-3 text-sm font-semibold text-white transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+    >
+      {t["auth.passwordReset.success.goToLogin"]}
+    </a>
+
+    <div class="flex items-center justify-center gap-6 text-sm text-slate-500">
+      <a href={`/${locale}`} class="transition hover:text-slate-700">
+        ← {t["auth.passwordReset.success.goHome"]}
+      </a>
+      <span class="text-slate-300">·</span>
+      <a
+        href={`mailto:${brand.supportEmail}`}
+        class="transition hover:text-slate-700"
+      >
+        {t["auth.passwordReset.success.contactSupport"]}
+      </a>
+    </div>
+  </AuthShell>
+</AuthLayout>
