@@ -39,7 +39,7 @@ final class DefaultAdminSeederTest extends TestCase
     {
         $this->seed(DefaultAdminSeeder::class);
         foreach (self::DEFAULT_TENANTS as $slug) {
-            $this->assertDatabaseHas('users', ['email' => "admin@{$slug}.com", 'is_active' => true]);
+            $this->assertDatabaseHas(table: 'users', data: ['email' => "admin@{$slug}.com", 'is_active' => true]);
         }
     }
 
@@ -82,9 +82,9 @@ final class DefaultAdminSeederTest extends TestCase
         $this->seed(DefaultAdminSeeder::class);
         foreach (self::DEFAULT_TENANTS as $slug) {
             $store = \App\Models\Stores\Store::query()->where(column: 'slug', operator: '=', value: $slug)->firstOrFail();
-            $this->assertDatabaseHas('store_domains', ['store_id' => $store->id, 'domain' => "{$slug}.com", 'is_primary' => true]);
-            $this->assertDatabaseHas('store_domains', ['store_id' => $store->id, 'domain' => "www.{$slug}.com"]);
-            $this->assertDatabaseHas('store_domains', ['store_id' => $store->id, 'domain' => "admin.{$slug}.com"]);
+            $this->assertDatabaseHas(table: 'store_domains', data: ['store_id' => $store->id, 'domain' => "{$slug}.com", 'is_primary' => true]);
+            $this->assertDatabaseHas(table: 'store_domains', data: ['store_id' => $store->id, 'domain' => "www.{$slug}.com"]);
+            $this->assertDatabaseHas(table: 'store_domains', data: ['store_id' => $store->id, 'domain' => "admin.{$slug}.com"]);
         }
     }
 

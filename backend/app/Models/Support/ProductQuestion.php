@@ -78,7 +78,7 @@ class ProductQuestion extends Model
      */
     public function scopeAnswered(Builder $query): Builder
     {
-        return $query->whereNotNull(column: 'answer');
+        return $query->whereNotNull(columns: 'answer');
     }
 
     /**
@@ -89,7 +89,7 @@ class ProductQuestion extends Model
      */
     public function scopePending(Builder $query): Builder
     {
-        return $query->whereNull(column: 'answer');
+        return $query->whereNull(columns: 'answer');
     }
 
     /**

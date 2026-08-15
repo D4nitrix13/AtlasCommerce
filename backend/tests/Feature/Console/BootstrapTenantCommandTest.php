@@ -86,36 +86,36 @@ final class BootstrapTenantCommandTest extends TestCase
             ->assertSuccessful();
 
         // El tenant se crea.
-        $this->assertDatabaseHas('stores', [
+        $this->assertDatabaseHas(table: 'stores', data: [
             'slug' => 'mm-boutique',
             'name' => 'MM Boutique',
             'is_active' => true,
-        ]);
+            ]);
 
         // Los dominios públicos se crean.
-        $this->assertDatabaseHas('store_domains', [
+        $this->assertDatabaseHas(table: 'store_domains', data: [
             'domain' => 'mm-boutique.com',
             'is_primary' => true,
             'is_active' => true,
-        ]);
-        $this->assertDatabaseHas('store_domains', [
+            ]);
+        $this->assertDatabaseHas(table: 'store_domains', data: [
             'domain' => 'www.mm-boutique.com',
             'is_primary' => false,
             'is_active' => true,
-        ]);
+            ]);
 
         // El dominio admin se crea.
-        $this->assertDatabaseHas('store_domains', [
+        $this->assertDatabaseHas(table: 'store_domains', data: [
             'domain' => 'admin.mm-boutique.com',
             'type' => 'subdomain',
             'is_active' => true,
-        ]);
+            ]);
 
         // El admin user se crea.
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseHas(table: 'users', data: [
             'email' => 'admin@mm-boutique.com',
             'is_active' => true,
-        ]);
+            ]);
 
         // El admin user queda asociado al tenant.
         $user = User::query()->where(column: 'email', operator: '=', value: 'admin@mm-boutique.com')->firstOrFail();
@@ -156,9 +156,9 @@ final class BootstrapTenantCommandTest extends TestCase
         $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
             ->assertSuccessful();
 
-        $this->assertDatabaseCount('stores', 2);
-        $this->assertDatabaseHas('stores', ['slug' => 'panda-estampados']);
-        $this->assertDatabaseHas('stores', ['slug' => 'kitsune']);
+        $this->assertDatabaseCount(table: 'stores', count: 2);
+        $this->assertDatabaseHas(table: 'stores', data: ['slug' => 'panda-estampados']);
+        $this->assertDatabaseHas(table: 'stores', data: ['slug' => 'kitsune']);
 
         // El admin user queda asociado a AMBAS tiendas.
         $user = User::query()->where(column: 'email', operator: '=', value: 'admin@panda-estampados.test')->firstOrFail();
@@ -287,7 +287,7 @@ final class BootstrapTenantCommandTest extends TestCase
         $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', ['email' => 'admin@no-password.com']);
+        $this->assertDatabaseHas(table: 'users', data: ['email' => 'admin@no-password.com']);
         $user = User::query()
             ->where('email', 'admin@no-password.com')
             ->firstOrFail();
@@ -318,8 +318,8 @@ final class BootstrapTenantCommandTest extends TestCase
             ->assertSuccessful();
 
         // USD y NIO se crean automáticamente.
-        $this->assertDatabaseHas('currencies', ['code' => 'USD', 'is_primary' => true]);
-        $this->assertDatabaseHas('currencies', ['code' => 'NIO']);
+        $this->assertDatabaseHas(table: 'currencies', data: ['code' => 'USD', 'is_primary' => true]);
+        $this->assertDatabaseHas(table: 'currencies', data: ['code' => 'NIO']);
 
         putenv('TEST_PASSWORD');
     }
@@ -386,13 +386,13 @@ final class BootstrapTenantCommandTest extends TestCase
         $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('store_themes', [
+        $this->assertDatabaseHas(table: 'store_themes', data: [
             'short_name' => 'Panda',
             'logo_path' => '/images/panda/logo.webp',
             'accent_color' => '#DC2626',
             'accent_hover_color' => '#B91C1C',
             'support_email' => 'support@panda-estampados.test',
-        ]);
+            ]);
     }
 
     #[Test]
@@ -419,7 +419,7 @@ final class BootstrapTenantCommandTest extends TestCase
             ->assertSuccessful();
 
         // Sin theme en el JSON, no se crea StoreTheme.
-        $this->assertDatabaseCount('store_themes', 0);
+        $this->assertDatabaseCount(table: 'store_themes', count: 0);
 
         putenv('NO_THEME_PASSWORD');
     }
@@ -461,9 +461,9 @@ final class BootstrapTenantCommandTest extends TestCase
         $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
             ->assertSuccessful();
 
-        $this->assertDatabaseCount('store_themes', 2);
-        $this->assertDatabaseHas('store_themes', ['short_name' => 'Panda', 'accent_color' => '#DC2626']);
-        $this->assertDatabaseHas('store_themes', ['short_name' => 'Kitsune', 'accent_color' => '#7C3AED']);
+        $this->assertDatabaseCount(table: 'store_themes', count: 2);
+        $this->assertDatabaseHas(table: 'store_themes', data: ['short_name' => 'Panda', 'accent_color' => '#DC2626']);
+        $this->assertDatabaseHas(table: 'store_themes', data: ['short_name' => 'Kitsune', 'accent_color' => '#7C3AED']);
     }
 
     #[Test]
@@ -495,6 +495,6 @@ final class BootstrapTenantCommandTest extends TestCase
         $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])->assertSuccessful();
 
         // Un solo theme, no duplicado.
-        $this->assertDatabaseCount('store_themes', 1);
+        $this->assertDatabaseCount(table: 'store_themes', count: 1);
     }
 }

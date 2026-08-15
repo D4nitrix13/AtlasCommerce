@@ -54,7 +54,7 @@ final class PaymentApiTest extends TestCase
         $this->currency = Currency::factory()->primary()->create();
         $this->store = Store::factory()->for(factory: $this->currency, relationship: 'currency')->create();
         $this->user = User::factory()->create();
-        $this->customer = Customer::factory()->create(['user_id' => $this->user->id]);
+        $this->customer = Customer::factory()->create(attributes: ['user_id' => $this->user->id]);
         $address = CustomerAddress::factory()->for($this->customer)->create();
         $this->paymentMethod = PaymentMethod::factory()->create();
 
@@ -62,7 +62,7 @@ final class PaymentApiTest extends TestCase
         $product = Product::factory()
             ->for(factory: Category::factory(), relationship: 'category')
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['base_price_cents' => 50_00]);
+            ->create(attributes: ['base_price_cents' => 50_00]);
 
         $this->order = Order::create([
             'customer_id' => $this->customer->id,
@@ -103,11 +103,11 @@ final class PaymentApiTest extends TestCase
     #[Test]
     public function guest_cannot_pay(): void
     {
-        $this->postJson('/api/payments', [
+        $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 10_00,
-        ])->assertUnauthorized();
+])->assertUnauthorized();
     }
 
     #[Test]
@@ -115,12 +115,12 @@ final class PaymentApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson('/api/payments', [
+        $response = $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 20_00,
             'reference' => 'TRF-001',
-        ]);
+            ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.amount.cents', 2000);
@@ -144,11 +144,11 @@ final class PaymentApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson('/api/payments', [
+        $response = $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 50_00,
-        ]);
+            ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.status', 'completed');
@@ -166,11 +166,11 @@ final class PaymentApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $this->postJson('/api/payments', [
+        $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 51_00, // 1 cent over
-        ])->assertStatus(422)
+])->assertStatus(422)
             ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'supera'));
 
         $this->invoice->refresh();
@@ -200,11 +200,11 @@ final class PaymentApiTest extends TestCase
             'issued_at' => now(),
         ]);
 
-        $this->postJson('/api/payments', [
+        $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $otherInvoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 10_00,
-        ])->assertForbidden();
+])->assertForbidden();
     }
 
     #[Test]
@@ -212,17 +212,17 @@ final class PaymentApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $this->postJson('/api/payments', [
+        $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 30_00,
-        ])->assertCreated();
+])->assertCreated();
 
-        $this->postJson('/api/payments', [
+        $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 20_00,
-        ])->assertCreated();
+])->assertCreated();
 
         $this->invoice->refresh();
         $this->assertSame(50_00, $this->invoice->paidAmountCents());

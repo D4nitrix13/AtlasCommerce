@@ -46,9 +46,9 @@ final class AdminThemeApiTest extends TestCase
 
         $this->store = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['slug' => 'panda-estampados', 'name' => 'Panda Estampados']);
+            ->create(attributes: ['slug' => 'panda-estampados', 'name' => 'Panda Estampados']);
 
-        StoreDomain::query()->create([
+        StoreDomain::query()->create(attributes: [
             'store_id' => $this->store->id,
             'domain' => 'panda-estampados.com',
             'type' => 'domain',
@@ -60,7 +60,7 @@ final class AdminThemeApiTest extends TestCase
             values: ['name' => 'Administrador', 'is_active' => true],
         );
 
-        $this->admin = User::factory()->create([
+        $this->admin = User::factory()->create(attributes: [
             'email' => 'admin@panda-estampados.test',
             'is_active' => true,
             'role_id' => $role->id,
@@ -84,7 +84,7 @@ final class AdminThemeApiTest extends TestCase
     #[Test]
     public function get_theme_returns_existing_theme(): void
     {
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $this->store->id,
             'short_name' => 'Panda',
             'logo_path' => '/images/panda/logo.webp',
@@ -115,17 +115,17 @@ final class AdminThemeApiTest extends TestCase
         $response->assertJsonPath(path: 'data.accent_color', expect: '#DC2626');
         $response->assertJsonPath(path: 'data.support_email', expect: 'support@panda-estampados.test');
 
-        $this->assertDatabaseHas('store_themes', [
+        $this->assertDatabaseHas(table: 'store_themes', data: [
             'store_id' => $this->store->id,
             'short_name' => 'Panda',
             'accent_color' => '#DC2626',
-        ]);
+            ]);
     }
 
     #[Test]
     public function patch_theme_updates_existing_theme(): void
     {
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $this->store->id,
             'short_name' => 'Old Name',
             'accent_color' => '#000000',
@@ -140,11 +140,11 @@ final class AdminThemeApiTest extends TestCase
         $response->assertJsonPath(path: 'data.short_name', expect: 'New Name');
         $response->assertJsonPath(path: 'data.accent_color', expect: '#FFFFFF');
 
-        $this->assertDatabaseHas('store_themes', [
+        $this->assertDatabaseHas(table: 'store_themes', data: [
             'store_id' => $this->store->id,
             'short_name' => 'New Name',
             'accent_color' => '#FFFFFF',
-        ]);
+            ]);
     }
 
     #[Test]
@@ -172,7 +172,7 @@ final class AdminThemeApiTest extends TestCase
     #[Test]
     public function patch_theme_allows_partial_updates(): void
     {
-        StoreTheme::query()->create([
+        StoreTheme::query()->create(attributes: [
             'store_id' => $this->store->id,
             'short_name' => 'Panda',
             'logo_path' => '/images/old-logo.webp',

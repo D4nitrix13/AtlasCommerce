@@ -113,11 +113,11 @@ class Promotion extends Model
     {
         return $query->where(column: 'is_active', value: true)
             ->where(function ($q) {
-                $q->whereNull(column: 'starts_at')
+                $q->whereNull(columns: 'starts_at')
                     ->orWhere(column: 'starts_at', operator: '<=', value: now());
             })
             ->where(function ($q) {
-                $q->whereNull(column: 'ends_at')
+                $q->whereNull(columns: 'ends_at')
                     ->orWhere(column: 'ends_at', operator: '>=', value: now());
             });
     }

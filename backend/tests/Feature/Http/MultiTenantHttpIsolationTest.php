@@ -52,11 +52,11 @@ final class MultiTenantHttpIsolationTest extends TestCase
         parent::setUp();
 
         $this->currency = Currency::factory()->primary()->create();
-        $this->storeA = Store::factory()->for($this->currency, 'currency')->create(['name' => 'Tienda A']);
-        $this->storeB = Store::factory()->for($this->currency, 'currency')->create(['name' => 'Tienda B']);
+        $this->storeA = Store::factory()->for($this->currency, 'currency')->create(attributes: ['name' => 'Tienda A']);
+        $this->storeB = Store::factory()->for($this->currency, 'currency')->create(attributes: ['name' => 'Tienda B']);
 
         $this->user = User::factory()->create();
-        $this->customer = Customer::factory()->create(['user_id' => $this->user->id]);
+        $this->customer = Customer::factory()->create(attributes: ['user_id' => $this->user->id]);
         $this->paymentMethod = PaymentMethod::factory()->create();
     }
 
@@ -71,8 +71,8 @@ final class MultiTenantHttpIsolationTest extends TestCase
         $product = Product::factory()
             ->for(Category::factory(), 'category')
             ->for($this->currency, 'currency')
-            ->create(['base_price_cents' => 10_00]);
-        $cartA->items()->create([
+            ->create(attributes: ['base_price_cents' => 10_00]);
+        $cartA->items()->create(attributes: [
             'product_id' => $product->id,
             'cart_line_key' => 'a',
             'quantity' => 1,
@@ -83,7 +83,7 @@ final class MultiTenantHttpIsolationTest extends TestCase
         // Cambiar contexto a Tienda B y crear un carrito distinto.
         app(StoreContextService::class)->setStore($this->storeB);
         $cartB = Cart::factory()->for($this->customer)->for($this->storeB)->for($this->currency)->create();
-        $cartB->items()->create([
+        $cartB->items()->create(attributes: [
             'product_id' => $product->id,
             'cart_line_key' => 'b',
             'quantity' => 1,
@@ -155,11 +155,11 @@ final class MultiTenantHttpIsolationTest extends TestCase
         $product = Product::factory()
             ->for(Category::factory(), 'category')
             ->for($this->currency, 'currency')
-            ->create(['base_price_cents' => 10_00]);
+            ->create(attributes: ['base_price_cents' => 10_00]);
 
         // Cart en Tienda B con un item.
         $cartInB = Cart::factory()->for($this->customer)->for($this->storeB)->for($this->currency)->create();
-        $cartInB->items()->create([
+        $cartInB->items()->create(attributes: [
             'product_id' => $product->id,
             'cart_line_key' => 'b',
             'quantity' => 1,
@@ -171,18 +171,18 @@ final class MultiTenantHttpIsolationTest extends TestCase
 
         // Context A → 404 (cart invisible).
         app(StoreContextService::class)->setStore($this->storeA);
-        $this->postJson('/api/orders', [
+        $this->postJson(uri: '/api/orders', data: [
             'cart_id' => $cartInB->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
-        ])->assertNotFound();
+])->assertNotFound();
 
         // Context B → 201.
         app(StoreContextService::class)->setStore($this->storeB);
-        $this->postJson('/api/orders', [
+        $this->postJson(uri: '/api/orders', data: [
             'cart_id' => $cartInB->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
-        ])->assertCreated();
+])->assertCreated();
     }
 }

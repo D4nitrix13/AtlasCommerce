@@ -87,6 +87,6 @@ class Category extends Model
      */
     public function scopeRoots(Builder $query): Builder
     {
-        return $query->whereNull(column: 'parent_id');
+        return $query->whereNull(columns: 'parent_id');
     }
 }

@@ -48,7 +48,7 @@ final class CheckoutTaxCalculationTest extends TestCase
     {
         $store = Store::factory()
             ->for($this->currency, 'currency')
-            ->create(['tax_rate' => 0]);
+            ->create(attributes: ['tax_rate' => 0]);
         app(StoreContextService::class)->setStore($store);
 
         $cart = $this->makeCartWithItems($store, totalCents: 10_000);
@@ -69,7 +69,7 @@ final class CheckoutTaxCalculationTest extends TestCase
     {
         $store = Store::factory()
             ->for($this->currency, 'currency')
-            ->create(['tax_rate' => 15.0]);
+            ->create(attributes: ['tax_rate' => 15.0]);
         app(StoreContextService::class)->setStore($store);
 
         $cart = $this->makeCartWithItems($store, totalCents: 10_000);
@@ -94,7 +94,7 @@ final class CheckoutTaxCalculationTest extends TestCase
         // Subtotal 5 cents con 15% → 0.75 → banker's round = 1 (HALF_EVEN).
         $store = Store::factory()
             ->for($this->currency, 'currency')
-            ->create(['tax_rate' => 15.0]);
+            ->create(attributes: ['tax_rate' => 15.0]);
         app(StoreContextService::class)->setStore($store);
 
         $cart = $this->makeCartWithItems($store, totalCents: 1);
@@ -115,7 +115,7 @@ final class CheckoutTaxCalculationTest extends TestCase
     {
         $store = Store::factory()
             ->for($this->currency, 'currency')
-            ->create(['tax_rate' => 13.0]);
+            ->create(attributes: ['tax_rate' => 13.0]);
         app(StoreContextService::class)->setStore($store);
 
         $cart = $this->makeCartWithItems($store, totalCents: 20_000);
@@ -135,7 +135,7 @@ final class CheckoutTaxCalculationTest extends TestCase
     {
         $store = Store::factory()
             ->for($this->currency, 'currency')
-            ->create(['tax_rate' => 10.0]);
+            ->create(attributes: ['tax_rate' => 10.0]);
         app(StoreContextService::class)->setStore($store);
 
         $cart = $this->makeCartWithItems($store, totalCents: 10_000);
@@ -164,9 +164,9 @@ final class CheckoutTaxCalculationTest extends TestCase
         $product = Product::factory()
             ->for(Category::factory(), 'category')
             ->for($this->currency, 'currency')
-            ->create(['base_price_cents' => $totalCents]);
+            ->create(attributes: ['base_price_cents' => $totalCents]);
 
-        $cart->items()->create([
+        $cart->items()->create(attributes: [
             'product_id' => $product->id,
             'cart_line_key' => 'k',
             'quantity' => 1,

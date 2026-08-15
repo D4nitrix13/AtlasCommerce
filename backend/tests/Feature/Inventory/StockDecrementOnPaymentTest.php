@@ -66,13 +66,13 @@ final class StockDecrementOnPaymentTest extends TestCase
         $this->store = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
             ->create();
-        $this->warehouse = Warehouse::factory()->create(['is_active' => true]);
+        $this->warehouse = Warehouse::factory()->create(attributes: ['is_active' => true]);
         $this->customer = Customer::factory()->create();
         $this->paymentMethod = PaymentMethod::factory()->create();
 
         $this->product = Product::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['base_price_cents' => 25_00]);
+            ->create(attributes: ['base_price_cents' => 25_00]);
 
         $this->seedOrderAndInvoice(quantity: 2, unitPriceCents: 25_00);
 

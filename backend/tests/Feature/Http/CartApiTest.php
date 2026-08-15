@@ -45,7 +45,7 @@ final class CartApiTest extends TestCase
         $this->currency = Currency::factory()->primary()->create();
         $this->store = Store::factory()->for($this->currency, 'currency')->create();
         $this->user = User::factory()->create();
-        $this->customer = Customer::factory()->create(['user_id' => $this->user->id]);
+        $this->customer = Customer::factory()->create(attributes: ['user_id' => $this->user->id]);
 
         app(StoreContextService::class)->setStore($this->store);
     }
@@ -70,12 +70,12 @@ final class CartApiTest extends TestCase
         $response->assertJsonPath('data.currency_id', $this->currency->id);
         $cartId = $response->json('data.id');
 
-        $this->assertDatabaseHas('carts', [
+        $this->assertDatabaseHas(table: 'carts', data: [
             'id' => $cartId,
             'customer_id' => $this->customer->id,
             'store_id' => $this->store->id,
             'status' => 'active',
-        ]);
+            ]);
 
         // Segundo store (mismo contexto) → idempotente, devuelve el mismo.
         $this->postJson('/api/carts')
@@ -93,7 +93,7 @@ final class CartApiTest extends TestCase
         $product = Product::factory()
             ->for(factory: $category, relationship: 'category')
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['base_price_cents' => 25_00]);
+            ->create(attributes: ['base_price_cents' => 25_00]);
 
         // Agregar 2 unidades.
         $response = $this->postJson("/api/carts/{$cart->id}/items", [
@@ -106,12 +106,12 @@ final class CartApiTest extends TestCase
         $response->assertJsonPath('data.unit_price.cents', 2500);
         $response->assertJsonPath('data.subtotal.cents', 5000);
 
-        $this->assertDatabaseHas('cart_items', [
+        $this->assertDatabaseHas(table: 'cart_items', data: [
             'cart_id' => $cart->id,
             'product_id' => $product->id,
             'quantity' => 2,
             'subtotal_cents' => 5000,
-        ]);
+            ]);
 
         // Subtotal del cart se actualiza.
         $this->getJson("/api/carts/{$cart->id}")
@@ -127,7 +127,7 @@ final class CartApiTest extends TestCase
         $product = Product::factory()
             ->for(Category::factory(), 'category')
             ->for($this->currency, 'currency')
-            ->create(['base_price_cents' => 10_00]);
+            ->create(attributes: ['base_price_cents' => 10_00]);
 
         $this->postJson("/api/carts/{$cart->id}/items", [
             'product_id' => $product->id, 'quantity' => 1,
@@ -138,13 +138,13 @@ final class CartApiTest extends TestCase
             'product_id' => $product->id, 'quantity' => 3,
         ])->assertOk();
 
-        $this->assertDatabaseCount('cart_items', 1);
-        $this->assertDatabaseHas('cart_items', [
+        $this->assertDatabaseCount(table: 'cart_items', count: 1);
+        $this->assertDatabaseHas(table: 'cart_items', data: [
             'cart_id' => $cart->id,
             'product_id' => $product->id,
             'quantity' => 4,
             'subtotal_cents' => 40_00,
-        ]);
+            ]);
     }
 
     #[Test]
@@ -155,11 +155,11 @@ final class CartApiTest extends TestCase
         $product = Product::factory()
             ->for(Category::factory(), 'category')
             ->for($this->currency, 'currency')
-            ->create(['base_price_cents' => 10_00]);
+            ->create(attributes: ['base_price_cents' => 10_00]);
 
         $variant = ProductVariant::factory()
             ->for($product)
-            ->create(['price_cents' => 12_50]);
+            ->create(attributes: ['price_cents' => 12_50]);
 
         $response = $this->postJson("/api/carts/{$cart->id}/items", [
             'product_id' => $product->id,
@@ -179,7 +179,7 @@ final class CartApiTest extends TestCase
             ->for($this->customer)
             ->for($this->store)
             ->for($this->currency)
-            ->create(['status' => 'converted']);
+            ->create(attributes: ['status' => 'converted']);
         $product = Product::factory()
             ->for(Category::factory(), 'category')
             ->for($this->currency, 'currency')

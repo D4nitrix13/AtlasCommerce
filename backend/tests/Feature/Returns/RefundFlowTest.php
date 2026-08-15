@@ -77,13 +77,13 @@ final class RefundFlowTest extends TestCase
             ->for(factory: $this->currency, relationship: 'currency')
             ->create();
         $this->user = User::factory()->create();
-        $this->customer = Customer::factory()->create(['user_id' => $this->user->id]);
-        $this->warehouse = Warehouse::factory()->create(['is_active' => true]);
+        $this->customer = Customer::factory()->create(attributes: ['user_id' => $this->user->id]);
+        $this->warehouse = Warehouse::factory()->create(attributes: ['is_active' => true]);
         $this->paymentMethod = PaymentMethod::factory()->create();
 
         $this->product = Product::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['base_price_cents' => 25_00]);
+            ->create(attributes: ['base_price_cents' => 25_00]);
 
         // Stock inicial = 100. La orden se venderá con 2 unidades → stock baja a 98.
         Inventory::factory()

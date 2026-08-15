@@ -39,7 +39,7 @@ final class StoreFeatureFlagTest extends TestCase
         $this->currency = Currency::factory()->primary()->create();
         $this->store = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['name' => 'Test Store', 'slug' => 'test-store']);
+            ->create(attributes: ['name' => 'Test Store', 'slug' => 'test-store']);
     }
 
     #[Test]
@@ -51,7 +51,7 @@ final class StoreFeatureFlagTest extends TestCase
     #[Test]
     public function has_feature_returns_true_when_feature_is_active(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
@@ -63,7 +63,7 @@ final class StoreFeatureFlagTest extends TestCase
     #[Test]
     public function has_feature_returns_false_when_feature_exists_but_is_inactive(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => false,
@@ -75,17 +75,17 @@ final class StoreFeatureFlagTest extends TestCase
     #[Test]
     public function features_relation_returns_all_features_of_a_store(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'bulk_import',
             'is_active' => true,
         ]);
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'instagram_shop',
             'is_active' => false,
@@ -104,9 +104,9 @@ final class StoreFeatureFlagTest extends TestCase
     {
         $otherStore = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['name' => 'Other Store', 'slug' => 'other-store']);
+            ->create(attributes: ['name' => 'Other Store', 'slug' => 'other-store']);
 
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
@@ -120,7 +120,7 @@ final class StoreFeatureFlagTest extends TestCase
     #[Test]
     public function feature_slug_must_be_unique_per_store(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
@@ -129,7 +129,7 @@ final class StoreFeatureFlagTest extends TestCase
         // Intentar crear el mismo (store, slug) debe fallar.
         $this->expectException(\Illuminate\Database\QueryException::class);
 
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => false,
@@ -141,15 +141,15 @@ final class StoreFeatureFlagTest extends TestCase
     {
         $otherStore = Store::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['name' => 'Other Store', 'slug' => 'other-store']);
+            ->create(attributes: ['name' => 'Other Store', 'slug' => 'other-store']);
 
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
         // Mismo slug, otra tienda: OK.
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $otherStore->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
@@ -162,16 +162,16 @@ final class StoreFeatureFlagTest extends TestCase
     #[Test]
     public function deleting_store_cascades_to_features(): void
     {
-        StoreFeature::query()->create([
+        StoreFeature::query()->create(attributes: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
             'is_active' => true,
         ]);
 
-        $this->assertDatabaseHas('store_features', [
+        $this->assertDatabaseHas(table: 'store_features', data: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
-        ]);
+            ]);
 
         $this->store->forceDelete();
 
