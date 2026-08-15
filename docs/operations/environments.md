@@ -55,12 +55,37 @@
 
 - `MAIL_MAILER` — Driver de correo
   (ej. `smtp`, `log`)
-- `MAIL_HOST` — Host SMTP (ej. `localhost`)
-- `MAIL_PORT` — Puerto SMTP (ej. `1025` con Mailpit)
+- `MAIL_HOST` — Host SMTP. En dev con Docker: `mailpit` (hostname del
+  container Mailpit levantado por docker-compose). En otros entornos:
+  `localhost` o el host del SMTP real.
+- `MAIL_PORT` — Puerto SMTP. En dev el container Mailpit escucha en
+  `1025`. El puerto expuesto al host depende de la instancia:
+  `1025` (panda-and-kitsune), `11025` (mm-boutique),
+  `12025` (morales-store).
 - `MAIL_USERNAME` — Usuario SMTP
 - `MAIL_PASSWORD` — Contraseña SMTP
 - `MAIL_FROM_ADDRESS` — Correo remitente
   (ej. `noreply@panda.com`)
+
+#### Mailpit en dev
+
+Cada `docker-compose.yml` de dev levanta un container Mailpit
+(`axllent/mailpit:latest`) en la misma red Docker que el backend.
+Mailpit captura todos los emails que Laravel envía via SMTP y los
+muestra en una UI web.
+
+| Instancia dev        | SMTP (host) | UI web                   |
+| -------------------- | ----------- | ------------------------ |
+| `panda-and-kitsune`  | `:1025`     | http://localhost:8025    |
+| `mm-boutique`        | `:11025`    | http://localhost:18025   |
+| `morales-store`      | `:12025`    | http://localhost:28025   |
+
+Uso:
+
+```bash
+./scripts/docker/mailpit-up.sh development:panda-and-kitsune
+./scripts/docker/mailpit-up.sh all   # las 3 instancias
+```
 
 ### Redis
 

@@ -11,12 +11,9 @@ erDiagram
     %% Catalog (products, categories, brands) is global; per-store
     %% visibility is controlled via `product_stores` pivot.
     %%
-    %% Auth: minimal in MVP — users, roles, permissions, password_reset_tokens.
-    %% password_reset_tokens is the OTP-based recovery flow (6-digit code,
-    %% 15 min TTL, consumed atomically). The only password recovery method.
-    %% 2FA / passkeys / otp_challenges / recovery_codes / trusted_devices /
-    %% login_attempts / security_events are deferred to a future phase
-    %% (no tables or migrations exist for them in the codebase).
+    %% Auth: users, roles, permissions, password_reset_tokens, two_factor_settings,
+    %% otp_challenges (TOTP + email_otp + recovery_code), recovery_codes.
+    %% Login attempts + security events siguen deferred a futuro.
     %%
     %% Customization: minimal in MVP — only `custom_designs` (file upload
     %% per order item) + `order_custom_designs` bridge. The full design
