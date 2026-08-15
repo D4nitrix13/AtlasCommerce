@@ -62,7 +62,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
 
         app(StoreContextService::class)->clear();
 
-        $this->currency = Currency::factory()->primary()->create([
+        $this->currency = Currency::factory()->primary()->create(attributes: [
             'code' => 'USD',
             'symbol' => '$',
             'decimal_places' => 2,
@@ -71,15 +71,15 @@ final class CheckPermissionMiddlewareTest extends TestCase
             ->for(factory: $this->currency, relationship: 'currency')
             ->create();
         $this->customer = Customer::factory()->create();
-        $this->warehouse = Warehouse::factory()->create(['is_active' => true]);
-        $this->zone = ShippingZone::factory()->create([
+        $this->warehouse = Warehouse::factory()->create(attributes: ['is_active' => true]);
+        $this->zone = ShippingZone::factory()->create(attributes: [
             'base_cost_cents' => 5_00,
             'is_active' => true,
         ]);
         $this->paymentMethod = PaymentMethod::factory()->create();
         $this->product = Product::factory()
             ->for(factory: $this->currency, relationship: 'currency')
-            ->create(['base_price_cents' => 25_00]);
+            ->create(attributes: ['base_price_cents' => 25_00]);
 
         Inventory::factory()
             ->for($this->warehouse)
@@ -113,7 +113,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
     #[Test]
     public function admin_role_bypasses_permission_check(): void
     {
-        $admin = User::factory()->create(['role_id' => $this->adminRole->id, 'is_active' => true]);
+        $admin = User::factory()->create(attributes: ['role_id' => $this->adminRole->id, 'is_active' => true]);
         Sanctum::actingAs($admin);
 
         // Liquida la invoice para crear un shipment.
@@ -133,7 +133,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
     #[Test]
     public function staff_with_permission_passes_check(): void
     {
-        $staff = User::factory()->create(['role_id' => $this->staffRole->id, 'is_active' => true]);
+        $staff = User::factory()->create(attributes: ['role_id' => $this->staffRole->id, 'is_active' => true]);
         Sanctum::actingAs($staff);
 
         app(PaymentService::class)->applyPayment(
@@ -152,7 +152,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
     #[Test]
     public function staff_without_permission_is_forbidden(): void
     {
-        $staff = User::factory()->create(['role_id' => $this->staffRole->id, 'is_active' => true]);
+        $staff = User::factory()->create(attributes: ['role_id' => $this->staffRole->id, 'is_active' => true]);
         Sanctum::actingAs($staff);
 
         app(PaymentService::class)->applyPayment(
@@ -173,7 +173,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
     #[Test]
     public function user_without_role_is_forbidden(): void
     {
-        $noRole = User::factory()->create(['role_id' => null, 'is_active' => true]);
+        $noRole = User::factory()->create(attributes: ['role_id' => null, 'is_active' => true]);
         Sanctum::actingAs($noRole);
 
         app(PaymentService::class)->applyPayment(
@@ -192,10 +192,10 @@ final class CheckPermissionMiddlewareTest extends TestCase
     #[Test]
     public function inactive_user_is_forbidden_even_with_admin_role(): void
     {
-        $admin = User::factory()->create(['role_id' => $this->adminRole->id, 'is_active' => false]);
+        $admin = User::factory()->create(attributes: ['role_id' => $this->adminRole->id, 'is_active' => false]);
         Sanctum::actingAs($admin);
 
-        $shipment = Shipment::factory()->create([
+        $shipment = Shipment::factory()->create(attributes: [
             'order_id' => $this->order->id,
             'currency_id' => $this->currency->id,
             'status' => 'pending',
@@ -218,10 +218,10 @@ final class CheckPermissionMiddlewareTest extends TestCase
     {
         $this->staffRole->update(['is_active' => false]);
 
-        $staff = User::factory()->create(['role_id' => $this->staffRole->id, 'is_active' => true]);
+        $staff = User::factory()->create(attributes: ['role_id' => $this->staffRole->id, 'is_active' => true]);
         Sanctum::actingAs($staff);
 
-        $shipment = Shipment::factory()->create([
+        $shipment = Shipment::factory()->create(attributes: [
             'order_id' => $this->order->id,
             'currency_id' => $this->currency->id,
             'status' => 'pending',
@@ -234,8 +234,8 @@ final class CheckPermissionMiddlewareTest extends TestCase
     #[Test]
     public function has_permission_method_returns_correctly(): void
     {
-        $admin = User::factory()->create(['role_id' => $this->adminRole->id]);
-        $staff = User::factory()->create(['role_id' => $this->staffRole->id]);
+        $admin = User::factory()->create(attributes: ['role_id' => $this->adminRole->id]);
+        $staff = User::factory()->create(attributes: ['role_id' => $this->staffRole->id]);
 
         $this->assertTrue($admin->hasPermission(slug: 'qualquier.permiso'));
         $this->assertTrue($staff->hasPermission(slug: 'shipping.shipments.ship'));

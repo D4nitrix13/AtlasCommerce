@@ -19,8 +19,8 @@ use Laravel\Sanctum\HasApiTokens;
  * Modelo de usuario principal.
  *
  * Representa la tabla `users` y actúa como modelo base para todo el sistema
- * de autenticación. Incluye relaciones con roles, intentos de login,
- * eventos de seguridad y configuración de 2FA.
+ * de autenticación. Incluye relaciones con roles, configuración de 2FA,
+ * recovery codes y challenges OTP.
  *
  * La autenticación de API se gestiona mediante Laravel Sanctum (trait HasApiTokens).
  * El cast automático `hashed` en `password` garantiza que la contraseña nunca se
@@ -116,22 +116,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Intentos de login registrados.
-     */
-    public function loginAttempts(): HasMany
-    {
-        return $this->hasMany(LoginAttempt::class);
-    }
-
-    /**
-     * Eventos de seguridad registrados.
-     */
-    public function securityEvents(): HasMany
-    {
-        return $this->hasMany(SecurityEvent::class);
-    }
-
-    /**
      * Tokens de restablecimiento de contraseña.
      */
     public function passwordResetTokens(): HasMany
@@ -187,7 +171,7 @@ class User extends Authenticatable
     public function hasAvailableRecoveryCode(): bool
     {
         return $this->recoveryCodes()
-            ->whereNull(column: 'used_at')
+            ->whereNull(columns: 'used_at')
             ->exists();
     }
 
@@ -197,7 +181,7 @@ class User extends Authenticatable
     public function unusedRecoveryCodesCount(): int
     {
         return $this->recoveryCodes()
-            ->whereNull(column: 'used_at')
+            ->whereNull(columns: 'used_at')
             ->count();
     }
 

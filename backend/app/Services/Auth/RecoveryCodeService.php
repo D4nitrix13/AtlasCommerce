@@ -76,7 +76,7 @@ class RecoveryCodeService
         }
 
         $match = $user->recoveryCodes()
-            ->whereNull(column: 'used_at')
+            ->whereNull(columns: 'used_at')
             ->get()
             ->first(fn (RecoveryCode $row): bool => password_verify($code, $row->code_hash));
 
@@ -95,7 +95,7 @@ class RecoveryCodeService
     public function availableCount(User $user): int
     {
         return $user->recoveryCodes()
-            ->whereNull(column: 'used_at')
+            ->whereNull(columns: 'used_at')
             ->count();
     }
 

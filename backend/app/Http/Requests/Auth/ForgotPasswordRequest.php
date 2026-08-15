@@ -11,6 +11,10 @@ use Illuminate\Foundation\Http\FormRequest;
  *
  * Reglas:
  *  - email requerido, formato email, máximo 255 chars.
+ *  - method opcional, debe ser 'email' | '2fa' | 'recovery_codes'.
+ *    Default 'email'. El controller valida que el método coincida con
+ *    `users.preferred_recovery_method` antes de continuar; si no coincide,
+ *    devuelve 422 indicando qué flow usar.
  *
  * La respuesta siempre es 200 OK con un mensaje genérico (seguridad:
  * no se revela si el email existe en el sistema). El rate limiting
@@ -30,6 +34,7 @@ class ForgotPasswordRequest extends FormRequest
     {
         return [
             'email' => ['required', 'string', 'email:rfc', 'max:255'],
+            'method' => ['sometimes', 'string', 'in:email,2fa,recovery_codes'],
         ];
     }
 
@@ -41,6 +46,7 @@ class ForgotPasswordRequest extends FormRequest
         return [
             'email.required' => 'El email es obligatorio.',
             'email.email' => 'El email debe tener formato válido.',
+            'method.in' => 'El método debe ser email, 2fa o recovery_codes.',
         ];
     }
 }
