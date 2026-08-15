@@ -32,9 +32,6 @@ vi.mock("../../../src/lib/api", () => ({
 }));
 
 import ResetPasswordForm from "../../../src/components/admin/auth/ResetPasswordForm";
-import { pandaTheme } from "@theme/panda-estampados";
-
-const brand = pandaTheme.brand;
 
 beforeEach(() => {
   mockApiFetch.mockReset();
@@ -49,7 +46,7 @@ beforeEach(() => {
 describe("components/admin/auth/ResetPasswordForm", () => {
   describe("render", () => {
     it("muestra los 3 inputs (code, password, confirm)", () => {
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       expect(screen.getByLabelText("auth.passwordReset.code.label")).toBeInTheDocument();
       expect(screen.getByLabelText("auth.passwordReset.newPassword.label")).toBeInTheDocument();
@@ -57,7 +54,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
     });
 
     it("code input tiene maxLength=6 y pattern numerico", () => {
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
       expect(codeInput).toHaveAttribute("maxLength", "6");
@@ -66,7 +63,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
     });
 
     it("password inputs tienen minLength=12 y autoComplete=new-password", () => {
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const newPassword = screen.getByLabelText("auth.passwordReset.newPassword.label");
       const confirmPassword = screen.getByLabelText("auth.passwordReset.confirmPassword.label");
@@ -77,7 +74,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
     });
 
     it("muestra el hint del code (15 minutos)", () => {
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       expect(screen.getByText("auth.passwordReset.step2.codeHelp")).toBeInTheDocument();
     });
@@ -86,7 +83,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
   describe("validación client-side", () => {
     it("muestra error si el código está vacío", async () => {
       const user = userEvent.setup();
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const submitButton = screen.getByRole("button", {
         name: "auth.passwordReset.submit",
@@ -103,7 +100,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
 
     it("muestra error si el código no tiene 6 dígitos", async () => {
       const user = userEvent.setup();
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
       await user.type(codeInput, "12345");
@@ -123,7 +120,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
 
     it("filtra caracteres no-numéricos en el code input", async () => {
       const user = userEvent.setup();
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
       await user.type(codeInput, "1a2b3c4d5e6f");
@@ -133,7 +130,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
 
     it("muestra error si la contraseña es débil", async () => {
       const user = userEvent.setup();
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
       await user.type(codeInput, "123456");
@@ -159,7 +156,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
 
     it("muestra error si las contraseñas no coinciden", async () => {
       const user = userEvent.setup();
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
       await user.type(codeInput, "123456");
@@ -192,7 +189,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
         user: { id: 1, email: "jane@example.com" },
       });
 
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
       await user.type(codeInput, "123456");
@@ -250,7 +247,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
       });
 
       try {
-        render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+        render(<ResetPasswordForm email="jane@example.com" />);
 
         const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
         await user.type(codeInput, "123456");
@@ -290,7 +287,7 @@ describe("components/admin/auth/ResetPasswordForm", () => {
         errors: { code: ["El código es inválido o ha expirado."] },
       });
 
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const codeInput = screen.getByLabelText("auth.passwordReset.code.label");
       await user.type(codeInput, "000000");
@@ -317,15 +314,15 @@ describe("components/admin/auth/ResetPasswordForm", () => {
   describe("show password toggle", () => {
     it("alterna el type de los 2 inputs de password", async () => {
       const user = userEvent.setup();
-      render(<ResetPasswordForm brand={brand} email="jane@example.com" />);
+      render(<ResetPasswordForm email="jane@example.com" />);
 
       const newPassword = screen.getByLabelText("auth.passwordReset.newPassword.label");
       const confirmPassword = screen.getByLabelText("auth.passwordReset.confirmPassword.label");
       expect(newPassword).toHaveAttribute("type", "password");
       expect(confirmPassword).toHaveAttribute("type", "password");
 
-      const toggle = screen.getByRole("checkbox", {
-        name: /auth\.passwordReset\.password\.(show|hide)/,
+      const toggle = screen.getByRole("button", {
+        name: "auth.passwordReset.password.show",
       });
       await user.click(toggle);
 

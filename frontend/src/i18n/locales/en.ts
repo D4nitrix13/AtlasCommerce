@@ -113,6 +113,7 @@ const en: Translations = {
   "auth.forgot.shell.helper": "We'll send a recovery link valid for 30 minutes.",
   "auth.forgot.shell.submit": "Send recovery link",
   "auth.forgot.shell.submitLoading": "Sending...",
+  "auth.forgot.shell.topRightBack": "Back to sign in",
   "auth.forgot.shell.infoTitle": "Didn't get the email?",
   "auth.forgot.shell.infoBody": "Check your spam folder or {support}.",
   "auth.forgot.shell.supportLink": "contact support",
@@ -129,9 +130,11 @@ const en: Translations = {
   "auth.passwordReset.email.label": "Email account",
   "auth.passwordReset.email.submit": "Send recovery code",
   "auth.passwordReset.step2.label": "Step 2 of 2 · Create your new password",
-  "auth.passwordReset.step2.heading": "Reset your password",
+  "auth.passwordReset.step2.heading": "Create a new password",
   "auth.passwordReset.step2.intro":
-    "We sent a 6-digit code to {email}. Enter the code and choose a new password for your account.",
+    "Your new password must be different from your previous ones and be at least 12 characters long.",
+  "auth.passwordReset.bannerFor":
+    "Resetting for {email}",
   "auth.passwordReset.step2.codeHelp":
     "The code expires in 15 minutes. If you can't find it, go back to step 1 to request a new one.",
   "auth.passwordReset.bodyCode":
@@ -139,12 +142,40 @@ const en: Translations = {
   "auth.passwordReset.code.label": "Verification code",
   "auth.passwordReset.code.placeholder": "000000",
   "auth.passwordReset.newPassword.label": "New password",
-  "auth.passwordReset.confirmPassword.label": "Confirm new password",
+  "auth.passwordReset.newPassword.placeholder": "At least 12 characters",
+  "auth.passwordReset.confirmPassword.label": "Confirm password",
+  "auth.passwordReset.confirmPassword.placeholder": "Repeat the password",
+  "auth.passwordReset.passwordsMatch": "Passwords match",
+  "auth.passwordReset.strengthLabel": "Strength:",
+  "auth.passwordReset.strength.weak": "Weak",
+  "auth.passwordReset.strength.fair": "Fair",
+  "auth.passwordReset.strength.good": "Good",
+  "auth.passwordReset.strength.strong": "Strong",
+  "auth.passwordReset.securityTipsTitle": "Your password must have:",
+  "auth.passwordReset.tip.minLength": "At least 12 characters",
+  "auth.passwordReset.tip.upperLower": "One uppercase and one lowercase letter",
+  "auth.passwordReset.tip.number": "At least one number",
+  "auth.passwordReset.tip.symbol": "One symbol (recommended)",
   "auth.passwordReset.password.show": "Show password",
   "auth.passwordReset.password.hide": "Hide password",
   "auth.passwordReset.passwordHint":
     "Your password must be at least 12 characters, contain an uppercase letter, a lowercase letter, and a number.",
   "auth.passwordReset.submit": "Reset password",
+  "auth.passwordReset.submitting": "Resetting…",
+  "auth.passwordReset.success.title": "Password reset!",
+  "auth.passwordReset.success.body":
+    "Your password was updated successfully. You can now sign in with your new password.",
+  "auth.passwordReset.success.changeApplied": "Change applied",
+  "auth.passwordReset.success.changeAppliedAt":
+    "{email} · a few seconds ago",
+  "auth.passwordReset.success.didntDoThis": "Didn't do this?",
+  "auth.passwordReset.success.didntDoThisBody":
+    "If you didn't make this change, contact us immediately at {supportEmail}.",
+  "auth.passwordReset.success.goToLogin": "Sign in",
+  "auth.passwordReset.success.goHome": "Back to home",
+  "auth.passwordReset.success.contactSupport": "Contact support",
+  "auth.passwordReset.expiryNote":
+    "This link expires in {time} for security.",
   "auth.passwordReset.requestNewCode": "Request a new code",
   "auth.passwordReset.close": "Close",
   "auth.passwordReset.error.emailEmpty": "Enter your email address.",

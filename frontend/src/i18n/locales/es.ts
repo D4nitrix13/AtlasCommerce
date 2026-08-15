@@ -116,6 +116,7 @@ const es: Translations = {
     "Te enviaremos un enlace de recuperación válido por 30 minutos.",
   "auth.forgot.shell.submit": "Enviar enlace de recuperación",
   "auth.forgot.shell.submitLoading": "Enviando...",
+  "auth.forgot.shell.topRightBack": "Volver a iniciar sesión",
   "auth.forgot.shell.infoTitle": "¿No recibes el correo?",
   "auth.forgot.shell.infoBody": "Revisa tu carpeta de spam o {support}.",
   "auth.forgot.shell.supportLink": "contacta soporte",
@@ -132,9 +133,11 @@ const es: Translations = {
   "auth.passwordReset.email.label": "Cuenta de email",
   "auth.passwordReset.email.submit": "Enviar código de recuperación",
   "auth.passwordReset.step2.label": "Paso 2 de 2 · Creá tu nueva contraseña",
-  "auth.passwordReset.step2.heading": "Restablecé tu contraseña",
+  "auth.passwordReset.step2.heading": "Creá una nueva contraseña",
   "auth.passwordReset.step2.intro":
-    "Te enviamos un código de 6 dígitos a {email}. Ingresá el código y elegí una nueva contraseña para tu cuenta.",
+    "Tu nueva contraseña debe ser diferente a las anteriores y tener al menos 8 caracteres.",
+  "auth.passwordReset.bannerFor":
+    "Restableciendo para {email}",
   "auth.passwordReset.step2.codeHelp":
     "El código vence en 15 minutos. Si no lo encontrás, volvé al paso 1 para pedir uno nuevo.",
   "auth.passwordReset.bodyCode":
@@ -142,12 +145,41 @@ const es: Translations = {
   "auth.passwordReset.code.label": "Código de verificación",
   "auth.passwordReset.code.placeholder": "000000",
   "auth.passwordReset.newPassword.label": "Nueva contraseña",
-  "auth.passwordReset.confirmPassword.label": "Confirmar nueva contraseña",
+  "auth.passwordReset.newPassword.placeholder": "Mínimo 8 caracteres",
+  "auth.passwordReset.confirmPassword.label": "Confirmar contraseña",
+  "auth.passwordReset.confirmPassword.placeholder": "Repetí la contraseña",
+  "auth.passwordReset.passwordsMatch": "Las contraseñas coinciden",
+  "auth.passwordReset.strengthLabel": "Fuerza:",
+  "auth.passwordReset.strength.weak": "Débil",
+  "auth.passwordReset.strength.fair": "Aceptable",
+  "auth.passwordReset.strength.good": "Buena",
+  "auth.passwordReset.strength.strong": "Excelente",
+  "auth.passwordReset.securityTipsTitle": "Tu contraseña debe tener:",
+  "auth.passwordReset.tip.minLength": "Al menos 12 caracteres",
+  "auth.passwordReset.tip.upperLower": "Una mayúscula y una minúscula",
+  "auth.passwordReset.tip.number": "Al menos un número",
+  "auth.passwordReset.tip.symbol": "Un símbolo (recomendado)",
   "auth.passwordReset.password.show": "Mostrar contraseña",
   "auth.passwordReset.password.hide": "Ocultar contraseña",
   "auth.passwordReset.passwordHint":
     "La contraseña debe tener al menos 12 caracteres, una letra mayúscula, una letra minúscula y un número.",
   "auth.passwordReset.submit": "Restablecer contraseña",
+  "auth.passwordReset.submitting": "Restableciendo…",
+  "auth.passwordReset.success.title": "¡Contraseña restablecida!",
+  "auth.passwordReset.success.body":
+    "Tu contraseña fue actualizada correctamente. Ya podés iniciar sesión con tu nueva contraseña.",
+  "auth.passwordReset.success.changeApplied": "Cambio aplicado",
+  "auth.passwordReset.success.changeAppliedAt":
+    "{email} · hace unos segundos",
+  "auth.passwordReset.success.didntDoThis":
+    "¿No realizaste este cambio?",
+  "auth.passwordReset.success.didntDoThisBody":
+    "Si no realizaste este cambio, contactanos inmediatamente a {supportEmail}.",
+  "auth.passwordReset.success.goToLogin": "Iniciar sesión",
+  "auth.passwordReset.success.goHome": "Volver al inicio",
+  "auth.passwordReset.success.contactSupport": "Contactar soporte",
+  "auth.passwordReset.expiryNote":
+    "Este enlace expira en {time} por seguridad.",
   "auth.passwordReset.requestNewCode": "Solicitar un nuevo código",
   "auth.passwordReset.close": "Cerrar",
   "auth.passwordReset.error.emailEmpty": "Ingrese su dirección de correo electrónico.",
