@@ -63,6 +63,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
+      - mm-boutique-dev
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
@@ -85,6 +86,7 @@ services:
     volumes:
       - ecommerce_mm_boutique_dev_ftp_data:/srv/ftp
     networks:
+      - mm-boutique-dev
 
   backend:
     build:
@@ -114,9 +116,9 @@ services:
       - DB_CONNECTION=pgsql
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_DATABASE=${POSTGRES_DB}
-      - DB_USERNAME=${POSTGRES_USER}
-      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_DATABASE=${POSTGRES_DB:-mm-boutique}
+      - DB_USERNAME=${POSTGRES_USER:-mm-boutique}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-devpass}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SESSION_DRIVER=file
@@ -125,8 +127,8 @@ services:
       - FILESYSTEM_DISK=local
       - FTP_HOST=ftp
       - FTP_PORT=21
-      - FTP_USERNAME=${FTP_USERNAME}
-      - FTP_PASSWORD=${FTP_PASSWORD}
+      - FTP_USERNAME=${FTP_USERNAME:-dev-ftp}
+      - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
       - FTP_ROOT=/srv/ftp
       - LOG_CHANNEL=stderr
     extra_hosts:
@@ -137,6 +139,7 @@ services:
       redis:
         condition: service_healthy
     networks:
+      - mm-boutique-dev
 
   # Sidecar nginx — agrega capa HTTP para que Caddy (en host) pueda
   # hacer `reverse_proxy localhost:${BACKEND_PORT}` con transporte HTTP
@@ -192,11 +195,27 @@ services:
       - NODE_ENV=development
       - HOST=0.0.0.0
       - PORT=4321
-      - PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-9000}/api
+      # PUBLIC_API_URL relativo (/api) para que el browser use el
+      # origin actual y Caddy rutee con Host header correcto.
+      - PUBLIC_API_URL=/api
       - ASTRO_TELEMETRY_DISABLED=1
     depends_on:
       - backend
     networks:
+      - mm-boutique-dev
+
+  # Mailpit: SMTP catcher para dev. Ver docker/instances/development/
+  # panda-and-kitsune/docker-compose.yml para detalles. UI expuesta
+  # en el host en el puerto :18025 para no chocar con otros stacks.
+  mailpit:
+    image: ${MAILPIT_IMAGE:-axllent/mailpit:latest}
+    container_name: ${MAILPIT_NAME:-mm-boutique-dev-mailpit}
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_SMTP_PORT:-11025}:1025"
+      - "${MAILPIT_UI_PORT:-18025}:8025"
+    networks:
+      - mm-boutique-dev
 
 networks:
   mm-boutique-dev:
