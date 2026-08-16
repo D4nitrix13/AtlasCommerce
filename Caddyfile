@@ -64,6 +64,53 @@
 # Si solo tenés prod corriendo, los handles de dev fallarán con 502
 # hasta que levantes dev.
 http:// {
+	# ===============================================================
+	# Security headers (defense-in-depth, R1 review 2026-08-15).
+	# Aplican a TODAS las responses proxy'd por Caddy (api + frontend).
+	# ===============================================================
+
+	# Clickjacking protection: previene que el sitio sea embebido en iframes
+	# de terceros. SAMEORIGIN permite iframes del mismo sitio (necesario
+	# para algunos admin tools de Astro pero NO permite terceros).
+	header X-Frame-Options "SAMEORIGIN"
+
+	# MIME sniffing protection: fuerza al browser a respetar el Content-Type
+	# declarado por el servidor, previene interpretación alternativa de
+	# archivos como ejecutables.
+	header X-Content-Type-Options "nosniff"
+
+	# Referrer policy: solo envía el origin (no el path completo) cuando
+	# el usuario navega cross-origin. Previene leak de URLs internas en
+	# analytics de terceros.
+	header Referrer-Policy "strict-origin-when-cross-origin"
+
+	# Permissions policy: deshabilita features del browser que NO usamos
+	# (geolocation, microphone, camera en storefront). Reduce superficie
+	# de ataque si XSS bypass logra ejecutar JS.
+	header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(self), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+
+	# XSS Protection (legacy, IE/older Safari): activa el filtro XSS del
+	# browser aunque sea deprecated. Defense-in-depth.
+	header X-XSS-Protection "1; mode=block"
+
+	# Strict-Transport-Security (HSTS): fuerza HTTPS por 1 año incluyendo
+	# subdomains. Solo aplica cuando el request es HTTPS. En dev (HTTP)
+	# es no-op (Caddy no emite el header en HTTP).
+	# max-age=31536000 (1 año), includeSubDomains, preload-ready
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	# Content-Security-Policy: política estricta para el FRONTEND (Astro).
+	# Permite scripts/styles del mismo origen + unsafe-inline para Astro
+	# (Astro usa inline styles para SSR), imágenes self+data: para avatars,
+	# sin object/frame embedding cross-origin.
+	# Nota: para /api/* responses el navegador NO aplica CSP (CSP es para
+	# HTML responses, no JSON), pero el header se envía igual — el browser
+	# lo ignora para non-HTML content types.
+	header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'"
+
+	# Referrer-Policy ya está arriba. Strict-Transport-Security abajo para
+	# tener todos los headers de seguridad juntos (no repetir).
+
 
 	# -----------------------------------------------------------
 	# DEVELOPMENT — puertos publicados en el host
