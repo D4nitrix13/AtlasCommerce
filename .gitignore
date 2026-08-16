@@ -15,4 +15,5 @@ Thumbs.db
 .playwright-cli/
 .atl/
 **/.atl/
+.codegraph/
 
