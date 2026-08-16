@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\System;
 
 use App\Models\Auth\User;
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,6 +36,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Audit extends Model
 {
+    use BelongsToStore;
+
     protected $fillable = [
         'user_id',
         'store_id',

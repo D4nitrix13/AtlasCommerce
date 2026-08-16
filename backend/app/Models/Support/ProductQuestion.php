@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Support;
 
 use App\Models\Catalog\Product;
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Customers\Customer;
 use App\Models\Stores\Store;
 use Carbon\Carbon;
@@ -30,6 +33,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ProductQuestion extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
