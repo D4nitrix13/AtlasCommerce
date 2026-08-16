@@ -1,19 +1,22 @@
-import { useEffect, type ReactElement } from "react";
-import { authStore, useAuth } from "../../../stores/auth";
-import { useTranslations } from "../../../i18n";
-
-const PUBLIC_ADMIN_PATHS = new Set(["/admin/auth/login"]);
-
-function isPublicAdminPath(pathname: string): boolean {
-  return PUBLIC_ADMIN_PATHS.has(pathname);
-}
+import { useEffect, type ReactElement } from 'react';
+import { authStore, useAuth } from '../../../stores/auth';
+import { useTranslations } from '../../../i18n';
+import { isPublicAdminPath, stripLocaleFromPath, withLocale } from '../../../lib/path-helpers';
 
 /**
  * Guard client-side para rutas admin.
  *
- * El token vive en localStorage (vía `stores/auth`), así que este
- * guard corre en el cliente y redirige vía `window.location` si
- * el usuario no está autenticado.
+ * El token vive en localStorage (v\u00eda `stores/auth`), as\u00ed que este
+ * guard corre en el cliente y redirige v\u00eda `window.location` si
+ * el usuario no est\u00e1 autenticado.
+ *
+ * Locale awareness (sdd/critical-2fa-frontend-flow · CR2):
+ *   - Astro i18n (`prefixDefaultLocale: true`) genera URLs
+ *     `/<locale>/admin/...` para ambos locales.
+ *   - El pathname del usuario conserva el locale al redirigir al
+ *     login para que el language switcher no lo "pierda".
+ *   - `PUBLIC_ADMIN_PATHS` cubre login + forgot + reset + reset-success
+ *     + 2fa (ver `lib/path-helpers.ts`).
  */
 export default function AuthGuard(): ReactElement | null {
   const { isAuthenticated, isHydrating } = useAuth();
@@ -24,13 +27,13 @@ export default function AuthGuard(): ReactElement | null {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return;
     }
 
-    const pathname = window.location.pathname;
+    const { locale, barePath } = stripLocaleFromPath(window.location.pathname);
 
-    if (isPublicAdminPath(pathname)) {
+    if (isPublicAdminPath(barePath)) {
       return;
     }
 
@@ -39,19 +42,26 @@ export default function AuthGuard(): ReactElement | null {
     }
 
     if (!isAuthenticated) {
-      // El pathname ya incluye `/es/` o `/en/` — lo preservamos.
-      const redirect = encodeURIComponent(pathname);
-      window.location.replace(`/admin/auth/login?redirect=${redirect}`);
+      // Preservamos el pathname completo (incluido locale + query) en
+      // `?redirect=`. El decode lo hace el LoginForm en el destino.
+      const redirect = encodeURIComponent(window.location.pathname);
+      const destination = `${withLocale('/admin/auth/login', locale)}?redirect=${redirect}`;
+      window.location.replace(destination);
     }
   }, [isAuthenticated, isHydrating]);
 
-  if (isHydrating && !isPublicAdminPath(window.location.pathname)) {
+  const { barePath } =
+    typeof window === 'undefined'
+      ? { barePath: '/' }
+      : stripLocaleFromPath(window.location.pathname);
+
+  if (isHydrating && !isPublicAdminPath(barePath)) {
     return (
       <div
         role="status"
         className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 text-sm text-slate-400"
       >
-        {t("auth.guard.redirecting")}
+        {t('auth.guard.redirecting')}
       </div>
     );
   }
