@@ -1,6 +1,14 @@
-import { useSyncExternalStore } from "react";
-import type { LoginPayload, LoginResponse, User } from "../types/auth";
-import { apiFetch } from "../lib/api";
+import { useSyncExternalStore } from 'react';
+import type {
+  LoginPayload,
+  LoginResponse,
+  LoginResult,
+  TwoFactorChallenge,
+  TwoFactorVerifyPayload,
+  User,
+} from '../types/auth';
+import { apiFetch } from '../lib/api';
+import { API_ENDPOINTS } from '../lib/endpoints';
 
 /**
  * Store de autenticación (React 19 + useSyncExternalStore).
@@ -13,13 +21,13 @@ import { apiFetch } from "../lib/api";
  *   const { user, token, login, logout, isAuthenticated } = useAuth();
  */
 
-const TOKEN_STORAGE_KEY = "auth.token";
+const TOKEN_STORAGE_KEY = 'auth.token';
 
-type AuthState = {
+interface AuthState {
   token: string | null;
   user: User | null;
   isHydrating: boolean;
-};
+}
 
 const initialState: AuthState = {
   token: readTokenFromStorage(),
@@ -35,10 +43,10 @@ const initialState: AuthState = {
  * navegación. Backend sigue siendo la fuente de verdad (validado vía
  * Sanctum en cada request).
  */
-const STORE_ID_STORAGE_KEY = "auth.store_id";
+const STORE_ID_STORAGE_KEY = 'auth.store_id';
 
 export function getActiveStoreId(): number | null {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return null;
   }
 
@@ -52,7 +60,7 @@ export function getActiveStoreId(): number | null {
 }
 
 function writeActiveStoreId(storeId: number | null): void {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return;
   }
 
@@ -73,7 +81,7 @@ function emit(): void {
 }
 
 function readTokenFromStorage(): string | null {
-  if (typeof window === "undefined" || window.localStorage === undefined) {
+  if (typeof window === 'undefined' || window.localStorage === undefined) {
     return null;
   }
 
@@ -85,7 +93,7 @@ function readTokenFromStorage(): string | null {
 }
 
 function writeTokenToStorage(token: string | null): void {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return;
   }
 
@@ -121,39 +129,129 @@ export function isAuthenticated(): boolean {
 }
 
 /**
- * Setea la sesión a partir de una respuesta de auth (login o register).
+ * Aplica el lado success del discriminated union de login.
  *
- * Usado por el flujo de register: el endpoint /auth/register ya
- * devuelve { token, user }, no necesitamos hacer un segundo POST
- * a /auth/login para obtener el token. Esta función lo guarda
- * directamente en el store + localStorage.
+ * Usado por:
+ *   - `login()` cuando el backend responde con `{ token, user }`.
+ *   - El form 2FA después de un `verifyTotpChallenge` exitoso
+ *     (mismo shape porque el backend re-emite token+user).
+ *
+ * Mantiene un solo punto de escritura del token para que
+ * el logout y el hydrate puedan limpiarlo consistentemente.
  */
-export function setSession(response: LoginResponse): void {
+function applySession(response: LoginResponse): void {
   state = { ...state, token: response.token, user: response.user };
   writeTokenToStorage(response.token);
   writeActiveStoreId(response.user.store_ids[0] ?? null);
   emit();
 }
 
-async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const response = await apiFetch<LoginResponse>("/auth/login", {
-    method: "POST",
-    body: payload,
-  });
+/**
+ * Setea la sesi\u00f3n a partir de una respuesta de auth (login o register).
+ *
+ * Usado por el flujo de register: el endpoint /auth/register ya
+ * devuelve { token, user }, no necesitamos hacer un segundo POST
+ * a /auth/login para obtener el token. Esta funci\u00f3n lo guarda
+ * directamente en el store + localStorage.
+ */
+export function setSession(response: LoginResponse): void {
+  applySession(response);
+}
 
-  state = { ...state, token: response.token, user: response.user };
-  writeTokenToStorage(response.token);
-  writeActiveStoreId(response.user.store_ids[0] ?? null);
-  emit();
+/**
+ * Login con discriminated union en la respuesta.
+ *
+ *   - HTTP 200 + { token, user }                  \u2192 { kind: 'success', ... }
+ *   - HTTP 200 + { status: '2fa_required', ... }  \u2192 { kind: '2fa_required', ... }
+ *   - HTTP 4xx/5xx                                 \u2192 throw ApiError
+ *
+ * En el caso `2fa_required` NO se escribe token ni user en el store
+ * (eso lo hace el caller llamando `setSession` despu\u00e9s del verify).
+ */
+async function login(payload: LoginPayload): Promise<LoginResult> {
+  const response = await apiFetch<LoginResponse & Partial<TwoFactorChallenge>>(
+    API_ENDPOINTS.auth.login,
+    {
+      method: 'POST',
+      body: payload,
+    }
+  );
 
-  return response;
+  if (isTwoFactorChallenge(response)) {
+    return {
+      kind: '2fa_required',
+      challengeId: response.challenge_token,
+      method: response.method,
+      expiresAt: response.expires_at,
+    };
+  }
+
+  applySession(response);
+
+  return {
+    kind: 'success',
+    token: response.token,
+    user: response.user,
+  };
+}
+
+/**
+ * Verifica un challenge 2FA (TOTP) y devuelve el mismo discriminated
+ * union que `login()`: si el backend responde success, persiste la
+ * sesi\u00f3n y devuelve `{ kind: 'success' }`; si responde con un nuevo
+ * challenge (raro, pero el backend podr\u00eda emitir uno nuevo), lo
+ * devuelve como `{ kind: '2fa_required' }` para que el form lo muestre.
+ */
+async function verifyTotpChallenge(payload: TwoFactorVerifyPayload): Promise<LoginResult> {
+  const response = await apiFetch<LoginResponse & Partial<TwoFactorChallenge>>(
+    API_ENDPOINTS.auth.twoFactor.totp.verifyLogin,
+    {
+      method: 'POST',
+      body: {
+        challenge_token: payload.challengeId,
+        code: payload.code,
+      },
+    }
+  );
+
+  if (isTwoFactorChallenge(response)) {
+    return {
+      kind: '2fa_required',
+      challengeId: response.challenge_token,
+      method: response.method,
+      expiresAt: response.expires_at,
+    };
+  }
+
+  applySession(response);
+
+  return {
+    kind: 'success',
+    token: response.token,
+    user: response.user,
+  };
+}
+
+function isTwoFactorChallenge(
+  response: LoginResponse & Partial<TwoFactorChallenge>
+): response is LoginResponse &
+  Partial<TwoFactorChallenge> & {
+    status: '2fa_required';
+    challenge_token: number;
+    method: 'totp';
+    expires_at: string;
+  } {
+  return (
+    (response as { status?: string }).status === '2fa_required' &&
+    typeof (response as { challenge_token?: unknown }).challenge_token === 'number'
+  );
 }
 
 async function logout(): Promise<void> {
   try {
     if (state.token !== null) {
-      await apiFetch("/auth/logout", {
-        method: "POST",
+      await apiFetch(API_ENDPOINTS.auth.logout, {
+        method: 'POST',
         token: state.token,
       });
     }
@@ -183,14 +281,14 @@ async function hydrate(): Promise<void> {
   state = { ...state, token, isHydrating: true };
   emit();
 
-  
-
   try {
-    const response = await apiFetch<{ user: User }>("/auth/me", { token });
+    const response = await apiFetch<{ user: User }>(API_ENDPOINTS.auth.me, {
+      token,
+    });
     state = { ...state, user: response.user, isHydrating: false };
     writeActiveStoreId(response.user.store_ids[0] ?? null);
   } catch {
-    // Token expirado o inválido → limpiar.
+    // Token expirado o inv\u00e1lido \u2192 limpiar.
     state = { token: null, user: null, isHydrating: false };
     writeTokenToStorage(null);
     writeActiveStoreId(null);
@@ -204,6 +302,7 @@ export const authStore = {
   logout,
   hydrate,
   setSession,
+  verifyTotpChallenge,
   subscribe,
   getSnapshot,
 };
@@ -213,9 +312,10 @@ export function useAuth(): {
   token: string | null;
   isAuthenticated: boolean;
   isHydrating: boolean;
-  login: (payload: LoginPayload) => Promise<LoginResponse>;
+  login: (payload: LoginPayload) => Promise<LoginResult>;
   logout: () => Promise<void>;
   setSession: typeof setSession;
+  verifyTotpChallenge: typeof verifyTotpChallenge;
 } {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
@@ -227,5 +327,6 @@ export function useAuth(): {
     login,
     logout,
     setSession,
+    verifyTotpChallenge,
   };
 }
