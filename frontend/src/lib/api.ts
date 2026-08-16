@@ -9,6 +9,16 @@ export type ApiError = {
   status: number;
   message: string;
   errors: Record<string, string[]> | null;
+  /**
+   * True cuando el error fue un fallo de red (fetch tiró TypeError
+   * porque el backend está caído, CORS bloqueó, DNS falló, etc.).
+   * Distinto de un HTTP 4xx/5xx (esos llevan isNetworkError: false).
+   *
+   * Los callers usan esto para decidir si limpian el estado de auth
+   * (401/403 → token inválido) o lo preservan (network → el token
+   * sigue siendo válido, solo no pudimos validarlo contra el backend).
+   */
+  isNetworkError: boolean;
 };
 
 type RequestOptions = Omit<RequestInit, "body"> & {
@@ -61,6 +71,7 @@ async function parseApiError(response: Response): Promise<ApiError> {
     status: response.status,
     message: error?.message ?? "API request failed",
     errors: error?.errors ?? null,
+    isNetworkError: false,
   };
 }
 
@@ -87,11 +98,28 @@ export async function apiFetch<T>(
     ...headers,
   };
 
-  const response = await fetch(resolveApiUrl(endpoint), {
-    ...rest,
-    body: serializedBody,
-    headers: requestHeaders,
-  });
+  let response: Response;
+  try {
+    response = await fetch(resolveApiUrl(endpoint), {
+      ...rest,
+      body: serializedBody,
+      headers: requestHeaders,
+    });
+  } catch (error) {
+    // fetch() rechaza con TypeError cuando la red cae (backend down,
+    // CORS, DNS, offline). Lo envolvemos como ApiError con
+    // isNetworkError: true para que los callers (auth.hydrate en
+    // particular) puedan distinguir "red caída" de "401 expirado".
+    const message =
+      error instanceof Error && error.message !== "" ? error.message : "Network error";
+    const networkError: ApiError = {
+      status: 0,
+      message,
+      errors: null,
+      isNetworkError: true,
+    };
+    throw networkError;
+  }
 
   if (!response.ok) {
     throw await parseApiError(response);
