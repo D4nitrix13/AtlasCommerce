@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Marketing;
 
 use App\Models\Catalog\Product;
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,6 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Promotion extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
@@ -112,11 +116,11 @@ class Promotion extends Model
     public function scopeValid(Builder $query): Builder
     {
         return $query->where(column: 'is_active', value: true)
-            ->where(function ($q) {
+            ->where(function ($q): void {
                 $q->whereNull(columns: 'starts_at')
                     ->orWhere(column: 'starts_at', operator: '<=', value: now());
             })
-            ->where(function ($q) {
+            ->where(function ($q): void {
                 $q->whereNull(columns: 'ends_at')
                     ->orWhere(column: 'ends_at', operator: '>=', value: now());
             });
