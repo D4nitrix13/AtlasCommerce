@@ -74,3 +74,45 @@ describe('lib/api · network error wrapping', () => {
     expect(sample.isNetworkError).toBe(true);
   });
 });
+
+describe('lib/api · Sanctum stateful cookies (CR2)', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('incluye credentials:include en el RequestInit (CR2: httpOnly cookies)', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ ok: 1 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+
+    await apiFetch('/auth/me');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    expect(init.credentials).toBe('include');
+  });
+
+  it('NO inyecta Authorization header (CR2: Bearer removido del frontend)', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ ok: 1 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+
+    // Aunque le pasemos un token "legacy" en opciones, no debe enviarse
+    // como Authorization — la auth viaja en cookies httpOnly.
+    await apiFetch('/auth/me', { token: 'legacy-token-ignored' });
+
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    const headers = new Headers(init.headers);
+    expect(headers.get('Authorization')).toBeNull();
+  });
+});
