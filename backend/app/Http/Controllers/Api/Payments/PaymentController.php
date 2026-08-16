@@ -34,11 +34,19 @@ class PaymentController extends Controller
 
     /**
      * Lista los pagos del cliente autenticado en la tienda actual.
-     * Filtrado automático por `BelongsToStore` global scope.
+     *
+     * Defense-in-depth: aunque `BelongsToStore` filtra por tienda, este
+     * endpoint también filtra explícitamente por `customer_id` para evitar
+     * exponer pagos de otros clientes dentro de la misma tienda.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return PaymentResource::collection(Payment::query()->get())
+        $customer = $this->resolveCustomer($request);
+
+        return PaymentResource::collection(Payment::query()
+            ->where(column: 'customer_id', operator: '=', value: $customer->id)
+            ->orderByDesc('paid_at')
+            ->get())
             ->response();
     }
 
