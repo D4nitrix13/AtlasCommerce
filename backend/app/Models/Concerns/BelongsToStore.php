@@ -13,8 +13,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Aísla una consulta por la tienda activa resuelta por el middleware.
  *
  * Modelos que tienen `store_id` deben usar este trait. El scope global
- * agrega el filtro `store_id = <tienda actual>` automáticamente cuando
- * existe una tienda en el contexto (singleton `StoreContextService`).
+ * agrega el filtro `store_id = <tienda actual> OR store_id IS NULL`
+ * automáticamente cuando existe una tienda en el contexto (singleton
+ * `StoreContextService`).
+ *
+ * Contrato de filas globales: una fila con `store_id = NULL` representa
+ * un recurso del sistema (cupón global, auditoría cross-tenant,
+ * notificación compartida) y es visible desde CUALQUIER contexto de
+ * tienda activa. Esto requiere que el modelo permita `store_id`
+ * nullable; si la columna es `NOT NULL`, el componente `IS NULL` se
+ * vuelve un no-op a nivel SQL y la fila global nunca existirá.
  *
  * Para consultas administrativas o cross-tenant usar el helper estático
  * `Model::withoutTenantScope()` o el scope local `withoutStoreScope()`.
@@ -38,10 +46,11 @@ trait BelongsToStore
             $storeId = app(StoreContextService::class)->getStoreId();
 
             if ($storeId !== null) {
-                $builder->where(
-                    $builder->getModel()->getTable().'.store_id',
-                    $storeId,
-                );
+                $table = $builder->getModel()->getTable();
+                $builder->where(function (Builder $query) use ($storeId, $table): void {
+                    $query->where("{$table}.store_id", $storeId)
+                        ->orWhereNull("{$table}.store_id");
+                });
             }
         });
     }

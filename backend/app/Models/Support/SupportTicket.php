@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Support;
 
+use App\Models\Concerns\BelongsToStore;
 use App\Models\Customers\Customer;
 use App\Models\Stores\Store;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,6 +31,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class SupportTicket extends Model
 {
+    use BelongsToStore;
     use SoftDeletes;
 
     protected $fillable = [
