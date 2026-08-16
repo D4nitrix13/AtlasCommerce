@@ -10,8 +10,10 @@ use App\Models\Auth\User;
 use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -61,6 +63,11 @@ final class AuthHttpTest extends TestCase
 
         // Asocia el user de tests a la tienda de tests.
         $this->user->stores()->attach($this->store->id);
+
+        // El RateLimiter usa cache shared entre tests. Limpiamos la
+        // key del login throttle para evitar flakes entre tests de la
+        // suite (login throttle y TTL).
+        RateLimiter::clear(key: 'login:test@example.com|127.0.0.1');
     }
 
     #[Test]
@@ -299,5 +306,123 @@ final class AuthHttpTest extends TestCase
             ]);
 
         $response->assertStatus(404);
+    }
+
+    #[Test]
+    public function it_expires_token_after_configured_minutes(): void
+    {
+        // Token con expires_at = ahora - 1 segundo (ya expirado).
+        Carbon::setTestNow(now()->subMinutes(10080)->subSecond());
+        $token = $this->user->createToken(name: 'expired-token', abilities: ['*'], expiresAt: now());
+
+        // Reset clock al "ahora" real (más allá de expires_at).
+        Carbon::setTestNow();
+
+        $response = $this->withHeaders(headers: [
+            'Authorization' => "Bearer {$token->plainTextToken}",
+        ])->getJson('/api/auth/me');
+
+        $response->assertStatus(401);
+    }
+
+    #[Test]
+    public function it_accepts_token_at_last_second(): void
+    {
+        // Token con expires_at = ahora + 10080min - 1 segundo (válido).
+        $token = $this->user->createToken(
+            name: 'about-to-expire-token',
+            abilities: ['*'],
+            expiresAt: now()->addMinutes(10080)->subSecond(),
+        );
+
+        $response = $this->withHeaders(headers: [
+            'Authorization' => "Bearer {$token->plainTextToken}",
+        ])->getJson('/api/auth/me');
+
+        $response->assertOk();
+        $response->assertJsonPath(path: 'user.email', expect: 'test@example.com');
+    }
+
+    #[Test]
+    public function it_refreshes_token_on_me_when_remaining_less_than_24h(): void
+    {
+        // Token con expires_at = ahora + 2h (menos de 24h).
+        $token = $this->user->createToken(
+            name: 'soon-to-expire-token',
+            abilities: ['*'],
+            expiresAt: now()->addHours(2),
+        );
+        $tokenId = $token->accessToken->id;
+        $originalExpiresAt = \Laravel\Sanctum\PersonalAccessToken::query()
+            ->find(id: $tokenId)
+            ->expires_at;
+
+        $response = $this->withHeaders(headers: [
+            'Authorization' => "Bearer {$token->plainTextToken}",
+        ])->getJson('/api/auth/me');
+
+        $response->assertOk();
+
+        // Reload from DB: refresh-on-use debe haber extendido expires_at
+        // a ~7 días desde ahora.
+        $refreshedExpiresAt = \Laravel\Sanctum\PersonalAccessToken::query()
+            ->find(id: $tokenId)
+            ->expires_at;
+
+        $this->assertGreaterThan($originalExpiresAt, $refreshedExpiresAt);
+    }
+
+    #[Test]
+    public function it_blocks_login_after_5_failed_attempts_per_email_ip(): void
+    {
+        // 5 intentos fallidos seguidos → el 6º debe ser bloqueado con
+        // mensaje "Demasiados intentos".
+        for ($i = 0; $i < 5; $i++) {
+            $response = $this->postJson(uri: '/api/auth/login', data: [
+                'email' => 'test@example.com',
+                'password' => 'wrong-password',
+            ]);
+            $response->assertStatus(422);
+            $response->assertJsonValidationErrors(['email']);
+        }
+
+        // 6º intento: debe ser bloqueado por throttle.
+        $response = $this->postJson(uri: '/api/auth/login', data: [
+            'email' => 'test@example.com',
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonPath(
+            path: 'errors.email.0',
+            expect: fn (string $m): bool => str_contains($m, 'Demasiados intentos'),
+        );
+    }
+
+    #[Test]
+    public function it_clears_login_throttle_after_successful_login(): void
+    {
+        // 4 fallos + 1 éxito → el contador se resetea y un fallo posterior
+        // NO debe ser bloqueado por throttle.
+        for ($i = 0; $i < 4; $i++) {
+            $this->postJson(uri: '/api/auth/login', data: [
+                'email' => 'test@example.com',
+                'password' => 'wrong-password',
+            ])->assertStatus(422);
+        }
+
+        // Login exitoso (resetea el contador).
+        $this->postJson(uri: '/api/auth/login', data: [
+            'email' => 'test@example.com',
+            'password' => 'secret-password',
+        ])->assertOk();
+
+        // 5 fallos más no deben disparar throttle (contador reseteado).
+        for ($i = 0; $i < 4; $i++) {
+            $this->postJson(uri: '/api/auth/login', data: [
+                'email' => 'test@example.com',
+                'password' => 'wrong-password',
+            ])->assertStatus(422);
+        }
     }
 }
