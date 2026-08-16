@@ -1,10 +1,12 @@
-import { useMemo, useState, type ReactElement } from "react";
-import { Eye, EyeOff, Check, Circle } from "lucide-react";
-import { apiFetch } from "../../../lib/api";
-import { AUTH_ACCENT } from "../../../lib/auth-accent";
-import { useAuth } from "../../../stores/auth";
-import { useTranslations } from "../../../i18n";
-import type { LoginResponse, ValidationErrors } from "../../../types/auth";
+import { useMemo, useState, type ReactElement } from 'react';
+import { Check } from 'lucide-react';
+import { apiFetch } from '../../../lib/api';
+import { useAuth } from '../../../stores/auth';
+import { useTranslations } from '../../../i18n';
+import { PasswordInput } from '../../../components/ui/PasswordInput';
+import { PasswordStrengthMeter } from '../../../components/ui/PasswordStrengthMeter';
+import { SecurityChecklist } from '../../../components/ui/SecurityChecklist';
+import type { LoginResponse, ValidationErrors } from '../../../types/auth';
 
 /**
  * Form para Step 2 del reset de password.
@@ -21,6 +23,11 @@ import type { LoginResponse, ValidationErrors } from "../../../types/auth";
  * aplican vía clases Tailwind arbitrarias (`#2D9D8E` family) — no
  * mediante `brand.accentColor`, que difiere por tienda y rompe la
  * consistencia visual entre páginas de auth.
+ *
+ * Compone sub-componentes extraídos (sdd PR 2 · Tasks 2.12-2.15):
+ *   - PasswordInput — input + toggle show/hide
+ *   - PasswordStrengthMeter — 4 barras + label
+ *   - SecurityChecklist — requisitos visuales
  */
 
 const PASSWORD_MIN_LENGTH = 12;
@@ -34,23 +41,20 @@ type ResetPasswordFormProps = {
 };
 
 type PasswordStrength = 0 | 1 | 2 | 3 | 4;
-const STRENGTH_LABELS = ["", "Débil", "Aceptable", "Buena", "Excelente"] as const;
+const STRENGTH_LABELS = ['', 'Débil', 'Aceptable', 'Buena', 'Excelente'] as const;
 
 export default function ResetPasswordForm({
   email,
-  codeFromUrl = "",
-  callbackPath = "/admin/dashboard",
-  locale = "es",
+  codeFromUrl = '',
+  callbackPath = '/admin/dashboard',
+  locale = 'es',
 }: ResetPasswordFormProps): ReactElement {
   const { t } = useTranslations();
   const { setSession } = useAuth();
 
-  const accent = AUTH_ACCENT.primary;
-
   const [code, setCode] = useState(codeFromUrl);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -62,59 +66,54 @@ export default function ResetPasswordForm({
       hasLower: /[a-z]/.test(password),
       hasNumber: /[0-9]/.test(password),
     }),
-    [password],
+    [password]
   );
 
   const passedChecks = Object.values(checks).filter(Boolean).length;
-  const strength: PasswordStrength = Math.min(
-    4,
-    Math.max(0, passedChecks),
-  ) as PasswordStrength;
+  const strength: PasswordStrength = Math.min(4, Math.max(0, passedChecks)) as PasswordStrength;
 
-  const passwordsMatch =
-    password !== "" && confirmPassword !== "" && password === confirmPassword;
+  const passwordsMatch = password !== '' && confirmPassword !== '' && password === confirmPassword;
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setErrorMessage(null);
 
-    if (code === "") {
-      setErrorMessage(t("auth.passwordReset.error.codeEmpty"));
+    if (code === '') {
+      setErrorMessage(t('auth.passwordReset.error.codeEmpty'));
       return;
     }
     if (code.length !== CODE_LENGTH) {
-      setErrorMessage(t("auth.passwordReset.error.codeInvalid"));
+      setErrorMessage(t('auth.passwordReset.error.codeInvalid'));
       return;
     }
-    if (password === "" || !checks.minLength || !checks.hasUpper || !checks.hasLower) {
-      setErrorMessage(t("auth.passwordReset.error.passwordWeak"));
+    if (password === '' || !checks.minLength || !checks.hasUpper || !checks.hasLower) {
+      setErrorMessage(t('auth.passwordReset.error.passwordWeak'));
       return;
     }
     if (!passwordsMatch) {
-      setErrorMessage(t("auth.passwordReset.error.passwordMismatch"));
+      setErrorMessage(t('auth.passwordReset.error.passwordMismatch'));
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const response = await apiFetch<LoginResponse>("/auth/reset-password", {
-        method: "POST",
+      const response = await apiFetch<LoginResponse>('/auth/reset-password', {
+        method: 'POST',
         body: {
           email,
           code: code.trim(),
           password,
           password_confirmation: confirmPassword,
-          device_name: "web-admin",
+          device_name: 'web-admin',
         },
       });
       setSession(response);
-      setSuccessMessage(t("auth.passwordReset.success"));
+      setSuccessMessage(t('auth.passwordReset.success'));
       window.setTimeout(() => {
         const params = new URLSearchParams({
           callback: callbackPath,
         });
-        window.location.href =
-          `/${locale}/admin/auth/reset-success?${params.toString()}`;
+        window.location.href = `/${locale}/admin/auth/reset-success?${params.toString()}`;
       }, 600);
     } catch (error_) {
       const apiError = error_ as {
@@ -123,9 +122,7 @@ export default function ResetPasswordForm({
       };
       const codeFieldError = apiError.errors?.code?.[0];
       setErrorMessage(
-        codeFieldError ??
-          apiError.message ??
-          t("auth.passwordReset.error.codeInvalid"),
+        codeFieldError ?? apiError.message ?? t('auth.passwordReset.error.codeInvalid')
       );
     } finally {
       setIsSubmitting(false);
@@ -156,111 +153,40 @@ export default function ResetPasswordForm({
         onSubmit={handleSubmit}
         className="flex flex-col gap-4"
         noValidate
-        aria-label={t("auth.passwordReset.title")}
+        aria-label={t('auth.passwordReset.title')}
       >
         {/* Code: hidden cuando viene del URL, visible si no */}
-        {codeFromUrl !== "" ? (
-          <input
-            type="hidden"
-            name="code"
-            value={code}
-            autoComplete="one-time-code"
-          />
+        {codeFromUrl !== '' ? (
+          <input type="hidden" name="code" value={code} autoComplete="one-time-code" />
         ) : (
-          <div>
-            <label
-              htmlFor="code"
-              className="block text-sm font-medium text-slate-700 mb-1.5"
-            >
-              {t("auth.passwordReset.code.label")}
-            </label>
-            <input
-              id="code"
-              name="code"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              required
-              maxLength={CODE_LENGTH}
-              pattern="[0-9]{6}"
-              placeholder={t("auth.passwordReset.code.placeholder")}
-              value={code}
-              onChange={(event) => {
-                setCode(
-                  event.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH),
-                );
-              }}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-center font-mono text-base tracking-[0.5em] text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
-            />
-            <p className="text-xs text-slate-400 mt-1.5">
-              {t("auth.passwordReset.step2.codeHelp")}
-            </p>
-          </div>
+          <CodeInput
+            code={code}
+            onChange={setCode}
+            label={t('auth.passwordReset.code.label')}
+            placeholder={t('auth.passwordReset.code.placeholder')}
+            helpText={t('auth.passwordReset.step2.codeHelp')}
+          />
         )}
 
         {/* Nueva contraseña */}
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-slate-700 mb-1.5"
-          >
-            {t("auth.passwordReset.newPassword.label")}
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
+            {t('auth.passwordReset.newPassword.label')}
           </label>
-          <div className="relative">
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="new-password"
-              required
-              minLength={PASSWORD_MIN_LENGTH}
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-              }}
-              className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setShowPassword(!showPassword);
-              }}
-              aria-label={
-                showPassword
-                  ? t("auth.passwordReset.password.hide")
-                  : t("auth.passwordReset.password.show")
-              }
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
-            >
-              {showPassword ? (
-                <EyeOff size={20} strokeWidth={2} />
-              ) : (
-                <Eye size={20} strokeWidth={2} />
-              )}
-            </button>
-          </div>
-
-          {/* Strength meter: 4 bars */}
-          <div className="mt-2 flex gap-1.5">
-            {[1, 2, 3, 4].map((bar) => (
-              <div
-                key={bar}
-                className="h-1 flex-1 rounded-full transition-colors"
-                style={{
-                  backgroundColor:
-                    strength >= bar ? accent : "#E5E5E5",
-                }}
-              />
-            ))}
-          </div>
-          {password !== "" && (
-            <p className="mt-1.5 text-xs text-slate-400">
-              {t("auth.passwordReset.strengthLabel")}{" "}
-              <span className="font-semibold text-[#2D9D8E]">
-                {STRENGTH_LABELS[strength]}
-              </span>
-            </p>
-          )}
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={setPassword}
+            showLabel={t('auth.passwordReset.password.show')}
+            hideLabel={t('auth.passwordReset.password.hide')}
+            required
+            minLength={PASSWORD_MIN_LENGTH}
+          />
+          <PasswordStrengthMeter
+            score={strength}
+            label={STRENGTH_LABELS[strength]}
+            labelPrefix={t('auth.passwordReset.strengthLabel')}
+          />
         </div>
 
         {/* Confirmar contraseña */}
@@ -269,134 +195,140 @@ export default function ResetPasswordForm({
             htmlFor="confirmPassword"
             className="block text-sm font-medium text-slate-700 mb-1.5"
           >
-            {t("auth.passwordReset.confirmPassword.label")}
+            {t('auth.passwordReset.confirmPassword.label')}
           </label>
-          <div className="relative">
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showPassword ? "text" : "password"}
-              autoComplete="new-password"
-              required
-              minLength={PASSWORD_MIN_LENGTH}
-              value={confirmPassword}
-              onChange={(event) => {
-                setConfirmPassword(event.target.value);
-              }}
-              className={`w-full px-4 py-2.5 pr-10 bg-slate-50 border rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 ${
-                passwordsMatch ? "border-[#2D9D8E]" : "border-slate-200"
-              }`}
-            />
-            {passwordsMatch && (
-              <div
-                aria-hidden="true"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2D9D8E]"
-              >
-                <Check size={18} strokeWidth={2.5} />
-              </div>
-            )}
-          </div>
+          <PasswordInput
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            showLabel={t('auth.passwordReset.password.show')}
+            hideLabel={t('auth.passwordReset.password.hide')}
+            required
+            minLength={PASSWORD_MIN_LENGTH}
+            className={passwordsMatch ? 'border-[#2D9D8E]' : 'border-slate-200'}
+          />
           {passwordsMatch && (
             <p className="mt-1.5 flex items-center gap-1 text-xs text-[#2D9D8E]">
               <Check size={14} strokeWidth={2.5} />
-              {t("auth.passwordReset.passwordsMatch")}
+              {t('auth.passwordReset.passwordsMatch')}
             </p>
           )}
         </div>
 
         {/* Checklist de seguridad */}
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <p className="mb-2 text-xs font-semibold text-slate-700">
-            {t("auth.passwordReset.securityTipsTitle")}
-          </p>
-          <ul className="space-y-1.5 text-xs text-slate-500">
-            <CheckItem
-              met={checks.minLength}
-              label={t("auth.passwordReset.tip.minLength")}
-            />
-            <CheckItem
-              met={checks.hasUpper && checks.hasLower}
-              label={t("auth.passwordReset.tip.upperLower")}
-            />
-            <CheckItem
-              met={checks.hasNumber}
-              label={t("auth.passwordReset.tip.number")}
-            />
-            <CheckItem
-              met={false}
-              label={t("auth.passwordReset.tip.symbol")}
-            />
-          </ul>
-        </div>
+        <SecurityChecklist
+          title={t('auth.passwordReset.securityTipsTitle')}
+          items={[
+            { met: checks.minLength, label: t('auth.passwordReset.tip.minLength') },
+            {
+              met: checks.hasUpper && checks.hasLower,
+              label: t('auth.passwordReset.tip.upperLower'),
+            },
+            { met: checks.hasNumber, label: t('auth.passwordReset.tip.number') },
+            { met: false, label: t('auth.passwordReset.tip.symbol') },
+          ]}
+        />
 
-        <button
-          type="submit"
-          disabled={isSubmitting || successMessage !== null}
-          className="w-full bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 flex items-center justify-center gap-2"
-        >
-          {isSubmitting ? (
-            <>
-              <svg
-                className="w-4 h-4 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
-              {t("auth.passwordReset.submitting")}
-            </>
-          ) : (
-            <>
-              <Check size={16} strokeWidth={2.5} />
-              {t("auth.passwordReset.submit")}
-            </>
-          )}
-        </button>
+        <SubmitButton
+          isSubmitting={isSubmitting}
+          hasSuccess={successMessage !== null}
+          submittingLabel={t('auth.passwordReset.submitting')}
+          idleLabel={t('auth.passwordReset.submit')}
+        />
       </form>
     </div>
   );
 }
 
-function CheckItem({
-  met,
+/**
+ * Input del código de 6 dígitos con `inputMode="numeric"` y filtro
+ * de caracteres no numéricos. Inline aquí (no extraído) porque solo se
+ * usa en este flujo.
+ */
+function CodeInput({
+  code,
+  onChange,
   label,
+  placeholder,
+  helpText,
 }: {
-  met: boolean;
+  code: string;
+  onChange: (value: string) => void;
   label: string;
+  placeholder: string;
+  helpText: string;
 }): ReactElement {
   return (
-    <li className="flex items-center gap-2">
-      {met ? (
-        <Check
-          size={14}
-          strokeWidth={2.5}
-          className="text-[#2D9D8E]"
-          aria-hidden="true"
-        />
-      ) : (
-        <Circle
-          size={14}
-          strokeWidth={2}
-          className="text-slate-400"
-          aria-hidden="true"
-        />
-      )}
-      <span className={met ? "text-[#2D9D8E]" : "text-slate-400"}>
+    <div>
+      <label htmlFor="code" className="block text-sm font-medium text-slate-700 mb-1.5">
         {label}
-      </span>
-    </li>
+      </label>
+      <input
+        id="code"
+        name="code"
+        type="text"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        required
+        maxLength={CODE_LENGTH}
+        pattern="[0-9]{6}"
+        placeholder={placeholder}
+        value={code}
+        onChange={(event) => {
+          onChange(event.target.value.replace(/\D/g, '').slice(0, CODE_LENGTH));
+        }}
+        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-center font-mono text-base tracking-[0.5em] text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+      />
+      <p className="text-xs text-slate-400 mt-1.5">{helpText}</p>
+    </div>
+  );
+}
+
+/**
+ * Botón submit con spinner inline (sin extracción porque es trivial).
+ */
+function SubmitButton({
+  isSubmitting,
+  hasSuccess,
+  submittingLabel,
+  idleLabel,
+}: {
+  isSubmitting: boolean;
+  hasSuccess: boolean;
+  submittingLabel: string;
+  idleLabel: string;
+}): ReactElement {
+  return (
+    <button
+      type="submit"
+      disabled={isSubmitting || hasSuccess}
+      className="w-full bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 flex items-center justify-center gap-2"
+    >
+      {isSubmitting ? (
+        <>
+          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+          {submittingLabel}
+        </>
+      ) : (
+        <>
+          <Check size={16} strokeWidth={2.5} />
+          {idleLabel}
+        </>
+      )}
+    </button>
   );
 }
