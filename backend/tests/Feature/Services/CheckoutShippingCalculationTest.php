@@ -65,7 +65,7 @@ final class CheckoutShippingCalculationTest extends TestCase
         $store = Store::factory()->for($this->currency, 'currency')->create();
         app(StoreContextService::class)->setStore($store);
 
-        ShippingZone::factory()->create(attributes: [
+        ShippingZone::factory()->forStore($store)->create(attributes: [
             'name' => 'Managua',
             'base_cost_cents' => 5_00,
             'is_active' => true,
@@ -87,8 +87,8 @@ final class CheckoutShippingCalculationTest extends TestCase
         $store = Store::factory()->for($this->currency, 'currency')->create();
         app(StoreContextService::class)->setStore($store);
 
-        ShippingZone::factory()->create(attributes: ['name' => 'Managua', 'base_cost_cents' => 5_00, 'is_active' => true]);
-        $express = ShippingZone::factory()->create(attributes: ['name' => 'Express', 'base_cost_cents' => 12_00, 'is_active' => true]);
+        ShippingZone::factory()->forStore($store)->create(attributes: ['name' => 'Managua', 'base_cost_cents' => 5_00, 'is_active' => true]);
+        $express = ShippingZone::factory()->forStore($store)->create(attributes: ['name' => 'Express', 'base_cost_cents' => 12_00, 'is_active' => true]);
 
         $cart = $this->makeCartWithItems($store, totalCents: 10_000);
 
@@ -108,7 +108,7 @@ final class CheckoutShippingCalculationTest extends TestCase
         $store = Store::factory()->for($this->currency, 'currency')->create();
         app(StoreContextService::class)->setStore($store);
 
-        $zone = ShippingZone::factory()->create(attributes: ['base_cost_cents' => 5_00, 'is_active' => true]);
+        $zone = ShippingZone::factory()->forStore($store)->create(attributes: ['base_cost_cents' => 5_00, 'is_active' => true]);
         $cart = $this->makeCartWithItems($store, totalCents: 10_000);
 
         $order = app(CheckoutService::class)->checkout(
@@ -130,7 +130,7 @@ final class CheckoutShippingCalculationTest extends TestCase
         $store = Store::factory()->for($this->currency, 'currency')->create();
         app(StoreContextService::class)->setStore($store);
 
-        ShippingZone::factory()->create(attributes: ['base_cost_cents' => 7_50, 'is_active' => true]);
+        ShippingZone::factory()->forStore($store)->create(attributes: ['base_cost_cents' => 7_50, 'is_active' => true]);
 
         $cart = $this->makeCartWithItems($store, totalCents: 20_000);
 
