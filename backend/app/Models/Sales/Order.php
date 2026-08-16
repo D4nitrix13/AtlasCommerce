@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Sales;
 
 use App\Models\Auth\User;
@@ -153,7 +155,7 @@ class Order extends Model
 
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where('custstomer_id', $customerId);
+        return $query->where(column: 'customer_id', operator: '=', value: $customerId);
     }
 
     public function scopeByStore(Builder $query, int $storeId): Builder
