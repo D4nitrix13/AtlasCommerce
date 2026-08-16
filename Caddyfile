@@ -111,6 +111,27 @@ http:// {
 	# Referrer-Policy ya está arriba. Strict-Transport-Security abajo para
 	# tener todos los headers de seguridad juntos (no repetir).
 
+	# ===============================================================
+	# Edge rate limiting (NOT IMPLEMENTED — requires caddy-ratelimit plugin)
+	# ===============================================================
+	# Defense-in-depth: rate limit per-IP a nivel de edge (Caddy) ANTES
+	# de que el request llegue al backend. Complementa los RateLimiter
+	# de Laravel (PR #6 cluster 3 Sanctum) con bloqueo DDoS early.
+	#
+	# R1 review 2026-08-15 noted this. Para activarlo, compilar Caddy
+	# con el plugin `caddy-ratelimit`:
+	#   $ xcaddy build --with github.com/mholt/caddy-ratelimit
+	# Y luego descomentar el bloque de abajo:
+	#
+	# @auth_login path /api/auth/login /api/auth/2fa/verify-totp-login /api/auth/recovery-codes/regenerate
+	# rate_limit @auth_login auth_login_zone 5r/m
+	#
+	# @auth_password_reset path /api/auth/forgot-password /api/auth/reset-password
+	# rate_limit @auth_password_reset auth_password_reset_zone 3r/h
+	#
+	# @api_general path /api/*
+	# not path /api/auth/login /api/auth/2fa/verify-totp-login /api/auth/recovery-codes/regenerate /api/auth/forgot-password /api/auth/reset-password
+	# rate_limit @api_general api_default_zone 60r/m
 
 	# -----------------------------------------------------------
 	# DEVELOPMENT — puertos publicados en el host
