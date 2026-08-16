@@ -53,6 +53,17 @@ final class TwoFactorLoginFlowTest extends TestCase
         RateLimiter::clear(key: 'forgot-password:2fauser@panda-estampados.com');
         RateLimiter::clear(key: 'forgot-password:admin@panda-estampados.com');
         RateLimiter::clear(key: 'reset-password:127.0.0.1');
+
+        // Limpia throttle keys de PR1 (login, verify-totp-login,
+        // totp-verify, recovery-codes).
+        RateLimiter::clear(key: 'login:2fauser@panda-estampados.com|127.0.0.1');
+        RateLimiter::clear(key: 'login:admin@panda-estampados.com|127.0.0.1');
+        RateLimiter::clear(key: 'verify-totp-login:127.0.0.1');
+        RateLimiter::clear(key: 'totp-verify:127.0.0.1');
+        $adminUser = \App\Models\Auth\User::query()->where(column: 'email', operator: '=', value: 'admin@panda-estampados.com')->first();
+        if ($adminUser !== null) {
+            RateLimiter::clear(key: 'recovery-codes:' . $adminUser->id . '|127.0.0.1');
+        }
     }
 
     /**
@@ -276,5 +287,63 @@ final class TwoFactorLoginFlowTest extends TestCase
 
         // NO devuelve challenge.
         $response->assertJsonMissingPath('challenge_token');
+    }
+
+    #[Test]
+    public function it_blocks_verify_totp_login_after_10_attempts_per_ip(): void
+    {
+        // 10 intentos de verify-totp-login desde la misma IP (mezcla de
+        // códigos correctos e incorrectos): el 11º debe ser bloqueado.
+        ['user' => $user, 'secret' => $secret] = $this->userWith2fa('2fauser@panda-estampados.com');
+
+        // Generamos 11 challenges (uno por intento). Cada verify consume
+        // o incrementa attempts; algunos intentos serán 422 por código
+        // incorrecto o challenge consumido, pero todos cuentan para el
+        // throttle IP-based.
+        for ($i = 0; $i < 10; $i++) {
+            $loginResponse = $this->postJson(uri: self::HOST . '/api/auth/login', data: [
+                'email' => $user->email,
+                'password' => 'password',
+            ]);
+            $challengeToken = (int) $loginResponse->json('challenge_token');
+
+            $verifyResponse = $this->postJson(uri: self::HOST . '/api/auth/2fa/verify-totp-login', data: [
+                'challenge_token' => $challengeToken,
+                'code' => $i % 2 === 0 ? '000000' : $this->totpCodeFor($secret),
+            ]);
+
+            // Primer intento con code correcto: success. Resto: 422.
+            // Todos cuentan para el throttle.
+            if ($i === 0) {
+                // 1º: code incorrecto → 422.
+                $this->assertSame(expected: 422, actual: $verifyResponse->status());
+            } elseif ($i === 1) {
+                // 2º: code correcto → 200.
+                $verifyResponse->assertOk();
+            } else {
+                // 3-10: alternan. Algunos pueden ser 200 (challenge_token
+                // nuevos con codes correctos), otros 422. Lo importante
+                // es que NINGUNO devuelve 429.
+                $this->assertContains(needle: $verifyResponse->status(), haystack: [200, 422]);
+            }
+        }
+
+        // 11º intento: nuevo login → challenge, pero verify debe ser bloqueado.
+        $loginResponse = $this->postJson(uri: self::HOST . '/api/auth/login', data: [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+        $challengeToken = (int) $loginResponse->json('challenge_token');
+
+        $verifyResponse = $this->postJson(uri: self::HOST . '/api/auth/2fa/verify-totp-login', data: [
+            'challenge_token' => $challengeToken,
+            'code' => $this->totpCodeFor($secret),
+        ]);
+
+        $verifyResponse->assertStatus(422);
+        $verifyResponse->assertJsonPath(
+            path: 'errors.code.0',
+            expect: fn (string $m): bool => str_contains($m, 'Demasiados intentos'),
+        );
     }
 }

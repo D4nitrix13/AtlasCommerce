@@ -9,6 +9,8 @@ use App\Models\Auth\User;
 use App\Services\Auth\RecoveryCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Endpoints de recovery codes.
@@ -49,6 +51,18 @@ class RecoveryCodeController extends Controller
      */
     public function regenerate(Request $request): JsonResponse
     {
+        // Throttle: 5 regeneraciones por hora por (user_id + IP).
+        // Previene abuso en caso de sesión comprometida: regenerar
+        // invalida los codes anteriores, lo que sería destructivo si
+        // se hace muchas veces seguidas.
+        $regenKey = 'recovery-codes:' . $request->user()?->id . '|' . $request->ip();
+        if (RateLimiter::tooManyAttempts(key: $regenKey, maxAttempts: 5)) {
+            throw ValidationException::withMessages([
+                'count' => ['Demasiados intentos. Probá de nuevo en ' . RateLimiter::availableIn(key: $regenKey) . ' segundos.'],
+            ]);
+        }
+        RateLimiter::hit(key: $regenKey, decaySeconds: 3600);
+
         $user = $request->user();
         $request->validate(rules: [
             'count' => ['sometimes', 'integer', 'min:1', 'max:50'],

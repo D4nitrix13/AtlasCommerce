@@ -12,6 +12,7 @@ use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -44,6 +45,16 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request, StoreContextService $storeContext): JsonResponse
     {
+        // Throttle IP+email: bloquea 6to intento dentro de 5 min.
+        // Aplica ANTES de validar credenciales para no leak info
+        // (no diferencia entre email inexistente y password incorrecto).
+        $loginKey = 'login:' . $request->input(key: 'email') . '|' . $request->ip();
+        if (RateLimiter::tooManyAttempts(key: $loginKey, maxAttempts: 5)) {
+            throw ValidationException::withMessages([
+                'email' => ['Demasiados intentos. Probá de nuevo en ' . RateLimiter::availableIn(key: $loginKey) . ' segundos.'],
+            ]);
+        }
+
         $credentials = $request->validated();
 
         /** @var User|null $user */
@@ -52,12 +63,15 @@ class AuthController extends Controller
             ->first();
 
         if ($user === null || ! Hash::check(value: $credentials['password'], hashedValue: $user->password)) {
+            // Contar el intento fallido en el throttle.
+            RateLimiter::hit(key: $loginKey, decaySeconds: 300);
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales no son válidas.'],
             ]);
         }
 
         if (! $user->is_active) {
+            RateLimiter::hit(key: $loginKey, decaySeconds: 300);
             throw ValidationException::withMessages([
                 'email' => ['La cuenta está desactivada.'],
             ]);
@@ -66,6 +80,7 @@ class AuthController extends Controller
         $currentStoreId = $storeContext->getStoreId();
 
         if ($currentStoreId !== null && ! $user->hasAccessToStore(storeId: $currentStoreId)) {
+            RateLimiter::hit(key: $loginKey, decaySeconds: 300);
             throw ValidationException::withMessages([
                 'email' => ['No tienes acceso a esta tienda.'],
             ]);
@@ -75,9 +90,7 @@ class AuthController extends Controller
 
         // Si el user tiene 2FA habilitada, NO emitimos token todavía.
         // Devolvemos un 200 con 'status: 2fa_required' y un challenge
-        // token que el frontend envía en /auth/2fa/verify-totp-login
-        // (endpoint que se implementa en un commit posterior). Esto
-        // evita emitir tokens si el user no completa 2FA.
+        // token que el frontend envía en /auth/2fa/verify-totp-login.
         if ($user->hasTwoFactorEnabled()) {
             $challenge = \App\Models\Auth\OtpChallenge::create([
                 'user_id' => $user->id,
@@ -88,6 +101,8 @@ class AuthController extends Controller
                 'context' => ['action' => 'login_2fa', 'device_name' => $deviceName],
                 'expires_at' => now()->addMinutes(value: 5),
             ]);
+            // Limpia el contador: el password es válido, no fue un ataque.
+            RateLimiter::clear(key: $loginKey);
             return response()->json(data: [
                 'status' => '2fa_required',
                 'challenge_token' => $challenge->id,
@@ -97,6 +112,10 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken(name: $deviceName);
+
+        // Login exitoso: limpia el contador (sin esto, 5 logins buenos
+        // seguidos lockean al user durante 5 min).
+        RateLimiter::clear(key: $loginKey);
 
         return response()->json(data: [
             'token' => $token->plainTextToken,
@@ -112,6 +131,21 @@ class AuthController extends Controller
      */
     public function verifyTotpLogin(Request $request): JsonResponse
     {
+        // Throttle IP-based (10/5min): defense-in-depth contra brute force
+        // de los ~30 códigos TOTP válidos por challenge (3 codes ×
+        // ±1 step × ventanas de 30s en 5 min). Aplica ANTES de validar
+        // challenge para que un atacante no pueda evadir el throttle
+        // pidiendo challenges nuevos.
+        $ipKey = 'verify-totp-login:' . $request->ip();
+        if (RateLimiter::tooManyAttempts(key: $ipKey, maxAttempts: 10)) {
+            throw ValidationException::withMessages([
+                'code' => ['Demasiados intentos. Probá de nuevo en ' . RateLimiter::availableIn(key: $ipKey) . ' segundos.'],
+            ]);
+        }
+        // Cuenta el intento actual. Hit ANTES de validar challenge para
+        // que throttle aplique incluso con challenge expirado o inválido.
+        RateLimiter::hit(key: $ipKey, decaySeconds: 300);
+
         $request->validate(rules: [
             'challenge_token' => ['required', 'integer'],
             'code' => ['required', 'string', 'size:6'],
@@ -170,6 +204,18 @@ class AuthController extends Controller
 
         if ($user === null) {
             return response()->json(data: ['message' => 'No autenticado.'], status: 401);
+        }
+
+        // Refresh-on-use: si el token actual expira en menos de 24h,
+        // extiende expires_at a (now + SANCTUM_EXPIRATION_MINUTES).
+        // El costo es 1 UPDATE por sesión activa por cada ventana de
+        // ~24h; reduce re-logins diarios sin sacrificar seguridad.
+        $token = $user->currentAccessToken();
+        $expiresAt = $token?->expires_at;
+        if ($expiresAt instanceof \Illuminate\Support\Carbon && $expiresAt->isBefore(now()->addDay())) {
+            $token->forceFill(attributes: [
+                'expires_at' => now()->addMinutes((int) config(key: 'sanctum.expiration')),
+            ])->save();
         }
 
         return response()->json(data: [
