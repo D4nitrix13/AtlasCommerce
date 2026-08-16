@@ -50,7 +50,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => (int) env(key: 'SANCTUM_EXPIRATION_MINUTES', default: 60 * 24 * 7),
 
     /*
     |--------------------------------------------------------------------------
