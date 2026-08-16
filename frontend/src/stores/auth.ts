@@ -269,6 +269,11 @@ async function logout(): Promise<void> {
 /**
  * Rehidrata el user desde el backend usando el token guardado.
  * Llamar al boot de la app para validar que el token sigue vigente.
+ *
+ * Distingue entre errores de auth y errores de red:
+ *   - HTTP 401 o 403 → token inválido/expirado → limpiar sesión.
+ *   - Cualquier otro throw (incluido network: isNetworkError=true,
+ *     HTTP 5xx) → conservar el token, seguir offline-tolerant.
  */
 async function hydrate(): Promise<void> {
   const token = readTokenFromStorage();
@@ -287,11 +292,33 @@ async function hydrate(): Promise<void> {
     });
     state = { ...state, user: response.user, isHydrating: false };
     writeActiveStoreId(response.user.store_ids[0] ?? null);
-  } catch {
-    // Token expirado o inv\u00e1lido \u2192 limpiar.
-    state = { token: null, user: null, isHydrating: false };
-    writeTokenToStorage(null);
-    writeActiveStoreId(null);
+  } catch (error) {
+    const apiError = error as {
+      status?: number;
+      isNetworkError?: boolean;
+    };
+
+    // Limpiar sesión SOLO cuando el backend nos rechaza la auth.
+    // Si el backend está caído o devuelve 5xx, conservamos el token:
+    // el token sigue siendo criptográficamente válido y queremos
+    // reintentar en la próxima navegación, no forzar logout.
+    const isAuthFailure = apiError.status === 401 || apiError.status === 403;
+
+    if (isAuthFailure) {
+      state = { token: null, user: null, isHydrating: false };
+      writeTokenToStorage(null);
+      writeActiveStoreId(null);
+    } else {
+      // Network down o 5xx — preservamos token + user previos.
+      // Solo log para diagnóstico: el usuario sigue "logueado" en
+      // el cliente, pero la próxima navegación intentará rehidratar.
+      if (typeof console !== 'undefined') {
+        console.warn(
+          `[auth.hydrate] Conservando sesión (no se pudo validar contra el backend). status=${apiError.status ?? 'unknown'} isNetworkError=${apiError.isNetworkError === true}`
+        );
+      }
+      state = { ...state, isHydrating: false };
+    }
   }
 
   emit();

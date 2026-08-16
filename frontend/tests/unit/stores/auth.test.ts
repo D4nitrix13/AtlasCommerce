@@ -172,6 +172,57 @@ describe('stores/auth', () => {
       await authStore.hydrate();
       expect(fetchSpy).not.toHaveBeenCalled();
     });
+
+    /**
+     * sdd/critical-2fa-frontend-flow · Task 2.2
+     *
+     * Cuando el backend está caído (fetch rechaza con TypeError) NO
+     * debemos limpiar el token: el token sigue siendo criptográficamente
+     * válido, solo no pudimos validarlo contra el backend. Limpiar el
+     * token en ese caso cierra la sesión al primer blip de red.
+     */
+    it('preserva el token cuando fetch tira TypeError (backend caído)', async () => {
+      window.localStorage.setItem('auth.token', 'still-valid');
+      window.localStorage.setItem('auth.store_id', '1');
+
+      vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+
+      await authStore.hydrate();
+
+      expect(window.localStorage.getItem('auth.token')).toBe('still-valid');
+      expect(window.localStorage.getItem('auth.store_id')).toBe('1');
+      expect(getAuthToken()).toBe('still-valid');
+    });
+
+    it('preserva el token en HTTP 500 (no es un problema de auth)', async () => {
+      window.localStorage.setItem('auth.token', 'still-valid');
+
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ message: 'Server error' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+
+      await authStore.hydrate();
+
+      expect(window.localStorage.getItem('auth.token')).toBe('still-valid');
+    });
+
+    it('limpia el token en HTTP 403 (forbidden, además de 401)', async () => {
+      window.localStorage.setItem('auth.token', 'forbidden');
+
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ message: 'Forbidden' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+
+      await authStore.hydrate();
+
+      expect(window.localStorage.getItem('auth.token')).toBeNull();
+    });
   });
 
   /**
