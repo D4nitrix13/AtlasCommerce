@@ -113,6 +113,16 @@ class AuthController extends Controller
 
         $token = $user->createToken(name: $deviceName);
 
+        // Sanctum stateful (post-PR7): emitir session cookie además
+        // del Bearer token. auth('web')->login() crea la sesión en el
+        // StoreSessionDomainFromHost middleware-set domain + setea
+        // cookie httpOnly. Guard con hasSession() porque los tests
+        // Bearer-only (AdminDefaultLoginFlowTest) usan driver=array
+        // sin sesión.
+        if ($request->hasSession()) {
+            auth('web')->login($user);
+        }
+
         // Login exitoso: limpia el contador (sin esto, 5 logins buenos
         // seguidos lockean al user durante 5 min).
         RateLimiter::clear(key: $loginKey);
@@ -176,6 +186,12 @@ class AuthController extends Controller
         $deviceName = data_get($challenge->context, 'device_name', 'web-admin') ?? 'web-admin';
         $token = $user->createToken(name: $deviceName);
 
+        // Sanctum stateful (post-PR7): emitir session cookie además
+        // del Bearer token. Ver login() para el rationale de hasSession().
+        if ($request->hasSession()) {
+            auth('web')->login($user);
+        }
+
         return response()->json(data: [
             'token' => $token->plainTextToken,
             'user' => new UserResource(
@@ -189,7 +205,23 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()?->currentAccessToken()?->delete();
+        // Sanctum stateful (post-PR7): cerrar sesión web si está activa
+        // (post auth('web')->login() en login()), además de revocar el
+        // Bearer token. Usamos auth('web')->logout() (no auth()->logout())
+        // porque el guard default es RequestGuard (de Sanctum) que no
+        // expone logout(). El guard 'web' es SessionGuard y sí tiene
+        // logout(). auth('web')->logout() limpia la sesión sin error
+        // si no hay sesión activa.
+        if ($request->hasSession()) {
+            auth('web')->logout();
+        }
+        // Solo revocamos tokens persistentes (NewAccessToken). Los
+        // TransientToken (session auth) no tienen delete() porque
+        // no están persistidos en la DB.
+        $token = $request->user()?->currentAccessToken();
+        if ($token instanceof \Laravel\Sanctum\NewAccessToken) {
+            $token->delete();
+        }
 
         return response()->json(data: ['message' => 'Sesión cerrada.']);
     }
@@ -210,12 +242,17 @@ class AuthController extends Controller
         // extiende expires_at a (now + SANCTUM_EXPIRATION_MINUTES).
         // El costo es 1 UPDATE por sesión activa por cada ventana de
         // ~24h; reduce re-logins diarios sin sacrificar seguridad.
+        // currentAccessToken() puede ser null (no auth) o un
+        // TransientToken (session auth) — solo NewAccessToken tiene
+        // expires_at. Solo refrescamos tokens persistentes.
         $token = $user->currentAccessToken();
-        $expiresAt = $token?->expires_at;
-        if ($expiresAt instanceof \Illuminate\Support\Carbon && $expiresAt->isBefore(now()->addDay())) {
-            $token->forceFill(attributes: [
-                'expires_at' => now()->addMinutes((int) config(key: 'sanctum.expiration')),
-            ])->save();
+        if ($token instanceof \Laravel\Sanctum\NewAccessToken) {
+            $expiresAt = $token->expires_at;
+            if ($expiresAt instanceof \Illuminate\Support\Carbon && $expiresAt->isBefore(now()->addDay())) {
+                $token->forceFill(attributes: [
+                    'expires_at' => now()->addMinutes((int) config(key: 'sanctum.expiration')),
+                ])->save();
+            }
         }
 
         return response()->json(data: [
