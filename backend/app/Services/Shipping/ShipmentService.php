@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Shipping;
 
 use App\Enums\ShipmentStatus;
+use App\Exceptions\Shipping\CrossTenantShippingZoneException;
 use App\Exceptions\Shipping\InvalidShipmentTransitionException;
 use App\Models\Sales\Invoice;
 use App\Models\Shipping\Shipment;
@@ -60,9 +61,23 @@ final class ShipmentService
             return $existing;
         }
 
+        // Busca la zona ignorando el global scope: queremos resolver por ID
+        // sin importar el contexto activo, y luego validar manualmente el
+        // tenant para evitar referencias cross-tenant.
         $zone = $invoice->shipping_zone_id !== null
-            ? ShippingZone::query()->find($invoice->shipping_zone_id)
+            ? ShippingZone::withoutGlobalScope('store')->find($invoice->shipping_zone_id)
             : null;
+
+        // Defensa contra referencia cross-tenant: si la zona pertenece
+        // explícitamente a otra tienda (store_id no nulo y distinto al
+        // de la invoice), fail-loud. Las zonas con store_id NULL se
+        // consideran globales y son válidas para cualquier invoice.
+        if ($zone !== null && $zone->store_id !== null && (int) $zone->store_id !== $invoice->store_id) {
+            throw CrossTenantShippingZoneException::fromZone(
+                expectedStoreId: $invoice->store_id,
+                actualStoreId: (int) $zone->store_id,
+            );
+        }
 
         $defaultCompany = ShippingCompany::query()
             ->orderBy('id')

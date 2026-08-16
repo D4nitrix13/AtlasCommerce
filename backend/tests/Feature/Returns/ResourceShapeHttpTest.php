@@ -87,7 +87,7 @@ final class ResourceShapeHttpTest extends TestCase
         ]);
         $this->customer = Customer::factory()->create(attributes: ['user_id' => $this->user->id]);
         $this->warehouse = Warehouse::factory()->create(attributes: ['is_active' => true]);
-        $this->zone = ShippingZone::factory()->create(attributes: [
+        $this->zone = ShippingZone::factory()->forStore($this->store)->create(attributes: [
             'base_cost_cents' => 5_00,
             'is_active' => true,
         ]);
@@ -284,7 +284,7 @@ final class ResourceShapeHttpTest extends TestCase
         $response = $this->postJson(uri: '/api/refunds', data: [
             'return_request_id' => $returnRequest->id,
             'amount_cents' => 25_00,
-            ]);
+        ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.status', RefundStatus::Pending->value);
