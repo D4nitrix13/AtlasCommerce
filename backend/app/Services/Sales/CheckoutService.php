@@ -278,7 +278,8 @@ final class CheckoutService
         }
 
         $zone = ShippingZone::query()
-            ->where('is_active', true)
+            ->where(column: 'store_id', operator: '=', value: $storeId)
+            ->where(column: 'is_active', operator: '=', value: true)
             ->orderBy('id')
             ->first();
 

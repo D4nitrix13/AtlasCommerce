@@ -107,7 +107,7 @@ final class PaymentApiTest extends TestCase
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 10_00,
-])->assertUnauthorized();
+        ])->assertUnauthorized();
     }
 
     #[Test]
@@ -120,7 +120,7 @@ final class PaymentApiTest extends TestCase
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 20_00,
             'reference' => 'TRF-001',
-            ]);
+        ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.amount.cents', 2000);
@@ -148,7 +148,7 @@ final class PaymentApiTest extends TestCase
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 50_00,
-            ]);
+        ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.status', 'completed');
@@ -170,7 +170,7 @@ final class PaymentApiTest extends TestCase
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 51_00, // 1 cent over
-])->assertStatus(422)
+        ])->assertStatus(422)
             ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'supera'));
 
         $this->invoice->refresh();
@@ -204,7 +204,7 @@ final class PaymentApiTest extends TestCase
             'invoice_id' => $otherInvoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 10_00,
-])->assertForbidden();
+        ])->assertForbidden();
     }
 
     #[Test]
@@ -216,13 +216,13 @@ final class PaymentApiTest extends TestCase
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 30_00,
-])->assertCreated();
+        ])->assertCreated();
 
         $this->postJson(uri: '/api/payments', data: [
             'invoice_id' => $this->invoice->id,
             'payment_method_id' => $this->paymentMethod->id,
             'amount_cents' => 20_00,
-])->assertCreated();
+        ])->assertCreated();
 
         $this->invoice->refresh();
         $this->assertSame(50_00, $this->invoice->paidAmountCents());
@@ -230,5 +230,63 @@ final class PaymentApiTest extends TestCase
 
         // Dos payments creados, ambos con status completed porque la invoice quedó pagada.
         $this->assertSame(2, Payment::where('customer_id', $this->customer->id)->count());
+    }
+
+    #[Test]
+    public function it_returns_only_authenticated_customer_payments(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        // Crear 1 payment del customer autenticado.
+        Payment::factory()->for($this->customer)->for($this->paymentMethod)->for($this->store)->for($this->currency)->create([
+            'amount_cents' => 25_00,
+        ]);
+
+        $response = $this->getJson('/api/payments');
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.customer_id', $this->customer->id);
+    }
+
+    #[Test]
+    public function it_excludes_other_customers_payments_in_same_store(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        // Payment del customer autenticado.
+        Payment::factory()->for($this->customer)->for($this->paymentMethod)->for($this->store)->for($this->currency)->create([
+            'amount_cents' => 10_00,
+        ]);
+
+        // Payment de OTRO customer en la MISMA tienda — esto es el leak pre-PR1.
+        $otherCustomer = Customer::factory()->create();
+        Payment::factory()->for($otherCustomer)->for($this->paymentMethod)->for($this->store)->for($this->currency)->create([
+            'amount_cents' => 99_00,
+        ]);
+
+        $response = $this->getJson('/api/payments');
+
+        $response->assertOk();
+        // Solo el payment del customer autenticado.
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.customer_id', $this->customer->id);
+    }
+
+    #[Test]
+    public function it_returns_empty_when_customer_has_no_payments(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        // Otro customer tiene payment pero el autenticado no.
+        $otherCustomer = Customer::factory()->create();
+        Payment::factory()->for($otherCustomer)->for($this->paymentMethod)->for($this->store)->for($this->currency)->create([
+            'amount_cents' => 15_00,
+        ]);
+
+        $response = $this->getJson('/api/payments');
+
+        $response->assertOk();
+        $response->assertJsonCount(0, 'data');
     }
 }
