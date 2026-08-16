@@ -10,6 +10,7 @@ use Database\Seeders\DefaultAdminSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -52,6 +53,14 @@ final class RecoveryCodeFlowTest extends TestCase
         RateLimiter::clear(key: 'forgot-password:emailuser@panda-estampados.com');
         RateLimiter::clear(key: 'forgot-password:admin@panda-estampados.com');
         RateLimiter::clear(key: 'reset-password:127.0.0.1');
+
+        // Limpia también el throttle de regenerate (PR1 H4). Usamos
+        // el ID del user admin creado por el seeder, más los users
+        // que este test crea (rccuser, emailuser, 2fauser).
+        $adminUser = \App\Models\Auth\User::query()->where(column: 'email', operator: '=', value: 'admin@panda-estampados.com')->first();
+        if ($adminUser !== null) {
+            RateLimiter::clear(key: 'recovery-codes:' . $adminUser->id . '|127.0.0.1');
+        }
     }
 
     /**
@@ -234,5 +243,29 @@ final class RecoveryCodeFlowTest extends TestCase
 
         $resetResponse->assertOk();
         $resetResponse->assertJsonStructure(['token', 'user']);
+    }
+
+    #[Test]
+    public function it_blocks_recovery_codes_regenerate_after_5_attempts_per_user_ip(): void
+    {
+        // User con 2FA activa: regenerar 5 veces debe funcionar, 6ª debe bloquearse.
+        ['user' => $user] = $this->userWithRecoveryCodes('rccuser@panda-estampados.com');
+
+        Sanctum::actingAs(user: $user, abilities: ['*']);
+
+        // 5 regeneraciones exitosas.
+        for ($i = 0; $i < 5; $i++) {
+            $response = $this->postJson(uri: self::HOST . '/api/auth/recovery-codes/regenerate');
+            $response->assertOk();
+        }
+
+        // 6ª regeneración: bloqueada por throttle.
+        $response = $this->postJson(uri: self::HOST . '/api/auth/recovery-codes/regenerate');
+
+        $response->assertStatus(422);
+        $response->assertJsonPath(
+            path: 'errors.count.0',
+            expect: fn (string $m): bool => str_contains($m, 'Demasiados intentos'),
+        );
     }
 }
