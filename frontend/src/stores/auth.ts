@@ -14,16 +14,23 @@ import { API_ENDPOINTS } from '../lib/endpoints';
  * Store de autenticación (React 19 + useSyncExternalStore).
  *
  * Sin dependencias externas: implementa el patrón subscribe/getSnapshot
- * manualmente. El token se persiste en `localStorage` para sobrevivir
- * recargas; el user se rehidrata via /auth/me al boot.
+ * manualmente. El user se rehidrata via /auth/me al boot usando la
+ * cookie de sesión httpOnly (CR2 — Sanctum stateful).
+ *
+ * Antes del CR2, el token se persistía en `localStorage` con key
+ * `auth.token` (vulnerable a XSS). Ahora la auth vive en cookies
+ * httpOnly que el browser maneja — JS no puede leer/escribir el token.
  *
  * Uso:
- *   const { user, token, login, logout, isAuthenticated } = useAuth();
+ *   const { user, login, logout, isAuthenticated } = useAuth();
  */
 
-const TOKEN_STORAGE_KEY = 'auth.token';
-
 interface AuthState {
+  /**
+   * @deprecated CR2 — siempre null (token en cookie httpOnly). Mantenido
+   * en el shape por compat con callers (se eliminará en cleanup post-
+   * quarantine window — ver design doc §8).
+   */
   token: string | null;
   user: User | null;
   isHydrating: boolean;
@@ -81,27 +88,21 @@ function emit(): void {
 }
 
 function readTokenFromStorage(): string | null {
-  if (typeof window === 'undefined' || window.localStorage === undefined) {
-    return null;
-  }
-
-  try {
-    return window.localStorage.getItem(TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  // CR2: Sanctum stateful usa cookies httpOnly (no JS-readable). El
+  // token ya NO vive en localStorage → esta función siempre devuelve
+  // null. Se mantiene la firma para no romper callers durante la
+  // ventana de transición (se eliminará en la limpieza post-quarantine
+  // window — ver design doc §8).
+  return null;
 }
 
-function writeTokenToStorage(token: string | null): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  if (token === null) {
-    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-  } else {
-    window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
-  }
+function writeTokenToStorage(_token: string | null): void {
+  // CR2: Sanctum stateful usa cookies httpOnly manejadas por el
+  // browser. JS no debe poder leer/escribir el token (XSS-safe).
+  // Esta función es no-op — los callers siguen invocándola para
+  // preservar el shape del flujo (login → writeTokenToStorage → no-op,
+  // logout → writeTokenToStorage(null) → no-op), pero localStorage ya
+  // no se toca.
 }
 
 function subscribe(listener: () => void): () => void {
@@ -140,6 +141,9 @@ export function isAuthenticated(): boolean {
  * el logout y el hydrate puedan limpiarlo consistentemente.
  */
 function applySession(response: LoginResponse): void {
+  // CR2: token NO persiste en localStorage (writeTokenToStorage es
+  // no-op). Se mantiene el shape del state.token para no romper
+  // callers durante la ventana de transición (Bearer compat).
   state = { ...state, token: response.token, user: response.user };
   writeTokenToStorage(response.token);
   writeActiveStoreId(response.user.store_ids[0] ?? null);
@@ -249,14 +253,16 @@ function isTwoFactorChallenge(
 
 async function logout(): Promise<void> {
   try {
-    if (state.token !== null) {
-      await apiFetch(API_ENDPOINTS.auth.logout, {
-        method: 'POST',
-        token: state.token,
-      });
-    }
+    // CR2: Sanctum stateful — la sesión viaja en cookie httpOnly. El
+    // endpoint /auth/logout cierra la sesión del web guard y rota el
+    // session ID. NO requiere Authorization header (la middleware
+    // auth:sanctum acepta sesión o token; Sanctum stateful envía
+    // automáticamente la cookie).
+    await apiFetch(API_ENDPOINTS.auth.logout, {
+      method: 'POST',
+    });
   } catch {
-    // Ignorar errores de logout (token expirado, network, etc.).
+    // Ignorar errores de logout (sesión expirada, network, etc.).
     // El objetivo es limpiar el estado local de todas formas.
   }
 
@@ -267,29 +273,24 @@ async function logout(): Promise<void> {
 }
 
 /**
- * Rehidrata el user desde el backend usando el token guardado.
- * Llamar al boot de la app para validar que el token sigue vigente.
+ * Rehidrata el user desde el backend usando la cookie de sesión httpOnly.
+ * Llamar al boot de la app para validar que la sesión sigue vigente.
+ *
+ * CR2: ya NO consultamos localStorage para el token — la auth viaja
+ * en la cookie de sesión (Sanctum stateful). `credentials:'include'`
+ * en apiFetch hace que el browser envíe la cookie automáticamente.
  *
  * Distingue entre errores de auth y errores de red:
- *   - HTTP 401 o 403 → token inválido/expirado → limpiar sesión.
+ *   - HTTP 401 o 403 → sesión inválida/expirada → limpiar store_id + user.
  *   - Cualquier otro throw (incluido network: isNetworkError=true,
- *     HTTP 5xx) → conservar el token, seguir offline-tolerant.
+ *     HTTP 5xx) → conservar store_id + user, seguir offline-tolerant.
  */
 async function hydrate(): Promise<void> {
-  const token = readTokenFromStorage();
-
-  if (token === null) {
-    state = { token: null, user: null, isHydrating: false };
-    return;
-  }
-
-  state = { ...state, token, isHydrating: true };
+  state = { ...state, isHydrating: true };
   emit();
 
   try {
-    const response = await apiFetch<{ user: User }>(API_ENDPOINTS.auth.me, {
-      token,
-    });
+    const response = await apiFetch<{ user: User }>(API_ENDPOINTS.auth.me);
     state = { ...state, user: response.user, isHydrating: false };
     writeActiveStoreId(response.user.store_ids[0] ?? null);
   } catch (error) {
@@ -299,17 +300,16 @@ async function hydrate(): Promise<void> {
     };
 
     // Limpiar sesión SOLO cuando el backend nos rechaza la auth.
-    // Si el backend está caído o devuelve 5xx, conservamos el token:
-    // el token sigue siendo criptográficamente válido y queremos
+    // Si el backend está caído o devuelve 5xx, conservamos la sesión:
+    // la cookie sigue siendo criptográficamente válida y queremos
     // reintentar en la próxima navegación, no forzar logout.
     const isAuthFailure = apiError.status === 401 || apiError.status === 403;
 
     if (isAuthFailure) {
-      state = { token: null, user: null, isHydrating: false };
-      writeTokenToStorage(null);
+      state = { ...state, user: null, isHydrating: false };
       writeActiveStoreId(null);
     } else {
-      // Network down o 5xx — preservamos token + user previos.
+      // Network down o 5xx — preservamos sesión (cookie httpOnly).
       // Solo log para diagnóstico: el usuario sigue "logueado" en
       // el cliente, pero la próxima navegación intentará rehidratar.
       if (typeof console !== 'undefined') {

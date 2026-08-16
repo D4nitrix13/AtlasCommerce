@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { authStore, getActiveStoreId, getAuthToken } from '../../../src/stores/auth';
+import { authStore, getActiveStoreId } from '../../../src/stores/auth';
 import type { LoginResponse, User } from '../../../src/types/auth';
 
 beforeEach(() => {
@@ -50,7 +50,9 @@ describe('stores/auth', () => {
   });
 
   describe('login', () => {
-    it('guarda token y user en localStorage', async () => {
+    // CR2: login() ya NO persiste el token en localStorage — el auth
+    // viaja en cookies httpOnly. store_id (no sensible) sí persiste.
+    it('NO escribe token en localStorage (CR2: cookies httpOnly) pero sí store_id', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response(JSON.stringify(fakeLoginResponse), {
           status: 200,
@@ -60,7 +62,7 @@ describe('stores/auth', () => {
 
       await authStore.login({ email: 'test@example.com', password: 'secret' });
 
-      expect(window.localStorage.getItem('auth.token')).toBe('abc123token');
+      expect(window.localStorage.getItem('auth.token')).toBeNull();
       expect(window.localStorage.getItem('auth.store_id')).toBe('1');
     });
 
@@ -85,10 +87,11 @@ describe('stores/auth', () => {
   });
 
   describe('setSession', () => {
-    it('persiste token y store_id', () => {
+    // CR2: setSession() ya NO persiste el token. Solo store_id.
+    it('NO persiste token en localStorage pero sí store_id', () => {
       authStore.setSession(fakeLoginResponse);
 
-      expect(window.localStorage.getItem('auth.token')).toBe('abc123token');
+      expect(window.localStorage.getItem('auth.token')).toBeNull();
       expect(window.localStorage.getItem('auth.store_id')).toBe('1');
     });
 
@@ -99,14 +102,16 @@ describe('stores/auth', () => {
       };
       authStore.setSession(response);
 
-      expect(window.localStorage.getItem('auth.token')).toBe('abc123token');
+      expect(window.localStorage.getItem('auth.token')).toBeNull();
       expect(window.localStorage.getItem('auth.store_id')).toBeNull();
     });
   });
 
   describe('logout', () => {
-    it('limpia token y store_id del localStorage', async () => {
-      window.localStorage.setItem('auth.token', 'abc123');
+    // CR2: logout() limpia store_id del localStorage y del backend.
+    // Ya NO hay token en localStorage que limpiar (writeTokenToStorage
+    // es no-op; el backend limpia la cookie httpOnly via auth('web')->logout()).
+    it('limpia store_id del localStorage y revoca sesión en backend', async () => {
       window.localStorage.setItem('auth.store_id', '1');
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
@@ -123,7 +128,6 @@ describe('stores/auth', () => {
     });
 
     it('limpia local incluso si el backend falla', async () => {
-      window.localStorage.setItem('auth.token', 'abc123');
       window.localStorage.setItem('auth.store_id', '1');
 
       vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network'));
@@ -136,9 +140,11 @@ describe('stores/auth', () => {
   });
 
   describe('hydrate', () => {
-    it('rehidrata user desde /auth/me con token válido', async () => {
-      window.localStorage.setItem('auth.token', 'abc123');
-
+    // CR2: hydrate() SIEMPRE llama /auth/me (la cookie httpOnly viaja
+    // automáticamente con credentials:include). Ya NO hay token en
+    // localStorage que consultar. Si /auth/me devuelve 200 → preserva
+    // store_id. Si 401/403 → limpia store_id.
+    it('rehidrata user desde /auth/me cuando la cookie de sesión es válida', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response(JSON.stringify({ user: fakeUser }), {
           status: 200,
@@ -151,9 +157,7 @@ describe('stores/auth', () => {
       expect(window.localStorage.getItem('auth.store_id')).toBe('1');
     });
 
-    it('limpia token si /auth/me devuelve 401', async () => {
-      window.localStorage.setItem('auth.token', 'expired');
-
+    it('limpia store_id si /auth/me devuelve 401', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response(JSON.stringify({ message: 'Unauthenticated' }), {
           status: 401,
@@ -167,35 +171,39 @@ describe('stores/auth', () => {
       expect(window.localStorage.getItem('auth.store_id')).toBeNull();
     });
 
-    it('no hace nada sin token', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    it('siempre llama /auth/me (la cookie viaja automática con credentials:include)', async () => {
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ user: fakeUser }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
       await authStore.hydrate();
-      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy.mock.calls[0]?.[0]).toContain('/auth/me');
     });
 
     /**
-     * sdd/critical-2fa-frontend-flow · Task 2.2
+     * sdd/critical-2fa-frontend-flow · Task 2.2 + CR2
      *
      * Cuando el backend está caído (fetch rechaza con TypeError) NO
-     * debemos limpiar el token: el token sigue siendo criptográficamente
-     * válido, solo no pudimos validarlo contra el backend. Limpiar el
-     * token en ese caso cierra la sesión al primer blip de red.
+     * debemos limpiar la sesión: la cookie httpOnly sigue siendo válida
+     * criptográficamente, solo no pudimos validarla contra el backend.
+     * Limpiar store_id en ese caso cierra la sesión al primer blip de red.
      */
-    it('preserva el token cuando fetch tira TypeError (backend caído)', async () => {
-      window.localStorage.setItem('auth.token', 'still-valid');
+    it('preserva store_id cuando fetch tira TypeError (backend caído)', async () => {
       window.localStorage.setItem('auth.store_id', '1');
 
       vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
 
       await authStore.hydrate();
 
-      expect(window.localStorage.getItem('auth.token')).toBe('still-valid');
+      expect(window.localStorage.getItem('auth.token')).toBeNull();
       expect(window.localStorage.getItem('auth.store_id')).toBe('1');
-      expect(getAuthToken()).toBe('still-valid');
     });
 
-    it('preserva el token en HTTP 500 (no es un problema de auth)', async () => {
-      window.localStorage.setItem('auth.token', 'still-valid');
+    it('preserva store_id en HTTP 500 (no es un problema de auth)', async () => {
+      window.localStorage.setItem('auth.store_id', '1');
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response(JSON.stringify({ message: 'Server error' }), {
@@ -206,11 +214,11 @@ describe('stores/auth', () => {
 
       await authStore.hydrate();
 
-      expect(window.localStorage.getItem('auth.token')).toBe('still-valid');
+      expect(window.localStorage.getItem('auth.store_id')).toBe('1');
     });
 
-    it('limpia el token en HTTP 403 (forbidden, además de 401)', async () => {
-      window.localStorage.setItem('auth.token', 'forbidden');
+    it('limpia store_id en HTTP 403 (forbidden, además de 401)', async () => {
+      window.localStorage.setItem('auth.store_id', '1');
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response(JSON.stringify({ message: 'Forbidden' }), {
@@ -221,7 +229,7 @@ describe('stores/auth', () => {
 
       await authStore.hydrate();
 
-      expect(window.localStorage.getItem('auth.token')).toBeNull();
+      expect(window.localStorage.getItem('auth.store_id')).toBeNull();
     });
   });
 
@@ -263,10 +271,9 @@ describe('stores/auth', () => {
       // No debe haber escrito token ni user en el store.
       expect(window.localStorage.getItem('auth.token')).toBeNull();
       expect(window.localStorage.getItem('auth.store_id')).toBeNull();
-      expect(getAuthToken()).toBeNull();
     });
 
-    it("responde success con kind='success' y persiste token + store_id", async () => {
+    it("responde success con kind='success' y persiste store_id (token NO)", async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response(JSON.stringify(fakeLoginResponse), {
           status: 200,
@@ -285,7 +292,8 @@ describe('stores/auth', () => {
         expect(result.user.email).toBe('test@example.com');
       }
 
-      expect(window.localStorage.getItem('auth.token')).toBe('abc123token');
+      // CR2: token NO persiste en localStorage (solo en cookie httpOnly).
+      expect(window.localStorage.getItem('auth.token')).toBeNull();
       expect(window.localStorage.getItem('auth.store_id')).toBe('1');
     });
 
