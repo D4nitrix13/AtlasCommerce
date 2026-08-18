@@ -2,16 +2,24 @@ import { useState, type ReactElement } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../stores/auth';
 import { useTranslations } from '../../../i18n';
+import { AUTH_ACCENT } from '../../../lib/auth-accent';
 import { stripLocaleFromPath, withLocale } from '../../../lib/path-helpers';
+import { FacebookIcon, GoogleIcon } from '../../ui/SocialIcons';
 
 /**
- * Form de login admin — sin register, sin social login.
+ * Form de login admin — email + password + OAuth (Google/Facebook).
  *
- * Solo email + password + "¿Olvidaste tu contraseña?" + checkbox
- * "Recuérdame" + submit.
+ * Bloque superior: 2 botones sociales (Google + Facebook) + divider
+ * "o con tu correo" antes del bloque email/password. Los botones
+ * delegan al backend vía `window.location.assign('/api/auth/social/{provider}/redirect')`
+ * — el `EnsureFrontendRequestsAreStateful` middleware aplica
+ * Sanctum stateful antes de la llamada para que el `state` CSRF
+ * sobreviva el round-trip al provider.
  *
- * El admin usa credenciales default (admin@<slug>.com / password)
- * creadas por el seeder backend. No hay OAuth.
+ * El admin puede usar credenciales internas (admin@<slug>.com / password)
+ * o continuar con un provider OAuth — el backend rechaza admin signup
+ * desde subdominios admin.* (P-C policy) pero usuarios pre-existentes
+ * pueden seguir logueando.
  */
 type LoginFormProps = {
   emailLabel?: string;
@@ -111,6 +119,39 @@ export default function LoginForm({
           {errorMessage}
         </div>
       )}
+
+      {/* Bloque social — Google + Facebook + divider. */}
+      <div className="space-y-3">
+        <button
+          type="button"
+          data-auth-link="social-google"
+          onClick={() => {
+            window.location.assign('/api/auth/social/google/redirect');
+          }}
+          className={`w-full flex items-center justify-center gap-2 bg-[#${AUTH_ACCENT.primary.slice(1)}] hover:bg-[#${AUTH_ACCENT.hover.slice(1)}] text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#${AUTH_ACCENT.primary}]/25`}
+        >
+          <GoogleIcon className="size-5" />
+          <span>{t('auth.login.shell.google')}</span>
+        </button>
+        <button
+          type="button"
+          data-auth-link="social-facebook"
+          onClick={() => {
+            window.location.assign('/api/auth/social/facebook/redirect');
+          }}
+          className={`w-full flex items-center justify-center gap-2 bg-[#${AUTH_ACCENT.primary.slice(1)}] hover:bg-[#${AUTH_ACCENT.hover.slice(1)}] text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#${AUTH_ACCENT.primary}]/25`}
+        >
+          <FacebookIcon className="size-5" />
+          <span>{t('auth.login.shell.facebook')}</span>
+        </button>
+        <div className="flex items-center gap-3" aria-hidden="false">
+          <span className="flex-1 h-px bg-slate-200" aria-hidden="true" />
+          <span className="text-xs uppercase tracking-wide text-slate-500">
+            {t('auth.login.shell.divider')}
+          </span>
+          <span className="flex-1 h-px bg-slate-200" aria-hidden="true" />
+        </div>
+      </div>
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
