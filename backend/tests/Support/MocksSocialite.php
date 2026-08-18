@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Support;
 
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\SocialiteManager;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use Mockery;
 
 /**
  * Helper para mockear el facade `Socialite` en tests Feature.
@@ -16,6 +18,12 @@ use Laravel\Socialite\Two\User as SocialiteUser;
  * `redirectUrl()` per-host. Este trait encapsula el patrón Mockery
  * facade (consistente con el resto de `tests/`) y queda como el único
  * seam de testing para el flujo OAuth.
+ *
+ * Implementación: creamos UN `Mockery::mock(SocialiteManager::class)`
+ * por test y lo swapeamos en el facade con `Socialite::swap()`. Esto
+ * evita el problema de `Facade::shouldReceive()` que intenta
+ * auto-resolver la clase via Container — la cual no tiene binding
+ * directo para `SocialiteManager::class` (solo `Factory::class`).
  *
  * Convenciones:
  *   - `mockSocialiteRedirect($provider, $url)` → para tests del
@@ -36,9 +44,17 @@ trait MocksSocialite
      */
     protected function mockSocialiteRedirect(string $provider, string $url): void
     {
-        $driver = $this->createSocialiteDriverMock(provider: $provider);
-        $driver->shouldReceive('redirectUrl')->andReturnSelf();
-        $driver->shouldReceive('redirect')->andReturn(redirect()->to($url));
+        $manager = Mockery::mock(SocialiteManager::class);
+        $manager->shouldReceive('driver')->with($provider)->andReturnUsing(
+            function () use ($url) {
+                $driver = Mockery::mock();
+                $driver->shouldReceive('redirectUrl')->andReturnSelf();
+                $driver->shouldReceive('redirect')->andReturn(redirect()->to($url));
+                return $driver;
+            }
+        );
+
+        Socialite::swap($manager);
     }
 
     /**
@@ -77,20 +93,17 @@ trait MocksSocialite
             ],
         ]);
 
-        $driver = $this->createSocialiteDriverMock(provider: $provider);
-        $driver->shouldReceive('user')->andReturn($oauthUser);
+        $manager = Mockery::mock(SocialiteManager::class);
+        $manager->shouldReceive('driver')->with($provider)->andReturnUsing(
+            function () use ($oauthUser) {
+                $driver = Mockery::mock();
+                $driver->shouldReceive('user')->andReturn($oauthUser);
+                return $driver;
+            }
+        );
+
+        Socialite::swap($manager);
 
         return $oauthUser;
-    }
-
-    /**
-     * Helper interno — mock del provider instance (lo que devuelve
-     * `Socialite::driver($provider)`).
-     */
-    private function createSocialiteDriverMock(string $provider): \Mockery\MockInterface
-    {
-        Socialite::shouldReceive('driver')->with($provider)->andReturnSelf();
-
-        return Socialite::shouldReceive('driver')->with($provider);
     }
 }
