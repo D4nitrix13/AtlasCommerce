@@ -178,6 +178,13 @@ class SocialAccountService
                 'store_id' => $storeId,
             ]);
 
+            // P-C policy: nuevos OAuth customers necesitan user_store
+            // para que `hasAccessToStore()` los deje pasar el tenant
+            // gate del callback (mismo check que `AuthController::login`).
+            // Sin este row, el controller responde 422 y el user no
+            // puede finalizar el flow.
+            $user->stores()->attach($storeId, ['role_id' => null]);
+
             $this->createSocialAccount(user: $user, providerUser: $providerUser, provider: $provider);
 
             return $user;

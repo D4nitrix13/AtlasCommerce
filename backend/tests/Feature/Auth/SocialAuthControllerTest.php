@@ -139,16 +139,25 @@ final class SocialAuthControllerTest extends TestCase
     }
 
     #[Test]
-    public function callback_supported_provider_returns_501_until_pr2(): void
+    public function callback_supported_provider_returns_200_when_session_target_present(): void
     {
-        // Stub explícito: hasta PR 2 el callback es 501. Esto
-        // documenta el límite del PR 1 — el storefront que ya
-        // apunta a esta URL va a ver este error en lo que se
-        // mergea PR 2.
-        $response = $this->get(uri: '/api/auth/social/google/callback');
+        // PR 2b: callback completo. Con un SocialiteUser mockeado +
+        // session target + config + store context, debe resolver el
+        // user y devolver 200 con token.
+        $this->mockSocialiteUser(
+            provider: 'google',
+            providerId: 'g-new-customer',
+            email: 'new-customer@example.com',
+            emailVerified: true,
+        );
 
-        $response->assertStatus(501);
-        $response->assertJsonStructure(['message', 'hint']);
+        $response = $this->get(
+            uri: '/api/auth/social/google/callback',
+            headers: ['referer' => 'http://localhost/es/account/auth/login'],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['token', 'user' => ['id', 'email']]);
     }
 
     protected function tearDown(): void

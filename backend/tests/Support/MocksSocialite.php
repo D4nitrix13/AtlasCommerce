@@ -78,19 +78,18 @@ trait MocksSocialite
         $oauthUser->name = $name;
         $oauthUser->email = $email;
         $oauthUser->avatar = $avatar;
-        // `email_verified` vive en el array `user` del Socialite raw
-        // payload. Google provider lo lee desde acá (discovery #210).
-        $oauthUser->setRawAttributes(attributes: [
+        // `email_verified` vive al TOP level del payload Google
+        // (GoogleProvider::mapUserToObject lo lee de ahí — discovery
+        // #210). El servicio también lo lee de `$providerUser->user['email_verified']`
+        // directo, no de un sub-array `user`.
+        $oauthUser->setRaw(user: [
             'id' => $providerId,
             'nickname' => null,
             'name' => $name,
             'email' => $email,
             'avatar' => $avatar,
             'avatar_original' => null,
-            'user' => [
-                'email_verified' => $emailVerified,
-                'id' => $providerId,
-            ],
+            'email_verified' => $emailVerified,
         ]);
 
         $manager = Mockery::mock(SocialiteManager::class);
