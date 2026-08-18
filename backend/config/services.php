@@ -35,4 +35,33 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | OAuth Socialite providers (Google + Facebook)
+    |--------------------------------------------------------------------------
+    |
+    | El `redirect` configurado acá es un fallback por env. En runtime el
+    | `SocialAuthController::redirect` lo override con la URL per-host
+    | (`$request->getSchemeAndHttpHost().'/api/auth/social/{provider}/callback'`)
+    | vía `redirectUrl($url)` para mantener el cookie domain aislado por
+    | tenant (ver `SetSessionDomainFromHost`).
+    |
+    | `OAUTH_REDIRECT_BASE_URL` puede apuntar al storefront o al admin
+    | según el provider console donde se registró la callback. Por
+    | defecto queda null (mecanismo per-host toma el control).
+    |
+    */
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('OAUTH_REDIRECT_BASE_URL').'/api/auth/social/google/callback',
+    ],
+
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('OAUTH_REDIRECT_BASE_URL').'/api/auth/social/facebook/callback',
+    ],
+
 ];
