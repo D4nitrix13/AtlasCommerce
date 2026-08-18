@@ -34,6 +34,19 @@ const en: Translations = {
   'auth.login.termsLink': 'Terms of Use',
   'auth.login.error.invalid': 'Invalid credentials.',
   'auth.login.error.disabled': 'This account is disabled.',
+  'auth.login.error.oauth_email_conflict':
+    'That email is already registered. Sign in with your password and link Google/Facebook from your account.',
+  'auth.login.error.oauth_email_unverified':
+    'Your OAuth provider reported the email as unverified. Verify it in Google and try again.',
+  'auth.login.error.oauth_admin_signup_disabled':
+    'OAuth sign-in is not available for admin accounts. Ask your administrator to create your account.',
+  'auth.login.error.oauth_state_mismatch':
+    'Your OAuth session expired or was tampered with. Please try signing in again.',
+  'auth.login.error.oauth_state_required':
+    'Your session expired. Enable cookies in your browser and try again.',
+  'auth.login.error.oauth_provider_not_configured':
+    'This OAuth provider is not configured for this environment. Contact your administrator.',
+  'auth.login.error.generic': "We couldn't complete the sign-in. Please try again.",
   'auth.login.brand.left.heading':
     'Personalize your products with the quality your brand deserves.',
   'auth.login.brand.left.body':

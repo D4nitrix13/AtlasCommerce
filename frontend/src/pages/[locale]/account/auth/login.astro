@@ -3,6 +3,7 @@ import AuthLayout from "../../../../layouts/AuthLayout.astro";
 import AuthShell from "../../../../components/auth/AuthShell.astro";
 import StorefrontLoginForm from "../../../../components/storefront/auth/StorefrontLoginForm";
 import LanguageSwitcher from "../../../../components/ui/LanguageSwitcher";
+import OAuthFlashToast from "../../../../components/auth/OAuthFlashToast";
 import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
 import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
 import { themeToBrand } from "../../../../lib/theme";
@@ -17,7 +18,7 @@ const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
 <AuthLayout title={`${t["auth.login.shell.heading"]} · ${brand.name}`}>
   <AuthShell
-    illustration=`/images/stores/${Astro.locals.tenant?.tenantSlug ?? "panda-estampados"}/amico/auth/login-amico.svg`
+    illustration={`/images/stores/${Astro.locals.tenant?.tenantSlug ?? "panda-estampados"}/amico/auth/login-amico.svg`}
     illustrationAlt={t["auth.shell.illustration.alt"]}
     leftHeading={t["auth.login.shell.leftHeading"]}
     leftBody={t["auth.login.shell.leftBody"]}
@@ -27,6 +28,8 @@ const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
     side="left"
   >
     <LanguageSwitcher slot="topRightExtra" client:load theme="light" />
+
+    <OAuthFlashToast client:load />
 
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-slate-900">
