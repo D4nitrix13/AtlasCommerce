@@ -124,6 +124,18 @@ class User extends Authenticatable
     }
 
     /**
+     * Identidades sociales vinculadas (Google, Facebook, etc.).
+     *
+     * Un user puede tener múltiples `SocialAccount` — uno por provider
+     * con el que se autenticó. El binding vive en `social_accounts`
+     * (FK con `cascadeOnDelete`).
+     */
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
      * Configuración 2FA / TOTP del usuario (one-to-one).
      *
      * Si la relación no existe, 2FA no está habilitada. Si existe,

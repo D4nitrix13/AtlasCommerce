@@ -4,23 +4,37 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth;
 
+use App\Http\Resources\Auth\OAuthErrorResource;
 use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Socialite\Facades\Socialite;
+use Mockery;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Support\MocksSocialite;
 use Tests\TestCase;
 
 /**
- * Cobertura del SocialAuthController stub.
+ * Cubre la shape del redirect endpoint del flujo OAuth.
  *
- * El controller devuelve 501 hasta que se instale laravel/socialite
- * y se configuren credenciales OAuth. Estos tests congelan ese
- * contrato: cuando alguien implemente Socialite, debe actualizar
- * estos tests al nuevo comportamiento (redirect 302 a Google/Facebook).
+ * PR 1 implementa `redirect()` completo:
+ *   - provider ∈ SUPPORTED
+ *   - $request->hasSession() (400 oauth_state_required si no)
+ *   - config services.{provider}.client_id + client_secret (503 si no)
+ *   - Socialite::driver()->redirectUrl(perHost)->redirect() → 302
+ *
+ * Los tests de callback (spec A3-A12) llegan en PR 2 cuando
+ * `findOrCreateFromProvider` esté completo.
  */
+#[Group('social-auth')]
+#[Group('controller')]
+#[CoversClass(\App\Http\Controllers\Api\Auth\SocialAuthController::class)]
 final class SocialAuthControllerTest extends TestCase
 {
+    use MocksSocialite;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -32,7 +46,7 @@ final class SocialAuthControllerTest extends TestCase
         // dentro de ese grupo en routes/api.php).
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
-        StoreDomain::query()->create(attributes: [
+        StoreDomain::query()->create([
             'store_id' => $store->id,
             'domain' => 'localhost',
             'type' => 'domain',
@@ -40,48 +54,106 @@ final class SocialAuthControllerTest extends TestCase
             'is_active' => true,
             'is_primary' => true,
         ]);
+
+        // Para los tests que esperan 302 (redirect), mockeamos
+        // client_id + client_secret como si el .env estuviera
+        // configurado. Los tests fail-closed en
+        // SocialAuthConfigurationTest los dejan en null.
+        config()->set('services.google.client_id', 'test-google-client-id');
+        config()->set('services.google.client_secret', 'test-google-client-secret');
+        config()->set('services.facebook.client_id', 'test-facebook-client-id');
+        config()->set('services.facebook.client_secret', 'test-facebook-client-secret');
     }
 
     #[Test]
-    public function redirect_with_google_returns_501(): void
+    public function redirect_google_returns_302_to_provider(): void
     {
-        $response = $this->get('/api/auth/social/google/redirect');
+        $this->mockSocialiteRedirect(
+            provider: 'google',
+            url: 'https://accounts.google.com/o/oauth2/auth?state=abc123',
+        );
+
+        $response = $this->get(
+            uri: '/api/auth/social/google/redirect',
+            headers: ['referer' => 'http://localhost/es/admin/auth/login'],
+        );
+
+        $response->assertStatus(302);
+        $response->assertRedirect(uri: 'https://accounts.google.com/o/oauth2/auth?state=abc123');
+    }
+
+    #[Test]
+    public function redirect_facebook_returns_302_to_provider(): void
+    {
+        $this->mockSocialiteRedirect(
+            provider: 'facebook',
+            url: 'https://www.facebook.com/v18.0/dialog/oauth?state=xyz789',
+        );
+
+        $response = $this->get(
+            uri: '/api/auth/social/facebook/redirect',
+            headers: ['referer' => 'http://localhost/es/account/auth/login'],
+        );
+
+        $response->assertStatus(302);
+        $response->assertRedirect(uri: 'https://www.facebook.com/v18.0/dialog/oauth?state=xyz789');
+    }
+
+    #[Test]
+    public function redirect_unsupported_provider_returns_400(): void
+    {
+        // No se mockea Socialite — el controller corta antes de
+        // llegar al facade (provider guard). El test verifica que
+        // NUNCA se llama Socialite porque la respuesta es 400
+        // inmediata.
+        $response = $this->get(uri: '/api/auth/social/github/redirect');
+
+        $response->assertStatus(400);
+        $response->assertJsonFragment(data: ['message' => "Provider 'github' no soportado."]);
+    }
+
+    #[Test]
+    public function redirect_without_session_cookie_returns_400_oauth_state_required(): void
+    {
+        // NO seteamos referer/origin — simulamos una request sin
+        // cookie de sesión. Defense-in-depth (R2 del proposal): el
+        // redirect endpoint debe cortar temprano si no hay session
+        // antes de delegar a Socialite.
+        $response = $this->get(uri: '/api/auth/social/google/redirect');
+
+        $response->assertStatus(400);
+        $payload = $response->json();
+        $this->assertSame(expected: 'oauth_state_required', actual: $payload['code']);
+        $this->assertSame(expected: 'google', actual: $payload['provider']);
+    }
+
+    #[Test]
+    public function callback_unsupported_provider_returns_400(): void
+    {
+        // PR 1: callback sigue siendo 501. Solo validamos el guard
+        // del provider (igual semántica que redirect).
+        $response = $this->get(uri: '/api/auth/social/github/callback');
+
+        $response->assertStatus(400);
+        $response->assertJsonFragment(data: ['message' => "Provider 'github' no soportado."]);
+    }
+
+    #[Test]
+    public function callback_supported_provider_returns_501_until_pr2(): void
+    {
+        // Stub explícito: hasta PR 2 el callback es 501. Esto
+        // documenta el límite del PR 1 — el storefront que ya
+        // apunta a esta URL va a ver este error en lo que se
+        // mergea PR 2.
+        $response = $this->get(uri: '/api/auth/social/google/callback');
 
         $response->assertStatus(501);
         $response->assertJsonStructure(['message', 'hint']);
     }
 
-    #[Test]
-    public function redirect_with_facebook_returns_501(): void
+    protected function tearDown(): void
     {
-        $response = $this->get('/api/auth/social/facebook/redirect');
-
-        $response->assertStatus(501);
-        $response->assertJsonStructure(['message', 'hint']);
-    }
-
-    #[Test]
-    public function redirect_with_unsupported_provider_returns_400(): void
-    {
-        $response = $this->get('/api/auth/social/twitter/redirect');
-
-        $response->assertStatus(400);
-        $response->assertJsonFragment(['message' => "Provider 'twitter' no soportado."]);
-    }
-
-    #[Test]
-    public function callback_with_google_returns_501(): void
-    {
-        $response = $this->get('/api/auth/social/google/callback');
-
-        $response->assertStatus(501);
-    }
-
-    #[Test]
-    public function callback_with_unsupported_provider_returns_400(): void
-    {
-        $response = $this->get('/api/auth/social/twitter/callback');
-
-        $response->assertStatus(400);
+        Mockery::close();
+        parent::tearDown();
     }
 }
