@@ -192,8 +192,7 @@ final class SocialAccountServiceFullTest extends TestCase
         $this->assertSame(expected: 'newcustomer@example.com', actual: $user->email);
         $this->assertNotNull($user->email_verified_at);
         // Password is bcrypt-hashed random string (R7). Verificamos
-        // que (a) NO es vacío, (b) NO es el valor plain text,
-        // (c) matchea formato bcrypt ($2y$).
+        // que (a) NO es vacío, (b) matchea formato bcrypt ($2y$).
         $this->assertNotEmpty($user->password);
         $this->assertStringStartsWith('$2y$', (string) $user->password);
 
@@ -203,9 +202,10 @@ final class SocialAccountServiceFullTest extends TestCase
         $this->assertSame(expected: 'Mendoza', actual: $customer->last_name);
         $this->assertSame(expected: 'newcustomer@example.com', actual: $customer->email);
 
-        // CustomerStore bound to the active store.
+        // CustomerStore + user_store bound to the active store (P-C).
         $binding = CustomerStore::query()->where('customer_id', $customer->id)->firstOrFail();
         $this->assertSame(expected: $this->store->id, actual: $binding->store_id);
+        $this->assertSame(expected: 1, actual: $user->stores()->count());
 
         // SocialAccount shape.
         $social = SocialAccount::query()->where('user_id', $user->id)->firstOrFail();
