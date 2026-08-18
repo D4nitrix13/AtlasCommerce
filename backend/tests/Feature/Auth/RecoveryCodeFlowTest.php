@@ -144,8 +144,8 @@ final class RecoveryCodeFlowTest extends TestCase
             'email' => $user->email,
             'method' => 'recovery_codes',
             'code' => $code,
-            'password' => 'BrandNewPassword1234',
-            'password_confirmation' => 'BrandNewPassword1234',
+            'password' => 'BrandNew-Password-1234',
+            'password_confirmation' => 'BrandNew-Password-1234',
             'device_name' => 'integration-test',
         ]);
 
@@ -155,7 +155,7 @@ final class RecoveryCodeFlowTest extends TestCase
         // Password actualizado en DB.
         $user->refresh();
         $this->assertTrue(
-            condition: Hash::check(value: 'BrandNewPassword1234', hashedValue: $user->password),
+            condition: Hash::check(value: 'BrandNew-Password-1234', hashedValue: $user->password),
         );
 
         // Code marcado como usado.
@@ -176,8 +176,8 @@ final class RecoveryCodeFlowTest extends TestCase
             'email' => $user->email,
             'method' => 'recovery_codes',
             'code' => $code,
-            'password' => 'BrandNewPassword1234',
-            'password_confirmation' => 'BrandNewPassword1234',
+            'password' => 'BrandNew-Password-1234',
+            'password_confirmation' => 'BrandNew-Password-1234',
         ])->assertOk();
 
         // Segundo intento con el MISMO code: debe fallar.
@@ -185,8 +185,8 @@ final class RecoveryCodeFlowTest extends TestCase
             'email' => $user->email,
             'method' => 'recovery_codes',
             'code' => $code,
-            'password' => 'AnotherNewPassword1234',
-            'password_confirmation' => 'AnotherNewPassword1234',
+            'password' => 'AnotherNew-Password-1234',
+            'password_confirmation' => 'AnotherNew-Password-1234',
         ]);
 
         $response->assertStatus(422);
@@ -202,8 +202,8 @@ final class RecoveryCodeFlowTest extends TestCase
             'email' => 'admin@panda-estampados.com',
             'method' => 'recovery_codes',
             'code' => 'AAAAAAAAAA',
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'NewPassword1234',
+'password' => 'NewPassword-1234',
+            'password_confirmation' => 'NewPassword-1234',
         ]);
 
         $response->assertStatus(422);
@@ -237,8 +237,8 @@ final class RecoveryCodeFlowTest extends TestCase
         $resetResponse = $this->postJson(uri: self::HOST . '/api/auth/reset-password', data: [
             'email' => $user->email,
             'code' => $code,
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'NewPassword1234',
+'password' => 'NewPassword-1234',
+            'password_confirmation' => 'NewPassword-1234',
         ]);
 
         $resetResponse->assertOk();

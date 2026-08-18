@@ -220,8 +220,8 @@ final class PasswordResetFlowTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/reset-password', data: [
             'email' => 'jane@example.com',
             'code' => $code,
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'NewPassword1234',
+            'password' => 'NewPassword-1234',
+            'password_confirmation' => 'NewPassword-1234',
             'device_name' => 'web-admin',
             ]);
 
@@ -230,7 +230,7 @@ final class PasswordResetFlowTest extends TestCase
 
         // Password actualizado.
         $this->user->refresh();
-        $this->assertTrue(Hash::check(value: 'NewPassword1234', hashedValue: $this->user->password));
+        $this->assertTrue(Hash::check(value: 'NewPassword-1234', hashedValue: $this->user->password));
 
         // Token marcado como usado.
         $this->assertNotNull($token->fresh()->used_at);
@@ -249,8 +249,8 @@ final class PasswordResetFlowTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/reset-password', data: [
             'email' => 'jane@example.com',
             'code' => '000000',
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'NewPassword1234',
+            'password' => 'NewPassword-1234',
+            'password_confirmation' => 'NewPassword-1234',
             ]);
 
         $response->assertStatus(422);
@@ -270,8 +270,8 @@ final class PasswordResetFlowTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/reset-password', data: [
             'email' => 'jane@example.com',
             'code' => '654321',
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'NewPassword1234',
+            'password' => 'NewPassword-1234',
+            'password_confirmation' => 'NewPassword-1234',
             ]);
 
         $response->assertStatus(422);
@@ -293,8 +293,8 @@ final class PasswordResetFlowTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/reset-password', data: [
             'email' => 'jane@example.com',
             'code' => $code,
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'NewPassword1234',
+            'password' => 'NewPassword-1234',
+            'password_confirmation' => 'NewPassword-1234',
             ]);
 
         $response->assertStatus(422);
@@ -336,12 +336,20 @@ final class PasswordResetFlowTest extends TestCase
             'password_confirmation' => 'AllUpperCaseOnly',
 ])->assertStatus(422)->assertJsonValidationErrors(['password']);
 
+        // Sin símbolo.
+        $this->postJson(uri: '/api/auth/reset-password', data: [
+            'email' => 'jane@example.com',
+            'code' => $code,
+            'password' => 'MySecurePass2026',
+            'password_confirmation' => 'MySecurePass2026',
+])->assertStatus(422)->assertJsonValidationErrors(['password']);
+
         // Passwords no coinciden.
         $this->postJson(uri: '/api/auth/reset-password', data: [
             'email' => 'jane@example.com',
             'code' => $code,
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'OtherPassword1234',
+            'password' => 'NewPassword-1234',
+            'password_confirmation' => 'OtherPassword-1234',
 ])->assertStatus(422)->assertJsonValidationErrors(['password']);
     }
 
@@ -351,8 +359,8 @@ final class PasswordResetFlowTest extends TestCase
         $this->postJson(uri: '/api/auth/reset-password', data: [
             'email' => 'jane@example.com',
             'code' => '12345', // solo 5 dígitos
-            'password' => 'NewPassword1234',
-            'password_confirmation' => 'NewPassword1234',
+            'password' => 'NewPassword-1234',
+            'password_confirmation' => 'NewPassword-1234',
 ])->assertStatus(422)->assertJsonValidationErrors(['code']);
     }
 
@@ -373,8 +381,8 @@ final class PasswordResetFlowTest extends TestCase
         $resetResponse = $this->postJson(uri: '/api/auth/reset-password', data: [
             'email' => 'jane@example.com',
             'code' => $code,
-            'password' => 'BrandNewPassword1234',
-            'password_confirmation' => 'BrandNewPassword1234',
+            'password' => 'BrandNew-Password-1234',
+            'password_confirmation' => 'BrandNew-Password-1234',
             ]);
 
         $resetResponse->assertOk();
@@ -383,7 +391,7 @@ final class PasswordResetFlowTest extends TestCase
         // Login con la nueva password funciona.
         $loginResponse = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'jane@example.com',
-            'password' => 'BrandNewPassword1234',
+            'password' => 'BrandNew-Password-1234',
             ]);
         $loginResponse->assertOk();
     }

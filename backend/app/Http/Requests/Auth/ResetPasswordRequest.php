@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Auth;
 
+use App\Validation\PasswordRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -17,8 +18,8 @@ use Illuminate\Foundation\Http\FormRequest;
  *    coincida con `users.preferred_recovery_method`.
  *  - code: según method. Para 'email' son 6 dígitos; para
  *    'recovery_codes' son 10 chars del alfabeto permitido.
- *  - password requerido, mínimo 12 caracteres, confirmado, con requisitos
- *    de complejidad (mayúscula, minúscula, número). Alineado con el
+ *  - password: ver `App\Validation\PasswordRules` (min 12 + mayúscula +
+ *    minúscula + número + símbolo + confirmed). Alineado con el
  *    frontend que muestra el passwordHint.
  *  - device_name opcional.
  *
@@ -47,16 +48,7 @@ class ResetPasswordRequest extends FormRequest
             'email' => ['required', 'string', 'email:rfc', 'max:255'],
             'method' => ['sometimes', 'string', 'in:email,recovery_codes'],
             'code' => $codeRule,
-            'password' => [
-                'required',
-                'string',
-                'min:12',
-                'max:255',
-                'confirmed',
-                'regex:/[A-Z]/',
-                'regex:/[a-z]/',
-                'regex:/[0-9]/',
-            ],
+            'password' => PasswordRules::complexity(),
             'device_name' => ['nullable', 'string', 'max:120'],
         ];
     }
@@ -75,7 +67,7 @@ class ResetPasswordRequest extends FormRequest
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'Su contraseña debe tener al menos 12 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
-            'password.regex' => 'Su contraseña debe tener una letra mayúscula, una letra minúscula y un número.',
+            'password.regex' => 'Su contraseña debe tener una letra mayúscula, una letra minúscula, un número y un símbolo.',
         ];
     }
 }
