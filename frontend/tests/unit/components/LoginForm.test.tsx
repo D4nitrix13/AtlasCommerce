@@ -105,26 +105,61 @@ describe('components/admin/auth/LoginForm', () => {
   });
 
   /**
-   * sdd/critical-2fa-frontend-flow · Task 2.3 + 2.4
+   * sdd/oauth-google-facebook-login · PR 3
    *
-   * El admin usa credenciales internas (admin@<slug>.com / password), sin
-   * OAuth. El docstring del componente (lines 6-14) y la e2e
-   * (`tests/e2e/login.spec.ts:52-63`) lo afirman. Los botones sociales
-   * fueron un refactor incompleto de PR 0 y DEBEN estar ausentes.
+   * El admin puede usar credenciales internas (admin@<slug>.com / password)
+   * O continuar con Google/Facebook. Los botones sociales están
+   * presentes y tienen `data-auth-link="social-{google|facebook}"` para
+   * que E2E y vitest puedan targetearlos.
    */
-  it('NO renderiza botones sociales (Google/Facebook)', () => {
+  it('renderiza el botón Google arriba del email con data-auth-link', () => {
     const { container } = render(<LoginForm />);
 
-    expect(screen.queryByRole('button', { name: /Google/i })).toBeNull();
-    expect(screen.queryByRole('button', { name: /Facebook/i })).toBeNull();
-    expect(container.querySelector("[data-auth-link='social-google']")).toBeNull();
-    expect(container.querySelector("[data-auth-link='social-facebook']")).toBeNull();
+    const googleBtn = container.querySelector("[data-auth-link='social-google']");
+    expect(googleBtn).not.toBeNull();
+    expect(googleBtn).toBeInstanceOf(HTMLButtonElement);
+    expect((googleBtn as HTMLButtonElement).type).toBe('button');
   });
 
-  it("NO renderiza el divider 'o con tu correo' (sin social, no hace falta)", () => {
+  it('renderiza el botón Facebook arriba del email con data-auth-link', () => {
+    const { container } = render(<LoginForm />);
+
+    const fbBtn = container.querySelector("[data-auth-link='social-facebook']");
+    expect(fbBtn).not.toBeNull();
+    expect(fbBtn).toBeInstanceOf(HTMLButtonElement);
+  });
+
+  it('renderiza el divider text desde i18n key auth.login.shell.divider', () => {
     render(<LoginForm />);
 
-    expect(screen.queryByText('auth.login.shell.divider')).toBeNull();
+    expect(screen.getByText('auth.login.shell.divider')).toBeInTheDocument();
+  });
+
+  it('click en Google button llama a window.location.assign con el relative path', async () => {
+    const user = userEvent.setup();
+
+    // Mockeamos window.location.assign para no navegar realmente.
+    const assignSpy = vi.fn();
+    const originalLocation = window.location;
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, assign: assignSpy },
+      writable: true,
+      configurable: true,
+    });
+
+    try {
+      render(<LoginForm />);
+      const googleBtn = screen.getByRole('button', { name: /Google/i });
+      await user.click(googleBtn);
+
+      expect(assignSpy).toHaveBeenCalledWith('/api/auth/social/google/redirect');
+    } finally {
+      Object.defineProperty(window, 'location', {
+        value: originalLocation,
+        writable: true,
+        configurable: true,
+      });
+    }
   });
 
   it('el checkbox rememberMe se propaga al login()', async () => {

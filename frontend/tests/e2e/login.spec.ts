@@ -43,11 +43,15 @@ test.describe('Login: solo login (sin register)', () => {
     await expect(page.getByLabel(/Recuérdame/i)).toBeVisible();
   });
 
-  test('no muestra botones sociales (Google/GitHub) en admin', async ({ page }) => {
+  test('muestra botones sociales (Google + Facebook) en admin', async ({ page }) => {
+    // sdd/oauth-google-facebook-login · PR 3 inversion.
+    // Antes: assert ausencia (pre-PR 1 stub 501). Después: admin login
+    // muestra los mismos botones que el storefront, con target
+    // data-auth-link para E2E stability.
     await page.goto(`${ADMIN_PANDA}${LOGIN_PATH}`);
 
-    await expect(page.getByRole('button', { name: /Google/i })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /GitHub/i })).toHaveCount(0);
+    await expect(page.locator("[data-auth-link='social-google']")).toBeVisible();
+    await expect(page.locator("[data-auth-link='social-facebook']")).toBeVisible();
   });
 
   test('muestra el selector de idioma (ES/EN)', async ({ page }) => {
@@ -251,9 +255,12 @@ test.describe('Storefront (cliente): login + register', () => {
     await expect(page.locator('#email')).toBeVisible();
     await expect(page.locator('#password')).toBeVisible();
 
-    // Sin social buttons.
-    await expect(page.getByRole('button', { name: /Google/i })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /GitHub/i })).toHaveCount(0);
+    // sdd/oauth-google-facebook-login · PR 3 inversion.
+    // Storefront ya tenía botones desde antes (discovery #203); el
+    // test estaba skipped o falling por colisión de expectations.
+    // Inversión explícita para que el e2e suite locke el contrato.
+    await expect(page.locator("[data-auth-link='social-google']")).toBeVisible();
+    await expect(page.locator("[data-auth-link='social-facebook']")).toBeVisible();
 
     const signupLink = page.locator("[data-auth-link='signup']");
     await expect(signupLink).toBeVisible();
