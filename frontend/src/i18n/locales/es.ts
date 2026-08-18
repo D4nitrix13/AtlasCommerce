@@ -34,6 +34,19 @@ const es: Translations = {
   'auth.login.termsLink': 'Términos de uso',
   'auth.login.error.invalid': 'Las credenciales no son válidas.',
   'auth.login.error.disabled': 'La cuenta está desactivada.',
+  'auth.login.error.oauth_email_conflict':
+    'Ese correo ya está registrado. Iniciá sesión con tu contraseña y vinculá Google/Facebook desde tu cuenta.',
+  'auth.login.error.oauth_email_unverified':
+    'Tu proveedor de OAuth reportó que el correo no está verificado. Verificá tu correo en Google y reintentá.',
+  'auth.login.error.oauth_admin_signup_disabled':
+    'El inicio de sesión con redes sociales no está disponible para administradores. Pedile al admin que cree tu cuenta.',
+  'auth.login.error.oauth_state_mismatch':
+    'La sesión de OAuth expiró o fue manipulada. Por favor reintentá el inicio de sesión.',
+  'auth.login.error.oauth_state_required':
+    'Tu sesión expiró. Habilitá las cookies en tu navegador y reintentá.',
+  'auth.login.error.oauth_provider_not_configured':
+    'Este proveedor de OAuth no está configurado en este entorno. Contactá al administrador.',
+  'auth.login.error.generic': 'No pudimos completar el inicio de sesión. Por favor reintentá.',
   'auth.login.brand.left.heading': 'Personalizá tus productos con la calidad que tu marca merece.',
   'auth.login.brand.left.body':
     'Estampados, sublimado y bordados sobre textiles, cerámica, vidrio y más. Trabajamos con empresas y emprendimientos que buscan calidad consistente y entregas puntuales.',

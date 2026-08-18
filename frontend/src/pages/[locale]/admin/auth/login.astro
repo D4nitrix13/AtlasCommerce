@@ -3,6 +3,7 @@ import AuthLayout from "../../../../layouts/AuthLayout.astro";
 import LoginForm from "../../../../components/admin/auth/LoginForm";
 import AuthShell from "../../../../components/auth/AuthShell.astro";
 import LanguageSwitcher from "../../../../components/ui/LanguageSwitcher";
+import OAuthFlashToast from "../../../../components/auth/OAuthFlashToast";
 import { getServerDictionary, getServerLocale } from "../../../../i18n/server";
 import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
 import { themeToBrand } from "../../../../lib/theme";
@@ -19,7 +20,7 @@ const forgotPath = `/${locale}/admin/auth/forgot-password`;
 
 <AuthLayout title={`${t["auth.login.shell.heading"]} · ${brand.name}`}>
   <AuthShell
-    illustration=`/images/stores/${Astro.locals.tenant?.tenantSlug ?? "panda-estampados"}/amico/auth/login-amico.svg`
+    illustration={`/images/stores/${Astro.locals.tenant?.tenantSlug ?? "panda-estampados"}/amico/auth/login-amico.svg`}
     illustrationAlt={t["auth.shell.illustration.alt"]}
     leftHeading={t["auth.login.shell.leftHeading"]}
     leftBody={t["auth.login.shell.leftBody"]}
@@ -30,6 +31,8 @@ const forgotPath = `/${locale}/admin/auth/forgot-password`;
   >
     <LanguageSwitcher slot="topRightExtra" client:load theme="light" />
 
+    <OAuthFlashToast client:load />
+
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-slate-900">
         {t["auth.login.shell.heading"]}
@@ -38,6 +41,7 @@ const forgotPath = `/${locale}/admin/auth/forgot-password`;
     </div>
 
     <LoginForm client:load forgotHref={forgotPath} />
+
 
     <p class="text-center text-xs text-slate-400 mt-8" slot="terms">
       {t["auth.shell.termsPrefix"]}{" "}

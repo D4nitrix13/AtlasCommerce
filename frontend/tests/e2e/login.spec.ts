@@ -294,3 +294,26 @@ test.describe('Storefront (cliente): login + register', () => {
     await expect(bars).toBeVisible();
   });
 });
+
+// sdd/oauth-google-facebook-login · PR 4 (failure UX + flash)
+test.describe('OAuth failure flash toast', () => {
+  test('oauth_failure_shows_toast_on_login_page', async ({ page }) => {
+    // Simulamos un callback que falló con oauth_email_conflict
+    // (el backend redirecta a /es/admin/auth/login?flash=oauth_email_conflict).
+    await page.goto(`${ADMIN_PANDA}/es/admin/auth/login?flash=oauth_email_conflict`);
+
+    // El toast aparece con data-testid y el código correcto.
+    const toast = page.locator("[data-testid='oauth-flash-toast']");
+    await expect(toast).toBeVisible();
+    await expect(toast).toHaveAttribute('data-flash-code', 'oauth_email_conflict');
+
+    // El texto debe ser distinto de la clave (i18n resuelto).
+    const text = await toast.textContent();
+    expect(text).not.toBe('auth.login.error.oauth_email_conflict');
+    expect(text?.length ?? 0).toBeGreaterThan(0);
+
+    // Después del mount, el query param `flash=` se strippea.
+    await expect(page).toHaveURL(/\/es\/admin\/auth\/login(?:\?.*)?$/);
+    expect(page.url()).not.toContain('flash=');
+  });
+});
