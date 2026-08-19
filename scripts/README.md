@@ -19,6 +19,10 @@ rutas absolutas para los binarios** (ver "Pautas" más abajo).
   hooks del proyecto en esta máquina vía `core.hooksPath`. Setea
   `.githooks/` como directorio activo. Idempotente, soporte
   `--clean` para desinstalar.
+- [`docker/help/registry.sh`](docker/help/registry.sh) — registro
+  centralizado de `cmd_help_<comando>` con panel de ayuda por
+  subcomando (`./docker-stack.sh volumes help` muestra este help).
+  Si agregás un comando nuevo, agregá su bloque acá también.
 
 ## Estructura de `docker/`
 
@@ -206,12 +210,45 @@ español para descripciones narrativas, inglés para términos técnicos.
    `exec/`, `setup/`). Si no encaja, crear nueva carpeta.
 2. Crear `docker/<carpeta>/<acción>.sh` siguiendo las pautas de
    arriba.
-3. Agregar dispatch en `docker-stack.sh`:
-   ```bash
-   <acción>)    source "${DOCKER_DIR}/<carpeta>/<acción>.sh";   cmd_<acción> "$@" ;;
-   ```
-4. Agregar entrada en `cmd_help` (categoría correspondiente).
-5. Si tiene alias corto, agregar también.
-6. Probar manualmente: `./scripts/docker-stack.sh <acción> ...`
-7. `bash -n` sobre el archivo nuevo.
-8. Commit siguiendo la convención.
+3. Registrar el archivo en `action_file_for` de `docker-stack.sh`
+   (no es un case suelto — la dispatcher es data-driven).
+4. Si tiene alias corto, agregarlo en `canonicalize_cmd` de
+   `docker-stack.sh` y en `is_known_cmd`.
+5. Agregar `cmd_help_<comando>` en `docker/help/registry.sh` con
+   el formato (USO, QUÉ HACE, EJEMPLOS) — el dispatcher lo sourcea
+   cuando el usuario pide help por subcomando.
+6. Agregar entrada breve en `cmd_help` (categoría correspondiente
+   en `docker/help/show.sh`).
+7. Probar manualmente:
+   - `./scripts/docker-stack.sh <acción>` (con summary pre-cmd).
+   - `./scripts/docker-stack.sh <acción> help` (per-command help).
+   - `./scripts/docker-stack.sh <acción> <área> help` (help filtrado).
+8. `bash -n` sobre el archivo nuevo.
+9. Commit siguiendo la convención.
+
+## Convenciones del orquestador `docker-stack.sh`
+
+- **Resumen pre-cmd**: cada acción que usa `resolve_targets` recibe
+  una línea `[<cmd>] área=<area> · n=<count> <plural>` antes de
+  ejecutarse. Esto lo emite `show_target_summary` desde
+  `_lib/summary.sh`, llamado por el dispatcher antes del dispatch.
+- **Pre-validación**: el dispatcher llama `validate_area` antes
+  del summary, para no mentir con un count cuando el área es
+  desconocida. `validate_area` emite su propio error y devuelve 1.
+- **Help por subcomando**: detecta la palabra `help` (o `-h`/`--help`)
+  en cualquier posición después del comando. Si está, sourcea
+  `help/registry.sh` y llama `cmd_help_<comando>`.
+- **Aliases**: `b` → `build`, `rs` → `restart`, `ls` → `ps`,
+  `psv` → `info`, `vol` → `volumes`, `rmvol` → `rm-volumes`.
+  Vive en `canonicalize_cmd`.
+
+## Área y servicios — anatomía del target
+
+- `<área>`: `all` (default, las 6), `prod` o `dev` (las 3 de un
+  scope), `production:<store>` o `development:<store>` (1 instancia).
+  Bare store sin prefijo NO es válido (forzar prefijo para evitar
+  ambigüedad prod vs dev).
+- `<servicio>`: nombre del servicio en el compose (`backend`,
+  `frontend`, `postgres`, `redis`, `ftp`, `nginx`, `mailpit`).
+  Cuando se pasa, el scope efectivo es 1 target.
+- `<plural>`: `instancia` (count=1) o `instancias` (count>1).
