@@ -1,6 +1,6 @@
 ---
 name: quality-gate-pre-commit
-description: Pre-commit quality gate - backend: pint + phpstan + phpunit. Frontend: astro check + eslint + prettier. Docs: markdownlint. Auto-evaluation checklist before commit. Triggers: pre-commit, pre-push, CI failures, when asked to commit/push.
+description: Pre-commit quality gate - backend: pint + phpstan + phpunit. Frontend: astro check + eslint + prettier. Docs: markdownlint. Infra: docker quality-check (absolute paths en Dockerfile, docker-compose, entrypoint). Auto-evaluation checklist before commit. Triggers: pre-commit, pre-push, CI failures, when asked to commit/push.
 ---
 
 # Quality Gate Pre-Commit
@@ -121,6 +121,26 @@ Config in `.markdownlint.json`:
 
 Style rules in `docs/agent-skills/documentation-styleguide/`.
 
+## Infra (Docker — paths absolutos)
+
+Regla: cualquier binario invocado desde un `Dockerfile.*`,
+`docker-compose*.yml` o `entrypoint*.sh` dentro de `docker/instances/`
+debe usar **ruta absoluta**. Mitiga PATH hijacking.
+
+```bash
+# Verificación manual
+./scripts/docker/quality-check.sh
+
+# Activación por dev (una vez por máquina)
+./scripts/install-git-hooks.sh
+```
+
+El check vive en [`scripts/docker/quality-check.sh`](../../scripts/docker/quality-check.sh "scripts/docker/quality-check.sh"). Cuando el hook está instalado, el commit se bloquea automáticamente si hay archivos Docker staged con violaciones. Regla completa en
+[`docs/agent-skills/docker-stack-orchestration/SKILL.md`](docker-stack-orchestration/SKILL.md "docker-stack-orchestration/SKILL.md").
+
+Bypass explícito: `git commit --no-verify`. Usar solo si sabés
+exactamente por qué la excepción es necesaria.
+
 ## Pre-commit complete (recommended)
 
 ```bash
@@ -132,6 +152,10 @@ cd ../frontend && pnpm run typecheck && pnpm run lint && pnpm run format:check
 
 # Docs
 cd .. && markdownlint 'docs/**/*.md' --ignore node_modules
+
+# Infra (Docker). Ya corre vía git hook si install-git-hooks.sh está hecho;
+# esta línea es para correrlo manual sin staging.
+./scripts/docker/quality-check.sh
 ```
 
 ## Self-evaluation before commit (CONTRIBUTING sec 6)
@@ -178,6 +202,7 @@ merged.
 - ❌ `pnpm run typecheck` if `.astro/` cannot be written (permissions issue).
 - ❌ `git commit --no-verify` without asking.
 - ❌ `--dirty` is not `precommit` - `lint:dirty` only lints, doesn't test.
+- ❌ Skipping the Docker quality-check with `--no-verify` cuando hay archivos Docker staged con violaciones.
 
 ## Trigger patterns
 
