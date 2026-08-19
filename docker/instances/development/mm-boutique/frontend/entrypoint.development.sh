@@ -20,21 +20,31 @@
 set -eu
 
 if [ "$(id -u)" = "0" ]; then
-    for dir in node_modules .pnpm-store; do
+    for dir in node_modules .pnpm-store .astro node_modules/.vite; do
         if [ -d "/app/$dir" ]; then
             /bin/chown -R node:node "/app/$dir"
         fi
     done
 
-    # Borrar el .astro/ entero (no solo el contenido) para forzar un
-    # cold-start del dev server. .astro/ es regenerado al primer run.
-    /bin/rm -rf /app/.astro
+    # Limpiar contenidos de caches stale (no los mount points — `rm -rf`
+    # sobre un mount falla con EBUSY). Borrar el .astro/dev.json force-
+    # enables cold-start del dev server cuando un container anterior dejó
+    # el lock file con un PID huérfano (incident 2026-08-17).
+/usr/bin/find /app/.astro -mindepth 1 -delete 2>/dev/null || true
+/usr/bin/find /app/node_modules/.vite -mindepth 1 -delete 2>/dev/null || true
+    # Matar cualquier astro/vite stale que haya sobrevivido (defense-in-depth).
+/usr/bin/pkill -f 'astro dev' 2>/dev/null || true
+/usr/bin/pkill -f 'vite'      2>/dev/null || true
 
     # Drop privilegios y exec pnpm como node (UID 1000).
-    exec /bin/su -s /bin/sh node -c '/usr/local/bin/pnpm run dev --host 0.0.0.0 --force "$@"' --
+    # CI=true: pnpm pide confirmación interactiva si node_modules quedó
+    # en estado inválido. En dev con TTY automático aborta. Explicit
+    # CI=true desde el entrypoint garantiza el bypass.
+    exec /bin/su -s /bin/sh node -c 'CI=true /usr/local/bin/pnpm run dev --host 0.0.0.0 --force "$@"' --
 fi
 
 # Si por alguna razón ya entramos como node, saltar el chown y correr pnpm directo.
-# Misma limpieza de .astro/ antes de iniciar.
-/bin/rm -rf /app/.astro 2>/dev/null || true
+# Misma limpieza de caches antes de iniciar.
+/usr/bin/find /app/.astro -mindepth 1 -delete 2>/dev/null || true
+/usr/bin/find /app/node_modules/.vite -mindepth 1 -delete 2>/dev/null || true
 exec /usr/local/bin/pnpm run dev --host 0.0.0.0 --force "$@"
