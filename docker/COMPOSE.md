@@ -31,15 +31,38 @@ Mapeo de binarios comunes en este repo:
 
 | Binario              | Path                                      |
 |----------------------|-------------------------------------------|
+| `corepack`           | `/usr/local/bin/corepack`                 |
 | `postgres`           | `/usr/lib/postgresql/<ver>/bin/postgres`  |
-| `redis-server`       | `/usr/bin/redis-server`                   |
+| `redis-server`       | `/usr/local/bin/redis-server`             |
 | `vsftpd`             | `/usr/sbin/vsftpd`                        |
 | `pnpm`               | `/usr/local/bin/pnpm`                     |
 | `node`               | `/usr/local/bin/node`                     |
+| `php`                | `/usr/local/bin/php`                      |
 | `php-fpm`            | `/usr/local/sbin/php-fpm`                 |
 | `php artisan`        | `/usr/local/bin/php artisan` (artisan es subcommand) |
 | `composer`           | `/usr/bin/composer`                       |
 | `docker-php-ext-install` | `/usr/local/bin/docker-php-ext-install` |
+| `docker-php-ext-enable`  | `/usr/local/bin/docker-php-ext-enable` |
+| `pecl`               | `/usr/local/bin/pecl`                     |
+| `apk`                | `/sbin/apk`                               |
+| `pg_isready`         | `/usr/bin/pg_isready`                     |
+| `id`                 | `/usr/bin/id`                             |
+| `grep`               | `/usr/bin/grep`                           |
+| `seq`                | `/usr/bin/seq`                            |
+| `find`               | `/usr/bin/find`                           |
+| `pkill`              | `/usr/bin/pkill`                          |
+| `sleep`              | `/bin/sleep`                              |
+| `wget`               | `/usr/bin/wget`                           |
+| `chown`              | `/bin/chown`                              |
+| `chmod`              | `/bin/chmod`                              |
+| `mkdir`              | `/bin/mkdir`                              |
+| `cp`                 | `/usr/bin/cp`                             |
+| `rm`                 | `/bin/rm`                                 |
+| `pwd`                | `/usr/bin/pwd`                            |
+
+Si necesitás un binario que no está en la tabla, validalo dentro del
+container con `docker compose exec <svc> /usr/bin/which <nombre>`. Nunca
+asumas que `nombre` solo va a funcionar — la convención es absoluta.
 
 Para verificar el path exacto dentro del container:
 ```bash
