@@ -185,7 +185,7 @@ Para cada `RUN` / `CMD` / `ENTRYPOINT`, verificar:
 ## 11. Naming y tags
 
 - Nombre de imagen: `<instancia>-<servicio>` (ej.
-  `panda-and-kitsune-backend`, `mm-boutique-frontend`).
+  `panda-estampados-backend`, `mm-boutique-frontend`).
 - Tag: por ahora `:latest` en dev (regenerado en cada `up` con
   `--build`). En prod usar tag semver (`v0.1.0`, `v0.1.1`, etc.).
 - No commitear `:latest` a registry de producción.
@@ -217,7 +217,7 @@ las señales lleguen al proceso principal).
 
 ```bash
 # Rebuild y check de tamaño
-docker compose -f docker/instances/development/panda-and-kitsune/docker-compose.yml \
+docker compose -f docker/instances/development/panda-estampados/docker-compose.yml \
     build --no-cache backend
 docker images | grep backend
 

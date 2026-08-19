@@ -11,7 +11,7 @@
 #
 # Uso:
 #   rm-volumes -y dev backend              # 3 dev, backend
-#   rm-volumes -y development:panda-and-kitsune  # 1 instancia
+#   rm-volumes -y development:panda-estampados  # 1 instancia
 #   rm-volumes -y all                      # ⚠ las 6 (con skip confirmación)
 cmd_rm_volumes() {
     local force="n"

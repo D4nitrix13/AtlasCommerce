@@ -35,7 +35,7 @@ use Illuminate\Database\Seeder;
  * Si querés un demo con Panda + Kitsune, ejecutá:
  *
  * ```bash
- * php artisan tenants:bootstrap docker/instances/panda-kitsune/seeds/panda.json
+ * php artisan tenants:bootstrap docker/instances/panda-estampados/seeds/panda.json
  * ```
  */
 class DatabaseSeeder extends Seeder

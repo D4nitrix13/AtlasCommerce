@@ -23,7 +23,7 @@ to the correct Docker instances according to `panda-estampados.com`,
 ### Prod (fixed IPs on bridge networks)
 
 ```caddyfile
-# panda-kitsune
+# panda-estampados
 *.panda-estampados.com, panda-estampados.com {
  reverse_proxy 172.21.0.20:8000 172.21.0.21:4321
 }
@@ -35,7 +35,7 @@ to the correct Docker instances according to `panda-estampados.com`,
 ### Dev (bind mounts on host)
 
 ```caddyfile
-# panda-and-kitsune-dev
+# panda-estampados-dev
 @dev-panda host panda-estampados.test localhost
 handle @dev-panda {
  reverse_proxy localhost:5321

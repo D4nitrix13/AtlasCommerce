@@ -31,8 +31,8 @@ final class SeedFilesValidationTest extends TestCase
     public static function instanceProvider(): array
     {
         return [
-            'panda-kitsune-dev' => ['development/panda-and-kitsune', 'dev-panda-and-kitsune.json', 'DEV_ADMIN_PASSWORD'],
-            'panda-kitsune-prod' => ['production/panda-and-kitsune', 'panda.json', 'PANDA_ADMIN_PASSWORD'],
+            'panda-estampados-dev' => ['development/panda-estampados', 'dev-panda-estampados.json', 'DEV_ADMIN_PASSWORD'],
+            'panda-estampados-prod' => ['production/panda-estampados', 'panda.json', 'PANDA_ADMIN_PASSWORD'],
             'mm-boutique-dev' => ['development/mm-boutique', 'dev-mm-boutique.json', 'DEV_ADMIN_PASSWORD'],
             'mm-boutique-prod' => ['production/mm-boutique', 'mm-boutique.json', 'MM_ADMIN_PASSWORD'],
             'morales-store-dev' => ['development/morales-store', 'dev-morales-store.json', 'DEV_ADMIN_PASSWORD'],
@@ -122,7 +122,7 @@ final class SeedFilesValidationTest extends TestCase
     #[Test]
     public function panda_seed_creates_two_tenants_and_admin_with_default_password(): void
     {
-        $path = $this->seedPath('development/panda-and-kitsune', 'dev-panda-and-kitsune.json');
+        $path = $this->seedPath('development/panda-estampados', 'dev-panda-estampados.json');
         $tmpPath = tempnam(sys_get_temp_dir(), 'seed-');
         copy($path, $tmpPath);
 

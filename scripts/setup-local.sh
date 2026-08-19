@@ -83,7 +83,7 @@ cat <<'NOTE'
   curl -sI http://morales-store.com/api/storefront/theme
 
 Para correr las instancias Docker (puerto por instancia):
-  cd docker/instances/panda-kitsune && docker compose up -d
+  cd docker/instances/panda-estampados && docker compose up -d
   cd docker/instances/mm-boutique  && docker compose up -d
   cd docker/instances/morales-store && docker compose up -d
 

@@ -5,8 +5,8 @@
 # publicando puertos en el host (dev).
 #
 # Producción (IPs fijas en redes Docker bridge):
-#   - panda-kitsune  (Panda Estampados + Kitsune Store, misma instancia)
-#     red panda-kitsune (172.21.0.0/24)
+#   - panda-estampados  (Panda Estampados + Kitsune Store, misma instancia)
+#     red panda-estampados (172.21.0.0/24)
 #     app=172.21.0.20:8000  frontend=172.21.0.21:4321
 #   - mm-boutique    (single-tenant: MM Boutique)
 #     red mm-boutique  (172.22.0.0/24)
@@ -16,7 +16,7 @@
 #     app=172.23.0.20:8000  frontend=172.23.0.21:4321
 #
 # Development (puertos publicados en el host):
-#   - panda-and-kitsune-dev: frontend=5321 (5321→4321)
+#   - panda-estampados-dev: frontend=5321 (5321→4321)
 #   - mm-boutique-dev:       frontend=6321 (6321→4321)
 #   - morals-store-dev:      frontend=7321 (7321→4321)
 #   Los dev usan bind mounts + xdebug, con BD aislada por tienda.
@@ -24,9 +24,9 @@
 #   3 dev puedan correr en paralelo sin conflicto.
 #
 # Reglas:
-#   *.panda-estampados.com -> backend/frontend panda-kitsune (prod)
-#                                o panda-and-kitsune-dev según cual esté Up
-#   *.kitsune.com           -> backend/frontend panda-kitsune
+#   *.panda-estampados.com -> backend/frontend panda-estampados (prod)
+#                                o panda-estampados-dev según cual esté Up
+#   *.kitsune.com           -> backend/frontend panda-estampados
 #   *.mm-boutique.com       -> backend/frontend mm-boutique (prod)
 #                                o mm-boutique-dev según cual esté Up
 #   *.morales-store.com     -> backend/frontend morales-store (prod)

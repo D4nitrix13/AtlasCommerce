@@ -53,15 +53,15 @@ return [
     */
 
     'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID'),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('OAUTH_REDIRECT_BASE_URL').'/api/auth/social/google/callback',
+        'client_id' => env(key: 'GOOGLE_CLIENT_ID', default: null),
+        'client_secret' => env(key: 'GOOGLE_CLIENT_SECRET', default: null),
+        'redirect' => env(key: 'OAUTH_REDIRECT_BASE_URL', default: null) . '/api/auth/social/google/callback',
     ],
 
     'facebook' => [
-        'client_id' => env('FACEBOOK_CLIENT_ID'),
-        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        'redirect' => env('OAUTH_REDIRECT_BASE_URL').'/api/auth/social/facebook/callback',
+        'client_id' => env(key: 'FACEBOOK_CLIENT_ID', default: null),
+        'client_secret' => env(key: 'FACEBOOK_CLIENT_SECRET', default: null),
+        'redirect' => env(key: 'OAUTH_REDIRECT_BASE_URL', default: null) . '/api/auth/social/facebook/callback',
     ],
 
 ];

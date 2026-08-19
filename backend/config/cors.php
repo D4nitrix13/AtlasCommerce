@@ -8,7 +8,7 @@
 | Configuración explícita para Sanctum stateful httpOnly cookies (CR2).
 | El default de Laravel 13 tiene `supports_credentials: false`, lo que
 | BLOQUEA cookies en cualquier request cross-origin. Como el backend
-| panda-kitsune sirve 2 eTLD+1s distintos (panda-estampados.com +
+| panda-estampados sirve 2 eTLD+1s distintos (panda-estampados.com +
 | kitsune.com) y el frontend hace requests cross-origin desde `www.`
 | y `admin.` subdomains, necesitamos lista explícita de origins.
 |

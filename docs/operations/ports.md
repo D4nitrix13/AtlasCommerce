@@ -16,7 +16,7 @@ cambiarlo.
 | Instancia | Postgres | Redis | Backend | Frontend | FTP |
 | --- | --- | --- | --- | --- | --- |
 | `dev` | 6432 | 7379 | 9000 | 5321 | 2121 |
-| `panda-kitsune` | — | — | — | — | 21 |
+| `panda-estampados` | — | — | — | — | 21 |
 | `mm-boutique` | — | — | — | — | — |
 | `morales-store` | — | — | — | — | — |
 
@@ -64,10 +64,10 @@ rango PASV).
 
 ---
 
-## `panda-kitsune` — producción multi-tenant
+## `panda-estampados` — producción multi-tenant
 
-Compose: [`docker/instances/panda-kitsune/docker-compose.yml`](../../docker/instances/panda-kitsune/docker-compose.yml)
-Env:      [`docker/instances/panda-kitsune/.env`](../../docker/instances/panda-kitsune/.env)
+Compose: [`docker/instances/panda-estampados/docker-compose.yml`](../../docker/instances/panda-estampados/docker-compose.yml)
+Env:      [`docker/instances/panda-estampados/.env`](../../docker/instances/panda-estampados/.env)
 
 | Servicio | Puerto host | Puerto container | Variable | Default |
 | --- | --- | --- | --- | --- |
@@ -94,7 +94,7 @@ Env:      [`docker/instances/mm-boutique/.env`](../../docker/instances/mm-boutiq
 | (ninguno) | — | Nada se publica al host. |
 
 El FTP está **deliberadamente no publicado** para no colisionar con el
-`21` de panda-and-kitsune en el mismo host. Si el deploy lo requiere expuesto,
+`21` de panda-estampados en el mismo host. Si el deploy lo requiere expuesto,
 agregar `ports:` al servicio `ftp` en el compose y setear `FTP_PORT=2121`
 (o el que esté libre) en el `.env`.
 
@@ -174,7 +174,7 @@ build. Cambios de variables de entorno no requieren rebuild.
 
 ## Si dos instancias quieren el mismo puerto del host
 
-Solo `panda-kitsune` публицa algo al host hoy. Si en el futuro dos
+Solo `panda-estampados` публицa algo al host hoy. Si en el futuro dos
 instancias necesitan exponer el mismo puerto (ej. FTP 21), hay 3
 opciones:
 
