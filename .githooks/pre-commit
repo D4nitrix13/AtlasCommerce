@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# ------------------------------------------------------------
+# .githooks/pre-commit
+# ------------------------------------------------------------
+# Pre-commit gate que se ejecuta antes de cada `git commit`. Solo
+# activa el check de Docker cuando hay archivos Docker staged; en
+# cualquier otro commit es no-op.
+#
+# Convención que enforce:
+#   scripts/docker/quality-check.sh (paths absolutos en Dockerfile,
+#   docker-compose.yml, entrypoint.sh — ver
+#   docs/agent-skills/docker-stack-orchestration/SKILL.md).
+#
+# Activación por dev (una vez por máquina):
+#   ./scripts/install-git-hooks.sh
+#
+# Bypass explícito (NO recomendado, debe ser consciente):
+#   git commit --no-verify
+#
+# Exit codes:
+#   0  → commit permitido
+#   1  → commit bloqueado por violación de Docker quality
+# ------------------------------------------------------------
+set -uo pipefail
+
+# Resolver el repo root sin importar desde dónde se invoque git.
+# BASH_SOURCE apunta al hook registrado en core.hooksPath (.githooks/).
+# Como `.githooks/` está en la raíz del repo, dirname/.. es la raíz.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && /usr/bin/pwd)"
+QC_SH="${REPO_ROOT}/scripts/docker/quality-check.sh"
+
+if [[ ! -x "${QC_SH}" ]]; then
+    # Si el check no existe o no es ejecutable, no bloqueamos commits.
+    # Fallar silenciosamente aquí rompería el flujo de TODOS los devs.
+    /usr/bin/printf "[pre-commit] WARN: %s no existe o no es ejecutable; saltando check.\n" "${QC_SH}" >&2
+    exit 0
+fi
+
+# Detectar archivos docker staged. `git diff --cached --name-only`
+# devuelve los paths staged. Filtramos por el patrón que quality-check
+# cubre: Dockerfile.<algo>, docker-compose*.yml, entrypoint*.sh dentro
+# de docker/instances/**/.
+STAGED_DOCKER="$(
+    /usr/bin/git diff --cached --name-only --diff-filter=ACMR 2>/dev/null | \
+    /usr/bin/awk '
+        /^docker\/instances\/.*Dockerfile\.[a-zA-Z]/ { print; next }
+        /^docker\/instances\/.*docker-compose.*\.ya?ml$/ { print; next }
+        /^docker\/instances\/.*entrypoint.*\.sh$/ { print; next }
+    '
+)"
+
+if [[ -z "${STAGED_DOCKER}" ]]; then
+    # No se modificaron archivos Docker → no-op.
+    exit 0
+fi
+
+/usr/bin/printf "[pre-commit] archivos Docker staged:\n"
+/usr/bin/printf "  %s\n" ${STAGED_DOCKER}
+/usr/bin/printf "[pre-commit] corriendo %s ...\n" "${QC_SH}"
+echo
+
+if ! "${QC_SH}"; then
+    echo
+    /usr/bin/printf "[pre-commit] FAIL: hay violaciones en archivos Docker.\n" >&2
+    /usr/bin/printf "[pre-commit] No se commitea hasta corregirlas.\n" >&2
+    /usr/bin/printf "[pre-commit] Ver docs/agent-skills/docker-stack-orchestration/SKILL.md (Hard rules).\n" >&2
+    /usr/bin/printf "[pre-commit] Para saltar el check (NO recomendado): git commit --no-verify\n" >&2
+    exit 1
+fi
+
+exit 0
