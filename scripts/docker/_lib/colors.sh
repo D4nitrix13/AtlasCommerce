@@ -12,16 +12,34 @@
 #   - cmd   → dim/gris (se distingue del output del comando)
 #   - bold  → para enfatizar nombres de instancia/servicio
 if [[ -t 1 ]]; then
+    # Reset y modificadores.
     C_RESET=$'\033[0m'
     C_BOLD=$'\033[1m'
+    C_DIM=$'\033[2m'
+    C_UL=$'\033[4m'         # underline
+    # Paleta base (30-37). Mezclada con bold parece "bright" en muchos
+    # terminales pero pierde contraste contra cyan o yellow en algunos
+    # temas. Por eso agregamos C_BRIGHT_* (90-97) como capa separada.
     C_RED=$'\033[31m'
     C_GREEN=$'\033[32m'
     C_YELLOW=$'\033[33m'
     C_BLUE=$'\033[34m'
     C_MAGENTA=$'\033[35m'
     C_CYAN=$'\033[36m'
-    C_DIM=$'\033[2m'
+    # Variantes BRIGHT (90-97). Más legibles sobre fondos oscuros y
+    # distintas entre sí (en temas donde las básicas se parecen).
+    C_BRIGHT_RED=$'\033[91m'
+    C_BRIGHT_GREEN=$'\033[92m'
+    C_BRIGHT_YELLOW=$'\033[93m'
+    C_BRIGHT_BLUE=$'\033[94m'
+    C_BRIGHT_MAGENTA=$'\033[95m'
+    C_BRIGHT_CYAN=$'\033[96m'
+    C_BRIGHT_WHITE=$'\033[97m'
 else
-    C_RESET=""; C_BOLD=""; C_RED=""; C_GREEN=""; C_YELLOW=""
-    C_BLUE=""; C_MAGENTA=""; C_CYAN=""; C_DIM=""
+    C_RESET=""; C_BOLD=""; C_DIM=""; C_UL=""
+    C_RED=""; C_GREEN=""; C_YELLOW=""
+    C_BLUE=""; C_MAGENTA=""; C_CYAN=""
+    C_BRIGHT_RED=""; C_BRIGHT_GREEN=""; C_BRIGHT_YELLOW=""
+    C_BRIGHT_BLUE=""; C_BRIGHT_MAGENTA=""; C_BRIGHT_CYAN=""
+    C_BRIGHT_WHITE=""
 fi
