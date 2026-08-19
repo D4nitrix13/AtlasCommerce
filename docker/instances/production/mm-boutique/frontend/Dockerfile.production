@@ -10,7 +10,7 @@ WORKDIR /app
 
 # Habilitar pnpm vía corepack, pineado por lockfile.
 RUN /usr/local/bin/corepack enable \
-    && corepack prepare pnpm@9 --activate
+    && /usr/local/bin/corepack prepare pnpm@9 --activate
 
 # Layer de cache de dependencias: package.json + lockfile primero.
 # `pnpm fetch` descarga las deps a un store local sin tocar el FS de la

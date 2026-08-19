@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Activar pnpm vía corepack.
 RUN /usr/local/bin/corepack enable \
-    && corepack prepare pnpm@9 --activate
+  && /usr/local/bin/corepack prepare pnpm@9 --activate
 
 # Layer de cache de dependencias. `pnpm fetch` descarga deps a un
 # store local sin instalar en el FS de la app; el siguiente `pnpm
@@ -19,26 +19,32 @@ RUN /usr/local/bin/corepack enable \
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 COPY frontend/pnpm-workspace.yaml* ./
 RUN /usr/local/bin/pnpm fetch --frozen-lockfile \
-    && /usr/local/bin/pnpm install --frozen-lockfile --offline
+  && /usr/local/bin/pnpm install --frozen-lockfile --offline
 
 # Variables de entorno: el dev server escucha en 0.0.0.0 para ser
 # accesible desde Caddy del host o del contenedor vecino.
 ENV HOST=0.0.0.0 \
-    PORT=4321 \
-    NODE_ENV=development \
-    ASTRO_TELEMETRY_DISABLED=1
+  PORT=4321 \
+  NODE_ENV=development \
+  ASTRO_TELEMETRY_DISABLED=1
 
 EXPOSE 4321
 
 # Healthcheck: en dev el server responde rápido.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD /usr/bin/wget -q --spider http://localhost:4321/ || exit 1
+  CMD /usr/bin/wget -q --spider http://localhost:4321/ || exit 1
 
-# Drop privilegios: el contenedor corre como `node` (UID 1000) en vez de
-# root. La build necesita root (instalar paquetes, copiar archivos al FS
-# de la imagen) pero el runtime no. El bind-mount del compose dev mapea
-# archivos del host (típicamente UID 1000) al container, así que usar
-# `node` (también UID 1000) matchea sin chowns extra.
-USER node
+# Entrypoint: arregla ownership de los volúmenes (node_modules,
+# .pnpm-store, .astro) que docker compose crea como root y que el
+# usuario `node` (UID 1000) necesita escribir. Después del chown,
+# hace setpriv para correr pnpm como node (mínimo privilegio).
+COPY docker/instances/development/morales-store/frontend/entrypoint.development.sh /usr/local/bin/entrypoint
+RUN /bin/chmod +x /usr/local/bin/entrypoint
 
-CMD ["/usr/local/bin/pnpm", "run", "dev", "--host", "0.0.0.0", "--force"]
+# El entrypoint hace el drop de privilegios via setpriv, así que la
+# imagen NO declara USER. Mantener root hasta el setpriv es necesario
+# para que el chown funcione.
+# USER node
+
+ENTRYPOINT ["/usr/local/bin/entrypoint"]
+CMD []
