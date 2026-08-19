@@ -183,7 +183,7 @@ composer test -- --filter=SocialAuth
 # 60 / 60 deben pasar (PR 2b baseline)
 
 # Smoke test manual
-docker exec panda-and-kitsune-dev-backend php artisan serve --host=0.0.0.0 --port=8000
+docker exec panda-estampados-dev-backend php artisan serve --host=0.0.0.0 --port=8000
 curl -i http://localhost:8000/api/auth/social/google/redirect
 # → 302 a accounts.google.com (con client_id presente)
 # → 503 oauth_provider_not_configured (si GOOGLE_CLIENT_ID vacío)

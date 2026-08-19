@@ -13,7 +13,7 @@
 #   volumes all                          # 6 instancias (3 prod + 3 dev)
 #   volumes dev                          # 3 dev
 #   volumes production                   # 3 prod
-#   volumes development:panda-and-kitsune # 1 instancia dev
+#   volumes development:panda-estampados # 1 instancia dev
 #   volumes dev backend                  # del servicio backend de las 3 dev
 cmd_volumes() {
     # Validación upfront: si no hay <área>, error con hint en lugar

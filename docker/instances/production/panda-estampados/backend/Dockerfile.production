@@ -48,8 +48,8 @@ WORKDIR /var/www/html
 # Configuración de PHP: php.ini base + opcache.ini.
 # El prefijo `zz-` en php.ini fuerza a que pise a los archivos por
 # defecto de la imagen oficial (orden alfabético en conf.d).
-COPY docker/instances/production/panda-and-kitsune/conf/php/php.ini /usr/local/etc/php/conf.d/zz-app.ini
-COPY docker/instances/production/panda-and-kitsune/conf/php/opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
+COPY docker/instances/production/panda-estampados/conf/php/php.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/instances/production/panda-estampados/conf/php/opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
 
 # Copiar composer files primero (cache de layers).
 COPY backend/composer.json backend/composer.lock ./
@@ -80,7 +80,7 @@ RUN /bin/chown -R www-data:www-data /var/www/html \
 EXPOSE 8000
 
 # Script de entrypoint que corre migraciones y opcionalmente el bootstrap.
-COPY docker/instances/production/panda-and-kitsune/backend/entrypoint.production.sh /usr/local/bin/entrypoint
+COPY docker/instances/production/panda-estampados/backend/entrypoint.production.sh /usr/local/bin/entrypoint
 RUN /bin/chmod +x /usr/local/bin/entrypoint
 
 # Drop privilegios: el contenedor corre como `www-data` (UID 33) en vez

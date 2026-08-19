@@ -126,7 +126,7 @@ final class BootstrapTenantCommandTest extends TestCase
     }
 
     #[Test]
-    public function it_creates_multiple_tenants_for_panda_kitsune_instance(): void
+    public function it_creates_multiple_tenants_for_panda_estampados_instance(): void
     {
         $this->writeConfig([
             'tenants' => [
@@ -425,7 +425,7 @@ final class BootstrapTenantCommandTest extends TestCase
     }
 
     #[Test]
-    public function it_creates_one_theme_per_tenant_for_panda_kitsune(): void
+    public function it_creates_one_theme_per_tenant_for_panda_estampados(): void
     {
         $this->writeConfig([
             'tenants' => [

@@ -12,8 +12,8 @@
 
 | Tenant | Marca | Dominio público | Dominio admin | Instancia |
 | ------ | ----- | --------------- | ------------- | --------- |
-| Cliente | Panda Estampados | `panda-estampados.com` | `admin.panda-estampados.com` | `panda-kitsune` |
-| Cliente | Kitsune Store | `kitsune.com` | `admin.kitsune.com` | `panda-kitsune` |
+| Cliente | Panda Estampados | `panda-estampados.com` | `admin.panda-estampados.com` | `panda-estampados` |
+| Cliente | Kitsune Store | `kitsune.com` | `admin.kitsune.com` | `panda-estampados` |
 | MM Boutique owner | MM Boutique | `mm-boutique.com` | `admin.mm-boutique.com` | `mm-boutique` |
 | Morales Store owner | Morales Store | `morales-store.com` | `admin.morales-store.com` | `morales-store` |
 
@@ -155,7 +155,7 @@ Esto no sirve cuando Morales Store deploya y no quiere esas tiendas.
 ```txt
 docker/instances/
 ├── README.md                    # Índice de instancias
-├── panda-kitsune/                # Cliente: Panda + Kitsune
+├── panda-estampados/                # Cliente: Panda + Kitsune
 │   ├── .env.example
 │   ├── Caddyfile                 # Dominios panda + kitsune
 │   ├── docker-compose.yml
@@ -183,7 +183,7 @@ docker/instances/
 
 **Archivos:** Directorio nuevo. ✅
 
-**Estado:** Completado el 2026-08-02. 3 instancias (panda-kitsune, mm-boutique,
+**Estado:** Completado el 2026-08-02. 3 instancias (panda-estampados, mm-boutique,
 morales-store) con su .env.example + Caddyfile + docker-compose.yml.
 2 Dockerfiles (backend, frontend) + entrypoint-backend.sh. README índice.
 
@@ -232,7 +232,7 @@ dominios, admin user y features.
 
 **Archivos:**
 
-- `docker/instances/panda-kitsune/seeds/panda.json` (nuevo) ✅
+- `docker/instances/panda-estampados/seeds/panda.json` (nuevo) ✅
 - `docker/instances/mm-boutique/seeds/mm-boutique.json` (nuevo) ✅
 - `docker/instances/morales-store/seeds/morales-store.json` (nuevo) ✅
 - `docker/entrypoint-backend.sh` (actualizado) ✅

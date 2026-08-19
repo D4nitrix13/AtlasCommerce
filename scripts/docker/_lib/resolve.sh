@@ -2,7 +2,7 @@
 # scripts/docker/_lib/resolve.sh
 # Constantes y funciones para resolver instancias / stage / servicio.
 # Cada comando del orquestador las usa para mapear el argumento
-# "production:panda-and-kitsune" o "dev backend" al directorio y
+# "production:panda-estampados" o "dev backend" al directorio y
 # compose file correctos.
 
 # ROOT_DIR apunta al repo raíz. Calculado en base a la ubicación del
@@ -14,10 +14,10 @@ INSTANCES_DIR="${ROOT_DIR}/docker/instances"
 # Las instancias se identifican con un scope: `production:<store>` o
 # `development:<store>`. Sin scope, se asume `production:` (default).
 # Esto permite que el mismo nombre de tienda exista en prod y dev
-# (panda-and-kitsune es multi-tenant en ambos mundos, pero vive en
+# (panda-estampados es multi-tenant en ambos mundos, pero vive en
 # carpetas distintas y con compose / Dockerfiles distintos).
-PROD_INSTANCES=(production:panda-and-kitsune production:mm-boutique production:morales-store)
-DEV_INSTANCES=(development:panda-and-kitsune development:mm-boutique development:morales-store)
+PROD_INSTANCES=(production:panda-estampados production:mm-boutique production:morales-store)
+DEV_INSTANCES=(development:panda-estampados development:mm-boutique development:morales-store)
 ALL_INSTANCES=("${PROD_INSTANCES[@]}" "${DEV_INSTANCES[@]}")
 
 # is_valid_instance <name>

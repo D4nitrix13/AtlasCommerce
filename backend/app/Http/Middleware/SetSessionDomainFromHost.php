@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Middleware que deriva `config('session.domain')` desde el host de la request.
  *
- * Razón de existir: el backend panda-kitsune sirve 2 eTLD+1s distintos
+ * Razón de existir: el backend panda-estampados sirve 2 eTLD+1s distintos
  * (`panda-estampados.com` y `kitsune.com`). Un `SESSION_DOMAIN` único
  * vía `.env` leakearía sesión entre tenants — cookie de panda válida
  * en kitsune (¡vector de account takeover cross-tenant!). Con un valor

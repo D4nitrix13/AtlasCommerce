@@ -70,14 +70,14 @@ host:
 
 | Instancia        | Backend host port | Frontend host port |
 | ---------------- | ----------------- | ------------------ |
-| panda-kitsune    | 8000              | 4321               |
+| panda-estampados    | 8000              | 4321               |
 | mm-boutique      | 8100              | 4322               |
 | morales-store    | 8200              | 4323               |
 
 Levantar las tres:
 
 ```bash
-cd docker/instances/panda-kitsune
+cd docker/instances/panda-estampados
 docker compose up -d
 cd ../mm-boutique
 docker compose up -d

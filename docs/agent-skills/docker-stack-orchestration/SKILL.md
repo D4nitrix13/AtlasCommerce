@@ -12,7 +12,7 @@ The monorepo runs **6 instances** in parallel (3 prod + 3 dev), all via
 
 | Slug | Prod network | Dev bind mount |
 |---|---|---|
-| `panda-estampados` + `kitsune` | `panda-kitsune` (172.21.0.0/24) | `panda-and-kitsune-dev` (5321) |
+| `panda-estampados` + `kitsune` | `panda-estampados` (172.21.0.0/24) | `panda-estampados-dev` (5321) |
 | `mm-boutique` | `mm-boutique` (172.22.0.0/24) | `mm-boutique-dev` (6321) |
 | `morales-store` | `morales-store` (172.23.0.0/24) | `morales-store-dev` (7321) |
 
@@ -91,7 +91,7 @@ docker/
 ├── DOCKERFILES.md ← Dockerfile conventions
 ├── instances/
 │ ├── development/
-│ │ ├── panda-and-kitsune/ ← dev compose + env
+│ │ ├── panda-estampados/ ← dev compose + env
 │ │ ├── mm-boutique/
 │ │ └── morales-store/
 │ └── production/
@@ -156,7 +156,7 @@ Activate when:
 4. **Docker prod**: `docker/instances/production/<slug>/docker-compose.yml` + `.env`.
 5. **Docker dev**: `docker/instances/development/<slug>/docker-compose.yml` + `.env`.
 6. **Postgres init**: add `docker/database/init/<slug>-db.sql`.
-7. **Caddyfile**: block for `<slug>` in `panda-kitsune` or new network.
+7. **Caddyfile**: block for `<slug>` in `panda-estampados` or new network.
 8. **Seeder**: `tests/Feature/Console/DefaultAdminSeederTest.php` to validate the bootstrap.
 
 ## Anti-patterns

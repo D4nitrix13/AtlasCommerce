@@ -56,7 +56,7 @@ Ecommerce/
 ├── docker/
 │   ├── dev/                  # Compose + env del entorno de desarrollo
 │   ├── instances/            # Compose por instancia de prod (1 carpeta c/u)
-│   │   ├── panda-kitsune/    # Multi-tenant (Panda + Kitsune)
+│   │   ├── panda-estampados/    # Multi-tenant (Panda + Kitsune)
 │   │   ├── mm-boutique/      # Single-tenant
 │   │   └── morales-store/    # Single-tenant
 │   ├── conf/                 # Configs montados (postgres, redis, php, etc.)
@@ -131,7 +131,7 @@ $EDITOR docker/dev/.env   # completá POSTGRES_PASSWORD, FTP_PASSWORD, etc.
 ```bash
 ./scripts/docker-stack.sh help                       # todos los comandos
 ./scripts/docker-stack.sh start dev                  # levantar solo dev
-./scripts/docker-stack.sh start panda-kitsune        # levantar solo Panda
+./scripts/docker-stack.sh start panda-estampados        # levantar solo Panda
 ./scripts/docker-stack.sh stop all                   # detener todas
 ./scripts/docker-stack.sh restart dev backend        # reiniciar un servicio
 ./scripts/docker-stack.sh build dev                  # rebuild (no cache)

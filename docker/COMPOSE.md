@@ -133,12 +133,12 @@ puedan coexistir sin pisarse IPs.
 
 ```yaml
 networks:
-  panda-kitsune-dev:
-    name: ecommerce-panda-kitsune-dev
+  panda-estampados-dev:
+    name: ecommerce-panda-estampados-dev
 
 # Y para prod con IPs fijas:
 networks:
-  panda-kitsune:
+  panda-estampados:
     driver: bridge
     ipam:
       config:
@@ -191,7 +191,7 @@ dev es lo más práctico.
 
 Cada instancia tiene su propio `.env` en
 `docker/instances/<stage>/<store>/environment/.env`. Ejemplo de
-template: `docker/instances/development/panda-and-kitsune/environment/.env.example`.
+template: `docker/instances/development/panda-estampados/environment/.env.example`.
 
 ```yaml
 env_file:
@@ -212,17 +212,17 @@ o falla con un error explícito.
 | Network                  | `ecommerce-<inst>-<stage>`                 |
 
 Ejemplos (dev):
-- `panda-and-kitsune-dev-frontend`
-- `ecommerce_panda_and_kitsune_dev_postgres_data`
-- `ecommerce-panda-kitsune-dev`
+- `panda-estampados-dev-frontend`
+- `ecommerce_panda_estampados_dev_postgres_data`
+- `ecommerce-panda-estampados-dev`
 
 Ejemplos (prod):
-- `panda-and-kitsune-frontend`
-- `panda-and-kitsune-db-data`
+- `panda-estampados-frontend`
+- `panda-estampados-db-data`
 
 Naming consistente permite filtrar por label con un solo comando:
 ```bash
-docker ps --filter "label=com.docker.compose.project=panda-and-kitsune-dev"
+docker ps --filter "label=com.docker.compose.project=panda-estampados-dev"
 ```
 
 ## 11. Recursos (CPU, memoria)
@@ -258,7 +258,7 @@ env_file:
 
 ```bash
 # Validar el compose (sin ejecutar)
-docker compose -f docker/instances/development/panda-and-kitsune/docker-compose.yml \
+docker compose -f docker/instances/development/panda-estampados/docker-compose.yml \
     config --quiet
 
 # Verificar que arranca sin secretos en claro

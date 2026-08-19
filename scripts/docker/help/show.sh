@@ -85,14 +85,14 @@ SEPARATOR
     printf "${C_BOLD}Instancias${C_RESET} (6 totales, separadas por scope)\n"
     printf "  ${C_BOLD}production${C_RESET} (3 prod, auto-contenidas)\n"
     printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "production:panda-and-kitsune" "multi-tenant: Pandas Estampados + Kitsune"
+        "production:panda-estampados" "multi-tenant: Pandas Estampados + Kitsune"
     printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
         "production:mm-boutique"       "single-tenant"
     printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
         "production:morales-store"     "single-tenant"
     printf "  ${C_BOLD}development${C_RESET} (3 dev, con bind mounts + xdebug)\n"
     printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "development:panda-and-kitsune" "BD aislada, puertos shifted +1000"
+        "development:panda-estampados" "BD aislada, puertos shifted +1000"
     printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
         "development:mm-boutique"       "BD aislada, puertos shifted +2000"
     printf "    ${C_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
@@ -112,7 +112,7 @@ SEPARATOR
     printf "    ${C_DIM}levanta solo MM Boutique dev${C_RESET}\n"
     printf "  ${C_CYAN}$0 build dev backend${C_RESET}\n"
     printf "    ${C_DIM}rebuild solo del backend de dev${C_RESET}\n"
-    printf "  ${C_CYAN}$0 restart panda-kitsune app${C_RESET}\n"
+    printf "  ${C_CYAN}$0 restart panda-estampados app${C_RESET}\n"
     printf "    ${C_DIM}reinicia solo el servicio 'app' de Panda prod${C_RESET}\n"
     printf "  ${C_CYAN}$0 logs development:mm-boutique frontend${C_RESET}\n"
     printf "    ${C_DIM}tail logs del frontend dev de mm-boutique${C_RESET}\n"
@@ -120,7 +120,7 @@ SEPARATOR
     printf "    ${C_DIM}bash dentro del app dev de morales-store${C_RESET}\n"
     printf "  ${C_CYAN}$0 info${C_RESET}\n"
     printf "    ${C_DIM}tabla detallada de todos los containers${C_RESET}\n"
-    printf "  ${C_CYAN}$0 volumes development:panda-and-kitsune${C_RESET}\n"
+    printf "  ${C_CYAN}$0 volumes development:panda-estampados${C_RESET}\n"
     printf "    ${C_DIM}lista los volúmenes de panda dev (postgres_data, storage, etc.)${C_RESET}\n"
     printf "  ${C_CYAN}$0 volumes dev backend${C_RESET}\n"
     printf "    ${C_DIM}volúmenes del servicio backend de las 3 dev (filtra los relevantes)${C_RESET}\n"
@@ -134,7 +134,7 @@ SEPARATOR
     printf "  ${C_BOLD}%-22s %6s %6s %8s %6s %5s %13s${C_RESET}\n" \
         "Tienda" "PG" "Redis" "Backend" "Front" "FTP" "PASV"
     printf "  ${C_DIM}%-22s %6s %6s %8s %6s %5s %13s${C_RESET}\n" \
-        "panda-and-kitsune-dev" "6432" "7379" "9000" "5321" "2121" "40000-40099"
+        "panda-estampados-dev" "6432" "7379" "9000" "5321" "2121" "40000-40099"
     printf "  ${C_DIM}%-22s %6s %6s %8s %6s %5s %13s${C_RESET}\n" \
         "mm-boutique-dev"       "7432" "8379" "10000" "6321" "3121" "40100-40199"
     printf "  ${C_DIM}%-22s %6s %6s %8s %5s %13s${C_RESET}\n" \

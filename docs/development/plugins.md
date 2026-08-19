@@ -202,7 +202,7 @@ Después de cambiar el JSON, ejecuta el bootstrap de la instancia:
 ```bash
 cd backend
 docker compose exec app php artisan tenants:bootstrap \
-  docker/instances/panda-kitsune/seeds/panda.json
+  docker/instances/panda-estampados/seeds/panda.json
 ```
 
 ## Instalar un plugin

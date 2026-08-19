@@ -129,6 +129,17 @@ services:
       - FTP_PORT=21
       - FTP_USERNAME=${FTP_USERNAME:-dev-ftp}
       - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
+      # Sanctum stateful hosts (los hosts desde los que se aceptan cookies
+      # httpOnly stateful). Multi-tenant: cada tenant × env. Forzado en
+      # compose para que Dotenv (que NO override existing env vars) lo vea.
+      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000,localhost:4321,panda-estampados.test,www.panda-estampados.test,admin.panda-estampados.test,kitsune.test,www.kitsune.test,admin.kitsune.test,mm-boutique.test,www.mm-boutique.test,admin.mm-boutique.test,morales-store.test,www.morales-store.test,admin.morales-store.test,panda-estampados.com,www.panda-estampados.com,admin.panda-estampados.com,kitsune.com,www.kitsune.com,admin.kitsune.com,mm-boutique.com,www.mm-boutique.com,admin.mm-boutique.com,morales-store.com,www.morales-store.com,admin.morales-store.com,127.0.0.1,127.0.0.1:8000
+      # OAuth social login (Google + Facebook). Pegar creds en
+      # environment/.env (NO en este compose). Vacíos → redirect 503.
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FACEBOOK_CLIENT_ID=${FACEBOOK_CLIENT_ID}
+      - FACEBOOK_CLIENT_SECRET=${FACEBOOK_CLIENT_SECRET}
+      - OAUTH_REDIRECT_BASE_URL=${OAUTH_REDIRECT_BASE_URL}
       - FTP_ROOT=/srv/ftp
       - LOG_CHANNEL=stderr
     extra_hosts:
@@ -143,7 +154,7 @@ services:
 
   # Sidecar nginx — agrega capa HTTP para que Caddy (en host) pueda
   # hacer `reverse_proxy localhost:${BACKEND_PORT}` con transporte HTTP
-  # y no FastCGI. Mismo patrón que en panda-and-kitsune y morales-store.
+  # y no FastCGI. Mismo patrón que en panda-estampados y morales-store.
   #
   # Cadena de requests:
   #   curl host:${BACKEND_PORT} → nginx:8000 (sidecar, vía port mapping)
@@ -172,8 +183,11 @@ services:
       dockerfile: docker/instances/development/mm-boutique/frontend/Dockerfile.development
     container_name: mm-boutique-dev-frontend
     restart: unless-stopped
-    # Run as host UID so bind-mounted frontend code is readable/writable.
-    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    # El entrypoint del Dockerfile hace chown de los volúmenes (root) y
+    # después setpriv para correr pnpm como node (UID 1000, mismo que
+    # el host user). NO usar `user: HOST_UID:HOST_GID` aquí: eso
+    # bypasea el chown del entrypoint y el container arranca como node
+    # con volúmenes owned by root → EACCES en /app/.pnpm-store.
     # tini: PID 1 = init, reaps zombies, forwards signals. Needed for
     # proper shutdown of astro dev and vite child processes.
     init: true
@@ -186,11 +200,14 @@ services:
       - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
       - ecommerce_mm_boutique_dev_node_modules:/app/node_modules
       - ecommerce_mm_boutique_dev_pnpm_store:/app/.pnpm-store
-      # Anonymous volumes shadow the bind-mount so stale .astro/ or
+      # Named volumes shadow the bind-mount so stale .astro/ or
       # .vite/ caches from the host don't break the dev server with
-      # phantom lock files. Destroyed on each `up`.
-      - /app/.astro
-      - /app/node_modules/.vite
+      # phantom lock files. Named (vs anonymous) so they survive
+      # between `up` runs and can be cleaned up surgically with
+      # `docker volume rm <name>` when a stale lock file breaks the
+      # startup (incident 2026-08-17).
+      - ecommerce_mm_boutique_dev_astro_cache:/app/.astro
+      - ecommerce_mm_boutique_dev_vite_cache:/app/node_modules/.vite
     environment:
       - NODE_ENV=development
       - HOST=0.0.0.0
@@ -205,7 +222,7 @@ services:
       - mm-boutique-dev
 
   # Mailpit: SMTP catcher para dev. Ver docker/instances/development/
-  # panda-and-kitsune/docker-compose.yml para detalles. UI expuesta
+  # panda-estampados/docker-compose.yml para detalles. UI expuesta
   # en el host en el puerto :18025 para no chocar con otros stacks.
   mailpit:
     image: ${MAILPIT_IMAGE:-axllent/mailpit:latest}
@@ -236,3 +253,7 @@ volumes:
     name: ecommerce_mm_boutique_dev_node_modules
   ecommerce_mm_boutique_dev_pnpm_store:
     name: ecommerce_mm_boutique_dev_pnpm_store
+  ecommerce_mm_boutique_dev_astro_cache:
+    name: ecommerce_mm_boutique_dev_astro_cache
+  ecommerce_mm_boutique_dev_vite_cache:
+    name: ecommerce_mm_boutique_dev_vite_cache

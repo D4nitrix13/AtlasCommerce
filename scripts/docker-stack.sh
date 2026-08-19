@@ -233,7 +233,7 @@ case "$cmd_canonical" in
                 log_err "  ${C_BRIGHT_CYAN}$0 volumes all${C_RESET}                    ${C_DIM}# 6 instancias${C_RESET}"
                 log_err "  ${C_BRIGHT_CYAN}$0 volumes dev${C_RESET}                    ${C_DIM}# 3 dev${C_RESET}"
                 log_err "  ${C_BRIGHT_CYAN}$0 volumes prod${C_RESET}                   ${C_DIM}# 3 prod${C_RESET}"
-                log_err "  ${C_BRIGHT_CYAN}$0 volumes development:panda-and-kitsune${C_RESET}  ${C_DIM}# 1 instancia${C_RESET}"
+                log_err "  ${C_BRIGHT_CYAN}$0 volumes development:panda-estampados${C_RESET}  ${C_DIM}# 1 instancia${C_RESET}"
                 log_err "Para help: ${C_BRIGHT_CYAN}$0 volumes help${C_RESET}"
             fi
             exit 1

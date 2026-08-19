@@ -160,7 +160,7 @@ cmd_help_restart() {
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET}                                      ${C_DIM}# las 6${C_RESET}\n"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET}                              ${C_DIM}# las 3 dev${C_RESET}\n"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET} ${C_GREEN}backend${C_RESET}              ${C_DIM}# 1 target${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET} ${C_BRIGHT_YELLOW}production:panda-and-kitsune${C_RESET} ${C_DIM}# 1 instancia${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET} ${C_BRIGHT_YELLOW}production:panda-estampados${C_RESET} ${C_DIM}# 1 instancia${C_RESET}\n"
 
     printf "\n"
     _registry_section "ALIAS"
@@ -181,7 +181,7 @@ cmd_help_build() {
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET}                                                ${C_DIM}# 6${C_RESET}\n"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET}                                    ${C_DIM}# 3 dev${C_RESET}\n"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET} ${C_GREEN}backend${C_RESET}                    ${C_DIM}# 1 target${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BRIGHT_YELLOW}production:panda-and-kitsune${C_RESET} ${C_GREEN}frontend${C_RESET} ${C_DIM}# 1 instancia${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BRIGHT_YELLOW}production:panda-estampados${C_RESET} ${C_GREEN}frontend${C_RESET} ${C_DIM}# 1 instancia${C_RESET}\n"
 
     printf "\n"
     _registry_section "ALIAS"
@@ -309,7 +309,7 @@ cmd_help_logs() {
 
     printf "\n"
     _registry_section "EJEMPLOS"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development:panda-and-kitsune${C_RESET}              ${C_DIM}# 1 instancia${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development:panda-estampados${C_RESET}              ${C_DIM}# 1 instancia${C_RESET}\n"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_GREEN}backend${C_RESET}                           ${C_DIM}# 3 dev, backend${C_RESET}\n"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}production:morales-store${C_RESET} ${C_GREEN}app${C_RESET}     ${C_DIM}# 1 instancia + servicio${C_RESET}\n"
 
@@ -419,7 +419,7 @@ cmd_help_exec() {
     _registry_section "EJEMPLOS"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}exec${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development:mm-boutique app bash${C_RESET}\n"
     printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}exec${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BRIGHT_YELLOW}backend${C_RESET} ${C_BRIGHT_GREEN}php artisan migrate --seed${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}exec${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}production:panda-and-kitsune app ls -la /var/www/html${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}exec${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}production:panda-estampados app ls -la /var/www/html${C_RESET}\n"
 
     printf "\n"
     _registry_section "NOTA"

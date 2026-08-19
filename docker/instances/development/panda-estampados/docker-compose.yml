@@ -21,7 +21,7 @@ services:
     # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
     # setear user: explícito. Sin esto, postgres rehúsa correr como root.
     user: "999:999"
-    container_name: panda-and-kitsune-dev-postgres
+    container_name: panda-estampados-dev-postgres
     restart: unless-stopped
     env_file:
       - environment/.env
@@ -34,7 +34,7 @@ services:
       - config_file=/etc/postgresql/postgresql.conf
     volumes:
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
-      - ecommerce_panda_and_kitsune_dev_postgres_data:/var/lib/postgresql
+      - ecommerce_panda_estampados_dev_postgres_data:/var/lib/postgresql
       - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -42,11 +42,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - panda-kitsune-dev
+      - panda-estampados-dev
 
   redis:
     image: ${REDIS_IMAGE:-redis:7-alpine}
-    container_name: panda-and-kitsune-dev-redis
+    container_name: panda-estampados-dev-redis
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -63,11 +63,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - panda-kitsune-dev
+      - panda-estampados-dev
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
-    container_name: panda-and-kitsune-dev-ftp
+    container_name: panda-estampados-dev-ftp
     restart: unless-stopped
     env_file:
       - environment/.env
@@ -84,15 +84,15 @@ services:
       - PASV_MAX_PORT=${FTP_PASV_MAX_PORT:-40100}
       - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
     volumes:
-      - ecommerce_panda_and_kitsune_dev_ftp_data:/srv/ftp
+      - ecommerce_panda_estampados_dev_ftp_data:/srv/ftp
     networks:
-      - panda-kitsune-dev
+      - panda-estampados-dev
 
   backend:
     build:
       context: ../../../..
-      dockerfile: docker/instances/development/panda-and-kitsune/backend/Dockerfile.development
-    container_name: panda-and-kitsune-dev-backend
+      dockerfile: docker/instances/development/panda-estampados/backend/Dockerfile.development
+    container_name: panda-estampados-dev-backend
     restart: unless-stopped
     # Run as host UID (typically 1000) so bind-mounted backend code is
     # readable/writable. The Dockerfile's USER www-data would otherwise
@@ -106,9 +106,9 @@ services:
       - environment/.env
     volumes:
       - ../../../../backend:/var/www/html
-      - ecommerce_panda_and_kitsune_dev_storage:/var/www/html/storage
-      - ecommerce_panda_and_kitsune_dev_bootstrap:/var/www/html/bootstrap/cache
-      - ecommerce_panda_and_kitsune_dev_logs:/var/log/php
+      - ecommerce_panda_estampados_dev_storage:/var/www/html/storage
+      - ecommerce_panda_estampados_dev_bootstrap:/var/www/html/bootstrap/cache
+      - ecommerce_panda_estampados_dev_logs:/var/log/php
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -136,7 +136,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - panda-kitsune-dev
+      - panda-estampados-dev
 
   # Sidecar nginx para exponer HTTP en puerto 8000 del container
   # backend. Caddy (en host) hace `reverse_proxy localhost:9000` con
@@ -150,7 +150,7 @@ services:
   # `build`/`image` y el port mapping.
   nginx:
     image: nginx:1.27-alpine
-    container_name: panda-and-kitsune-dev-nginx
+    container_name: panda-estampados-dev-nginx
     restart: unless-stopped
     init: true
     ports:
@@ -161,7 +161,7 @@ services:
     depends_on:
       - backend
     networks:
-      - panda-kitsune-dev
+      - panda-estampados-dev
     # Cadena de requests (host → Caddy → nginx → FPM):
     #   curl host:5321              → frontend (Astro en container)
     #   curl host:9000              → nginx:8000 (sidecar, vía port mapping)
@@ -170,8 +170,8 @@ services:
   frontend:
     build:
       context: ../../../..
-      dockerfile: docker/instances/development/panda-and-kitsune/frontend/Dockerfile.development
-    container_name: panda-and-kitsune-dev-frontend
+      dockerfile: docker/instances/development/panda-estampados/frontend/Dockerfile.development
+    container_name: panda-estampados-dev-frontend
     restart: unless-stopped
     # El entrypoint del Dockerfile hace chown de los volúmenes (root) y
     # después setpriv para correr pnpm como node (UID 1000, mismo que
@@ -188,15 +188,16 @@ services:
     volumes:
       - ../../../../frontend:/app
       - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
-      - ecommerce_panda_and_kitsune_dev_node_modules:/app/node_modules
-      - ecommerce_panda_and_kitsune_dev_pnpm_store:/app/.pnpm-store
-      # Volúmenes anónimos sobre el bind-mount: enmascaran los
-      # caches locales (Astro + Vite) que arrastran el host. Sin esto,
-      # un .astro/dev.json stale o un node_modules/.vite desactualizado
-      # del host rompe el arranque del dev server. Al ser anónimos, se
-      # recrean vacíos en cada up del container.
-      - /app/.astro
-      - /app/node_modules/.vite
+      - ecommerce_panda_estampados_dev_node_modules:/app/node_modules
+      - ecommerce_panda_estampados_dev_pnpm_store:/app/.pnpm-store
+      # Named volumes enmascaran el bind-mount para que caches stale
+      # (Astro `.astro/dev.json`, Vite `.vite/`) del host no rompan el
+      # dev server con phantom lock files. Named (no anonymous) para
+      # identificarlos en `docker volume ls` y permitir purgado
+      # quirúrgico con `docker volume rm <name>` cuando el lock file
+      # stale rompe el arranque (incident 2026-08-17).
+      - ecommerce_panda_estampados_dev_astro_cache:/app/.astro
+      - ecommerce_panda_estampados_dev_vite_cache:/app/node_modules/.vite
     environment:
       - NODE_ENV=development
       - HOST=0.0.0.0
@@ -216,7 +217,7 @@ services:
     depends_on:
       - backend
     networks:
-      - panda-kitsune-dev
+      - panda-estampados-dev
 
   # Mailpit: SMTP catcher para dev. Captura los emails que Laravel envía
   # (forgot-password, notifications varias) y los muestra en una UI web.
@@ -226,30 +227,34 @@ services:
   # Se expone :8025 al host para inspección desde el browser del dev.
   mailpit:
     image: ${MAILPIT_IMAGE:-axllent/mailpit:latest}
-    container_name: ${MAILPIT_NAME:-panda-and-kitsune-dev-mailpit}
+    container_name: ${MAILPIT_NAME:-panda-estampados-dev-mailpit}
     restart: unless-stopped
     ports:
       - "${MAILPIT_SMTP_PORT:-1025}:1025"
       - "${MAILPIT_UI_PORT:-8025}:8025"
     networks:
-      - panda-kitsune-dev
+      - panda-estampados-dev
 
 networks:
-  panda-kitsune-dev:
-    name: ecommerce-panda-kitsune-dev
+  panda-estampados-dev:
+    name: ecommerce-panda-estampados-dev
 
 volumes:
-  ecommerce_panda_and_kitsune_dev_postgres_data:
-    name: ecommerce_panda_and_kitsune_dev_postgres_data
-  ecommerce_panda_and_kitsune_dev_storage:
-    name: ecommerce_panda_and_kitsune_dev_storage
-  ecommerce_panda_and_kitsune_dev_bootstrap:
-    name: ecommerce_panda_and_kitsune_dev_bootstrap
-  ecommerce_panda_and_kitsune_dev_logs:
-    name: ecommerce_panda_and_kitsune_dev_logs
-  ecommerce_panda_and_kitsune_dev_ftp_data:
-    name: ecommerce_panda_and_kitsune_dev_ftp_data
-  ecommerce_panda_and_kitsune_dev_node_modules:
-    name: ecommerce_panda_and_kitsune_dev_node_modules
-  ecommerce_panda_and_kitsune_dev_pnpm_store:
-    name: ecommerce_panda_and_kitsune_dev_pnpm_store
+  ecommerce_panda_estampados_dev_postgres_data:
+    name: ecommerce_panda_estampados_dev_postgres_data
+  ecommerce_panda_estampados_dev_storage:
+    name: ecommerce_panda_estampados_dev_storage
+  ecommerce_panda_estampados_dev_bootstrap:
+    name: ecommerce_panda_estampados_dev_bootstrap
+  ecommerce_panda_estampados_dev_logs:
+    name: ecommerce_panda_estampados_dev_logs
+  ecommerce_panda_estampados_dev_ftp_data:
+    name: ecommerce_panda_estampados_dev_ftp_data
+  ecommerce_panda_estampados_dev_node_modules:
+    name: ecommerce_panda_estampados_dev_node_modules
+  ecommerce_panda_estampados_dev_pnpm_store:
+    name: ecommerce_panda_estampados_dev_pnpm_store
+  ecommerce_panda_estampados_dev_astro_cache:
+    name: ecommerce_panda_estampados_dev_astro_cache
+  ecommerce_panda_estampados_dev_vite_cache:
+    name: ecommerce_panda_estampados_dev_vite_cache
