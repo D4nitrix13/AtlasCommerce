@@ -11,6 +11,10 @@ rutas absolutas para los binarios** (ver "Pautas" más abajo).
 - [`docker/`](docker/) — submódulos del orquestador Docker.
 - [`docker/_lib/`](docker/_lib/) — librería compartida entre los
   archivos de acción (colores, logging, resolve, docker_compose).
+- [`docker/quality-check.sh`](docker/quality-check.sh) — verifica la
+  convención de **rutas absolutas** en todos los `Dockerfile.*`,
+  `docker-compose*.yml` y `entrypoint*.sh` bajo `docker/instances/`.
+  Falla con exit 1 si encuentra un binario invocado bare.
 
 ## Estructura de `docker/`
 
@@ -146,6 +150,25 @@ bash -n scripts/docker/_lib/*.sh
 bash -n scripts/docker/lifecycle/*.sh
 # ...
 ```
+
+### 9. Antes de commitear cambios en `docker/instances/`
+
+Correr el quality check. Bloquea el commit si encuentra violaciones:
+
+```bash
+./scripts/docker/quality-check.sh
+# Exit codes:
+#   0 → OK
+#   1 → una o más violaciones (commit debería abortar)
+```
+
+Para wireear al pre-commit (en `quality-gate-pre-commit` o en un git
+hook local), ver
+[scripts/docker/quality-check.sh](docker/quality-check.sh "scripts/docker/quality-check.sh").
+
+El check lee `docs/agent-skills/docker-stack-orchestration/SKILL.md`
+para la lista de builtins exceptuados y la tabla de paths absolutos.
+Si modificás esa tabla, el check se actualiza implícitamente.
 
 ## Convención de commits
 
