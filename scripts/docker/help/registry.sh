@@ -325,21 +325,37 @@ cmd_help_logs() {
 
 cmd_help_volumes() {
     _registry_header "volumes" "listar volúmenes Docker declarados por las instancias"
-    _registry_use "volumes" "[<área>] [<servicio>]"
-    _registry_area_block
+    _registry_use_required "volumes" "<área>" "[<servicio>]"
 
     printf "\n"
-    printf "${C_BOLD}${C_BRIGHT_RED}▸ PARA VER TODOS LOS VOLÚMENES${C_RESET} ${C_BRIGHT_RED}(la única forma)${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_UL}${C_BRIGHT_YELLOW}all${C_RESET}\n"
+    printf "  ${C_DIM}<área> REQUERIDA — no hay default. Pasar 'all' para ver todos.${C_RESET}\n"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "all"                    "→ las 6 instancias (3 prod + 3 dev)"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "dev"                    "→ las 3 dev (bind mounts + xdebug)"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "prod"                   "→ las 3 prod"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "production:<store>"     "→ 1 instancia prod"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "development:<store>"    "→ 1 instancia dev"
+
+    printf "\n"
+    printf "${C_BOLD}${C_BRIGHT_RED}▸ PARA VER TODOS${C_RESET} ${C_BRIGHT_RED}(la única forma es pasar 'all')${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_UL}${C_BRIGHT_YELLOW}all${C_RESET}\n"
 
     printf "\n"
     _registry_section "EJEMPLOS"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_UL}${C_BRIGHT_YELLOW}all${C_RESET}                              ${C_DIM}# 6 instancias${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_UL}${C_BRIGHT_YELLOW}all${C_RESET}                              ${C_DIM}# DEFAULT = all${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET}                                  ${C_DIM}# 3 dev${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET} ${C_GREEN}backend${C_RESET}                  ${C_DIM}# backend de las 3 dev${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}production${C_RESET}                       ${C_DIM}# 3 prod${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}production:morales-store${C_RESET}         ${C_DIM}# 1 instancia prod${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_UL}${C_BRIGHT_YELLOW}all${C_RESET}                              ${C_DIM}# 6 instancias${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET}                                  ${C_DIM}# 3 dev${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET} ${C_GREEN}backend${C_RESET}                  ${C_DIM}# backend de las 3 dev${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}production${C_RESET}                       ${C_DIM}# 3 prod${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BRIGHT_YELLOW}production:morales-store${C_RESET}         ${C_DIM}# 1 instancia prod${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "ERROR SI FALTA"
+    printf "  ${C_DIM}\$0 volumes${C_RESET} ${C_BRIGHT_RED}# error: <área> requerido${C_RESET}\n"
+    printf "  ${C_DIM}\$0 volumes help${C_RESET} ${C_BRIGHT_RED}# este help${C_RESET}\n"
 
     printf "\n"
     _registry_section "ALIAS"
@@ -352,22 +368,38 @@ cmd_help_rm_volumes() {
     printf "${C_BOLD}${C_BRIGHT_RED}⚠ DESTRUCTIVO${C_RESET}\n"
 
     _registry_section "USO"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_GREEN}[-y]${C_RESET} ${C_BRIGHT_YELLOW}[<área>] [<servicio>]${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_GREEN}[-y]${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<área>${C_RESET} ${C_GREEN}[<servicio>]${C_RESET}\n"
 
     printf "\n"
     _registry_section "FLAGS"
     printf "  ${C_BOLD}${C_BRIGHT_YELLOW}-y${C_RESET}    ${C_DIM}saltear confirmación interactiva (cuidado)${C_RESET}\n"
 
-    _registry_area_block
+    printf "\n"
+    printf "  ${C_DIM}<área> REQUERIDA — no hay default. Pasar 'all' para borrar todos.${C_RESET}\n"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "all"                    "→ las 6 instancias"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "dev"                    "→ las 3 dev"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "prod"                   "→ las 3 prod"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "production:<store>"     "→ 1 instancia prod"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+        "development:<store>"    "→ 1 instancia dev"
 
     printf "\n"
     printf "${C_BOLD}${C_BRIGHT_RED}▸ PARA BORRAR TODO${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_GREEN}-y${C_RESET} ${C_BOLD}${C_UL}${C_BRIGHT_YELLOW}all${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_GREEN}-y${C_RESET} ${C_BOLD}${C_UL}${C_BRIGHT_YELLOW}all${C_RESET}\n"
 
     printf "\n"
     _registry_section "EJEMPLOS"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET}                              ${C_DIM}# pedir confirmación${C_RESET}\n"
-    printf "  ${C_BRIGHT_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_GREEN}-y${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET} ${C_GREEN}backend${C_RESET}    ${C_DIM}# sin confirmación, 1 target${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET}                              ${C_DIM}# pedir confirmación${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_GREEN}-y${C_RESET} ${C_BRIGHT_YELLOW}dev${C_RESET} ${C_GREEN}backend${C_RESET}    ${C_DIM}# sin confirmación, 1 target${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "ERROR SI FALTA"
+    printf "  ${C_DIM}\$0 rm-volumes${C_RESET}      ${C_BRIGHT_RED}# error: <área> requerido${C_RESET}\n"
+    printf "  ${C_DIM}\$0 rm-volumes -y${C_RESET}   ${C_BRIGHT_RED}# error también${C_RESET}\n"
 
     printf "\n"
     _registry_section "ALIAS"

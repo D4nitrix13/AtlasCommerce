@@ -211,6 +211,36 @@ case "$cmd_canonical" in
     setup|hosts|caddy|help)
         "$cmd_fn" "$@"
         ;;
+    # Comandos que REQUIEREN <area> explicito (no default a all).
+    # Justificacion: su output por instancia es masivo (volumes:
+    # 8+ volúmenes; rm-volumes: además destructivo). El default a all
+    # generaba escapes de output que el usuario no esperaba. Mejor
+    # forzarlo a ser explicito, con hint de qué pasar.
+    volumes|rm-volumes)
+        # rm-volumes soporta flag opcional -y antes del area.
+        area_check="${1:-}"
+        if [[ "$cmd_canonical" == "rm-volumes" && "$area_check" == "-y" ]]; then
+            area_check="${2:-}"
+        fi
+        if [[ -z "$area_check" ]]; then
+            log_err "<area> es requerido. Para ver TODOS pasar 'all' explícitamente."
+            if [[ "$cmd_canonical" == "rm-volumes" ]]; then
+                log_err "  ${C_BRIGHT_CYAN}$0 rm-volumes -y all${C_RESET}                ${C_DIM}# todas (skip confirm)${C_RESET}"
+                log_err "  ${C_BRIGHT_CYAN}$0 rm-volumes -y dev${C_RESET}                ${C_DIM}# 3 dev${C_RESET}"
+                log_err "  ${C_BRIGHT_CYAN}$0 rm-volumes -y dev backend${C_RESET}        ${C_DIM}# 1 target (destructivo!)${C_RESET}"
+                log_err "Para help: ${C_BRIGHT_CYAN}$0 rm-volumes help${C_RESET}"
+            else
+                log_err "  ${C_BRIGHT_CYAN}$0 volumes all${C_RESET}                    ${C_DIM}# 6 instancias${C_RESET}"
+                log_err "  ${C_BRIGHT_CYAN}$0 volumes dev${C_RESET}                    ${C_DIM}# 3 dev${C_RESET}"
+                log_err "  ${C_BRIGHT_CYAN}$0 volumes prod${C_RESET}                   ${C_DIM}# 3 prod${C_RESET}"
+                log_err "  ${C_BRIGHT_CYAN}$0 volumes development:panda-and-kitsune${C_RESET}  ${C_DIM}# 1 instancia${C_RESET}"
+                log_err "Para help: ${C_BRIGHT_CYAN}$0 volumes help${C_RESET}"
+            fi
+            exit 1
+        fi
+        show_target_summary "$cmd_canonical" "$@"
+        "$cmd_fn" "$@"
+        ;;
     *)
         # Pre-validate (validate_area imprime su propio error y devuelve 1).
         if ! validate_area "${1:-}"; then
