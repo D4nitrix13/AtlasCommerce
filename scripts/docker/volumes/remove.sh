@@ -1,15 +1,33 @@
 #!/usr/bin/env bash
 # scripts/docker/volumes/remove.sh
-# cmd_rm_volumes [-y] [scope] [svc]
+# cmd_rm_volumes [-y] <área> [<servicio>]
+#
 # ⚠ Elimina volúmenes Docker. Borra datos persistentes (BD, storage,
 # caches, pnpm-store). Pide confirmación a menos que se pase `-y`.
 #
+# El <área> es REQUERIDA — `rm-volumes` solo es válido si se pasa
+# un scope explícito. Tiene sentido doble: es destructivo + el
+# output por instancia es masivo. Default to all = peligro.
+#
 # Uso:
-#   rm-volumes -y dev backend           # borra volúmenes del backend de las 3 dev
-#   rm-volumes development:panda-and-kitsune # borra TODO el state de panda dev
+#   rm-volumes -y dev backend              # 3 dev, backend
+#   rm-volumes -y development:panda-and-kitsune  # 1 instancia
+#   rm-volumes -y all                      # ⚠ las 6 (con skip confirmación)
 cmd_rm_volumes() {
     local force="n"
     [[ "${1:-}" == "-y" ]] && { force="y"; shift; }
+
+    # Validación upfront del área. Si no hay scope después del flag,
+    # error con hint — nunca defaultear a 'all' en un comando
+    # destructivo.
+    if [[ -z "${1:-}" ]]; then
+        log_err "Falta <área>. Pasar una explícita:"
+        log_err "  ${C_BRIGHT_CYAN}-y all${C_RESET}                    → ${C_BRIGHT_RED}las 6 (⚠)${C_RESET}"
+        log_err "  ${C_BRIGHT_CYAN}-y dev${C_RESET}                    → 3 dev"
+        log_err "  ${C_BRIGHT_CYAN}-y prod${C_RESET}                   → 3 prod"
+        log_err "Para más: ${C_BRIGHT_CYAN}$0 rm-volumes help${C_RESET}"
+        return 1
+    fi
 
     if [[ "$force" != "y" ]]; then
         log_warn "⚠  rm-volumes ELIMINA VOLÚMENES. Esto borra datos persistentes (BD, storage, caches)."
@@ -29,10 +47,10 @@ cmd_rm_volumes() {
             log_warn "  ${inst}: no hay volúmenes para borrar."
             continue
         fi
-        printf "\n${C_BOLD}==[ %s ]==${C_RESET}\n" "$inst"
+        printf "\n${C_BOLD}${C_BRIGHT_BLUE}==[ ${C_BRIGHT_CYAN}%s${C_BRIGHT_BLUE} ]==${C_RESET}\n" "$inst"
         while IFS= read -r volname; do
             [[ -z "$volname" ]] && continue
-            log_info "  rm volume ${C_CYAN}${volname}${C_RESET}"
+            log_info "  rm volume ${C_BRIGHT_MAGENTA}${volname}${C_RESET}"
             log_cmd "/usr/bin/docker volume rm ${volname}"
             if /usr/bin/docker volume rm "$volname" 2>/dev/null; then
                 log_ok "  ${volname} borrado."
