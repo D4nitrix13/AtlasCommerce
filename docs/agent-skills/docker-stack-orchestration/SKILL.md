@@ -1,6 +1,6 @@
 ---
 name: docker-stack-orchestration
-description: Multi-instance Docker orchestration (3 prod + 3 dev), Caddy + per-tenant IPs, volumes, env per instance. Triggers: adding a new tenant, debugging docker-compose, env files, scripts/docker-stack.sh, docker/instances/.
+description: Multi-instance Docker orchestration (3 prod + 3 dev), Caddy + per-tenant IPs, volumes, env per instance. Required reading before editing ANY Dockerfile, docker-compose.yml, entrypoint.sh, conf/php, conf/postgres, conf/redis, conf/nginx, or .env under docker/instances/. Enforces: absolute paths for ALL binaries (RUN/CMD/ENTRYPOINT/command:/shell), no-root users, tini as PID 1, separate networks per instance, host UID binding for dev bind-mounts. Triggers: adding a new tenant, debugging docker-compose, env files, Dockerfile, entrypoint, scripts/docker-stack.sh, docker/instances/, paths absolutos, PATH hijacking, security hardening.
 ---
 
 # Docker Stack Orchestration
@@ -21,6 +21,65 @@ The monorepo runs **6 instances** in parallel (3 prod + 3 dev), all via
 **Dev** uses bind mounts + xdebug, ports published on the host
 (frontend 5321/6321/7321, avoiding conflict between themselves and
 with prod).
+
+## Hard rules (non-negotiable, applies to every file under `docker/`)
+
+These are not preferences. They are documented in
+[docker/COMPOSE.md](../COMPOSE.md) and
+[docker/DOCKERFILES.md](../DOCKERFILES.md) but restated HERE so any
+agent that loads ONLY this skill has the rules without opening other
+files.
+
+### Always use absolute paths for binaries
+
+Any binary invoked from `RUN`, `CMD`, `ENTRYPOINT`, `command:` (compose),
+or from inside an `entrypoint.sh` MUST be invoked with its absolute path.
+No `php artisan ...` — must be `/usr/local/bin/php artisan ...`.
+
+**Why**: PATH hijacking. If a writable dir is on `$PATH` (typical in
+containers with `/app/storage` or temp dirs), a malicious binary there
+intercepts the call. Absolute path = no interception.
+
+**Common binaries in this repo** (full table in `docker/COMPOSE.md#1`):
+
+| Binary                     | Path                                              |
+|----------------------------|---------------------------------------------------|
+| `corepack`                 | `/usr/local/bin/corepack`                         |
+| `pnpm`                     | `/usr/local/bin/pnpm`                             |
+| `node`                     | `/usr/local/bin/node`                             |
+| `php`                      | `/usr/local/bin/php`                              |
+| `php-fpm`                  | `/usr/local/sbin/php-fpm`                         |
+| `composer`                 | `/usr/bin/composer`                               |
+| `docker-php-ext-install`   | `/usr/local/bin/docker-php-ext-install`           |
+| `docker-php-ext-enable`    | `/usr/local/bin/docker-php-ext-enable`            |
+| `pecl`                     | `/usr/local/bin/pecl`                             |
+| `apk`                      | `/sbin/apk`                                       |
+| `postgres`                 | `/usr/lib/postgresql/<ver>/bin/postgres`          |
+| `redis-server`             | `/usr/local/bin/redis-server`                     |
+| `pg_isready`               | `/usr/bin/pg_isready`                             |
+| `id`                       | `/usr/bin/id`                                     |
+| `grep`                     | `/usr/bin/grep`                                   |
+| `seq`                      | `/usr/bin/seq`                                    |
+| `sleep`                    | `/bin/sleep`                                      |
+| `wget`                     | `/usr/bin/wget`                                   |
+| `chown` / `chmod` / `mkdir`| `/bin/chown` / `/bin/chmod` / `/bin/mkdir`        |
+| `cp` / `rm` / `pwd`        | `/usr/bin/cp` / `/bin/rm` / `/usr/bin/pwd`        |
+
+If a binary you need is NOT in the table, run
+`docker compose exec <svc> /usr/bin/which <name>` to find its real
+path. Never assume `name` works.
+
+### Other hard rules
+
+- **No-root runtime**: container runs as `www-data` (UID 33) for backend
+  or `node` (UID 1000) for frontend. `root` only in build time.
+- **`init: true`** on every service we author (not needed for official
+  images — they bring their own PID 1).
+- **No `docker run` loose** — always via compose.
+- **One `docker-compose.yml` per instance** under `docker/instances/<stage>/<store>/`.
+  No sharing of volumes or networks between prod and dev.
+- **`depends_on` with `condition: service_healthy`** for every dependency
+  that exposes a port (postgres, redis, etc.).
 
 ## File layout
 
