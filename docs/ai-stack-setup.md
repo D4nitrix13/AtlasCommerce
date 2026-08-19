@@ -48,10 +48,16 @@ cd Ecommerce
 
 # 2. Activar las skills commiteadas
 ./scripts/install-agent-skills.sh
+
+# 3. Activar el git hook de pre-commit (Docker quality-check)
+./scripts/install-git-hooks.sh
 ```
 
-Esto crea los symlinks en `.claude/skills/` que apuntan a
-`docs/agent-skills/`. Es idempotente — se puede re-correr sin romper.
+Los symlinks en `.claude/skills/` apuntan a `docs/agent-skills/`. Es
+idempotente — se puede re-correr sin romper.
+
+El git hook setea `core.hooksPath=.githooks` en este repo, así
+`.githooks/pre-commit` corre automáticamente antes de cada commit.
 
 Más detalles en
 [scripts/README.md](scripts/README.md "scripts/README.md") y en
@@ -207,6 +213,7 @@ ln -s ~/.agents/skills/<nombre> ~/.claude/skills/<nombre>
 
 - [scripts/install-agent-skills.sh](../scripts/install-agent-skills.sh "../scripts/install-agent-skills.sh")
 - [scripts/install-marketplace-skills.sh](../scripts/install-marketplace-skills.sh "../scripts/install-marketplace-skills.sh")
+- [scripts/install-git-hooks.sh](../scripts/install-git-hooks.sh "../scripts/install-git-hooks.sh")
 - [.claude/skills/README.md](../.claude/skills/README.md ".claude/skills/README.md")
 - [.atl/skill-registry.md](../.atl/skill-registry.md ".atl/skill-registry.md")
 - [HANDOFF-2026-08-15.md](HANDOFF-2026-08-15.md "HANDOFF-2026-08-15.md")

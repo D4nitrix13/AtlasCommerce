@@ -15,6 +15,10 @@ rutas absolutas para los binarios** (ver "Pautas" más abajo).
   convención de **rutas absolutas** en todos los `Dockerfile.*`,
   `docker-compose*.yml` y `entrypoint*.sh` bajo `docker/instances/`.
   Falla con exit 1 si encuentra un binario invocado bare.
+- [`install-git-hooks.sh`](install-git-hooks.sh) — registra los git
+  hooks del proyecto en esta máquina vía `core.hooksPath`. Setea
+  `.githooks/` como directorio activo. Idempotente, soporte
+  `--clean` para desinstalar.
 
 ## Estructura de `docker/`
 
@@ -162,9 +166,17 @@ Correr el quality check. Bloquea el commit si encuentra violaciones:
 #   1 → una o más violaciones (commit debería abortar)
 ```
 
-Para wireear al pre-commit (en `quality-gate-pre-commit` o en un git
-hook local), ver
-[scripts/docker/quality-check.sh](docker/quality-check.sh "scripts/docker/quality-check.sh").
+El proyecto tiene un **git hook** listo en `.githooks/pre-commit`
+(no se activa solo al clonar). Para activarlo:
+
+```bash
+./scripts/install-git-hooks.sh           # install (set core.hooksPath)
+./scripts/install-git-hooks.sh --clean   # uninstall
+```
+
+Una vez instalado, el hook detecta automáticamente cuando hay
+archivos Docker staged y corre el check. Bypass consciente:
+`git commit --no-verify`.
 
 El check lee `docs/agent-skills/docker-stack-orchestration/SKILL.md`
 para la lista de builtins exceptuados y la tabla de paths absolutos.
