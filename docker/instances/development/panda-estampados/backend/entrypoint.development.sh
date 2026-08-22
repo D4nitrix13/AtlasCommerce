@@ -6,14 +6,14 @@
 
 set -eu
 
-/bin/cd /var/www/html
+cd /var/www/html
 
 # Esperar a Postgres si está configurado (default 60s).
 if [ -n "${DB_HOST:-}" ]; then
-  /bin/echo "[dev] Esperando a Postgres en ${DB_HOST}:${DB_PORT:-5432}…"
+  echo "[dev] Esperando a Postgres en ${DB_HOST}:${DB_PORT:-5432}…"
   for _ in $(seq 1 60); do
     if /usr/local/bin/php -r "fsockopen('${DB_HOST}', ${DB_PORT:-5432}, \$errno, \$errstr, 2) || exit(1);" 2>/dev/null; then
-      /bin/echo "[dev] Postgres reachable."
+      echo "[dev] Postgres reachable."
       break
     fi
     sleep 1
