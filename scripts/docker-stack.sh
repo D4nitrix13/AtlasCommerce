@@ -89,6 +89,7 @@ action_file_for() {
             printf '%s\n' "${DOCKER_DIR}/volumes/remove.sh" ;;
         exec)        printf '%s\n' "${DOCKER_DIR}/exec/cmd.sh" ;;
         setup)       printf '%s\n' "${DOCKER_DIR}/setup/first-install.sh" ;;
+        fresh)       printf '%s\n' "${DOCKER_DIR}/setup/fresh-instance.sh" ;;
         hosts)       printf '%s\n' "${DOCKER_DIR}/setup/hosts.sh" ;;
         caddy)       printf '%s\n' "${DOCKER_DIR}/setup/caddy.sh" ;;
         help)        printf '%s\n' "${DOCKER_DIR}/help/show.sh" ;;
@@ -102,7 +103,7 @@ is_known_cmd() {
         up|start|stop|restart|build|down|nuke|\
         status|ps|info|logs|\
         volumes|rm-volumes|\
-        exec|setup|hosts|caddy|help|\
+        exec|setup|fresh|hosts|caddy|help|\
         b|rs|ls|psv|vol|rmvol) return 0 ;;
         *) return 1 ;;
     esac
@@ -208,7 +209,7 @@ shift  # descarta "$cmd_raw"
 # Pre-validar el área (sin consumir la salida de resolve_targets) para
 # evitar summaries optimistas antes de un error inevitable.
 case "$cmd_canonical" in
-    setup|hosts|caddy|help)
+    setup|fresh|hosts|caddy|help)
         "$cmd_fn" "$@"
         ;;
     # Comandos que REQUIEREN <area> explicito (no default a all).
