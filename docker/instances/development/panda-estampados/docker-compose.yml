@@ -34,6 +34,7 @@ services:
       - config_file=/etc/postgresql/postgresql.conf
     volumes:
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./conf/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
       - ecommerce_panda_estampados_dev_postgres_data:/var/lib/postgresql
       - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
