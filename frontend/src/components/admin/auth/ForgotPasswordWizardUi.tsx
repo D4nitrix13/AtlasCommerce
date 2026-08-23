@@ -117,7 +117,7 @@ export function WizardFormContainer({
 }: WizardFormContainerProps): ReactElement {
   return (
     <div
-      className={`rounded-xl border border-slate-200 bg-white p-6 shadow-sm ${className}`}
+      className={`rounded-xl border border-slate-200 bg-white p-8 shadow-sm w-full max-w-xl ${className}`}
     >
       {children}
     </div>
@@ -191,7 +191,7 @@ export function WizardButtonRow({
         type="button"
         onClick={handlePrimaryClick}
         disabled={isSubmitting || hasSuccess}
-        className="flex-1 max-w-xs bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 flex items-center justify-center gap-2"
+        className="flex-1 min-w-[180px] max-w-sm bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 flex items-center justify-center gap-2"
       >
         {showSpinner ? (
           <>
