@@ -2,7 +2,7 @@
 # ------------------------------------------------------------
 # scripts/docker/setup/fresh-instance.sh
 # ------------------------------------------------------------
-# cmd_fresh <instancia> [--build]
+# cmd_fresh <stage> <store>
 #
 # Fresh start de UNA instancia: borra todo, rebuild, initdb si
 # aplica, migrations, seeders, tenants:bootstrap. Idempotente en
@@ -16,9 +16,13 @@
 #   2. initdb solo crea el cluster con la base `postgres`; el nombre
 #      real (panda_estampados) hay que crearlo con `createdb`.
 #
+# Acepta nueva firma posicional <stage> <store>. El dispatcher rechaza
+# `fresh ... all` (no se puede "freshear" todas a la vez — debe ser
+# una sola tienda).
+#
 # Uso:
-#   $0 cmd_fresh development:panda-estampados
-#   $0 cmd_fresh production:panda-estampados
+#   $0 cmd_fresh development panda-estampados
+#   $0 cmd_fresh production panda-estampados
 #
 # Requiere:
 #   - ./scripts/docker-stack.sh (mismo wrapper que el orquestador)
@@ -26,15 +30,16 @@
 #   - Bash 4+
 # ------------------------------------------------------------
 cmd_fresh() {
-    local instance="${1:-}"
-    local build_flag="${2:-}"
-    if [[ -z "$instance" ]]; then
-        log_err "Falta <instancia>."
-        log_err "Ejemplos:"
-        log_err "  $0 cmd_fresh development:panda-estampados"
-        log_err "  $0 cmd_fresh production:panda-estampados"
+    local stage="$1"
+    local store="$2"
+    if [[ -z "$stage" || -z "$store" ]]; then
+        log_err "Faltan argumentos: cmd_fresh <stage> <store>"
         return 1
     fi
+
+    # Construir el identificador interno <stage>:<store> que el resto
+    # del script necesita (mismo formato que instance_compose_dir).
+    local instance="${stage}:${store}"
 
     log_bold "Fresh start de ${instance}"
     echo
@@ -56,26 +61,19 @@ cmd_fresh() {
         log_warn "docker compose down falló (¿no estaba corriendo?). Continúo."
     fi
 
-    # 3. Levantar la instancia (build + start).
+    # 3. Levantar la instancia (build + start). `fresh` siempre rebuild:
+    # el sentido del comando es partir de cero, así que el `--build`
+    # es implícito.
     log_info "Levantando ${instance} con build…"
-    if [[ "$build_flag" == "--build" ]]; then
-        /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
-            up -d --build --remove-orphans 2>&1 | /usr/bin/tail -20
-    else
-        /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
-            up -d --remove-orphans 2>&1 | /usr/bin/tail -20
-    fi
+    /usr/bin/docker compose \
+        -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+        --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
+        up -d --build --remove-orphans 2>&1 | /usr/bin/tail -20
 
     # 4. Pre-initdb workaround (dev / prod que usen el compose con
     # `command:` override). Si la imagen es postgis/postgis, el
     # entrypoint oficial NO corre por culpa del override; hay que
-    # initdb manualmente.
-    local stage="${instance%%:*}"
-    local store="${instance##*:}"
+    # initdb manualmente. `stage` y `store` ya vienen como $1/$2.
     local pg_service="postgres"
     local pg_image
     pg_image=$(/usr/bin/docker compose \

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # scripts/docker/setup/first-install.sh
-# cmd_setup [prod|dev|all]
+# cmd_setup <stage> <store|all>
 # Primera instalación: copia docker/versions.env si falta, asegura
-# .env de cada instancia, levanta los stacks.
+# .env de cada instancia, levanta los stacks. Acepta store=all para
+# aplicar a todas las tiendas del stage.
 cmd_setup() {
-    local scope="${1:-all}"
+    local stage="$1"
+    local store="${2:-all}"
     log_bold "Primera instalación de las instancias."
     # 1. docker/versions.env (centraliza versiones de imágenes)
     if [[ ! -f "${ROOT_DIR}/docker/versions.env" ]]; then
@@ -16,26 +18,13 @@ cmd_setup() {
             exit 1
         fi
     fi
-    # 2. Resolver qué instancias levanta este setup según el scope.
+    # 2. Resolver qué instancias levanta este setup según (stage, store).
+    # El dispatcher ya normalizó stage (prod→production, dev→development).
     local -a instances_to_start=()
-    case "$scope" in
-        prod)
-            instances_to_start=("${PROD_INSTANCES[@]}")
-            log_info "Scope: prod (${PROD_INSTANCES[*]})"
-            ;;
-        dev)
-            instances_to_start=("${DEV_INSTANCES[@]}")
-            log_info "Scope: dev (${DEV_INSTANCES[*]})"
-            ;;
-        all)
-            instances_to_start=("${ALL_INSTANCES[@]}")
-            log_info "Scope: all (prod + dev)"
-            ;;
-        *)
-            log_err "Scope inválido: $scope. Usá: prod | dev | all"
-            exit 1
-            ;;
-    esac
+    while IFS=$'\t' read -r inst _; do
+        instances_to_start+=("$inst")
+    done < <(resolve_targets "$stage" "$store")
+    log_info "Scope: stage=${stage} store=${store} (${#instances_to_start[@]} instancias: ${instances_to_start[*]})"
     # 3. Asegurar .env de cada instancia.
     for inst in "${instances_to_start[@]}"; do
         ensure_env_file "$inst"
