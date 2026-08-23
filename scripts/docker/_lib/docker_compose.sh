@@ -13,9 +13,10 @@ readonly DOCKER_BIN="/usr/bin/docker"
 readonly ID_BIN="/usr/bin/id"
 
 # docker_compose <instance> <args...>
-# Compone el comando final, lo loguea con [cmd], y lo ejecuta dentro
-# del directorio de la instancia. Exporta HOST_UID/HOST_GID para
-# que el `user:` del compose tenga el UID correcto.
+# Compone el comando final, lo loguea con formato multi-línea via
+# log_cmd_block (cd + env + exec, coloreado por sección), y lo
+# ejecuta dentro del directorio de la instancia. Exporta HOST_UID/
+# HOST_GID para que el `user:` del compose tenga el UID correcto.
 docker_compose() {
     local name="$1"; shift
     local dir
@@ -25,12 +26,23 @@ docker_compose() {
     local env_file
     env_file="$(instance_env_file "$name")"
 
-    # Echo del comando real (con path absoluto) ANTES de ejecutarlo.
-    # Los flags variables ($env_file, $*) se interpolan al final.
-    log_cmd "(cd ${dir} && HOST_UID=\$(${ID_BIN} -u) HOST_GID=\$(${ID_BIN} -g) ${DOCKER_BIN} compose -f ${file} ${env_file} $*)"
+    local host_uid="${HOST_UID:-$(${ID_BIN} -u)}"
+    local host_gid="${HOST_GID:-$(${ID_BIN} -g)}"
+    local env_string="HOST_UID=${host_uid} HOST_GID=${host_gid}"
+
+    # Armar el array de tokens para `docker compose`. Separamos flags
+    # (-f, --env-file) de valores posicionales para que log_cmd_block
+    # los coloree distinto y los wrappee con `\` cuando aparece un flag.
+    local compose_args=("${DOCKER_BIN}" "compose" "-f" "$file")
+    if [[ -n "$env_file" ]]; then
+        compose_args+=("--env-file" "${dir}/environment/.env")
+    fi
+    compose_args+=("$@")
+
+    log_cmd_block "$dir" "$env_string" "${compose_args[@]}"
 
     # shellcheck disable=SC2086
-    (cd "$dir" && HOST_UID="${HOST_UID:-$(${ID_BIN} -u)}" HOST_GID="${HOST_GID:-$(${ID_BIN} -g)}" ${DOCKER_BIN} compose -f "$file" $env_file "$@")
+    (cd "$dir" && HOST_UID="${host_uid}" HOST_GID="${host_gid}" ${DOCKER_BIN} compose -f "$file" $env_file "$@")
 }
 
 # docker_ps_project <project>

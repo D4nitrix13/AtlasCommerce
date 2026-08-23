@@ -3,14 +3,14 @@
 # scripts/docker-stack.sh — entry point del orquestador Docker
 # ------------------------------------------------------------
 # Dispatcher delgado con detección de "help" por subcomando y
-# resumen de área + servicios antes de cada ejecución.
+# resumen de stage + store + servicio antes de cada ejecución.
 #
 # Comandos disponibles (canonical):
 #   Lifecycle   : up start stop restart build down nuke
 #   Inspección  : status ps info logs
 #   Volumes     : volumes rm-volumes
 #   Exec        : exec
-#   Setup       : setup hosts caddy
+#   Setup       : setup fresh hosts caddy
 #   Help        : help
 #
 # Cada acción vive en su propia carpeta:
@@ -30,16 +30,17 @@
 #   - Dispatcher delgado, lógica en lib/ y en cada acción.
 #
 # Uso:
-#   ./scripts/docker-stack.sh <comando> [<área>] [<servicio>]
-#   ./scripts/docker-stack.sh <comando> help          # help del comando
-#   ./scripts/docker-stack.sh <comando> <área> help   # help filtrado
-#   ./scripts/docker-stack.sh help                    # help global
+#   ./scripts/docker-stack.sh <cmd> [flags] <stage> <store|all> [<servicio>]
+#   ./scripts/docker-stack.sh <cmd> help                  # help del comando
+#   ./scripts/docker-stack.sh help                        # help global
 #
-# Áreas canónicas:
-#   all       → todas las 6 instancias (3 prod + 3 dev)
-#   prod      → las 3 prod
-#   dev       → las 3 dev
-#   <store>   → 1 instancia (default: production:<store>)
+# Stages canónicos:
+#   production | prod    → 3 instancias de producción
+#   development | dev    → 3 instancias de development
+#
+# Stores:
+#   panda-estampados | mm-boutique | morales-store   → 1 instancia
+#   all                                            → todas las del stage
 #
 # Requiere: docker compose v2 (>= 5.x), bash 4+.
 # ------------------------------------------------------------
@@ -120,6 +121,51 @@ args_contain_help() {
     return 1
 }
 
+# Imprime el bloque de USO + lista de stages + stores + ejemplos
+# cuando faltan argumentos posicionales. Usado por casi todos los
+# comandos con args requeridos.
+_print_positional_usage() {
+    local cmd_canonical="$1"
+    local script_path="$2"
+
+    log_err "Uso: ${C_BRIGHT_CYAN}${script_path} <cmd>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store|all>${C_RESET} ${C_GREEN}[<servicio>]${C_RESET}"
+    log_err "Stages: ${C_BRIGHT_CYAN}production|prod${C_RESET}, ${C_BRIGHT_CYAN}development|dev${C_RESET}"
+    log_err "Stores: ${C_BRIGHT_CYAN}panda-estampados${C_RESET}, ${C_BRIGHT_CYAN}mm-boutique${C_RESET}, ${C_BRIGHT_CYAN}morales-store${C_RESET}, ${C_BRIGHT_CYAN}all${C_RESET}"
+    echo ""
+    case "$cmd_canonical" in
+        build)
+            log_err "  ${C_BRIGHT_CYAN}${script_path} build no-cache dev panda-estampados backend${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} build dev all backend${C_RESET}                    ${C_DIM}# 3 dev${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} build production all${C_RESET}                      ${C_DIM}# 3 prod${C_RESET}"
+            log_err "Para help: ${C_BRIGHT_CYAN}${script_path} build help${C_RESET}"
+            ;;
+        rm-volumes)
+            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes -y dev panda-estampados${C_RESET}      ${C_DIM}# 1 store, skip confirm${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes dev all${C_RESET}                       ${C_DIM}# 3 dev, pedir confirm${C_RESET}"
+            ;;
+        logs)
+            log_err "  ${C_BRIGHT_CYAN}${script_path} logs dev panda-estampados backend${C_RESET}      ${C_DIM}# svc requerido${C_RESET}"
+            ;;
+        exec)
+            log_err "  ${C_BRIGHT_CYAN}${script_path} exec dev panda-estampados backend bash${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} exec production mm-boutique app ls /var/www${C_RESET}"
+            ;;
+        setup)
+            log_err "  ${C_BRIGHT_CYAN}${script_path} setup production all${C_RESET}                     ${C_DIM}# 3 prod (incluye all)${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} setup development panda-estampados${C_RESET}      ${C_DIM}# 1 dev${C_RESET}"
+            ;;
+        fresh)
+            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh development panda-estampados${C_RESET}      ${C_DIM}# 1 instancia (store obligatorio)${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh production mm-boutique${C_RESET}            ${C_DIM}# 1 instancia prod${C_RESET}"
+            ;;
+        *)
+            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev panda-estampados${C_RESET}    ${C_DIM}# 1 instancia${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev all${C_RESET}                  ${C_DIM}# 3 dev${C_RESET}"
+            log_err "Para help: ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} help${C_RESET}"
+            ;;
+    esac
+}
+
 # ─────────────────────────────────────────────────────────────
 # Dispatch
 # ─────────────────────────────────────────────────────────────
@@ -156,6 +202,9 @@ if ! is_known_cmd "$cmd_raw"; then
 fi
 
 # Si cualquier arg después del comando es "help" → per-command help.
+# help_args captura los args antes de "help" (ej: `up dev all help`
+# → help_args=(dev all)). Esos args se ignoran al imprimir help
+# (los cmd_help_* no filtran, solo imprimen).
 if args_contain_help "${@:2}"; then
     help_args=()
     for arg in "${@:2}"; do
@@ -185,7 +234,128 @@ if args_contain_help "${@:2}"; then
     exit 0
 fi
 
-# Dispatch normal: source del archivo + llamada al cmd_.
+# Dispatch: comandos que NO usan stage/store como posicionales.
+# Pasan todos sus args tal cual a cmd_<cmd>.
+case "$cmd_canonical" in
+    help|hosts|caddy)
+        action_path="$(action_file_for "$cmd_canonical")"
+        if [[ -z "$action_path" || ! -f "$action_path" ]]; then
+            log_err "Acción no encontrada para el comando '$cmd_canonical'"
+            exit 1
+        fi
+        # shellcheck source=/dev/null
+        source "$action_path"
+        cmd_fn="cmd_${cmd_canonical//-/_}"
+        if ! declare -F "$cmd_fn" > /dev/null; then
+            log_err "Comando '$cmd_canonical' no exporta la función $cmd_fn"
+            exit 1
+        fi
+        shift  # descarta el nombre del comando
+        "$cmd_fn" "$@"
+        exit 0
+        ;;
+esac
+
+# ─────────────────────────────────────────────────────────────
+# Dispatch: comandos con posicionales <stage> <store> [<servicio>]
+# ─────────────────────────────────────────────────────────────
+
+# Flags conocidos por comando. Los filtramos de los args
+# posicionales para que no se cuenten como stage/store/service.
+# También los exponemos via env vars para que cmd_* los lea sin
+# cambiar la firma (escala a más flags sin tocar funciones).
+#
+# Patrón de flags:
+#   build      → no-cache    (en cualquier posición)
+#   rm-volumes → -y          (skip confirmation)
+HAS_NO_CACHE=0
+RM_VOLUMES_SKIP_CONFIRM=0
+KNOWN_FLAGS=()
+case "$cmd_canonical" in
+    build)
+        KNOWN_FLAGS=("no-cache")
+        ;;
+    rm-volumes)
+        KNOWN_FLAGS=("-y")
+        ;;
+    *)
+        KNOWN_FLAGS=()
+        ;;
+esac
+
+# Filtrar flags → POSITIONAL (en orden) + activar flags detectados.
+POSITIONAL=()
+for arg in "$@"; do
+    # Saltar el primer arg (que es el nombre del comando: $cmd_raw).
+    # El loop arranca en $@ completo; descartamos arg1 acá.
+    [[ "$arg" == "$cmd_raw" ]] && continue
+
+    is_flag=0
+    for flag in "${KNOWN_FLAGS[@]}"; do
+        if [[ "$arg" == "$flag" ]]; then
+            is_flag=1
+            case "$flag" in
+                no-cache) HAS_NO_CACHE=1 ;;
+                -y)       RM_VOLUMES_SKIP_CONFIRM=1 ;;
+            esac
+            break
+        fi
+    done
+    [[ $is_flag -eq 0 ]] && POSITIONAL+=("$arg")
+done
+
+# Mínimo de posicionales por comando.
+case "$cmd_canonical" in
+    exec)         MIN_POS=4 ;;  # stage, store, servicio, cmd... (>=1 cmd token)
+    logs)         MIN_POS=3 ;;  # stage, store, servicio (servicio REQUERIDO)
+    *)            MIN_POS=2 ;;  # stage, store
+esac
+
+if [[ ${#POSITIONAL[@]} -lt $MIN_POS ]]; then
+    _print_positional_usage "$cmd_canonical" "$0"
+    exit 1
+fi
+
+STAGE="${POSITIONAL[0]}"
+STORE="${POSITIONAL[1]}"
+SERVICE="${POSITIONAL[2]:-}"
+# Args extra después de servicio (usados solo por exec: el comando
+# a correr dentro del container).
+EXTRA=("${POSITIONAL[@]:3}")
+
+# Validar stage + store. Errores claros por separado.
+if ! validate_stage_store "$STAGE" "$STORE"; then
+    echo ""
+    _print_positional_usage "$cmd_canonical" "$0"
+    exit 1
+fi
+
+# Normalizar stage para uso interno (alias → canónico).
+case "$STAGE" in
+    prod) STAGE="production" ;;
+    dev)  STAGE="development" ;;
+esac
+
+# Para `logs`, el servicio es OBLIGATORIO (el dispatcher ya
+# exige MIN_POS=3, pero por las dudas revalidamos).
+if [[ "$cmd_canonical" == "logs" && -z "$SERVICE" ]]; then
+    log_err "logs requiere <servicio>."
+    log_err "Uso: ${C_BRIGHT_CYAN}$0 logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store|all>${C_RESET} ${C_GREEN}<servicio>${C_RESET}"
+    log_err "  ${C_BRIGHT_CYAN}$0 logs dev panda-estampados backend${C_RESET}"
+    exit 1
+fi
+
+# Para `fresh`, NO se permite store=all (crea una instancia
+# específica — debe ser una sola tienda).
+if [[ "$cmd_canonical" == "fresh" && "$STORE" == "all" ]]; then
+    log_err "fresh requiere una tienda específica — 'all' no es válido."
+    log_err "Uso: ${C_BRIGHT_CYAN}$0 fresh${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store>${C_RESET}"
+    log_err "  ${C_BRIGHT_CYAN}$0 fresh development panda-estampados${C_RESET}"
+    log_err "  ${C_BRIGHT_CYAN}$0 fresh production mm-boutique${C_RESET}"
+    exit 1
+fi
+
+# Dispatch real: source del archivo + llamada al cmd_.
 action_path="$(action_file_for "$cmd_canonical")"
 if [[ -z "$action_path" || ! -f "$action_path" ]]; then
     log_err "Acción no encontrada para el comando '$cmd_canonical'"
@@ -201,53 +371,21 @@ if ! declare -F "$cmd_fn" > /dev/null; then
     exit 1
 fi
 
-# Las funciones cmd_* (up, start, ..., volumes, rm-volumes, exec, ...)
-# esperan args SIN el primer elemento (el nombre del comando). Ese es
-# el convenio de resolve_targets: arg1=área, arg2=servicio.
-shift  # descarta "$cmd_raw"
+# Exportar flags detectados para que cmd_* los consuma.
+# Esto evita filtrarlos manualmente en cada call site y mantiene
+# la firma cmd_*(stage, store, [svc]) estable.
+export HAS_NO_CACHE
+export RM_VOLUMES_SKIP_CONFIRM
 
-# Pre-validar el área (sin consumir la salida de resolve_targets) para
-# evitar summaries optimistas antes de un error inevitable.
+# Summary antes de ejecutar (con stage/store ya normalizados).
+show_target_summary "$cmd_canonical" "$STAGE" "$STORE" "$SERVICE"
+
+# Dispatch al handler con (stage, store, [svc], [extra...]).
 case "$cmd_canonical" in
-    setup|fresh|hosts|caddy|help)
-        "$cmd_fn" "$@"
-        ;;
-    # Comandos que REQUIEREN <area> explicito (no default a all).
-    # Justificacion: su output por instancia es masivo (volumes:
-    # 8+ volúmenes; rm-volumes: además destructivo). El default a all
-    # generaba escapes de output que el usuario no esperaba. Mejor
-    # forzarlo a ser explicito, con hint de qué pasar.
-    volumes|rm-volumes)
-        # rm-volumes soporta flag opcional -y antes del area.
-        area_check="${1:-}"
-        if [[ "$cmd_canonical" == "rm-volumes" && "$area_check" == "-y" ]]; then
-            area_check="${2:-}"
-        fi
-        if [[ -z "$area_check" ]]; then
-            log_err "<area> es requerido. Para ver TODOS pasar 'all' explícitamente."
-            if [[ "$cmd_canonical" == "rm-volumes" ]]; then
-                log_err "  ${C_BRIGHT_CYAN}$0 rm-volumes -y all${C_RESET}                ${C_DIM}# todas (skip confirm)${C_RESET}"
-                log_err "  ${C_BRIGHT_CYAN}$0 rm-volumes -y dev${C_RESET}                ${C_DIM}# 3 dev${C_RESET}"
-                log_err "  ${C_BRIGHT_CYAN}$0 rm-volumes -y dev backend${C_RESET}        ${C_DIM}# 1 target (destructivo!)${C_RESET}"
-                log_err "Para help: ${C_BRIGHT_CYAN}$0 rm-volumes help${C_RESET}"
-            else
-                log_err "  ${C_BRIGHT_CYAN}$0 volumes all${C_RESET}                    ${C_DIM}# 6 instancias${C_RESET}"
-                log_err "  ${C_BRIGHT_CYAN}$0 volumes dev${C_RESET}                    ${C_DIM}# 3 dev${C_RESET}"
-                log_err "  ${C_BRIGHT_CYAN}$0 volumes prod${C_RESET}                   ${C_DIM}# 3 prod${C_RESET}"
-                log_err "  ${C_BRIGHT_CYAN}$0 volumes development:panda-estampados${C_RESET}  ${C_DIM}# 1 instancia${C_RESET}"
-                log_err "Para help: ${C_BRIGHT_CYAN}$0 volumes help${C_RESET}"
-            fi
-            exit 1
-        fi
-        show_target_summary "$cmd_canonical" "$@"
-        "$cmd_fn" "$@"
+    exec)
+        "$cmd_fn" "$STAGE" "$STORE" "$SERVICE" "${EXTRA[@]}"
         ;;
     *)
-        # Pre-validate (validate_area imprime su propio error y devuelve 1).
-        if ! validate_area "${1:-}"; then
-            exit 1
-        fi
-        show_target_summary "$cmd_canonical" "$@"
-        "$cmd_fn" "$@"
+        "$cmd_fn" "$STAGE" "$STORE" "$SERVICE"
         ;;
 esac

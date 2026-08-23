@@ -1,41 +1,40 @@
 #!/usr/bin/env bash
 # scripts/docker/volumes/remove.sh
-# cmd_rm_volumes [-y] <área> [<servicio>]
+# cmd_rm_volumes <stage> <store> [<servicio>]
 #
 # ⚠ Elimina volúmenes Docker. Borra datos persistentes (BD, storage,
-# caches, pnpm-store). Pide confirmación a menos que se pase `-y`.
+# caches, pnpm-store). Pide confirmación a menos que el dispatcher
+# haya seteado $RM_VOLUMES_SKIP_CONFIRM=1 (cuando el usuario pasó
+# `-y` en el comando).
 #
-# El <área> es REQUERIDA — `rm-volumes` solo es válido si se pasa
-# un scope explícito. Tiene sentido doble: es destructivo + el
-# output por instancia es masivo. Default to all = peligro.
+# El dispatcher valida que <stage> y <store> sean correctos antes de
+# llegar acá. Si store es 'all', se borran los volúmenes de las 3
+# tiendas del stage.
 #
 # Uso:
-#   rm-volumes -y dev backend              # 3 dev, backend
-#   rm-volumes -y development:panda-estampados  # 1 instancia
-#   rm-volumes -y all                      # ⚠ las 6 (con skip confirmación)
+#   rm-volumes dev panda-estampados          # 1 dev
+#   rm-volumes -y dev all                   # 3 dev, sin confirmación
+#   rm-volumes production mm-boutique        # 1 prod
 cmd_rm_volumes() {
-    local force="n"
-    [[ "${1:-}" == "-y" ]] && { force="y"; shift; }
+    local stage="$1"
+    local store="$2"
+    local svc="${3:-}"
 
-    # Validación upfront del área. Si no hay scope después del flag,
-    # error con hint — nunca defaultear a 'all' en un comando
-    # destructivo.
-    if [[ -z "${1:-}" ]]; then
-        log_err "Falta <área>. Pasar una explícita:"
-        log_err "  ${C_BRIGHT_CYAN}-y all${C_RESET}                    → ${C_BRIGHT_RED}las 6 (⚠)${C_RESET}"
-        log_err "  ${C_BRIGHT_CYAN}-y dev${C_RESET}                    → 3 dev"
-        log_err "  ${C_BRIGHT_CYAN}-y prod${C_RESET}                   → 3 prod"
-        log_err "Para más: ${C_BRIGHT_CYAN}$0 rm-volumes help${C_RESET}"
-        return 1
-    fi
+    # RM_VOLUMES_SKIP_CONFIRM lo setea el dispatcher cuando el
+    # usuario pasa `-y`. Defense-in-depth: si alguien invoca este
+    # script directo, también aceptamos `-y` como $4.
+    local force="n"
+    [[ "${RM_VOLUMES_SKIP_CONFIRM:-0}" == "1" ]] && force="y"
+    [[ "${4:-}" == "-y" ]] && force="y"
 
     if [[ "$force" != "y" ]]; then
         log_warn "⚠  rm-volumes ELIMINA VOLÚMENES. Esto borra datos persistentes (BD, storage, caches)."
-        /usr/bin/read -rp "¿Confirmás? escribí 'yes' para continuar: " confirm
+        # `read` es un builtin de bash, no un binario en /usr/bin.
+        read -rp "¿Confirmás? escribí 'yes' para continuar: " confirm
         [[ "$confirm" == "yes" ]] || { log_info "Cancelado."; exit 0; }
     fi
 
-    while IFS=$'\t' read -r inst svc; do
+    while IFS=$'\t' read -r inst resolved_svc; do
         local dir
         dir="$(instance_compose_dir "$inst")"
         local file
@@ -58,5 +57,5 @@ cmd_rm_volumes() {
                 log_warn "  ${volname} no se pudo borrar (¿en uso? ¿inexistente?)."
             fi
         done <<<"$vols"
-    done < <(resolve_targets "$@")
+    done < <(resolve_targets "$stage" "$store" "$svc")
 }

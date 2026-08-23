@@ -1,39 +1,28 @@
 #!/usr/bin/env bash
 # scripts/docker/volumes/list.sh
-# cmd_volumes <área> [<servicio>]
+# cmd_volumes <stage> <store> [<servicio>]
 #
 # Lista volúmenes Docker (driver, mountpoint, size) de los targets
 # solicitados.
 #
-# El <área> es REQUERIDA — para ver TODOS los volúmenes hay que
-# pasar explícitamente `all`. Esto evita que un `volumes` sin args
-# escupa output de las 6 instancias sin que el usuario lo notara.
+# <stage> y <store> son REQUERIDOS — el dispatcher los valida antes
+# de llegar acá (si store es 'all', se listan todas las del stage).
 #
 # Uso:
-#   volumes all                          # 6 instancias (3 prod + 3 dev)
-#   volumes dev                          # 3 dev
-#   volumes production                   # 3 prod
-#   volumes development:panda-estampados # 1 instancia dev
-#   volumes dev backend                  # del servicio backend de las 3 dev
+#   volumes dev all                          # 3 dev
+#   volumes production all                  # 3 prod
+#   volumes development panda-estampados    # 1 instancia dev
+#   volumes dev all backend                  # servicio backend de las 3 dev
 cmd_volumes() {
-    # Validación upfront: si no hay <área>, error con hint en lugar
-    # de defaultear silenciosamente a 'all'. El usuario debe EXPLICITAR
-    # qué quiere ver.
-    if [[ -z "${1:-}" ]]; then
-        log_err "Falta <área>. Pasar una explícita:"
-        log_err "  ${C_BRIGHT_CYAN}all${C_RESET}                       → 6 instancias (3 prod + 3 dev)"
-        log_err "  ${C_BRIGHT_CYAN}dev${C_RESET}                       → 3 dev"
-        log_err "  ${C_BRIGHT_CYAN}prod${C_RESET}                      → 3 prod"
-        log_err "  ${C_BRIGHT_CYAN}development:<store>${C_RESET}        → 1 instancia dev"
-        log_err "Para más: ${C_BRIGHT_CYAN}$0 volumes help${C_RESET}"
-        return 1
-    fi
+    local stage="$1"
+    local store="$2"
+    local svc="${3:-}"
 
     log_info "Listando volúmenes Docker de los targets solicitados…"
     # docker compose config --volumes imprime los volúmenes nombrados
     # que la instancia declara. Combinamos con docker volume inspect
     # para ver tamaño + driver + mountpoint reales.
-    while IFS=$'\t' read -r inst svc; do
+    while IFS=$'\t' read -r inst resolved_svc; do
         local dir
         dir="$(instance_compose_dir "$inst")"
         local file
@@ -55,5 +44,5 @@ cmd_volumes() {
             printf "  ${C_BRIGHT_MAGENTA}%-50s${C_RESET}  ${C_DIM}driver=${C_RESET}%s  ${C_DIM}size=${C_RESET}%s\n" \
                 "$volname" "$driver" "$size"
         done <<<"$vols"
-    done < <(resolve_targets "$@")
+    done < <(resolve_targets "$stage" "$store" "$svc")
 }

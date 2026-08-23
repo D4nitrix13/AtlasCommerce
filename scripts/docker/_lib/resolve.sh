@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 # scripts/docker/_lib/resolve.sh
-# Constantes y funciones para resolver instancias / stage / servicio.
-# Cada comando del orquestador las usa para mapear el argumento
-# "production:panda-estampados" o "dev backend" al directorio y
-# compose file correctos.
+# Constantes y funciones para resolver instancias / stage / store / servicio.
+# Cada comando del orquestador las usa para mapear los argumentos
+# `<stage> <store> [servicio]` al directorio y compose file correctos.
+#
+# Somos el ÚNICO módulo que sabe dónde vive cada instancia en el FS.
+# El resto del orquestador consume instancias en formato `<stage>:<store>`
+# (ej: `production:panda-estampados`), el mismo que devuelve
+# resolve_targets. Esto nos permite agregar / quitar tiendas tocando
+# solo este archivo.
 
 # ROOT_DIR apunta al repo raíz. Calculado en base a la ubicación del
 # script actual (BASH_SOURCE) para que el script sea portable sin
@@ -11,16 +16,42 @@
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && /usr/bin/pwd)"
 INSTANCES_DIR="${ROOT_DIR}/docker/instances"
 
-# Las instancias se identifican con un scope: `production:<store>` o
-# `development:<store>`. Sin scope, se asume `production:` (default).
-# Esto permite que el mismo nombre de tienda exista en prod y dev
-# (panda-estampados es multi-tenant en ambos mundos, pero vive en
-# carpetas distintas y con compose / Dockerfiles distintos).
-PROD_INSTANCES=(production:panda-estampados production:mm-boutique production:morales-store)
-DEV_INSTANCES=(development:panda-estampados development:mm-boutique development:morales-store)
-ALL_INSTANCES=("${PROD_INSTANCES[@]}" "${DEV_INSTANCES[@]}")
+# Stages y stores disponibles como fuente de verdad única. Cualquier
+# comando que liste o valide stages/stores consume estos arrays.
+STAGES=(production development)
+STORES=(panda-estampados mm-boutique morales-store)
+
+# Construimos ALL_INSTANCES (y las sublistas por stage) cruzando
+# STAGES x STORES. Formato: `<stage>:<store>` — mismo formato que se
+# consume en instance_compose_dir y friends. NO escribir estos arrays
+# a mano: derivarlos de STAGES/STORES garantiza que agregar una tienda
+# se propaga automáticamente.
+ALL_INSTANCES=()
+PROD_INSTANCES=()
+DEV_INSTANCES=()
+for _stage in "${STAGES[@]}"; do
+    for _store in "${STORES[@]}"; do
+        ALL_INSTANCES+=("${_stage}:${_store}")
+        case "$_stage" in
+            production) PROD_INSTANCES+=("${_stage}:${_store}") ;;
+            development) DEV_INSTANCES+=("${_stage}:${_store}") ;;
+        esac
+    done
+done
+unset _stage _store
+
+# is_valid_store <store>
+# True si <store> es uno de los declarados en STORES.
+is_valid_store() {
+    local store="$1"
+    for s in "${STORES[@]}"; do
+        [[ "$s" == "$store" ]] && return 0
+    done
+    return 1
+}
 
 # is_valid_instance <name>
+# True si <name> es un `<stage>:<store>` conocido (formato interno).
 is_valid_instance() {
     local name="$1"
     for inst in "${ALL_INSTANCES[@]}"; do
@@ -30,9 +61,8 @@ is_valid_instance() {
 }
 
 # instance_compose_dir <name>
-# Resuelve la ruta ABSOLUTA al directorio de la instancia según el scope.
-# Scope explícito (production:<store> / development:<store>) tiene
-# prioridad. Sin scope, default = production.
+# Resuelve la ruta ABSOLUTA al directorio de la instancia según el
+# stage. <name> debe venir en formato `<stage>:<store>`.
 # Esta es la única función que sabe dónde vive cada instancia en el FS.
 instance_compose_dir() {
     local name="$1"
@@ -64,63 +94,68 @@ instance_env_file() {
     fi
 }
 
-# resolve_targets <stage|instancia> [servicio]
-# Variante que también captura un servicio opcional. Imprime líneas
-# "<instancia>\t<servicio>". Si servicio está vacío, opera sobre todo
-# el stack. Permite que cada comando opere a nivel de stack o de un
-# servicio individual.
+# resolve_targets <stage> <store> [svc]
+# Variante canónica: stage y store como args separados. Imprime
+# líneas `<instancia>\t<servicio>`, donde `<instancia>` está en
+# formato `<stage>:<store>`. Si `store` es `all`, expande a todas
+# las tiendas del stage.
 #
-# Scopes soportados:
-#   all                  → todas las instancias (3 prod + 3 dev)
-#   production / prod    → todas las instancias de production
-#   development / dev    → todas las instancias de development
-#   production:<store>   → 1 instancia de prod con scope explícito
-#   development:<store>  → 1 instancia de dev con scope explícito
-#   <store>              → 1 instancia, default = production
+# Args:
+#   stage  → production | development | prod | dev (normalizado)
+#   store  → uno de STORES, o 'all'
+#   svc    → (opcional) nombre de servicio a pasar a compose
 #
 # Ejemplos:
-#   resolve_targets all                  → 6 instancias
-#   resolve_targets development          → 3 dev
-#   resolve_targets dev backend          → 3 dev con servicio backend
-#   resolve_targets development:mm-boutique → 1 dev específica
+#   resolve_targets development panda-estampados         → 1 instancia dev
+#   resolve_targets dev all                             → 3 dev
+#   resolve_targets production mm-boutique backend      → 1 prod con svc
+#   resolve_targets prod all                            → 3 prod
 resolve_targets() {
-    local arg="${1:-all}"
-    local svc="${2:-}"
-    if [[ -z "$arg" ]]; then
-        log_err "Falta la instancia o stage. Usá 'all', 'development', 'production', o una de: ${ALL_INSTANCES[*]}"
+    local stage_raw="${1:-}"
+    local store_raw="${2:-}"
+    local svc="${3:-}"
+
+    if [[ -z "$stage_raw" || -z "$store_raw" ]]; then
+        log_err "Faltan argumentos. Uso: resolve_targets <stage> <store> [svc]"
         exit 1
     fi
-    case "$arg" in
-        all)
-            for inst in "${ALL_INSTANCES[@]}"; do
-                printf "%s\t%s\n" "$inst" "$svc"
-            done
-            return
-            ;;
-        production|prod)
-            for inst in "${PROD_INSTANCES[@]}"; do
-                printf "%s\t%s\n" "$inst" "$svc"
-            done
-            return
-            ;;
-        development|dev)
-            for inst in "${DEV_INSTANCES[@]}"; do
-                printf "%s\t%s\n" "$inst" "$svc"
-            done
-            return
-            ;;
+
+    # Normalizar stage (acepta alias corto).
+    local stage
+    case "$stage_raw" in
+        production|prod)     stage="production" ;;
+        development|dev)     stage="development" ;;
+        *) log_err "Stage inválido: $stage_raw. Válidos: production|prod, development|dev"
+           exit 1 ;;
     esac
-    if is_valid_instance "$arg"; then
-        printf "%s\t%s\n" "$arg" "$svc"
-        return
+
+    # Determinar lista de instancias para este (stage, store).
+    local -a instances=()
+    if [[ "$store_raw" == "all" ]]; then
+        for inst in "${ALL_INSTANCES[@]}"; do
+            [[ "$inst" == "${stage}:"* ]] && instances+=("$inst")
+        done
+    elif is_valid_store "$store_raw"; then
+        instances=("${stage}:${store_raw}")
+    else
+        log_err "Store inválido: $store_raw. Válidos: ${STORES[*]} o 'all'"
+        exit 1
     fi
-    log_err "Instancia o stage desconocido: $arg. Válidas: all, production|prod, development|dev, o: ${ALL_INSTANCES[*]}"
-    exit 1
+
+    local inst
+    for inst in "${instances[@]}"; do
+        printf "%s\t%s\n" "$inst" "$svc"
+    done
 }
 
 # resolve_instances <arg>
-# Deprecated: mantener por retrocompatibilidad interna (cmd_setup).
-# Devuelve solo el nombre de instancia, una por línea.
+# Deprecated: mantener por retrocompatibilidad interna (scripts que
+# llaman resolve_instances en vez de resolve_targets). Devuelve solo
+# el nombre de instancia, una por línea.
+#
+# Acepta la sintaxis legacy (`dev`, `production:<store>`, etc.) porque
+# hay scripts externos (mailpit-up.sh) y referencias históricas que
+# la usan. NO usar desde código nuevo del orquestador.
 resolve_instances() {
     local arg="${1:-}"
     if [[ -z "$arg" ]]; then
@@ -128,7 +163,7 @@ resolve_instances() {
         exit 1
     fi
     if [[ "$arg" == "all" ]]; then
-        printf "%s\n" "${ALL_INSTANCES[@]}"
+        printf '%s\n' "${ALL_INSTANCES[@]}"
         return
     fi
     if is_valid_instance "$arg"; then
