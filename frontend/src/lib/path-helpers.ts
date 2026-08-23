@@ -11,16 +11,36 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from '../i18n/config';
  */
 
 /**
- * Set de paths admin/auth p\u00fablicos (sin prefijo de locale).
+ * Set de paths admin/auth CANONICALS (sin prefijo de locale ni `/admin/`).
  *
  * Si un usuario no autenticado llega a cualquiera de estos paths,
- * AuthGuard NO redirige. Cualquier otra ruta `/admin/...` (incluido
- * `/admin/dashboard`) s\u00ed dispara redirect al login con `?redirect=`.
+ * AuthGuard NO redirige. Cualquier otra ruta `/auth/...` o `/admin/...`
+ * sí dispara redirect al login con `?redirect=`.
  *
- * Mantener sincronizado con las p\u00e1ginas Astro bajo
- * `src/pages/[locale]/admin/auth/`.
+ * Histórico: antes vivían como `/admin/auth/*` (subfolder mirror del URL).
+ * Como los archivos Astro viven en `src/pages/[locale]/auth/` (sin
+ * `admin/`) y el middleware redirige el path legacy `/admin/auth/*` →
+ * `/auth/*` cuando el host es `admin.*`, el set de paths públicos
+ * ahora son estos. Ver `LEGACY_ADMIN_AUTH_PATHS` abajo para los paths
+ * legacy (usados solo por el middleware para redirigir el tráfico viejo).
  */
 export const PUBLIC_ADMIN_PATHS: ReadonlySet<string> = new Set<string>([
+  '/auth/login',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/reset-success',
+  '/auth/2fa',
+]);
+
+/**
+ * Set de paths admin/auth LEGACY (con prefijo `/admin/`).
+ *
+ * Usado SOLO por el middleware para redirigir el tráfico viejo cuando
+ * un usuario llega con un link que aún tiene el prefijo `/admin/`.
+ * El frontend NUNCA debe generar links a estos paths — el path canónico
+ * es `/auth/*` (ver `PUBLIC_ADMIN_PATHS` arriba).
+ */
+export const LEGACY_ADMIN_AUTH_PATHS: ReadonlySet<string> = new Set<string>([
   '/admin/auth/login',
   '/admin/auth/forgot-password',
   '/admin/auth/reset-password',
@@ -32,13 +52,13 @@ export const PUBLIC_ADMIN_PATHS: ReadonlySet<string> = new Set<string>([
  * Extrae el locale del path `/<locale>/...`.
  *
  *   stripLocaleFromPath("/es/admin/dashboard")
- *     \u2192 { locale: "es", barePath: "/admin/dashboard" }
- *   stripLocaleFromPath("/en/admin/auth/login")
- *     \u2192 { locale: "en", barePath: "/admin/auth/login" }
- *   stripLocaleFromPath("/admin/dashboard")
- *     \u2192 { locale: "es", barePath: "/admin/dashboard" }   (fallback)
+ *     → { locale: "es", barePath: "/admin/dashboard" }
+ *   stripLocaleFromPath("/es/auth/login")
+ *     → { locale: "es", barePath: "/auth/login" }
+ *   stripLocaleFromPath("/auth/login")
+ *     → { locale: "es", barePath: "/auth/login" }   (fallback)
  *   stripLocaleFromPath("/")
- *     \u2192 { locale: "es", barePath: "/" }                  (fallback)
+ *     → { locale: "es", barePath: "/" }                  (fallback)
  */
 export function stripLocaleFromPath(pathname: string): {
   locale: Locale;
@@ -73,9 +93,9 @@ export function getLocaleFromPath(pathname: string): Locale {
 /**
  * Construye un path absoluto con el locale prefijado.
  *
- *   withLocale("/admin/dashboard", "es") \u2192 "/es/admin/dashboard"
- *   withLocale("/admin/dashboard", "en") \u2192 "/en/admin/dashboard"
- *   withLocale("/", "es")                \u2192 "/es"
+ *   withLocale("/admin/dashboard", "es") → "/es/admin/dashboard"
+ *   withLocale("/admin/dashboard", "en") → "/en/admin/dashboard"
+ *   withLocale("/", "es")                → "/es"
  */
 export function withLocale(barePath: string, locale: Locale): string {
   if (barePath === '/' || barePath === '') {
@@ -88,8 +108,8 @@ export function withLocale(barePath: string, locale: Locale): string {
 
 /**
  * Determina si un barePath (locale ya removido) es una ruta admin/auth
- * p\u00fablica. AuthGuard usa esto para no redirigir al login a usuarios
- * no autenticados que est\u00e1n siguiendo un email link o viendo 2FA.
+ * pública. AuthGuard usa esto para no redirigir al login a usuarios
+ * no autenticados que están siguiendo un email link o viendo 2FA.
  */
 export function isPublicAdminPath(barePath: string): boolean {
   return PUBLIC_ADMIN_PATHS.has(barePath);

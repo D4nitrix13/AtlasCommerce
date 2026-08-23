@@ -93,6 +93,8 @@ const es: Translations = {
   'auth.login.shell.submit': 'Iniciar sesión',
   'auth.login.shell.submitLoading': 'Ingresando...',
   'auth.login.shell.google': 'Google',
+  'auth.login.shell.facebookComingSoon': 'Próximamente — Facebook OAuth estará disponible pronto',
+  'auth.login.shell.comingSoon': 'próximamente',
   'auth.login.shell.facebook': 'Facebook',
 
   'auth.signup.shell.heading': 'Crea tu cuenta',
@@ -202,7 +204,88 @@ const es: Translations = {
   'auth.passwordReset.error.generic': 'Algo salió mal. Por favor intente de nuevo.',
   'auth.passwordReset.error.missingEmail':
     'Falta el email para continuar. Volvé a empezar el flujo de recuperación.',
+  'auth.passwordReset.error.codeInvalidOrExpired':
+    'El código es inválido, ya fue usado o ha expirado.',
+  'auth.passwordReset.error.challengeInvalid':
+    'La sesión de recuperación expiró. Volvé a empezar el flujo.',
   'auth.passwordReset.success': 'Su contraseña fue restablecida. Ya tiene una sesión activa.',
+
+  // ─── auth: password recovery wizard (multi-step) ─────────────────────
+  'auth.passwordRecovery.title': 'Recuperar tu contraseña',
+  'auth.passwordRecovery.heading': 'Recuperá el acceso a tu cuenta',
+  'auth.passwordRecovery.subtitle':
+    'Elegí cómo querés verificar tu identidad. Te enviaremos los pasos para crear una contraseña nueva.',
+  'auth.passwordRecovery.steps.email': 'Tu email',
+  'auth.passwordRecovery.steps.method': 'Método',
+  'auth.passwordRecovery.steps.code': 'Verificación',
+  'auth.passwordRecovery.steps.password': 'Nueva contraseña',
+  'auth.passwordRecovery.email.label': 'Correo electrónico',
+  'auth.passwordRecovery.email.placeholder': 'tu@correo.com',
+  'auth.passwordRecovery.email.submit': 'Continuar',
+  'auth.passwordRecovery.email.submitting': 'Buscando...',
+  'auth.passwordRecovery.email.helper':
+    'Ingresá el email con el que te registraste. Te mostraremos las opciones disponibles.',
+  'auth.passwordRecovery.email.bannerFor': 'Recuperando para {email}',
+  'auth.passwordRecovery.method.heading': 'Elegí un método',
+  'auth.passwordRecovery.method.subtitle':
+    'Tu cuenta tiene varias formas de verificar tu identidad. Elegí la que prefieras.',
+  'auth.passwordRecovery.method.email.title': 'Correo electrónico',
+  'auth.passwordRecovery.method.email.description':
+    'Te enviamos un código de 6 dígitos a tu correo. Si no lo ves, revisá spam.',
+  'auth.passwordRecovery.method.email.hint': 'Recomendado si tenés acceso a tu correo.',
+  'auth.passwordRecovery.method.recoveryCode.title': 'Código de respaldo',
+  'auth.passwordRecovery.method.recoveryCode.description':
+    'Ingresá uno de los códigos alfanuméricos que guardaste cuando configuraste 2FA.',
+  'auth.passwordRecovery.method.totp.title': 'App autenticadora',
+  'auth.passwordRecovery.method.totp.description':
+    'Ingresá el código de 6 dígitos de Google Authenticator, Authy o tu app TOTP.',
+  'auth.passwordRecovery.method.checkEmail.title': 'Revisá tu correo',
+  'auth.passwordRecovery.method.checkEmail.description':
+    'Te enviamos un código de 6 dígitos. Ingresalo en el siguiente paso.',
+  'auth.passwordRecovery.code.heading': 'Ingresá tu código',
+  'auth.passwordRecovery.code.subtitle':
+    'Tu código es válido por 10 minutos. Si lo perdiste, podés volver a empezar.',
+  'auth.passwordRecovery.code.label': 'Código de verificación',
+  'auth.passwordRecovery.code.recoveryCodePlaceholder': 'XXXXXXXXXX',
+  'auth.passwordRecovery.code.totpPlaceholder': '000000',
+  'auth.passwordRecovery.code.help':
+    'Los códigos alfanuméricos no incluyen 0, O, 1, I ni L para evitar confusiones.',
+  'auth.passwordRecovery.code.submit': 'Verificar código',
+  'auth.passwordRecovery.code.submitting': 'Verificando...',
+  'auth.passwordRecovery.code.invalid': 'El código es inválido o ya fue usado.',
+  'auth.passwordRecovery.code.locked':
+    'Demasiados intentos. Esperá unos minutos antes de intentar de nuevo.',
+  'auth.passwordRecovery.password.heading': 'Creá tu nueva contraseña',
+  'auth.passwordRecovery.password.subtitle':
+    'Elegí una contraseña segura y diferente a las anteriores.',
+  'auth.passwordRecovery.password.label': 'Nueva contraseña',
+  'auth.passwordRecovery.password.placeholder': 'Mínimo 12 caracteres',
+  'auth.passwordRecovery.password.confirm': 'Confirmar contraseña',
+  'auth.passwordRecovery.password.confirmPlaceholder': 'Repetí la contraseña',
+  'auth.passwordRecovery.password.submit': 'Cambiar contraseña',
+  'auth.passwordRecovery.password.submitting': 'Cambiando...',
+  'auth.passwordRecovery.password.mismatch': 'Las contraseñas coinciden',
+  'auth.passwordRecovery.password.invalidMatch': 'Las contraseñas no coinciden.',
+  'auth.passwordRecovery.password.strengthLabel': 'Fuerza:',
+  'auth.passwordRecovery.password.strengthWeak': 'Débil',
+  'auth.passwordRecovery.password.strengthFair': 'Aceptable',
+  'auth.passwordRecovery.password.strengthGood': 'Buena',
+  'auth.passwordRecovery.password.strengthStrong': 'Excelente',
+  'auth.passwordRecovery.password.tip.minLength': 'Al menos 12 caracteres',
+  'auth.passwordRecovery.password.tip.upperLower': 'Una mayúscula y una minúscula',
+  'auth.passwordRecovery.password.tip.number': 'Al menos un número',
+  'auth.passwordRecovery.password.tip.symbol': 'Un símbolo (recomendado)',
+  'auth.passwordRecovery.success.heading': '¡Contraseña actualizada!',
+  'auth.passwordRecovery.success.body':
+    'Tu contraseña fue cambiada correctamente. Ya podés iniciar sesión con tu nueva contraseña.',
+  'auth.passwordRecovery.success.subbody':
+    'Si no realizaste este cambio, contactanos inmediatamente a {supportEmail}.',
+  'auth.passwordRecovery.success.cta': 'Ir a iniciar sesión',
+  'auth.passwordRecovery.backButton': 'Atrás',
+  'auth.passwordRecovery.useEmail': 'Usar correo',
+  'auth.passwordRecovery.useRecoveryCode': 'Usar código de respaldo',
+  'auth.passwordRecovery.useTotp': 'Usar app autenticadora',
+  'auth.passwordRecovery.changeEmail': 'Cambiar email',
 
   'auth.twoFactor.title': 'Verificación en dos pasos',
   'auth.twoFactor.heading': 'Verificá tu identidad',

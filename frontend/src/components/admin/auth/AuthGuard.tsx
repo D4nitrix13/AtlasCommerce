@@ -45,7 +45,7 @@ export default function AuthGuard(): ReactElement | null {
       // Preservamos el pathname completo (incluido locale + query) en
       // `?redirect=`. El decode lo hace el LoginForm en el destino.
       const redirect = encodeURIComponent(window.location.pathname);
-      const destination = `${withLocale('/admin/auth/login', locale)}?redirect=${redirect}`;
+      const destination = `${withLocale('/auth/login', locale)}?redirect=${redirect}`;
       window.location.replace(destination);
     }
   }, [isAuthenticated, isHydrating]);

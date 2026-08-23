@@ -93,6 +93,8 @@ const en: Translations = {
   'auth.login.shell.submit': 'Sign in',
   'auth.login.shell.submitLoading': 'Signing in...',
   'auth.login.shell.google': 'Google',
+  'auth.login.shell.facebookComingSoon': 'Coming soon — Facebook OAuth will be available soon',
+  'auth.login.shell.comingSoon': 'coming soon',
   'auth.login.shell.facebook': 'Facebook',
 
   'auth.signup.shell.heading': 'Create your account',
@@ -202,7 +204,88 @@ const en: Translations = {
   'auth.passwordReset.error.generic': 'Something went wrong. Please try again.',
   'auth.passwordReset.error.missingEmail':
     'Email is missing to continue. Please restart the recovery flow.',
+  'auth.passwordReset.error.codeInvalidOrExpired':
+    'The code is invalid, has already been used, or has expired.',
+  'auth.passwordReset.error.challengeInvalid':
+    'Your recovery session expired. Please restart the flow.',
   'auth.passwordReset.success': 'Your password was reset. You are now signed in.',
+
+  // ─── auth: password recovery wizard (multi-step) ─────────────────────
+  'auth.passwordRecovery.title': 'Recover your password',
+  'auth.passwordRecovery.heading': 'Recover access to your account',
+  'auth.passwordRecovery.subtitle':
+    'Choose how you want to verify your identity. We will guide you through creating a new password.',
+  'auth.passwordRecovery.steps.email': 'Your email',
+  'auth.passwordRecovery.steps.method': 'Method',
+  'auth.passwordRecovery.steps.code': 'Verification',
+  'auth.passwordRecovery.steps.password': 'New password',
+  'auth.passwordRecovery.email.label': 'Email address',
+  'auth.passwordRecovery.email.placeholder': 'you@email.com',
+  'auth.passwordRecovery.email.submit': 'Continue',
+  'auth.passwordRecovery.email.submitting': 'Looking up...',
+  'auth.passwordRecovery.email.helper':
+    'Enter the email you signed up with. We will show you the verification options available.',
+  'auth.passwordRecovery.email.bannerFor': 'Recovering for {email}',
+  'auth.passwordRecovery.method.heading': 'Choose a method',
+  'auth.passwordRecovery.method.subtitle':
+    'Your account has several ways to verify your identity. Pick the one you prefer.',
+  'auth.passwordRecovery.method.email.title': 'Email',
+  'auth.passwordRecovery.method.email.description':
+    'We send a 6-digit code to your inbox. If you do not see it, check spam.',
+  'auth.passwordRecovery.method.email.hint': 'Recommended if you still have access to your email.',
+  'auth.passwordRecovery.method.recoveryCode.title': 'Recovery code',
+  'auth.passwordRecovery.method.recoveryCode.description':
+    'Enter one of the alphanumeric backup codes you saved when you set up 2FA.',
+  'auth.passwordRecovery.method.totp.title': 'Authenticator app',
+  'auth.passwordRecovery.method.totp.description':
+    'Enter the 6-digit code from Google Authenticator, Authy, or your TOTP app.',
+  'auth.passwordRecovery.method.checkEmail.title': 'Check your email',
+  'auth.passwordRecovery.method.checkEmail.description':
+    'We sent a 6-digit code. Enter it in the next step.',
+  'auth.passwordRecovery.code.heading': 'Enter your code',
+  'auth.passwordRecovery.code.subtitle':
+    'Your code is valid for 10 minutes. If you lose it, you can start over.',
+  'auth.passwordRecovery.code.label': 'Verification code',
+  'auth.passwordRecovery.code.recoveryCodePlaceholder': 'XXXXXXXXXX',
+  'auth.passwordRecovery.code.totpPlaceholder': '000000',
+  'auth.passwordRecovery.code.help':
+    'Alphanumeric codes do not include 0, O, 1, I, or L to avoid confusion.',
+  'auth.passwordRecovery.code.submit': 'Verify code',
+  'auth.passwordRecovery.code.submitting': 'Verifying...',
+  'auth.passwordRecovery.code.invalid': 'The code is invalid or has already been used.',
+  'auth.passwordRecovery.code.locked':
+    'Too many attempts. Wait a few minutes before trying again.',
+  'auth.passwordRecovery.password.heading': 'Create your new password',
+  'auth.passwordRecovery.password.subtitle':
+    'Pick a strong password, different from your previous ones.',
+  'auth.passwordRecovery.password.label': 'New password',
+  'auth.passwordRecovery.password.placeholder': 'At least 12 characters',
+  'auth.passwordRecovery.password.confirm': 'Confirm password',
+  'auth.passwordRecovery.password.confirmPlaceholder': 'Repeat the password',
+  'auth.passwordRecovery.password.submit': 'Change password',
+  'auth.passwordRecovery.password.submitting': 'Changing...',
+  'auth.passwordRecovery.password.mismatch': 'Passwords match',
+  'auth.passwordRecovery.password.invalidMatch': 'Passwords do not match.',
+  'auth.passwordRecovery.password.strengthLabel': 'Strength:',
+  'auth.passwordRecovery.password.strengthWeak': 'Weak',
+  'auth.passwordRecovery.password.strengthFair': 'Fair',
+  'auth.passwordRecovery.password.strengthGood': 'Good',
+  'auth.passwordRecovery.password.strengthStrong': 'Strong',
+  'auth.passwordRecovery.password.tip.minLength': 'At least 12 characters',
+  'auth.passwordRecovery.password.tip.upperLower': 'One uppercase and one lowercase letter',
+  'auth.passwordRecovery.password.tip.number': 'At least one number',
+  'auth.passwordRecovery.password.tip.symbol': 'One symbol (recommended)',
+  'auth.passwordRecovery.success.heading': 'Password updated!',
+  'auth.passwordRecovery.success.body':
+    'Your password was changed successfully. You can now sign in with your new password.',
+  'auth.passwordRecovery.success.subbody':
+    "If you did not make this change, contact us immediately at {supportEmail}.",
+  'auth.passwordRecovery.success.cta': 'Go to sign in',
+  'auth.passwordRecovery.backButton': 'Back',
+  'auth.passwordRecovery.useEmail': 'Use email',
+  'auth.passwordRecovery.useRecoveryCode': 'Use recovery code',
+  'auth.passwordRecovery.useTotp': 'Use authenticator app',
+  'auth.passwordRecovery.changeEmail': 'Change email',
 
   'auth.twoFactor.title': 'Two-step verification',
   'auth.twoFactor.heading': 'Verify your identity',
