@@ -50,8 +50,8 @@ cmd_fresh() {
     # volumes — fresh = clean slate).
     log_info "Bajando containers + borrando volumes de ${instance}…"
     if ! /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
             down -v 2>&1 | /usr/bin/grep -E '^(Container|Volume|Network)'; then
         log_warn "docker compose down falló (¿no estaba corriendo?). Continúo."
     fi
@@ -60,13 +60,13 @@ cmd_fresh() {
     log_info "Levantando ${instance} con build…"
     if [[ "$build_flag" == "--build" ]]; then
         /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
             up -d --build --remove-orphans 2>&1 | /usr/bin/tail -20
     else
         /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
             up -d --remove-orphans 2>&1 | /usr/bin/tail -20
     fi
 
@@ -79,8 +79,8 @@ cmd_fresh() {
     local pg_service="postgres"
     local pg_image
     pg_image=$(/usr/bin/docker compose \
-        -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-        --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+        -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+        --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
         config --images 2>/dev/null | /usr/bin/awk -v svc="${pg_service}" '$0 ~ svc":" { print $2 }')
     log_info "Imagen postgres detectada: ${pg_image:-desconocida}"
 
@@ -90,17 +90,17 @@ cmd_fresh() {
         # Detectar user/db de environment/.env
         local pg_user pg_db pg_pass
         pg_user=$(/usr/bin/grep '^POSTGRES_USER=' \
-            "${SCRIPT_DIR}/docker/instances/${instance/:/}/environment/.env" \
+            "${SCRIPT_DIR}/docker/instances/${instance//:/}/environment/.env" \
             2>/dev/null | /usr/bin/head -1 | /usr/bin/cut -d= -f2)
         pg_db=$(/usr/bin/grep '^POSTGRES_DB=' \
-            "${SCRIPT_DIR}/docker/instances/${instance/:/}/environment/.env" \
+            "${SCRIPT_DIR}/docker/instances/${instance//:/}/environment/.env" \
             2>/dev/null | /usr/bin/head -1 | /usr/bin/cut -d= -f2)
         pg_user="${pg_user:-postgres}"
         pg_db="${pg_db:-postgres}"
 
         /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
             run --rm \
             --entrypoint /usr/lib/postgresql/18/bin/initdb \
             -u 999:999 \
@@ -112,8 +112,8 @@ cmd_fresh() {
         # Reiniciar postgres para que arranque con el cluster inicializado.
         log_info "Reiniciando postgres para arrancar con cluster inicializado…"
         /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
             restart "${pg_service}" 2>&1 | /usr/bin/tail -3
 
         # Esperar a postgres healthy.
@@ -146,33 +146,33 @@ cmd_fresh() {
     # 5. Migrations + seeders.
     log_info "Migrations…"
     /usr/bin/docker compose \
-        -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-        --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+        -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+        --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
         exec backend /usr/local/bin/php artisan migrate --force 2>&1 | /usr/bin/tail -5
 
     log_info "Base seeders…"
     /usr/bin/docker compose \
-        -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-        --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+        -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+        --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
         exec backend /usr/local/bin/php artisan db:seed --force 2>&1 | /usr/bin/tail -5
 
     # 6. tenants:bootstrap con el seed file del instance.
-    local seed_file="${SCRIPT_DIR}/docker/instances/${instance/:/}/seeds/${instance##*:}.json"
+    local seed_file="${SCRIPT_DIR}/docker/instances/${instance//:/}/seeds/${instance##*:}.json"
     if [[ ! -f "$seed_file" ]]; then
         # Fallback: buscar dev-*.json en dev o *.json en prod
-        seed_file=$(/usr/bin/find "${SCRIPT_DIR}/docker/instances/${instance/:/}/seeds/" \
+        seed_file=$(/usr/bin/find "${SCRIPT_DIR}/docker/instances/${instance//:/}/seeds/" \
             -name "*.json" 2>/dev/null | /usr/bin/head -1)
     fi
     if [[ -f "$seed_file" ]]; then
         log_info "tenants:bootstrap con ${seed_file##*/}…"
         /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
             exec -T backend /bin/sh -c "cat > /tmp/seed.json" \
             < "$seed_file"
         /usr/bin/docker compose \
-            -f "${SCRIPT_DIR}/docker/instances/${instance/:/}/docker-compose.yml" \
-            --project-directory "${SCRIPT_DIR}/docker/instances/${instance/:/}/.." \
+            -f "${SCRIPT_DIR}/docker/instances/${instance//:/}/docker-compose.yml" \
+            --project-directory "${SCRIPT_DIR}/docker/instances/${instance//:/}/.." \
             exec backend /usr/local/bin/php artisan tenants:bootstrap /tmp/seed.json 2>&1 \
             | /usr/bin/tail -5
     else
