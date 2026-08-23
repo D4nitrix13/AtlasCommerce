@@ -91,7 +91,7 @@ final class RecoveryCodesTestSeeder extends Seeder
             if ($store === null) {
                 $this->command?->error(
                     'RecoveryCodesTestSeeder: no se pudo crear el store '
-                    .$character['store_slug'].' — saltando personaje.',
+                    . $character['store_slug'] . ' — saltando personaje.',
                 );
 
                 continue;
@@ -172,6 +172,12 @@ final class RecoveryCodesTestSeeder extends Seeder
      * canal del comando) para que `php artisan db:seed` lo muestre
      * sin truncar y conserve la decoración Unicode.
      *
+     * Estructura de cada línea: ║ + contenido($width chars) + ║.
+     * El contenido tiene un prefix (ej: "  RECOVERY CODES — "), después
+     * puede haber datos del user, después el ║ final. Calculamos el
+     * padding restante para que el total entre los dos ║ sea exactamente
+     * $width chars.
+     *
      * @param  array<int, string>  $codes
      */
     private function printSummary(string $email, string $store, bool $totp, array $codes): void
@@ -179,34 +185,44 @@ final class RecoveryCodesTestSeeder extends Seeder
         $width = 68;
         $line = str_repeat(string: '═', times: $width);
 
-        echo "\n╔{$line}╗\n";
-        echo '║  RECOVERY CODES — '.$this->pad($email, $width - 22)."║\n";
-        echo '║  Tienda: '.$this->pad($store, $width - 11)."║\n";
-        $flags = 'TOTP: '.($totp ? 'sí' : 'no').'   Recovery codes: '.count($codes);
-        echo '║  '.$this->pad($flags, $width - 2)."║\n";
-        echo '║  Guardar en password manager. No se vuelven a mostrar.'.$this->pad('', $width - 56)."║\n";
+        // mb_strlen cuenta CARACTERES (no bytes). Los ║/═ son multibyte
+        // UTF-8 (3 bytes cada uno) pero ocupan 1 columna visual.
+
+        // Línea de email: "║  RECOVERY CODES — <email>"
+        $prefix = '  RECOVERY CODES — ';  // sin el ║ — el ║ se concatena fuera
+        $pad = max(0, $width - mb_strlen($prefix) - mb_strlen($email));
+        echo '║' . $prefix . str_repeat(' ', $pad) . $email . "║\n";
+
+        // Línea de tienda: "║  Tienda: <store>"
+        $prefix = '  Tienda: ';
+        $pad = max(0, $width - mb_strlen($prefix) - mb_strlen($store));
+        echo '║' . $prefix . str_repeat(' ', $pad) . $store . "║\n";
+
+        // Flags
+        $flags = '  TOTP: ' . ($totp ? 'sí' : 'no') . '   Recovery codes: ' . count($codes);
+        $pad = max(0, $width - mb_strlen($flags));
+        echo '║' . $flags . str_repeat(' ', $pad) . "║\n";
+
+        // Warning
+        $warning = '  Guardar en password manager. No se vuelven a mostrar.';
+        $pad = max(0, $width - mb_strlen($warning));
+        echo '║' . $warning . str_repeat(' ', $pad) . "║\n";
+
         echo "╠{$line}╣\n";
 
         if ($codes === []) {
-            echo '║  (sin recovery codes)'.$this->pad('', $width - 22)."║\n";
+            $msg = '  (sin recovery codes)';
+            $pad = max(0, $width - mb_strlen($msg));
+            echo '║' . $msg . str_repeat(' ', $pad) . "║\n";
         } else {
             foreach ($codes as $index => $code) {
-                $row = sprintf('%3d.  %s', $index + 1, $code);
-                echo '║  '.$this->pad($row, $width - 2)."║\n";
+                $row = sprintf('  %3d.  %s', $index + 1, $code);
+                $pad = max(0, $width - mb_strlen($row));
+                echo '║' . $row . str_repeat(' ', $pad) . "║\n";
             }
         }
 
         echo "╚{$line}╝\n";
-    }
-
-    private function pad(string $text, int $targetWidth): string
-    {
-        $len = strlen($text);
-        if ($len >= $targetWidth) {
-            return '';
-        }
-
-        return str_repeat(string: ' ', times: $targetWidth - $len);
     }
 
     private function firstNameFromEmail(string $email): string
