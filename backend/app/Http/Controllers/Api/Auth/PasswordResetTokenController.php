@@ -8,10 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\Auth\UserResource;
+use App\Models\Auth\OtpChallenge;
 use App\Models\Auth\PasswordResetToken;
 use App\Models\Auth\User;
 use App\Notifications\Auth\PasswordResetCodeNotification;
 use App\Services\Auth\RecoveryCodeService;
+use App\Services\Auth\TotpService;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -72,6 +74,24 @@ class PasswordResetTokenController extends Controller
     private const CODE_LENGTH = 6;
 
     /**
+     * Minutos de TTL para challenge_tokens emitidos por
+     * recover-via-recovery-code / recover-via-totp. Corto a propósito:
+     * una vez que el user verificó el segundo factor (recovery code o
+     * TOTP), debe completar el reset rápido antes de que el challenge
+     * expire.
+     */
+    private const CHALLENGE_TTL_MINUTES = 10;
+
+    /**
+     * Throttle de recover-via-* y verify-totp-login: max intentos por
+     * IP. Defense-in-depth contra brute force (recovery codes: 30^10
+     * combinaciones; TOTP: ~3 codes válidos por ventana de 30s).
+     */
+    private const RECOVER_MAX_ATTEMPTS = 5;
+
+    private const RECOVER_DECAY_SECONDS = 900;
+
+    /**
      * Solicita un código de recuperación para el email dado.
      *
      * Siempre devuelve 200 OK con un mensaje genérico. Si el email
@@ -103,7 +123,7 @@ class PasswordResetTokenController extends Controller
         $method = $request->validated('method') ?? 'email';
 
         // Throttle por email: max 3 attempts cada 5 minutos.
-        $throttleKey = 'forgot-password:' . $email;
+        $throttleKey = 'forgot-password:'.$email;
 
         if (RateLimiter::tooManyAttempts(key: $throttleKey, maxAttempts: 3)) {
             $seconds = RateLimiter::availableIn(key: $throttleKey);
@@ -249,7 +269,7 @@ class PasswordResetTokenController extends Controller
         $method = $request->validated('method') ?? 'email';
 
         // Throttle por IP: max 5 attempts cada 15 minutos.
-        $throttleKey = 'reset-password:' . $request->ip();
+        $throttleKey = 'reset-password:'.$request->ip();
 
         if (RateLimiter::tooManyAttempts(key: $throttleKey, maxAttempts: 5)) {
             $seconds = RateLimiter::availableIn(key: $throttleKey);
@@ -282,6 +302,28 @@ class PasswordResetTokenController extends Controller
 
         $deviceName = $request->validated('device_name') ?? 'web-admin';
 
+        // Dispatch por challenge_token (flow de 2 pasos: recover-* →
+        // reset). Cuando viene, el user ya pasó por recoverWithRecoveryCode
+        // o recoverWithTotp y obtuvimos un challenge de un solo uso.
+        $challengeToken = $request->validated('challenge_token');
+        if (is_int($challengeToken) && $challengeToken > 0) {
+            $this->resetWithChallengeToken(
+                user: $user,
+                challengeId: $challengeToken,
+                password: $password,
+                throttleKey: $throttleKey,
+            );
+
+            $sanctumToken = $user->createToken(name: $deviceName)->plainTextToken;
+
+            return response()->json(data: [
+                'token' => $sanctumToken,
+                'user' => new UserResource(
+                    resource: $user->load(['role', 'stores']),
+                ),
+            ]);
+        }
+
         // Dispatch según método.
         if ($method === 'recovery_codes') {
             $this->resetWithRecoveryCode($user, $code, $password, $deviceName, $throttleKey);
@@ -312,6 +354,229 @@ class PasswordResetTokenController extends Controller
             'user' => new UserResource(
                 resource: $user->load(['role', 'stores']),
             ),
+        ]);
+    }
+
+    /**
+     * Verifica un recovery code y emite un challenge_token de un solo uso.
+     *
+     * Acepta un código de 10 chars alfanumérico (sin 0/O/1/I/L) del
+     * alphabet estándar (`RecoveryCodeService::generatePlainCode`).
+     * Si el code es válido (existe, no usado, normalizable), lo consume
+     * via `verifyAndConsume` y crea un `OtpChallenge` con type
+     * `recovery_code` que el caller envía a `/auth/reset-password` con
+     * `challenge_token` para completar el reset.
+     *
+     * Este split en 2 pasos (recover → reset) permite separar la
+     * verificación del code de la confirmación del nuevo password, así
+     * el código nunca toca el form del nuevo password.
+     *
+     * Body:
+     *   - email (required)
+     *   - code (required): 10 chars alfanuméricos del alfabeto permitido.
+     *
+     * Response 200:
+     *   - challenge_token: int — el id de OtpChallenge recién creado.
+     *   - expires_at: string ISO-8601.
+     *   - expires_minutes: int — TTL del challenge.
+     *
+     * Errores 422:
+     *   - "El email es obligatorio." / formato (form request).
+     *   - "Demasiados intentos. Probá de nuevo en N segundos." (throttle).
+     *   - "La cuenta está inactiva o no pertenece a esta tienda."
+     *   - "Tu cuenta no tiene recovery codes disponibles."
+     *   - "El recovery code es inválido o ya fue usado."
+     */
+    public function recoverWithRecoveryCode(
+        Request $request,
+        StoreContextService $storeContext,
+    ): JsonResponse {
+        $validated = $request->validate(rules: [
+            'email' => ['required', 'string', 'email:rfc', 'max:255'],
+            'code' => ['required', 'string', 'regex:/^[A-HJ-KM-NP-Z2-9]{10}$/'],
+        ]);
+
+        $email = strtolower(trim($validated['email']));
+        $code = strtoupper(trim($validated['code']));
+
+        $throttleKey = 'recover-via-recovery-code:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts(key: $throttleKey, maxAttempts: self::RECOVER_MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn(key: $throttleKey);
+
+            throw ValidationException::withMessages([
+                'code' => ["Demasiados intentos. Probá de nuevo en {$seconds} segundos."],
+            ]);
+        }
+
+        RateLimiter::hit(key: $throttleKey, decaySeconds: self::RECOVER_DECAY_SECONDS);
+
+        /** @var User|null $user */
+        $user = User::query()
+            ->where(column: 'email', operator: '=', value: $email)
+            ->first();
+
+        $currentStoreId = $storeContext->getStoreId();
+
+        $canRecover = $user !== null
+            && $user->is_active
+            && ($currentStoreId === null || $user->hasAccessToStore(storeId: $currentStoreId));
+
+        if (! $canRecover) {
+            throw ValidationException::withMessages([
+                'email' => ['La cuenta está inactiva o no pertenece a esta tienda.'],
+            ]);
+        }
+
+        if (! $user->hasAvailableRecoveryCode()) {
+            throw ValidationException::withMessages([
+                'code' => ['Tu cuenta no tiene recovery codes disponibles.'],
+            ]);
+        }
+
+        $service = app(abstract: RecoveryCodeService::class);
+
+        if (! $service->verifyAndConsume(user: $user, code: $code)) {
+            RateLimiter::hit(key: $throttleKey, decaySeconds: self::RECOVER_DECAY_SECONDS);
+
+            throw ValidationException::withMessages([
+                'code' => ['El recovery code es inválido o ya fue usado.'],
+            ]);
+        }
+
+        $challenge = OtpChallenge::query()->create(attributes: [
+            'user_id' => $user->id,
+            'type' => OtpChallenge::TYPE_RECOVERY_CODE,
+            // bcrypt de un string random — el code real NO se guarda,
+            // solo necesitamos un hash único para identificar el
+            // challenge. La verificación de uso posterior usa
+            // `OtpChallenge::id` como challenge_token.
+            'code_hash' => bcrypt(value: bin2hex(random_bytes(length: 16))),
+            'context' => [
+                'action' => 'recover_via_recovery_code',
+                'email' => $email,
+                'ip' => $request->ip(),
+            ],
+            'expires_at' => now()->addMinutes(minutes: self::CHALLENGE_TTL_MINUTES),
+        ]);
+
+        Log::info(message: 'recover-via-recovery-code: challenge emitido', context: [
+            'user_id' => $user->id,
+            'challenge_id' => $challenge->id,
+            'expires_at' => $challenge->expires_at,
+        ]);
+
+        return response()->json(data: [
+            'challenge_token' => $challenge->id,
+            'expires_at' => $challenge->expires_at->toIso8601String(),
+            'expires_minutes' => self::CHALLENGE_TTL_MINUTES,
+        ]);
+    }
+
+    /**
+     * Verifica un TOTP code y emite un challenge_token de un solo uso.
+     *
+     * Mismo split 2-step que `recoverWithRecoveryCode` pero para
+     * usuarios con 2FA habilitada. El user ingresa el código de 6
+     * dígitos de su authenticator app, lo validamos contra el secret
+     * almacenado, y emitimos un OtpChallenge con type=totp que se usa
+     * en /auth/reset-password con `challenge_token`.
+     *
+     * Body:
+     *   - email (required)
+     *   - code (required): 6 dígitos numéricos.
+     *
+     * Response 200:
+     *   - challenge_token: int
+     *   - expires_at: string ISO-8601.
+     *   - expires_minutes: int
+     *
+     * Errores 422:
+     *   - "El email es obligatorio." / formato.
+     *   - "Demasiados intentos..." (throttle por IP, 5/15min).
+     *   - "La cuenta está inactiva o no pertenece a esta tienda."
+     *   - "Tu cuenta no tiene 2FA habilitada."
+     *   - "El código TOTP es inválido."
+     */
+    public function recoverWithTotp(
+        Request $request,
+        StoreContextService $storeContext,
+    ): JsonResponse {
+        $validated = $request->validate(rules: [
+            'email' => ['required', 'string', 'email:rfc', 'max:255'],
+            'code' => ['required', 'string', 'regex:/^[0-9]{6}$/'],
+        ]);
+
+        $email = strtolower(trim($validated['email']));
+        $code = preg_replace('/\s+/', '', $validated['code']) ?? '';
+
+        $throttleKey = 'recover-via-totp:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts(key: $throttleKey, maxAttempts: self::RECOVER_MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn(key: $throttleKey);
+
+            throw ValidationException::withMessages([
+                'code' => ["Demasiados intentos. Probá de nuevo en {$seconds} segundos."],
+            ]);
+        }
+
+        RateLimiter::hit(key: $throttleKey, decaySeconds: self::RECOVER_DECAY_SECONDS);
+
+        /** @var User|null $user */
+        $user = User::query()
+            ->where(column: 'email', operator: '=', value: $email)
+            ->first();
+
+        $currentStoreId = $storeContext->getStoreId();
+
+        $canRecover = $user !== null
+            && $user->is_active
+            && ($currentStoreId === null || $user->hasAccessToStore(storeId: $currentStoreId));
+
+        if (! $canRecover) {
+            throw ValidationException::withMessages([
+                'email' => ['La cuenta está inactiva o no pertenece a esta tienda.'],
+            ]);
+        }
+
+        if (! $user->hasTwoFactorEnabled()) {
+            throw ValidationException::withMessages([
+                'code' => ['Tu cuenta no tiene 2FA habilitada.'],
+            ]);
+        }
+
+        $service = app(abstract: TotpService::class);
+
+        if (! $service->verify(user: $user, code: $code)) {
+            RateLimiter::hit(key: $throttleKey, decaySeconds: self::RECOVER_DECAY_SECONDS);
+
+            throw ValidationException::withMessages([
+                'code' => ['El código TOTP es inválido.'],
+            ]);
+        }
+
+        $challenge = OtpChallenge::query()->create(attributes: [
+            'user_id' => $user->id,
+            'type' => OtpChallenge::TYPE_TOTP,
+            'code_hash' => bcrypt(value: bin2hex(random_bytes(length: 16))),
+            'context' => [
+                'action' => 'recover_via_totp',
+                'email' => $email,
+                'ip' => $request->ip(),
+            ],
+            'expires_at' => now()->addMinutes(minutes: self::CHALLENGE_TTL_MINUTES),
+        ]);
+
+        Log::info(message: 'recover-via-totp: challenge emitido', context: [
+            'user_id' => $user->id,
+            'challenge_id' => $challenge->id,
+            'expires_at' => $challenge->expires_at,
+        ]);
+
+        return response()->json(data: [
+            'challenge_token' => $challenge->id,
+            'expires_at' => $challenge->expires_at->toIso8601String(),
+            'expires_minutes' => self::CHALLENGE_TTL_MINUTES,
         ]);
     }
 
@@ -394,6 +659,52 @@ class PasswordResetTokenController extends Controller
         });
 
         return $user->createToken(name: $deviceName)->plainTextToken;
+    }
+
+    /**
+     * Resetea password consumiendo un OtpChallenge de 2-step flow.
+     *
+     * El challenge debe pertenecer al user (defense-in-depth: aunque el
+     * token se filtra, no funciona sin user_id matching). Debe estar
+     * vigente (`isUsable()` chequea consumed_at + expires_at +
+     * attempts). Una vez consumido, el password se actualiza en una
+     * transacción atómica.
+     *
+     * Throttle por IP: cada intento (válido o no) cuenta hacia el
+     * mismo limitador. Esto evita brute force sobre el espacio de IDs
+     * de OtpChallenge.
+     */
+    private function resetWithChallengeToken(
+        User $user,
+        int $challengeId,
+        string $password,
+        string $throttleKey,
+    ): void {
+        /** @var OtpChallenge|null $challenge */
+        $challenge = OtpChallenge::query()
+            ->where(column: 'id', operator: '=', value: $challengeId)
+            ->where(column: 'user_id', operator: '=', value: $user->id)
+            ->whereNull(columns: 'consumed_at')
+            ->first();
+
+        if ($challenge === null || ! $challenge->isUsable()) {
+            RateLimiter::hit(key: $throttleKey, decaySeconds: 900);
+
+            throw ValidationException::withMessages([
+                'challenge_token' => ['El challenge es inválido, expiró o ya fue consumido.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($challenge, $user, $password): void {
+            $challenge->update(attributes: ['consumed_at' => now()]);
+            $user->update(attributes: ['password' => $password]);
+        });
+
+        Log::info(message: 'reset-password: challenge consumido', context: [
+            'user_id' => $user->id,
+            'challenge_id' => $challenge->id,
+            'challenge_type' => $challenge->type,
+        ]);
     }
 
     /**

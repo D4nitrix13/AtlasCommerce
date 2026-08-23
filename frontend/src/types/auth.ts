@@ -95,3 +95,81 @@ export interface TwoFactorVerifyPayload {
 }
 
 export type ValidationErrors = Record<string, string[]>;
+
+/**
+ * Métodos de recuperación disponibles para un usuario.
+ *
+ * El backend (`POST /auth/forgot-password`) devuelve esta lista para
+ * que el frontend muestre solo los métodos que el user realmente puede
+ * usar:
+ *
+ *  - `'email'` — siempre disponible si la cuenta existe; el backend
+ *    envía un OTP al email.
+ *  - `'recovery_codes'` — disponible si el user tiene al menos un
+ *    recovery code sin usar.
+ *  - `'totp'` — disponible si el user tiene 2FA habilitada.
+ */
+export type AvailableMethod = 'email' | 'recovery_codes' | 'totp';
+
+/**
+ * Respuesta de `POST /auth/forgot-password` cuando se llama desde el
+ * flow wizard. El backend declara qué métodos tiene disponibles el user
+ * para que el wizard muestre solo los que aplican.
+ */
+export interface ForgotPasswordResponse {
+  message: string;
+  expires_minutes: number;
+  /**
+   * Métodos que el user puede usar para verificar su identidad. Si la
+   * cuenta no existe (respuesta genérica por seguridad), el array está
+   * vacío. El wizard debe mostrar todos los métodos disponibles como
+   * opciones; el user elige cuál usar.
+   */
+  available_methods: AvailableMethod[];
+  /**
+   * Solo presente en dev (`APP_ENV !== 'production'`). El código OTP
+   * para que el dev pueda probar el flow sin SMTP.
+   */
+  code?: string;
+  dev?: boolean;
+}
+
+/**
+ * Respuesta de `POST /auth/recover-via-recovery-code` y
+ * `POST /auth/recover-via-totp`. El `challenge_token` se envía en el
+ * siguiente paso a `/auth/reset-password` para completar el cambio de
+ * password sin volver a pedir el segundo factor.
+ */
+export interface RecoveryCodeChallengeResponse {
+  challenge_token: number;
+  expires_at: string;
+  expires_minutes: number;
+}
+
+/**
+ * Payload para `POST /auth/reset-password`.
+ *
+ * Dos modos:
+ *  - `code` (default): código OTP/recovery code directo.
+ *  - `challenge_token`: token emitido por recover-via-recovery-code /
+ *    recover-via-totp. NO debe acompañarse de `code`.
+ */
+export interface ResetPasswordRequest {
+  email: string;
+  method?: 'email' | 'recovery_codes';
+  code?: string;
+  challenge_token?: number;
+  password: string;
+  password_confirmation: string;
+  device_name?: string;
+}
+
+/**
+ * Pasos del wizard `ForgotPasswordWizard`.
+ *
+ *  - `'email'`   — ingreso de email + ver métodos disponibles.
+ *  - `'method'`  — selección del método (cuando hay >1 disponible).
+ *  - `'code'`    — ingreso del código (recovery o TOTP) según método.
+ *  - `'password'`— ingreso del nuevo password ×2 + submit.
+ */
+export type ForgotPasswordWizardStep = 'email' | 'method' | 'code' | 'password';
