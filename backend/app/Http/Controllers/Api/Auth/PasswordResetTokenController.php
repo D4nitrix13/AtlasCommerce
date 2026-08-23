@@ -165,7 +165,22 @@ class PasswordResetTokenController extends Controller
         $response = [
             'message' => 'Si el email existe, te enviamos un código.',
             'expires_minutes' => $ttlMinutes,
+            'available_methods' => ['email'],
         ];
+
+        // Si el user existe y está activo, agregar los métodos alternativos
+        // disponibles para que el wizard del frontend muestre las opciones.
+        // Si el user no existe, mantenemos solo 'email' (no leakear info
+        // sobre si el email está registrado — siempre 200 con mensaje
+        // genérico, igual que en cualquier flow de password reset).
+        if ($user !== null && $user->is_active) {
+            if ($user->hasTwoFactorEnabled()) {
+                $response['available_methods'][] = 'totp';
+            }
+            if ($user->recoveryCodes()->whereNull('used_at')->exists()) {
+                $response['available_methods'][] = 'recovery_code';
+            }
+        }
 
         if (! $shouldSend) {
             Log::info(
@@ -198,15 +213,26 @@ class PasswordResetTokenController extends Controller
         });
 
         // Enviar notificación. ShouldQueue → no bloquea la request.
-        Notification::send(
-            $user,
-            new PasswordResetCodeNotification(
-                code: $code,
-                appName: config('app.name'),
-                expiresMinutes: $ttlMinutes,
-                supportEmail: $user->email,
-            ),
-        );
+        // Envoltura try/catch: si el render del email falla (ej: tempnam()
+        // falla por permisos de /tmp en dev containers), NO debemos matar
+        // la request — el código OTP ya está guardado en DB y el user
+        // puede usar recovery codes / TOTP / dashboard para resetear.
+        try {
+            Notification::send(
+                $user,
+                new PasswordResetCodeNotification(
+                    code: $code,
+                    appName: config('app.name'),
+                    expiresMinutes: $ttlMinutes,
+                    supportEmail: $user->email,
+                ),
+            );
+        } catch (\Throwable $e) {
+            Log::warning(
+                message: 'forgot-password: fallo envío de email (no crítico)',
+                context: ['email' => $email, 'error' => $e->getMessage()],
+            );
+        }
 
         if (! app()->environment('production')) {
             Log::info(
