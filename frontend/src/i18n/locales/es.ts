@@ -313,7 +313,7 @@ const es: Translations = {
   'auth.passwordRecovery.stepper.code': 'Código',
   'auth.passwordRecovery.stepper.email': 'Email',
   'auth.passwordRecovery.stepper.method': 'Método',
-  'auth.passwordRecovery.stepper.password': 'Nueva contraseña',
+  'auth.passwordRecovery.stepper.password': 'Contraseña',
   'auth.passwordRecovery.steps.code.descriptionOtp':
     'Es el código de 6 dígitos de tu authenticator app o el que recibiste por correo.',
   'auth.passwordRecovery.steps.code.descriptionRecovery':
