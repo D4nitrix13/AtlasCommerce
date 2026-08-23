@@ -119,8 +119,13 @@ services:
       - DB_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - SESSION_DRIVER=file
-      - CACHE_STORE=file
+      # Sessions + cache en Redis (no en filesystem).
+      # Razón: storage está owned por UID 0 (root del build), pero el
+      # compose override corre como UID 1000 (host user). File driver
+      # tira "Permission denied" al primer write. Redis evita el problema
+      # y de paso es lo que usaremos en prod.
+      - SESSION_DRIVER=redis
+      - CACHE_STORE=redis
       - QUEUE_CONNECTION=sync
       - FILESYSTEM_DISK=local
       - FTP_HOST=ftp
