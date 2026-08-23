@@ -43,15 +43,16 @@ export function WizardStepper({ steps, current, labels }: WizardStepperProps): R
   const currentIndex = steps.indexOf(current);
 
   return (
-    <div className="flex items-center justify-center gap-2 mb-6" aria-label="Progreso del wizard">
+    <div className="flex items-start justify-between w-full mb-6" aria-label="Progreso del wizard">
       {steps.map((step, index) => {
         const isComplete = index < currentIndex;
         const isCurrent = index === currentIndex;
         const label = labels?.[step] ?? step;
+        const isLast = index === steps.length - 1;
 
         return (
-          <div key={step} className="flex items-center">
-            <div className="flex flex-col items-center gap-1.5">
+          <div key={step} className="flex-1 flex items-center min-w-0">
+            <div className="flex flex-col items-center gap-1.5 w-full min-w-0">
               <div
                 aria-current={isCurrent ? 'step' : undefined}
                 className={
@@ -63,39 +64,30 @@ export function WizardStepper({ steps, current, labels }: WizardStepperProps): R
                 }
               >
                 {isComplete ? (
-                  <svg
-                    aria-hidden="true"
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <span aria-hidden="true">✓</span>
                 ) : (
                   index + 1
                 )}
               </div>
               <span
                 className={
-                  isCurrent
-                    ? 'text-xs font-medium text-[#2D9D8E]'
+                  'text-xs text-center max-w-full leading-tight ' +
+                  (isCurrent
+                    ? 'font-medium text-[#2D9D8E]'
                     : isComplete
-                      ? 'text-xs font-medium text-slate-700'
-                      : 'text-xs text-slate-400'
+                      ? 'font-medium text-slate-700'
+                      : 'text-slate-400')
                 }
               >
                 {label}
               </span>
             </div>
-            {index < steps.length - 1 && (
+            {!isLast && (
               <div
                 aria-hidden="true"
                 className={
-                  isComplete
-                    ? 'h-0.5 w-10 mx-2 bg-[#2D9D8E]'
-                    : 'h-0.5 w-10 mx-2 bg-slate-200'
+                  'h-0.5 flex-1 mx-2 self-center -mt-3 ' +
+                  (isComplete ? 'bg-[#2D9D8E]' : 'bg-slate-200')
                 }
               />
             )}
