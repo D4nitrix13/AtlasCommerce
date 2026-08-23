@@ -61,6 +61,16 @@ Route::middleware(['store.domain'])->group(function (): void {
     Route::post('auth/reset-password', [PasswordResetTokenController::class, 'reset'])
         ->name('auth.reset-password');
 
+    // 2-step recovery flows: el usuario verifica un segundo factor
+    // (recovery code o TOTP) y obtiene un challenge_token de un solo uso
+    // que después envía a /auth/reset-password con `challenge_token`
+    // para completar el cambio de password. Esto desacopla la
+    // verificación del code de la confirmación del nuevo password.
+    Route::post('auth/recover-via-recovery-code', [PasswordResetTokenController::class, 'recoverWithRecoveryCode'])
+        ->name('auth.recover.recovery-code');
+    Route::post('auth/recover-via-totp', [PasswordResetTokenController::class, 'recoverWithTotp'])
+        ->name('auth.recover.totp');
+
     // Social login (Google + Facebook) — stub que devuelve 501 mientras
     // no esté instalado laravel/socialite. Ver SocialAuthController.
     Route::get('auth/social/{provider}/redirect', [SocialAuthController::class, 'redirect'])

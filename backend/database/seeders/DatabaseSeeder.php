@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->ensureBaseCurrencies();
         $this->call(class: PermissionsCatalogSeeder::class);
+        $this->call(class: RecoveryCodesTestSeeder::class);
     }
 
     /**

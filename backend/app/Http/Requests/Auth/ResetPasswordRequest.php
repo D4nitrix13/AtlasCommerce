@@ -15,16 +15,21 @@ use Illuminate\Foundation\Http\FormRequest;
  *    'recovery_codes' (code = 10 chars alfanumérico, sin 0/O/1/I/L).
  *    El controller dispatcha al handler correspondiente y verifica que
  *    coincida con `users.preferred_recovery_method`.
+ *  - challenge_token opcional (integer): cuando viene presente, el
+ *    controller consume un OtpChallenge previamente emitido por
+ *    /auth/recover-via-recovery-code o /auth/recover-via-totp. En ese
+ *    modo `code` NO se exige (es un flow challenge_token de 2 pasos).
  *  - code: según method. Para 'email' son 6 dígitos; para
- *    'recovery_codes' son 10 chars del alfabeto permitido.
+ *    'recovery_codes' son 10 chars del alfabeto permitido. Requerido
+ *    salvo cuando se provee `challenge_token`.
  *  - password requerido, mínimo 12 caracteres, confirmado, con requisitos
  *    de complejidad (mayúscula, minúscula, número). Alineado con el
  *    frontend que muestra el passwordHint.
  *  - device_name opcional.
  *
- * El código se valida contra password_reset_tokens (email) o vía
- * RecoveryCodeService (recovery_codes) en el controller; aquí solo
- * validamos formato.
+ * El código se valida contra password_reset_tokens (email), vía
+ * RecoveryCodeService (recovery_codes), o contra OtpChallenge
+ * (challenge_token) en el controller; aquí solo validamos formato.
  */
 class ResetPasswordRequest extends FormRequest
 {
@@ -43,10 +48,13 @@ class ResetPasswordRequest extends FormRequest
             ? ['required', 'string', 'regex:/^[A-HJ-KM-NP-Z2-9]{10}$/']
             : ['required', 'string', 'regex:/^[0-9]{6}$/'];
 
+        $hasChallengeToken = $this->filled(key: 'challenge_token');
+
         return [
             'email' => ['required', 'string', 'email:rfc', 'max:255'],
             'method' => ['sometimes', 'string', 'in:email,recovery_codes'],
-            'code' => $codeRule,
+            'code' => $hasChallengeToken ? ['nullable', 'string'] : $codeRule,
+            'challenge_token' => ['nullable', 'integer', 'min:1'],
             'password' => [
                 'required',
                 'string',
@@ -72,6 +80,7 @@ class ResetPasswordRequest extends FormRequest
             'method.in' => 'El método debe ser email o recovery_codes.',
             'code.required' => 'El código es obligatorio.',
             'code.regex' => 'El código no tiene el formato esperado para este método.',
+            'challenge_token.integer' => 'El challenge token debe ser un identificador numérico.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'Su contraseña debe tener al menos 12 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
