@@ -3,6 +3,8 @@ import {
   WizardButtonRow,
   WizardErrorMessage,
 } from './ForgotPasswordWizardUi';
+import { useTranslations } from '../../../i18n';
+import type { TranslationKey } from '../../../i18n/types';
 import type { AvailableMethod } from '../../../types/auth';
 
 /**
@@ -33,15 +35,16 @@ export function EmailStep({
   errorMessage,
   isSubmitting,
 }: EmailStepProps): ReactElement {
+  const { t } = useTranslations();
   const [email, setEmail] = useState<string>(data.email);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const validate = (value: string): string | null => {
     if (value.trim() === '') {
-      return 'Ingresá tu correo electrónico.';
+      return t('auth.passwordRecovery.steps.email.emailErrorEmpty');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      return 'El correo no tiene un formato válido.';
+      return t('auth.passwordRecovery.steps.email.emailErrorInvalid');
     }
     return null;
   };
@@ -68,9 +71,11 @@ export function EmailStep({
       noValidate
     >
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-1">Recuperá tu cuenta</h2>
+        <h2 className="text-lg font-semibold text-slate-900 mb-1">
+          {t('auth.passwordRecovery.steps.email.heading')}
+        </h2>
         <p className="text-sm text-slate-500">
-          Empezamos por tu correo. Te mostraremos las opciones de recuperación disponibles.
+          {t('auth.passwordRecovery.steps.email.subtitle')}
         </p>
       </div>
 
@@ -84,7 +89,7 @@ export function EmailStep({
           htmlFor="wizard-email"
           className="block text-sm font-medium text-slate-700 mb-1.5"
         >
-          Correo electrónico
+          {t('auth.passwordRecovery.email.label')}
         </label>
         <input
           id="wizard-email"
@@ -93,7 +98,7 @@ export function EmailStep({
           inputMode="email"
           autoComplete="email"
           required
-          placeholder="tu@correo.com"
+          placeholder={t('auth.passwordRecovery.email.placeholder')}
           value={email}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             setEmail(event.target.value);
@@ -103,8 +108,8 @@ export function EmailStep({
       </div>
 
       <WizardButtonRow
-        nextLabel="Continuar"
-        submittingLabel="Verificando..."
+        nextLabel={t('auth.passwordRecovery.buttons.continue')}
+        submittingLabel={t('auth.passwordRecovery.buttons.verifying')}
         onNext={handleSubmit}
         isSubmitting={isSubmitting}
       />
@@ -123,18 +128,21 @@ type MethodStepProps = MethodStepData & {
   errorMessage: string | null;
 };
 
-const METHOD_LABELS: Record<AvailableMethod, { title: string; description: string }> = {
+const METHOD_LABELS: Record<
+  AvailableMethod,
+  { title: TranslationKey; description: TranslationKey }
+> = {
   email: {
-    title: 'Correo electrónico',
-    description: 'Te enviaremos un código de 6 dígitos a tu correo.',
+    title: 'auth.passwordRecovery.steps.method.email.title',
+    description: 'auth.passwordRecovery.steps.method.email.description',
   },
   recovery_codes: {
-    title: 'Código de respaldo',
-    description: 'Ingresá uno de los códigos de 10 caracteres que guardaste al activar 2FA.',
+    title: 'auth.passwordRecovery.steps.method.recoveryCode.title',
+    description: 'auth.passwordRecovery.steps.method.recoveryCode.description',
   },
   totp: {
-    title: 'Authenticator app',
-    description: 'Ingresá el código de 6 dígitos de tu app de autenticación.',
+    title: 'auth.passwordRecovery.steps.method.totp.title',
+    description: 'auth.passwordRecovery.steps.method.totp.description',
   },
 };
 
@@ -149,12 +157,19 @@ export function MethodStep({
   onBack,
   errorMessage,
 }: MethodStepProps): ReactElement {
+  const { t } = useTranslations();
+
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-1">Elegí cómo verificarte</h2>
+        <h2 className="text-lg font-semibold text-slate-900 mb-1">
+          {t('auth.passwordRecovery.steps.method.heading')}
+        </h2>
         <p className="text-sm text-slate-500">
-          Para {email} tenés {availableMethods.length} opciones de recuperación:
+          {t('auth.passwordRecovery.steps.method.subtitleTemplate', {
+            email,
+            count: availableMethods.length,
+          })}
         </p>
       </div>
 
@@ -172,14 +187,17 @@ export function MethodStep({
               }}
               className="w-full text-left p-4 rounded-lg border border-slate-200 hover:border-[#2D9D8E] hover:bg-[#2D9D8E]/5 transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
             >
-              <div className="font-semibold text-slate-900">{info.title}</div>
-              <div className="text-sm text-slate-500 mt-0.5">{info.description}</div>
+              <div className="font-semibold text-slate-900">{t(info.title)}</div>
+              <div className="text-sm text-slate-500 mt-0.5">{t(info.description)}</div>
             </button>
           );
         })}
       </div>
 
-      <WizardButtonRow onBack={onBack} nextLabel="Continuar" />
+      <WizardButtonRow
+        onBack={onBack}
+        nextLabel={t('auth.passwordRecovery.buttons.continue')}
+      />
     </div>
   );
 }
@@ -209,6 +227,7 @@ export function CodeStep({
   errorMessage,
   isSubmitting,
 }: CodeStepProps): ReactElement {
+  const { t } = useTranslations();
   void email;
   const [code, setCode] = useState<string>('');
 
@@ -237,10 +256,15 @@ export function CodeStep({
     onNext(code);
   };
 
-  const title = isRecovery ? 'Ingresá tu código de respaldo' : 'Ingresá tu código de verificación';
+  const title = isRecovery
+    ? t('auth.passwordRecovery.steps.code.headingRecovery')
+    : t('auth.passwordRecovery.steps.code.headingOtp');
   const helperText = isRecovery
-    ? 'Es uno de los códigos de 10 caracteres que guardaste al activar la verificación en dos pasos.'
-    : 'Es el código de 6 dígitos de tu authenticator app o el que recibiste por correo.';
+    ? t('auth.passwordRecovery.steps.code.descriptionRecovery')
+    : t('auth.passwordRecovery.steps.code.descriptionOtp');
+  const placeholder = isRecovery
+    ? t('auth.passwordRecovery.steps.code.placeholderRecovery')
+    : t('auth.passwordRecovery.steps.code.placeholderOtp');
 
   return (
     <form
@@ -263,7 +287,7 @@ export function CodeStep({
           htmlFor="wizard-code"
           className="block text-sm font-medium text-slate-700 mb-1.5"
         >
-          Código de verificación
+          {t('auth.passwordRecovery.code.label')}
         </label>
         <input
           id="wizard-code"
@@ -274,7 +298,7 @@ export function CodeStep({
           required
           maxLength={expectedLength}
           pattern={pattern}
-          placeholder={isRecovery ? 'ABCDEFGHJK' : '000000'}
+          placeholder={placeholder}
           value={code}
           onChange={handleChange}
           className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-center font-mono text-2xl tracking-[0.4em] text-slate-900 placeholder:text-slate-300 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
@@ -283,8 +307,8 @@ export function CodeStep({
 
       <WizardButtonRow
         onBack={onBack}
-        nextLabel="Verificar código"
-        submittingLabel="Verificando..."
+        nextLabel={t('auth.passwordRecovery.buttons.verifyCode')}
+        submittingLabel={t('auth.passwordRecovery.buttons.verifying')}
         onNext={handleSubmit}
         isSubmitting={isSubmitting}
       />
@@ -320,6 +344,7 @@ export function PasswordStep({
   errorMessage,
   isSubmitting,
 }: PasswordStepProps): ReactElement {
+  const { t } = useTranslations();
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
 
@@ -337,9 +362,9 @@ export function PasswordStep({
   };
 
   const checklist = [
-    { met: minLengthOk, label: 'Al menos 12 caracteres' },
-    { met: upperLowerOk, label: 'Una letra mayúscula y una minúscula' },
-    { met: numberOk, label: 'Al menos un número' },
+    { met: minLengthOk, label: t('auth.passwordRecovery.steps.password.minLength') },
+    { met: upperLowerOk, label: t('auth.passwordRecovery.steps.password.upperLower') },
+    { met: numberOk, label: t('auth.passwordRecovery.steps.password.number') },
   ];
 
   return (
@@ -352,9 +377,11 @@ export function PasswordStep({
       noValidate
     >
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-1">Creá tu nueva contraseña</h2>
+        <h2 className="text-lg font-semibold text-slate-900 mb-1">
+          {t('auth.passwordRecovery.steps.password.heading')}
+        </h2>
         <p className="text-sm text-slate-500">
-          Elegí una contraseña segura. La necesitás para iniciar sesión.
+          {t('auth.passwordRecovery.steps.password.subtitle')}
         </p>
       </div>
 
@@ -362,7 +389,7 @@ export function PasswordStep({
 
       <div>
         <label htmlFor="wizard-password" className="block text-sm font-medium text-slate-700 mb-1.5">
-          Nueva contraseña
+          {t('auth.passwordRecovery.password.label')}
         </label>
         <input
           id="wizard-password"
@@ -371,7 +398,7 @@ export function PasswordStep({
           autoComplete="new-password"
           required
           minLength={PASSWORD_MIN_LENGTH}
-          placeholder="Mínimo 12 caracteres"
+          placeholder={t('auth.passwordRecovery.password.placeholder')}
           value={password}
           onChange={(event) => {
             setPassword(event.target.value);
@@ -385,7 +412,7 @@ export function PasswordStep({
           htmlFor="wizard-password-confirm"
           className="block text-sm font-medium text-slate-700 mb-1.5"
         >
-          Repetir contraseña
+          {t('auth.passwordRecovery.steps.password.confirmLabel')}
         </label>
         <input
           id="wizard-password-confirm"
@@ -394,7 +421,7 @@ export function PasswordStep({
           autoComplete="new-password"
           required
           minLength={PASSWORD_MIN_LENGTH}
-          placeholder="Repetí la contraseña"
+          placeholder={t('auth.passwordRecovery.password.confirmPlaceholder')}
           value={confirmPassword}
           onChange={(event) => {
             setConfirmPassword(event.target.value);
@@ -402,21 +429,26 @@ export function PasswordStep({
           className={passwordsMatch ? PASSWORD_INPUT_MATCH_CLASS : PASSWORD_INPUT_CLASS}
         />
         {passwordsMatch && (
-          <p className="text-xs text-[#2D9D8E] mt-1.5">Las contraseñas coinciden.</p>
+          <p className="text-xs text-[#2D9D8E] mt-1.5">
+            {t('auth.passwordRecovery.steps.password.matchHint')}
+          </p>
         )}
       </div>
 
       <ul className="text-xs text-slate-600 space-y-1 bg-slate-50 rounded-lg p-3">
         {checklist.map((item) => (
           <li key={item.label} className={item.met ? 'text-[#2D9D8E]' : ''}>
-            {item.met ? 'OK' : '-'} {item.label}
+            {item.met
+              ? t('auth.passwordRecovery.steps.password.statusMet')
+              : t('auth.passwordRecovery.steps.password.statusUnmet')}{' '}
+            {item.label}
           </li>
         ))}
       </ul>
 
       <WizardButtonRow
-        nextLabel="Restablecer contraseña"
-        submittingLabel="Restableciendo..."
+        nextLabel={t('auth.passwordRecovery.buttons.resetPassword')}
+        submittingLabel={t('auth.passwordRecovery.buttons.resetting')}
         onNext={handleSubmit}
         isSubmitting={isSubmitting}
       />

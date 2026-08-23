@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { apiFetch } from '../../../lib/api';
+import { useTranslations } from '../../../i18n';
 import {
   WizardFormContainer,
   WizardStepper,
@@ -48,13 +49,6 @@ const STEP_ORDER: readonly ForgotPasswordWizardStep[] = [
   'password',
 ] as const;
 
-const STEP_LABELS: Record<ForgotPasswordWizardStep, string> = {
-  email: 'Email',
-  method: 'Método',
-  code: 'Código',
-  password: 'Nueva contraseña',
-};
-
 type WizardState = {
   step: ForgotPasswordWizardStep;
   email: string;
@@ -81,7 +75,16 @@ export default function ForgotPasswordWizard({
   locale = 'es',
   callbackPath = '/admin/dashboard',
 }: ForgotPasswordWizardProps): ReactElement {
+  const { t } = useTranslations();
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
+
+  // Labels del stepper — derivadas del locale activo vía t().
+  const stepLabels: Record<ForgotPasswordWizardStep, string> = {
+    email: t('auth.passwordRecovery.stepper.email'),
+    method: t('auth.passwordRecovery.stepper.method'),
+    code: t('auth.passwordRecovery.stepper.code'),
+    password: t('auth.passwordRecovery.stepper.password'),
+  };
 
   const updateState = (patch: Partial<WizardState>): void => {
     setState((prev) => ({ ...prev, ...patch }));
@@ -118,7 +121,7 @@ export default function ForgotPasswordWizard({
       const apiError = error_ as { message?: string };
       updateState({
         isSubmitting: false,
-        errorMessage: apiError.message ?? 'No pudimos verificar tu correo. Probá de nuevo.',
+        errorMessage: apiError.message ?? t('auth.passwordRecovery.errors.emailSubmit'),
       });
     }
   };
@@ -142,7 +145,7 @@ export default function ForgotPasswordWizard({
   // Step 3 → 4: verifica el código (recovery o TOTP) y emite challenge_token.
   const handleCodeSubmit = async (code: string): Promise<void> => {
     if (state.selectedMethod === null) {
-      updateState({ errorMessage: 'Seleccioná un método de recuperación.' });
+      updateState({ errorMessage: t('auth.passwordRecovery.errors.methodRequired') });
       return;
     }
 
@@ -167,7 +170,8 @@ export default function ForgotPasswordWizard({
       const fieldError = apiError.errors?.code?.[0];
       updateState({
         isSubmitting: false,
-        errorMessage: fieldError ?? apiError.message ?? 'El código es inválido.',
+        errorMessage:
+          fieldError ?? apiError.message ?? t('auth.passwordRecovery.errors.codeInvalid'),
       });
     }
   };
@@ -176,7 +180,7 @@ export default function ForgotPasswordWizard({
   // En éxito, redirige al login con flash param.
   const handlePasswordSubmit = async (password: string): Promise<void> => {
     if (state.challengeToken === null) {
-      updateState({ errorMessage: 'Sesión de recuperación expirada. Volvé a empezar.' });
+      updateState({ errorMessage: t('auth.passwordRecovery.errors.challengeExpired') });
       return;
     }
 
@@ -208,7 +212,8 @@ export default function ForgotPasswordWizard({
       updateState({
         isSubmitting: false,
         errorMessage:
-          challengeError ?? passwordError ?? apiError.message ?? 'No pudimos restablecer la contraseña.',
+          challengeError ?? passwordError ?? apiError.message ??
+          t('auth.passwordRecovery.errors.reset'),
       });
     }
   };
@@ -230,16 +235,16 @@ export default function ForgotPasswordWizard({
         if (state.availableMethods.length === 0) {
           return (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-slate-900">Sin métodos disponibles</h2>
-              <p className="text-sm text-slate-600">
-                No encontramos métodos de recuperación para esta cuenta. Contactá a soporte.
-              </p>
+              <h2 className="text-lg font-semibold text-slate-900">
+                {t('auth.passwordRecovery.empty.heading')}
+              </h2>
+              <p className="text-sm text-slate-600">{t('auth.passwordRecovery.empty.body')}</p>
               <button
                 type="button"
                 onClick={handleBackToEmail}
                 className="text-sm font-semibold text-[#2D9D8E] hover:text-[#1E6F62]"
               >
-                Volver al inicio
+                {t('auth.passwordRecovery.empty.backToStart')}
               </button>
             </div>
           );
@@ -257,7 +262,9 @@ export default function ForgotPasswordWizard({
       case 'code': {
         if (state.selectedMethod === null) {
           return (
-            <div className="text-sm text-slate-600">Algo salió mal. Volvé a empezar.</div>
+            <div className="text-sm text-slate-600">
+              {t('auth.passwordRecovery.errors.genericFallback')}
+            </div>
           );
         }
         const codeData: CodeStepData = {
@@ -279,7 +286,7 @@ export default function ForgotPasswordWizard({
         if (state.challengeToken === null) {
           return (
             <div className="text-sm text-slate-600">
-              La sesión de recuperación expiró. Volvé a empezar.
+              {t('auth.passwordRecovery.errors.challengeExpiredLate')}
             </div>
           );
         }
@@ -304,10 +311,10 @@ export default function ForgotPasswordWizard({
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <WizardStepper steps={STEP_ORDER} current={state.step} labels={STEP_LABELS} />
+      <WizardStepper steps={STEP_ORDER} current={state.step} labels={stepLabels} />
       <WizardFormContainer>
         {state.isComplete && (
-          <WizardSuccessMessage message="Contraseña restablecida. Redirigiendo al login..." />
+          <WizardSuccessMessage message={t('auth.passwordRecovery.success.redirecting')} />
         )}
         {renderActiveStep()}
       </WizardFormContainer>

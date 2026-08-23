@@ -287,6 +287,70 @@ const en: Translations = {
   'auth.passwordRecovery.useTotp': 'Use authenticator app',
   'auth.passwordRecovery.changeEmail': 'Change email',
 
+  // ─── forgot-password wizard (ForgotPasswordWizard) ─────────────────
+  'auth.passwordRecovery.buttons.continue': 'Continue',
+  'auth.passwordRecovery.buttons.resetPassword': 'Reset password',
+  'auth.passwordRecovery.buttons.resetting': 'Resetting...',
+  'auth.passwordRecovery.buttons.verifyCode': 'Verify code',
+  'auth.passwordRecovery.buttons.verifying': 'Verifying...',
+  'auth.passwordRecovery.empty.backToStart': 'Back to start',
+  'auth.passwordRecovery.empty.body':
+    "We couldn't find recovery methods for this account. Please contact support.",
+  'auth.passwordRecovery.empty.heading': 'No methods available',
+  'auth.passwordRecovery.errors.challengeExpired':
+    'Recovery session expired. Please start over.',
+  'auth.passwordRecovery.errors.challengeExpiredLate':
+    'The recovery session expired. Please start over.',
+  'auth.passwordRecovery.errors.codeInvalid': 'The code is invalid.',
+  'auth.passwordRecovery.errors.emailSubmit':
+    "We couldn't verify your email. Please try again.",
+  'auth.passwordRecovery.errors.genericFallback': 'Something went wrong. Please start over.',
+  'auth.passwordRecovery.errors.methodRequired': 'Please select a recovery method.',
+  'auth.passwordRecovery.errors.noMethodsBody':
+    "We couldn't find recovery methods for this account. Please contact support.",
+  'auth.passwordRecovery.errors.noMethodsHeading': 'No methods available',
+  'auth.passwordRecovery.errors.reset': "We couldn't reset your password.",
+  'auth.passwordRecovery.stepper.code': 'Code',
+  'auth.passwordRecovery.stepper.email': 'Email',
+  'auth.passwordRecovery.stepper.method': 'Method',
+  'auth.passwordRecovery.stepper.password': 'New password',
+  'auth.passwordRecovery.steps.code.descriptionOtp':
+    'It is the 6-digit code from your authenticator app or the one you received by email.',
+  'auth.passwordRecovery.steps.code.descriptionRecovery':
+    'It is one of the 10-character codes you saved when you activated two-step verification.',
+  'auth.passwordRecovery.steps.code.headingOtp': 'Enter your verification code',
+  'auth.passwordRecovery.steps.code.headingRecovery': 'Enter your recovery code',
+  'auth.passwordRecovery.steps.code.placeholderOtp': '000000',
+  'auth.passwordRecovery.steps.code.placeholderRecovery': 'ABCDEFGHJK',
+  'auth.passwordRecovery.steps.email.emailErrorEmpty': 'Please enter your email address.',
+  'auth.passwordRecovery.steps.email.emailErrorInvalid': 'The email is not in a valid format.',
+  'auth.passwordRecovery.steps.email.heading': 'Recover your account',
+  'auth.passwordRecovery.steps.email.subtitle':
+    "We'll start with your email. We'll show you the recovery options available.",
+  'auth.passwordRecovery.steps.method.email.description':
+    "We'll send a 6-digit code to your email.",
+  'auth.passwordRecovery.steps.method.email.title': 'Email address',
+  'auth.passwordRecovery.steps.method.heading': 'Choose how to verify',
+  'auth.passwordRecovery.steps.method.recoveryCode.description':
+    'Enter one of the 10-character codes you saved when you activated 2FA.',
+  'auth.passwordRecovery.steps.method.recoveryCode.title': 'Recovery code',
+  'auth.passwordRecovery.steps.method.subtitleTemplate':
+    'For {email} you have {count} recovery options:',
+  'auth.passwordRecovery.steps.method.totp.description':
+    'Enter the 6-digit code from your authenticator app.',
+  'auth.passwordRecovery.steps.method.totp.title': 'Authenticator app',
+  'auth.passwordRecovery.steps.password.confirmLabel': 'Repeat password',
+  'auth.passwordRecovery.steps.password.heading': 'Create your new password',
+  'auth.passwordRecovery.steps.password.matchHint': 'Passwords match.',
+  'auth.passwordRecovery.steps.password.minLength': 'At least 12 characters',
+  'auth.passwordRecovery.steps.password.number': 'At least one number',
+  'auth.passwordRecovery.steps.password.statusMet': 'OK',
+  'auth.passwordRecovery.steps.password.statusUnmet': '-',
+  'auth.passwordRecovery.steps.password.subtitle':
+    'Pick a strong password. You will need it to sign in.',
+  'auth.passwordRecovery.steps.password.upperLower': 'One uppercase and one lowercase letter',
+  'auth.passwordRecovery.success.redirecting': 'Password reset. Redirecting to sign in...',
+
   'auth.twoFactor.title': 'Two-step verification',
   'auth.twoFactor.heading': 'Verify your identity',
   'auth.twoFactor.subtitle':
