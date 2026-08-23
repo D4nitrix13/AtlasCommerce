@@ -51,7 +51,7 @@ export function WizardStepper({ steps, current, labels }: WizardStepperProps): R
         const isLast = index === steps.length - 1;
 
         return (
-          <div key={step} className="flex-1 flex items-center min-w-[140px]">
+          <div key={step} className="flex-1 min-w-0 flex items-center">
             <div className="flex flex-col items-center gap-1.5 w-full min-w-0">
               <div
                 aria-current={isCurrent ? 'step' : undefined}
@@ -71,7 +71,7 @@ export function WizardStepper({ steps, current, labels }: WizardStepperProps): R
               </div>
               <span
                 className={
-                  'text-xs text-center max-w-full leading-tight break-words px-1 ' +
+                  'text-xs text-center max-w-full leading-tight whitespace-normal px-1 ' +
                   (isCurrent
                     ? 'font-medium text-[#2D9D8E]'
                     : isComplete
