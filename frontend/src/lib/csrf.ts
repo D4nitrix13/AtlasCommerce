@@ -24,12 +24,32 @@ const CSRF_ENDPOINT = '/sanctum/csrf-cookie';
 let cachedToken: string | null = null;
 
 /**
- * Lee `cachedToken` — usado por `api.ts` para inyectar X-XSRF-TOKEN.
+ * Lee el XSRF-TOKEN que Sanctum emite como cookie. Usado por `api.ts` para
+ * inyectar X-XSRF-TOKEN en POST/PUT/DELETE/PATCH.
  *
- * Devuelve `null` antes del primer `bootstrapCsrf()` o si el backend
- * no emitió la cookie (ej: response 4xx antes de Sanctum stateful).
+ * Fuente de verdad: `document.cookie` (lee SIEMPRE, sin cache). Esto es
+ * importante porque el cookie puede ser seteada por código que NO pasa
+ * por `bootstrapCsrf()` (ej: el script inline en AuthLayout.astro que
+ * hace `fetch('/sanctum/csrf-cookie')` directamente). Si cacheáramos,
+ * ese flujo alternativo no actualizaría el cache y `apiFetch` pensaría
+ * que no hay token.
+ *
+ * El cache (`cachedToken`) queda como optimization para evitar el
+ * parsing de `document.cookie` en cada POST, pero NO es source of truth.
+ *
+ * Devuelve `null` si Sanctum no emitió la cookie todavía (ej: primer
+ * load de página antes del script inline que llama al endpoint).
  */
 export function getXsrfToken(): string | null {
+  // Source of truth: document.cookie.
+  const fromCookie = readXsrfTokenFromCookie();
+  if (fromCookie !== null) {
+    // Update cache opportunistically (best-effort sync).
+    cachedToken = fromCookie;
+    return fromCookie;
+  }
+  // Fallback al cache en caso de que el cookie sea eliminado entre
+  // el bootstrap y el POST (raro, pero defensivo).
   return cachedToken;
 }
 
