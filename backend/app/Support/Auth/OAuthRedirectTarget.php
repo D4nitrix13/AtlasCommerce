@@ -19,6 +19,36 @@ namespace App\Support\Auth;
 final class OAuthRedirectTarget
 {
     /**
+     * Extrae el prefijo de locale de una ruta, si existe.
+     *
+     * Reglas:
+     *   - `/es/admin/auth/login`  → `es`
+     *   - `/en/account/auth/login` → `en`
+     *   - `/admin/auth/login`     → `null` (sin locale)
+     *   - `/`                     → `null`
+     *
+     * El locale válido es cualquier segmento de path de 2 letras
+     * lowercase que matchee uno de los locales configurados en
+     * `config('app.available_locales')` (default: `['es', 'en']`).
+     */
+    public static function extractLocaleFromPath(string $path): ?string
+    {
+        $availableLocales = (array) config(key: 'app.available_locales', default: ['es', 'en']);
+
+        if (! str_starts_with($path, '/')) {
+            return null;
+        }
+
+        $segments = explode('/', $path);
+        if (count($segments) >= 2
+            && in_array($segments[1], $availableLocales, strict: true)) {
+            return $segments[1];
+        }
+
+        return null;
+    }
+
+    /**
      * Quita el prefijo de locale de una ruta.
      *
      * Reglas:
@@ -32,7 +62,7 @@ final class OAuthRedirectTarget
      * `config('app.available_locales')` (default: `['es', 'en']`).
      *
      * @param  string  $path  Ruta absoluta del request path.
-     * @return string  Ruta sin el segmento de locale.
+     * @return string Ruta sin el segmento de locale.
      */
     public static function stripLocaleFromPath(string $path): string
     {
@@ -80,9 +110,16 @@ final class OAuthRedirectTarget
      * Combina `stripLocaleFromPath` + decisión admin/account según
      * el host. Usado por el controller en el catch block cuando
      * alguna `OAuthException` se dispara.
+     *
+     * IMPORTANTE: preserva el locale prefix del path original. Si el
+     * browser estaba en `/es/admin/auth/login` cuando inició el flow,
+     * el callback failure redirect vuelve a `/es/admin/auth/login`,
+     * no a `/admin/auth/login`. Sin esto, el browser concatena
+     * relativo y termina en `/es/admin/admin/auth/login` (404).
      */
     public static function fromRequest(string $originalPath, string $host): string
     {
+        $locale = self::extractLocaleFromPath($originalPath);
         $path = self::stripLocaleFromPath($originalPath);
         $loginSegment = self::isAdminHost(host: $host) ? '/admin/auth/login' : '/account/auth/login';
 
@@ -91,9 +128,11 @@ final class OAuthRedirectTarget
         // Si no (caso raro: redirect desde una URL arbitraria),
         // caemos al login del tenant del host.
         if (str_ends_with($path, '/admin/auth/login') || str_ends_with($path, '/account/auth/login')) {
-            return $path;
+            $result = $path;
+        } else {
+            $result = $loginSegment;
         }
 
-        return $loginSegment;
+        return $locale !== null ? '/'.$locale.$result : $result;
     }
 }

@@ -64,8 +64,18 @@ Route::middleware(['store.domain'])->group(function (): void {
     // Social login (Google + Facebook) — stub que devuelve 501 mientras
     // no esté instalado laravel/socialite. Ver SocialAuthController.
     Route::get('auth/social/{provider}/redirect', [SocialAuthController::class, 'redirect'])
+        ->middleware([
+            Illuminate\Cookie\Middleware\EncryptCookies::class,
+            Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            Illuminate\Session\Middleware\StartSession::class,
+        ])
         ->name('auth.social.redirect');
     Route::get('auth/social/{provider}/callback', [SocialAuthController::class, 'callback'])
+        ->middleware([
+            Illuminate\Cookie\Middleware\EncryptCookies::class,
+            Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            Illuminate\Session\Middleware\StartSession::class,
+        ])
         ->name('auth.social.callback');
 
     // Verificación TOTP cuando el login retorna '2fa_required'.

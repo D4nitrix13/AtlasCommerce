@@ -23,6 +23,35 @@ use Tests\TestCase;
 final class OAuthRedirectTargetTest extends TestCase
 {
     // ---------------------------------------------------------------------
+    // extractLocaleFromPath
+    // ---------------------------------------------------------------------
+
+    #[Test]
+    #[DataProvider('localeExtractCases')]
+    public function extract_locale_from_path(string $input, ?string $expected): void
+    {
+        $this->assertSame(expected: $expected, actual: OAuthRedirectTarget::extractLocaleFromPath($input));
+    }
+
+    /**
+     * @return array<string, array{string, ?string}>
+     */
+    public static function localeExtractCases(): array
+    {
+        return [
+            'es admin login' => ['/es/admin/auth/login', 'es'],
+            'en account login' => ['/en/account/auth/login', 'en'],
+            'no locale admin' => ['/admin/auth/login', null],
+            'no locale account' => ['/account/auth/login', null],
+            'root' => ['/', null],
+            'deep path with locale' => ['/es/some/deep/path', 'es'],
+            'deep path without locale' => ['/some/deep/path', null],
+            'unknown locale segment' => ['/xx/admin/auth/login', null],
+            'relative path' => ['relative/path', null],
+        ];
+    }
+
+    // ---------------------------------------------------------------------
     // stripLocaleFromPath
     // ---------------------------------------------------------------------
 
@@ -94,25 +123,40 @@ final class OAuthRedirectTargetTest extends TestCase
     // ---------------------------------------------------------------------
 
     #[Test]
-    public function from_request_preserves_admin_login_path(): void
+    public function from_request_preserves_admin_login_path_with_locale(): void
     {
         $result = OAuthRedirectTarget::fromRequest(
             originalPath: '/es/admin/auth/login',
             host: 'admin.panda-estampados.com',
         );
 
-        $this->assertSame(expected: '/admin/auth/login', actual: $result);
+        // El locale se preserva: si el browser estaba en /es/admin/auth/login,
+        // el callback failure redirect vuelve a la misma URL (no a /admin/auth/login
+        // que terminaría concatenado en /es/admin/admin/auth/login → 404).
+        $this->assertSame(expected: '/es/admin/auth/login', actual: $result);
     }
 
     #[Test]
-    public function from_request_preserves_account_login_path(): void
+    public function from_request_preserves_account_login_path_with_locale(): void
     {
         $result = OAuthRedirectTarget::fromRequest(
             originalPath: '/en/account/auth/login',
             host: 'kitsune.com',
         );
 
-        $this->assertSame(expected: '/account/auth/login', actual: $result);
+        $this->assertSame(expected: '/en/account/auth/login', actual: $result);
+    }
+
+    #[Test]
+    public function from_request_works_without_locale_prefix(): void
+    {
+        // Host sin locale en el routing (ej: ruta legacy `/admin/auth/login`).
+        $result = OAuthRedirectTarget::fromRequest(
+            originalPath: '/admin/auth/login',
+            host: 'admin.panda-estampados.com',
+        );
+
+        $this->assertSame(expected: '/admin/auth/login', actual: $result);
     }
 
     #[Test]
@@ -125,7 +169,7 @@ final class OAuthRedirectTargetTest extends TestCase
             host: 'admin.panda-estampados.com',
         );
 
-        $this->assertSame(expected: '/admin/auth/login', actual: $result);
+        $this->assertSame(expected: '/es/admin/auth/login', actual: $result);
     }
 
     #[Test]
@@ -136,6 +180,6 @@ final class OAuthRedirectTargetTest extends TestCase
             host: 'panda-estampados.com',
         );
 
-        $this->assertSame(expected: '/account/auth/login', actual: $result);
+        $this->assertSame(expected: '/es/account/auth/login', actual: $result);
     }
 }
