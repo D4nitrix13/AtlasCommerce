@@ -40,10 +40,10 @@ function resolveRecoveryHref(override: string | undefined): string {
   }
 
   if (typeof window === 'undefined') {
-    return '/admin/auth/login';
+    return '/auth/login';
   }
 
-  return withLocale('/admin/auth/login', stripLocaleFromPath(window.location.pathname).locale);
+  return withLocale('/auth/login', stripLocaleFromPath(window.location.pathname).locale);
 }
 export default function TwoFactorChallengeForm(props: TwoFactorChallengeFormProps): ReactElement {
   const { verifyTotpChallenge, setSession } = useAuth();

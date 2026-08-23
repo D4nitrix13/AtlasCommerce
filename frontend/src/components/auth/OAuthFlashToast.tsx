@@ -5,7 +5,7 @@ import { useTranslations } from '../../i18n';
 /**
  * Toast que muestra errores OAuth desde el callback del provider.
  *
- * El backend (PR 2b) hace `redirect()->to('/admin/auth/login?flash=oauth_xxx')`
+ * El backend (PR 2b) hace `redirect()->to('/auth/login?flash=oauth_xxx')`
  * en cada `OAuthException`. Este componente lee `?flash=` en mount,
  * muestra un toast con el i18n key `auth.login.error.{code}` y luego
  * strippea el query param vía `history.replaceState` (no reload).

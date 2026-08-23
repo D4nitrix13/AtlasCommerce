@@ -21,7 +21,7 @@ export default function AdminUserMenu(): ReactElement {
       // Preserva el locale en la URL post-logout.
       const localeMatch = window.location.pathname.match(/^\/(es|en)/);
       const localePrefix = localeMatch !== null ? localeMatch[0] : "/es";
-      window.location.href = `${localePrefix}/admin/auth/login`;
+      window.location.href = `${localePrefix}/auth/login`;
     }
   };
 

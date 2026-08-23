@@ -80,7 +80,7 @@ export default function LoginForm({
   };
 
   /**
-   * Construye la URL `/<locale>/admin/auth/2fa?token=<challengeId>`
+   * Construye la URL `/<locale>/auth/2fa?token=<challengeId>`
    * preservando el `?redirect=` original para volver al destino
    * correcto una vez verificado el código TOTP.
    */
@@ -88,7 +88,7 @@ export default function LoginForm({
     const params = new URLSearchParams(window.location.search);
     const currentRedirect = params.get('redirect') ?? '';
     const locale = stripLocaleFromPath(window.location.pathname).locale;
-    const target = withLocale('/admin/auth/2fa', locale);
+    const target = withLocale('/auth/2fa', locale);
     const qs = new URLSearchParams();
     qs.set('token', String(challengeId));
     if (currentRedirect !== '') {
@@ -120,30 +120,41 @@ export default function LoginForm({
         </div>
       )}
 
-      {/* Bloque social — Google + Facebook + divider. */}
+      {/* Bloque social — Google (activo) + Facebook (deshabilitado) en fila + divider. */}
       <div className="space-y-3">
-        <button
-          type="button"
-          data-auth-link="social-google"
-          onClick={() => {
-            window.location.assign('/api/auth/social/google/redirect');
-          }}
-          className={`w-full flex items-center justify-center gap-2 bg-[#${AUTH_ACCENT.primary.slice(1)}] hover:bg-[#${AUTH_ACCENT.hover.slice(1)}] text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#${AUTH_ACCENT.primary}]/25`}
-        >
-          <GoogleIcon className="size-5" />
-          <span>{t('auth.login.shell.google')}</span>
-        </button>
-        <button
-          type="button"
-          data-auth-link="social-facebook"
-          onClick={() => {
-            window.location.assign('/api/auth/social/facebook/redirect');
-          }}
-          className={`w-full flex items-center justify-center gap-2 bg-[#${AUTH_ACCENT.primary.slice(1)}] hover:bg-[#${AUTH_ACCENT.hover.slice(1)}] text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#${AUTH_ACCENT.primary}]/25`}
-        >
-          <FacebookIcon className="size-5" />
-          <span>{t('auth.login.shell.facebook')}</span>
-        </button>
+        <div className="flex gap-3">
+          {/* Google: activo. Backend OAuth listo y probado end-to-end
+              (config/services.php + SocialAuthController con `google`
+              en SUPPORTED_PROVIDERS, redirect URI registrada en Google
+              Cloud Console, session + state CSRF funcionando). */}
+          <button
+            type="button"
+            data-auth-link="social-google"
+            onClick={() => {
+              window.location.assign('/api/auth/social/google/redirect');
+            }}
+            className={`flex-1 flex items-center justify-center gap-2 bg-[#${AUTH_ACCENT.primary.slice(1)}] hover:bg-[#${AUTH_ACCENT.hover.slice(1)}] text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#${AUTH_ACCENT.primary}]/25`}
+          >
+            <GoogleIcon className="size-5" />
+            <span>{t('auth.login.shell.google')}</span>
+          </button>
+          {/* Facebook: deshabilitado temporalmente. El backend OAuth está
+              listo (provider en SUPPORTED_PROVIDERS) pero las credenciales
+              no están configuradas (Meta exige business verification
+              ~7-14 días). Cursor `not-allowed` + opacidad + sin onClick
+              → no dispara redirect. */}
+          <button
+            type="button"
+            data-auth-link="social-facebook"
+            disabled
+            aria-disabled="true"
+            title={t('auth.login.shell.facebookComingSoon')}
+            className={`flex-1 flex items-center justify-center gap-2 bg-[#${AUTH_ACCENT.primary.slice(1)}] text-white font-semibold py-2.5 rounded-lg transition opacity-50 cursor-not-allowed`}
+          >
+            <FacebookIcon className="size-5" />
+            <span>{t('auth.login.shell.facebook')}</span>
+          </button>
+        </div>
         <div className="flex items-center gap-3" aria-hidden="false">
           <span className="flex-1 h-px bg-slate-200" aria-hidden="true" />
           <span className="text-xs uppercase tracking-wide text-slate-500">
