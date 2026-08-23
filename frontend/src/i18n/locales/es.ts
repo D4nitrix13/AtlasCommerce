@@ -287,6 +287,71 @@ const es: Translations = {
   'auth.passwordRecovery.useTotp': 'Usar app autenticadora',
   'auth.passwordRecovery.changeEmail': 'Cambiar email',
 
+  // ─── forgot-password wizard (ForgotPasswordWizard) ─────────────────
+  'auth.passwordRecovery.buttons.continue': 'Continuar',
+  'auth.passwordRecovery.buttons.resetPassword': 'Restablecer contraseña',
+  'auth.passwordRecovery.buttons.resetting': 'Restableciendo...',
+  'auth.passwordRecovery.buttons.verifyCode': 'Verificar código',
+  'auth.passwordRecovery.buttons.verifying': 'Verificando...',
+  'auth.passwordRecovery.empty.backToStart': 'Volver al inicio',
+  'auth.passwordRecovery.empty.body':
+    'No encontramos métodos de recuperación para esta cuenta. Contactá a soporte.',
+  'auth.passwordRecovery.empty.heading': 'Sin métodos disponibles',
+  'auth.passwordRecovery.errors.challengeExpired':
+    'Sesión de recuperación expirada. Volvé a empezar.',
+  'auth.passwordRecovery.errors.challengeExpiredLate':
+    'La sesión de recuperación expiró. Volvé a empezar.',
+  'auth.passwordRecovery.errors.codeInvalid': 'El código es inválido.',
+  'auth.passwordRecovery.errors.emailSubmit':
+    'No pudimos verificar tu correo. Probá de nuevo.',
+  'auth.passwordRecovery.errors.genericFallback': 'Algo salió mal. Volvé a empezar.',
+  'auth.passwordRecovery.errors.methodRequired': 'Seleccioná un método de recuperación.',
+  'auth.passwordRecovery.errors.noMethodsBody':
+    'No encontramos métodos de recuperación para esta cuenta. Contactá a soporte.',
+  'auth.passwordRecovery.errors.noMethodsHeading': 'Sin métodos disponibles',
+  'auth.passwordRecovery.errors.reset': 'No pudimos restablecer la contraseña.',
+  'auth.passwordRecovery.stepper.code': 'Código',
+  'auth.passwordRecovery.stepper.email': 'Email',
+  'auth.passwordRecovery.stepper.method': 'Método',
+  'auth.passwordRecovery.stepper.password': 'Nueva contraseña',
+  'auth.passwordRecovery.steps.code.descriptionOtp':
+    'Es el código de 6 dígitos de tu authenticator app o el que recibiste por correo.',
+  'auth.passwordRecovery.steps.code.descriptionRecovery':
+    'Es uno de los códigos de 10 caracteres que guardaste al activar la verificación en dos pasos.',
+  'auth.passwordRecovery.steps.code.headingOtp': 'Ingresá tu código de verificación',
+  'auth.passwordRecovery.steps.code.headingRecovery': 'Ingresá tu código de respaldo',
+  'auth.passwordRecovery.steps.code.placeholderOtp': '000000',
+  'auth.passwordRecovery.steps.code.placeholderRecovery': 'ABCDEFGHJK',
+  'auth.passwordRecovery.steps.email.emailErrorEmpty': 'Ingresá tu correo electrónico.',
+  'auth.passwordRecovery.steps.email.emailErrorInvalid':
+    'El correo no tiene un formato válido.',
+  'auth.passwordRecovery.steps.email.heading': 'Recuperá tu cuenta',
+  'auth.passwordRecovery.steps.email.subtitle':
+    'Empezamos por tu correo. Te mostraremos las opciones de recuperación disponibles.',
+  'auth.passwordRecovery.steps.method.email.description':
+    'Te enviaremos un código de 6 dígitos a tu correo.',
+  'auth.passwordRecovery.steps.method.email.title': 'Correo electrónico',
+  'auth.passwordRecovery.steps.method.heading': 'Elegí cómo verificarte',
+  'auth.passwordRecovery.steps.method.recoveryCode.description':
+    'Ingresá uno de los códigos de 10 caracteres que guardaste al activar 2FA.',
+  'auth.passwordRecovery.steps.method.recoveryCode.title': 'Código de respaldo',
+  'auth.passwordRecovery.steps.method.subtitleTemplate':
+    'Para {email} tenés {count} opciones de recuperación:',
+  'auth.passwordRecovery.steps.method.totp.description':
+    'Ingresá el código de 6 dígitos de tu app de autenticación.',
+  'auth.passwordRecovery.steps.method.totp.title': 'Authenticator app',
+  'auth.passwordRecovery.steps.password.confirmLabel': 'Repetir contraseña',
+  'auth.passwordRecovery.steps.password.heading': 'Creá tu nueva contraseña',
+  'auth.passwordRecovery.steps.password.matchHint': 'Las contraseñas coinciden.',
+  'auth.passwordRecovery.steps.password.minLength': 'Al menos 12 caracteres',
+  'auth.passwordRecovery.steps.password.number': 'Al menos un número',
+  'auth.passwordRecovery.steps.password.statusMet': 'OK',
+  'auth.passwordRecovery.steps.password.statusUnmet': '-',
+  'auth.passwordRecovery.steps.password.subtitle':
+    'Elegí una contraseña segura. La necesitás para iniciar sesión.',
+  'auth.passwordRecovery.steps.password.upperLower': 'Una letra mayúscula y una minúscula',
+  'auth.passwordRecovery.success.redirecting': 'Contraseña restablecida. Redirigiendo al login...',
+
   'auth.twoFactor.title': 'Verificación en dos pasos',
   'auth.twoFactor.heading': 'Verificá tu identidad',
   'auth.twoFactor.subtitle':
