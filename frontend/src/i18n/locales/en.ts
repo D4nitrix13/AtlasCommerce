@@ -342,6 +342,8 @@ const en: Translations = {
   'auth.passwordRecovery.steps.password.confirmLabel': 'Repeat password',
   'auth.passwordRecovery.steps.password.heading': 'Create your new password',
   'auth.passwordRecovery.steps.password.matchHint': 'Passwords match.',
+  'auth.passwordRecovery.steps.password.showPassword': 'Show password',
+  'auth.passwordRecovery.steps.password.hidePassword': 'Hide password',
   'auth.passwordRecovery.steps.password.minLength': 'At least 12 characters',
   'auth.passwordRecovery.steps.password.number': 'At least one number',
   'auth.passwordRecovery.steps.password.statusMet': 'OK',
