@@ -178,7 +178,7 @@ class PasswordResetTokenController extends Controller
                 $response['available_methods'][] = 'totp';
             }
             if ($user->recoveryCodes()->whereNull('used_at')->exists()) {
-                $response['available_methods'][] = 'recovery_code';
+                $response['available_methods'][] = 'recovery_codes';
             }
         }
 
