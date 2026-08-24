@@ -88,12 +88,14 @@ const isReversed = side === "right";
 
   <main
     class:list={[
-      "flex items-center justify-center p-6 sm:p-12",
+      "flex items-center justify-center p-4 sm:p-8 lg:p-10",
       isReversed ? "order-2 lg:order-1" : "lg:order-2",
     ]}
   >
-    {/* max-w-2xl = ~672px (más ancho que max-w-md = 448px del original) */}
-    <div class="w-full max-w-2xl">
+    {/* max-w-4xl = ~896px: el form ocupa todo el ancho disponible sin
+        que el card se vea apretado en mobile/tablet. Antes max-w-2xl
+        (672px) limitaba el card a 448px en viewports chicos. */}
+    <div class="w-full max-w-4xl">
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-10">
         <div class="flex items-center gap-3 shrink-0">
           {brandLogo && (
