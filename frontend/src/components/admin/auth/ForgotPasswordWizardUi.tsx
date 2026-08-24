@@ -117,7 +117,7 @@ export function WizardFormContainer({
 }: WizardFormContainerProps): ReactElement {
   return (
     <div
-      className={`rounded-xl border border-slate-200 bg-white p-8 shadow-sm w-full max-w-xl ${className}`}
+      className={`rounded-xl border border-slate-200 bg-white p-8 shadow-sm w-full max-w-2xl ${className}`}
     >
       {children}
     </div>

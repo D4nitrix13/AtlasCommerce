@@ -310,7 +310,7 @@ export default function ForgotPasswordWizard({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full">
       <WizardStepper steps={STEP_ORDER} current={state.step} labels={stepLabels} />
       <WizardFormContainer>
         {state.isComplete && (
