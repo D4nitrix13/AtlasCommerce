@@ -312,12 +312,14 @@ export default function ForgotPasswordWizard({
   return (
     <div className="w-full">
       <WizardStepper steps={STEP_ORDER} current={state.step} labels={stepLabels} />
+      <div className="flex justify-center">
       <WizardFormContainer>
         {state.isComplete && (
           <WizardSuccessMessage message={t('auth.passwordRecovery.success.redirecting')} />
         )}
         {renderActiveStep()}
       </WizardFormContainer>
+      </div>
     </div>
   );
 }
