@@ -1,4 +1,5 @@
 import { useState, type ReactElement, type ChangeEvent } from 'react';
+import { Eye, EyeOff, Mail, Smartphone, KeyRound } from 'lucide-react';
 import {
   WizardButtonRow,
   WizardErrorMessage,
@@ -147,6 +148,21 @@ const METHOD_LABELS: Record<
 };
 
 /**
+ * Iconos SVG (lucide-react) por método. Cada uno es representativo:
+ * - email: sobre con @ (correo tradicional)
+ * - totp: smartphone con candado (authenticator app)
+ * - recovery_codes: llave con escudo (códigos de respaldo)
+ *
+ * Se renderizan en un círculo de color accent (teal) para consistencia
+ * con el resto del design system.
+ */
+const METHOD_ICONS: Record<AvailableMethod, ReactElement> = {
+  email: <Mail className="size-5" aria-hidden="true" />,
+  totp: <Smartphone className="size-5" aria-hidden="true" />,
+  recovery_codes: <KeyRound className="size-5" aria-hidden="true" />,
+};
+
+/**
  * Step 2 del wizard: cuando hay >1 método, el usuario elige cuál usar.
  * El `Wizard` se salta este step cuando hay 0 o 1 método disponible.
  */
@@ -187,8 +203,15 @@ export function MethodStep({
               }}
               className="w-full text-left p-4 rounded-lg border border-slate-200 hover:border-[#2D9D8E] hover:bg-[#2D9D8E]/5 transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
             >
-              <div className="font-semibold text-slate-900">{t(info.title)}</div>
-              <div className="text-sm text-slate-500 mt-0.5">{t(info.description)}</div>
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-9 h-9 rounded-full bg-[#E6F7F4] text-[#1E6F62] flex items-center justify-center">
+                  {METHOD_ICONS[method]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-slate-900">{t(info.title)}</div>
+                  <div className="text-sm text-slate-500 mt-0.5">{t(info.description)}</div>
+                </div>
+              </div>
             </button>
           );
         })}
@@ -347,6 +370,8 @@ export function PasswordStep({
   const { t } = useTranslations();
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   const minLengthOk = password.length >= PASSWORD_MIN_LENGTH;
   const upperLowerOk = /[A-Z]/.test(password) && /[a-z]/.test(password);
@@ -391,20 +416,36 @@ export function PasswordStep({
         <label htmlFor="wizard-password" className="block text-sm font-medium text-slate-700 mb-1.5">
           {t('auth.passwordRecovery.password.label')}
         </label>
-        <input
-          id="wizard-password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={PASSWORD_MIN_LENGTH}
-          placeholder={t('auth.passwordRecovery.password.placeholder')}
-          value={password}
-          onChange={(event) => {
-            setPassword(event.target.value);
-          }}
-          className={PASSWORD_INPUT_CLASS}
-        />
+        <div className="relative">
+          <input
+            id="wizard-password"
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            required
+            minLength={PASSWORD_MIN_LENGTH}
+            placeholder={t('auth.passwordRecovery.password.placeholder')}
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+            }}
+            className={PASSWORD_INPUT_CLASS}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setShowPassword(!showPassword);
+            }}
+            aria-label={t(showPassword ? 'auth.passwordRecovery.steps.password.hidePassword' : 'auth.passwordRecovery.steps.password.showPassword')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+          >
+            {showPassword ? (
+              <EyeOff size={20} strokeWidth={2} />
+            ) : (
+              <Eye size={20} strokeWidth={2} />
+            )}
+          </button>
+        </div>
       </div>
 
       <div>
@@ -414,20 +455,36 @@ export function PasswordStep({
         >
           {t('auth.passwordRecovery.steps.password.confirmLabel')}
         </label>
-        <input
-          id="wizard-password-confirm"
-          name="password_confirmation"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={PASSWORD_MIN_LENGTH}
-          placeholder={t('auth.passwordRecovery.password.confirmPlaceholder')}
-          value={confirmPassword}
-          onChange={(event) => {
-            setConfirmPassword(event.target.value);
-          }}
-          className={passwordsMatch ? PASSWORD_INPUT_MATCH_CLASS : PASSWORD_INPUT_CLASS}
-        />
+        <div className="relative">
+          <input
+            id="wizard-password-confirm"
+            name="password_confirmation"
+            type={showConfirmPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            required
+            minLength={PASSWORD_MIN_LENGTH}
+            placeholder={t('auth.passwordRecovery.password.confirmPlaceholder')}
+            value={confirmPassword}
+            onChange={(event) => {
+              setConfirmPassword(event.target.value);
+            }}
+            className={passwordsMatch ? PASSWORD_INPUT_MATCH_CLASS : PASSWORD_INPUT_CLASS}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setShowConfirmPassword(!showConfirmPassword);
+            }}
+            aria-label={t(showConfirmPassword ? 'auth.passwordRecovery.steps.password.hidePassword' : 'auth.passwordRecovery.steps.password.showPassword')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+          >
+            {showConfirmPassword ? (
+              <EyeOff size={20} strokeWidth={2} />
+            ) : (
+              <Eye size={20} strokeWidth={2} />
+            )}
+          </button>
+        </div>
         {passwordsMatch && (
           <p className="text-xs text-[#2D9D8E] mt-1.5">
             {t('auth.passwordRecovery.steps.password.matchHint')}
