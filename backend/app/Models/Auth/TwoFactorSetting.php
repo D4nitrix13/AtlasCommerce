@@ -32,8 +32,7 @@ use Illuminate\Support\Facades\Crypt;
  * @property \Illuminate\Support\Carbon|null $recovery_codes_generated_at
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- *
- * @property-read \App\Models\Auth\User $user
+ * @property-read User $user
  */
 class TwoFactorSetting extends Model
 {

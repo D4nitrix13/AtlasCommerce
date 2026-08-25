@@ -171,7 +171,7 @@ final class StoreFeatureFlagTest extends TestCase
         $this->assertDatabaseHas(table: 'store_features', data: [
             'store_id' => $this->store->id,
             'slug' => 'wholesale_pricing',
-            ]);
+        ]);
 
         $this->store->forceDelete();
 

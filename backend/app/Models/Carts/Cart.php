@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Carts;
 
 use App\Models\Concerns\BelongsToStore;
@@ -71,7 +73,7 @@ class Cart extends Model
 
     public function scopeNotExpired(Builder $query): Builder
     {
-        return $query->where(function ($q) {
+        return $query->where(function ($q): void {
             $q->whereNull('expires_at')
                 ->orWhere('expires_at', '>', now());
         });

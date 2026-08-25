@@ -7,6 +7,7 @@ namespace App\Http\Resources\Auth;
 use App\Exceptions\SocialAuth\OAuthException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Throwable;
 
 /**
  * Envelope uniforme para errores del flujo OAuth.
@@ -21,7 +22,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   return new OAuthErrorResource($e);                    // equivalente
  *   return OAuthErrorResource::make($genericThrowable);    // fallback genérico
  *
- * @property-read \Throwable $resource
+ * @property-read Throwable $resource
  */
 class OAuthErrorResource extends JsonResource
 {
@@ -32,7 +33,7 @@ class OAuthErrorResource extends JsonResource
      * `extras()`. Para cualquier otra, devuelve un envelope genérico
      * con código `oauth_error` y mensaje sanitizado.
      */
-    public static function from(\Throwable $e): self
+    public static function from(Throwable $e): self
     {
         return new self($e);
     }

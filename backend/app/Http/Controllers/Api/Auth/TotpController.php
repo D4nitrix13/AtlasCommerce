@@ -85,10 +85,10 @@ class TotpController extends Controller
         // del código TOTP. Aunque TotpService valida ventana ±1 step,
         // un atacante con acceso a la sesión podría iterar códigos
         // random sin disparar el per-challenge MAX_ATTEMPTS.
-        $verifyKey = 'totp-verify:' . $request->ip();
+        $verifyKey = 'totp-verify:'.$request->ip();
         if (RateLimiter::tooManyAttempts(key: $verifyKey, maxAttempts: 10)) {
             throw ValidationException::withMessages([
-                'code' => ['Demasiados intentos. Probá de nuevo en ' . RateLimiter::availableIn(key: $verifyKey) . ' segundos.'],
+                'code' => ['Demasiados intentos. Probá de nuevo en '.RateLimiter::availableIn(key: $verifyKey).' segundos.'],
             ]);
         }
         RateLimiter::hit(key: $verifyKey, decaySeconds: 300);

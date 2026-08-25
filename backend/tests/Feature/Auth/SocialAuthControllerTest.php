@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth;
 
-use App\Http\Resources\Auth\OAuthErrorResource;
 use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;

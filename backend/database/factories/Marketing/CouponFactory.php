@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Marketing;
 
 use App\Models\Marketing\Coupon;

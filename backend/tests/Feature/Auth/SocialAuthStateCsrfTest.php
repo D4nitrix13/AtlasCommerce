@@ -10,7 +10,6 @@ use App\Models\Stores\StoreDomain;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Support\MocksSocialite;
@@ -78,7 +77,8 @@ final class SocialAuthStateCsrfTest extends TestCase
             ->andReturnUsing(function () {
                 $driver = Mockery::mock();
                 $driver->shouldReceive('user')
-                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException());
+                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException);
+
                 return $driver;
             });
         \Laravel\Socialite\Facades\Socialite::swap($manager);
@@ -107,7 +107,8 @@ final class SocialAuthStateCsrfTest extends TestCase
             ->andReturnUsing(function () {
                 $driver = Mockery::mock();
                 $driver->shouldReceive('user')
-                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException());
+                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException);
+
                 return $driver;
             });
         \Laravel\Socialite\Facades\Socialite::swap($manager);

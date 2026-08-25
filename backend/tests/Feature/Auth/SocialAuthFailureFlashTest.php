@@ -79,7 +79,8 @@ final class SocialAuthFailureFlashTest extends TestCase
             ->andReturnUsing(function () {
                 $driver = Mockery::mock();
                 $driver->shouldReceive('user')
-                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException());
+                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException);
+
                 return $driver;
             });
         \Laravel\Socialite\Facades\Socialite::swap($manager);
@@ -123,7 +124,8 @@ final class SocialAuthFailureFlashTest extends TestCase
             ->andReturnUsing(function () {
                 $driver = Mockery::mock();
                 $driver->shouldReceive('user')
-                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException());
+                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException);
+
                 return $driver;
             });
         \Laravel\Socialite\Facades\Socialite::swap($manager);
@@ -157,7 +159,8 @@ final class SocialAuthFailureFlashTest extends TestCase
             ->andReturnUsing(function () {
                 $driver = Mockery::mock();
                 $driver->shouldReceive('user')
-                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException());
+                    ->andThrow(new \Laravel\Socialite\Two\InvalidStateException);
+
                 return $driver;
             });
         \Laravel\Socialite\Facades\Socialite::swap($manager);
