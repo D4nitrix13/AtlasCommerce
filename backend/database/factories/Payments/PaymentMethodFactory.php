@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Payments;
 
 use App\Models\Payments\PaymentMethod;

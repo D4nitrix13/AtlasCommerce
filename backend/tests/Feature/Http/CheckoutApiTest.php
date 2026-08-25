@@ -70,7 +70,7 @@ final class CheckoutApiTest extends TestCase
             'cart_id' => $cart->id,
             'shipping_address_id' => 1,
             'payment_method_id' => $this->paymentMethod->id,
-])->assertUnauthorized();
+        ])->assertUnauthorized();
     }
 
     #[Test]
@@ -98,7 +98,7 @@ final class CheckoutApiTest extends TestCase
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
             'notes' => 'Por favor envolver para regalo.',
-            ]);
+        ]);
 
         $response->assertCreated();
         $response->assertJsonPath('data.status', 'pending');
@@ -116,7 +116,7 @@ final class CheckoutApiTest extends TestCase
             'store_id' => $this->store->id,
             'status' => 'pending',
             'total_cents' => 6000,
-            ]);
+        ]);
 
         // La invoice queda con payment_status pending (el pago se crea aparte).
         $invoice = Invoice::where('order_id', $orderId)->firstOrFail();
@@ -134,7 +134,7 @@ final class CheckoutApiTest extends TestCase
             'unit_price_cents' => 3000,
             'subtotal_cents' => 6000,
             'product_name_snapshot' => 'Camiseta Anime',
-            ]);
+        ]);
 
         // Invoice items también replican.
         $this->assertDatabaseCount(table: 'invoice_items', count: 1);
@@ -143,13 +143,13 @@ final class CheckoutApiTest extends TestCase
             'product_id' => $product->id,
             'quantity' => 2,
             'unit_price_cents' => 3000,
-            ]);
+        ]);
 
         // Cart queda convertido.
         $this->assertDatabaseHas(table: 'carts', data: [
             'id' => $cart->id,
             'status' => 'converted',
-            ]);
+        ]);
     }
 
     #[Test]
@@ -164,7 +164,7 @@ final class CheckoutApiTest extends TestCase
             'cart_id' => $cart->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
-])->assertStatus(500);
+        ])->assertStatus(500);
     }
 
     #[Test]
@@ -185,7 +185,7 @@ final class CheckoutApiTest extends TestCase
             'cart_id' => $cart->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
-])->assertForbidden();
+        ])->assertForbidden();
     }
 
     #[Test]
@@ -205,7 +205,7 @@ final class CheckoutApiTest extends TestCase
             'cart_id' => $cart->id,
             'shipping_address_id' => $foreignAddress->id,
             'payment_method_id' => $this->paymentMethod->id,
-])->assertForbidden();
+        ])->assertForbidden();
     }
 
     #[Test]
@@ -256,7 +256,7 @@ final class CheckoutApiTest extends TestCase
             'cart_id' => $otherCart->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
-])->assertForbidden();
+        ])->assertForbidden();
 
         // La orden NO se creó.
         $this->assertDatabaseCount(table: 'orders', count: 0);

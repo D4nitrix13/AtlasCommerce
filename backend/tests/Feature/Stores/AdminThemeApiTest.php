@@ -119,7 +119,7 @@ final class AdminThemeApiTest extends TestCase
             'store_id' => $this->store->id,
             'short_name' => 'Panda',
             'accent_color' => '#DC2626',
-            ]);
+        ]);
     }
 
     #[Test]
@@ -144,7 +144,7 @@ final class AdminThemeApiTest extends TestCase
             'store_id' => $this->store->id,
             'short_name' => 'New Name',
             'accent_color' => '#FFFFFF',
-            ]);
+        ]);
     }
 
     #[Test]

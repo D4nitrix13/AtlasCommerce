@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Inventory;
 
 use App\Models\Inventory\Warehouse;

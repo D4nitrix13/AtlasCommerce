@@ -92,11 +92,11 @@ final class MoneyFoundationTest extends TestCase
         // deben devolver null al intentar accederlas y NUNCA escribir.
         $this->assertFalse(
             Schema::hasColumn('invoices', 'paid_amount'),
-            'La columna paid_amount debe estar eliminada.'
+            'La columna paid_amount debe estar eliminada.',
         );
         $this->assertFalse(
             Schema::hasColumn('invoices', 'pending_balance'),
-            'La columna pending_balance debe estar eliminada.'
+            'La columna pending_balance debe estar eliminada.',
         );
     }
 

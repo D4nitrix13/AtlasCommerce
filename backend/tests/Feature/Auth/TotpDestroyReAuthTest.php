@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\Auth;
 
 use App\Models\Auth\OtpChallenge;
-use App\Models\Auth\Permission;
 use App\Models\Auth\Role;
 use App\Models\Auth\TwoFactorSetting;
 use App\Models\Auth\User;
@@ -108,18 +107,18 @@ final class TotpDestroyReAuthTest extends TestCase
             $bitsLeft += 5;
             if ($bitsLeft >= 8) {
                 $bitsLeft -= 8;
-                $output .= chr(($buffer >> $bitsLeft) & 0xff);
+                $output .= chr(($buffer >> $bitsLeft) & 0xFF);
             }
         }
         $step ??= intdiv(num1: time(), num2: TotpService::STEP_SECONDS);
         $counter = pack('N*', 0, $step);
         $hash = hash_hmac(algo: 'sha1', data: $counter, key: $output, binary: true);
-        $offset = ord($hash[19]) & 0xf;
+        $offset = ord($hash[19]) & 0xF;
         $code = (
-            ((ord($hash[$offset]) & 0x7f) << 24)
-            | ((ord($hash[$offset + 1]) & 0xff) << 16)
-            | ((ord($hash[$offset + 2]) & 0xff) << 8)
-            | (ord($hash[$offset + 3]) & 0xff)
+            ((ord($hash[$offset]) & 0x7F) << 24)
+            | ((ord($hash[$offset + 1]) & 0xFF) << 16)
+            | ((ord($hash[$offset + 2]) & 0xFF) << 8)
+            | (ord($hash[$offset + 3]) & 0xFF)
         ) % (10 ** TotpService::DIGITS);
 
         return str_pad(

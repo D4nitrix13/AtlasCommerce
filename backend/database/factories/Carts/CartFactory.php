@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Carts;
 
 use App\Models\Carts\Cart;

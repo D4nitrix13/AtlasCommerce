@@ -77,7 +77,7 @@ final class AuthHttpTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'secret-password',
             'device_name' => 'jest-test',
-            ]);
+        ]);
 
         $response->assertOk();
         $response->assertJsonStructure([
@@ -106,7 +106,7 @@ final class AuthHttpTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'wrong-password',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
@@ -118,7 +118,7 @@ final class AuthHttpTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'unknown@example.com',
             'password' => 'secret-password',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
@@ -132,7 +132,7 @@ final class AuthHttpTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonPath('errors.email.0', fn (string $m): bool => str_contains($m, 'desactivada'));
@@ -144,7 +144,7 @@ final class AuthHttpTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'not-an-email',
             'password' => 'secret-password',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
@@ -156,7 +156,7 @@ final class AuthHttpTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'short',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['password']);
@@ -211,7 +211,7 @@ final class AuthHttpTest extends TestCase
         $response = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
-            ]);
+        ]);
 
         $response->assertOk();
         $this->assertNotEmpty($response->json('token'));
@@ -303,7 +303,7 @@ final class AuthHttpTest extends TestCase
             'last_name' => 'User',
             'email' => 'new-admin@example.com',
             'password' => 'Secure-Pass-2026',
-            ]);
+        ]);
 
         $response->assertStatus(404);
     }

@@ -15,7 +15,6 @@ use App\Http\Resources\Auth\OAuthErrorResource;
 use App\Models\Auth\SocialAccount;
 use App\Models\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;

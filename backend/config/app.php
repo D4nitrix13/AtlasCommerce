@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -101,7 +103,7 @@ return [
 
     'previous_keys' => [
         ...array_filter(
-            array: explode(separator: ',', string: (string) env(key: 'APP_PREVIOUS_KEYS', default: ''))
+            array: explode(separator: ',', string: (string) env(key: 'APP_PREVIOUS_KEYS', default: '')),
         ),
     ],
 

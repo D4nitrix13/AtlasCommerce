@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Sales;
 
 use App\Models\Customers\Customer;

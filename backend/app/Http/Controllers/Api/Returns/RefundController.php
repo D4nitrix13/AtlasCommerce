@@ -14,6 +14,7 @@ use App\Services\Returns\RefundService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use RuntimeException;
 
 /**
  * Controlador API para gestionar reembolsos.
@@ -71,7 +72,7 @@ class RefundController extends Controller
                 amountCents: (int) $request->input('amount_cents'),
                 paymentMethod: $paymentMethod,
             );
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             return response()->json(data: ['message' => $e->getMessage()], status: 422);
         }
 
@@ -84,7 +85,7 @@ class RefundController extends Controller
     {
         try {
             $updated = $this->service->process(refund: $refund);
-        } catch (InvalidRefundTransitionException|\RuntimeException $e) {
+        } catch (InvalidRefundTransitionException|RuntimeException $e) {
             return response()->json(data: ['message' => $e->getMessage()], status: 422);
         }
 

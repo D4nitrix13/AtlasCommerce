@@ -15,7 +15,6 @@ use App\Models\Stores\Store;
 use App\Services\Auth\SocialAccountService;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -230,7 +229,7 @@ final class SocialAccountServiceFullTest extends TestCase
         // el store context devuelve un store_id inexistente.
         // `id` no está en fillable de Store — usamos setRawAttributes
         // para bypassear y setear el id sin persistir.
-        $ghostStore = new Store();
+        $ghostStore = new Store;
         $ghostStore->setRawAttributes(['id' => 999999]);
         $this->app->make(StoreContextService::class)->setStore($ghostStore);
 
@@ -385,7 +384,7 @@ final class SocialAccountServiceFullTest extends TestCase
         string $name = 'Test User',
         string $provider = 'google',
     ): SocialiteUser {
-        $user = new SocialiteUser();
+        $user = new SocialiteUser;
         $user->id = $providerId;
         $user->nickname = null;
         $user->name = $name;

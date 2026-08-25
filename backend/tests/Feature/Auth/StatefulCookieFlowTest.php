@@ -73,7 +73,7 @@ final class StatefulCookieFlowTest extends TestCase
         // /auth/logout no pueden autenticar vía cookie de sesión porque
         // la sesión se pierde entre requests.
         config(['session.driver' => 'file']);
-        $sessionDir = sys_get_temp_dir() . '/sanctum-stateful-test-sessions';
+        $sessionDir = sys_get_temp_dir().'/sanctum-stateful-test-sessions';
         if (! is_dir($sessionDir)) {
             mkdir($sessionDir, 0777, true);
         }
@@ -132,9 +132,9 @@ final class StatefulCookieFlowTest extends TestCase
     protected function tearDown(): void
     {
         // Limpiar archivos de sesión temporales para no acumular cruft.
-        $dir = sys_get_temp_dir() . '/sanctum-stateful-test-sessions';
+        $dir = sys_get_temp_dir().'/sanctum-stateful-test-sessions';
         if (is_dir($dir)) {
-            array_map(unlink(...), glob($dir . '/*') ?: []);
+            array_map(unlink(...), glob($dir.'/*') ?: []);
             @rmdir($dir);
         }
 
@@ -153,7 +153,7 @@ final class StatefulCookieFlowTest extends TestCase
     private function bootstrapCsrf(string $origin = 'http://panda-estampados.test'): array
     {
         $response = $this->withHeaders(['Origin' => $origin])
-            ->get(uri: $origin . '/sanctum/csrf-cookie');
+            ->get(uri: $origin.'/sanctum/csrf-cookie');
 
         $cookies = [];
         foreach ($response->headers->getCookies() as $cookie) {

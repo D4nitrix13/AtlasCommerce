@@ -174,6 +174,7 @@ class User extends Authenticatable
     public function hasTwoFactorEnabled(): bool
     {
         $setting = $this->twoFactorSetting;
+
         return $setting !== null && $setting->isEnabled();
     }
 

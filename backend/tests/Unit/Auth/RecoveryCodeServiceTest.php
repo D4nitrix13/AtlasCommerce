@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Auth;
 
-use App\Models\Auth\RecoveryCode;
 use App\Models\Auth\User;
 use App\Services\Auth\RecoveryCodeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 /**
@@ -22,7 +22,7 @@ final class RecoveryCodeServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new RecoveryCodeService();
+        $this->service = new RecoveryCodeService;
     }
 
     public function test_generate_creates_default_count_codes(): void
@@ -48,7 +48,7 @@ final class RecoveryCodeServiceTest extends TestCase
     public function test_generate_rejects_invalid_count(): void
     {
         $user = User::factory()->create();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->service->generateFor(user: $user, count: 0);
     }
 

@@ -48,10 +48,10 @@ class AuthController extends Controller
         // Throttle IP+email: bloquea 6to intento dentro de 5 min.
         // Aplica ANTES de validar credenciales para no leak info
         // (no diferencia entre email inexistente y password incorrecto).
-        $loginKey = 'login:' . $request->input(key: 'email') . '|' . $request->ip();
+        $loginKey = 'login:'.$request->input(key: 'email').'|'.$request->ip();
         if (RateLimiter::tooManyAttempts(key: $loginKey, maxAttempts: 5)) {
             throw ValidationException::withMessages([
-                'email' => ['Demasiados intentos. Probá de nuevo en ' . RateLimiter::availableIn(key: $loginKey) . ' segundos.'],
+                'email' => ['Demasiados intentos. Probá de nuevo en '.RateLimiter::availableIn(key: $loginKey).' segundos.'],
             ]);
         }
 
@@ -103,6 +103,7 @@ class AuthController extends Controller
             ]);
             // Limpia el contador: el password es válido, no fue un ataque.
             RateLimiter::clear(key: $loginKey);
+
             return response()->json(data: [
                 'status' => '2fa_required',
                 'challenge_token' => $challenge->id,
@@ -146,10 +147,10 @@ class AuthController extends Controller
         // ±1 step × ventanas de 30s en 5 min). Aplica ANTES de validar
         // challenge para que un atacante no pueda evadir el throttle
         // pidiendo challenges nuevos.
-        $ipKey = 'verify-totp-login:' . $request->ip();
+        $ipKey = 'verify-totp-login:'.$request->ip();
         if (RateLimiter::tooManyAttempts(key: $ipKey, maxAttempts: 10)) {
             throw ValidationException::withMessages([
-                'code' => ['Demasiados intentos. Probá de nuevo en ' . RateLimiter::availableIn(key: $ipKey) . ' segundos.'],
+                'code' => ['Demasiados intentos. Probá de nuevo en '.RateLimiter::availableIn(key: $ipKey).' segundos.'],
             ]);
         }
         // Cuenta el intento actual. Hit ANTES de validar challenge para
@@ -176,6 +177,7 @@ class AuthController extends Controller
         if (! $totp->verify($user, $request->input(key: 'code'))) {
             $challenge->attempts++;
             $challenge->save();
+
             return response()->json(data: ['message' => 'Código inválido.'], status: 422);
         }
 

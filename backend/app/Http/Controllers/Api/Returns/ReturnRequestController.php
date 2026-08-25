@@ -13,6 +13,7 @@ use App\Services\Returns\ReturnRequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use RuntimeException;
 
 /**
  * Controlador API para gestionar solicitudes de devolución.
@@ -71,7 +72,7 @@ class ReturnRequestController extends Controller
                 items: $request->input('items'),
                 customerId: $request->input('customer_id'),
             );
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             return response()->json(data: ['message' => $e->getMessage()], status: 422);
         }
 

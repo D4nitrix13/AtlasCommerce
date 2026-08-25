@@ -15,9 +15,9 @@ use App\Support\Auth\OAuthRedirectTarget;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as ProviderUserContract;
+use RuntimeException;
 
 /**
  * Resuelve la identidad OAuth contra el modelo interno.
@@ -168,7 +168,7 @@ class SocialAccountService
             if ($storeId === null) {
                 // Sin tenant context el binding falla — propagamos
                 // como RuntimeException para que el controller decida.
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     message: 'Store context no resuelto — el middleware store.domain no se ejecutó antes del callback OAuth.',
                 );
             }
