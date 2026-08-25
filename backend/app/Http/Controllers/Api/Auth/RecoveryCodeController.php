@@ -40,6 +40,7 @@ class RecoveryCodeController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
+
         return response()->json(data: [
             'unused_count' => $this->service->availableCount($user),
         ], status: 200);
@@ -55,10 +56,10 @@ class RecoveryCodeController extends Controller
         // Previene abuso en caso de sesión comprometida: regenerar
         // invalida los codes anteriores, lo que sería destructivo si
         // se hace muchas veces seguidas.
-        $regenKey = 'recovery-codes:' . $request->user()?->id . '|' . $request->ip();
+        $regenKey = 'recovery-codes:'.$request->user()?->id.'|'.$request->ip();
         if (RateLimiter::tooManyAttempts(key: $regenKey, maxAttempts: 5)) {
             throw ValidationException::withMessages([
-                'count' => ['Demasiados intentos. Probá de nuevo en ' . RateLimiter::availableIn(key: $regenKey) . ' segundos.'],
+                'count' => ['Demasiados intentos. Probá de nuevo en '.RateLimiter::availableIn(key: $regenKey).' segundos.'],
             ]);
         }
         RateLimiter::hit(key: $regenKey, decaySeconds: 3600);

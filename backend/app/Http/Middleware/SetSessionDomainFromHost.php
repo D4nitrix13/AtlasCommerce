@@ -63,7 +63,7 @@ final class SetSessionDomainFromHost
         $etld1 = $this->resolveEtld1(host: $host);
 
         if ($etld1 !== null) {
-            config(['session.domain' => '.' . $etld1]);
+            config(['session.domain' => '.'.$etld1]);
         }
 
         return $next($request);
@@ -81,7 +81,7 @@ final class SetSessionDomainFromHost
         }
 
         foreach (self::ETLD1S as $etld1) {
-            if ($host === $etld1 || str_ends_with(haystack: $host, needle: '.' . $etld1)) {
+            if ($host === $etld1 || str_ends_with(haystack: $host, needle: '.'.$etld1)) {
                 return $etld1;
             }
         }

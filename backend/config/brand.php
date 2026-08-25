@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Logo fallback cuando la tienda no tiene logo propio
     'default_logo_path' => env(key: 'BRAND_DEFAULT_LOGO_PATH', default: 'images/shared/brand/app-logo.webp'),

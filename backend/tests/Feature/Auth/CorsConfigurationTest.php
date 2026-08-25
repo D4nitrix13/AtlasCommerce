@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Http\Request;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +40,7 @@ final class CorsConfigurationTest extends TestCase
         array $extraServer = [],
     ): Request {
         return Request::create(
-            uri: $origin . $path,
+            uri: $origin.$path,
             method: 'OPTIONS',
             server: array_merge([
                 'HTTP_ORIGIN' => $origin,

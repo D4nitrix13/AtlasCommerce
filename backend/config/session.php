@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Str;
 
 return [
@@ -129,7 +131,7 @@ return [
 
     'cookie' => env(
         key: 'SESSION_COOKIE',
-        default: Str::slug(title: (string) env(key: 'APP_NAME', default: 'laravel')).'-session'
+        default: Str::slug(title: (string) env(key: 'APP_NAME', default: 'laravel')).'-session',
     ),
 
     /*

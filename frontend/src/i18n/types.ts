@@ -310,6 +310,8 @@ export type TranslationKey =
   | 'auth.passwordRecovery.steps.password.confirmLabel'
   | 'auth.passwordRecovery.steps.password.heading'
   | 'auth.passwordRecovery.steps.password.matchHint'
+  | 'auth.passwordRecovery.steps.password.showPassword'
+  | 'auth.passwordRecovery.steps.password.hidePassword'
   | 'auth.passwordRecovery.steps.password.minLength'
   | 'auth.passwordRecovery.steps.password.number'
   | 'auth.passwordRecovery.steps.password.statusMet'

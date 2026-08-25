@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth;
 
-use App\Models\Auth\Permission;
 use App\Models\Auth\Role;
 use App\Models\Auth\TwoFactorSetting;
 use App\Models\Auth\User;

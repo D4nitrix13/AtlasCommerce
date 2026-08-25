@@ -74,7 +74,7 @@ final class PasswordResetFlowTest extends TestCase
 
         $response = $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'jane@example.com',
-            ]);
+        ]);
 
         $response->assertOk();
         $response->assertJsonStructure(['message', 'expires_minutes', 'code', 'dev']);
@@ -87,7 +87,7 @@ final class PasswordResetFlowTest extends TestCase
             'user_id' => $this->user->id,
             'email' => 'jane@example.com',
             'used_at' => null,
-            ]);
+        ]);
 
         // Email enviado (fake de Notification).
         Notification::assertSentTo(
@@ -103,7 +103,7 @@ final class PasswordResetFlowTest extends TestCase
 
         $response = $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'noexiste@example.com',
-            ]);
+        ]);
 
         $response->assertOk();
         $response->assertJsonStructure(['message', 'expires_minutes']);
@@ -122,7 +122,7 @@ final class PasswordResetFlowTest extends TestCase
 
         $response = $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'jane@example.com',
-            ]);
+        ]);
 
         $response->assertOk();
         $response->assertJsonMissing(['code']);
@@ -140,7 +140,7 @@ final class PasswordResetFlowTest extends TestCase
 
         $response = $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'jane@example.com',
-            ]);
+        ]);
 
         $response->assertOk();
         $response->assertJsonMissing(['code']);
@@ -161,7 +161,7 @@ final class PasswordResetFlowTest extends TestCase
 
         $response = $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'jane@example.com',
-            ]);
+        ]);
 
         $response->assertOk();
 
@@ -188,12 +188,12 @@ final class PasswordResetFlowTest extends TestCase
         for ($i = 0; $i < 3; $i++) {
             $this->postJson(uri: '/api/auth/forgot-password', data: [
                 'email' => 'jane@example.com',
-])->assertOk();
+            ])->assertOk();
         }
 
         $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'jane@example.com',
-])->assertStatus(422)
+        ])->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
     }
 
@@ -202,7 +202,7 @@ final class PasswordResetFlowTest extends TestCase
     {
         $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'not-an-email',
-])->assertStatus(422)
+        ])->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
     }
 
@@ -223,7 +223,7 @@ final class PasswordResetFlowTest extends TestCase
             'password' => 'NewPassword1234',
             'password_confirmation' => 'NewPassword1234',
             'device_name' => 'web-admin',
-            ]);
+        ]);
 
         $response->assertOk();
         $response->assertJsonStructure(['token', 'user' => ['id', 'email']]);
@@ -251,7 +251,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => '000000',
             'password' => 'NewPassword1234',
             'password_confirmation' => 'NewPassword1234',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['code']);
@@ -272,7 +272,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => '654321',
             'password' => 'NewPassword1234',
             'password_confirmation' => 'NewPassword1234',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['code']);
@@ -295,7 +295,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => $code,
             'password' => 'NewPassword1234',
             'password_confirmation' => 'NewPassword1234',
-            ]);
+        ]);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['code']);
@@ -318,7 +318,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => $code,
             'password' => 'Short1',
             'password_confirmation' => 'Short1',
-])->assertStatus(422)->assertJsonValidationErrors(['password']);
+        ])->assertStatus(422)->assertJsonValidationErrors(['password']);
 
         // Sin mayúscula.
         $this->postJson(uri: '/api/auth/reset-password', data: [
@@ -326,7 +326,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => $code,
             'password' => 'alllowercase1234',
             'password_confirmation' => 'alllowercase1234',
-])->assertStatus(422)->assertJsonValidationErrors(['password']);
+        ])->assertStatus(422)->assertJsonValidationErrors(['password']);
 
         // Sin número.
         $this->postJson(uri: '/api/auth/reset-password', data: [
@@ -334,7 +334,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => $code,
             'password' => 'AllUpperCaseOnly',
             'password_confirmation' => 'AllUpperCaseOnly',
-])->assertStatus(422)->assertJsonValidationErrors(['password']);
+        ])->assertStatus(422)->assertJsonValidationErrors(['password']);
 
         // Passwords no coinciden.
         $this->postJson(uri: '/api/auth/reset-password', data: [
@@ -342,7 +342,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => $code,
             'password' => 'NewPassword1234',
             'password_confirmation' => 'OtherPassword1234',
-])->assertStatus(422)->assertJsonValidationErrors(['password']);
+        ])->assertStatus(422)->assertJsonValidationErrors(['password']);
     }
 
     #[Test]
@@ -353,7 +353,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => '12345', // solo 5 dígitos
             'password' => 'NewPassword1234',
             'password_confirmation' => 'NewPassword1234',
-])->assertStatus(422)->assertJsonValidationErrors(['code']);
+        ])->assertStatus(422)->assertJsonValidationErrors(['code']);
     }
 
     #[Test]
@@ -364,7 +364,7 @@ final class PasswordResetFlowTest extends TestCase
         // Step 1: forgot.
         $forgotResponse = $this->postJson(uri: '/api/auth/forgot-password', data: [
             'email' => 'jane@example.com',
-            ]);
+        ]);
         $forgotResponse->assertOk();
         $code = $forgotResponse->json('code');
         $this->assertNotEmpty($code);
@@ -375,7 +375,7 @@ final class PasswordResetFlowTest extends TestCase
             'code' => $code,
             'password' => 'BrandNewPassword1234',
             'password_confirmation' => 'BrandNewPassword1234',
-            ]);
+        ]);
 
         $resetResponse->assertOk();
         $resetResponse->assertJsonStructure(['token', 'user']);
@@ -384,7 +384,7 @@ final class PasswordResetFlowTest extends TestCase
         $loginResponse = $this->postJson(uri: '/api/auth/login', data: [
             'email' => 'jane@example.com',
             'password' => 'BrandNewPassword1234',
-            ]);
+        ]);
         $loginResponse->assertOk();
     }
 }

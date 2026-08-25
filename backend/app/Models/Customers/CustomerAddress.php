@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Customers;
 
 use Illuminate\Database\Eloquent\Builder;

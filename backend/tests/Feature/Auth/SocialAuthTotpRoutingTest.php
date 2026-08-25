@@ -76,7 +76,7 @@ final class SocialAuthTotpRoutingTest extends TestCase
     }
 
     #[Test]
-    public function callback_existing_totp_user_routes_through_verifyTotpLogin(): void
+    public function callback_existing_totp_user_routes_through_verify_totp_login(): void
     {
         // Arrange — user con 2FA habilitada + SocialAccount binding.
         $user = User::factory()->create();

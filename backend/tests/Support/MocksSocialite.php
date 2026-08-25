@@ -50,8 +50,9 @@ trait MocksSocialite
                 $driver = Mockery::mock();
                 $driver->shouldReceive('redirectUrl')->andReturnSelf();
                 $driver->shouldReceive('redirect')->andReturn(redirect()->to($url));
+
                 return $driver;
-            }
+            },
         );
 
         Socialite::swap($manager);
@@ -72,7 +73,7 @@ trait MocksSocialite
         ?string $avatar = null,
         bool $emailVerified = true,
     ): SocialiteUser {
-        $oauthUser = new SocialiteUser();
+        $oauthUser = new SocialiteUser;
         $oauthUser->id = $providerId;
         $oauthUser->nickname = null;
         $oauthUser->name = $name;
@@ -97,8 +98,9 @@ trait MocksSocialite
             function () use ($oauthUser) {
                 $driver = Mockery::mock();
                 $driver->shouldReceive('user')->andReturn($oauthUser);
+
                 return $driver;
-            }
+            },
         );
 
         Socialite::swap($manager);

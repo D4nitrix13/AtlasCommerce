@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -40,7 +42,7 @@ return new class extends Migration
             // Un producto solo puede estar una vez por lista de deseos
             $table->unique(
                 columns: ['wishlist_id', 'product_id'],
-                name: 'wishlist_items_wishlist_product_unique'
+                name: 'wishlist_items_wishlist_product_unique',
             );
         });
     }

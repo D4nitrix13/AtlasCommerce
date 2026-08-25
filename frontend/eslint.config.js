@@ -17,7 +17,10 @@ export default [
   ...tseslint.configs.stylistic,
   reactPlugin.configs.flat.recommended,
   reactHooks.configs['recommended-latest'],
-  jsxA11y.flatConfigs.recommended,
+  // jsx-a11y se aplica SOLO a archivos .jsx/.tsx en el override de
+  // abajo. Aplicarlo globalmente rompe con archivos .astro por un
+  // bug del plugin (issue upstream: el parser de Astro no es
+  // compatible con jsx-ast-utils).
   prettier,
   {
     languageOptions: {
@@ -65,12 +68,9 @@ export default [
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
 
-      // Accesibilidad (regla frontend §17)
-      'jsx-a11y/label-has-associated-control': 'error',
-      'jsx-a11y/no-static-element-interactions': 'warn',
-      'jsx-a11y/click-events-have-key-events': 'warn',
-      'jsx-a11y/alt-text': 'error',
-      'jsx-a11y/anchor-has-content': 'error',
+      // Accesibilidad (regla frontend §17). Las reglas del plugin
+      // jsx-a11y se aplican via el override de abajo para que no
+      // rompan en archivos .astro.
     },
   },
   ...astro.configs.recommended,
@@ -78,6 +78,24 @@ export default [
     files: ['**/*.astro'],
     rules: {
       'no-unused-vars': 'off',
+    },
+  },
+  {
+    // jsx-a11y SOLO aplica a .jsx/.tsx. Aplicarlo en .astro causa
+    // `The prop must be a JSXAttribute collected by the AST parser`
+    // porque el parser de Astro no es compatible con jsx-ast-utils.
+    // Workaround hasta que el plugin agregue soporte oficial.
+    files: ['**/*.jsx', '**/*.tsx'],
+    ...jsxA11y.flatConfigs.recommended,
+    rules: {
+      // Accesibilidad (regla frontend §17). Sobreescribimos las
+      // defaults del plugin para mantener las reglas que el repo
+      // declara como 'error' o 'warn' en su config original.
+      'jsx-a11y/label-has-associated-control': 'error',
+      'jsx-a11y/no-static-element-interactions': 'warn',
+      'jsx-a11y/click-events-have-key-events': 'warn',
+      'jsx-a11y/alt-text': 'error',
+      'jsx-a11y/anchor-has-content': 'error',
     },
   },
   {

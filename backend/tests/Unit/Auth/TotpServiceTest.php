@@ -31,7 +31,7 @@ final class TotpServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new TotpService();
+        $this->service = new TotpService;
     }
 
     public function test_generate_secret_returns_base32_string(): void
@@ -140,6 +140,7 @@ final class TotpServiceTest extends TestCase
             'enabled_at' => now(),
         ]);
         $user->refresh();
+
         return $user;
     }
 
@@ -152,13 +153,14 @@ final class TotpServiceTest extends TestCase
         $key = $this->base32Decode(base32: $base32Secret);
         $counter = pack('N*', 0, $step);
         $hash = hash_hmac(algo: 'sha1', data: $counter, key: $key, binary: true);
-        $offset = ord($hash[19]) & 0xf;
+        $offset = ord($hash[19]) & 0xF;
         $code = (
-            ((ord($hash[$offset]) & 0x7f) << 24)
-            | ((ord($hash[$offset + 1]) & 0xff) << 16)
-            | ((ord($hash[$offset + 2]) & 0xff) << 8)
-            | (ord($hash[$offset + 3]) & 0xff)
+            ((ord($hash[$offset]) & 0x7F) << 24)
+            | ((ord($hash[$offset + 1]) & 0xFF) << 16)
+            | ((ord($hash[$offset + 2]) & 0xFF) << 8)
+            | (ord($hash[$offset + 3]) & 0xFF)
         ) % (10 ** TotpService::DIGITS);
+
         return str_pad(
             string: (string) $code,
             length: TotpService::DIGITS,
@@ -179,9 +181,10 @@ final class TotpServiceTest extends TestCase
             $bitsLeft += 5;
             if ($bitsLeft >= 8) {
                 $bitsLeft -= 8;
-                $output .= chr(($buffer >> $bitsLeft) & 0xff);
+                $output .= chr(($buffer >> $bitsLeft) & 0xFF);
             }
         }
+
         return $output;
     }
 }

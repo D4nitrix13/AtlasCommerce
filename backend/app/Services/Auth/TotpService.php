@@ -8,6 +8,7 @@ use App\Models\Auth\TwoFactorSetting;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Crypt;
 use InvalidArgumentException;
+use Throwable;
 
 /**
  * TOTP (Time-based One-Time Password) service.
@@ -46,6 +47,7 @@ class TotpService
     public function generateSecret(): string
     {
         $rawBytes = random_bytes(self::SECRET_BYTES);
+
         return $this->base32Encode($rawBytes);
     }
 
@@ -57,10 +59,11 @@ class TotpService
     public function provisioningUri(User $user, string $encryptedSecret): string
     {
         $secret = $this->decryptSecret($encryptedSecret);
-        $label = rawurlencode(self::ISSUER . ':' . $user->email);
+        $label = rawurlencode(self::ISSUER.':'.$user->email);
         $issuer = rawurlencode(self::ISSUER);
+
         return "otpauth://totp/{$label}?secret={$secret}&issuer={$issuer}&digits="
-            . self::DIGITS . "&period=" . self::STEP_SECONDS . "&algorithm=SHA1";
+            .self::DIGITS.'&period='.self::STEP_SECONDS.'&algorithm=SHA1';
     }
 
     /**
@@ -94,6 +97,7 @@ class TotpService
                 // Audit: cuándo fue usado por última vez
                 $setting->last_used_at = now();
                 $setting->save();
+
                 return true;
             }
         }
@@ -110,13 +114,14 @@ class TotpService
         $key = $this->base32Decode($base32Secret);
         $counter = pack('N*', 0, $step);
         $hash = hash_hmac('sha1', $counter, $key, true);
-        $offset = ord($hash[19]) & 0xf;
+        $offset = ord($hash[19]) & 0xF;
         $code = (
-            ((ord($hash[$offset]) & 0x7f) << 24)
-            | ((ord($hash[$offset + 1]) & 0xff) << 16)
-            | ((ord($hash[$offset + 2]) & 0xff) << 8)
-            | (ord($hash[$offset + 3]) & 0xff)
+            ((ord($hash[$offset]) & 0x7F) << 24)
+            | ((ord($hash[$offset + 1]) & 0xFF) << 16)
+            | ((ord($hash[$offset + 2]) & 0xFF) << 8)
+            | (ord($hash[$offset + 3]) & 0xFF)
         ) % (10 ** self::DIGITS);
+
         return str_pad((string) $code, self::DIGITS, '0', STR_PAD_LEFT);
     }
 
@@ -135,13 +140,14 @@ class TotpService
             $bitsLeft += 8;
             while ($bitsLeft >= 5) {
                 $bitsLeft -= 5;
-                $index = ($buffer >> $bitsLeft) & 0x1f;
+                $index = ($buffer >> $bitsLeft) & 0x1F;
                 $output .= $alphabet[$index];
             }
         }
         if ($bitsLeft > 0) {
-            $output .= $alphabet[($buffer << (5 - $bitsLeft)) & 0x1f];
+            $output .= $alphabet[($buffer << (5 - $bitsLeft)) & 0x1F];
         }
+
         return $output;
     }
 
@@ -166,9 +172,10 @@ class TotpService
             $bitsLeft += 5;
             if ($bitsLeft >= 8) {
                 $bitsLeft -= 8;
-                $output .= chr(($buffer >> $bitsLeft) & 0xff);
+                $output .= chr(($buffer >> $bitsLeft) & 0xFF);
             }
         }
+
         return $output;
     }
 
@@ -180,7 +187,7 @@ class TotpService
     {
         try {
             return Crypt::decryptString($encrypted);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new InvalidArgumentException(
                 'No se puede desencriptar el secret 2FA. ¿APP_KEY rotada?',
                 previous: $e,

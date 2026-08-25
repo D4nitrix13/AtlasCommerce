@@ -57,7 +57,7 @@ class PasswordResetCodeNotification extends Notification implements ShouldQueue
      */
     public function toMail(mixed $notifiable): MailMessage
     {
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject(subject: "Código de recuperación — {$this->appName}")
             ->markdown(
                 view: 'emails.auth.password-reset-code',

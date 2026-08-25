@@ -91,7 +91,7 @@ final class RecoveryCodesTestSeeder extends Seeder
             if ($store === null) {
                 $this->command?->error(
                     'RecoveryCodesTestSeeder: no se pudo crear el store '
-                    . $character['store_slug'] . ' — saltando personaje.',
+                    .$character['store_slug'].' — saltando personaje.',
                 );
 
                 continue;
@@ -191,34 +191,34 @@ final class RecoveryCodesTestSeeder extends Seeder
         // Línea de email: "║  RECOVERY CODES — <email>"
         $prefix = '  RECOVERY CODES — ';  // sin el ║ — el ║ se concatena fuera
         $pad = max(0, $width - mb_strlen($prefix) - mb_strlen($email));
-        echo '║' . $prefix . str_repeat(' ', $pad) . $email . "║\n";
+        echo '║'.$prefix.str_repeat(' ', $pad).$email."║\n";
 
         // Línea de tienda: "║  Tienda: <store>"
         $prefix = '  Tienda: ';
         $pad = max(0, $width - mb_strlen($prefix) - mb_strlen($store));
-        echo '║' . $prefix . str_repeat(' ', $pad) . $store . "║\n";
+        echo '║'.$prefix.str_repeat(' ', $pad).$store."║\n";
 
         // Flags
-        $flags = '  TOTP: ' . ($totp ? 'sí' : 'no') . '   Recovery codes: ' . count($codes);
+        $flags = '  TOTP: '.($totp ? 'sí' : 'no').'   Recovery codes: '.count($codes);
         $pad = max(0, $width - mb_strlen($flags));
-        echo '║' . $flags . str_repeat(' ', $pad) . "║\n";
+        echo '║'.$flags.str_repeat(' ', $pad)."║\n";
 
         // Warning
         $warning = '  Guardar en password manager. No se vuelven a mostrar.';
         $pad = max(0, $width - mb_strlen($warning));
-        echo '║' . $warning . str_repeat(' ', $pad) . "║\n";
+        echo '║'.$warning.str_repeat(' ', $pad)."║\n";
 
         echo "╠{$line}╣\n";
 
         if ($codes === []) {
             $msg = '  (sin recovery codes)';
             $pad = max(0, $width - mb_strlen($msg));
-            echo '║' . $msg . str_repeat(' ', $pad) . "║\n";
+            echo '║'.$msg.str_repeat(' ', $pad)."║\n";
         } else {
             foreach ($codes as $index => $code) {
                 $row = sprintf('  %3d.  %s', $index + 1, $code);
                 $pad = max(0, $width - mb_strlen($row));
-                echo '║' . $row . str_repeat(' ', $pad) . "║\n";
+                echo '║'.$row.str_repeat(' ', $pad)."║\n";
             }
         }
 

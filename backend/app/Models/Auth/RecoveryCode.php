@@ -28,8 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $used_at
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- *
- * @property-read \App\Models\Auth\User $user
+ * @property-read User $user
  */
 class RecoveryCode extends Model
 {

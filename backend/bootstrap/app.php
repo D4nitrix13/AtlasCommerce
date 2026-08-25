@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SetSessionDomainFromHost;

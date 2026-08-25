@@ -23,9 +23,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
-use Laravel\Socialite\Contracts\User as ProviderUserContract;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
+use Throwable;
 
 /**
  * OAuth social login (Google + Facebook).
@@ -125,7 +125,7 @@ class SocialAuthController extends Controller
             ) ?: '/';
             $request->session()->put(key: self::SESSION_REDIRECT_TARGET, value: $refererPath);
 
-            $callbackUrl = $request->getSchemeAndHttpHost() . '/api/auth/social/' . $provider . '/callback';
+            $callbackUrl = $request->getSchemeAndHttpHost().'/api/auth/social/'.$provider.'/callback';
 
             return Socialite::driver($provider)
                 ->redirectUrl($callbackUrl)
@@ -201,7 +201,7 @@ class SocialAuthController extends Controller
             }
 
             // Happy path.
-            $deviceName = 'oauth-' . $provider;
+            $deviceName = 'oauth-'.$provider;
             if ($request->hasSession()) {
                 Auth::guard(name: 'web')->login($user);
             }
@@ -241,7 +241,7 @@ class SocialAuthController extends Controller
             host: (string) $request->getHost(),
         );
 
-        $url = $loginPath . '?flash=' . urlencode(string: $e->oauthCode());
+        $url = $loginPath.'?flash='.urlencode(string: $e->oauthCode());
 
         Log::info(message: 'oauth_failure_flash', context: [
             'code' => $e->oauthCode(),
@@ -257,14 +257,14 @@ class SocialAuthController extends Controller
      * Helper estático reutilizado por `redirect()` (no usa session
      * target — redirect nunca falla con `?flash=`).
      */
-    public static function oauthError(\Throwable $e): JsonResponse
+    public static function oauthError(Throwable $e): JsonResponse
     {
         $statusCode = match (true) {
             $e instanceof OAuthProviderNotConfiguredException => 503,
             default => 400,
         };
 
-        $payload = OAuthErrorResource::from($e)->toArray(request: \Illuminate\Http\Request::create(uri: '/'));
+        $payload = OAuthErrorResource::from($e)->toArray(request: Request::create(uri: '/'));
 
         return Response::json(data: $payload, status: $statusCode);
     }
@@ -272,8 +272,6 @@ class SocialAuthController extends Controller
     /**
      * Construye el envelope `2fa_required` (A11), idéntico a
      * `AuthController::login` lines 94-112.
-     *
-     * @return JsonResponse
      */
     private function build2faRequiredResponse(User $user): JsonResponse
     {

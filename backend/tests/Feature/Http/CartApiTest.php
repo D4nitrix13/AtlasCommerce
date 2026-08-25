@@ -75,7 +75,7 @@ final class CartApiTest extends TestCase
             'customer_id' => $this->customer->id,
             'store_id' => $this->store->id,
             'status' => 'active',
-            ]);
+        ]);
 
         // Segundo store (mismo contexto) → idempotente, devuelve el mismo.
         $this->postJson('/api/carts')
@@ -111,7 +111,7 @@ final class CartApiTest extends TestCase
             'product_id' => $product->id,
             'quantity' => 2,
             'subtotal_cents' => 5000,
-            ]);
+        ]);
 
         // Subtotal del cart se actualiza.
         $this->getJson("/api/carts/{$cart->id}")
@@ -144,7 +144,7 @@ final class CartApiTest extends TestCase
             'product_id' => $product->id,
             'quantity' => 4,
             'subtotal_cents' => 40_00,
-            ]);
+        ]);
     }
 
     #[Test]

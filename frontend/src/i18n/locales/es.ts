@@ -343,6 +343,8 @@ const es: Translations = {
   'auth.passwordRecovery.steps.password.confirmLabel': 'Repetir contraseña',
   'auth.passwordRecovery.steps.password.heading': 'Creá tu nueva contraseña',
   'auth.passwordRecovery.steps.password.matchHint': 'Las contraseñas coinciden.',
+  'auth.passwordRecovery.steps.password.showPassword': 'Mostrar contraseña',
+  'auth.passwordRecovery.steps.password.hidePassword': 'Ocultar contraseña',
   'auth.passwordRecovery.steps.password.minLength': 'Al menos 12 caracteres',
   'auth.passwordRecovery.steps.password.number': 'Al menos un número',
   'auth.passwordRecovery.steps.password.statusMet': 'OK',

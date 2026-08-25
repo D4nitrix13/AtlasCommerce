@@ -57,9 +57,9 @@ final class RecoveryCodeFlowTest extends TestCase
         // Limpia también el throttle de regenerate (PR1 H4). Usamos
         // el ID del user admin creado por el seeder, más los users
         // que este test crea (rccuser, emailuser, 2fauser).
-        $adminUser = \App\Models\Auth\User::query()->where(column: 'email', operator: '=', value: 'admin@panda-estampados.com')->first();
+        $adminUser = User::query()->where(column: 'email', operator: '=', value: 'admin@panda-estampados.com')->first();
         if ($adminUser !== null) {
-            RateLimiter::clear(key: 'recovery-codes:' . $adminUser->id . '|127.0.0.1');
+            RateLimiter::clear(key: 'recovery-codes:'.$adminUser->id.'|127.0.0.1');
         }
     }
 
@@ -100,7 +100,7 @@ final class RecoveryCodeFlowTest extends TestCase
             ->firstOrFail();
         $user->stores()->syncWithoutDetaching(ids: [$store->id]);
 
-        $response = $this->postJson(uri: self::HOST . '/api/auth/forgot-password', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/auth/forgot-password', data: [
             'email' => $user->email,
         ]);
 
@@ -117,7 +117,7 @@ final class RecoveryCodeFlowTest extends TestCase
     {
         ['user' => $user] = $this->userWithRecoveryCodes('rccuser@panda-estampados.com');
 
-        $response = $this->postJson(uri: self::HOST . '/api/auth/forgot-password', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/auth/forgot-password', data: [
             'email' => $user->email,
         ]);
 
@@ -140,7 +140,7 @@ final class RecoveryCodeFlowTest extends TestCase
         ['user' => $user, 'codes' => $codes] = $this->userWithRecoveryCodes('rccuser@panda-estampados.com');
         $code = $codes[0];
 
-        $response = $this->postJson(uri: self::HOST . '/api/auth/reset-password', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
             'email' => $user->email,
             'method' => 'recovery_codes',
             'code' => $code,
@@ -172,7 +172,7 @@ final class RecoveryCodeFlowTest extends TestCase
         $code = $codes[0];
 
         // Primer reset: consume el code.
-        $this->postJson(uri: self::HOST . '/api/auth/reset-password', data: [
+        $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
             'email' => $user->email,
             'method' => 'recovery_codes',
             'code' => $code,
@@ -181,7 +181,7 @@ final class RecoveryCodeFlowTest extends TestCase
         ])->assertOk();
 
         // Segundo intento con el MISMO code: debe fallar.
-        $response = $this->postJson(uri: self::HOST . '/api/auth/reset-password', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
             'email' => $user->email,
             'method' => 'recovery_codes',
             'code' => $code,
@@ -198,7 +198,7 @@ final class RecoveryCodeFlowTest extends TestCase
     {
         // admin@panda-estampados.com (creado por seeder) tiene
         // preferred_recovery_method='email' y NO tiene recovery codes.
-        $response = $this->postJson(uri: self::HOST . '/api/auth/reset-password', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
             'email' => 'admin@panda-estampados.com',
             'method' => 'recovery_codes',
             'code' => 'AAAAAAAAAA',
@@ -226,7 +226,7 @@ final class RecoveryCodeFlowTest extends TestCase
         $user->stores()->syncWithoutDetaching(ids: [$store->id]);
 
         // Step 1: forgot-password (devuelve OTP).
-        $forgotResponse = $this->postJson(uri: self::HOST . '/api/auth/forgot-password', data: [
+        $forgotResponse = $this->postJson(uri: self::HOST.'/api/auth/forgot-password', data: [
             'email' => $user->email,
         ]);
         $forgotResponse->assertOk();
@@ -234,7 +234,7 @@ final class RecoveryCodeFlowTest extends TestCase
         $this->assertNotEmpty($code);
 
         // Step 2: reset-password sin method field (default 'email').
-        $resetResponse = $this->postJson(uri: self::HOST . '/api/auth/reset-password', data: [
+        $resetResponse = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
             'email' => $user->email,
             'code' => $code,
             'password' => 'NewPassword1234',
@@ -255,12 +255,12 @@ final class RecoveryCodeFlowTest extends TestCase
 
         // 5 regeneraciones exitosas.
         for ($i = 0; $i < 5; $i++) {
-            $response = $this->postJson(uri: self::HOST . '/api/auth/recovery-codes/regenerate');
+            $response = $this->postJson(uri: self::HOST.'/api/auth/recovery-codes/regenerate');
             $response->assertOk();
         }
 
         // 6ª regeneración: bloqueada por throttle.
-        $response = $this->postJson(uri: self::HOST . '/api/auth/recovery-codes/regenerate');
+        $response = $this->postJson(uri: self::HOST.'/api/auth/recovery-codes/regenerate');
 
         $response->assertStatus(422);
         $response->assertJsonPath(

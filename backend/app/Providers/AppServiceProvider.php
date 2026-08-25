@@ -70,13 +70,13 @@ class AppServiceProvider extends ServiceProvider
         // Login: 5 intentos cada 5 min por (email + IP).
         RateLimiter::for(name: 'login', callback: function (Request $request): Limit {
             return Limit::perMinutes(decayMinutes: 5, maxAttempts: 5)
-                ->by(key: $request->input(key: 'email') . '|' . $request->ip());
+                ->by(key: $request->input(key: 'email').'|'.$request->ip());
         });
 
         // Regeneración de recovery codes: 5 intentos cada hora por (user_id + IP).
         RateLimiter::for(name: 'recovery-codes', callback: function (Request $request): Limit {
             return Limit::perHour(maxAttempts: 5)
-                ->by(key: (string) $request->user()?->id . '|' . $request->ip());
+                ->by(key: (string) $request->user()?->id.'|'.$request->ip());
         });
 
         // Verificación TOTP (activación 2FA): 10 intentos cada 5 min por IP.

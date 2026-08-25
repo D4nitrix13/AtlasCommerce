@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -56,7 +58,7 @@ return new class extends Migration
             // Índice único para evitar duplicados de producto+variante en el mismo almacén
             $table->unique(
                 columns: ['warehouse_id', 'product_id', 'product_variant_id'],
-                name: 'inventories_warehouse_product_variant_unique'
+                name: 'inventories_warehouse_product_variant_unique',
             );
         });
     }

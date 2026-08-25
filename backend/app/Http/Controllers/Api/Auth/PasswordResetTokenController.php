@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 /**
  * Endpoints de recuperación de contraseña.
@@ -227,7 +228,7 @@ class PasswordResetTokenController extends Controller
                     supportEmail: $user->email,
                 ),
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::warning(
                 message: 'forgot-password: fallo envío de email (no crítico)',
                 context: ['email' => $email, 'error' => $e->getMessage()],

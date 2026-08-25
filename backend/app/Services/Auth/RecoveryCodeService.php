@@ -7,6 +7,7 @@ namespace App\Services\Auth;
 use App\Models\Auth\RecoveryCode;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 /**
  * Servicio de recovery codes de un solo uso.
@@ -42,7 +43,7 @@ class RecoveryCodeService
     public function generateFor(User $user, int $count = self::DEFAULT_COUNT): array
     {
         if ($count < 1 || $count > 50) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "count debe estar entre 1 y 50, recibido: {$count}",
             );
         }
@@ -86,6 +87,7 @@ class RecoveryCodeService
 
         $match->used_at = now();
         $match->save();
+
         return true;
     }
 
@@ -114,6 +116,7 @@ class RecoveryCodeService
         for ($i = 0; $i < self::CODE_LENGTH; $i++) {
             $code .= $alphabet[random_int(0, $max)];
         }
+
         return $code;
     }
 

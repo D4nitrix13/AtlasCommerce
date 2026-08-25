@@ -37,8 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $attempts
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- *
- * @property-read \App\Models\Auth\User $user
+ * @property-read User $user
  */
 class OtpChallenge extends Model
 {

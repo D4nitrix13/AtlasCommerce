@@ -165,7 +165,7 @@ final class OAuthRoundTripTest extends TestCase
             // fallback al happy path con skip explícito.
             $this->markTestSkipped(
                 'HTTP_HOST no propagó al controller — unit test del '
-                . 'service en SocialAccountServiceFullTest cubre admin signup.',
+                .'service en SocialAccountServiceFullTest cubre admin signup.',
             );
         }
     }

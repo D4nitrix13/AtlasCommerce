@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Auth\RecoveryCode;
 use App\Models\Auth\Role;
 use App\Models\Auth\TwoFactorSetting;
 use App\Models\Auth\User;
@@ -51,6 +50,7 @@ use Illuminate\Support\Facades\Hash;
 final class AuthFlowTestUsersSeeder extends Seeder
 {
     private const DEFAULT_PASSWORD = 'password';
+
     private const SLUG = 'panda-estampados';
 
     public function run(): void
@@ -61,9 +61,10 @@ final class AuthFlowTestUsersSeeder extends Seeder
 
         if ($store === null) {
             $this->command?->error(
-                'AuthFlowTestUsersSeeder: la tienda ' . self::SLUG . ' no existe. '
-                . 'Ejecuta DefaultAdminSeeder primero.'
+                'AuthFlowTestUsersSeeder: la tienda '.self::SLUG.' no existe. '
+                .'Ejecuta DefaultAdminSeeder primero.',
             );
+
             return;
         }
 
@@ -77,8 +78,8 @@ final class AuthFlowTestUsersSeeder extends Seeder
         $this->ensureKataraWithRecoveryCodes($store, $adminRole);
 
         $this->command?->info(
-            'AuthFlowTestUsersSeeder: 3 usuarios creados en ' . $store->name
-            . ' (zuko: 2FA, sokka: email, katara: recovery codes).'
+            'AuthFlowTestUsersSeeder: 3 usuarios creados en '.$store->name
+            .' (zuko: 2FA, sokka: email, katara: recovery codes).',
         );
     }
 
@@ -108,6 +109,7 @@ final class AuthFlowTestUsersSeeder extends Seeder
         app(RecoveryCodeService::class)->generateFor($user, count: 10);
 
         $user->stores()->syncWithoutDetaching(ids: [$store->id]);
+
         return $user;
     }
 
@@ -120,6 +122,7 @@ final class AuthFlowTestUsersSeeder extends Seeder
             preferredMethod: 'email',
         );
         $user->stores()->syncWithoutDetaching(ids: [$store->id]);
+
         return $user;
     }
 
@@ -138,6 +141,7 @@ final class AuthFlowTestUsersSeeder extends Seeder
         app(RecoveryCodeService::class)->generateFor($user, count: 10);
 
         $user->stores()->syncWithoutDetaching(ids: [$store->id]);
+
         return $user;
     }
 

@@ -95,7 +95,7 @@ final class SocialAccountsMigrationTest extends \Tests\TestCase
         // El RefreshDatabase ya deja la tabla creada. Llamamos el down
         // de la migración directamente y verificamos que la tabla
         // desaparece.
-        $migration = require __DIR__ . '/../../../database/migrations/auth/2026_08_17_000001_create_social_accounts_table.php';
+        $migration = require __DIR__.'/../../../database/migrations/auth/2026_08_17_000001_create_social_accounts_table.php';
         $migration->down();
 
         $this->assertFalse(Schema::hasTable(table: 'social_accounts'));

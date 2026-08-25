@@ -90,32 +90,32 @@ final class BootstrapTenantCommandTest extends TestCase
             'slug' => 'mm-boutique',
             'name' => 'MM Boutique',
             'is_active' => true,
-            ]);
+        ]);
 
         // Los dominios públicos se crean.
         $this->assertDatabaseHas(table: 'store_domains', data: [
             'domain' => 'mm-boutique.com',
             'is_primary' => true,
             'is_active' => true,
-            ]);
+        ]);
         $this->assertDatabaseHas(table: 'store_domains', data: [
             'domain' => 'www.mm-boutique.com',
             'is_primary' => false,
             'is_active' => true,
-            ]);
+        ]);
 
         // El dominio admin se crea.
         $this->assertDatabaseHas(table: 'store_domains', data: [
             'domain' => 'admin.mm-boutique.com',
             'type' => 'subdomain',
             'is_active' => true,
-            ]);
+        ]);
 
         // El admin user se crea.
         $this->assertDatabaseHas(table: 'users', data: [
             'email' => 'admin@mm-boutique.com',
             'is_active' => true,
-            ]);
+        ]);
 
         // El admin user queda asociado al tenant.
         $user = User::query()->where(column: 'email', operator: '=', value: 'admin@mm-boutique.com')->firstOrFail();
@@ -392,7 +392,7 @@ final class BootstrapTenantCommandTest extends TestCase
             'accent_color' => '#DC2626',
             'accent_hover_color' => '#B91C1C',
             'support_email' => 'support@panda-estampados.test',
-            ]);
+        ]);
     }
 
     #[Test]
