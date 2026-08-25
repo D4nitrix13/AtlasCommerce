@@ -126,7 +126,14 @@ export default function ForgotPasswordWizard({
     }
   };
 
-  // Step 2 → 3: el usuario eligió método (cuando hay >1).
+  // Step 2 → 3: el usuario eligió método en MethodStep (solo guarda
+  // selección; el "Continuar" del WizardButtonRow dispara handleMethodSubmit).
+  const handleMethodSelect = (method: AvailableMethod): void => {
+    updateState({ selectedMethod: method, errorMessage: null });
+  };
+
+  // Step 2 → 3: el usuario hizo click en "Continuar" del MethodStep
+  // con un método seleccionado. Avanza al code step.
   const handleMethodSubmit = (method: AvailableMethod): void => {
     updateState({ selectedMethod: method, step: 'code', errorMessage: null });
   };
@@ -254,8 +261,10 @@ export default function ForgotPasswordWizard({
             email={state.email}
             availableMethods={state.availableMethods}
             onNext={handleMethodSubmit}
+            onSelect={handleMethodSelect}
             onBack={handleBackToEmail}
             errorMessage={state.errorMessage}
+            selectedMethod={state.selectedMethod}
           />
         );
 

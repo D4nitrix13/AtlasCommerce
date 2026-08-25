@@ -136,6 +136,8 @@ type WizardButtonRowProps = {
   backLabel?: string;
   /** Si el botón primario está disabled (loading o validación fallida). */
   isSubmitting?: boolean;
+  /** Si el botón primario está disabled por validación previa (sin spinner). */
+  disabled?: boolean;
   /** Si el botón primario debe verse como "success" (verde, no teal). */
   hasSuccess?: boolean;
 };
@@ -157,10 +159,11 @@ export function WizardButtonRow({
   submittingLabel,
   backLabel = 'Atrás',
   isSubmitting = false,
+  disabled = false,
   hasSuccess = false,
 }: WizardButtonRowProps): ReactElement {
   const handlePrimaryClick = (): void => {
-    if (isSubmitting || hasSuccess) {
+    if (isSubmitting || hasSuccess || disabled) {
       return;
     }
     if (onSubmit !== undefined) {
@@ -190,7 +193,7 @@ export function WizardButtonRow({
       <button
         type="button"
         onClick={handlePrimaryClick}
-        disabled={isSubmitting || hasSuccess}
+        disabled={isSubmitting || hasSuccess || disabled}
         className="flex-1 min-w-[180px] max-w-sm bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 flex items-center justify-center gap-2"
       >
         {showSpinner ? (
