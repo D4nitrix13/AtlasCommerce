@@ -125,8 +125,13 @@ export type MethodStepData = {
 
 type MethodStepProps = MethodStepData & {
   onNext: (method: AvailableMethod) => void;
+  onSelect: (method: AvailableMethod) => void;
   onBack: () => void;
   errorMessage: string | null;
+  /** Método actualmente seleccionado (del state del Wizard). El MethodStep
+   * solo guarda selección local para feedback visual; el "Continuar"
+   * usa el selectedMethod del parent. */
+  selectedMethod?: AvailableMethod | null;
 };
 
 const METHOD_LABELS: Record<
@@ -170,10 +175,16 @@ export function MethodStep({
   email,
   availableMethods,
   onNext,
+  onSelect,
   onBack,
   errorMessage,
+  selectedMethod = null,
 }: MethodStepProps): ReactElement {
   const { t } = useTranslations();
+  // El MethodStep NO tiene state propio para selectedMethod. Lee del
+  // parent via props. El parent mantiene la selección en WizardState
+  // (state.selectedMethod), que se actualiza via onSelect cuando el
+  // user clickea un método y se consume cuando hace "Continuar".
 
   return (
     <div className="space-y-4">
@@ -194,17 +205,29 @@ export function MethodStep({
       <div className="space-y-2">
         {availableMethods.map((method) => {
           const info = METHOD_LABELS[method];
+          const isSelected = selectedMethod === method;
           return (
             <button
               key={method}
               type="button"
               onClick={() => {
-                onNext(method);
+                onSelect(method);
               }}
-              className="w-full text-left p-4 rounded-lg border border-slate-200 hover:border-[#2D9D8E] hover:bg-[#2D9D8E]/5 transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+              aria-pressed={isSelected}
+              className={
+                'w-full text-left p-4 rounded-lg border transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 ' +
+                (isSelected
+                  ? 'border-[#2D9D8E] bg-[#2D9D8E]/5 ring-1 ring-[#2D9D8E]'
+                  : 'border-slate-200 hover:border-[#2D9D8E] hover:bg-[#2D9D8E]/5')
+              }
             >
-              <div className="flex items-start gap-3">
-                <div className="shrink-0 w-9 h-9 rounded-full bg-[#E6F7F4] text-[#1E6F62] flex items-center justify-center">
+              <div className="flex items-center gap-3">
+                <div className={
+                  'shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition ' +
+                  (isSelected
+                    ? 'bg-[#2D9D8E] text-white'
+                    : 'bg-[#E6F7F4] text-[#1E6F62]')
+                }>
                   {METHOD_ICONS[method]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -220,6 +243,12 @@ export function MethodStep({
       <WizardButtonRow
         onBack={onBack}
         nextLabel={t('auth.passwordRecovery.buttons.continue')}
+        onNext={() => {
+          if (selectedMethod !== null) {
+            onNext(selectedMethod);
+          }
+        }}
+        disabled={selectedMethod === null}
       />
     </div>
   );
