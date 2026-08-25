@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -66,7 +68,13 @@ return [
             'username' => env('FTP_USERNAME'),
             'password' => env('FTP_PASSWORD'),
             'port' => (int) env('FTP_PORT', 21),
-            'root' => env('FTP_ROOT'),
+            // Default `/srv/ftp/images` (no `/srv/ftp` raíz) para que
+            // todos los assets de tenant vivan en un subdirectorio
+            // dedicado. Documentado en
+            // docs/architecture/assets-naming-convention.md §2.4.
+            // Sobre-escribible via env si una instancia necesita otra
+            // ruta (ej. instancia legada con assets en la raíz).
+            'root' => env('FTP_ROOT', '/srv/ftp/images'),
             'passive' => (bool) env('FTP_PASSIVE', true),
             'ssl' => (bool) env('FTP_SSL', false),
             'timeout' => (int) env('FTP_TIMEOUT', 30),
