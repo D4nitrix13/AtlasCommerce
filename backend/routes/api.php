@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Returns\ReturnRequestController;
 use App\Http\Controllers\Api\Returns\ReturnRequestItemController;
 use App\Http\Controllers\Api\Sales\OrderController;
 use App\Http\Controllers\Api\Shipping\ShipmentController;
+use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use Illuminate\Support\Facades\Route;
@@ -226,4 +227,9 @@ Route::middleware(['store.domain'])->prefix('storefront')->group(function (): vo
     Route::get('/products/{slug}', [StorefrontProductController::class, 'show']);
     Route::get('/products/{slug}/price', [StorefrontProductController::class, 'price']);
     Route::get('/theme', [StorefrontThemeController::class, 'show']);
+    // Proxy de assets del tenant desde FTP al browser.
+    // El {path} acepta slashes via where() regex para que coincida
+    // con paths completos tipo tenants/panda-estampados/branding/logo.webp.
+    Route::get('/assets/{path}', [StorefrontAssetController::class, 'show'])
+        ->where('path', '.*');
 });
