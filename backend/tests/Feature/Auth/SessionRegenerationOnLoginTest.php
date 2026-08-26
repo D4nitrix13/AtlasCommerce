@@ -70,7 +70,7 @@ final class SessionRegenerationOnLoginTest extends TestCase
         // Forzar session driver = 'file' para que persista entre
         // requests del mismo test (phpunit.xml default = 'array'
         // per-request, lo que imposibilita comparar session IDs).
-        $sessionDir = sys_get_temp_dir() . '/' . self::SESSION_DIR_NAME;
+        $sessionDir = sys_get_temp_dir().'/'.self::SESSION_DIR_NAME;
         if (! is_dir($sessionDir)) {
             mkdir($sessionDir, self::SESSION_DIR_PERMS, true);
         }
@@ -106,15 +106,15 @@ final class SessionRegenerationOnLoginTest extends TestCase
         // active autenticación por sesión.
         config(['sanctum.stateful' => [self::HOST]]);
 
-        RateLimiter::clear(key: 'login:' . self::USER_EMAIL . '|127.0.0.1');
+        RateLimiter::clear(key: 'login:'.self::USER_EMAIL.'|127.0.0.1');
         RateLimiter::clear(key: 'verify-totp-login:127.0.0.1');
     }
 
     protected function tearDown(): void
     {
-        $dir = sys_get_temp_dir() . '/' . self::SESSION_DIR_NAME;
+        $dir = sys_get_temp_dir().'/'.self::SESSION_DIR_NAME;
         if (is_dir($dir)) {
-            array_map(unlink(...), glob($dir . '/*') ?: []);
+            array_map(unlink(...), glob($dir.'/*') ?: []);
             @rmdir($dir);
         }
 
@@ -132,8 +132,8 @@ final class SessionRegenerationOnLoginTest extends TestCase
     private function bootstrapCsrf(): array
     {
         $response = $this->withHeaders([
-            'Origin' => 'http://' . self::HOST,
-        ])->get('http://' . self::HOST . '/sanctum/csrf-cookie');
+            'Origin' => 'http://'.self::HOST,
+        ])->get('http://'.self::HOST.'/sanctum/csrf-cookie');
 
         $cookies = [];
         foreach ($response->headers->getCookies() as $cookie) {
@@ -150,9 +150,9 @@ final class SessionRegenerationOnLoginTest extends TestCase
         $preLoginSessionId = $bootstrap[$this->sessionCookieName] ?? null;
 
         $response = $this->withHeaders([
-            'Origin' => 'http://' . self::HOST,
+            'Origin' => 'http://'.self::HOST,
             'X-XSRF-TOKEN' => $bootstrap['XSRF-TOKEN'] ?? '',
-        ])->postJson('http://' . self::HOST . '/api/auth/login', [
+        ])->postJson('http://'.self::HOST.'/api/auth/login', [
             'email' => self::USER_EMAIL,
             'password' => self::USER_PASSWORD,
             'device_name' => 'session-fixation-test',
@@ -189,9 +189,9 @@ final class SessionRegenerationOnLoginTest extends TestCase
         $bootstrap = $this->bootstrapCsrf();
 
         $loginResponse = $this->withHeaders([
-            'Origin' => 'http://' . self::HOST,
+            'Origin' => 'http://'.self::HOST,
             'X-XSRF-TOKEN' => $bootstrap['XSRF-TOKEN'] ?? '',
-        ])->postJson('http://' . self::HOST . '/api/auth/login', [
+        ])->postJson('http://'.self::HOST.'/api/auth/login', [
             'email' => self::USER_EMAIL,
             'password' => self::USER_PASSWORD,
         ]);
@@ -211,9 +211,9 @@ final class SessionRegenerationOnLoginTest extends TestCase
         );
 
         $verifyResponse = $this->withHeaders([
-            'Origin' => 'http://' . self::HOST,
+            'Origin' => 'http://'.self::HOST,
             'X-XSRF-TOKEN' => $bootstrap['XSRF-TOKEN'] ?? '',
-        ])->postJson('http://' . self::HOST . '/api/auth/2fa/verify-totp-login', [
+        ])->postJson('http://'.self::HOST.'/api/auth/2fa/verify-totp-login', [
             'challenge_token' => $challengeToken,
             'code' => $this->totpCodeFor($secret),
         ]);
@@ -254,18 +254,18 @@ final class SessionRegenerationOnLoginTest extends TestCase
             $bitsLeft += 5;
             if ($bitsLeft >= 8) {
                 $bitsLeft -= 8;
-                $output .= chr(($buffer >> $bitsLeft) & 0xff);
+                $output .= chr(($buffer >> $bitsLeft) & 0xFF);
             }
         }
         $step ??= intdiv(num1: time(), num2: TotpService::STEP_SECONDS);
         $counter = pack('N*', 0, $step);
         $hash = hash_hmac(algo: 'sha1', data: $counter, key: $output, binary: true);
-        $offset = ord($hash[19]) & 0xf;
+        $offset = ord($hash[19]) & 0xF;
         $code = (
-            ((ord($hash[$offset]) & 0x7f) << 24)
-            | ((ord($hash[$offset + 1]) & 0xff) << 16)
-            | ((ord($hash[$offset + 2]) & 0xff) << 8)
-            | ((ord($hash[$offset + 3]) & 0xff))
+            ((ord($hash[$offset]) & 0x7F) << 24)
+            | ((ord($hash[$offset + 1]) & 0xFF) << 16)
+            | ((ord($hash[$offset + 2]) & 0xFF) << 8)
+            | ((ord($hash[$offset + 3]) & 0xFF))
         ) % (10 ** TotpService::DIGITS);
 
         return str_pad(
