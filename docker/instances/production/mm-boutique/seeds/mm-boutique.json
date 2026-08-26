@@ -13,8 +13,8 @@
       ],
       "theme": {
         "short_name": "MM",
-        "logo_path": "/images/stores/mm-boutique/brand/logo.svg",
-        "login_logo_path": "/images/stores/mm-boutique/brand/logo.svg",
+        "logo_path": "tenants/mm-boutique/branding/logo.svg",
+        "login_logo_path": "tenants/mm-boutique/branding/logo.svg",
         "accent_color": "#EC4899",
         "accent_hover_color": "#DB2777",
         "support_email": "support@mm-boutique.com"
