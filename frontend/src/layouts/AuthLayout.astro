@@ -8,12 +8,12 @@ interface Props {
 const { title = "Login" } = Astro.props;
 
 // Favicon per-tenant: derivado del slug del tenant detectado por el
-// middleware. Convention: /images/stores/{slug}/brand/favicon.webp.
+// middleware. Convention: /api/storefront/assets/tenants/{slug}/branding/favicon.webp.
 // Si el tenant no está detectado (ej. dev local sin /etc/hosts),
 // cae al favicon genérico del repo en /favicon.svg.
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const tenantFavicon = tenantSlug
-  ? `/images/stores/${tenantSlug}/brand/favicon.webp`
+  ? `/api/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
   : "/favicon.svg";
 ---
 
