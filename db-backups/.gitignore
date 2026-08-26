@@ -1,0 +1,15 @@
+# Backups de BD locales — NO commitear a git
+#
+# Los dumps pueden contener datos personales (emails, passwords,
+# direcciones). Si vienen de producción, anonimizar antes de
+# compartir. Ver README.md para el workflow completo.
+#
+# Patron: <stage>-<store>-<YYYY-MM-DD-HHMM>.sql.gz
+
+*.sql
+*.sql.gz
+*.dump
+
+# Excepcion: este README y el .gitkeep son parte del repo
+!.gitkeep
+!README.md

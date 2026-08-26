@@ -10,7 +10,8 @@
 #   Inspección  : status ps info logs
 #   Volumes     : volumes rm-volumes
 #   Exec        : exec
-#   Setup       : setup fresh hosts caddy
+#   Setup       : setup fresh bootstrap hosts caddy
+#   DB          : db-backup db-restore
 #   Help        : help
 #
 # Cada acción vive en su propia carpeta:
@@ -90,9 +91,12 @@ action_file_for() {
             printf '%s\n' "${DOCKER_DIR}/volumes/remove.sh" ;;
         exec)        printf '%s\n' "${DOCKER_DIR}/exec/cmd.sh" ;;
         setup)       printf '%s\n' "${DOCKER_DIR}/setup/first-install.sh" ;;
+        bootstrap)   printf '%s\n' "${DOCKER_DIR}/setup/bootstrap.sh" ;;
         fresh)       printf '%s\n' "${DOCKER_DIR}/setup/fresh-instance.sh" ;;
         hosts)       printf '%s\n' "${DOCKER_DIR}/setup/hosts.sh" ;;
         caddy)       printf '%s\n' "${DOCKER_DIR}/setup/caddy.sh" ;;
+        db-backup)   printf '%s\n' "${DOCKER_DIR}/db/backup.sh" ;;
+        db-restore)  printf '%s\n' "${DOCKER_DIR}/db/restore.sh" ;;
         help)        printf '%s\n' "${DOCKER_DIR}/help/show.sh" ;;
         *)           printf '\n' ;;
     esac
@@ -104,7 +108,9 @@ is_known_cmd() {
         up|start|stop|restart|build|down|nuke|\
         status|ps|info|logs|\
         volumes|rm-volumes|\
-        exec|setup|fresh|hosts|caddy|help|\
+        exec|setup|bootstrap|fresh|hosts|caddy|\
+        db-backup|db-restore|\
+        help|\
         b|rs|ls|psv|vol|rmvol) return 0 ;;
         *) return 1 ;;
     esac
@@ -308,6 +314,7 @@ done
 case "$cmd_canonical" in
     exec)         MIN_POS=4 ;;  # stage, store, servicio, cmd... (>=1 cmd token)
     logs)         MIN_POS=3 ;;  # stage, store, servicio (servicio REQUERIDO)
+    db-restore)   MIN_POS=3 ;;  # stage, store, archivo
     *)            MIN_POS=2 ;;  # stage, store
 esac
 
@@ -318,9 +325,14 @@ fi
 
 STAGE="${POSITIONAL[0]}"
 STORE="${POSITIONAL[1]}"
-SERVICE="${POSITIONAL[2]:-}"
-# Args extra después de servicio (usados solo por exec: el comando
-# a correr dentro del container).
+# Para db-restore, POSITIONAL[2] es el archivo (no servicio).
+# Para el resto, POSITIONAL[2] es servicio (puede estar vacio).
+if [[ "$cmd_canonical" == "db-restore" ]]; then
+    SERVICE=""
+else
+    SERVICE="${POSITIONAL[2]:-}"
+fi
+# Args extra después de servicio/archivo (usados por exec y db-restore).
 EXTRA=("${POSITIONAL[@]:3}")
 
 # Validar stage + store. Errores claros por separado.
@@ -384,6 +396,18 @@ show_target_summary "$cmd_canonical" "$STAGE" "$STORE" "$SERVICE"
 case "$cmd_canonical" in
     exec)
         "$cmd_fn" "$STAGE" "$STORE" "$SERVICE" "${EXTRA[@]}"
+        ;;
+    # db-restore tiene archivo como 3er posicional + flags despues.
+    db-restore)
+        local_restore_file="${POSITIONAL[2]}"
+        # El archivo + flags (--force, --truncate, etc.) van como args.
+        "$cmd_fn" "$STAGE" "$STORE" "$local_restore_file" "${EXTRA[@]}"
+        ;;
+    # Comandos que NO usan servicio. db-backup opera sobre el
+    # servicio postgres del tenant (interno). bootstrap opera sobre
+    # el backend del tenant (interno).
+    db-backup|bootstrap)
+        "$cmd_fn" "$STAGE" "$STORE"
         ;;
     *)
         "$cmd_fn" "$STAGE" "$STORE" "$SERVICE"
