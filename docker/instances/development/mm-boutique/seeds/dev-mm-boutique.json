@@ -13,8 +13,8 @@
       ],
       "theme": {
         "short_name": "MM DEV",
-        "logo_path": "/images/stores/mm-boutique/brand/logo.webp",
-        "login_logo_path": "/images/stores/mm-boutique/brand/logo.webp",
+        "logo_path": "tenants/mm-boutique/branding/logo.webp",
+        "login_logo_path": "tenants/mm-boutique/branding/logo.webp",
         "accent_color": "#DB2777",
         "accent_hover_color": "#BE185D",
         "support_email": "support@dev.mm-boutique.test"

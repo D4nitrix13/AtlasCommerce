@@ -13,8 +13,8 @@
       ],
       "theme": {
         "short_name": "Morales DEV",
-        "logo_path": "/images/stores/morales-store/brand/logo.webp",
-        "login_logo_path": "/images/stores/morales-store/brand/logo.webp",
+        "logo_path": "tenants/morales-store/branding/logo.webp",
+        "login_logo_path": "tenants/morales-store/branding/logo.webp",
         "accent_color": "#2563EB",
         "accent_hover_color": "#1D4ED8",
         "support_email": "support@dev.morales-store.test"
