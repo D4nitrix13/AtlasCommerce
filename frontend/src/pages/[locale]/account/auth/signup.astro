@@ -16,7 +16,7 @@ const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
 <AuthLayout title={`${t["auth.signup.shell.heading"]} · ${brand.name}`}>
   <AuthShell
-    illustration=`/images/stores/${Astro.locals.tenant?.tenantSlug ?? "panda-estampados"}/amico/auth/signup-amico.svg`
+    illustration=`/images/amico/auth/signup-amico.svg`
     illustrationAlt={t["auth.shell.illustration.alt"]}
     leftHeading={t["auth.signup.shell.leftHeading"]}
     leftBody={t["auth.signup.shell.leftBody"]}
