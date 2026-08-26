@@ -5,12 +5,43 @@ on:
     branches: [master, main]
   pull_request:
     branches: [master, main]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  pre-commit-info:
+    name: Pre-commit local check info
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print local pre-commit commands
+        run: |
+          echo "## Local pre-commit checklist" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo 'Antes de pushear, corré estos comandos localmente:' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo '# Backend' >> $GITHUB_STEP_SUMMARY
+          echo 'cd backend' >> $GITHUB_STEP_SUMMARY
+          echo 'composer precommit  # = lint:dirty + analyse + test' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '# Frontend' >> $GITHUB_STEP_SUMMARY
+          echo 'cd frontend' >> $GITHUB_STEP_SUMMARY
+          echo 'pnpm run typecheck && pnpm run lint && pnpm exec prettier --check "src/**/*.{ts,tsx,astro,css,md}"' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '# Docs' >> $GITHUB_STEP_SUMMARY
+          echo 'cd ..' >> $GITHUB_STEP_SUMMARY
+          echo 'markdownlint "**/*.md" --ignore node_modules --ignore vendor --ignore dist --ignore .astro' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '# Infra (Docker — paths absolutos)' >> $GITHUB_STEP_SUMMARY
+          echo './scripts/docker/quality-check.sh' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
   backend-quality:
     name: Backend (Laravel)
     runs-on: ubuntu-latest
@@ -35,14 +66,14 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: pgsql, intl, zip, gd
           coverage: none
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Cache Composer
         uses: actions/cache@v4
@@ -133,10 +164,62 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Install markdownlint
-        run: npm install -g markdownlint-cli@0.42
+      - name: Install markdownlint-cli2
+        run: npm install -g markdownlint-cli2@0.18
 
       - name: Lint Markdown
-        run: markdownlint '**/*.md' --ignore node_modules --ignore vendor --ignore dist --ignore .astro
+        run: markdownlint-cli2 '**/*.md' '#node_modules' '#vendor' '#dist' '#.astro' '#frontend/dist' '#backend/storage' '**/*.md'
+
+  infra-quality:
+    name: Infra (Docker)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Docker changes
+        id: docker
+        run: |
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q '^docker/' || \
+             git diff --name-only origin/master...HEAD 2>/dev/null | grep -q '^docker/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Docker Quality Check (paths absolutos)
+        if: steps.docker.outputs.changed == 'true'
+        run: |
+          # Verifica que todos los comandos en docker/instances/*/*.sh
+          # y docker/instances/*/Dockerfile* usen paths absolutos.
+          # Regla: cualquier binario invocado desde RUN, CMD, ENTRYPOINT
+          # debe tener ruta absoluta (mitiga PATH hijacking).
+          bash ./scripts/docker/quality-check.sh
+
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [backend-quality, frontend-quality, docs-quality, infra-quality]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | ------ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend (Laravel) | ${{ needs.backend-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend (Astro)  | ${{ needs.frontend-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docs (Markdown)   | ${{ needs.docs-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Infra (Docker)    | ${{ needs.infra-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Si algo fallo, corre los comandos locales del job 'Pre-commit local check info'." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.backend-quality.result }}" != "success" ] || \
+             [ "${{ needs.frontend-quality.result }}" != "success" ] || \
+             [ "${{ needs.docs-quality.result }}" != "success" ] || \
+             [ "${{ needs.infra-quality.result }}" != "success" ]; then
+            exit 1
+          fi
