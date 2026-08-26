@@ -165,14 +165,38 @@ final class StorefrontAssetTest extends TestCase
     public function it_strips_leading_slashes_from_path(): void
     {
         Storage::disk(name: 'ftp')->put(
-            path: 'tenants/panda-estampados/branding/logo.webp',
+            path: 'tenants/panda-estampados/brand/logo.webp',
             contents: 'content',
         );
 
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets//tenants/panda-estampados/branding/logo.webp');
+        ])->get(uri: '/api/storefront/assets//tenants/panda-estampados/brand/logo.webp');
 
         $response->assertOk();
+    }
+
+    #[Test]
+    public function it_caches_assets_in_redis_with_24h_ttl(): void
+    {
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/logo.webp',
+            contents: 'cached-content',
+        );
+
+        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: 'tenants/panda-estampados/branding/logo.webp');
+
+        // Antes del request: cache no existe.
+        $this->assertFalse(condition: \Illuminate\Support\Facades\Cache::store(name: 'redis')->has(key: $cacheKey));
+
+        // Hacer el request: dispara cache miss + lectura FTP + escritura en cache.
+        $this->withServerVariables(serverVariables: [
+            'HTTP_HOST' => 'panda-estampados.test',
+        ])->get(uri: '/api/storefront/assets/tenants/panda-estampados/branding/logo.webp')
+            ->assertOk();
+
+        // Despues del request: cache existe.
+        $this->assertTrue(condition: \Illuminate\Support\Facades\Cache::store(name: 'redis')->has(key: $cacheKey));
+        $this->assertSame(expected: 'cached-content', actual: \Illuminate\Support\Facades\Cache::store(name: 'redis')->get(key: $cacheKey));
     }
 }
