@@ -13,8 +13,8 @@
       ],
       "theme": {
         "short_name": "Panda DEV",
-        "logo_path": "/images/stores/panda-estampados/brand/logo.webp",
-        "login_logo_path": "/images/stores/panda-estampados/brand/logo.webp",
+        "logo_path": "tenants/panda-estampados/branding/logo.webp",
+        "login_logo_path": "tenants/panda-estampados/branding/logo.webp",
         "accent_color": "#DC2626",
         "accent_hover_color": "#B91C1C",
         "support_email": "support@dev.panda-estampados.test"
@@ -33,8 +33,8 @@
       ],
       "theme": {
         "short_name": "Kitsune DEV",
-        "logo_path": "/images/stores/kitsune/brand/logo.svg",
-        "login_logo_path": "/images/stores/kitsune/brand/logo.svg",
+        "logo_path": "tenants/kitsune/branding/logo.svg",
+        "login_logo_path": "tenants/kitsune/branding/logo.svg",
         "accent_color": "#7C3AED",
         "accent_hover_color": "#6D28D9",
         "support_email": "support@dev.kitsune.test"

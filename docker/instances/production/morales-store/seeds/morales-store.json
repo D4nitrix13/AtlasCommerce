@@ -13,8 +13,8 @@
       ],
       "theme": {
         "short_name": "Morales",
-        "logo_path": "/images/stores/morales-store/brand/logo.svg",
-        "login_logo_path": "/images/stores/morales-store/brand/logo.svg",
+        "logo_path": "tenants/morales-store/branding/logo.svg",
+        "login_logo_path": "tenants/morales-store/branding/logo.svg",
         "accent_color": "#0EA5E9",
         "accent_hover_color": "#0284C7",
         "support_email": "support@morales-store.com"
