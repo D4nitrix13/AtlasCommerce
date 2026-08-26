@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Storefront;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
  *     tenants/{tenant-slug}/products/{product-slug}/{hash}.{ext}
  *
  * El browser no puede pedirlos directo al FTP (no es HTTP, no es
- * público, etc.), entonces este controller hace de proxy:
+ * publico, etc.), entonces este controller hace de proxy:
  *
  *     GET /api/storefront/assets/{path...}
  *
@@ -27,6 +28,14 @@ use Symfony\Component\HttpFoundation\Response;
  * que el `path` solicitado vive bajo el namespace del tenant activo
  * o bajo `shared/` (assets de marca compartida). Esto evita que un
  * tenant sirva accidentalmente un asset de otro tenant.
+ *
+ * Cache:
+ *   El contenido binario se cachea en Redis (store `redis`) con TTL
+ *   de 24h. Esto elimina la latencia del FTP en requests repetidos:
+ *   primera peticion lee FTP + cachea, siguientes leen Redis. Si el
+ *   archivo cambia en FTP, expira despues del TTL y se regenera.
+ *   Para invalidar inmediatamente, el command `assets:invalidate-cache`
+ *   (TBD) borra todas las claves con prefijo `ftp-asset:`.
  *
  * Headers de respuesta:
  *   - Content-Type:    inferido de la extension
@@ -77,7 +86,21 @@ class AssetController extends Controller
             return response(content: 'Not found', status: 404);
         }
 
-        $contents = $disk->get(path: $normalizedPath);
+        // Cache en Redis con TTL 24h. La key usa sha256 del path para
+        // longitud fija y evitar colisiones. Cachea el contenido binario
+        // para eliminar latencia del FTP en requests repetidos.
+        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $normalizedPath);
+        $ttl = 86400; // 24 horas
+        $contents = Cache::store(name: 'redis')->remember(
+            key: $cacheKey,
+            ttl: $ttl,
+            callback: fn (): string|false => $disk->get(path: $normalizedPath),
+        );
+
+        if ($contents === false) {
+            return response(content: 'Cache miss - FTP read failed', status: 500);
+        }
+
         $mimeType = $disk->mimeType(path: $normalizedPath) ?? 'application/octet-stream';
         $etag = '"'.md5($contents).'"';
 
