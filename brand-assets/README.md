@@ -42,12 +42,12 @@ brand-assets/
 └── frontend/                        # Categoria B — assets estaticos del framework
     └── amico/
         └── auth/                    # SVG illustrations para paginas de auth
-            ├── forgot-password-amico.svg
-            ├── login-amico.svg
-            ├── signup-amico.svg
-            ├── reset-password-amico.svg
-            ├── reset-success-amico.svg
-            └── verified-amico.svg
+            ├── forgot-password.svg
+            ├── login.svg
+            ├── signup.svg
+            ├── reset-password.svg
+            ├── success.svg
+            └── verified.svg
 ```
 
 ### Las 3 categorias
@@ -107,7 +107,7 @@ Para dev:
 
 ```bash
 # Una sola vez cuando se hace setup
-cp -r brand-assets/frontend/* frontend/public/images/
+cp brand-assets/frontend/amico/auth/*.svg frontend/public/images/amico/auth/
 
 # O via el script de setup (TBD)
 ./scripts/docker-stack.sh setup dev  # lo automatiza
@@ -115,6 +115,11 @@ cp -r brand-assets/frontend/* frontend/public/images/
 
 Para prod: el build del frontend incluye esos archivos via el script
 de deploy (TBD).
+
+**Naming**: los archivos en `frontend/amico/auth/` NO llevan sufijo
+`-amico` porque ya estan dentro del directorio `amico/`. La convencion
+es que el directorio padre provee el namespace, el archivo solo
+describe el asset concreto.
 
 ---
 
