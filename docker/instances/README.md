@@ -12,7 +12,7 @@ misma base de código (este repo) pero tienen:
 
 | Instancia | Tiendas | Dominios | Archivo de seed |
 | --------- | ------- | -------- | ---------------- |
-| `panda-estampados/` | Panda + Kitsune | `panda-estampados.com`, `kitsune.com` | `seeds/panda.json` |
+| `panda-estampados-and-kitsune/` | Panda + Kitsune | `panda-estampados.com`, `kitsune.com` | `seeds/panda.json` |
 | `mm-boutique/` | MM Boutique | `mm-boutique.com` | `seeds/mm-boutique.json` |
 | `morales-store/` | Morales Store | `morales-store.com` | `seeds/morales-store.json` |
 
@@ -99,7 +99,7 @@ o servicio de backup con snapshot de ese volumen + push a S3.
 ## Multi-tenancy dentro de una instancia
 
 Es posible tener 2+ tiendas en la misma instancia. Por ejemplo
-`panda-estampados/` tiene Panda + Kitsune juntas porque son del mismo
+`panda-estampados-and-kitsune/` tiene Panda + Kitsune juntas porque son del mismo
 cliente. El JSON de seed declara ambos tenants:
 
 ```json

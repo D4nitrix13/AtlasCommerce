@@ -21,7 +21,7 @@
 ```txt
 brand-assets/
 ├── store/                           # Categoria A — per-tenant, configurable
-│   ├── panda-estampados/
+│   ├── panda-estampados-and-kitsune/
 │   │   ├── logo.webp                # Logo principal
 │   │   ├── favicon.webp             # Favicon del browser
 │   │   ├── og-image.webp             # Open Graph (redes sociales)

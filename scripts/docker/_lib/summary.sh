@@ -68,7 +68,7 @@ show_target_summary() {
     esac
 
     # Contar instancias objetivo (1..3, nunca más: dentro de un stage
-    # siempre son 3 tiendas — panda-estampados, mm-boutique, morales-store).
+    # siempre son 3 tiendas — panda-estampados-and-kitsune, mm-boutique, morales-store).
     local count
     if [[ "$store_raw" == "all" ]]; then
         count=$(printf '%s\n' "${ALL_INSTANCES[@]}" | /usr/bin/grep -c "^${stage_label}:" || true)

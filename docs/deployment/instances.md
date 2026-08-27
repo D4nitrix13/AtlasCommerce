@@ -12,7 +12,7 @@ Cada instancia se deploya independientemente:
 
 | Instancia | Servidor | Tiendas |
 | --------- | -------- | ------- |
-| `panda-estampados/` | Server A (multi-tenant) | Panda + Kitsune |
+| `panda-estampados-and-kitsune/` | Server A (multi-tenant) | Panda + Kitsune |
 | `mm-boutique/` | Server B (single-tenant) | MM Boutique |
 | `morales-store/` | Server C (single-tenant) | Morales Store |
 

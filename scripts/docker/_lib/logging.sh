@@ -15,10 +15,24 @@ log_bold()  { printf "${C_BOLD}%s${C_RESET}\n" "$*"; }
 # caller — usar SIEMPRE rutas absolutas (/usr/bin/docker, /usr/bin/id,
 # etc.) para evitar path hijacking.
 #
+# Display-only: si el comando contiene rutas bajo $HOME, se reemplazan
+# por `~/...` para que el log sea legible. La ejecución usa SIEMPRE
+# la ruta absoluta del caller (el script no toca el comando), asi que
+# esto es solo cosmético.
+#
 # Variante single-line. Usada por inspection/* y volumes/* cuando
 # ejecutan `docker` directo (no `docker_compose`). Para compose,
 # preferí `log_cmd_block` que es multi-línea y coloreado por sección.
-log_cmd()   { printf "${C_DIM}[cmd]${C_RESET}  %s\n" "$*"; }
+log_cmd() {
+    local msg="$*"
+    # Acortar "$HOME/" → "~/" en cualquier ocurrencia. Si $HOME no esta
+    # seteado o es la raiz (/), no tocar el mensaje. La ejecución del
+    # caller usa la ruta ABSOLUTA original — esto es solo cosmético.
+    if [[ -n "$HOME" && "$HOME" != "/" ]]; then
+        msg="${msg//$HOME\//~\/}"
+    fi
+    printf "${C_DIM}[cmd]${C_RESET}  %s\n" "$msg"
+}
 
 # log_cmd_block <cd_path> <env_string> <docker_token...>
 # Imprime el comando `docker compose` con formato multi-línea y color
@@ -47,6 +61,18 @@ log_cmd_block() {
     local cd_path="$1"
     local env_string="$2"
     shift 2
+
+    # Display-only: acortar $HOME/ → ~/ en cd_path y en los tokens.
+    # Si $HOME no esta seteado o es /, no tocar nada.
+    if [[ -n "$HOME" && "$HOME" != "/" ]]; then
+        cd_path="${cd_path//$HOME\//~\/}"
+        local t new_args=()
+        for t in "$@"; do
+            t="${t//$HOME\//~\/}"
+            new_args+=("$t")
+        done
+        set -- "${new_args[@]}"
+    fi
 
     # Newline literal via ANSI-C quoting — bash en double-quotes NO
     # expande \n (lo deja como 2 chars literales), por eso usamos $'\n'.

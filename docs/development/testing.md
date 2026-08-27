@@ -164,7 +164,7 @@ test("admin login en Admin Panda", async ({ page }) => {
 
   await expect(page).toHaveTitle(/Panda Estampados/);
 
-  await page.getByLabel("Email").fill("admin@panda-estampados.test");
+  await page.getByLabel("Email").fill("admin@panda-estampados-and-kitsune.test");
   await page.getByLabel("Password").fill("password");
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
 

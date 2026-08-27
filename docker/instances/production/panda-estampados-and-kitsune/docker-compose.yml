@@ -6,7 +6,7 @@
 # con defaults embebidos. Si el archivo no existe, igual funciona.
 #
 # Networking:
-#   - Red dedicada `panda-estampados` (subnet 172.21.0.0/24).
+#   - Red dedicada `panda-estampados-and-kitsune` (subnet 172.21.0.0/24).
 #   - Cada servicio tiene IP fija (ver bloque networks al final).
 #   - El host Caddy enruta `panda-estampados.com` y `kitsune.com`
 #     a 172.21.0.20:8000 (API) y 172.21.0.21:4321 (frontend).
@@ -15,8 +15,8 @@ services:
   app:
     build:
       context: ../../../..
-      dockerfile: docker/instances/production/panda-estampados/backend/Dockerfile.production
-    container_name: panda-estampados-app
+      dockerfile: docker/instances/production/panda-estampados-and-kitsune/backend/Dockerfile.production
+    container_name: panda-estampados-and-kitsune-app
     restart: unless-stopped
     # Run as www-data (UID 33) — never root. The build chowns
     # /var/www/html to www-data so the runtime has full access.
@@ -67,14 +67,14 @@ services:
       ftp:
         condition: service_started
     networks:
-      panda-estampados:
+      panda-estampados-and-kitsune:
         ipv4_address: 172.21.0.20
 
   frontend:
     build:
       context: ../../../..
-      dockerfile: docker/instances/production/panda-estampados/frontend/Dockerfile.production
-    container_name: panda-estampados-frontend
+      dockerfile: docker/instances/production/panda-estampados-and-kitsune/frontend/Dockerfile.production
+    container_name: panda-estampados-and-kitsune-frontend
     restart: unless-stopped
     # Run as node (UID 1000) — never root. The bundle SSR only reads
     # files and writes logs to stdout.
@@ -91,7 +91,7 @@ services:
     depends_on:
       - app
     networks:
-      panda-estampados:
+      panda-estampados-and-kitsune:
         ipv4_address: 172.21.0.21
 
   db:
@@ -100,7 +100,7 @@ services:
     # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
     # setear user: explícito. Sin esto, postgres rehúsa correr como root.
     user: "999:999"
-    container_name: panda-estampados-db
+    container_name: panda-estampados-and-kitsune-db
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -122,12 +122,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      panda-estampados:
+      panda-estampados-and-kitsune:
         ipv4_address: 172.21.0.10
 
   redis:
     image: ${REDIS_IMAGE:-redis:7-alpine}
-    container_name: panda-estampados-redis
+    container_name: panda-estampados-and-kitsune-redis
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -142,12 +142,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      panda-estampados:
+      panda-estampados-and-kitsune:
         ipv4_address: 172.21.0.11
 
   ftp:
     image: ${VSFTPD_IMAGE:-fauria/vsftpd}
-    container_name: panda-estampados-ftp
+    container_name: panda-estampados-and-kitsune-ftp
     restart: unless-stopped
     env_file:
       - ../../../versions.env
@@ -165,11 +165,11 @@ services:
     volumes:
       - ftp-data:${FTP_ROOT:-/srv/ftp}
     networks:
-      panda-estampados:
+      panda-estampados-and-kitsune:
         ipv4_address: 172.21.0.12
 
 networks:
-  panda-estampados:
+  panda-estampados-and-kitsune:
     driver: bridge
     ipam:
       config:
@@ -181,4 +181,4 @@ volumes:
   storage-app:
   bootstrap-app:
   ftp-data:
-    name: panda-estampados-ftp-data
+    name: panda-estampados-and-kitsune-ftp-data

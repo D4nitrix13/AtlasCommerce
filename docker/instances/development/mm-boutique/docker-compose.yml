@@ -53,8 +53,10 @@ services:
     command:
       - /usr/local/bin/redis-server
       - /usr/local/etc/redis/redis.conf
+    # Named en /data para evitar volumenes anonimos de la imagen redis:7-alpine.
     volumes:
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ecommerce_mm_boutique_dev_redis_data:/data
     ports:
       - "${REDIS_PORT:-7379}:6379"
     healthcheck:
@@ -83,8 +85,11 @@ services:
       - PASV_MIN_PORT=${FTP_PASV_MIN_PORT:-40000}
       - PASV_MAX_PORT=${FTP_PASV_MAX_PORT:-40100}
       - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
+    # Named para los VOLUMEs anonimos de la imagen fauria/vsftpd.
     volumes:
+      - ecommerce_mm_boutique_dev_ftp_home:/home/vsftpd
       - ecommerce_mm_boutique_dev_ftp_data:/srv/ftp
+      - ecommerce_mm_boutique_dev_ftp_logs:/var/log/vsftpd
     networks:
       - mm-boutique-dev
 
@@ -132,7 +137,7 @@ services:
       # Sanctum stateful hosts (los hosts desde los que se aceptan cookies
       # httpOnly stateful). Multi-tenant: cada tenant × env. Forzado en
       # compose para que Dotenv (que NO override existing env vars) lo vea.
-      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000,localhost:4321,panda-estampados.test,www.panda-estampados.test,admin.panda-estampados.test,kitsune.test,www.kitsune.test,admin.kitsune.test,mm-boutique.test,www.mm-boutique.test,admin.mm-boutique.test,morales-store.test,www.morales-store.test,admin.morales-store.test,panda-estampados.com,www.panda-estampados.com,admin.panda-estampados.com,kitsune.com,www.kitsune.com,admin.kitsune.com,mm-boutique.com,www.mm-boutique.com,admin.mm-boutique.com,morales-store.com,www.morales-store.com,admin.morales-store.com,127.0.0.1,127.0.0.1:8000
+      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000,localhost:4321,panda-estampados-and-kitsune.test,www.panda-estampados-and-kitsune.test,admin.panda-estampados-and-kitsune.test,kitsune.test,www.kitsune.test,admin.kitsune.test,mm-boutique.test,www.mm-boutique.test,admin.mm-boutique.test,morales-store.test,www.morales-store.test,admin.morales-store.test,panda-estampados-and-kitsune.com,www.panda-estampados-and-kitsune.com,admin.panda-estampados-and-kitsune.com,kitsune.com,www.kitsune.com,admin.kitsune.com,mm-boutique.com,www.mm-boutique.com,admin.mm-boutique.com,morales-store.com,www.morales-store.com,admin.morales-store.com,127.0.0.1,127.0.0.1:8000
       # OAuth social login (Google + Facebook). Pegar creds en
       # environment/.env (NO en este compose). Vacíos → redirect 503.
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
@@ -154,7 +159,7 @@ services:
 
   # Sidecar nginx — agrega capa HTTP para que Caddy (en host) pueda
   # hacer `reverse_proxy localhost:${BACKEND_PORT}` con transporte HTTP
-  # y no FastCGI. Mismo patrón que en panda-estampados y morales-store.
+  # y no FastCGI. Mismo patrón que en panda-estampados-and-kitsune y morales-store.
   #
   # Cadena de requests:
   #   curl host:${BACKEND_PORT} → nginx:8000 (sidecar, vía port mapping)
@@ -222,7 +227,7 @@ services:
       - mm-boutique-dev
 
   # Mailpit: SMTP catcher para dev. Ver docker/instances/development/
-  # panda-estampados/docker-compose.yml para detalles. UI expuesta
+  # panda-estampados-and-kitsune/docker-compose.yml para detalles. UI expuesta
   # en el host en el puerto :18025 para no chocar con otros stacks.
   mailpit:
     image: ${MAILPIT_IMAGE:-axllent/mailpit:latest}
@@ -231,6 +236,50 @@ services:
     ports:
       - "${MAILPIT_SMTP_PORT:-11025}:1025"
       - "${MAILPIT_UI_PORT:-18025}:8025"
+    networks:
+      - mm-boutique-dev
+
+  pgadmin:
+    image: ${PGADMIN_IMAGE:-dpage/pgadmin4:latest}
+    container_name: mm-boutique-dev-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@mm-boutique.test}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+      - PGADMIN_LISTEN_PORT=80
+    ports:
+      - "${PGADMIN_PORT:-7050}:80"
+    volumes:
+      - ecommerce_mm_boutique_dev_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mm-boutique-dev
+
+  redis-insight:
+    image: ${REDIS_INSIGHT_IMAGE:-redis/redisinsight:latest}
+    container_name: mm-boutique-dev-redis-insight
+    restart: unless-stopped
+    ports:
+      - "${REDIS_INSIGHT_PORT:-7540}:5540"
+    volumes:
+      - ecommerce_mm_boutique_dev_redis_insight_data:/db
+    depends_on:
+      - redis
+    networks:
+      - mm-boutique-dev
+
+  filebrowser:
+    image: ${FILEBROWSER_IMAGE:-filebrowser/filebrowser:latest}
+    container_name: mm-boutique-dev-filebrowser
+    restart: unless-stopped
+    ports:
+      - "${FILEBROWSER_PORT:-10080}:80"
+    volumes:
+      - ecommerce_mm_boutique_dev_ftp_data:/srv/ftp:ro
+      - ecommerce_mm_boutique_dev_filebrowser_config:/config
+      - ecommerce_mm_boutique_dev_filebrowser_db:/database
     networks:
       - mm-boutique-dev
 
@@ -247,8 +296,22 @@ volumes:
     name: ecommerce_mm_boutique_dev_bootstrap
   ecommerce_mm_boutique_dev_logs:
     name: ecommerce_mm_boutique_dev_logs
+  ecommerce_mm_boutique_dev_redis_data:
+    name: ecommerce_mm_boutique_dev_redis_data
+  ecommerce_mm_boutique_dev_redis_insight_data:
+    name: ecommerce_mm_boutique_dev_redis_insight_data
   ecommerce_mm_boutique_dev_ftp_data:
     name: ecommerce_mm_boutique_dev_ftp_data
+  ecommerce_mm_boutique_dev_ftp_home:
+    name: ecommerce_mm_boutique_dev_ftp_home
+  ecommerce_mm_boutique_dev_ftp_logs:
+    name: ecommerce_mm_boutique_dev_ftp_logs
+  ecommerce_mm_boutique_dev_pgadmin_data:
+    name: ecommerce_mm_boutique_dev_pgadmin_data
+  ecommerce_mm_boutique_dev_filebrowser_config:
+    name: ecommerce_mm_boutique_dev_filebrowser_config
+  ecommerce_mm_boutique_dev_filebrowser_db:
+    name: ecommerce_mm_boutique_dev_filebrowser_db
   ecommerce_mm_boutique_dev_node_modules:
     name: ecommerce_mm_boutique_dev_node_modules
   ecommerce_mm_boutique_dev_pnpm_store:

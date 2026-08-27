@@ -6,7 +6,7 @@
 #
 # Somos el ÚNICO módulo que sabe dónde vive cada instancia en el FS.
 # El resto del orquestador consume instancias en formato `<stage>:<store>`
-# (ej: `production:panda-estampados`), el mismo que devuelve
+# (ej: `production:panda-estampados-and-kitsune`), el mismo que devuelve
 # resolve_targets. Esto nos permite agregar / quitar tiendas tocando
 # solo este archivo.
 
@@ -18,8 +18,13 @@ INSTANCES_DIR="${ROOT_DIR}/docker/instances"
 
 # Stages y stores disponibles como fuente de verdad única. Cualquier
 # comando que liste o valide stages/stores consume estos arrays.
+#
+# `panda-estampados-and-kitsune` es una sola instancia Docker multi-tenant
+# que hospeda 2 sub-tenants (Pandas Estampados + Kitsune). Renombrado
+# desde `panda-estampados-and-kitsune` para que el nombre refleje la multi-tenancy
+# y no parezca solo el tenant Pandas.
 STAGES=(production development)
-STORES=(panda-estampados mm-boutique morales-store)
+STORES=(panda-estampados-and-kitsune mm-boutique morales-store)
 
 # Construimos ALL_INSTANCES (y las sublistas por stage) cruzando
 # STAGES x STORES. Formato: `<stage>:<store>` — mismo formato que se
@@ -106,7 +111,7 @@ instance_env_file() {
 #   svc    → (opcional) nombre de servicio a pasar a compose
 #
 # Ejemplos:
-#   resolve_targets development panda-estampados         → 1 instancia dev
+#   resolve_targets development panda-estampados-and-kitsune → 1 instancia dev
 #   resolve_targets dev all                             → 3 dev
 #   resolve_targets production mm-boutique backend      → 1 prod con svc
 #   resolve_targets prod all                            → 3 prod

@@ -12,7 +12,7 @@
 # tiendas del stage.
 #
 # Uso:
-#   rm-volumes dev panda-estampados          # 1 dev
+#   rm-volumes dev panda-estampados-and-kitsune          # 1 dev
 #   rm-volumes -y dev all                   # 3 dev, sin confirmación
 #   rm-volumes production mm-boutique        # 1 prod
 cmd_rm_volumes() {

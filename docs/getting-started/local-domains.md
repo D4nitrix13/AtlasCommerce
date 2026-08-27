@@ -117,7 +117,7 @@ curl -sI http://admin.kitsune.com/login
 # API
 curl -s -X POST http://panda-estampados.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@panda-estampados.test","password":"password"}'
+  -d '{"email":"admin@panda-estampados-and-kitsune.test","password":"password"}'
 ```
 
 En el browser:

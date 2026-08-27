@@ -167,7 +167,7 @@ php artisan tinker
 >>> User::count()
 => 1
 >>> User::find(1)->email
-=> "admin@panda-estampados.test"
+=> "admin@panda-estampados-and-kitsune.test"
 ```
 
 Para debug rápido:

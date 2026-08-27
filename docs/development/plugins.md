@@ -178,7 +178,7 @@ Declara la feature en el JSON usado por `tenants:bootstrap`:
 {
     "tenants": [
         {
-            "slug": "panda-estampados",
+            "slug": "panda-estampados-and-kitsune",
             "features": {
                 "erp": true
             }
@@ -202,7 +202,7 @@ Después de cambiar el JSON, ejecuta el bootstrap de la instancia:
 ```bash
 cd backend
 docker compose exec app php artisan tenants:bootstrap \
-  docker/instances/panda-estampados/seeds/panda.json
+  docker/instances/panda-estampados-and-kitsune/seeds/panda.json
 ```
 
 ## Instalar un plugin
