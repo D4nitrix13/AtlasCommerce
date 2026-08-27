@@ -396,30 +396,32 @@ fi
 # se evita el typo silencioso de correr `up dev panda-estampados-and-kitsune`
 # (sin servicio) que arrancaba TODOS los servicios (postgres, redis, ftp,
 # backend, frontend, nginx, mailpit, pgadmin, redis-insight, filebrowser).
-# Para arrancar todo, el usuario debe ser explicito: `up dev all`.
 #
-# "all" como SERVICE tampoco es valido: docker compose no lo reconoce
-# como nombre de servicio. Si el usuario quiere TODOS los servicios de
-# UNA instancia especifica, debe usar `up dev <store> <svc1> <svc2> ...`
-# o listar cada servicio explicitamente. Lo mas comodo: usar `up dev all`
-# para arrancar TODAS las instancias y todos sus servicios.
+# "all" tiene 2 significados validos:
+#   - Como STORE: TODAS las instancias del stage (`up dev all`)
+#   - Como SERVICE: TODOS los servicios de UNA instancia (`up dev <store> all`)
+# Cuando SERVICE es "all" y STORE es especifico, lo traducimos a string
+# vacio para que docker compose arranque todos los servicios. Asi:
+#   `up dev all`                  → todas las instancias, todos los servicios
+#   `up dev <store> all`          → 1 instancia, todos los servicios
+#   `up dev all backend`          → todas las instancias, solo backend
+#   `up dev <store> backend`      → 1 instancia, solo backend
+#   `up dev <store> b1 b2 b3`     → 1 instancia, varios servicios
 case "$cmd_canonical" in
     up|start|stop|restart|down|nuke|build)
         if [[ "$STORE" != "all" && -z "$SERVICE" ]]; then
-            log_err "'$cmd_canonical <store>' requiere servicio o 'all' en store."
+            log_err "'$cmd_canonical <store>' requiere servicio o 'all' (como servicio)."
             log_err "Si querés arrancar/detener TODOS los servicios de la instancia, usar:"
-            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE all${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE all${C_RESET}"
             log_err "Si querés solo 1 servicio (ej backend):"
             log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE backend${C_RESET}"
             exit 1
         fi
+        # "all" como SERVICE = todos los servicios de esta instancia.
+        # Lo traducimos a vacio para que docker compose use el default
+        # (levanta todos los servicios del compose).
         if [[ "$SERVICE" == "all" ]]; then
-            log_err "'all' no es un nombre de servicio valido."
-            log_err "Si querés TODOS los servicios de TODAS las instancias, usar:"
-            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE all${C_RESET}"
-            log_err "Si querés solo algunos servicios de la instancia, listarlos:"
-            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE backend frontend postgres${C_RESET}"
-            exit 1
+            SERVICE=""
         fi
         ;;
 esac
