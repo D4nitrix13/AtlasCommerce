@@ -394,9 +394,15 @@ fi
 # Comandos que operan sobre servicios: si el usuario pasa una tienda
 # ESPECIFICA (no "all"), DEBE especificar tambien el servicio. Asi
 # se evita el typo silencioso de correr `up dev panda-estampados-and-kitsune`
-# (sin servicio) que arranca TODOS los servicios (postgres, redis, ftp,
+# (sin servicio) que arrancaba TODOS los servicios (postgres, redis, ftp,
 # backend, frontend, nginx, mailpit, pgadmin, redis-insight, filebrowser).
 # Para arrancar todo, el usuario debe ser explicito: `up dev all`.
+#
+# "all" como SERVICE tampoco es valido: docker compose no lo reconoce
+# como nombre de servicio. Si el usuario quiere TODOS los servicios de
+# UNA instancia especifica, debe usar `up dev <store> <svc1> <svc2> ...`
+# o listar cada servicio explicitamente. Lo mas comodo: usar `up dev all`
+# para arrancar TODAS las instancias y todos sus servicios.
 case "$cmd_canonical" in
     up|start|stop|restart|down|nuke|build)
         if [[ "$STORE" != "all" && -z "$SERVICE" ]]; then
@@ -405,6 +411,14 @@ case "$cmd_canonical" in
             log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE all${C_RESET}"
             log_err "Si querés solo 1 servicio (ej backend):"
             log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE backend${C_RESET}"
+            exit 1
+        fi
+        if [[ "$SERVICE" == "all" ]]; then
+            log_err "'all' no es un nombre de servicio valido."
+            log_err "Si querés TODOS los servicios de TODAS las instancias, usar:"
+            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE all${C_RESET}"
+            log_err "Si querés solo algunos servicios de la instancia, listarlos:"
+            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE backend frontend postgres${C_RESET}"
             exit 1
         fi
         ;;
