@@ -68,13 +68,12 @@ return [
             'username' => env('FTP_USERNAME'),
             'password' => env('FTP_PASSWORD'),
             'port' => (int) env('FTP_PORT', 21),
-            // Default `/srv/ftp/images` (no `/srv/ftp` raíz) para que
-            // todos los assets de tenant vivan en un subdirectorio
-            // dedicado. Documentado en
-            // docs/architecture/assets-naming-convention.md §2.4.
-            // Sobre-escribible via env si una instancia necesita otra
-            // ruta (ej. instancia legada con assets en la raíz).
-            'root' => env('FTP_ROOT', '/srv/ftp/images'),
+            // Default `/srv/ftp` (raíz del HOME del FTP user). El command
+            // assets:sync-from-public crea automaticamente los subdirectorios
+            // tenants/{slug}/branding/ y shared/ cuando los necesita.
+            // Documentado en docs/architecture/assets-naming-convention.md §2.4.
+            // Sobre-escribible via env si una instancia necesita otra ruta.
+            'root' => env('FTP_ROOT', '/srv/ftp'),
             'passive' => (bool) env('FTP_PASSIVE', true),
             'ssl' => (bool) env('FTP_SSL', false),
             'timeout' => (int) env('FTP_TIMEOUT', 30),

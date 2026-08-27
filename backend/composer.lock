@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "17908cb30d0f8f9de484562dfaa7ebc0",
+    "content-hash": "859ad32e54dcf28fda7f51f42bc3693b",
     "packages": [
         {
             "name": "brick/math",
@@ -213,7 +213,7 @@
         },
         {
             "name": "d4nitrix13/ecommerce-plugin-erp",
-            "version": "dev-master",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "packages/ecommerce-plugin-erp",
@@ -2064,6 +2064,56 @@
                 "source": "https://github.com/thephpleague/flysystem/tree/3.35.2"
             },
             "time": "2026-07-06T14:42:07+00:00"
+        },
+        {
+            "name": "league/flysystem-ftp",
+            "version": "3.35.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/flysystem-ftp.git",
+                "reference": "6253a2041868a210afdcf06db185a116cdf28d35"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/flysystem-ftp/zipball/6253a2041868a210afdcf06db185a116cdf28d35",
+                "reference": "6253a2041868a210afdcf06db185a116cdf28d35",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ftp": "*",
+                "league/flysystem": "^3.0.0",
+                "league/mime-type-detection": "^1.0.0",
+                "php": "^8.0.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "League\\Flysystem\\Ftp\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frankdejonge.nl"
+                }
+            ],
+            "description": "FTP filesystem adapter for Flysystem.",
+            "keywords": [
+                "Flysystem",
+                "file",
+                "files",
+                "filesystem",
+                "ftp",
+                "ftpd"
+            ],
+            "support": {
+                "source": "https://github.com/thephpleague/flysystem-ftp/tree/3.35.3"
+            },
+            "time": "2026-08-16T17:47:54+00:00"
         },
         {
             "name": "league/flysystem-local",

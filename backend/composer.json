@@ -19,11 +19,12 @@
     ],
     "require": {
         "php": "^8.4",
-        "d4nitrix13/ecommerce-plugin-erp": "dev-master",
+        "d4nitrix13/ecommerce-plugin-erp": "dev-main",
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.0",
         "laravel/tinker": "^3.0",
+        "league/flysystem-ftp": "^3.0",
         "spatie/laravel-medialibrary": "^11.23"
     },
     "require-dev": {

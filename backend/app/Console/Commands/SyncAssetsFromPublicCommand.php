@@ -182,16 +182,64 @@ final class SyncAssetsFromPublicCommand extends Command
             return;
         }
 
-        if ($disk->exists(path: $destPath) && ! $isForce) {
-            $this->line(string: "  - {$destPath} ya existe (usar --force para sobrescribir)");
-            $stats['skipped']++;
+        if ($isDryRun) {
+            $this->line(string: "  - DRY-RUN: subiria {$sourcePath} -> {$destPath}");
+            $stats['uploaded']++;
 
             return;
         }
 
-        if ($isDryRun) {
-            $this->line(string: "  - DRY-RUN: subiria {$sourcePath} -> {$destPath}");
-            $stats['uploaded']++;
+        // Crear el directorio padre recursivamente. El driver FTP de
+        // Flysystem NO crea directorios padre automaticamente al hacer
+        // put(), asi que si la jerarquia tenants/kitsune/branding/
+        // no existe, el upload falla con 'Unable to resolve connection root'.
+        if (! $isDryRun) {
+            $parentDir = dirname(path: $destPath);
+            if ($parentDir !== '.' && $parentDir !== '/') {
+                // Crear recursivamente. makeDirectory solo crea 1 nivel,
+                // asi que iteramos desde el nivel mas bajo hasta el root.
+                // Usamos try/catch en exists() porque si el root no existe
+                // (FTP vacio), exists() lanza una excepcion en vez de devolver false.
+                $partsToCreate = [];
+                $current = $parentDir;
+                while ($current !== '.' && $current !== '/') {
+                    $parentExists = false;
+                    try {
+                        $parentExists = $disk->exists(path: $current);
+                    } catch (Throwable) {
+                        // Si el directorio no existe (FTP vacio o path invalido),
+                        // asumimos false y seguimos creando hacia arriba.
+                        $parentExists = false;
+                    }
+                    if ($parentExists) {
+                        break;
+                    }
+                    $partsToCreate[] = $current;
+                    $current = dirname(path: $current);
+                }
+                // Crear desde el nivel mas alto al mas bajo.
+                foreach (array_reverse(array: $partsToCreate) as $dirToCreate) {
+                    try {
+                        $disk->makeDirectory(path: $dirToCreate);
+                    } catch (Throwable) {
+                        // Si makeDirectory falla (ej. ya existe), ignorar.
+                    }
+                }
+            }
+        }
+
+        // Verificar si el archivo ya existe. Try/catch porque exists()
+        // puede lanzar excepcion si el directorio padre no existe.
+        $destExists = false;
+        try {
+            $destExists = $disk->exists(path: $destPath);
+        } catch (Throwable) {
+            $destExists = false;
+        }
+
+        if ($destExists && ! $isForce) {
+            $this->line(string: "  - {$destPath} ya existe (usar --force para sobrescribir)");
+            $stats['skipped']++;
 
             return;
         }
