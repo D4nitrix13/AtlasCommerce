@@ -13,6 +13,13 @@
 #   Flag             → C_BOLD + C_BRIGHT_RED
 #   Destructivo      → C_BOLD + C_BRIGHT_RED
 #   Comentario       → C_DIM
+#
+# Layout:
+#   comando  [flag]  <stage>  <store|all>  [<servicio>]   descripcion
+#
+# El padding se calcula en runtime con _help_pad() para que la columna
+# de descripcion quede alineada aunque los comandos tengan distinta
+# cantidad de columnas (ej: build tiene flag, fresh no).
 cmd_help() {
     /usr/bin/cat <<'SEPARATOR'
 
@@ -23,7 +30,7 @@ SEPARATOR
     printf "${C_BOLD}${C_CYAN}══════════════════════════════════════════════════════════════════════════${C_RESET}\n"
     printf "\n"
     printf "${C_BOLD}Uso${C_RESET}\n"
-    printf "  ${C_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<comando>${C_RESET} ${C_BRIGHT_GREEN}[flags]${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}<store|all>${C_RESET} ${C_BRIGHT_GREEN}[<servicio>]${C_RESET}\n"
+    printf "  ${C_CYAN}$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}<comando>${C_RESET} ${C_BRIGHT_GREEN}[flags]${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}<store|all>${C_RESET} ${C_BRIGHT_GREEN}[<servicio>]${C_RESET}\n"
     printf "\n"
     printf "${C_BOLD}Stages${C_RESET}  (color yellow en ejemplos)\n"
     printf "  ${C_BOLD}${C_BRIGHT_YELLOW}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
@@ -42,57 +49,61 @@ SEPARATOR
         "all"                   "→ todas las tiendas del stage"
     printf "\n"
 
-    printf "${C_BOLD}Comandos principales${C_RESET}\n"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "start"    "<stage>"      "<store|all>"       "[<svc>]"       "Levantar containers (preserva volúmenes)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "stop"     "<stage>"      "<store|all>"       "[<svc>]"       "Detener containers (preserva volúmenes)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "restart"  "<stage>"      "<store|all>"       "[<svc>]"       "Reiniciar containers"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "up"       "<stage>"      "<store|all>"       "[<svc>]"       "build + start (convenio docker compose)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_RED}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-10s${C_RESET} ${C_BRIGHT_GREEN}%-6s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "build"    "[no-cache]"   "<stage>"           "<store|all>"   "[<svc>]"  "Reconstruir imágenes (con cache por default)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "down"     "<stage>"      "<store|all>"       "[<svc>]"       "Detener y eliminar containers (preserva volúmenes)"
-    printf "  ${C_BOLD}${C_BRIGHT_RED}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_RED}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_RED}%-20s${C_RESET} ${C_BOLD}${C_BRIGHT_RED}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "nuke"     "<stage>"      "<store|all>"       "[<svc>]"       "⚠ down + eliminar volúmenes (BORRA DATOS)"
-    printf "\n"
+    # Calcular el ancho maximo de las primeras 4 columnas (cmd, flag,
+    # stage, store) para alinear las descripciones.
+    # IMPORTANTE: el delimitador entre campos es `;` (no `|`), porque
+    # `<store|all>` contiene un pipe literal que rompe el split.
+    local rows=(
+        # cmd;flag;stage;store;svc;desc
+        "start;        ;<stage>;      <store|all>;      [<svc>];Levantar containers (preserva volúmenes)"
+        "stop;         ;<stage>;      <store|all>;      [<svc>];Detener containers (preserva volúmenes)"
+        "restart;      ;<stage>;      <store|all>;      [<svc>];Reiniciar containers"
+        "up;           ;<stage>;      <store|all>;      [<svc>];build + start (recrea si .env cambia)"
+        "build;       [no-cache];<stage>;            <store|all>;[<svc>];Reconstruir imágenes (con cache por default)"
+        "down;         ;<stage>;      <store|all>;      [<svc>];Detener y eliminar containers (preserva volúmenes)"
+        "nuke;         ;<stage>;      <store|all>;      [<svc>];⚠ down + eliminar volúmenes (BORRA DATOS)"
+        "status;       ;<stage>;      <store|all>;      [<svc>];Estado de cada servicio (compose ps)"
+        "ps;           ;              ;                 ;              ;Lista de containers (vista rápida, todas las instancias)"
+        "info;         ;<stage>;      <store|all>;      [<svc>];Tabla detallada: imagen, comando, puertos, status"
+        "logs;         ;<stage>;      <store|all>;      <servicio>;Tail de logs (servicio REQUERIDO)"
+        "exec;         ;<stage>;      <store>;          <servicio> <cmd...>;Ejecuta <cmd> dentro del container"
+        "volumes;      ;<stage>;      <store|all>;      [<svc>];Lista volúmenes Docker (driver, mountpoint, size)"
+        "rm-volumes;  [-y];<stage>;   <store|all>;     [<svc>];⚠ Elimina volúmenes (pide confirmación o -y)"
+        "setup;        ;<stage>;      <store|all>;      ;              Primera instalación: copia .env.example + levanta"
+        "bootstrap;    ;<stage>;      <store>;          ;              Post-deploy: migrate, key:generate, caches (--with-seed, --with-backup)"
+        "fresh;        ;<stage>;      <store>;          ;              ⚠ Fresh start: down -v + rebuild + reinit + migrate + seed"
+        "db-backup;    ;<stage>;      <store>;          ;              Exporta BD a db-backups/<name>.sql.gz (--schema-only, --no-compress)"
+        "db-restore;   ;<stage>;      <store>;          <archivo>;     Carga dump en BD con pre-backup safety net (--force, --truncate)"
+        "hosts;        ;              ;                 ;              Imprime el bloque para /etc/hosts"
+        "caddy;        ;              ;                 ;              Imprime el Caddyfile a usar"
+        "help;         ;              ;                 ;              Muestra esta ayuda"
+    )
+    # Calcular anchos maximos por columna (5 primeras separadas por ;)
+    local max_cmd=0 max_flag=0 max_stage=0 max_store=0 max_svc=0
+    for row in "${rows[@]}"; do
+        IFS=';' read -r cmd flag stage store svc desc <<< "$row"
+        [[ ${#cmd}   -gt $max_cmd   ]] && max_cmd=${#cmd}
+        [[ ${#flag}  -gt $max_flag  ]] && max_flag=${#flag}
+        [[ ${#stage} -gt $max_stage ]] && max_stage=${#stage}
+        [[ ${#store} -gt $max_store ]] && max_store=${#store}
+        [[ ${#svc}   -gt $max_svc   ]] && max_svc=${#svc}
+    done
 
-    printf "${C_BOLD}Información${C_RESET}\n"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "status"   "<stage>"      "<store|all>"       "[<svc>]"       "Estado de cada servicio (compose ps)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_DIM}%-51s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "ps"       "(sin args)"                                "Lista de containers (vista rápida, todas las instancias)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "info"     "<stage>"      "<store|all>"       "[<svc>]"       "Tabla detallada: imagen, comando, puertos, status"
-    printf "\n"
-
-    printf "${C_BOLD}Logs y ejecución${C_RESET}\n"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "logs"     "<stage>"      "<store|all>"       "<servicio>"    "Tail de logs (servicio REQUERIDO)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-30s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "exec"     "<stage>"      "<store>"           "<servicio> <cmd...>" "Ejecuta <cmd> dentro del container"
-    printf "\n"
-
-    printf "${C_BOLD}Volúmenes${C_RESET}\n"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_BRIGHT_GREEN}%-13s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "volumes"      "<stage>"     "<store|all>"       "[<svc>]"       "Lista volúmenes Docker (driver, mountpoint, size)"
-    printf "  ${C_BOLD}${C_BRIGHT_RED}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_RED}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-10s${C_RESET} ${C_BRIGHT_GREEN}%-6s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "rm-volumes"   "[-y]"        "<stage>"           "<store|all>"   "[<svc>]"  "⚠ Elimina volúmenes (pide confirmación o -y)"
-    printf "\n"
-
-    printf "${C_BOLD}Setup y ayuda${C_RESET}\n"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "setup"    "<stage>"      "<store|all>"       "Primera instalación: copia .env.example, levanta"
-    printf "  ${C_BOLD}${C_BRIGHT_RED}%-10s${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}%-15s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-20s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "fresh"    "<stage>"      "<store>"           "⚠ Fresh start de 1 instancia (borra volumes + rebuild + reinit)"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_DIM}%-51s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "hosts"    ""                                       "Imprime el bloque para /etc/hosts"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_DIM}%-51s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "caddy"    ""                                       "Imprime el Caddyfile a usar"
-    printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}%-10s${C_RESET} ${C_DIM}%-51s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "help"     ""                                       "Muestra esta ayuda"
+    printf "${C_BOLD}Comandos${C_RESET}  (ancho calculado en runtime — siempre alineado)\n"
+    for row in "${rows[@]}"; do
+        IFS=';' read -r cmd flag stage store svc desc <<< "$row"
+        # Color: rojo si destructivo.
+        local cmd_color="${C_BOLD}${C_BRIGHT_MAGENTA}"
+        if [[ "$cmd" == "nuke"* || "$cmd" == "fresh"* || "$cmd" == "rm-volumes"* || "$cmd" == "db-restore"* ]]; then
+            cmd_color="${C_BOLD}${C_BRIGHT_RED}"
+        fi
+        local flag_color=""
+        [[ -n "$flag" ]] && flag_color="${C_BOLD}${C_BRIGHT_RED}${flag}${C_RESET} "
+        # Imprimir siempre 5 campos con padding fijo + separador `|`.
+        # El svc puede ser vacio; en ese caso queda padding en blanco.
+        printf "  ${cmd_color}%-${max_cmd}s${C_RESET} ${flag_color}%-${max_stage}s${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}%-${max_store}s${C_RESET} ${C_BRIGHT_GREEN}%-${max_svc}s  |${C_RESET} ${C_DIM}%s${C_RESET}\n" \
+            "$cmd" "$stage" "$store" "$svc" "$desc"
+    done
     printf "\n"
 
     printf "${C_BOLD}Aliases cortos${C_RESET}\n"
@@ -135,6 +146,12 @@ SEPARATOR
     printf "    ${C_DIM}borra los volúmenes de Panda dev sin pedir confirmación${C_RESET}\n"
     printf "  ${C_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}setup${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET}\n"
     printf "    ${C_DIM}primera instalación de las 3 dev (copia .env.example + levanta)${C_RESET}\n"
+    printf "  ${C_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}bootstrap${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}\n"
+    printf "    ${C_DIM}post-deploy: migrate + key:generate + caches (sin seeders)${C_RESET}\n"
+    printf "  ${C_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}db-backup${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}\n"
+    printf "    ${C_DIM}exporta BD a db-backups/<store>-<ts>.sql.gz${C_RESET}\n"
+    printf "  ${C_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}db-restore${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET} ${C_BRIGHT_GREEN}<archivo>${C_RESET}\n"
+    printf "    ${C_DIM}carga dump en BD con pre-backup safety net${C_RESET}\n"
     printf "  ${C_CYAN}\$0${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}fresh${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}\n"
     printf "    ${C_DIM}fresh start de Panda dev (borra volumes + rebuild + reinit)${C_RESET}\n"
     printf "\n"
