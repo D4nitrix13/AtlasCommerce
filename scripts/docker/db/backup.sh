@@ -79,19 +79,23 @@ cmd_db_backup() {
         output_path="db-backups/${stage}-${store}-${ts}.sql"
     fi
 
-    # Path absoluto (resuelve ~, relativo, etc.)
+    # Path: si es relativo, se resuelve desde ROOT_DIR (la raiz del
+    # repo). En el output mostramos el path relativo al repo (./...)
+    # para que sea portable entre maquinas, no el path absoluto del host.
+    local output_abs=""
     if [[ "$output_path" != /* ]]; then
-        output_path="${ROOT_DIR}/${output_path}"
+        output_abs="${ROOT_DIR}/${output_path}"
+    else
+        output_abs="$output_path"
     fi
-
     # Crear directorio si no existe
     local output_dir
-    output_dir="$(/usr/bin/dirname "$output_path")"
+    output_dir="$(/usr/bin/dirname "$output_abs")"
     /usr/bin/mkdir -p "$output_dir"
 
     log_bold "Exportando BD de ${first_inst}"
     log_info "Stage: ${C_BOLD}${stage}${C_RESET} · Store: ${C_BOLD}${store}${C_RESET}"
-    log_info "Output: ${C_BOLD}${output_path}${C_RESET}"
+    log_info "Output: ${C_BOLD}${output_path}${C_RESET} ${C_DIM}(abs: ${output_abs})${C_RESET}"
     [[ $schema_only -eq 1 ]] && log_info "Modo: schema-only (sin data)"
 
     # ──────────────────────────────────────────────────────────
