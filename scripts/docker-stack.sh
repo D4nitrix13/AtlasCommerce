@@ -40,7 +40,7 @@
 #   development | dev    → 3 instancias de development
 #
 # Stores:
-#   panda-estampados | mm-boutique | morales-store   → 1 instancia
+#   panda-estampados-and-kitsune | mm-boutique | morales-store   → 1 instancia
 #   all                                            → todas las del stage
 #
 # Requiere: docker compose v2 (>= 5.x), bash 4+.
@@ -97,6 +97,8 @@ action_file_for() {
         caddy)       printf '%s\n' "${DOCKER_DIR}/setup/caddy.sh" ;;
         db-backup)   printf '%s\n' "${DOCKER_DIR}/db/backup.sh" ;;
         db-restore)  printf '%s\n' "${DOCKER_DIR}/db/restore.sh" ;;
+        seed-db)     printf '%s\n' "${DOCKER_DIR}/db/seed.sh" ;;
+        sync-assets) printf '%s\n' "${DOCKER_DIR}/assets/sync.sh" ;;
         help)        printf '%s\n' "${DOCKER_DIR}/help/show.sh" ;;
         *)           printf '\n' ;;
     esac
@@ -110,6 +112,7 @@ is_known_cmd() {
         volumes|rm-volumes|\
         exec|setup|bootstrap|fresh|hosts|caddy|\
         db-backup|db-restore|\
+        seed-db|sync-assets|\
         help|\
         b|rs|ls|psv|vol|rmvol) return 0 ;;
         *) return 1 ;;
@@ -136,36 +139,36 @@ _print_positional_usage() {
 
     log_err "Uso: ${C_BRIGHT_CYAN}${script_path} <cmd>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store|all>${C_RESET} ${C_GREEN}[<servicio>]${C_RESET}"
     log_err "Stages: ${C_BRIGHT_CYAN}production|prod${C_RESET}, ${C_BRIGHT_CYAN}development|dev${C_RESET}"
-    log_err "Stores: ${C_BRIGHT_CYAN}panda-estampados${C_RESET}, ${C_BRIGHT_CYAN}mm-boutique${C_RESET}, ${C_BRIGHT_CYAN}morales-store${C_RESET}, ${C_BRIGHT_CYAN}all${C_RESET}"
+    log_err "Stores: ${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}, ${C_BRIGHT_CYAN}mm-boutique${C_RESET}, ${C_BRIGHT_CYAN}morales-store${C_RESET}, ${C_BRIGHT_CYAN}all${C_RESET}"
     echo ""
     case "$cmd_canonical" in
         build)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} build no-cache dev panda-estampados backend${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} build no-cache dev panda-estampados-and-kitsune backend${C_RESET}"
             log_err "  ${C_BRIGHT_CYAN}${script_path} build dev all backend${C_RESET}                    ${C_DIM}# 3 dev${C_RESET}"
             log_err "  ${C_BRIGHT_CYAN}${script_path} build production all${C_RESET}                      ${C_DIM}# 3 prod${C_RESET}"
             log_err "Para help: ${C_BRIGHT_CYAN}${script_path} build help${C_RESET}"
             ;;
         rm-volumes)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes -y dev panda-estampados${C_RESET}      ${C_DIM}# 1 store, skip confirm${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes -y dev panda-estampados-and-kitsune${C_RESET}      ${C_DIM}# 1 store, skip confirm${C_RESET}"
             log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes dev all${C_RESET}                       ${C_DIM}# 3 dev, pedir confirm${C_RESET}"
             ;;
         logs)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} logs dev panda-estampados backend${C_RESET}      ${C_DIM}# svc requerido${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} logs dev panda-estampados-and-kitsune backend${C_RESET}      ${C_DIM}# svc requerido${C_RESET}"
             ;;
         exec)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} exec dev panda-estampados backend bash${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} exec dev panda-estampados-and-kitsune backend bash${C_RESET}"
             log_err "  ${C_BRIGHT_CYAN}${script_path} exec production mm-boutique app ls /var/www${C_RESET}"
             ;;
         setup)
             log_err "  ${C_BRIGHT_CYAN}${script_path} setup production all${C_RESET}                     ${C_DIM}# 3 prod (incluye all)${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} setup development panda-estampados${C_RESET}      ${C_DIM}# 1 dev${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} setup development panda-estampados-and-kitsune${C_RESET}      ${C_DIM}# 1 dev${C_RESET}"
             ;;
         fresh)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh development panda-estampados${C_RESET}      ${C_DIM}# 1 instancia (store obligatorio)${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh development panda-estampados-and-kitsune${C_RESET}      ${C_DIM}# 1 instancia (store obligatorio)${C_RESET}"
             log_err "  ${C_BRIGHT_CYAN}${script_path} fresh production mm-boutique${C_RESET}            ${C_DIM}# 1 instancia prod${C_RESET}"
             ;;
         *)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev panda-estampados${C_RESET}    ${C_DIM}# 1 instancia${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev panda-estampados-and-kitsune${C_RESET}    ${C_DIM}# 1 instancia${C_RESET}"
             log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev all${C_RESET}                  ${C_DIM}# 3 dev${C_RESET}"
             log_err "Para help: ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} help${C_RESET}"
             ;;
@@ -284,10 +287,20 @@ case "$cmd_canonical" in
     rm-volumes)
         KNOWN_FLAGS=("-y")
         ;;
+    sync-assets)
+        KNOWN_FLAGS=("--dry-run" "--force")
+        ;;
     *)
         KNOWN_FLAGS=()
         ;;
 esac
+
+# Flags booleanos detectados para pasarlos a cmd_*. Seteamos la env
+# var aca (en lugar de pasarlos como args posicionales) para que la
+# firma cmd_*(stage, store, ...) sea estable y los flags se acumulen
+# en una sola variable por comando.
+SYNC_ASSETS_DRY_RUN=0
+SYNC_ASSETS_FORCE=0
 
 # Filtrar flags → POSITIONAL (en orden) + activar flags detectados.
 POSITIONAL=()
@@ -301,8 +314,10 @@ for arg in "$@"; do
         if [[ "$arg" == "$flag" ]]; then
             is_flag=1
             case "$flag" in
-                no-cache) HAS_NO_CACHE=1 ;;
-                -y)       RM_VOLUMES_SKIP_CONFIRM=1 ;;
+                no-cache)      HAS_NO_CACHE=1 ;;
+                -y)            RM_VOLUMES_SKIP_CONFIRM=1 ;;
+                --dry-run)     SYNC_ASSETS_DRY_RUN=1 ;;
+                --force)       SYNC_ASSETS_FORCE=1 ;;
             esac
             break
         fi
@@ -353,7 +368,7 @@ esac
 if [[ "$cmd_canonical" == "logs" && -z "$SERVICE" ]]; then
     log_err "logs requiere <servicio>."
     log_err "Uso: ${C_BRIGHT_CYAN}$0 logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store|all>${C_RESET} ${C_GREEN}<servicio>${C_RESET}"
-    log_err "  ${C_BRIGHT_CYAN}$0 logs dev panda-estampados backend${C_RESET}"
+    log_err "  ${C_BRIGHT_CYAN}$0 logs dev panda-estampados-and-kitsune backend${C_RESET}"
     exit 1
 fi
 
@@ -362,7 +377,7 @@ fi
 if [[ "$cmd_canonical" == "fresh" && "$STORE" == "all" ]]; then
     log_err "fresh requiere una tienda específica — 'all' no es válido."
     log_err "Uso: ${C_BRIGHT_CYAN}$0 fresh${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store>${C_RESET}"
-    log_err "  ${C_BRIGHT_CYAN}$0 fresh development panda-estampados${C_RESET}"
+    log_err "  ${C_BRIGHT_CYAN}$0 fresh development panda-estampados-and-kitsune${C_RESET}"
     log_err "  ${C_BRIGHT_CYAN}$0 fresh production mm-boutique${C_RESET}"
     exit 1
 fi
@@ -388,6 +403,8 @@ fi
 # la firma cmd_*(stage, store, [svc]) estable.
 export HAS_NO_CACHE
 export RM_VOLUMES_SKIP_CONFIRM
+export SYNC_ASSETS_DRY_RUN
+export SYNC_ASSETS_FORCE
 
 # Summary antes de ejecutar (con stage/store ya normalizados).
 show_target_summary "$cmd_canonical" "$STAGE" "$STORE" "$SERVICE"
@@ -408,6 +425,12 @@ case "$cmd_canonical" in
     # el backend del tenant (interno).
     db-backup|bootstrap)
         "$cmd_fn" "$STAGE" "$STORE"
+        ;;
+    # sync-assets y seed-db operan sobre el backend (interno) y
+    # aceptan flags extra (--dry-run/--force, --seed/--sql) que se
+    # pasan tal cual al wrapper.
+    sync-assets|seed-db)
+        "$cmd_fn" "$STAGE" "$STORE" "${EXTRA[@]}"
         ;;
     *)
         "$cmd_fn" "$STAGE" "$STORE" "$SERVICE"

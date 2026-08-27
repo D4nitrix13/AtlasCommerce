@@ -130,8 +130,8 @@ docker_compose`. NO duplicar imports en cada `cmd_*()`.
 
 | Concepto | Formato | Ejemplo |
 | --- | --- | --- |
-| Instance (resolve_targets) | `<stage>:<store>` | `development:panda-estampados` |
-| Container (docker ps) | `<store>-<stage_alias>-<svc>` | `panda-estampados-dev-postgres` |
+| Instance (resolve_targets) | `<stage>:<store>` | `development:panda-estampados-and-kitsune` |
+| Container (docker ps) | `<store>-<stage_alias>-<svc>` | `panda-estampados-and-kitsune-dev-postgres` |
 | Stage alias | `dev` o `prod` | dev (no `development`) |
 | Postgres user/db | derivado del slug (`-` → `_`) | `panda_estampados` |
 
@@ -151,25 +151,25 @@ Si necesitas el path absoluto para pasarlo a otro comando, usa
 
 ```bash
 # 1. Primera vez
-./scripts/docker-stack.sh setup dev panda-estampados
+./scripts/docker-stack.sh setup dev panda-estampados-and-kitsune
 
 # 2. Bootstrap post-deploy (migrations, key, caches)
-./scripts/docker-stack.sh bootstrap dev panda-estampados
+./scripts/docker-stack.sh bootstrap dev panda-estampados-and-kitsune
 
 # 3. Si queres datos reales en vez de seeders fake
-./scripts/docker-stack.sh bootstrap dev panda-estampados \
-    --with-backup dev-panda-estampados-2026-08-26-1430.sql.gz
+./scripts/docker-stack.sh bootstrap dev panda-estampados-and-kitsune \
+    --with-backup dev-panda-estampados-and-kitsune-2026-08-26-1430.sql.gz
 
 # 4. Inspeccionar
-./scripts/docker-stack.sh status dev panda-estampados
-./scripts/docker-stack.sh logs dev panda-estampados backend
+./scripts/docker-stack.sh status dev panda-estampados-and-kitsune
+./scripts/docker-stack.sh logs dev panda-estampados-and-kitsune backend
 
 # 5. Ejecutar comando dentro del backend
-./scripts/docker-stack.sh exec dev panda-estampados backend \
+./scripts/docker-stack.sh exec dev panda-estampados-and-kitsune backend \
     /usr/local/bin/php artisan tinker
 
 # 6. Backup despues de tener data util
-./scripts/docker-stack.sh db-backup dev panda-estampados
+./scripts/docker-stack.sh db-backup dev panda-estampados-and-kitsune
 
 # 7. Destruir todo (cUIDADO, BORRA DATOS)
 ./scripts/docker-stack.sh nuke dev all -y
@@ -204,15 +204,15 @@ NO el wrapper. Ver `db/backup.sh` para el patron correcto.
 caches, etc. corre `bootstrap` despues:
 
 ```bash
-./scripts/docker-stack.sh setup dev panda-estampados
-./scripts/docker-stack.sh bootstrap dev panda-estampados
+./scripts/docker-stack.sh setup dev panda-estampados-and-kitsune
+./scripts/docker-stack.sh bootstrap dev panda-estampados-and-kitsune
 ```
 
 O atomicamente:
 
 ```bash
-./scripts/docker-stack.sh setup dev panda-estampados && \
-./scripts/docker-stack.sh bootstrap dev panda-estampados
+./scripts/docker-stack.sh setup dev panda-estampados-and-kitsune && \
+./scripts/docker-stack.sh bootstrap dev panda-estampados-and-kitsune
 ```
 
 ### db-backup genera archivo vacio

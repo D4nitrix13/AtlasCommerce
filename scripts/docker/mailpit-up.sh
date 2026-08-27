@@ -4,16 +4,16 @@
 # cada docker-compose.yml; este script solo orquesta el up.
 #
 # Uso:
-#   ./scripts/docker/mailpit-up.sh development:panda-estampados
+#   ./scripts/docker/mailpit-up.sh development:panda-estampados-and-kitsune
 #   ./scripts/docker/mailpit-up.sh dev:mm-boutique
 #   ./scripts/docker/mailpit-up.sh dev:morales-store
 #   # Para todos:
 #   ./scripts/docker/mailpit-up.sh all
 #
 # UI de mailpit por instancia:
-#   panda-estampados → http://localhost:8025
-#   mm-boutique       → http://localhost:18025
-#   morales-store     → http://localhost:28025
+#   panda-estampados-and-kitsune → http://localhost:8025
+#   mm-boutique                  → http://localhost:18025
+#   morales-store                → http://localhost:28025
 
 set -euo pipefail
 
@@ -33,7 +33,7 @@ start_one() {
 
 # Todas las instancias dev.
 start_all() {
-    for inst in panda-estampados mm-boutique morales-store; do
+    for inst in panda-estampados-and-kitsune mm-boutique morales-store; do
         start_one "$inst" || true
     done
 }

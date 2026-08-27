@@ -38,12 +38,12 @@ Stores: 2 (Panda, Kitsune)
 StoreDomains: 6 (3 por tienda)
 Roles: 2 (admin, staff)
 Permissions: 26 (agrupados por módulo)
-Users: 1 (admin@panda-estampados.test)
+Users: 1 (admin@panda-estampados-and-kitsune.test)
 ```
 
 ## 3. Credenciales del admin
 
-- `email`: `admin@panda-estampados.test`
+- `email`: `admin@panda-estampados-and-kitsune.test`
 - `password`: `password`
 - `role`: admin (bypass total)
 - `store_ids`: ambas tiendas (Panda + Kitsune)
@@ -53,7 +53,7 @@ Users: 1 (admin@panda-estampados.test)
 ```bash
 curl -s -X POST http://panda-estampados.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@panda-estampados.test","password":"password"}'
+  -d '{"email":"admin@panda-estampados-and-kitsune.test","password":"password"}'
 ```
 
 Respuesta:
@@ -63,7 +63,7 @@ Respuesta:
   "token": "1|abc123...",
   "user": {
     "id": 1,
-    "email": "admin@panda-estampados.test",
+    "email": "admin@panda-estampados-and-kitsune.test",
     "full_name": "Admin Panda",
     "role": { "id": 1, "slug": "admin", "name": "Administrador" },
     "store_ids": [1, 2],

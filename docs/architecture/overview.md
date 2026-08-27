@@ -12,8 +12,8 @@ como reverse proxy.
 ```txt
 ┌─────────────────────────────────────────────────────┐
 │                  Cliente (Browser)                  │
-│      panda-estampados.com  ·  kitsune.com          │
-│      admin.panda-estampados.com                    │
+│      panda-estampados-and-kitsune.com  ·  kitsune.com          │
+│      admin.panda-estampados-and-kitsune.com                    │
 └───────────────────────┬─────────────────────────────┘
                         │ HTTPS (443)
 ┌───────────────────────▼─────────────────────────────┐
@@ -47,9 +47,9 @@ Un solo build de `Astro` sirve tanto la tienda
 pública como el panel administrativo. El mismo
 código fuente se despliega bajo diferentes dominios:
 
-- `panda-estampados.com` → tienda Panda
+- `panda-estampados-and-kitsune.com` → tienda Panda
 - `kitsune.com` → tienda Kitsune
-- `admin.panda-estampados.com` → panel administrativo central
+- `admin.panda-estampados-and-kitsune.com` → panel administrativo central
 
 El frontend resuelve qué tienda renderizar según
 el dominio de origen. Los componentes `React`

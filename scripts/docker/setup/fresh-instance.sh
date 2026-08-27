@@ -21,8 +21,8 @@
 # una sola tienda).
 #
 # Uso:
-#   $0 cmd_fresh development panda-estampados
-#   $0 cmd_fresh production panda-estampados
+#   $0 cmd_fresh development panda-estampados-and-kitsune
+#   $0 cmd_fresh production panda-estampados-and-kitsune
 #
 # Requiere:
 #   - ./scripts/docker-stack.sh (mismo wrapper que el orquestador)

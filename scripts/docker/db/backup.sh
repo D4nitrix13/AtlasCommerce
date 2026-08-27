@@ -18,9 +18,9 @@
 # exit 1 con mensaje claro.
 #
 # Uso:
-#   cmd_db_backup dev panda-estampados
+#   cmd_db_backup dev panda-estampados-and-kitsune
 #   cmd_db_backup production mm-boutique --schema-only
-#   cmd_db_backup dev panda-estampados --output db-backups/custom.sql.gz
+#   cmd_db_backup dev panda-estampados-and-kitsune --output db-backups/custom.sql.gz
 # ------------------------------------------------------------
 set -euo pipefail
 
@@ -116,7 +116,7 @@ cmd_db_backup() {
     local pg_container="${store_slug}-${stage_alias}-postgres"
     # User/DB Postgres siguen el slug del store (con guión → guión bajo)
     # porque el docker-compose del postgres no acepta guiones.
-    # ej: panda-estampados → panda_estampados
+    # ej: panda-estampados-and-kitsune → panda_estampados_and_kitsune
     local pg_user_db="${store_slug//-/_}"
     # Si DB_USERNAME/DB_DATABASE vienen del .env (vía env_file), usar.
     # Si no, derivar del slug.

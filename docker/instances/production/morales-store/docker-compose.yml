@@ -148,7 +148,7 @@ services:
     env_file:
       - ../../../versions.env
     # Sin `ports:`: el FTP single-tenant no se expone al host para
-    # evitar colisión con panda-estampados en port 21. Accesible vía
+    # evitar colisión con panda-estampados-and-kitsune en port 21. Accesible vía
     # `docker exec -it moralesstore-ftp bash` o desde otros containers
     # de la red `morales-store`.
     environment:

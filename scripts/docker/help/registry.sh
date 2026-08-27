@@ -19,7 +19,7 @@
 #   Path del script ($0)      → C_CYAN (más suave que bright)
 #   Comando (build, up, …)    → C_BOLD + C_BRIGHT_MAGENTA
 #   Stage (production, dev)   → C_BOLD + C_BRIGHT_YELLOW
-#   Store (panda-estampados)  → C_BOLD + C_BRIGHT_CYAN
+#   Store (panda-estampados-and-kitsune)  → C_BOLD + C_BRIGHT_CYAN
 #   Service (backend)         → C_BOLD + C_BRIGHT_GREEN
 #   Flag (no-cache, -y)       → C_BOLD + C_BRIGHT_RED (atención)
 #   "PARA AFECTAR TODOS"      → C_BOLD + C_BRIGHT_RED
@@ -33,7 +33,7 @@
 # Ancho de columna donde arranca el comentario `# ...` en ejemplos.
 # Medido en caracteres VISIBLES (sin contar códigos ANSI). Calibrado
 # para que el ejemplo más largo del orquestador quepa:
-#   "./scripts/docker-stack.sh build no-cache dev panda-estampados backend"
+#   "./scripts/docker-stack.sh build no-cache dev panda-estampados-and-kitsune backend"
 #   = 71 chars visibles. Con 78 hay 7 chars de padding mínimo.
 _REGISTRY_EXAMPLE_COMMENT_COL=78
 
@@ -61,7 +61,7 @@ _registry_stage_block() {
 _registry_store_block() {
     _registry_section "STORE"
     printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
-        "panda-estampados"      "→ 1 instancia (multi-tenant: Pandas + Kitsune)"
+        "panda-estampados-and-kitsune"      "→ 1 instancia (multi-tenant: Pandas + Kitsune)"
     printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
         "mm-boutique"           "→ 1 instancia (single-tenant)"
     printf "  ${C_BOLD}${C_BRIGHT_CYAN}%-22s${C_RESET} ${C_DIM}%s${C_RESET}\n" \
@@ -128,11 +128,11 @@ _registry_use_required2_flag() {
 #
 # Ejemplo:
 #   _registry_example "$0" \
-#       "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_RED}no-cache${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
+#       "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_RED}no-cache${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
 #       "sin cache, 1 target"
 #
 # Resultado (los `<X>` son códigos ANSI expandidos):
-#   ./scripts/docker-stack.sh <X>build<X> <X>no-cache<X> <X>dev<X> <X>panda-estampados<X> <X>backend<X>    # sin cache, 1 target
+#   ./scripts/docker-stack.sh <X>build<X> <X>no-cache<X> <X>dev<X> <X>panda-estampados-and-kitsune<X> <X>backend<X>    # sin cache, 1 target
 #                                                  ^ el `#` cae en col 78 visible
 _registry_example() {
     local script_path="$1"
@@ -188,7 +188,7 @@ cmd_help_up() {
     printf "\n"
     _registry_section "EJEMPLOS"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}up${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}up${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
         "1 instancia dev"
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}up${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
@@ -277,7 +277,7 @@ cmd_help_restart() {
         "${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET}" \
         "las 3 dev"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}restart${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
         "1 instancia + servicio"
 
     printf "\n"
@@ -318,13 +318,13 @@ cmd_help_build() {
     printf "\n"
     _registry_section "EJEMPLOS"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
         "1 instancia dev (con cache)"
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
         "3 dev backend (con cache)"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_RED}no-cache${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_RED}no-cache${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
         "sin cache, 1 target"
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}build${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}production${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}mm-boutique${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}frontend${C_RESET}" \
@@ -418,7 +418,7 @@ cmd_help_status() {
         "${C_BOLD}${C_BRIGHT_MAGENTA}status${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET}" \
         "las 3 dev"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}status${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}status${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
         "1 instancia"
 
     printf "\n"
@@ -459,7 +459,7 @@ cmd_help_info() {
         "${C_BOLD}${C_BRIGHT_MAGENTA}info${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET}" \
         "las 3 dev"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}info${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}nginx${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}info${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}nginx${C_RESET}" \
         "nginx de 1 instancia"
 
     printf "\n"
@@ -478,7 +478,7 @@ cmd_help_logs() {
     printf "\n"
     _registry_section "EJEMPLOS"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
         "1 instancia, 1 svc"
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}logs${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
@@ -498,9 +498,15 @@ cmd_help_logs() {
 # ─────────────────────────────────────────────────────────────
 
 cmd_help_volumes() {
-    _registry_header "volumes" "listar volúmenes Docker declarados por las instancias"
+    _registry_header "volumes" "listar volúmenes Docker agrupados por categoría con tamaño real"
     _registry_use_required2 "volumes" "<stage>" "<store|all>" "[<servicio>]"
     _registry_stage_store_block
+
+    printf "\n"
+    printf "${C_BOLD}▸ CATEGORÍAS MOSTRADAS${C_RESET}\n"
+    printf "  ${C_BOLD}${C_BRIGHT_RED}Data${C_RESET}    ${C_DIM}postgres_data, storage, bootstrap, ftp_data (CRÍTICO: borra datos persistentes)${C_RESET}\n"
+    printf "  ${C_BOLD}${C_BRIGHT_YELLOW}Caches${C_RESET} ${C_DIM}node_modules, pnpm_store, vite_cache, astro_cache (se reconstruyen en up)${C_RESET}\n"
+    printf "  ${C_BOLD}${C_BRIGHT_BLUE}Logs${C_RESET}    ${C_DIM}logs${C_RESET}\n"
 
     printf "\n"
     printf "${C_BOLD}${C_BRIGHT_RED}▸ PARA VER TODOS DEL STAGE${C_RESET} ${C_BRIGHT_RED}(pasar 'all' en store)${C_RESET}\n"
@@ -514,7 +520,7 @@ cmd_help_volumes() {
         "${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET}" \
         "3 dev"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
         "1 instancia dev"
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}volumes${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}production${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
@@ -554,7 +560,7 @@ cmd_help_rm_volumes() {
     printf "\n"
     _registry_section "EJEMPLOS"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
         "pedir confirmación"
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}rm-volumes${C_RESET} ${C_BOLD}${C_BRIGHT_RED}-y${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET}" \
@@ -568,6 +574,111 @@ cmd_help_rm_volumes() {
     printf "\n"
     _registry_section "ALIAS"
     printf "  ${C_BOLD}${C_BRIGHT_MAGENTA}rmvol${C_RESET}\n"
+}
+
+# ─────────────────────────────────────────────────────────────
+# Sync assets
+# ─────────────────────────────────────────────────────────────
+
+cmd_help_sync_assets() {
+    _registry_header "sync-assets" "sincronizar assets de marca (brand-assets/) al FTP del tenant"
+    _registry_use_required2_flag "sync-assets" "--dry-run | --force" "<stage>" "<store|all>" ""
+
+    printf "\n"
+    printf "  ${C_DIM}Wrapper de ${C_RESET}${C_CYAN}php artisan assets:sync-from-public${C_RESET}${C_DIM}.${C_RESET}\n"
+    printf "  ${C_DIM}Lee ${C_CYAN}brand-assets/store/{slug}/*${C_RESET}${C_DIM} y ${C_CYAN}brand-assets/shared/*${C_RESET}${C_DIM} y los sube al FTP.${C_RESET}\n"
+    printf "  ${C_DIM}Convencion documentada en ${C_CYAN}docs/architecture/assets-naming-convention.md${C_RESET}${C_DIM}.${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "FLAGS"
+    printf "  ${C_BOLD}${C_BRIGHT_RED}--dry-run${C_RESET}     ${C_DIM}solo reporta lo que haria, sin escribir en FTP${C_RESET}\n"
+    printf "  ${C_BOLD}${C_BRIGHT_RED}--force${C_RESET}       ${C_DIM}sobrescribe archivos existentes en FTP${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "STORE=ALL"
+    printf "  ${C_DIM}Cada backend container ve el mismo ${C_CYAN}brand-assets/${C_RESET}${C_DIM} via bind mount,${C_RESET}\n"
+    printf "  ${C_DIM}asi que el wrapper ejecuta el artisan command SIN ${C_RESET}${C_BOLD}${C_BRIGHT_RED}--store${C_RESET}${C_DIM} y${C_RESET}\n"
+    printf "  ${C_DIM}sincroniza TODAS las tiendas que encuentre.${C_RESET}\n"
+    printf "  ${C_DIM}Para UNA sola tienda, pasala como store especifico.${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "QUE HACE"
+    printf "  ${C_DIM}1.${C_RESET} ${C_BOLD}${C_BRIGHT_MAGENTA}resolve_targets${C_RESET} ${C_DIM}→ toma la primera instancia del scope (entry point)${C_RESET}\n"
+    printf "  ${C_DIM}2.${C_RESET} ${C_CYAN}docker compose exec backend php artisan assets:sync-from-public${C_RESET}\n"
+    printf "  ${C_DIM}3.${C_RESET} el artisan command sube los assets al FTP bajo ${C_CYAN}tenants/{slug}/branding/${C_RESET}${C_DIM} y ${C_CYAN}shared/${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "EJEMPLOS"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}sync-assets${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
+        "1 tienda"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}sync-assets${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET}" \
+        "3 tiendas"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}sync-assets${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET} ${C_BOLD}${C_BRIGHT_RED}--dry-run${C_RESET}" \
+        "preview sin escribir"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}sync-assets${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_RED}--force${C_RESET}" \
+        "sobrescribir"
+
+    printf "\n"
+    _registry_section "ERROR SI FALTA"
+    printf "  ${C_DIM}\$0 sync-assets${C_RESET}                            ${C_BRIGHT_RED}# error: <stage> y <store> requeridos${C_RESET}\n"
+    printf "  ${C_DIM}\$0 sync-assets help${C_RESET}                       ${C_BRIGHT_RED}# este help${C_RESET}\n"
+}
+
+# ─────────────────────────────────────────────────────────────
+# Seed DB
+# ─────────────────────────────────────────────────────────────
+
+cmd_help_seed_db() {
+    _registry_header "seed-db" "migrar + poblar BD (seeders y/o SQL dump)"
+    _registry_use_required2_flag "seed-db" "--seed | --sql <file>" "<stage>" "<store>" ""
+
+    printf "\n"
+    printf "  ${C_DIM}Comando FOCUSED: solo toca BD (no key:generate, storage:link, etc).${C_RESET}\n"
+    printf "  ${C_DIM}Para setup inicial completo, usar ${C_RESET}${C_CYAN}bootstrap${C_RESET}${C_DIM}.${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "FLAGS"
+    printf "  ${C_BOLD}${C_BRIGHT_RED}--seed${C_RESET}            ${C_DIM}corre ${C_RESET}${C_CYAN}db:seed${C_RESET}${C_DIM} despues de migrate (datos fake)${C_RESET}\n"
+    printf "  ${C_BOLD}${C_BRIGHT_RED}--sql <file>${C_RESET}     ${C_DIM}carga dump .sql/.sql.gz despues de migrate (datos reales)${C_RESET}\n"
+    printf "  ${C_DIM}Si pasas ambos, corre seeders Y carga SQL.${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "DIFERENCIAS"
+    printf "  ${C_DIM}bootstrap${C_RESET}              ${C_DIM}setup completo + migrate + tenants:bootstrap (idempotente)${C_RESET}\n"
+    printf "  ${C_DIM}seed-db${C_RESET}                ${C_DIM}migrate + (seeders y/o SQL) — solo BD${C_RESET}\n"
+    printf "  ${C_DIM}db-restore${C_RESET}            ${C_DIM}SQL + migrate — no corre seeders${C_RESET}\n"
+    printf "  ${C_DIM}fresh${C_RESET}                 ${C_BRIGHT_RED}down -v + rebuild + reinit (DESTRUCTIVO)${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "QUE HACE"
+    printf "  ${C_DIM}1.${C_RESET} espera Postgres healthy\n"
+    printf "  ${C_DIM}2.${C_RESET} ${C_CYAN}php artisan migrate --force${C_RESET}${C_DIM} sobre el backend del tenant${C_RESET}\n"
+    printf "  ${C_DIM}3.${C_RESET} ${C_DIM}(opcional)${C_RESET} ${C_CYAN}db:seed${C_RESET}${C_DIM} y/o carga SQL via stdin al postgres container${C_RESET}\n"
+
+    printf "\n"
+    _registry_section "EJEMPLOS"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}seed-db${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
+        "solo migrate"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}seed-db${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_RED}--seed${C_RESET}" \
+        "migrate + seeders fake"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}seed-db${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_RED}--sql${C_RESET} ${C_BRIGHT_WHITE}db-backups/dev-panda.sql.gz${C_RESET}" \
+        "migrate + datos reales"
+    _registry_example "$0" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}seed-db${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_RED}--seed --sql${C_RESET} ${C_BRIGHT_WHITE}fixtures.sql${C_RESET}" \
+        "ambos"
+
+    printf "\n"
+    _registry_section "ERROR SI FALTA"
+    printf "  ${C_DIM}\$0 seed-db${C_RESET}                                  ${C_BRIGHT_RED}# error: <stage> y <store> requeridos${C_RESET}\n"
+    printf "  ${C_DIM}\$0 seed-db help${C_RESET}                             ${C_BRIGHT_RED}# este help${C_RESET}\n"
+    printf "  ${C_DIM}\$0 seed-db dev panda-estampados-and-kitsune --sql${C_RESET}       ${C_BRIGHT_RED}# --sql requiere <archivo>${C_RESET}\n"
 }
 
 # ─────────────────────────────────────────────────────────────
@@ -589,7 +700,7 @@ cmd_help_exec() {
     printf "\n"
     _registry_section "EJEMPLOS"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}exec${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET} ${C_BRIGHT_GREEN}bash${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}exec${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET} ${C_BRIGHT_GREEN}bash${C_RESET}" \
         ""
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}exec${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}dev${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}mm-boutique${C_RESET} ${C_BOLD}${C_BRIGHT_GREEN}backend${C_RESET} ${C_BRIGHT_GREEN}php artisan migrate --seed${C_RESET}" \
@@ -630,7 +741,7 @@ cmd_help_setup() {
         "${C_BOLD}${C_BRIGHT_MAGENTA}setup${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}production${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}all${C_RESET}" \
         "las 3 prod"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}setup${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}setup${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
         "1 instancia dev"
 }
 
@@ -655,7 +766,7 @@ cmd_help_fresh() {
     printf "\n"
     _registry_section "EJEMPLOS"
     _registry_example "$0" \
-        "${C_BOLD}${C_BRIGHT_MAGENTA}fresh${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados${C_RESET}" \
+        "${C_BOLD}${C_BRIGHT_MAGENTA}fresh${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}development${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}" \
         "1 dev fresh"
     _registry_example "$0" \
         "${C_BOLD}${C_BRIGHT_MAGENTA}fresh${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}production${C_RESET} ${C_BOLD}${C_BRIGHT_CYAN}mm-boutique${C_RESET}" \

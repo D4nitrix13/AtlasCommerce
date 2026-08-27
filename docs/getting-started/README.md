@@ -71,7 +71,7 @@ curl -sI http://panda-estampados.com/login
 # API auth
 curl -s -X POST http://panda-estampados.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@panda-estampados.test","password":"password"}'
+  -d '{"email":"admin@panda-estampados-and-kitsune.test","password":"password"}'
 # {"token":"...","user":{...}}
 ```
 

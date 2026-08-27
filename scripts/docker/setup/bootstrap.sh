@@ -2,37 +2,39 @@
 # ------------------------------------------------------------
 # scripts/docker/setup/bootstrap.sh
 # ------------------------------------------------------------
-# cmd_bootstrap <stage> <store> [--with-seed] [--with-backup]
+# cmd_bootstrap <stage> <store>
 #
-# Ejecuta TODAS las tareas post-deploy que necesita el backend
-# para estar operativo:
+# Setup inicial del backend Laravel (no toca datos de BD mas alla
+# del schema y el seed de tenants). Idempotente: se puede correr
+# multiples veces sin efectos secundarios.
+#
+# Pasos:
 #   1. Esperar a que Postgres este healthy
-#   2. key:generate (APP_KEY si falta)
-#   3. storage:link (symlink public/storage)
+#   2. storage:link (symlink public/storage)
+#   3. key:generate (APP_KEY si falta)
 #   4. cache:clear + config:clear
 #   5. migrate --force
 #   6. tenants:bootstrap (seed especifico de la instancia)
-#   7. (opcional) db:seed (datos fake de prueba)
-#   8. (opcional) db:restore (cargar backup real desde db-backups/)
 #
-# Idempotente: se puede correr multiples veces sin efectos
-# secundarios. Las migraciones usan --force que es safe si no hay
-# cambios pendientes.
+# NO hace:
+#   - db:seed (datos fake de testing)         -> usar `seed-db --seed`
+#   - cargar SQL dump                         -> usar `seed-db --sql <file>`
+#   - importar backup desde db-backups/      -> usar `db-restore <file>`
 #
-# Flags:
-#   --with-seed    Corre ademas db:seed (datos fake de desarrollo).
-#                  Default: NO corre (queremos datos reales).
-#   --with-backup <file>  Corre db:restore con el archivo indicado
-#                  desde db-backups/ antes de las migraciones.
-#                  Util para levantar la app con datos reales
-#                  versionados externamente.
+# Esas 3 cosas antes eran flags de bootstrap (--with-seed, --with-backup).
+# Las sacamos para que cada comando tenga una sola responsabilidad:
+# bootstrap es setup de la APP, seed-db/db-restore son sobre DATOS.
 #
 # Uso:
-#   cmd_bootstrap dev panda-estampados                # solo schema
-#   cmd_bootstrap dev panda-estampados --with-seed    # + seeders fake
-#   cmd_bootstrap dev panda-estampados --with-backup backup-2026-08-25.sql
+#   cmd_bootstrap dev panda-estampados-and-kitsune
+#   cmd_bootstrap production mm-boutique
 #
-# Output: cada paso se loguea con [step N/8] <descripcion>. Errores
+# Para datos de testing o dumps reales, usar seed-db / db-restore:
+#   ./scripts/docker-stack.sh seed-db dev panda-estampados-and-kitsune --seed
+#   ./scripts/docker-stack.sh seed-db dev panda-estampados-and-kitsune --sql backup.sql
+#   ./scripts/docker-stack.sh db-restore dev panda-estampados-and-kitsune backup.sql
+#
+# Output: cada paso se loguea con [step N/6] <descripcion>. Errores
 # hacen exit 1 con mensaje claro. El comando nunca falla silencioso.
 # ------------------------------------------------------------
 set -euo pipefail
@@ -42,29 +44,14 @@ cmd_bootstrap() {
     local store="$2"
     shift 2
 
-    # Parsear flags
-    local with_seed=0
-    local with_backup=""
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --with-seed)
-                with_seed=1
-                shift
-                ;;
-            --with-backup)
-                with_backup="${2:-}"
-                if [[ -z "$with_backup" ]]; then
-                    log_err "--with-backup requiere <archivo>"
-                    return 1
-                fi
-                shift 2
-                ;;
-            *)
-                log_err "Flag desconocida: $1"
-                return 1
-                ;;
-        esac
-    done
+    # bootstrap no acepta flags. Si pasan algo, error explicito
+    # (antes aceptaba --with-seed y --with-backup — ver CHANGELOG).
+    if [[ $# -gt 0 ]]; then
+        log_err "bootstrap no acepta flags. Si querés seeders/SQL usar:"
+        log_err "  ./scripts/docker-stack.sh seed-db <stage> <store> [--seed | --sql <file>]"
+        log_err "  ./scripts/docker-stack.sh db-restore <stage> <store> <archivo>"
+        return 1
+    fi
 
     # Resolver primera instancia del scope
     local first_inst
@@ -76,13 +63,11 @@ cmd_bootstrap() {
 
     log_bold "Bootstrap de ${first_inst}"
     log_info "Stage: ${C_BOLD}${stage}${C_RESET} · Store: ${C_BOLD}${store}${C_RESET}"
-    [[ $with_seed -eq 1 ]] && log_info "Incluye: db:seed (datos fake de desarrollo)"
-    [[ -n "$with_backup" ]] && log_info "Incluye: db:restore desde db-backups/${with_backup}"
 
     # ──────────────────────────────────────────────────────────
-    # Step 1/8: Esperar Postgres healthy
+    # Step 1/6: Esperar Postgres healthy
     # ──────────────────────────────────────────────────────────
-    log_step "1/8" "Esperando Postgres healthy"
+    log_step "1/6" "Esperando Postgres healthy"
     local pg_container="${first_inst}-postgres"
     local attempts=0
     local max_attempts=30
@@ -98,36 +83,17 @@ cmd_bootstrap() {
     log_ok "Postgres healthy"
 
     # ──────────────────────────────────────────────────────────
-    # Step 2/8: db:restore (si --with-backup)
+    # Step 2/6: storage:link
     # ──────────────────────────────────────────────────────────
-    if [[ -n "$with_backup" ]]; then
-        log_step "2/8" "Restaurando BD desde db-backups/${with_backup}"
-        if [[ ! -f "${ROOT_DIR}/db-backups/${with_backup}" ]]; then
-            log_err "Archivo no existe: db-backups/${with_backup}"
-            return 1
-        fi
-        /usr/bin/docker compose \
-            -f "$(instance_compose_file "$first_inst")" \
-            --env-file "$(instance_env_file "$first_inst")" \
-            exec -T "$postgres_svc" /usr/bin/psql \
-                -U "${DB_USERNAME:-postgres}" \
-                -d "${DB_DATABASE:-ecommerce}" \
-                -f "/var/www/backup/${with_backup}" 2>&1 | /usr/bin/grep -E "(ERROR|CREATE|INSERT|ALTER)" | /usr/bin/head -10
-        log_ok "BD restaurada"
-    fi
-
-    # ──────────────────────────────────────────────────────────
-    # Step 3/8: storage:link (crea public/storage -> storage/app/public)
-    # ──────────────────────────────────────────────────────────
-    log_step "3/8" "storage:link"
+    log_step "2/6" "storage:link"
     docker_compose "$first_inst" exec -T backend \
         /usr/local/bin/php artisan storage:link 2>&1 | /usr/bin/grep -v "^\[No exception" || true
     log_ok "Storage symlinked"
 
     # ──────────────────────────────────────────────────────────
-    # Step 4/8: key:generate (solo si APP_KEY falta)
+    # Step 3/6: key:generate (solo si APP_KEY falta)
     # ──────────────────────────────────────────────────────────
-    log_step "4/8" "Verificando APP_KEY"
+    log_step "3/6" "Verificando APP_KEY"
     local app_key
     app_key="$(/usr/bin/grep -E '^APP_KEY=' "$(instance_env_file "$first_inst")" | /usr/bin/cut -d= -f2-)"
     if [[ -z "$app_key" || "$app_key" == *"GENERAR_CON_KEY"* || "$app_key" == *"GENERATE"* ]]; then
@@ -140,9 +106,9 @@ cmd_bootstrap() {
     fi
 
     # ──────────────────────────────────────────────────────────
-    # Step 5/8: cache:clear + config:clear
+    # Step 4/6: cache:clear + config:clear
     # ──────────────────────────────────────────────────────────
-    log_step "5/8" "Limpiando caches de Laravel"
+    log_step "4/6" "Limpiando caches de Laravel"
     docker_compose "$first_inst" exec -T backend \
         /usr/local/bin/php artisan cache:clear 2>&1 | /usr/bin/grep -v "^$" || true
     docker_compose "$first_inst" exec -T backend \
@@ -150,23 +116,17 @@ cmd_bootstrap() {
     log_ok "Caches limpios"
 
     # ──────────────────────────────────────────────────────────
-    # Step 6/8: migrate --force
+    # Step 5/6: migrate --force
     # ──────────────────────────────────────────────────────────
-    log_step "6/8" "Ejecutando migraciones"
-    docker_compose "$first_inst" exec -T backend \
-        /usr/local/bin/php artisan migrate --force 2>&1 | /usr/bin/grep -E "(Migrating|Migrated|ERROR|Nothing)" || true
-    log_ok "Migraciones aplicadas"
-
-    # ───────────────────────────────────────────────────────────────────────────────────
-    log_step "6/8" "Ejecutando migraciones"
+    log_step "5/6" "Ejecutando migraciones"
     docker_compose "$first_inst" exec -T backend \
         /usr/local/bin/php artisan migrate --force 2>&1 | /usr/bin/grep -E "(Migrating|Migrated|ERROR|Nothing)" || true
     log_ok "Migraciones aplicadas"
 
     # ──────────────────────────────────────────────────────────
-    # Step 7/8: tenants:bootstrap (seed de la instancia)
+    # Step 6/6: tenants:bootstrap (seed de la instancia)
     # ──────────────────────────────────────────────────────────
-    log_step "7/8" "tenants:bootstrap (seed de la instancia)"
+    log_step "6/6" "tenants:bootstrap (seed de la instancia)"
     local seed_file
     seed_file="$(/usr/bin/grep -E '^TENANTS_SEED_FILE=' "$(instance_env_file "$first_inst")" | /usr/bin/cut -d= -f2-)"
     if [[ -n "$seed_file" && -f "$(instance_compose_dir "$first_inst")/${seed_file#/}" ]]; then
@@ -177,26 +137,16 @@ cmd_bootstrap() {
         log_warn "Seed file no encontrado ($seed_file), skipping tenants:bootstrap"
     fi
 
-    # ──────────────────────────────────────────────────────────
-    # Step 8/8: db:seed (solo si --with-seed)
-    # ──────────────────────────────────────────────────────────
-    if [[ $with_seed -eq 1 ]]; then
-        log_step "8/8" "db:seed (datos fake de desarrollo)"
-        docker_compose "$first_inst" exec -T backend \
-            /usr/local/bin/php artisan db:seed --force 2>&1 | /usr/bin/grep -E "(Seeded|ERROR)" || true
-        log_ok "Database seeded con datos fake"
-    else
-        log_step "8/8" "db:seed (SKIPPED — usar --with-seed para datos fake)"
-    fi
-
     log_bold "Bootstrap completo de ${first_inst}"
     echo
-    echo "  Verificaciones sugeridas:"
-    echo "    curl -sI http://${store}.test:9000/api/storefront/theme"
-    echo "    ./scripts/docker-stack.sh exec $stage $store backend bash"
+    echo "  Para datos de testing, correr:"
+    echo "    ./scripts/docker-stack.sh seed-db $stage $store --seed"
+    echo "  Para cargar un dump SQL:"
+    echo "    ./scripts/docker-stack.sh seed-db $stage $store --sql <archivo>"
+    echo "    ./scripts/docker-stack.sh db-restore $stage $store <archivo>"
 }
 
-# Helper: log_step imprime [step N/8] <desc> en un formato consistente.
+# Helper: log_step imprime [step N/6] <desc> en un formato consistente.
 # Definido aca (no en _lib) porque solo lo usa bootstrap.
 log_step() {
     local n="$1"

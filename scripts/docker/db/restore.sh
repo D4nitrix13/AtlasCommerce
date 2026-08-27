@@ -19,8 +19,8 @@
 #                        Default: respetar --clean del dump.
 #
 # Uso:
-#   cmd_db_restore dev panda-estampados \
-#       dev-panda-estampados-2026-08-26-1430.sql.gz
+#   cmd_db_restore dev panda-estampados-and-kitsune \
+#       dev-panda-estampados-and-kitsune-2026-08-26-1430.sql.gz
 #   cmd_db_restore production mm-boutique mm-boutique.sql.gz --force
 # ------------------------------------------------------------
 set -euo pipefail

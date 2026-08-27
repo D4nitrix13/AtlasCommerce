@@ -51,9 +51,9 @@ flowchart TB
     User -->|HTTPS| CF
     CF -->|HTTPS<br/>cached o proxied| Caddy
 
-    Caddy -->|"panda-estampados.com<br/>www.panda-estampados.com<br/>kitsune.com<br/>www.kitsune.com"| Astro
-    Caddy -->|"admin.panda-estampados.com<br/>admin.kitsune.com"| PHP
-    Caddy -->|"api.panda-estampados.com<br/>api.kitsune.com"| PHP
+    Caddy -->|"panda-estampados-and-kitsune.com<br/>www.panda-estampados-and-kitsune.com<br/>kitsune.com<br/>www.kitsune.com"| Astro
+    Caddy -->|"admin.panda-estampados-and-kitsune.com<br/>admin.kitsune.com"| PHP
+    Caddy -->|"api.panda-estampados-and-kitsune.com<br/>api.kitsune.com"| PHP
 
     Astro -->|"fetch /api/*<br/>cookie + X-Forwarded-Host"| PHP
 
@@ -77,7 +77,7 @@ flowchart TB
 
 ## 2. Flujo de request — Storefront
 
-Cómo se resuelve una visita a `panda-estampados.com/productos`:
+Cómo se resuelve una visita a `panda-estampados-and-kitsune.com/productos`:
 
 ```mermaid
 sequenceDiagram
@@ -92,17 +92,17 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Cache as Redis
 
-    U->>CF: GET https://panda-estampados.com/productos
-    CF->>Caddy: HTTPS request (Host: panda-estampados.com)
+    U->>CF: GET https://panda-estampados-and-kitsune.com/productos
+    CF->>Caddy: HTTPS request (Host: panda-estampados-and-kitsune.com)
     Caddy->>FE: reverse_proxy a frontend:4321
 
     FE->>FE: Astro lee request.headers.host<br/>Resuelve tenant='panda'
     FE->>FE: Aplica theme + i18n + branding de Panda
 
-    FE->>BE: GET /api/storefront/products<br/>Header: X-Forwarded-Host: panda-estampados.com<br/>Cookie: session (si existe)
+    FE->>BE: GET /api/storefront/products<br/>Header: X-Forwarded-Host: panda-estampados-and-kitsune.com<br/>Cookie: session (si existe)
 
     BE->>MW: handle(request)
-    MW->>DB: SELECT s.* FROM stores s<br/>JOIN store_domains d<br/>WHERE d.domain='panda-estampados.com'<br/>AND s.is_active=true
+    MW->>DB: SELECT s.* FROM stores s<br/>JOIN store_domains d<br/>WHERE d.domain='panda-estampados-and-kitsune.com'<br/>AND s.is_active=true
     DB-->>MW: store_id=1, is_active=true
     MW->>SC: setStore($store) (singleton por request)
     MW-->>BE: next($request) con store en contexto
@@ -128,7 +128,7 @@ el `MultiTenantHttpIsolationTest` es crítico.
 
 ## 3. Flujo de request — Admin
 
-Cómo se resuelve un login en `admin.panda-estampados.com`:
+Cómo se resuelve un login en `admin.panda-estampados-and-kitsune.com`:
 
 ```mermaid
 sequenceDiagram
@@ -141,12 +141,12 @@ sequenceDiagram
     participant Auth as Sanctum
     participant DB as PostgreSQL
 
-    Admin->>CF: GET https://admin.panda-estampados.com/login
-    CF->>Caddy: HTTPS (Host: admin.panda-estampados.com)
+    Admin->>CF: GET https://admin.panda-estampados-and-kitsune.com/login
+    CF->>Caddy: HTTPS (Host: admin.panda-estampados-and-kitsune.com)
     Caddy->>BE: reverse_proxy a backend:8000
 
     BE->>MW: handle(request)
-    MW->>DB: SELECT store FROM store_domains<br/>WHERE domain='admin.panda-estampados.com'
+    MW->>DB: SELECT store FROM store_domains<br/>WHERE domain='admin.panda-estampados-and-kitsune.com'
     DB-->>MW: store_id=1 (Panda)
     MW->>BE: store resuelto en contexto
 
@@ -169,7 +169,7 @@ sequenceDiagram
 veces**: una por el dominio (`ResolveStoreFromDomain`) y otra por el
 usuario logueado (campo `users.store_id`). Si no coinciden, **se
 rechaza el request**. Esto evita que un operador de Kitsune entre a
-`admin.panda-estampados.com`.
+`admin.panda-estampados-and-kitsune.com`.
 
 ---
 
@@ -225,15 +225,15 @@ flowchart LR
 | **Redis compartido con namespaces**        | `panda:cart:123` y `kitsune:cart:123` conviven sin colisión. Invalidación cross-tenant no es problema porque no existe. |
 | **FTP único con prefijos**                 | Los assets son archivos. El servidor no sabe de tiendas. Los nombres de archivo lleva la tienda.                          |
 | **Middleware resuelve tienda por host**    | Single source of truth para el store activo en cada request.                                                            |
-| **Wildcard TLS `*.panda-estampados.com`** | Un cert cubre storefront + admin. Renovación automática con Caddy + Cloudflare.                                         |
+| **Wildcard TLS `*.panda-estampados-and-kitsune.com`** | Un cert cubre storefront + admin. Renovación automática con Caddy + Cloudflare.                                         |
 
 ---
 
 ## 6. Lo que falta para llegar a producción
 
 1. **Caddyfile** con los virtualhosts para cada dominio real.
-2. **Seeder `store_domains`** cargando `panda-estampados.com`,
-   `admin.panda-estampados.com`, `kitsune.com`,
+2. **Seeder `store_domains`** cargando `panda-estampados-and-kitsune.com`,
+   `admin.panda-estampados-and-kitsune.com`, `kitsune.com`,
    `admin.kitsune.com`, `www.*`, etc.
 3. **Campo `users.store_id`** con FK a `stores.id`.
 4. **Middleware/Policy** que valida que
