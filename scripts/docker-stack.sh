@@ -391,6 +391,25 @@ if [[ "$cmd_canonical" == "logs" && -z "$SERVICE" ]]; then
     exit 1
 fi
 
+# Comandos que operan sobre servicios: si el usuario pasa una tienda
+# ESPECIFICA (no "all"), DEBE especificar tambien el servicio. Asi
+# se evita el typo silencioso de correr `up dev panda-estampados-and-kitsune`
+# (sin servicio) que arranca TODOS los servicios (postgres, redis, ftp,
+# backend, frontend, nginx, mailpit, pgadmin, redis-insight, filebrowser).
+# Para arrancar todo, el usuario debe ser explicito: `up dev all`.
+case "$cmd_canonical" in
+    up|start|stop|restart|down|nuke|build)
+        if [[ "$STORE" != "all" && -z "$SERVICE" ]]; then
+            log_err "'$cmd_canonical <store>' requiere servicio o 'all' en store."
+            log_err "Si querés arrancar/detener TODOS los servicios de la instancia, usar:"
+            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE all${C_RESET}"
+            log_err "Si querés solo 1 servicio (ej backend):"
+            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE backend${C_RESET}"
+            exit 1
+        fi
+        ;;
+esac
+
 # Para `fresh`, NO se permite store=all (crea una instancia
 # específica — debe ser una sola tienda).
 if [[ "$cmd_canonical" == "fresh" && "$STORE" == "all" ]]; then
