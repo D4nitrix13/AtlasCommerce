@@ -133,6 +133,12 @@ args_contain_help() {
 # Imprime el bloque de USO + lista de stages + stores + ejemplos
 # cuando faltan argumentos posicionales. Usado por casi todos los
 # comandos con args requeridos.
+#
+# Layout: cada ejemplo se imprime en 2 lineas — el comando solo en
+# una, y la descripcion (color dim) en la siguiente con indent de 4
+# espacios. Asi no se descuadra cuando un ejemplo tiene más chars que
+# otro (problema classico cuando se intenta alinear comentarios en
+# columna fija con anchos variables).
 _print_positional_usage() {
     local cmd_canonical="$1"
     local script_path="$2"
@@ -144,32 +150,45 @@ _print_positional_usage() {
     case "$cmd_canonical" in
         build)
             log_err "  ${C_BRIGHT_CYAN}${script_path} build no-cache dev panda-estampados-and-kitsune backend${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} build dev all backend${C_RESET}                    ${C_DIM}# 3 dev${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} build production all${C_RESET}                      ${C_DIM}# 3 prod${C_RESET}"
+            log_err "    ${C_DIM}rebuild sin cache de 1 target${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} build dev all backend${C_RESET}"
+            log_err "    ${C_DIM}3 dev (con cache)${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} build production all${C_RESET}"
+            log_err "    ${C_DIM}3 prod (con cache)${C_RESET}"
             log_err "Para help: ${C_BRIGHT_CYAN}${script_path} build help${C_RESET}"
             ;;
         rm-volumes)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes -y dev panda-estampados-and-kitsune${C_RESET}      ${C_DIM}# 1 store, skip confirm${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes dev all${C_RESET}                       ${C_DIM}# 3 dev, pedir confirm${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes -y dev panda-estampados-and-kitsune${C_RESET}"
+            log_err "    ${C_DIM}1 store, skip confirm${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes dev all${C_RESET}"
+            log_err "    ${C_DIM}3 dev, pedir confirm${C_RESET}"
             ;;
         logs)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} logs dev panda-estampados-and-kitsune backend${C_RESET}      ${C_DIM}# svc requerido${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} logs dev panda-estampados-and-kitsune backend${C_RESET}"
+            log_err "    ${C_DIM}svc requerido (backend|frontend|postgres|...)${C_RESET}"
             ;;
         exec)
             log_err "  ${C_BRIGHT_CYAN}${script_path} exec dev panda-estampados-and-kitsune backend bash${C_RESET}"
             log_err "  ${C_BRIGHT_CYAN}${script_path} exec production mm-boutique app ls /var/www${C_RESET}"
+            log_err "Para help: ${C_BRIGHT_CYAN}${script_path} exec help${C_RESET}"
             ;;
         setup)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} setup production all${C_RESET}                     ${C_DIM}# 3 prod (incluye all)${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} setup development panda-estampados-and-kitsune${C_RESET}      ${C_DIM}# 1 dev${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} setup production all${C_RESET}"
+            log_err "    ${C_DIM}3 prod (incluye all)${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} setup development panda-estampados-and-kitsune${C_RESET}"
+            log_err "    ${C_DIM}1 dev${C_RESET}"
             ;;
         fresh)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh development panda-estampados-and-kitsune${C_RESET}      ${C_DIM}# 1 instancia (store obligatorio)${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh production mm-boutique${C_RESET}            ${C_DIM}# 1 instancia prod${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh development panda-estampados-and-kitsune${C_RESET}"
+            log_err "    ${C_DIM}1 instancia (store obligatorio)${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh production mm-boutique${C_RESET}"
+            log_err "    ${C_DIM}1 instancia prod${C_RESET}"
             ;;
         *)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev panda-estampados-and-kitsune${C_RESET}    ${C_DIM}# 1 instancia${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev all${C_RESET}                  ${C_DIM}# 3 dev${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev panda-estampados-and-kitsune${C_RESET}"
+            log_err "    ${C_DIM}1 instancia${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev all${C_RESET}"
+            log_err "    ${C_DIM}3 dev${C_RESET}"
             log_err "Para help: ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} help${C_RESET}"
             ;;
     esac
