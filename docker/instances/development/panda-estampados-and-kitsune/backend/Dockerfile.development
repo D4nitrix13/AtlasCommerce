@@ -49,7 +49,7 @@ WORKDIR /var/www/html
 # Configuración PHP: dev (errores visibles + xdebug) + opcache off.
 # Ojo: NO copiamos opcache.ini porque activaría OPcache en dev. La
 # sección [opcache] de php.development.ini lo deja en `enable=0`.
-COPY docker/instances/development/panda-estampados/conf/php/php.development.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/instances/development/panda-estampados-and-kitsune/conf/php/php.development.ini /usr/local/etc/php/conf.d/zz-app.ini
 
 # Directorios de logs que xdebug y php_error.log esperan.
 RUN /bin/mkdir -p /var/log/php && /bin/chown -R www-data:www-data /var/log/php
@@ -75,7 +75,7 @@ RUN /usr/bin/composer dump-autoload --optimize
 
 EXPOSE 8000
 
-COPY docker/instances/development/panda-estampados/backend/entrypoint.development.sh /usr/local/bin/entrypoint
+COPY docker/instances/development/panda-estampados-and-kitsune/backend/entrypoint.development.sh /usr/local/bin/entrypoint
 RUN /bin/chmod +x /usr/local/bin/entrypoint
 
 # Drop privilegios: el contenedor corre como `www-data` (UID 33) en vez
