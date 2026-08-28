@@ -38,7 +38,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 # .pnpm-store, .astro) que docker compose crea como root y que el
 # usuario `node` (UID 1000) necesita escribir. Después del chown,
 # hace setpriv para correr pnpm como node (mínimo privilegio).
-COPY docker/instances/development/panda-estampados/frontend/entrypoint.development.sh /usr/local/bin/entrypoint
+COPY docker/instances/development/panda-estampados-and-kitsune/frontend/entrypoint.development.sh /usr/local/bin/entrypoint
 RUN /bin/chmod +x /usr/local/bin/entrypoint
 
 # El entrypoint hace el drop de privilegios via setpriv, así que la
