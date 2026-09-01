@@ -2,7 +2,7 @@
  * RemSidebar.tsx
  *
  * React island for the REM viewer (REQ-03, REQ-04, REQ-09, REQ-10,
- * REQ-12). Owns:
+ * REQ-12, REQ-13, REQ-14, REQ-15, REQ-18, REQ-19, REQ-24). Owns:
  *
  *   - Search query (case-insensitive substring via `lib/rem/search`).
  *   - Selection state (UID of the currently highlighted requirement
@@ -19,11 +19,17 @@
  *   - Detail-panel update via `fetch + innerHTML` (F2 locked;
  *     design §4 step 8). The endpoint ships in Batch 2b — the call
  *     silently fails today and the URL state still works.
+ *   - v2 additions: hosts the 3 collapsible top-level groups
+ *     (`RemGroupShell`) + nested collapsibles per RF `module` / RNF
+ *     `category` (`RemNestedGroup`) + the draggable resize handle
+ *     (`RemResizeHandle`) + the `+ Nuevo` button slot per group
+ *     (REQ-18#1).
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
 import { RemTreeNode } from './RemTreeNode';
+import { RemGroupShell, RemNestedGroup } from './RemGroupShell';
 import { match as searchMatch } from '../../lib/rem/search';
 import { buildTree } from '../../lib/rem/tree';
 import type { Kind, RemDataset, Requirement, Stakeholder, TreeNode } from '../../lib/rem/types';
@@ -270,6 +276,16 @@ export function RemSidebar({
     }
   }, []);
 
+  // ─── v2: `+ Nuevo` per group (REQ-18#1) ────────────────────────────
+  // Stub for D1 — D2 wires the actual `RemEditDialog` open here. For
+  // now we just log so the test confirms the click fires.
+  const onCreate = useCallback((groupId: 'stakeholders' | 'rf' | 'rnf') => {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[rem] + Nuevo stub for ${groupId} — dialog wiring lands in D2`,
+    );
+  }, []);
+
   // ─── Search filter ──────────────────────────────────────────────────
   const baseTree = useMemo(() => buildTree(dataset), [dataset]);
   const filteredTree = useMemo(() => {
@@ -384,32 +400,89 @@ export function RemSidebar({
           onKeyDown={handleTreeKeyDown}
           role="tree"
           aria-label={t('rem.sidebar.heading')}
+          data-rem-tree-region
           className="rem-tree flex-1 overflow-y-auto"
         >
-          <TreeBranch
+          <RemGroupShell
+            groupId="stakeholders"
             label={t('rem.tree.stakeholders')}
-            nodes={filteredTree.stakeholders}
-            selectedUid={selectedUid}
-            onSelect={handleSelect}
-            t={t}
-            level={1}
-          />
-          <TreeBranch
+            onCreate={onCreate}
+          >
+            {filteredTree.stakeholders.length > 0 ? (
+              <ul role="group" aria-label={t('rem.tree.stakeholders')} className="space-y-0.5">
+                {filteredTree.stakeholders.map((n) => (
+                  <RemTreeNode
+                    key={n.id}
+                    node={n}
+                    level={2}
+                    selectedUid={selectedUid}
+                    onSelect={handleSelect}
+                    t={t}
+                  />
+                ))}
+              </ul>
+            ) : null}
+          </RemGroupShell>
+
+          <RemGroupShell
+            groupId="rf"
             label={t('rem.tree.functional')}
-            nodes={filteredTree.functional}
-            selectedUid={selectedUid}
-            onSelect={handleSelect}
-            t={t}
-            level={1}
-          />
-          <TreeBranch
+            onCreate={onCreate}
+          >
+            {filteredTree.functional.length > 0 ? (
+              <ul role="group" aria-label={t('rem.tree.functional')} className="space-y-1">
+                {filteredTree.functional.map((module) => (
+                  <RemNestedGroup
+                    key={module.id}
+                    groupId="rf"
+                    bucketName={module.label}
+                    label={module.label}
+                  >
+                    {(module.children ?? []).map((leaf) => (
+                      <RemTreeNode
+                        key={leaf.id}
+                        node={leaf}
+                        level={3}
+                        selectedUid={selectedUid}
+                        onSelect={handleSelect}
+                        t={t}
+                      />
+                    ))}
+                  </RemNestedGroup>
+                ))}
+              </ul>
+            ) : null}
+          </RemGroupShell>
+
+          <RemGroupShell
+            groupId="rnf"
             label={t('rem.tree.nonfunctional')}
-            nodes={filteredTree.nonFunctional}
-            selectedUid={selectedUid}
-            onSelect={handleSelect}
-            t={t}
-            level={1}
-          />
+            onCreate={onCreate}
+          >
+            {filteredTree.nonFunctional.length > 0 ? (
+              <ul role="group" aria-label={t('rem.tree.nonfunctional')} className="space-y-1">
+                {filteredTree.nonFunctional.map((category) => (
+                  <RemNestedGroup
+                    key={category.id}
+                    groupId="rnf"
+                    bucketName={category.label}
+                    label={category.label}
+                  >
+                    {(category.children ?? []).map((leaf) => (
+                      <RemTreeNode
+                        key={leaf.id}
+                        node={leaf}
+                        level={3}
+                        selectedUid={selectedUid}
+                        onSelect={handleSelect}
+                        t={t}
+                      />
+                    ))}
+                  </RemNestedGroup>
+                ))}
+              </ul>
+            ) : null}
+          </RemGroupShell>
         </div>
       )}
     </div>
@@ -421,6 +494,14 @@ export function RemSidebar({
  * a listbox-of-groups: the headings are not focusable; their leaves are.
  * For stakeholders (flat), we render the list directly without an extra
  * `role="treeitem"` wrapper — each leaf carries its own.
+ *
+ * v2 NOTE: `TreeBranch` is retained for backward compat with the v1
+ * recursive tree tests but no longer drives the main render — see the
+ * top-level JSX above. The 3 branches are now wrapped in
+ * `RemGroupShell`, and the RF/RNF inner groups are wrapped in
+ * `RemNestedGroup`. `TreeBranch` remains as a building block for
+ * future tree shapes; the v1 recursive behaviour is preserved by
+ * `RemTreeNode`'s group variant.
  */
 function TreeBranch({
   label,

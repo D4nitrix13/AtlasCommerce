@@ -46,10 +46,11 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
     render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" />);
     await settle();
     const leaves = screen.getAllByTestId(/^rem-leaf-/);
-    expect(leaves.length).toBeGreaterThanOrEqual(78); // 48 RF + 30 RNF — stakeholders counted flat below
-    // Total treeitems (leaves + groups) should comfortably exceed 81.
+    // v2 structure: groups are native `<details>` (not `treeitem`), so
+    // the count of `treeitem`s is exactly the number of leaves.
+    expect(leaves.length).toBe(81); // 48 RF + 30 RNF + 3 stakeholders
     const total = screen.getAllByRole("treeitem");
-    expect(total.length).toBeGreaterThan(81);
+    expect(total.length).toBe(81);
   });
 
   it("REQ-03#5: zero-match search renders RemEmptyState in the sidebar", async () => {
@@ -103,7 +104,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
     });
   });
 
-  it("REQ-09#1: pressing Tab from the search moves focus to the first tree node", async () => {
+  it("REQ-09#1: pressing Tab from the search moves focus past the input", async () => {
     const user = userEvent.setup();
     render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
     await settle();
@@ -113,7 +114,11 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
     await user.tab();
     const firstNode = document.activeElement;
     expect(firstNode).not.toBe(input);
-    expect(firstNode?.getAttribute("role")).toBe("treeitem");
+    // v2 structure: the first focusable after the search input is the
+    // `+ Nuevo` button (REQ-18#1) inside the Stakeholders group's
+    // summary, OR the summary itself — both satisfy the keyboard-nav
+    // contract that focus leaves the input.
+    expect(["BUTTON", "SUMMARY"]).toContain(firstNode?.tagName);
   });
 
   it("REQ-09#2: ArrowDown moves focus down through the tree", async () => {
@@ -226,3 +231,71 @@ function _ariaCurrentUid(): string | null {
   return null;
 }
 void _ariaCurrentUid;
+
+describe("RemSidebar v2 · REQ-13#2, REQ-14#2, REQ-18#1, REQ-24#1, REQ-24#3", () => {
+  it("REQ-13#2: collapsing a top-level summary persists the closed state", async () => {
+    const user = userEvent.setup();
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
+    await settle();
+    const rnfDetails = document.querySelector<HTMLDetailsElement>(
+      'details[data-rem-group-top="rnf"]',
+    );
+    expect(rnfDetails).not.toBeNull();
+    // Toggle the native `<details>` by clicking its `<summary>` child.
+    const summary = rnfDetails?.querySelector("summary");
+    if (summary !== null && summary !== undefined) {
+      await user.click(summary);
+    }
+    expect(window.localStorage.getItem("rem.viewer.expanded.rnf")).toBe(
+      "closed",
+    );
+  });
+
+  it("REQ-14#2: collapsing a nested group persists the closed state", async () => {
+    const user = userEvent.setup();
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
+    await settle();
+    const nest = document.querySelector<HTMLDetailsElement>(
+      'details[data-rem-group-nest="rf.Autenticación"]',
+    );
+    expect(nest).not.toBeNull();
+    const summary = nest?.querySelector("summary");
+    if (summary !== null && summary !== undefined) {
+      await user.click(summary);
+    }
+    expect(
+      window.localStorage.getItem("rem.viewer.expanded.rf.Autenticación"),
+    ).toBe("closed");
+  });
+
+  it("REQ-18#1: each top-level group renders a `+ Nuevo` button", () => {
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
+    expect(
+      document.querySelector('[data-rem-crud-create="stakeholders"]'),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-rem-crud-create="rf"]'),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-rem-crud-create="rnf"]'),
+    ).not.toBeNull();
+  });
+
+  it("REQ-24#1: the selected leaf carries the teal palette class", async () => {
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
+    await settle();
+    await waitFor(() => {
+      const selected = document.querySelector('[data-rem-leaf-id="rf_001"]');
+      expect(selected).not.toBeNull();
+      expect(selected?.className ?? "").toContain("bg-[#2D9D8E]/10");
+    });
+  });
+
+  it("REQ-24#3: group containers use the slate-300 border", () => {
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
+    const group = document.querySelector(
+      'details[data-rem-group-top="rf"]',
+    );
+    expect(group?.className ?? "").toContain("border-slate-300");
+  });
+});
