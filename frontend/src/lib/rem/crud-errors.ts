@@ -62,10 +62,16 @@ function statusFor(code: string): number {
  * Build a successful JSON response with `{ ok: true, ...payload }`.
  * Used by POST (returns the new UID) and PUT (returns the updated
  * item); DELETE uses a 204 with empty body and skips this helper.
+ *
+ * `status` defaults to 200 for PUT. POST overrides to 201 per the
+ * design §8 spec.
  */
-export function crudSuccessResponse(payload: Record<string, unknown>): Response {
+export function crudSuccessResponse(
+  payload: Record<string, unknown>,
+  status: number = 200
+): Response {
   return new Response(JSON.stringify({ ok: true, ...payload }), {
-    status: 200,
+    status,
     headers: JSON_HEADERS,
   });
 }
