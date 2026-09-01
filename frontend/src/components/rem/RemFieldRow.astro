@@ -41,9 +41,9 @@ const { label, value, isLinksRow = false } = Astro.props;
 const variant = getFieldRowVariant(value, { isLinksRow });
 
 const labelClass =
-  'rem-detail-row__label w-1/3 border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 align-top';
-const valueBaseClass =
-  'rem-detail-row__value w-2/3 border-b border-slate-200 px-3 py-2 text-sm text-slate-900 align-top';
+    'rem-detail-row__label w-1/4 border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 align-top';
+  const valueBaseClass =
+    'rem-detail-row__value w-3/4 border-b border-slate-200 px-3 py-2 text-sm text-slate-900 align-top whitespace-pre-wrap break-words';
 ---
 
 <tr role="row" data-rem-row data-rem-row-variant={variant}>
