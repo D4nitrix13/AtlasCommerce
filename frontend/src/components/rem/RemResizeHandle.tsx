@@ -9,8 +9,8 @@
  * that event and persist the final width via
  * `SIDEBAR_WIDTH_STORAGE_KEY` (`rem.viewer.sidebar.width`).
  *
- * Clamp `[minPx, maxPx]` defaults to `[280, 560]`. Default width
- * `416` (matches v2's `lg:w-[26rem]` in `RemLayout.astro`). On mount,
+ * Clamp `[minPx, maxPx]` defaults to `[320, 640]`. Default width
+ * `480` (matches v2's `lg:w-[30rem]` in `RemLayout.astro`). On mount,
  * the helper reads the stored value and clamps out-of-range values,
  * overwriting the stored value with the clamped one (REQ-15#2,
  * REQ-15#3).
@@ -33,12 +33,12 @@ import { SIDEBAR_WIDTH_STORAGE_KEY } from '../../lib/rem/types';
 
 // ─── Constants ───────────────────────────────────────────────────────
 
-/** Matches `RemLayout.astro`'s `lg:w-[26rem]`. */
-const DEFAULT_WIDTH_PX = 416;
+/** Matches `RemLayout.astro`'s `lg:w-[30rem]`. */
+const DEFAULT_WIDTH_PX = 480;
 /** REQ-15#1 lock — clamp range. */
-const MIN_WIDTH_PX = 280;
+const MIN_WIDTH_PX = 320;
 /** REQ-15#1 lock — clamp range. */
-const MAX_WIDTH_PX = 560;
+const MAX_WIDTH_PX = 640;
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
