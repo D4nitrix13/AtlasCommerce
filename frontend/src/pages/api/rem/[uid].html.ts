@@ -239,9 +239,11 @@ export const GET: APIRoute = ({ params, url, locals }) => {
   // Locale resolution: middleware sets `locals.locale`; the React
   // island can also pass `?locale=es|en` to override (useful when the
   // user switches via `LanguageSwitcher` and the Astro URL has not yet
-  // been refreshed).
+  // been refreshed). `locals` may be `undefined` in unit-test paths
+  // where the endpoint is invoked without the Astro middleware.
   const localeRaw =
-    url.searchParams.get('locale') ?? (locals.locale as string | undefined);
+    url.searchParams.get('locale') ??
+    (locals?.locale as string | undefined);
 
   let dataset: ReturnType<typeof loadAllRequirements>;
   try {
