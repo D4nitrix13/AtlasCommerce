@@ -473,6 +473,44 @@ const en: Translations = {
   'rem.pd.label': 'To Define',
   'rem.sources.empty.ariaLabel': 'No sources',
   'rem.cover.dateFormat': 'en-NI',
+
+  // ─── rem v2 — kebab / dialog / forms (REQ-16/17/18/19) ───────────
+  'rem.crud.actions': 'Actions',
+  'rem.crud.edit': 'Edit',
+  'rem.crud.delete': 'Delete',
+  'rem.crud.cancel': 'Cancel',
+  'rem.crud.create.submit': 'Create',
+  'rem.crud.edit.submit': 'Save changes',
+  'rem.crud.delete.confirm':
+    'Delete this requirement? This action cannot be undone.',
+  'rem.crud.delete.error':
+    'Could not delete the requirement. Please try again in a few seconds.',
+  'rem.crud.write.error':
+    'Could not save the change. Please try again in a few seconds.',
+  'rem.dialog.create.heading': 'New requirement',
+  'rem.dialog.edit.heading': 'Edit requirement',
+  'rem.form.code.label': 'Code',
+  'rem.form.code.invalid': 'Invalid format (e.g. RF-AUTH-001).',
+  'rem.form.code.required': 'Code is required.',
+  'rem.form.title.label': 'Title',
+  'rem.form.title.required': 'Title is required.',
+  'rem.form.priority.label': 'Priority',
+  'rem.form.priority.required': 'Please pick a priority.',
+  'rem.form.status.label': 'Status',
+  'rem.form.module.label': 'Module',
+  'rem.form.module.required': 'Please pick a module.',
+  'rem.form.category.label': 'Category',
+  'rem.form.category.required': 'Please pick a category.',
+  'rem.form.rationale.label': 'Description',
+  'rem.form.verifiedBy.label': 'Verified by',
+  'rem.form.fuentes.label': 'Sources',
+  'rem.form.dependencias.label': 'Dependencies',
+  'rem.form.stakeholder.name.label': 'Name',
+  'rem.form.stakeholder.name.required': 'Name is required.',
+  'rem.form.stakeholder.title.label': 'Title',
+  'rem.form.stakeholder.role.label': 'Role',
+  'rem.form.stakeholder.organization.label': 'Organization',
+  'rem.form.stakeholder.notes.label': 'Notes',
 };
 
 export default en;

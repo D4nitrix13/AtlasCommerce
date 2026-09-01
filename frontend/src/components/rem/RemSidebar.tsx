@@ -30,6 +30,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } 
 
 import { RemTreeNode } from './RemTreeNode';
 import { RemGroupShell, RemNestedGroup } from './RemGroupShell';
+import { RemKebabMenu, type RemKebabKind } from './RemKebabMenu';
+import { RemEditDialog, type RemEditKind, type RemEditMode } from './RemEditDialog';
 import { match as searchMatch } from '../../lib/rem/search';
 import { buildTree } from '../../lib/rem/tree';
 import type { Kind, RemDataset, Requirement, Stakeholder, TreeNode } from '../../lib/rem/types';
@@ -277,13 +279,31 @@ export function RemSidebar({
   }, []);
 
   // ─── v2: `+ Nuevo` per group (REQ-18#1) ────────────────────────────
-  // Stub for D1 — D2 wires the actual `RemEditDialog` open here. For
-  // now we just log so the test confirms the click fires.
+  // D2 wires the dialog open. D4 will plug the actual form bodies +
+  // POST/PUT dispatch.
+  const [dialog, setDialog] = useState<{
+    open: boolean;
+    mode: RemEditMode;
+    kind: RemEditKind;
+    uid: string | null;
+  }>({ open: false, mode: 'create', kind: 'rf', uid: null });
+
   const onCreate = useCallback((groupId: 'stakeholders' | 'rf' | 'rnf') => {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[rem] + Nuevo stub for ${groupId} — dialog wiring lands in D2`,
-    );
+    const kind: RemEditKind =
+      groupId === 'stakeholders' ? 'stakeholder' : groupId;
+    setDialog({ open: true, mode: 'create', kind, uid: null });
+  }, []);
+
+  const handleEdit = useCallback(
+    (uid: string, kind: RemKebabKind) => {
+      const editKind: RemEditKind = kind === 'stakeholder' ? 'stakeholder' : kind;
+      setDialog({ open: true, mode: 'edit', kind: editKind, uid });
+    },
+    []
+  );
+
+  const handleCloseDialog = useCallback(() => {
+    setDialog((prev) => ({ ...prev, open: false }));
   }, []);
 
   // ─── Search filter ──────────────────────────────────────────────────
@@ -418,6 +438,16 @@ export function RemSidebar({
                     selectedUid={selectedUid}
                     onSelect={handleSelect}
                     t={t}
+                    actions={
+                      n.data !== undefined ? (
+                        <RemKebabMenu
+                          uid={n.data.uid}
+                          kind="stakeholder"
+                          onEdit={handleEdit}
+                          onDelete={() => {}}
+                        />
+                      ) : undefined
+                    }
                   />
                 ))}
               </ul>
@@ -446,6 +476,16 @@ export function RemSidebar({
                         selectedUid={selectedUid}
                         onSelect={handleSelect}
                         t={t}
+                        actions={
+                          leaf.data !== undefined ? (
+                            <RemKebabMenu
+                              uid={leaf.data.uid}
+                              kind="rf"
+                              onEdit={handleEdit}
+                              onDelete={() => {}}
+                            />
+                          ) : undefined
+                        }
                       />
                     ))}
                   </RemNestedGroup>
@@ -476,6 +516,16 @@ export function RemSidebar({
                         selectedUid={selectedUid}
                         onSelect={handleSelect}
                         t={t}
+                        actions={
+                          leaf.data !== undefined ? (
+                            <RemKebabMenu
+                              uid={leaf.data.uid}
+                              kind="rnf"
+                              onEdit={handleEdit}
+                              onDelete={() => {}}
+                            />
+                          ) : undefined
+                        }
                       />
                     ))}
                   </RemNestedGroup>
@@ -485,6 +535,21 @@ export function RemSidebar({
           </RemGroupShell>
         </div>
       )}
+
+      <RemEditDialog
+        open={dialog.open}
+        mode={dialog.mode}
+        kind={dialog.kind}
+        uid={dialog.uid ?? undefined}
+        onClose={handleCloseDialog}
+      >
+        {/* D4 plugs the Zod-backed form bodies here. D2 ships an empty
+            dialog so the click → open wiring is exercised; submitting
+            with no form yields a no-op (preventDefault in the dialog). */}
+        <p className="text-sm text-slate-600">
+          {dialog.kind} — {dialog.mode} — {dialog.uid ?? '(new)'}
+        </p>
+      </RemEditDialog>
     </div>
   );
 }
