@@ -423,11 +423,18 @@ const es: Translations = {
   'format.empty': '—',
   'format.date.locale': 'es-NI',
 
-  // ─── rem viewer (Batch 2b · REQ-08) ──────────────────────────────────
+  // ─── rem viewer (Batch 2b · REQ-08 + Batch 2c corrective) ────────────
+  // Batch 2c added the 13 keys the components referenced but the
+  // original namespace omitted: sidebar empty state, skeleton copy,
+  // shell landmark aria-labels, error.load.* variants, and the
+  // dynamic `rem.detail.status.<value>` keys for the 5-status enum.
   'rem.title': 'REM Viewer',
   'rem.sidebar.heading': 'Requisitos',
   'rem.sidebar.search.placeholder': 'Buscar por código, título o módulo',
   'rem.sidebar.search.clear': 'Limpiar búsqueda',
+  'rem.sidebar.empty.heading': 'Búsqueda sin resultados',
+  'rem.sidebar.empty.body':
+    'Probá con otros términos o limpiá la búsqueda para ver todos los requisitos.',
   'rem.tree.stakeholders': 'Stakeholders',
   'rem.tree.functional': 'Requisitos funcionales',
   'rem.tree.nonfunctional': 'Requisitos no funcionales',
@@ -439,6 +446,11 @@ const es: Translations = {
   'rem.detail.category': 'Categoría',
   'rem.detail.priority': 'Prioridad',
   'rem.detail.status': 'Estado',
+  'rem.detail.status.pending': 'Pendiente',
+  'rem.detail.status.in-analysis': 'En análisis',
+  'rem.detail.status.approved': 'Aprobado',
+  'rem.detail.status.implemented': 'Implementado',
+  'rem.detail.status.verified': 'Verificado',
   'rem.detail.verifiedBy': 'Verificado por',
   'rem.detail.sources': 'Fuentes/Dependencias',
   'rem.detail.rationale': 'Descripción',
@@ -451,8 +463,15 @@ const es: Translations = {
   'rem.print.full': 'Informe completo',
   'rem.print.coverTitle': 'REM — Panda Estampados',
   'rem.empty.title': 'Sin resultados',
+  'rem.skeleton.loading': 'Cargando visor...',
   'rem.error.title': 'No se pudieron cargar los requisitos',
   'rem.error.codeUnknown': 'Requisito no encontrado',
+  'rem.error.load.title': 'No se pudieron cargar los requisitos',
+  'rem.error.load.body':
+    'Revisá los archivos YAML de requisitos o contactá a soporte si el problema persiste.',
+  'rem.shell.header': 'Encabezado del visor',
+  'rem.shell.main': 'Detalle del requisito seleccionado',
+  'rem.shell.footer': 'Pie del visor',
   'rem.pd.label': 'Por Definir',
   'rem.sources.empty.ariaLabel': 'Sin fuentes',
   'rem.cover.dateFormat': 'es-NI',

@@ -336,8 +336,8 @@ export function RemSidebar({
         type="search"
         data-testid="rem-search-input"
         data-rem-search
-        placeholder={t('rem.sidebar.searchPlaceholder')}
-        aria-label={t('rem.sidebar.searchPlaceholder')}
+        placeholder={t('rem.sidebar.search.placeholder')}
+        aria-label={t('rem.sidebar.search.placeholder')}
         value={query}
         onChange={(e) => setQuery(e.currentTarget.value)}
         onKeyDown={handleSearchKeyDown}
@@ -363,7 +363,7 @@ export function RemSidebar({
             onClick={() => setQuery('')}
             className="rem-empty__clear mt-2 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
           >
-            {t('rem.sidebar.empty.clear')}
+            {t('rem.sidebar.search.clear')}
           </button>
         </section>
       ) : (
@@ -375,7 +375,7 @@ export function RemSidebar({
           className="rem-tree flex-1 overflow-y-auto"
         >
           <TreeBranch
-            label={t('rem.sidebar.group.stakeholders')}
+            label={t('rem.tree.stakeholders')}
             nodes={filteredTree.stakeholders}
             selectedUid={selectedUid}
             onSelect={handleSelect}
@@ -383,7 +383,7 @@ export function RemSidebar({
             level={1}
           />
           <TreeBranch
-            label={t('rem.sidebar.group.functional')}
+            label={t('rem.tree.functional')}
             nodes={filteredTree.functional}
             selectedUid={selectedUid}
             onSelect={handleSelect}
@@ -391,7 +391,7 @@ export function RemSidebar({
             level={1}
           />
           <TreeBranch
-            label={t('rem.sidebar.group.nonfunctional')}
+            label={t('rem.tree.nonfunctional')}
             nodes={filteredTree.nonFunctional}
             selectedUid={selectedUid}
             onSelect={handleSelect}

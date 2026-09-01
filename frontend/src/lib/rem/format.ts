@@ -193,7 +193,13 @@ export function buildDetailRows(
     rows.push({
       field: 'status',
       labelKey: t('rem.detail.status'),
-      value: req.status ? formatStatus(req.status) : null,
+      // Batch 2c: wrap the dynamic key in t() so the row value is
+      // translated instead of leaking the literal "rem.detail.status.<x>"
+      // string into the UI. The static analysis still returns the key
+      // when the caller passes the identity translator (see
+      // `RemDetail.test.tsx`), but the production translator resolves
+      // it to the locale string.
+      value: req.status ? t(formatStatus(req.status)) : null,
     });
 
     // RF only: "Verificado por" row (REQ-05#2 — RNF has no verified-by)
@@ -220,7 +226,10 @@ export function buildDetailRows(
     }
     rows.push({
       field: 'fuentes',
-      labelKey: t('rem.detail.links'),
+      // Batch 2c: align labelKey with the canonical namespace key
+      // (`rem.detail.sources` = "Fuentes/Dependencias"); previously
+      // `rem.detail.links` did not exist in the namespace.
+      labelKey: t('rem.detail.sources'),
       value: combined.length === 0 ? [] : combined,
     });
 

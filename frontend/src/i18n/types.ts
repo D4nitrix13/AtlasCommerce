@@ -396,10 +396,17 @@ export type TranslationKey =
   // Page title + sidebar/tree/print/error/empty namespace. The
   // existing components referenced these keys via string literals
   // until Batch 2b; this union is the canonical source of truth.
+  //
+  // Batch 2c (corrective): added 13 keys that were referenced by
+  // components but missing from the namespace (sidebar empty state,
+  // skeleton, shell landmarks, error.load.* variants, dynamic
+  // status values).
   | 'rem.title'
   | 'rem.sidebar.heading'
   | 'rem.sidebar.search.placeholder'
   | 'rem.sidebar.search.clear'
+  | 'rem.sidebar.empty.heading'
+  | 'rem.sidebar.empty.body'
   | 'rem.tree.stakeholders'
   | 'rem.tree.functional'
   | 'rem.tree.nonfunctional'
@@ -411,6 +418,11 @@ export type TranslationKey =
   | 'rem.detail.category'
   | 'rem.detail.priority'
   | 'rem.detail.status'
+  | 'rem.detail.status.pending'
+  | 'rem.detail.status.in-analysis'
+  | 'rem.detail.status.approved'
+  | 'rem.detail.status.implemented'
+  | 'rem.detail.status.verified'
   | 'rem.detail.verifiedBy'
   | 'rem.detail.sources'
   | 'rem.detail.rationale'
@@ -423,8 +435,14 @@ export type TranslationKey =
   | 'rem.print.full'
   | 'rem.print.coverTitle'
   | 'rem.empty.title'
+  | 'rem.skeleton.loading'
   | 'rem.error.title'
   | 'rem.error.codeUnknown'
+  | 'rem.error.load.title'
+  | 'rem.error.load.body'
+  | 'rem.shell.header'
+  | 'rem.shell.main'
+  | 'rem.shell.footer'
   | 'rem.pd.label'
   | 'rem.sources.empty.ariaLabel'
   | 'rem.cover.dateFormat';
