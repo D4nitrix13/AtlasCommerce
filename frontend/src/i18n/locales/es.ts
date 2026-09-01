@@ -302,8 +302,7 @@ const es: Translations = {
   'auth.passwordRecovery.errors.challengeExpiredLate':
     'La sesión de recuperación expiró. Volvé a empezar.',
   'auth.passwordRecovery.errors.codeInvalid': 'El código es inválido.',
-  'auth.passwordRecovery.errors.emailSubmit':
-    'No pudimos verificar tu correo. Probá de nuevo.',
+  'auth.passwordRecovery.errors.emailSubmit': 'No pudimos verificar tu correo. Probá de nuevo.',
   'auth.passwordRecovery.errors.genericFallback': 'Algo salió mal. Volvé a empezar.',
   'auth.passwordRecovery.errors.methodRequired': 'Seleccioná un método de recuperación.',
   'auth.passwordRecovery.errors.noMethodsBody':
@@ -323,8 +322,7 @@ const es: Translations = {
   'auth.passwordRecovery.steps.code.placeholderOtp': '000000',
   'auth.passwordRecovery.steps.code.placeholderRecovery': 'ABCDEFGHJK',
   'auth.passwordRecovery.steps.email.emailErrorEmpty': 'Ingresá tu correo electrónico.',
-  'auth.passwordRecovery.steps.email.emailErrorInvalid':
-    'El correo no tiene un formato válido.',
+  'auth.passwordRecovery.steps.email.emailErrorInvalid': 'El correo no tiene un formato válido.',
   'auth.passwordRecovery.steps.email.heading': 'Recuperá tu cuenta',
   'auth.passwordRecovery.steps.email.subtitle':
     'Empezamos por tu correo. Te mostraremos las opciones de recuperación disponibles.',
@@ -424,6 +422,40 @@ const es: Translations = {
 
   'format.empty': '—',
   'format.date.locale': 'es-NI',
+
+  // ─── rem viewer (Batch 2b · REQ-08) ──────────────────────────────────
+  'rem.title': 'REM Viewer',
+  'rem.sidebar.heading': 'Requisitos',
+  'rem.sidebar.search.placeholder': 'Buscar por código, título o módulo',
+  'rem.sidebar.search.clear': 'Limpiar búsqueda',
+  'rem.tree.stakeholders': 'Stakeholders',
+  'rem.tree.functional': 'Requisitos funcionales',
+  'rem.tree.nonfunctional': 'Requisitos no funcionales',
+  'rem.tree.role': 'tree',
+  'rem.treeitem.role': 'treeitem',
+  'rem.detail.code': 'Código',
+  'rem.detail.title': 'Título',
+  'rem.detail.module': 'Módulo',
+  'rem.detail.category': 'Categoría',
+  'rem.detail.priority': 'Prioridad',
+  'rem.detail.status': 'Estado',
+  'rem.detail.verifiedBy': 'Verificado por',
+  'rem.detail.sources': 'Fuentes/Dependencias',
+  'rem.detail.rationale': 'Descripción',
+  'rem.detail.notes': 'Notas',
+  'rem.detail.organization': 'Organización',
+  'rem.detail.role': 'Rol',
+  'rem.detail.uid': 'UID',
+  'rem.detail.name': 'Nombre',
+  'rem.print.single': 'Imprimir PDF',
+  'rem.print.full': 'Informe completo',
+  'rem.print.coverTitle': 'REM — Panda Estampados',
+  'rem.empty.title': 'Sin resultados',
+  'rem.error.title': 'No se pudieron cargar los requisitos',
+  'rem.error.codeUnknown': 'Requisito no encontrado',
+  'rem.pd.label': 'Por Definir',
+  'rem.sources.empty.ariaLabel': 'Sin fuentes',
+  'rem.cover.dateFormat': 'es-NI',
 };
 
 export default es;

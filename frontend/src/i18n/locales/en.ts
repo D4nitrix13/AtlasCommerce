@@ -253,8 +253,7 @@ const en: Translations = {
   'auth.passwordRecovery.code.submit': 'Verify code',
   'auth.passwordRecovery.code.submitting': 'Verifying...',
   'auth.passwordRecovery.code.invalid': 'The code is invalid or has already been used.',
-  'auth.passwordRecovery.code.locked':
-    'Too many attempts. Wait a few minutes before trying again.',
+  'auth.passwordRecovery.code.locked': 'Too many attempts. Wait a few minutes before trying again.',
   'auth.passwordRecovery.password.heading': 'Create your new password',
   'auth.passwordRecovery.password.subtitle':
     'Pick a strong password, different from your previous ones.',
@@ -279,7 +278,7 @@ const en: Translations = {
   'auth.passwordRecovery.success.body':
     'Your password was changed successfully. You can now sign in with your new password.',
   'auth.passwordRecovery.success.subbody':
-    "If you did not make this change, contact us immediately at {supportEmail}.",
+    'If you did not make this change, contact us immediately at {supportEmail}.',
   'auth.passwordRecovery.success.cta': 'Go to sign in',
   'auth.passwordRecovery.backButton': 'Back',
   'auth.passwordRecovery.useEmail': 'Use email',
@@ -297,13 +296,11 @@ const en: Translations = {
   'auth.passwordRecovery.empty.body':
     "We couldn't find recovery methods for this account. Please contact support.",
   'auth.passwordRecovery.empty.heading': 'No methods available',
-  'auth.passwordRecovery.errors.challengeExpired':
-    'Recovery session expired. Please start over.',
+  'auth.passwordRecovery.errors.challengeExpired': 'Recovery session expired. Please start over.',
   'auth.passwordRecovery.errors.challengeExpiredLate':
     'The recovery session expired. Please start over.',
   'auth.passwordRecovery.errors.codeInvalid': 'The code is invalid.',
-  'auth.passwordRecovery.errors.emailSubmit':
-    "We couldn't verify your email. Please try again.",
+  'auth.passwordRecovery.errors.emailSubmit': "We couldn't verify your email. Please try again.",
   'auth.passwordRecovery.errors.genericFallback': 'Something went wrong. Please start over.',
   'auth.passwordRecovery.errors.methodRequired': 'Please select a recovery method.',
   'auth.passwordRecovery.errors.noMethodsBody':
@@ -423,6 +420,40 @@ const en: Translations = {
 
   'format.empty': '—',
   'format.date.locale': 'en-US',
+
+  // ─── rem viewer (Batch 2b · REQ-08) ──────────────────────────────────
+  'rem.title': 'REM Viewer',
+  'rem.sidebar.heading': 'Requirements',
+  'rem.sidebar.search.placeholder': 'Search by code, title, or module',
+  'rem.sidebar.search.clear': 'Clear search',
+  'rem.tree.stakeholders': 'Stakeholders',
+  'rem.tree.functional': 'Functional requirements',
+  'rem.tree.nonfunctional': 'Non-functional requirements',
+  'rem.tree.role': 'tree',
+  'rem.treeitem.role': 'treeitem',
+  'rem.detail.code': 'Code',
+  'rem.detail.title': 'Title',
+  'rem.detail.module': 'Module',
+  'rem.detail.category': 'Category',
+  'rem.detail.priority': 'Priority',
+  'rem.detail.status': 'Status',
+  'rem.detail.verifiedBy': 'Verified by',
+  'rem.detail.sources': 'Sources/Dependencies',
+  'rem.detail.rationale': 'Description',
+  'rem.detail.notes': 'Notes',
+  'rem.detail.organization': 'Organization',
+  'rem.detail.role': 'Role',
+  'rem.detail.uid': 'UID',
+  'rem.detail.name': 'Name',
+  'rem.print.single': 'Print PDF',
+  'rem.print.full': 'Full report',
+  'rem.print.coverTitle': 'REM — Panda Estampados',
+  'rem.empty.title': 'No results',
+  'rem.error.title': 'Could not load requirements',
+  'rem.error.codeUnknown': 'Requirement not found',
+  'rem.pd.label': 'To Define',
+  'rem.sources.empty.ariaLabel': 'No sources',
+  'rem.cover.dateFormat': 'en-NI',
 };
 
 export default en;
