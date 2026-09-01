@@ -105,7 +105,7 @@ export function RemPrintButton(): ReactElement {
         aria-label={t('rem.print.full')}
         onClick={handleFull}
         disabled={busy}
-        className="rem-print-button__full inline-flex items-center justify-center rounded-md border border-[#2D9D8E] bg-[#2D9D8E] px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-[#24897B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E] disabled:cursor-not-allowed disabled:opacity-60"
+        className="rem-print-button__full inline-flex items-center justify-center rounded-md border border-[#2D9D8E] bg-[#2D9D8E] px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-[#258777] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {t('rem.print.full')}
       </button>
