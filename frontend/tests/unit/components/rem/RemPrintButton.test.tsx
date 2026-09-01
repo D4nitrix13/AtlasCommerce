@@ -80,4 +80,11 @@ describe("RemPrintButton · REQ-06#1 + REQ-06#2", () => {
     expect(layout).toMatch(/rem-print\.css/);
     expect(layout).toMatch(/media\s*=\s*"print"/);
   });
+
+  it("REQ-24#4: full report button uses #2D9D8E base + #258777 hover (auth accent)", () => {
+    render(<RemPrintButton />);
+    const fullBtn = screen.getByTestId("rem-print-full");
+    expect(fullBtn.className).toContain("bg-[#2D9D8E]");
+    expect(fullBtn.className).toContain("hover:bg-[#258777]");
+  });
 });
