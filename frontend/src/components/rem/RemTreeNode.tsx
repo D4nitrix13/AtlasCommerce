@@ -84,6 +84,11 @@ function RemTreeNodeInner({
 
   const baseClass =
     'rem-tree-node flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-left text-sm hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]';
+  // v2 (REQ-24#1): selected leaf uses the auth accent palette — teal
+  // background with the deeper text colour. The hover style still
+  // applies for non-selected rows.
+  const selectedClass =
+    'rem-tree-node--selected bg-[#2D9D8E]/10 text-[#1E6F62] hover:bg-[#2D9D8E]/15';
 
   if (leaf) {
     return (
@@ -95,7 +100,7 @@ function RemTreeNodeInner({
         data-rem-leaf
         data-rem-leaf-id={node.data?.uid ?? node.id}
         data-testid={`rem-leaf-${node.data?.uid ?? node.id}`}
-        className={baseClass}
+        className={isSelected === true ? `${baseClass} ${selectedClass}` : baseClass}
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
