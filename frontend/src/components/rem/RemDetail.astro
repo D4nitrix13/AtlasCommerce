@@ -1,0 +1,91 @@
+---
+/**
+ * RemDetail.astro
+ *
+ * Server-rendered detail panel for one requirement (or stakeholder)
+ * — REQ-05 + REQ-04#2. Zero client JS; the page hydrates with this
+ * markup already in place.
+ *
+ * The detail panel swap-on-selection uses `fetch + innerHTML` from
+ * `RemSidebar.tsx` (F2-locked, design §4 step 8): the island fetches
+ * `/api/rem/<uid>.html` (Batch 2b's endpoint) and replaces the contents
+ * of `.rem-detail` with the Astro-rendered HTML for the new UID.
+ *
+ * Row specs come from `buildDetailRows` in `lib/rem/format.ts` so the
+ * production Astro and the unit tests share the same source of truth.
+ */
+
+import RemFieldRow from './RemFieldRow.astro';
+import { buildDetailRows } from '../../lib/rem/format';
+import type { Requirement, Stakeholder } from '../../lib/rem/types';
+
+interface Props {
+  /** The item to display — an RF, RNF, or stakeholder. */
+  item: Requirement | Stakeholder;
+  /** Stakeholder list for resolving `verifiedBy` UIDs to names. */
+  stakeholders?: Stakeholder[];
+  /** Translator — same shape as React `useTranslations()`'s `t`. */
+  t?: (key: string) => string;
+}
+
+const { item, stakeholders = [], t = (k: string) => k } = Astro.props;
+
+const rows = buildDetailRows(item, t, stakeholders);
+
+// ─── Header line ─────────────────────────────────────────────────────
+
+interface HeaderShape {
+  code: string | null;
+  title: string | null;
+  kind: 'rf' | 'rnf' | 'stakeholder';
+}
+
+function headerOf(item: Requirement | Stakeholder): HeaderShape {
+  if ('kind' in item) {
+    return { code: item.code || null, title: item.title || null, kind: item.kind };
+  }
+  return { code: item.uid, title: item.name || null, kind: 'stakeholder' };
+}
+
+// `buildDetailRows` returns a `stakeholders` shape for the
+// `verifiedBy` row; the field row component renders that as plain
+// text by joining the resolved names.
+function rowValueToString(value: (typeof rows)[number]['value']): string | string[] | null {
+  if (value === null) return null;
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'object' && value.kind === 'stakeholders') {
+    return value.names.join(', ');
+  }
+  return null;
+}
+
+const header = headerOf(item);
+const headerTitle = `${header.code ?? '?'} — ${header.title ?? 'Sin título'}`;
+---
+
+<section
+  data-rem-detail-render
+  data-rem-detail-kind={header.kind}
+  data-rem-detail-uid={'uid' in item ? item.uid : ''}
+  class="rem-detail__panel mx-auto max-w-3xl rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+>
+  <header class="rem-detail__header mb-6 border-b border-slate-200 pb-4">
+    <h2 class="rem-detail__header-title text-2xl font-semibold text-slate-900">
+      {headerTitle}
+    </h2>
+  </header>
+
+  <table class="rem-detail__table w-full border-collapse text-left" role="table">
+    <tbody>
+      {
+        rows.map((row) => (
+          <RemFieldRow
+            label={row.labelKey}
+            value={rowValueToString(row.value)}
+            isLinksRow={row.field === 'fuentes'}
+          />
+        ))
+      }
+    </tbody>
+  </table>
+</section>
