@@ -22,6 +22,14 @@
 import { memo, useCallback, useState, type ReactElement } from 'react';
 
 import type { TreeNode } from '../../lib/rem/types';
+import type { useTranslations } from '../../i18n';
+
+/**
+ * Translator shape from the i18n hook. Mirrors the type alias in
+ * `RemSidebar.tsx` so the prop signature is consistent across the
+ * sidebar subtree (was `(key: string) => string` before Batch 4).
+ */
+type Translator = ReturnType<typeof useTranslations>['t'];
 
 export interface RemTreeNodeProps {
   /** Tree node to render — see `lib/rem/types.ts` `TreeNode`. */
@@ -35,8 +43,8 @@ export interface RemTreeNodeProps {
    * Groups ignore this — they only toggle themselves.
    */
   onSelect: (uid: string) => void;
-  /** Translator — mirrors `format.ts`'s `Translator` shape. */
-  t: (key: string) => string;
+  /** Translator — mirrors the i18n hook's `t` shape. */
+  t: Translator;
 }
 
 function isLeaf(node: TreeNode): boolean {

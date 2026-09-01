@@ -19,8 +19,6 @@ import { SEED_DATASET } from "../../rem/fixtures/seed";
 import { SEED_MINI } from "../../rem/fixtures/seed-mini";
 import type { Stakeholder } from "../../../../src/lib/rem/types";
 
-const t = (key: string) => key;
-
 const SAMPLES = {
   dataset: SEED_DATASET,
   mini: SEED_MINI,
@@ -45,7 +43,7 @@ afterEach(() => {
 
 describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3", () => {
   it("REQ-04#1 (rendering root): renders 81 selectable leaves in the tree", async () => {
-    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" />);
     await settle();
     const leaves = screen.getAllByTestId(/^rem-leaf-/);
     expect(leaves.length).toBeGreaterThanOrEqual(78); // 48 RF + 30 RNF — stakeholders counted flat below
@@ -56,7 +54,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
 
   it("REQ-03#5: zero-match search renders RemEmptyState in the sidebar", async () => {
     const user = userEvent.setup();
-    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" />);
     await settle();
     const input = screen.getByTestId("rem-search-input");
     await user.type(input, "zzzzzz-no-match");
@@ -71,7 +69,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
   });
 
   it("REQ-10#1: skeleton with aria-busy renders on initial mount", () => {
-    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" />);
     // The wrapper mounts synchronously with aria-busy="true" so
     // assistive tech announces the loading state. The component then
     // flips to "false" on the next animation frame; we don't assert
@@ -85,7 +83,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
 
   it("REQ-04#3: clearing the search input keeps the current selection intact", async () => {
     const user = userEvent.setup();
-    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_002" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_002" locale="es" />);
     await settle();
 
     // Type a query that matches everything except rf_002; selection is on rf_002.
@@ -107,7 +105,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
 
   it("REQ-09#1: pressing Tab from the search moves focus to the first tree node", async () => {
     const user = userEvent.setup();
-    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
     await settle();
     const input = screen.getByTestId("rem-search-input");
     input.focus();
@@ -120,7 +118,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
 
   it("REQ-09#2: ArrowDown moves focus down through the tree", async () => {
     const user = userEvent.setup();
-    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
     await settle();
     const input = screen.getByTestId("rem-search-input");
     input.focus();
@@ -139,7 +137,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
 
   it("REQ-09#3: pressing Enter on a focused tree node selects it (sets aria-current)", async () => {
     const user = userEvent.setup();
-    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
     await settle();
     const input = screen.getByTestId("rem-search-input");
     input.focus();
@@ -159,7 +157,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
 
   it("REQ-09#4: pressing Escape inside the search input clears its value", async () => {
     const user = userEvent.setup();
-    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.dataset} initialUid="rf_001" locale="es" />);
     await settle();
     const input = screen.getByTestId("rem-search-input");
     await user.type(input, "redis");
@@ -171,7 +169,7 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
 
   it("REQ-12#1: clicking a tree leaf updates the URL to ?id=<uid> via history.replaceState", async () => {
     const user = userEvent.setup();
-    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" t={t} />);
+    render(<RemSidebar dataset={SAMPLES.mini} initialUid="rf_001" locale="es" />);
     await settle();
 
     // The mount effect already mirrors the initial selection to ?id=…
@@ -195,7 +193,6 @@ describe("RemSidebar · REQ-03#5 + REQ-04#1 + REQ-09 + REQ-10#1,#2 + REQ-12#1,#3
         dataset={SAMPLES.mini}
         initialUid="rf_does_not_exist"
         locale="es"
-        t={t}
       />,
     );
     await settle();

@@ -23,11 +23,10 @@ import { describe, expect, it, beforeEach, vi, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import RemPrintButton from "../../../../src/components/rem/RemPrintButton";
-const t = (key: string) => key;
 
 describe("RemPrintButton · REQ-06#1 + REQ-06#2", () => {
   let printSpy: ReturnType<typeof vi.fn>;
@@ -44,11 +43,17 @@ describe("RemPrintButton · REQ-06#1 + REQ-06#2", () => {
 
   it("REQ-06#1: clicking 'Imprimir PDF' invokes window.print within 100 ms", async () => {
     const user = userEvent.setup();
-    render(<RemPrintButton t={t} />);
+    render(<RemPrintButton />);
     const btn = screen.getByTestId("rem-print-single");
 
     const t0 = performance.now();
     await user.click(btn);
+    // The implementation defers `window.print()` to `setTimeout(0, ...)`
+    // so the click handler returns synchronously and the spec's 100 ms
+    // timing window measures only the scheduling latency, not the
+    // native dialog's blocking time. We wait for the spy call before
+    // measuring the elapsed budget — the same 100 ms ceiling applies.
+    await waitFor(() => expect(printSpy).toHaveBeenCalledTimes(1));
     const t1 = performance.now();
 
     // jsdom + a stubbed window.print makes the call synchronous and
