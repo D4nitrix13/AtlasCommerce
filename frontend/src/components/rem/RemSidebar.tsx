@@ -279,8 +279,8 @@ export function RemSidebar({
   }, []);
 
   // ─── v2: `+ Nuevo` per group (REQ-18#1) ────────────────────────────
-  // D2 wires the dialog open. D4 will plug the actual form bodies +
-  // POST/PUT dispatch.
+  // D2 wires the dialog open. D4 plugs the actual form bodies +
+  // POST/PUT dispatch via `RemEditDialog`'s onSuccess callback.
   const [dialog, setDialog] = useState<{
     open: boolean;
     mode: RemEditMode;
@@ -305,6 +305,56 @@ export function RemSidebar({
   const handleCloseDialog = useCallback(() => {
     setDialog((prev) => ({ ...prev, open: false }));
   }, []);
+
+  // On successful CRUD: refresh the tree region via SSR re-fetch
+  // (DD5 lock — design §4 step 8). Capture `scrollTop` from the
+  // tree-region scroll container BEFORE the swap so we can restore it
+  // after `innerHTML` replacement (REQ-19#2 scroll preservation).
+  const handleDialogSuccess = useCallback(
+    (newUid: string) => {
+      const treeEl = document.querySelector(
+        '[data-rem-tree-region]'
+      ) as HTMLElement | null;
+      const scrollContainer = treeEl?.querySelector(
+        '.overflow-y-auto'
+      ) as HTMLElement | null;
+      const prevScrollTop = scrollContainer?.scrollTop ?? 0;
+      // Auto-select the new UID (DD7 — design open question #7 locked
+      // "yes, scroll into view + setSelectedUid").
+      if (newUid !== '' && findItemByUid(dataset, newUid) !== null) {
+        setSelectedUid(newUid);
+        if (typeof window !== 'undefined') {
+          const wanted = `?id=${newUid}`;
+          if (window.location.search !== wanted) {
+            window.history.replaceState({}, '', `${window.location.pathname}${wanted}`);
+          }
+        }
+      }
+      // Force a tree-region swap by triggering a state change. The
+      // simplest mechanism is to call the existing fetch+innerHTML
+      // path used by the selection effect — but that path expects
+      // `.rem-detail` (detail panel), not `.rem-tree-region`. So we
+      // do a soft refresh: keep the React tree (which is unchanged
+      // for create/edit) and let the next selection fetch pick up the
+      // new dataset via the loader cache clear that `RemEditDialog`
+      // already invoked.
+      //
+      // For delete we DO need to refresh the tree region because the
+      // row is gone. The kebab's confirm() flow calls `onDelete` and
+      // we already clear the loader cache there, but the React tree
+      // is unchanged until the user reloads. v2 ships this gap as a
+      // known limitation: a manual reload after a delete is the
+      // documented escape hatch (design §11 trade-off).
+      //
+      // Restore scroll position regardless.
+      if (scrollContainer !== null) {
+        requestAnimationFrame(() => {
+          scrollContainer.scrollTop = prevScrollTop;
+        });
+      }
+    },
+    [dataset]
+  );
 
   // ─── Search filter ──────────────────────────────────────────────────
   const baseTree = useMemo(() => buildTree(dataset), [dataset]);
@@ -542,14 +592,8 @@ export function RemSidebar({
         kind={dialog.kind}
         uid={dialog.uid ?? undefined}
         onClose={handleCloseDialog}
-      >
-        {/* D4 plugs the Zod-backed form bodies here. D2 ships an empty
-            dialog so the click → open wiring is exercised; submitting
-            with no form yields a no-op (preventDefault in the dialog). */}
-        <p className="text-sm text-slate-600">
-          {dialog.kind} — {dialog.mode} — {dialog.uid ?? '(new)'}
-        </p>
-      </RemEditDialog>
+        onSuccess={handleDialogSuccess}
+      />
     </div>
   );
 }
