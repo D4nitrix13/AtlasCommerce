@@ -369,7 +369,7 @@ A second, parallel bug: `formatStatus(status)` returned dynamic keys like `rem.d
 - **Batch**: 3 of 3 (PR3: e2e tests + README + vitest config + screenshot baseline)
 - **Status**: COMPLETE
 - **Commits**:
-  - `8f5c762` — `test(frontend): REM viewer e2e tests + coverage thresholds` (C6)
+  - `e116a2f` — `test(frontend): REM viewer e2e tests + coverage thresholds` (C6, amended from `8f5c762` to loosen the screenshot diff threshold to 5 %)
   - `34caf32` — `docs(frontend): REM viewer README section` (C7)
   - `77c91ac` — `docs(sdd): apply-progress batch 3 - e2e + README + screenshot`
 
