@@ -28,14 +28,21 @@ import { match as searchMatch } from '../../lib/rem/search';
 import { buildTree } from '../../lib/rem/tree';
 import type { Kind, RemDataset, Requirement, Stakeholder, TreeNode } from '../../lib/rem/types';
 import type { Locale } from '../../i18n/config';
+import { useTranslations } from '../../i18n';
+
+/**
+ * Translator shape sourced from the i18n hook. The hook returns a
+ * function whose parameter is narrowed to `keyof Translations`, so
+ * this type aliases the actual runtime signature for use as a prop
+ * type across `TreeBranch` and the leaf `RemTreeNode`.
+ */
+type Translator = ReturnType<typeof useTranslations>['t'];
 
 export interface RemSidebarProps {
   dataset: RemDataset;
   /** UID to preselect; falls back to the first item when invalid. */
   initialUid: string;
   locale: Locale;
-  /** Optional translator — mirrors `format.ts`'s `Translator` shape. */
-  t?: (key: string) => string;
 }
 
 /**
@@ -149,8 +156,13 @@ export function RemSidebar({
   dataset,
   initialUid,
   locale: _locale,
-  t = (k: string) => k,
 }: RemSidebarProps): ReactElement {
+  // Translator comes from the i18n hook (serializable across the SSR →
+  // client boundary) instead of a closure prop. The previous `t` prop
+  // broke hydration: after SSR serialized the prop, the React island
+  // re-mounted without a translator and the click handler was never
+  // wired (REQ-04#1 click → panel update failed end-to-end).
+  const { t } = useTranslations();
   const [hydrating, setHydrating] = useState(true);
   const [query, setQuery] = useState('');
   const [selectedUid, setSelectedUid] = useState<string>(initialUid);
@@ -422,7 +434,7 @@ function TreeBranch({
   nodes: TreeNode[];
   selectedUid: string;
   onSelect: (uid: string) => void;
-  t: (key: string) => string;
+  t: Translator;
   level: number;
 }): ReactElement | null {
   if (nodes.length === 0) return null;

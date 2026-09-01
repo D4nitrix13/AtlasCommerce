@@ -29,20 +29,20 @@
  * of truth (per REQ-08#1 the page must serve both locales).
  */
 
-import RemLayout from '../../../../layouts/RemLayout.astro';
-import RemSidebar from '../../../../components/rem/RemSidebar';
-import RemDetail from '../../../../components/rem/RemDetail.astro';
-import RemPrintButton from '../../../../components/rem/RemPrintButton';
-import RemError from '../../../../components/rem/RemError.astro';
-import { loadAllRequirements } from '../../../../lib/rem/loader';
+import RemLayout from '../../../layouts/RemLayout.astro';
+import RemSidebar from '../../../components/rem/RemSidebar';
+import RemDetail from '../../../components/rem/RemDetail.astro';
+import RemPrintButton from '../../../components/rem/RemPrintButton';
+import RemError from '../../../components/rem/RemError.astro';
+import { loadAllRequirements } from '../../../lib/rem/loader';
 import {
   findItemByUid,
   getRemStaticPaths,
   resolveSelectionFromQuery,
-} from '../../../../lib/rem/page-route';
-import { getServerDictionary } from '../../../../i18n/server';
-import { SUPPORTED_LOCALES, type Locale } from '../../../../i18n/config';
-import type { RemDataset } from '../../../../lib/rem/types';
+} from '../../../lib/rem/page-route';
+import { getServerDictionary } from '../../../i18n/server';
+import { SUPPORTED_LOCALES, type Locale } from '../../../i18n/config';
+import type { RemDataset } from '../../../lib/rem/types';
 
 // Re-export the static paths from the helper so Astro generates both
 // `/es/rem/` and `/en/rem/`. Keeping the source of truth in one place
@@ -55,9 +55,15 @@ const locale: Locale =
     ? (rawLocale as Locale)
     : 'es';
 
-// Page-side translator — same shape as `useTranslations().t` so the
-// `t` prop on each REM component accepts it verbatim.
-const t = getServerDictionary(locale);
+// Page-side translator — wraps the server dictionary in a function so
+// children that expect the `useTranslations().t` shape (`(key) => string`)
+// can consume it verbatim. Falls back to the literal key when the
+// translation is missing so the page never throws on a missing entry.
+const dictionary = getServerDictionary(locale);
+const t = (key: string): string => {
+  const value = (dictionary as Record<string, string>)[key];
+  return value ?? key;
+};
 
 let dataset: RemDataset | null = null;
 let errorCode: string | null = null;
@@ -110,14 +116,13 @@ const title = t('rem.title');
     </RemLayout>
   ) : (
     <RemLayout title={title} locale={locale} t={t}>
-      <RemPrintButton slot="header-actions" t={t} client:idle />
+      <RemPrintButton slot="header-actions" client:idle />
 
       <RemSidebar
         slot="sidebar"
         dataset={safeDataset}
         initialUid={selectedUid}
         locale={locale}
-        t={t}
         client:load
       />
 
