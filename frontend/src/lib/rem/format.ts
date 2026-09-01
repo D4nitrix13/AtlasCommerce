@@ -18,7 +18,7 @@
  * React.
  */
 
-import type { FieldKey, Priority, Requirement, Stakeholder, Status } from "./types";
+import type { FieldKey, Priority, Requirement, Stakeholder, Status } from './types';
 
 /**
  * A single field/value row in the detail panel.
@@ -34,7 +34,7 @@ import type { FieldKey, Priority, Requirement, Stakeholder, Status } from "./typ
 export interface RowSpec {
   field: FieldKey;
   labelKey: string;
-  value: string | string[] | { kind: "stakeholders"; uids: string[]; names: string[] } | null;
+  value: string | string[] | { kind: 'stakeholders'; uids: string[]; names: string[] } | null;
 }
 
 /**
@@ -51,12 +51,12 @@ export type Translator = (key: string) => string;
  */
 export function formatPriority(priority: Priority): string {
   switch (priority) {
-    case "H":
-      return "5";
-    case "M":
-      return "3";
-    case "L":
-      return "1";
+    case 'H':
+      return '5';
+    case 'M':
+      return '3';
+    case 'L':
+      return '1';
   }
 }
 
@@ -69,6 +69,64 @@ export function formatStatus(status: Status): string {
   return `rem.detail.status.${status}`;
 }
 
+// ─── Row variants (RemFieldRow.astro contract) ───────────────────────
+
+/**
+ * The three visual variants `RemFieldRow.astro` chooses between:
+ *   - `pd`        → value is null → render the "PD" (Por Definir) badge.
+ *   - `no-links`  → value is an empty array AND the row is the links row
+ *                   (Fuentes/Dependencias) → render the red `?` with
+ *                   `aria-label="Sin fuentes"`.
+ *   - `plain`     → string or non-empty array → render the value as-is.
+ *
+ * Extracted into a pure helper so `RemFieldRow.test.tsx` can assert on
+ * the branch without needing an Astro render container. The Astro file
+ * calls this same helper and switches on the result.
+ */
+export type FieldRowVariant = 'pd' | 'no-links' | 'plain';
+
+export interface FieldRowOptions {
+  /** Set on the "Fuentes/Dependencias" row only. */
+  isLinksRow?: boolean;
+}
+
+export function getFieldRowVariant(
+  value: string | string[] | null,
+  options: FieldRowOptions = {}
+): FieldRowVariant {
+  if (value === null) {
+    return 'pd';
+  }
+  if (Array.isArray(value) && value.length === 0 && options.isLinksRow === true) {
+    return 'no-links';
+  }
+  return 'plain';
+}
+
+// ─── Error variant (RemError.astro contract) ─────────────────────────
+
+/**
+ * Visual variant for `RemError.astro`. The RemError component renders
+ * an `Alert` whose label is derived from this so unit tests can assert
+ * without rendering Astro. The Astro file is responsible for the
+ * actual Alert wrapper + i18n string interpolation.
+ */
+export type ErrorVariant = 'load' | 'notfound' | 'generic';
+
+/**
+ * Maps an error code prefix into a variant. Unknown prefixes fall back
+ * to `generic` so the UI never crashes on a malformed error code.
+ */
+export function getErrorVariant(errorCode: string): ErrorVariant {
+  if (errorCode.startsWith('load:')) {
+    return 'load';
+  }
+  if (errorCode.startsWith('notfound:')) {
+    return 'notfound';
+  }
+  return 'generic';
+}
+
 /**
  * Resolves a list of stakeholder UIDs against a stakeholder list and
  * returns the comma-joined display names. Unknown UIDs are kept
@@ -76,7 +134,7 @@ export function formatStatus(status: Status): string {
  */
 function resolveStakeholderNames(
   uids: string[],
-  stakeholders: Stakeholder[],
+  stakeholders: Stakeholder[]
 ): { uids: string[]; names: string[] } {
   const byUid = new Map(stakeholders.map((s) => [s.uid, s.name] as const));
   return {
@@ -109,45 +167,45 @@ function resolveStakeholderNames(
 export function buildDetailRows(
   item: Requirement | Stakeholder,
   t: Translator,
-  stakeholders: Stakeholder[] = [],
+  stakeholders: Stakeholder[] = []
 ): RowSpec[] {
-  if ("kind" in item) {
+  if ('kind' in item) {
     // Requirement (RF or RNF)
     const req = item;
     const rows: RowSpec[] = [
-      { field: "code", labelKey: t("rem.detail.code"), value: req.code || null },
-      { field: "title", labelKey: t("rem.detail.title"), value: req.title || null },
+      { field: 'code', labelKey: t('rem.detail.code'), value: req.code || null },
+      { field: 'title', labelKey: t('rem.detail.title'), value: req.title || null },
     ];
-    if (req.kind === "rf") {
-      rows.push({ field: "module", labelKey: t("rem.detail.module"), value: req.module ?? null });
+    if (req.kind === 'rf') {
+      rows.push({ field: 'module', labelKey: t('rem.detail.module'), value: req.module ?? null });
     } else {
       rows.push({
-        field: "category",
-        labelKey: t("rem.detail.category"),
+        field: 'category',
+        labelKey: t('rem.detail.category'),
         value: req.category ?? null,
       });
     }
     rows.push({
-      field: "priority",
-      labelKey: t("rem.detail.priority"),
+      field: 'priority',
+      labelKey: t('rem.detail.priority'),
       value: req.priority ? formatPriority(req.priority) : null,
     });
     rows.push({
-      field: "status",
-      labelKey: t("rem.detail.status"),
+      field: 'status',
+      labelKey: t('rem.detail.status'),
       value: req.status ? formatStatus(req.status) : null,
     });
 
     // RF only: "Verificado por" row (REQ-05#2 — RNF has no verified-by)
-    if (req.kind === "rf") {
+    if (req.kind === 'rf') {
       const resolved = resolveStakeholderNames(req.verifiedBy, stakeholders);
       rows.push({
-        field: "verifiedBy",
-        labelKey: t("rem.detail.verifiedBy"),
+        field: 'verifiedBy',
+        labelKey: t('rem.detail.verifiedBy'),
         value:
           resolved.uids.length === 0
             ? null
-            : { kind: "stakeholders", uids: resolved.uids, names: resolved.names },
+            : { kind: 'stakeholders', uids: resolved.uids, names: resolved.names },
       });
     }
 
@@ -161,14 +219,14 @@ export function buildDetailRows(
       combined.push(d);
     }
     rows.push({
-      field: "fuentes",
-      labelKey: t("rem.detail.links"),
+      field: 'fuentes',
+      labelKey: t('rem.detail.links'),
       value: combined.length === 0 ? [] : combined,
     });
 
     rows.push({
-      field: "rationale",
-      labelKey: t("rem.detail.rationale"),
+      field: 'rationale',
+      labelKey: t('rem.detail.rationale'),
       value: req.rationale || null,
     });
 
@@ -178,15 +236,15 @@ export function buildDetailRows(
   // Stakeholder
   const s = item;
   return [
-    { field: "uid", labelKey: t("rem.detail.uid"), value: s.uid || null },
-    { field: "name", labelKey: t("rem.detail.name"), value: s.name || null },
-    { field: "title", labelKey: t("rem.detail.title"), value: s.title || null },
-    { field: "role", labelKey: t("rem.detail.role"), value: s.role || null },
+    { field: 'uid', labelKey: t('rem.detail.uid'), value: s.uid || null },
+    { field: 'name', labelKey: t('rem.detail.name'), value: s.name || null },
+    { field: 'title', labelKey: t('rem.detail.title'), value: s.title || null },
+    { field: 'role', labelKey: t('rem.detail.role'), value: s.role || null },
     {
-      field: "organization",
-      labelKey: t("rem.detail.organization"),
+      field: 'organization',
+      labelKey: t('rem.detail.organization'),
       value: s.organization || null,
     },
-    { field: "notes", labelKey: t("rem.detail.notes"), value: s.notes || null },
+    { field: 'notes', labelKey: t('rem.detail.notes'), value: s.notes || null },
   ];
 }

@@ -1,0 +1,42 @@
+---
+/**
+ * RemEmptyState.astro
+ *
+ * Shown when the search returns zero matches (REQ-03#5, REQ-10#2).
+ * Renders a heading, a body line, and a "Limpiar búsqueda" button
+ * whose click is owned by the parent (RemSidebar) via the standard
+ * form-submit / button pattern — see RemSidebar.tsx for the
+ * `data-rem-clear-search` click handler.
+ *
+ * Translator is the same `(key: string) => string` shape used by
+ * `format.ts` so the page can wire `useTranslations().t` here in
+ * Batch 2b without touching this file.
+ */
+
+interface Props {
+  t?: (key: string) => string;
+}
+
+const { t = (k: string) => k } = Astro.props;
+---
+
+<section
+  role="status"
+  data-rem-empty
+  class="rem-empty mx-auto flex max-w-md flex-col items-center gap-3 p-6 text-center text-slate-600"
+  aria-live="polite"
+>
+  <h3 class="rem-empty__heading text-base font-semibold text-slate-800">
+    {t('rem.sidebar.empty.heading')}
+  </h3>
+  <p class="rem-empty__body text-sm">
+    {t('rem.sidebar.empty.body')}
+  </p>
+  <button
+    type="button"
+    data-rem-clear-search
+    class="rem-empty__clear mt-2 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+  >
+    {t('rem.sidebar.empty.clear')}
+  </button>
+</section>
