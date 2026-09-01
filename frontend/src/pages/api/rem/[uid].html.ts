@@ -29,6 +29,8 @@ import type { APIRoute } from 'astro';
 
 import { clearLoaderCache, loadAllRequirements } from '../../../lib/rem/loader';
 import { buildDetailRows, getFieldRowVariant, type RowSpec } from '../../../lib/rem/format';
+import { getServerDictionary } from '../../../i18n/server';
+import { SUPPORTED_LOCALES, type Locale } from '../../../i18n/config';
 import type { Requirement, Stakeholder } from '../../../lib/rem/types';
 
 export const prerender = false;
@@ -135,6 +137,22 @@ function renderRow(row: RowSpec): string {
 }
 
 /**
+ * Build a locale-aware translator for the endpoint. The middleware
+ * sets `Astro.locals.locale`, so the endpoint reads that and falls back
+ * to the `?locale=` query string only if needed. Honors both 'es' and
+ * 'en' (project `SUPPORTED_LOCALES`); anything else falls back to 'es'.
+ */
+function translatorFor(localeRaw: string | undefined): (key: string) => string {
+  const locale: Locale =
+    localeRaw !== undefined && (SUPPORTED_LOCALES as readonly string[]).includes(localeRaw)
+      ? (localeRaw as Locale)
+      : 'es';
+  const dictionary = getServerDictionary(locale);
+  return (key: string): string =>
+    (dictionary as Record<string, string>)[key] ?? key;
+}
+
+/**
  * Render the full detail panel — same outline as `RemDetail.astro`:
  *   <section data-rem-detail-render data-rem-detail-kind="...">
  *     <header><h2>code — title</h2></header>
@@ -143,18 +161,16 @@ function renderRow(row: RowSpec): string {
  *     </table>
  *   </section>
  *
- * The `t` translator is identity: the React island sets the same
- * labels into the DOM (RemFieldRow.astro calls them by key at SSR
- * time, the endpoint mirrors them verbatim). When real i18n ships
- * the `useTranslations().t` prop reaches this codepath via the page
- * route, which renders `<RemDetail>` instead.
+ * `t` is the locale-aware translator so labels render with the
+ * actual UI string, not the i18n key literal.
  */
 function renderDetailPanel(
   item: Requirement | Stakeholder,
   kind: 'rf' | 'rnf' | 'stakeholder',
-  dataset: { rf: Requirement[]; rnf: Requirement[]; stakeholders: Stakeholder[] }
+  dataset: { rf: Requirement[]; rnf: Requirement[]; stakeholders: Stakeholder[] },
+  localeRaw: string | undefined
 ): string {
-  const t = (key: string): string => key;
+  const t = translatorFor(localeRaw);
   const rows = buildDetailRows(item, t, dataset.stakeholders);
   const code = 'kind' in item ? item.code || null : item.uid;
   const title = 'kind' in item ? item.title || null : item.name || null;
@@ -214,11 +230,18 @@ const htmlResponse = (body: string, status = 200): Response =>
     },
   });
 
-export const GET: APIRoute = ({ params }) => {
+export const GET: APIRoute = ({ params, url, locals }) => {
   const uid = params.uid ?? '';
   if (uid === '') {
     return htmlResponse(renderErrorBody('notfound:empty'), 404);
   }
+
+  // Locale resolution: middleware sets `locals.locale`; the React
+  // island can also pass `?locale=es|en` to override (useful when the
+  // user switches via `LanguageSwitcher` and the Astro URL has not yet
+  // been refreshed).
+  const localeRaw =
+    url.searchParams.get('locale') ?? (locals.locale as string | undefined);
 
   let dataset: ReturnType<typeof loadAllRequirements>;
   try {
@@ -239,5 +262,5 @@ export const GET: APIRoute = ({ params }) => {
     return htmlResponse(renderErrorBody(`notfound:${uid}`), 404);
   }
 
-  return htmlResponse(renderDetailPanel(found.item, found.kind, dataset), 200);
+  return htmlResponse(renderDetailPanel(found.item, found.kind, dataset, localeRaw), 200);
 };

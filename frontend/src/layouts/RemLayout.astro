@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import { getServerDictionary } from '../i18n/server';
+import { SUPPORTED_LOCALES, type Locale } from '../i18n/config';
 
 /**
  * RemLayout.astro
@@ -57,8 +59,19 @@ const {
   title,
   locale = 'es',
   navLabel = 'rem.sidebar.heading',
-  t = (k: string) => k,
+  t: tProp,
 } = Astro.props;
+
+// Always resolve `t` against the server dictionary for the active
+// locale. When the caller passes `t` (page route or the API endpoint)
+// we honor it; otherwise we derive from `Astro.locals.locale` (set by
+// the project middleware) and fall back to identity for safety.
+const resolvedLocale: Locale =
+  (Astro.locals.locale as Locale | undefined) ?? locale;
+const dictionary = getServerDictionary(resolvedLocale);
+const fallbackT = (key: string): string =>
+  (dictionary as Record<string, string>)[key] ?? key;
+const t = tProp ?? fallbackT;
 
 /**
  * Vite resolves the CSS file via its import and emits a hashed asset
