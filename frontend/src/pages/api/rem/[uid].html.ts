@@ -124,9 +124,9 @@ function renderRow(row: RowSpec): string {
   }
 
   const labelClass =
-    'rem-detail-row__label w-1/3 border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 align-top';
+    'rem-detail-row__label w-1/4 border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 align-top';
   const valueClass =
-    'rem-detail-row__value w-2/3 border-b border-slate-200 px-3 py-2 text-sm text-slate-900 align-top';
+    'rem-detail-row__value w-3/4 border-b border-slate-200 px-3 py-2 text-sm text-slate-900 align-top whitespace-pre-wrap break-words';
 
   return (
     `<tr role="row" data-rem-row data-rem-row-variant="${variant}">` +
@@ -178,7 +178,7 @@ function renderDetailPanel(
   const uidAttr = 'uid' in item ? escapeHtml(item.uid) : '';
 
   const sectionClass =
-    'rem-detail__panel mx-auto max-w-3xl rounded-lg border border-slate-200 bg-white p-6 shadow-sm';
+    'rem-detail__panel w-full rounded-lg border border-slate-200 bg-white p-8 shadow-sm';
   const headerClass = 'rem-detail__header mb-6 border-b border-slate-200 pb-4';
   const titleClass = 'rem-detail__header-title text-2xl font-semibold text-slate-900';
   const tableClass = 'rem-detail__table w-full border-collapse text-left';
