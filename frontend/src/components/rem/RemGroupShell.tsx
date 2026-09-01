@@ -160,7 +160,7 @@ export function RemGroupShell({
       className="rem-group-shell group mb-2 rounded-md border border-slate-300 bg-white"
     >
       <summary
-        className="rem-group-shell__summary flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+        className="rem-group-shell__summary flex cursor-pointer list-none items-center justify-between gap-2 rounded-t-md bg-gradient-to-r from-slate-50 to-white px-3 py-2 text-sm font-semibold text-slate-800 transition-colors hover:from-slate-100 hover:to-slate-50 hover:text-[#1E6F62]"
       >
         <span className="rem-group-shell__label flex min-w-0 flex-1 items-center gap-2">
           <svg
@@ -254,7 +254,7 @@ export function RemNestedGroup({
       onToggle={handleToggle}
       className="rem-group-nested group mb-1 rounded border border-slate-200 bg-white"
     >
-      <summary className="rem-group-nested__summary flex cursor-pointer list-none items-center gap-2 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+      <summary className="rem-group-nested__summary flex cursor-pointer list-none items-center gap-2 rounded-t bg-gradient-to-r from-slate-50 to-white px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:from-slate-100 hover:to-slate-50 hover:text-[#1E6F62]">
         <svg
           width="12"
           height="12"

@@ -90,12 +90,12 @@ function RemTreeNodeInner({
   const isSelected = leaf && selectedUid !== null && node.data?.uid === selectedUid;
 
   const baseClass =
-    'rem-tree-node flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-left text-sm hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]';
-  // v2 (REQ-24#1): selected leaf uses the auth accent palette — teal
-  // background with the deeper text colour. The hover style still
-  // applies for non-selected rows.
+    'rem-tree-node flex w-full items-center gap-1.5 rounded-md border border-transparent px-2 py-1.5 text-left text-sm transition-colors hover:border-slate-200 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]';
+  // v2 (REQ-24#1): selected leaf gets the teal accent palette — left
+  // border indicator + soft teal background. Hover transitions keep
+  // the affordance visible from idle through focus.
   const selectedClass =
-    'rem-tree-node--selected bg-[#2D9D8E]/10 text-[#1E6F62] hover:bg-[#2D9D8E]/15';
+    'rem-tree-node--selected border-l-[3px] border-l-[#2D9D8E] bg-[#2D9D8E]/12 pl-[5px] font-semibold text-[#1E6F62]';
 
   if (leaf) {
     return (
@@ -107,20 +107,23 @@ function RemTreeNodeInner({
         data-rem-leaf
         data-rem-leaf-id={node.data?.uid ?? node.id}
         data-testid={`rem-leaf-${node.data?.uid ?? node.id}`}
-        className={isSelected === true ? `${baseClass} ${selectedClass}` : baseClass}
+        className={`group ${isSelected === true ? `${baseClass} ${selectedClass}` : baseClass}`}
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
       >
-        <span className="rem-tree-node__label truncate" title={node.label}>
+        <span
+          className="rem-tree-node__label min-w-0 flex-1 truncate"
+          title={node.label}
+        >
           {node.label}
         </span>
-        <span className="rem-tree-node__meta text-xs text-slate-500">
+        {actions !== undefined ? (
+          <span className="rem-tree-node__actions shrink-0">{actions}</span>
+        ) : null}
+        <span className="rem-tree-node__uid shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-500 group-hover:bg-slate-200">
           {node.data !== undefined ? shortCode(node.data.uid) : ''}
         </span>
-        {actions !== undefined ? (
-          <span className="rem-tree-node__actions">{actions}</span>
-        ) : null}
       </li>
     );
   }
