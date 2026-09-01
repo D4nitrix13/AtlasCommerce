@@ -475,6 +475,44 @@ const es: Translations = {
   'rem.pd.label': 'Por Definir',
   'rem.sources.empty.ariaLabel': 'Sin fuentes',
   'rem.cover.dateFormat': 'es-NI',
+
+  // ─── rem v2 — kebab / dialog / forms (REQ-16/17/18/19) ───────────
+  'rem.crud.actions': 'Acciones',
+  'rem.crud.edit': 'Editar',
+  'rem.crud.delete': 'Eliminar',
+  'rem.crud.cancel': 'Cancelar',
+  'rem.crud.create.submit': 'Crear',
+  'rem.crud.edit.submit': 'Guardar cambios',
+  'rem.crud.delete.confirm':
+    '¿Eliminar este requisito? Esta acción no se puede deshacer.',
+  'rem.crud.delete.error':
+    'No se pudo eliminar el requisito. Reintentá en unos segundos.',
+  'rem.crud.write.error':
+    'No se pudo guardar el cambio. Reintentá en unos segundos.',
+  'rem.dialog.create.heading': 'Nuevo requisito',
+  'rem.dialog.edit.heading': 'Editar requisito',
+  'rem.form.code.label': 'Código',
+  'rem.form.code.invalid': 'Formato inválido (ej: RF-AUTH-001).',
+  'rem.form.code.required': 'El código es obligatorio.',
+  'rem.form.title.label': 'Título',
+  'rem.form.title.required': 'El título es obligatorio.',
+  'rem.form.priority.label': 'Prioridad',
+  'rem.form.priority.required': 'Indicá la prioridad.',
+  'rem.form.status.label': 'Estado',
+  'rem.form.module.label': 'Módulo',
+  'rem.form.module.required': 'Indicá el módulo.',
+  'rem.form.category.label': 'Categoría',
+  'rem.form.category.required': 'Indicá la categoría.',
+  'rem.form.rationale.label': 'Descripción',
+  'rem.form.verifiedBy.label': 'Verificado por',
+  'rem.form.fuentes.label': 'Fuentes',
+  'rem.form.dependencias.label': 'Dependencias',
+  'rem.form.stakeholder.name.label': 'Nombre',
+  'rem.form.stakeholder.name.required': 'El nombre es obligatorio.',
+  'rem.form.stakeholder.title.label': 'Título',
+  'rem.form.stakeholder.role.label': 'Rol',
+  'rem.form.stakeholder.organization.label': 'Organización',
+  'rem.form.stakeholder.notes.label': 'Notas',
 };
 
 export default es;

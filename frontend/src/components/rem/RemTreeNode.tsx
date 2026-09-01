@@ -19,7 +19,7 @@
  * shell stays in `.astro`.
  */
 
-import { memo, useCallback, useState, type ReactElement } from 'react';
+import { memo, useCallback, useState, type ReactElement, type ReactNode } from 'react';
 
 import type { TreeNode } from '../../lib/rem/types';
 import type { useTranslations } from '../../i18n';
@@ -45,6 +45,12 @@ export interface RemTreeNodeProps {
   onSelect: (uid: string) => void;
   /** Translator — mirrors the i18n hook's `t` shape. */
   t: Translator;
+  /**
+   * v2 slot: per-row action UI (kebab menu). Rendered as the last
+   * child of the leaf when present. The parent (RemSidebar) wires the
+   * onEdit / onDelete callbacks.
+   */
+  actions?: ReactNode;
 }
 
 function isLeaf(node: TreeNode): boolean {
@@ -57,6 +63,7 @@ function RemTreeNodeInner({
   selectedUid,
   onSelect,
   t,
+  actions,
 }: RemTreeNodeProps): ReactElement {
   const leaf = isLeaf(node);
   const [expanded, setExpanded] = useState(true);
@@ -111,6 +118,9 @@ function RemTreeNodeInner({
         <span className="rem-tree-node__meta text-xs text-slate-500">
           {node.data !== undefined ? shortCode(node.data.uid) : ''}
         </span>
+        {actions !== undefined ? (
+          <span className="rem-tree-node__actions">{actions}</span>
+        ) : null}
       </li>
     );
   }

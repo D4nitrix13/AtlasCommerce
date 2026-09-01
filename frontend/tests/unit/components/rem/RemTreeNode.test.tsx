@@ -105,4 +105,26 @@ describe("RemTreeNode · REQ-09 + REQ-24#1", () => {
     expect(notSelected?.className ?? "").not.toContain("bg-[#2D9D8E]/10");
     expect(notSelected?.getAttribute("aria-current")).not.toBe("true");
   });
+
+  it("REQ-16#1: renders the kebab slot (actions prop) inside the leaf", () => {
+    render(
+      <RemTreeNode
+        node={buildLeaf("rf_001", "RF-AUTH-001")}
+        level={1}
+        selectedUid={null}
+        onSelect={() => {}}
+        t={t}
+        actions={
+          <button type="button" data-testid="custom-kebab-slot">
+            ⋮
+          </button>
+        }
+      />,
+    );
+    const li = document.querySelector('[data-rem-leaf-id="rf_001"]');
+    expect(li).not.toBeNull();
+    const slot = li?.querySelector('[data-testid="custom-kebab-slot"]');
+    expect(slot).not.toBeNull();
+    expect(slot?.textContent).toContain("⋮");
+  });
 });

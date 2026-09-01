@@ -445,7 +445,44 @@ export type TranslationKey =
   | 'rem.shell.footer'
   | 'rem.pd.label'
   | 'rem.sources.empty.ariaLabel'
-  | 'rem.cover.dateFormat';
+  | 'rem.cover.dateFormat'
+
+  // ─── rem (v2 — REQ-16/17/18/19 kebab + dialog + forms) ─────────────
+  // Per design §7. ~32 keys for kebab actions, dialog chrome, CRUD
+  // form labels, and the delete/write error alerts.
+  | 'rem.crud.actions'
+  | 'rem.crud.edit'
+  | 'rem.crud.delete'
+  | 'rem.crud.cancel'
+  | 'rem.crud.create.submit'
+  | 'rem.crud.edit.submit'
+  | 'rem.crud.delete.confirm'
+  | 'rem.crud.delete.error'
+  | 'rem.crud.write.error'
+  | 'rem.dialog.create.heading'
+  | 'rem.dialog.edit.heading'
+  | 'rem.form.code.label'
+  | 'rem.form.code.invalid'
+  | 'rem.form.code.required'
+  | 'rem.form.title.label'
+  | 'rem.form.title.required'
+  | 'rem.form.priority.label'
+  | 'rem.form.priority.required'
+  | 'rem.form.status.label'
+  | 'rem.form.module.label'
+  | 'rem.form.module.required'
+  | 'rem.form.category.label'
+  | 'rem.form.category.required'
+  | 'rem.form.rationale.label'
+  | 'rem.form.verifiedBy.label'
+  | 'rem.form.fuentes.label'
+  | 'rem.form.dependencias.label'
+  | 'rem.form.stakeholder.name.label'
+  | 'rem.form.stakeholder.name.required'
+  | 'rem.form.stakeholder.title.label'
+  | 'rem.form.stakeholder.role.label'
+  | 'rem.form.stakeholder.organization.label'
+  | 'rem.form.stakeholder.notes.label';
 
 /**
  * Mapa de traducciones: cada key mapea al string traducido.
