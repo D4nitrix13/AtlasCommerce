@@ -28,10 +28,29 @@ declare module "node:fs" {
   export function copyFileSync(src: string, dest: string): void;
 }
 
+declare module "node:fs/promises" {
+  export function readdir(path: string): Promise<string[]>;
+  export function readFile(path: string, encoding: "utf-8"): Promise<string>;
+  export function writeFile(
+    path: string,
+    data: string,
+    encoding: "utf-8",
+  ): Promise<void>;
+  export function copyFile(src: string, dest: string): Promise<void>;
+  export function mkdir(path: string, options?: { recursive?: boolean }): Promise<void>;
+  export function rename(src: string, dest: string): Promise<void>;
+  export function unlink(path: string): Promise<void>;
+  export function stat(path: string): Promise<{ size: number }>;
+}
+
 declare module "node:path" {
   export function join(...parts: string[]): string;
   export function resolve(...parts: string[]): string;
   export function dirname(path: string): string;
+}
+
+declare module "node:url" {
+  export function fileURLToPath(url: string | URL): string;
 }
 
 declare module "node:os" {
