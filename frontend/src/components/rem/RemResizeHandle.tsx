@@ -9,10 +9,11 @@
  * that event and persist the final width via
  * `SIDEBAR_WIDTH_STORAGE_KEY` (`rem.viewer.sidebar.width`).
  *
- * Clamp `[minPx, maxPx]` defaults to `[240, 480]`. Default width
- * `320` (matches v1's `lg:w-80`). On mount, the helper reads the
- * stored value and clamps out-of-range values, overwriting the
- * stored value with the clamped one (REQ-15#2, REQ-15#3).
+ * Clamp `[minPx, maxPx]` defaults to `[280, 560]`. Default width
+ * `416` (matches v2's `lg:w-[26rem]` in `RemLayout.astro`). On mount,
+ * the helper reads the stored value and clamps out-of-range values,
+ * overwriting the stored value with the clamped one (REQ-15#2,
+ * REQ-15#3).
  *
  * Hidden below the `lg` breakpoint (1024 px) via `hidden lg:block`
  * (REQ-15#5). When hidden, no `localStorage.setItem` fires — the
@@ -32,12 +33,12 @@ import { SIDEBAR_WIDTH_STORAGE_KEY } from '../../lib/rem/types';
 
 // ─── Constants ───────────────────────────────────────────────────────
 
-/** Matches v1's `lg:w-80`. */
-const DEFAULT_WIDTH_PX = 320;
+/** Matches `RemLayout.astro`'s `lg:w-[26rem]`. */
+const DEFAULT_WIDTH_PX = 416;
 /** REQ-15#1 lock — clamp range. */
-const MIN_WIDTH_PX = 240;
+const MIN_WIDTH_PX = 280;
 /** REQ-15#1 lock — clamp range. */
-const MAX_WIDTH_PX = 480;
+const MAX_WIDTH_PX = 560;
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
