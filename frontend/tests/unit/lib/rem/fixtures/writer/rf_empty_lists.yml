@@ -1,0 +1,13 @@
+rf_empty_lists:
+  title: "RF con listas vacías"
+  rationale: "Fixture para probar que las listas vacías se serializan como []"
+  priority: "L"
+  status: "pending"
+  module: "Test"
+  code: "RF-TEST-000"
+  verified-by: []
+  version: "1.0"
+  autores: []
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

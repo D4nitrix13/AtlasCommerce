@@ -1,0 +1,6 @@
+stakeholder_empty_strings:
+  name: "Anonymous Stakeholder"
+  title: ""
+  role: ""
+  organization: ""
+  notes: ""

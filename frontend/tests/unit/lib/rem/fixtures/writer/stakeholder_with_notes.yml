@@ -1,0 +1,8 @@
+# Stakeholder: Daniel Benjamin Perez Morales
+# Generado por migrate_to_doorstop.py
+stakeholder_with_notes:
+  name: "Daniel Benjamin Perez Morales"
+  title: "Lider / Desarrollador Full-Stack"
+  role: "developer"
+  organization: "Panda Estampados + Kitsune"
+  notes: "Owner del stack. Toda la programación pasa por este stakeholder."

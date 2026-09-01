@@ -1,0 +1,12 @@
+rnf_empty_lists:
+  title: "RNF con listas vacías"
+  rationale: "Fixture para probar la serialización con category + listas vacías"
+  priority: "M"
+  status: "in-analysis"
+  category: "Test"
+  code: "RNF-TEST-000"
+  version: "1.0"
+  autores: []
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
