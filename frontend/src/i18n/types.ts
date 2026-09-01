@@ -390,7 +390,44 @@ export type TranslationKey =
 
   // ─── formatters ──────────────────────────────────────────────────────
   | 'format.empty'
-  | 'format.date.locale';
+  | 'format.date.locale'
+
+  // ─── rem (REM viewer · Batch 2b · REQ-08) ────────────────────────────
+  // Page title + sidebar/tree/print/error/empty namespace. The
+  // existing components referenced these keys via string literals
+  // until Batch 2b; this union is the canonical source of truth.
+  | 'rem.title'
+  | 'rem.sidebar.heading'
+  | 'rem.sidebar.search.placeholder'
+  | 'rem.sidebar.search.clear'
+  | 'rem.tree.stakeholders'
+  | 'rem.tree.functional'
+  | 'rem.tree.nonfunctional'
+  | 'rem.tree.role'
+  | 'rem.treeitem.role'
+  | 'rem.detail.code'
+  | 'rem.detail.title'
+  | 'rem.detail.module'
+  | 'rem.detail.category'
+  | 'rem.detail.priority'
+  | 'rem.detail.status'
+  | 'rem.detail.verifiedBy'
+  | 'rem.detail.sources'
+  | 'rem.detail.rationale'
+  | 'rem.detail.notes'
+  | 'rem.detail.organization'
+  | 'rem.detail.role'
+  | 'rem.detail.uid'
+  | 'rem.detail.name'
+  | 'rem.print.single'
+  | 'rem.print.full'
+  | 'rem.print.coverTitle'
+  | 'rem.empty.title'
+  | 'rem.error.title'
+  | 'rem.error.codeUnknown'
+  | 'rem.pd.label'
+  | 'rem.sources.empty.ariaLabel'
+  | 'rem.cover.dateFormat';
 
 /**
  * Mapa de traducciones: cada key mapea al string traducido.
