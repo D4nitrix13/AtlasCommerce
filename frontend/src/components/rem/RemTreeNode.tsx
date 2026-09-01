@@ -118,12 +118,12 @@ function RemTreeNodeInner({
         >
           {node.label}
         </span>
-        {actions !== undefined ? (
-          <span className="rem-tree-node__actions shrink-0">{actions}</span>
-        ) : null}
         <span className="rem-tree-node__uid shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-500 group-hover:bg-slate-200">
           {node.data !== undefined ? shortCode(node.data.uid) : ''}
         </span>
+        {actions !== undefined ? (
+          <span className="rem-tree-node__actions shrink-0">{actions}</span>
+        ) : null}
       </li>
     );
   }
