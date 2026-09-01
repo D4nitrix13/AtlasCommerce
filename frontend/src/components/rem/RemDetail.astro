@@ -17,6 +17,8 @@
 
 import RemFieldRow from './RemFieldRow.astro';
 import { buildDetailRows } from '../../lib/rem/format';
+import { getServerDictionary } from '../../i18n/server';
+import { SUPPORTED_LOCALES, type Locale } from '../../i18n/config';
 import type { Requirement, Stakeholder } from '../../lib/rem/types';
 
 interface Props {
@@ -28,7 +30,18 @@ interface Props {
   t?: (key: string) => string;
 }
 
-const { item, stakeholders = [], t = (k: string) => k } = Astro.props;
+const { item, stakeholders = [], t: tProp } = Astro.props;
+
+// Build a locale-aware fallback translator from the server dictionary
+// (set by the project middleware via `Astro.locals.locale`). The page
+// route and the API endpoint both pass `t`; this fallback prevents
+// identity-key rendering if either forgets.
+const resolvedLocale: Locale =
+  (Astro.locals.locale as Locale | undefined) ?? 'es';
+const dictionary = getServerDictionary(resolvedLocale);
+const fallbackT = (key: string): string =>
+  (dictionary as Record<string, string>)[key] ?? key;
+const t = tProp ?? fallbackT;
 
 const rows = buildDetailRows(item, t, stakeholders);
 
