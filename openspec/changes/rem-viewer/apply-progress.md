@@ -367,9 +367,11 @@ A second, parallel bug: `formatStatus(status)` returned dynamic keys like `rem.d
 
 - **Branch**: `feat/frontend-rem-viewer`
 - **Batch**: 3 of 3 (PR3: e2e tests + README + vitest config + screenshot baseline)
+- **Status**: COMPLETE
 - **Commits**:
-  - `<pending>` — `test(frontend): REM viewer e2e tests + coverage thresholds` (C6)
-  - `<pending>` — `docs(frontend): REM viewer README section` (C7)
+  - `8f5c762` — `test(frontend): REM viewer e2e tests + coverage thresholds` (C6)
+  - `34caf32` — `docs(frontend): REM viewer README section` (C7)
+  - `77c91ac` — `docs(sdd): apply-progress batch 3 - e2e + README + screenshot`
 
 ## Tasks Completed (3.1 — 3.5)
 
