@@ -157,12 +157,23 @@ export function RemGroupShell({
       data-rem-group-top={groupId}
       open={open}
       onToggle={handleToggle}
-      className="rem-group-shell mb-2 rounded-md border border-slate-300 bg-white"
+      className="rem-group-shell group mb-2 rounded-md border border-slate-300 bg-white"
     >
       <summary
         className="rem-group-shell__summary flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
       >
-        <span className="rem-group-shell__label">{label}</span>
+        <span className="rem-group-shell__label flex min-w-0 flex-1 items-center gap-2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            className="rem-group-shell__chevron shrink-0 text-slate-500 transition-transform duration-150 group-open:rotate-90"
+          >
+            <path d="M5.5 3 L11 8 L5.5 13" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="truncate">{label}</span>
+        </span>
         {onCreate !== undefined ? (
           <button
             type="button"
@@ -241,10 +252,19 @@ export function RemNestedGroup({
       data-rem-group-nest={`${groupId}.${bucketName}`}
       open={open}
       onToggle={handleToggle}
-      className="rem-group-nested mb-1 rounded border border-slate-200 bg-white"
+      className="rem-group-nested group mb-1 rounded border border-slate-200 bg-white"
     >
-      <summary className="rem-group-nested__summary flex cursor-pointer list-none items-center px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
-        {label}
+      <summary className="rem-group-nested__summary flex cursor-pointer list-none items-center gap-2 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 16 16"
+          aria-hidden="true"
+          className="rem-group-nested__chevron shrink-0 text-slate-500 transition-transform duration-150 group-open:rotate-90"
+        >
+          <path d="M5.5 3 L11 8 L5.5 13" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="truncate">{label}</span>
       </summary>
       <ul className="rem-group-nested__content space-y-0.5 border-t border-slate-200 p-1">
         {children}
