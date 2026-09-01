@@ -28,7 +28,6 @@ import {
 } from 'react';
 
 import { useTranslations } from '../../i18n';
-import { clearLoaderCache } from '../../lib/rem/loader';
 import { RemRfForm } from './forms/RemRfForm';
 import { RemRnfForm } from './forms/RemRnfForm';
 import { RemStakeholderForm } from './forms/RemStakeholderForm';
@@ -152,7 +151,10 @@ export function RemEditDialog({
         });
         if (res.status === 201 || res.status === 200) {
           const body = (await res.json()) as { ok: boolean; uid?: string };
-          clearLoaderCache();
+          // Server already invalidated its loader cache via
+          // `clearLoaderCache()` in the POST/PUT/DELETE handlers; the
+          // client doesn't reach into server-side module state — it
+          // just re-fetches the sidebar HTML on `onSuccess`.
           const newUid = body.uid ?? uid ?? '';
           if (newUid !== '') {
             onSuccess?.(newUid);
