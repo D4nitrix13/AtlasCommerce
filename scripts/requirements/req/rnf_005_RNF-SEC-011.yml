@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-011 - Soporte obligatorio de MFA para admin
+# Generado por migrate_to_doorstop.py
+rnf_005:
+  title: "Soporte obligatorio de MFA para admin"
+  rationale: "Los usuarios admin pueden (y deberían) activar TOTP 2FA. Backend: TotpController + RecoveryCodeController."
+  priority: "H"
+  status: "verified"
+  category: "Seguridad"
+  code: "RNF-SEC-011"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

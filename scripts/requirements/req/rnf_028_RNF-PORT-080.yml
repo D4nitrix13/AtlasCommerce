@@ -1,0 +1,16 @@
+# RNF: RNF-PORT-080 - Compatible con Linux (Ubuntu/Debian/Fedora)
+# Generado por migrate_to_doorstop.py
+rnf_028:
+  title: "Compatible con Linux (Ubuntu/Debian/Fedora)"
+  rationale: "Stack validado en Ubuntu 22.04 LTS y Debian 12. Asume kernel 5.x+ con namespaces para Docker."
+  priority: "H"
+  status: "verified"
+  category: "Portabilidad"
+  code: "RNF-PORT-080"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

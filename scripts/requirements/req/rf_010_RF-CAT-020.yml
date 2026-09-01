@@ -1,0 +1,22 @@
+# RF: RF-CAT-020 - Listado público de productos con paginación
+# Generado por migrate_to_doorstop.py
+rf_010:
+  title: "Listado público de productos con paginación"
+  rationale: "El visitante puede navegar el catálogo paginado. Backend: ProductController."
+  priority: "H"
+  status: "implemented"
+  module: "Catálogo"
+  code: "RF-CAT-020"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-PERF-022
+    - RNF-PERF-023
+    - RNF-USA-040
+  estabilidad: "alta"

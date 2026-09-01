@@ -1,0 +1,16 @@
+# RNF: RNF-MAIN-050 - Cobertura de tests mínima 70%
+# Generado por migrate_to_doorstop.py
+rnf_020:
+  title: "Cobertura de tests mínima 70%"
+  rationale: "Backend: PHPUnit + RefreshDatabase. Frontend: Vitest + Testing Library + Playwright E2E. CI falla si coverage < 70%."
+  priority: "H"
+  status: "in-analysis"
+  category: "Mantenibilidad"
+  code: "RNF-MAIN-050"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

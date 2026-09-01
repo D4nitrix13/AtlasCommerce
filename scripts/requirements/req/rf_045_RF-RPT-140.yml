@@ -1,0 +1,22 @@
+# RF: RF-RPT-140 - Reportes de ventas
+# Generado por migrate_to_doorstop.py
+rf_045:
+  title: "Reportes de ventas"
+  rationale: "Dashboard y reportes exportables (CSV/PDF) de ventas por período. Frontend: /admin/reports."
+  priority: "H"
+  status: "implemented"
+  module: "Reportes"
+  code: "RF-RPT-140"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-OBS-070
+    - RNF-PERF-022
+    - RNF-USA-040
+  estabilidad: "alta"

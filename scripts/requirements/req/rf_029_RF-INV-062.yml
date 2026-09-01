@@ -1,0 +1,20 @@
+# RF: RF-INV-062 - Movimientos de inventario
+# Generado por migrate_to_doorstop.py
+rf_029:
+  title: "Movimientos de inventario"
+  rationale: "Registro de entradas, salidas y transferencias entre almacenes. Frontend: /admin/inventory/movements."
+  priority: "H"
+  status: "implemented"
+  module: "Inventario"
+  code: "RF-INV-062"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-PERF-021
+    - RNF-REL-061
+    - RNF-REL-062
+  estabilidad: "alta"

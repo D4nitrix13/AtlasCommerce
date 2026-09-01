@@ -1,0 +1,1360 @@
+[
+  {
+    "__key": "RF-AUTH-001",
+    "titulo": "Login con email y contraseña",
+    "codigo": "RF-AUTH-001",
+    "modulo": "Autenticación",
+    "descripcion": "El usuario puede autenticarse en la tienda con email y contraseña. Backend: AuthController. Frontend: /[locale]/account/auth/login.astro",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-AUTH-002",
+    "titulo": "Registro de nuevos usuarios (signup)",
+    "codigo": "RF-AUTH-002",
+    "modulo": "Autenticación",
+    "descripcion": "Un visitante puede crear una cuenta nueva en la tienda. Frontend: /[locale]/account/auth/signup.astro",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-AUTH-003",
+    "titulo": "Recuperación de password por email",
+    "codigo": "RF-AUTH-003",
+    "modulo": "Autenticación",
+    "descripcion": "El usuario puede solicitar un email para resetear su contraseña. Backend: PasswordResetTokenController. Frontend: /[locale]/account/auth/forgot-password.astro",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-AUTH-004",
+    "titulo": "Autenticación de dos factores TOTP",
+    "codigo": "RF-AUTH-004",
+    "modulo": "Autenticación",
+    "descripcion": "El usuario puede activar MFA basado en TOTP (RFC 6238). Backend: TotpController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-AUTH-005",
+    "titulo": "Códigos de recuperación MFA",
+    "codigo": "RF-AUTH-005",
+    "modulo": "Autenticación",
+    "descripcion": "El usuario puede generar códigos de un solo uso para recuperar acceso si pierde su dispositivo TOTP. Backend: RecoveryCodeController.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-AUTH-006",
+    "titulo": "Login con redes sociales (OAuth)",
+    "codigo": "RF-AUTH-006",
+    "modulo": "Autenticación",
+    "descripcion": "El usuario puede autenticarse usando proveedores OAuth (Google, Facebook, etc.). Backend: SocialAuthController.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-011",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-CART-010",
+    "titulo": "Agregar items al carrito",
+    "codigo": "RF-CART-010",
+    "modulo": "Carrito",
+    "descripcion": "El usuario puede agregar productos al carrito con su variante. Backend: CartItemController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-020",
+      "RNF-PERF-022",
+      "RNF-USA-040",
+      "RNF-USA-042"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-020",
+      "RNF-PERF-022",
+      "RNF-USA-040",
+      "RNF-USA-042"
+    ]
+  },
+  {
+    "__key": "RF-CART-011",
+    "titulo": "Quitar items del carrito",
+    "codigo": "RF-CART-011",
+    "modulo": "Carrito",
+    "descripcion": "El usuario puede remover items del carrito. Backend: CartItemController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-020",
+      "RNF-PERF-022",
+      "RNF-USA-040",
+      "RNF-USA-042"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-020",
+      "RNF-PERF-022",
+      "RNF-USA-040",
+      "RNF-USA-042"
+    ]
+  },
+  {
+    "__key": "RF-CART-012",
+    "titulo": "Visualizar contenido del carrito",
+    "codigo": "RF-CART-012",
+    "modulo": "Carrito",
+    "descripcion": "El usuario puede ver el contenido del carrito con totales. Frontend: /cart.astro.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-020",
+      "RNF-PERF-022",
+      "RNF-USA-040",
+      "RNF-USA-042"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-020",
+      "RNF-PERF-022",
+      "RNF-USA-040",
+      "RNF-USA-042"
+    ]
+  },
+  {
+    "__key": "RF-CAT-020",
+    "titulo": "Listado público de productos con paginación",
+    "codigo": "RF-CAT-020",
+    "modulo": "Catálogo",
+    "descripcion": "El visitante puede navegar el catálogo paginado. Backend: ProductController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ]
+  },
+  {
+    "__key": "RF-CAT-021",
+    "titulo": "Detalle de producto",
+    "codigo": "RF-CAT-021",
+    "modulo": "Catálogo",
+    "descripcion": "El visitante puede ver la página de detalle de un producto con imágenes, descripción, variantes y precio. Frontend: /products/[slug].astro.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ]
+  },
+  {
+    "__key": "RF-CAT-022",
+    "titulo": "Listado y navegación por categorías",
+    "codigo": "RF-CAT-022",
+    "modulo": "Catálogo",
+    "descripcion": "El visitante puede filtrar productos por categoría. Frontend: /categories/[slug].astro.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ]
+  },
+  {
+    "__key": "RF-CAT-023",
+    "titulo": "Variantes de producto (color, talla, etc.)",
+    "codigo": "RF-CAT-023",
+    "modulo": "Catálogo",
+    "descripcion": "Cada producto puede tener múltiples variantes con su propio SKU, precio y stock. Backend: ProductController + admin/catalog/variants.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ]
+  },
+  {
+    "__key": "RF-CAT-024",
+    "titulo": "Gestión de marcas (admin)",
+    "codigo": "RF-CAT-024",
+    "modulo": "Catálogo",
+    "descripcion": "El admin puede crear, editar y eliminar marcas. Frontend: /admin/catalog/brands.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-022",
+      "RNF-PERF-023",
+      "RNF-USA-040"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-030",
+    "titulo": "Editor de diseño personalizado (canvas)",
+    "codigo": "RF-CUSTOM-030",
+    "modulo": "Personalización",
+    "descripcion": "El usuario puede crear diseños personalizados sobre productos (estampados, bordados, grabado). Backend: CustomDesignController. Caso clave para Panda Estampados (B2B).",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-031",
+    "titulo": "Gestión de capas del diseño",
+    "codigo": "RF-CUSTOM-031",
+    "modulo": "Personalización",
+    "descripcion": "El editor permite agregar, mover, redimensionar y eliminar capas (layers). Backend: DesignLayerController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-032",
+    "titulo": "Biblioteca de fuentes",
+    "codigo": "RF-CUSTOM-032",
+    "modulo": "Personalización",
+    "descripcion": "El usuario puede elegir entre fuentes pre-cargadas en sus diseños. Backend: DesignFontController.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-033",
+    "titulo": "Biblioteca de gráficos (clipart)",
+    "codigo": "RF-CUSTOM-033",
+    "modulo": "Personalización",
+    "descripcion": "El usuario puede agregar gráficos predefinidos al diseño. Backend: DesignGraphicController.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-034",
+    "titulo": "Subida de assets por el usuario",
+    "codigo": "RF-CUSTOM-034",
+    "modulo": "Personalización",
+    "descripcion": "El usuario puede subir imágenes propias para usar en el diseño. Backend: DesignAssetController. Storage: FTP + filesystem.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-035",
+    "titulo": "Render de mockup del diseño",
+    "codigo": "RF-CUSTOM-035",
+    "modulo": "Personalización",
+    "descripcion": "El sistema genera un mockup visual del diseño aplicado al área de impresión. Backend: DesignMockupRenderController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-036",
+    "titulo": "Definición de áreas de impresión por producto",
+    "codigo": "RF-CUSTOM-036",
+    "modulo": "Personalización",
+    "descripcion": "El admin define las zonas donde se puede estampar/grabar en cada producto. Backend: PrintAreaController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-CUSTOM-037",
+    "titulo": "Personalización por variantes de producto",
+    "codigo": "RF-CUSTOM-037",
+    "modulo": "Personalización",
+    "descripcion": "Cada producto puede tener opciones de personalización (color base, material). Backend: ProductCustomizationController.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-023",
+      "RNF-SEC-014",
+      "RNF-USA-040",
+      "RNF-USA-041"
+    ]
+  },
+  {
+    "__key": "RF-SALES-050",
+    "titulo": "Crear orden desde checkout",
+    "codigo": "RF-SALES-050",
+    "modulo": "Ventas",
+    "descripcion": "El cliente confirma el carrito, completa datos y crea la orden. Backend: OrderController. Frontend: /checkout.astro.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-SALES-051",
+    "titulo": "Detalle de orden (cliente y admin)",
+    "codigo": "RF-SALES-051",
+    "modulo": "Ventas",
+    "descripcion": "El cliente ve sus órdenes; el admin ve todas. Frontend: /admin/sales/orders/[id].astro.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-SALES-052",
+    "titulo": "Generación de facturas",
+    "codigo": "RF-SALES-052",
+    "modulo": "Ventas",
+    "descripcion": "El sistema genera facturas en PDF para cada orden. Frontend: /admin/sales/invoices.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-SALES-053",
+    "titulo": "Asociación de diseño custom a orden",
+    "codigo": "RF-SALES-053",
+    "modulo": "Ventas",
+    "descripcion": "Las órdenes con productos personalizados guardan el diseño final. Backend: OrderCustomDesignController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-USA-040",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-INV-060",
+    "titulo": "CRUD de almacenes",
+    "codigo": "RF-INV-060",
+    "modulo": "Inventario",
+    "descripcion": "El admin crea y administra almacenes físicos. Frontend: /admin/inventory/warehouses.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-INV-061",
+    "titulo": "Stock por producto y almacén",
+    "codigo": "RF-INV-061",
+    "modulo": "Inventario",
+    "descripcion": "El sistema lleva el stock por variante de producto en cada almacén. Frontend: /admin/inventory/stock.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-INV-062",
+    "titulo": "Movimientos de inventario",
+    "codigo": "RF-INV-062",
+    "modulo": "Inventario",
+    "descripcion": "Registro de entradas, salidas y transferencias entre almacenes. Frontend: /admin/inventory/movements.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-PAY-070",
+    "titulo": "CRUD de métodos de pago",
+    "codigo": "RF-PAY-070",
+    "modulo": "Pagos",
+    "descripcion": "El admin configura métodos de pago disponibles por tienda. Frontend: /admin/payments/methods.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-PAY-071",
+    "titulo": "Procesar pago en checkout",
+    "codigo": "RF-PAY-071",
+    "modulo": "Pagos",
+    "descripcion": "Procesa el pago con el proveedor configurado durante el checkout. Backend: PaymentController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-PAY-072",
+    "titulo": "Gestión de cuotas / installments",
+    "codigo": "RF-PAY-072",
+    "modulo": "Pagos",
+    "descripcion": "El admin configura planes de cuotas. Frontend: /admin/payments/installments.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-PAY-073",
+    "titulo": "Procesar reembolso (refund)",
+    "codigo": "RF-PAY-073",
+    "modulo": "Pagos",
+    "descripcion": "El admin procesa refunds de pagos ya cobrados. Backend: RefundController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-SEC-010",
+      "RNF-SEC-012",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-SHIP-080",
+    "titulo": "CRUD de zonas de envío",
+    "codigo": "RF-SHIP-080",
+    "modulo": "Envíos",
+    "descripcion": "El admin define zonas geográficas y sus tarifas. Frontend: /admin/shipping/zones.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ]
+  },
+  {
+    "__key": "RF-SHIP-081",
+    "titulo": "CRUD de empresas de envío",
+    "codigo": "RF-SHIP-081",
+    "modulo": "Envíos",
+    "descripcion": "El admin configura couriers (local, nacional, internacional). Frontend: /admin/shipping/companies.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ]
+  },
+  {
+    "__key": "RF-SHIP-082",
+    "titulo": "Crear shipment para una orden",
+    "codigo": "RF-SHIP-082",
+    "modulo": "Envíos",
+    "descripcion": "Genera un envío contra el courier configurado con número de tracking. Backend: ShipmentController.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ]
+  },
+  {
+    "__key": "RF-RET-090",
+    "titulo": "Cliente solicita devolución",
+    "codigo": "RF-RET-090",
+    "modulo": "Devoluciones",
+    "descripcion": "El cliente puede abrir una solicitud de devolución sobre una orden entregada. Frontend: /account.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-RET-091",
+    "titulo": "Admin gestiona return request",
+    "codigo": "RF-RET-091",
+    "modulo": "Devoluciones",
+    "descripcion": "El admin aprueba, rechaza o inspecciona devoluciones. Frontend: /admin/returns. Backend: ReturnRequestController, ReturnRequestItemController.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-SEC-014"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-SEC-014"
+    ]
+  },
+  {
+    "__key": "RF-PURCH-100",
+    "titulo": "CRUD de proveedores",
+    "codigo": "RF-PURCH-100",
+    "modulo": "Compras",
+    "descripcion": "El admin registra proveedores con sus datos fiscales. Frontend: /admin/purchases/suppliers.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ]
+  },
+  {
+    "__key": "RF-PURCH-101",
+    "titulo": "Órdenes de compra",
+    "codigo": "RF-PURCH-101",
+    "modulo": "Compras",
+    "descripcion": "El admin crea órdenes de compra a proveedores para reposición de stock. Frontend: /admin/purchases/orders.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021",
+      "RNF-REL-061"
+    ]
+  },
+  {
+    "__key": "RF-TAX-110",
+    "titulo": "Configuración de impuestos",
+    "codigo": "RF-TAX-110",
+    "modulo": "Impuestos",
+    "descripcion": "El admin define reglas de impuestos por zona/país. Frontend: /admin/settings/taxes.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021"
+    ]
+  },
+  {
+    "__key": "RF-CURR-120",
+    "titulo": "Multi-moneda por tienda",
+    "codigo": "RF-CURR-120",
+    "modulo": "Monedas",
+    "descripcion": "Cada tienda puede operar en múltiples monedas con tasas de cambio configurables. Frontend: /admin/settings/currencies.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-PERF-021"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-PERF-021"
+    ]
+  },
+  {
+    "__key": "RF-STOR-130",
+    "titulo": "Multi-tienda con resolución por dominio",
+    "codigo": "RF-STOR-130",
+    "modulo": "Multi-Store",
+    "descripcion": "El sistema corre múltiples tiendas independientes; cada request se rutea al tenant correcto según el Host header (Caddy + middleware Laravel).",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-MT-001",
+      "RNF-MT-002",
+      "RNF-MT-003",
+      "RNF-SCAL-030",
+      "RNF-SEC-013"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-MT-001",
+      "RNF-MT-002",
+      "RNF-MT-003",
+      "RNF-SCAL-030",
+      "RNF-SEC-013"
+    ]
+  },
+  {
+    "__key": "RF-STOR-131",
+    "titulo": "Configuración visual por tienda (tema)",
+    "codigo": "RF-STOR-131",
+    "modulo": "Multi-Store",
+    "descripcion": "Cada tienda puede tener su tema (logo, colores, layout). Backend: ThemeController. Frontend: /admin/settings/theme.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-MT-001",
+      "RNF-MT-002",
+      "RNF-MT-003",
+      "RNF-SCAL-030",
+      "RNF-SEC-013"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-MT-001",
+      "RNF-MT-002",
+      "RNF-MT-003",
+      "RNF-SCAL-030",
+      "RNF-SEC-013"
+    ]
+  },
+  {
+    "__key": "RF-RPT-140",
+    "titulo": "Reportes de ventas",
+    "codigo": "RF-RPT-140",
+    "modulo": "Reportes",
+    "descripcion": "Dashboard y reportes exportables (CSV/PDF) de ventas por período. Frontend: /admin/reports.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-PERF-022",
+      "RNF-USA-040"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-PERF-022",
+      "RNF-USA-040"
+    ]
+  },
+  {
+    "__key": "RF-RPT-141",
+    "titulo": "Reportes de inventario",
+    "codigo": "RF-RPT-141",
+    "modulo": "Reportes",
+    "descripcion": "Reporte de stock actual, valorización, productos sin stock. Frontend: /admin/inventory.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel",
+      "andy"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-PERF-022",
+      "RNF-USA-040"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel",
+      "andy"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-PERF-022",
+      "RNF-USA-040"
+    ]
+  },
+  {
+    "__key": "RF-SYS-150",
+    "titulo": "Notificaciones internas",
+    "codigo": "RF-SYS-150",
+    "modulo": "Sistema",
+    "descripcion": "Sistema de notificaciones in-app + email para admin (pedidos nuevos, stock bajo, etc.). Frontend: /admin/system/notifications.",
+    "prioridad": "media",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-SEC-014",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-SEC-014",
+      "RNF-REL-062"
+    ]
+  },
+  {
+    "__key": "RF-SYS-151",
+    "titulo": "Auditoría de acciones admin",
+    "codigo": "RF-SYS-151",
+    "modulo": "Sistema",
+    "descripcion": "Log de auditoría de todas las acciones admin (CRUD, configuración, etc.). Frontend: /admin/system/audits.",
+    "prioridad": "alta",
+    "estado": "implementado",
+    "stakeholders": [
+      "daniel"
+    ],
+    "cumple_rnf": [
+      "RNF-OBS-070",
+      "RNF-SEC-014",
+      "RNF-REL-062"
+    ],
+    "version": "1.0",
+    "autores": [
+      "daniel"
+    ],
+    "fuentes": [],
+    "dependencias": [
+      "RNF-OBS-070",
+      "RNF-SEC-014",
+      "RNF-REL-062"
+    ]
+  }
+]

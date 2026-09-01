@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-013 - HTTPS obligatorio en producción
+# Generado por migrate_to_doorstop.py
+rnf_007:
+  title: "HTTPS obligatorio en producción"
+  rationale: "Caddy activa auto_https=on y obtiene certs de Let's Encrypt automáticamente. HTTP se redirige a HTTPS."
+  priority: "H"
+  status: "verified"
+  category: "Seguridad"
+  code: "RNF-SEC-013"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

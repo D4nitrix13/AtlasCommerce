@@ -1,0 +1,16 @@
+# RNF: RNF-OBS-070 - Audit log de acciones admin
+# Generado por migrate_to_doorstop.py
+rnf_027:
+  title: "Audit log de acciones admin"
+  rationale: "Toda acción admin (CRUD, configuración) queda registrada. Visible en /admin/system/audits."
+  priority: "H"
+  status: "verified"
+  category: "Observabilidad"
+  code: "RNF-OBS-070"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

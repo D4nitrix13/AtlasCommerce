@@ -1,0 +1,20 @@
+# RF: RF-PAY-071 - Procesar pago en checkout
+# Generado por migrate_to_doorstop.py
+rf_031:
+  title: "Procesar pago en checkout"
+  rationale: "Procesa el pago con el proveedor configurado durante el checkout. Backend: PaymentController."
+  priority: "H"
+  status: "implemented"
+  module: "Pagos"
+  code: "RF-PAY-071"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-SEC-010
+    - RNF-SEC-012
+    - RNF-SEC-014
+  estabilidad: "alta"

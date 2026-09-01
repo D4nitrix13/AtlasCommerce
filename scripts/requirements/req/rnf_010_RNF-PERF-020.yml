@@ -1,0 +1,16 @@
+# RNF: RNF-PERF-020 - Sesiones en Redis
+# Generado por migrate_to_doorstop.py
+rnf_010:
+  title: "Sesiones en Redis"
+  rationale: "Las sesiones PHP se guardan en Redis, no en filesystem (evita EACCES con bind mounts UID-mismatch)."
+  priority: "H"
+  status: "verified"
+  category: "Rendimiento / Fiabilidad"
+  code: "RNF-PERF-020"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

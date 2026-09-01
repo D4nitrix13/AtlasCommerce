@@ -1,0 +1,20 @@
+# RF: RF-SYS-151 - Auditoría de acciones admin
+# Generado por migrate_to_doorstop.py
+rf_048:
+  title: "Auditoría de acciones admin"
+  rationale: "Log de auditoría de todas las acciones admin (CRUD, configuración, etc.). Frontend: /admin/system/audits."
+  priority: "H"
+  status: "implemented"
+  module: "Sistema"
+  code: "RF-SYS-151"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-OBS-070
+    - RNF-SEC-014
+    - RNF-REL-062
+  estabilidad: "alta"

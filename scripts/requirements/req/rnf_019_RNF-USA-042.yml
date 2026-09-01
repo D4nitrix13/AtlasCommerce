@@ -1,0 +1,17 @@
+# RNF: RNF-USA-042 - Mensajes de error user-friendly
+# Generado por migrate_to_doorstop.py
+rnf_019:
+  title: "Mensajes de error user-friendly"
+  rationale: "Las excepciones se traducen a mensajes legibles vía Exceptions/Handlers. Nunca se filtra stack trace al cliente."
+  priority: "M"
+  status: "implemented"
+  category: "Usabilidad"
+  code: "RNF-USA-042"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

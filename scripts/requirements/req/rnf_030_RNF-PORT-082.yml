@@ -1,0 +1,16 @@
+# RNF: RNF-PORT-082 - User no-root en runtime
+# Generado por migrate_to_doorstop.py
+rnf_030:
+  title: "User no-root en runtime"
+  rationale: "Los containers corren como usuario no-root (UID host bind-mount o nobody). Reducción de blast radius."
+  priority: "H"
+  status: "verified"
+  category: "Seguridad"
+  code: "RNF-PORT-082"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

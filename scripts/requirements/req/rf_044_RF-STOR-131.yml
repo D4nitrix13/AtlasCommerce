@@ -1,0 +1,24 @@
+# RF: RF-STOR-131 - Configuración visual por tienda (tema)
+# Generado por migrate_to_doorstop.py
+rf_044:
+  title: "Configuración visual por tienda (tema)"
+  rationale: "Cada tienda puede tener su tema (logo, colores, layout). Backend: ThemeController. Frontend: /admin/settings/theme."
+  priority: "M"
+  status: "implemented"
+  module: "Multi-Store"
+  code: "RF-STOR-131"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-MT-001
+    - RNF-MT-002
+    - RNF-MT-003
+    - RNF-SCAL-030
+    - RNF-SEC-013
+  estabilidad: "alta"
