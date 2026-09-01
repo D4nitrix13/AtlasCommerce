@@ -6,29 +6,44 @@
  * click for free (no overlay/backdrop code).
  *
  * Two-phase lifecycle (D2 → D4):
- *   - D2 (this file): renders the dialog chrome + Cancel/Submit
- *     buttons + slot for the actual form body. The submit button is a
- *     stub that fires `onSubmit(values)` after Zod passes. Two skeleton
- *     tests verify the chrome + Cancel/Escape behavior.
- *   - D4: plugs the 3 Zod-backed forms (RemRfForm / RemRnfForm /
- *     RemStakeholderForm) and wires POST/PUT dispatch + 201/200/500
- *     success/error paths.
+ *   - D2: renders the dialog chrome + Cancel/Submit buttons + slot
+ *     for the actual form body.
+ *   - D4 (this version): plugs the 3 Zod-backed forms (RemRfForm /
+ *     RemRnfForm / RemStakeholderForm) and wires POST/PUT dispatch.
  *
- * The dialog does NOT call `fetch` directly. D4 introduces a thin
- * `submit` prop that takes a parsed payload and forwards it to the
- * endpoint — keeps the dialog testable in isolation.
+ * The dialog calls `fetch` directly on submit (REQ-19#2 #3 #5):
+ *   - POST `/api/rem/<kind>` (create) or PUT `/api/rem/<kind>/<uid>` (edit)
+ *   - On 201/200: call `onSuccess(uid)`, close the dialog
+ *   - On 400: stay open; the form's Zod errors surface
+ *     (`formState.errors` from the form component)
+ *   - On 500: stay open + show `errorMessage`
  */
 
 import {
   useCallback,
   useEffect,
   useRef,
-  type FormEvent,
+  useState,
   type ReactElement,
-  type ReactNode,
 } from 'react';
 
 import { useTranslations } from '../../i18n';
+import { clearLoaderCache } from '../../lib/rem/loader';
+import { RemRfForm } from './forms/RemRfForm';
+import { RemRnfForm } from './forms/RemRnfForm';
+import { RemStakeholderForm } from './forms/RemStakeholderForm';
+import type {
+  RfCreateInput,
+  RfUpdateInput,
+} from '../../lib/rem/rf.schema';
+import type {
+  RnfCreateInput,
+  RnfUpdateInput,
+} from '../../lib/rem/rnf.schema';
+import type {
+  StakeholderCreateInput,
+  StakeholderUpdateInput,
+} from '../../lib/rem/stakeholder.schema';
 
 export type RemEditMode = 'create' | 'edit';
 export type RemEditKind = 'rf' | 'rnf' | 'stakeholder';
@@ -42,22 +57,16 @@ export interface RemEditDialogProps {
   kind: RemEditKind;
   /** Existing UID (edit mode only). */
   uid?: string;
-  /**
-   * Form body slot — D4 plugs one of the 3 Zod-backed forms in.
-   * The slot owns `formState` + onSubmit — the dialog is a thin shell.
-   */
-  children?: ReactNode;
-  /**
-   * Submit handler — D4 wires POST/PUT here. D2 ships a no-op so the
-   * skeleton renders and Cancel/Escape tests pass.
-   */
-  onSubmit?: (event: FormEvent<HTMLFormElement>) => void;
+  /** Default values for edit mode. */
+  defaultValues?: Record<string, unknown>;
   /** Cancel/Escape/backdrop close. */
   onClose: () => void;
-  /** True while the request is in flight (disables Submit + shows spinner). */
-  busy?: boolean;
-  /** Top-level error message (server 500 or validation summary). */
-  errorMessage?: string | null;
+  /**
+   * Fired after a successful submit (201 or 200). The parent
+   * (RemSidebar) refreshes the tree region + auto-selects the new
+   * leaf (REQ-19#2 + DD5).
+   */
+  onSuccess?: (uid: string) => void;
 }
 
 /**
@@ -69,19 +78,17 @@ export function RemEditDialog({
   open,
   mode,
   kind,
-  uid: _uid,
-  children,
-  onSubmit,
+  uid,
+  defaultValues,
   onClose,
-  busy = false,
-  errorMessage = null,
+  onSuccess,
 }: RemEditDialogProps): ReactElement | null {
   const { t } = useTranslations();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Open / close the native `<dialog>` based on the `open` prop. We
-  // delegate to the browser for the visibility + Escape handling so we
-  // never have to write overlay logic ourselves.
+  // Open / close the native `<dialog>` based on the `open` prop.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog === null) return;
@@ -89,10 +96,6 @@ export function RemEditDialog({
       try {
         dialog.showModal();
       } catch {
-        // `showModal()` throws if called from outside a user gesture in
-        // some browsers; React's effect fires too late. We can fall
-        // back to `setAttribute('open', '')` which keeps the dialog
-        // visible without the modal backdrop.
         dialog.setAttribute('open', '');
       }
     } else if (!open && dialog.open) {
@@ -114,25 +117,74 @@ export function RemEditDialog({
     };
   }, [onClose]);
 
-  const handleFormSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      if (onSubmit !== undefined) {
-        onSubmit(event);
-        return;
+  // Reset error when the dialog re-opens.
+  useEffect(() => {
+    if (open) setErrorMessage(null);
+  }, [open]);
+
+  /**
+   * Submit handler. The form components call this from their
+   * `onSubmit(values)` callback with the parsed Zod payload.
+   */
+  const submit = useCallback(
+    async (
+      values:
+        | RfCreateInput
+        | RfUpdateInput
+        | RnfCreateInput
+        | RnfUpdateInput
+        | StakeholderCreateInput
+        | StakeholderUpdateInput
+    ) => {
+      setBusy(true);
+      setErrorMessage(null);
+      const endpointKind = kind === 'stakeholder' ? 'stakeholder' : kind;
+      const url =
+        mode === 'create'
+          ? `/api/rem/${endpointKind}`
+          : `/api/rem/${endpointKind}/${uid ?? ''}`;
+      const method = mode === 'create' ? 'POST' : 'PUT';
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(values),
+        });
+        if (res.status === 201 || res.status === 200) {
+          const body = (await res.json()) as { ok: boolean; uid?: string };
+          clearLoaderCache();
+          const newUid = body.uid ?? uid ?? '';
+          if (newUid !== '') {
+            onSuccess?.(newUid);
+          }
+          onClose();
+          return;
+        }
+        if (res.status === 400) {
+          // Surface the validation summary via the dialog alert; the
+          // form's own errors are still visible inline.
+          const body = (await res.json().catch(() => ({}))) as { error?: string };
+          setErrorMessage(body.error ?? t('rem.crud.write.error'));
+          return;
+        }
+        // 500 / unknown
+        setErrorMessage(t('rem.crud.write.error'));
+      } catch {
+        setErrorMessage(t('rem.crud.write.error'));
+      } finally {
+        setBusy(false);
       }
-      // Default: prevent the page reload but do nothing else (D2 skeleton).
-      event.preventDefault();
     },
-    [onSubmit]
+    [kind, mode, uid, onClose, onSuccess, t]
   );
 
-  const handleCancel = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      onClose();
-    },
-    [onClose]
-  );
+  const handleShellSubmit = useCallback(() => {
+    // The form components own their onSubmit (handleSubmit of
+    // react-hook-form). We no longer wrap the dialog in an outer
+    // `<form>` because nested forms are invalid HTML — the inner
+    // form's submit handler captures the event.
+    // (Kept as an unused no-op for future Enter-key handling.)
+  }, []);
 
   if (!open) {
     return null;
@@ -140,8 +192,6 @@ export function RemEditDialog({
 
   const titleKey =
     mode === 'create' ? 'rem.dialog.create.heading' : 'rem.dialog.edit.heading';
-  const submitKey =
-    mode === 'create' ? 'rem.crud.create.submit' : 'rem.crud.edit.submit';
 
   return (
     <dialog
@@ -152,7 +202,7 @@ export function RemEditDialog({
       aria-labelledby="rem-edit-dialog-title"
       className="rem-edit-dialog w-full max-w-lg rounded-lg border border-slate-300 bg-white p-6 text-left shadow-xl backdrop:bg-slate-900/40"
     >
-      <form onSubmit={handleFormSubmit} className="flex flex-col gap-4" noValidate>
+      <div className="rem-edit-dialog__inner flex flex-col gap-4">
         <header className="flex items-center justify-between border-b border-slate-200 pb-3">
           <h2
             id="rem-edit-dialog-title"
@@ -164,7 +214,7 @@ export function RemEditDialog({
             type="button"
             data-testid="rem-edit-dialog-close"
             aria-label={t('rem.crud.cancel')}
-            onClick={handleCancel}
+            onClick={onClose}
             className="text-slate-500 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
           >
             ✕
@@ -172,7 +222,40 @@ export function RemEditDialog({
         </header>
 
         <div className="rem-edit-dialog__body flex flex-col gap-3">
-          {children}
+          {kind === 'rf' ? (
+            <RemRfForm
+              mode={mode}
+              defaultValues={
+                mode === 'edit'
+                  ? ({ uid, ...(defaultValues ?? {}) } as Partial<RfUpdateInput>)
+                  : (defaultValues as Partial<RfUpdateInput>)
+              }
+              onSubmit={submit}
+              onCancel={onClose}
+            />
+          ) : kind === 'rnf' ? (
+            <RemRnfForm
+              mode={mode}
+              defaultValues={
+                mode === 'edit'
+                  ? ({ uid, ...(defaultValues ?? {}) } as Partial<RnfUpdateInput>)
+                  : (defaultValues as Partial<RnfUpdateInput>)
+              }
+              onSubmit={submit}
+              onCancel={onClose}
+            />
+          ) : (
+            <RemStakeholderForm
+              mode={mode}
+              defaultValues={
+                mode === 'edit'
+                  ? ({ uid, ...(defaultValues ?? {}) } as Partial<StakeholderUpdateInput>)
+                  : (defaultValues as Partial<StakeholderUpdateInput>)
+              }
+              onSubmit={submit}
+              onCancel={onClose}
+            />
+          )}
         </div>
 
         {errorMessage !== null && errorMessage !== '' ? (
@@ -185,25 +268,16 @@ export function RemEditDialog({
           </div>
         ) : null}
 
-        <footer className="flex items-center justify-end gap-2 border-t border-slate-200 pt-3">
-          <button
-            type="button"
-            data-testid="rem-edit-dialog-cancel"
-            onClick={handleCancel}
-            className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+        {busy ? (
+          <div
+            data-testid="rem-edit-dialog-busy"
+            className="text-sm text-slate-500"
+            aria-live="polite"
           >
-            {t('rem.crud.cancel')}
-          </button>
-          <button
-            type="submit"
-            data-testid="rem-edit-dialog-submit"
-            disabled={busy}
-            className="inline-flex items-center justify-center rounded-md border border-[#2D9D8E] bg-[#2D9D8E] px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-[#24897B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {t(submitKey)}
-          </button>
-        </footer>
-      </form>
+            ...
+          </div>
+        ) : null}
+      </div>
     </dialog>
   );
 }
