@@ -1,0 +1,90 @@
+/**
+ * rem-print.css
+ *
+ * `@media print` rules for the REM viewer (design §10 / DP7).
+ *
+ * Linked from `RemLayout.astro` with `media="print"` so the browser
+ * only loads this stylesheet when the user is actually printing — no
+ * cost in the normal-page CSS bundle.
+ *
+ * Two scopes:
+ *   1. Default ("single requirement") — prints the currently selected
+ *      detail; sidebar / skeleton are hidden.
+ *   2. `body[data-rem-scope="full"]` — flips the island into full-report
+ *      mode: cover page + TOC + every detail paginated.
+ *
+ * The F3-locked rule for `.rem-detail` (page-break-after: always +
+ * page-break-inside: avoid) lives here, NOT in a per-component
+ * stylesheet, so a single stylesheet owns the print surface.
+ */
+
+/* ─── 1. Default scope: single-requirement print ───────────────────── */
+
+@media print {
+  /* Hide interactive chrome that has no printed meaning. */
+  .rem-sidebar,
+  .rem-search,
+  .rem-empty,
+  .rem-shell__actions,
+  [data-rem-skeleton],
+  [data-rem-clear-search] {
+    display: none !important;
+  }
+
+  /* The detail panel is the printed surface. */
+  .rem-detail {
+    page-break-after: always;
+    page-break-inside: avoid;
+    break-after: page;
+    break-inside: avoid;
+  }
+
+  /* Keep individual rows together when a row is large. */
+  .rem-detail-row {
+    break-inside: avoid;
+  }
+
+  /* Header text scales gracefully for A4. */
+  .rem-shell__title,
+  .rem-detail__header-title {
+    color: #000 !important;
+  }
+
+  /* Show URLs in links (academic-document convention). */
+  a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #555;
+  }
+
+  /* @page setup: A4, sane margins. */
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+}
+
+/* ─── 2. Full-report scope: cover + TOC + every detail ────────────── */
+
+@media print {
+  body[data-rem-scope='full'] .rem-cover {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  body[data-rem-scope='full'] .rem-toc {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  body[data-rem-scope='full'] .rem-detail {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  body[data-rem-scope='full'] .rem-sidebar {
+    /* Even after the default-rule hide, force display none again in
+       this scope so any future reinstatement can't leak the tree. */
+    display: none !important;
+  }
+}

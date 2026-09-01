@@ -1,0 +1,73 @@
+---
+/**
+ * RemFieldRow.astro
+ *
+ * One row in the REM detail panel. Three visual variants:
+ *   - null value              → "PD" (Por Definir) badge
+ *                                 (REQ-05#3)
+ *   - empty array on links row → red `?` with aria-label="Sin fuentes"
+ *                                (REQ-05#4)
+ *   - string or non-empty array → plain text render
+ *
+ * Variant selection lives in `lib/rem/format.ts` (`getFieldRowVariant`)
+ * so the Vitest container-free test
+ * (`tests/unit/components/rem/RemFieldRow.test.tsx`) can exercise it
+ * without needing an Astro render API.
+ *
+ * Contrast targets (per design §9):
+ *   - PD badge  bg-[#fef3c7] / text-[#92400e]  = 7.5:1
+ *   - Red `?`   bg-[#fee2e2] / text-[#b91c1c]  = 5.9:1
+ * Both pass WCAG 2.2 AA (≥ 4.5:1).
+ */
+
+import { getFieldRowVariant } from '../../lib/rem/format';
+
+interface Props {
+  /** Cell label, already translated by the caller (e.g. "Módulo"). */
+  label: string;
+  /**
+   * Cell value. `format.ts`'s `RowSpec.value` is the richer
+   * `string | string[] | { kind: "stakeholders"; ... } | null` union
+   * — the stakeholder-row case is rendered server-side by the parent
+   * (`RemDetail.astro`) before this component sees it, so the type here
+   * is the three-branch rendering subset the row needs.
+   */
+  value: string | string[] | null;
+  /** True only on the Fuentes/Dependencias row (REQ-05#4). */
+  isLinksRow?: boolean;
+}
+
+const { label, value, isLinksRow = false } = Astro.props;
+const variant = getFieldRowVariant(value, { isLinksRow });
+
+const labelClass =
+  'rem-detail-row__label w-1/3 border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 align-top';
+const valueBaseClass =
+  'rem-detail-row__value w-2/3 border-b border-slate-200 px-3 py-2 text-sm text-slate-900 align-top';
+---
+
+<tr role="row" data-rem-row data-rem-row-variant={variant}>
+  <th scope="row" class={labelClass}>
+    {label}
+  </th>
+  <td class={valueBaseClass}>
+    {
+      variant === 'pd' && (
+        <span class="rem-pd-badge inline-flex items-center rounded-full bg-[#fef3c7] px-2 py-0.5 text-xs font-medium text-[#92400e]">
+          PD
+        </span>
+      )
+    }
+    {
+      variant === 'no-links' && (
+        <span
+          aria-label="Sin fuentes"
+          class="rem-no-links inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#fee2e2] text-base font-bold text-[#b91c1c]"
+        >
+          ?
+        </span>
+      )
+    }
+    {variant === 'plain' && (Array.isArray(value) ? value.join(', ') : value)}
+  </td>
+</tr>

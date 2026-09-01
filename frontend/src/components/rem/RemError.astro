@@ -1,0 +1,62 @@
+---
+/**
+ * RemError.astro
+ *
+ * Loader-error state (REQ-10#3). Replaces the sidebar + detail panel
+ * when the YAML loader throws (typically a malformed YAML or a missing
+ * folder). The page frontmatter catches the error and passes the
+ * error code here.
+ *
+ * No sidebar/detail rendering: REQ-10#3 specifies that only the alert
+ * + code are shown. This Astro file is therefore self-contained; it
+ * never renders another REM component inline.
+ *
+ * Variant selection (load / notfound / generic) lives in
+ * `lib/rem/format.ts` (`getErrorVariant`) so the matching unit test can
+ * exercise the contract without needing an Astro render container.
+ */
+
+import { getErrorVariant } from '../../lib/rem/format';
+
+interface Props {
+  /** Free-form error code, e.g. "load:parse-error:req/rf_001.yml". */
+  code: string;
+  /**
+   * Translator — same shape as the React `useTranslations()` `t` so the
+   * page (Batch 2b) can pass `useTranslations().t` here verbatim.
+   * Defaults to identity (returns the key) so the component is
+   * self-contained when no translator is wired yet.
+   */
+  t?: (key: string) => string;
+}
+
+const { code, t = (k: string) => k } = Astro.props;
+const variant = getErrorVariant(code);
+
+/**
+ * Per-variant i18n keys. The page fills in real translations in Batch
+ * 2b (Task 3.3). For now the translator returns the key string itself.
+ */
+const titleKey = variant === 'load' ? t('rem.error.load.title') : t('common.error');
+const bodyKey =
+  variant === 'load'
+    ? t('rem.error.load.body')
+    : variant === 'notfound'
+      ? t('common.error')
+      : t('common.error');
+---
+
+<section
+  role="alert"
+  data-rem-error
+  data-rem-error-code={code}
+  data-rem-error-variant={variant}
+  class="rem-error mx-auto my-12 max-w-2xl rounded-lg border border-red-300 bg-red-50 p-6 text-red-900 shadow-sm"
+  aria-live="polite"
+>
+  <h2 class="rem-error__title text-lg font-semibold">{titleKey}</h2>
+  <p class="rem-error__body mt-2 text-sm">{bodyKey}</p>
+  <p class="rem-error__code mt-4 font-mono text-xs text-red-700">
+    Código: <span class="rem-error__code-value">{code}</span>
+  </p>
+</section>
