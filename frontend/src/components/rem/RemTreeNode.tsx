@@ -1,0 +1,166 @@
+/**
+ * RemTreeNode.tsx
+ *
+ * Recursive tree node used by `RemSidebar.tsx` (REQ-09 tree semantics).
+ *
+ * Two visual modes per spec §3 / design §9:
+ *
+ *   - Group (RF/RNF by module/category): `role="treeitem"` +
+ *     `aria-expanded`, `aria-level`. Clicking the header toggles
+ *     `expanded` state in the parent.
+ *
+ *   - Leaf (selectable RF / RNF / stakeholder): `role="treeitem"` +
+ *     `aria-selected` (focused) + `aria-current="true"` when this
+ *     leaf is the active selection.
+ *
+ * Memoized on `node.id` so React 19's Concurrent Mode reuses the
+ * subtrees when only one leaf flips its `aria-current`. Per AGENTS.md
+ * §18, dynamic-interactive state stays in `.tsx` while the static
+ * shell stays in `.astro`.
+ */
+
+import { memo, useCallback, useState, type ReactElement } from 'react';
+
+import type { TreeNode } from '../../lib/rem/types';
+
+export interface RemTreeNodeProps {
+  /** Tree node to render — see `lib/rem/types.ts` `TreeNode`. */
+  node: TreeNode;
+  /** Current depth in the tree (1 = top level). */
+  level: number;
+  /** UID of the currently-selected leaf (or null when nothing is picked). */
+  selectedUid: string | null;
+  /**
+   * Fired when the user activates a leaf (click / Enter / Space).
+   * Groups ignore this — they only toggle themselves.
+   */
+  onSelect: (uid: string) => void;
+  /** Translator — mirrors `format.ts`'s `Translator` shape. */
+  t: (key: string) => string;
+}
+
+function isLeaf(node: TreeNode): boolean {
+  return node.children === undefined || node.children.length === 0;
+}
+
+function RemTreeNodeInner({
+  node,
+  level,
+  selectedUid,
+  onSelect,
+  t,
+}: RemTreeNodeProps): ReactElement {
+  const leaf = isLeaf(node);
+  const [expanded, setExpanded] = useState(true);
+
+  const handleClick = useCallback(() => {
+    if (leaf && node.data !== undefined) {
+      onSelect(node.data.uid);
+      return;
+    }
+    setExpanded((prev) => !prev);
+  }, [leaf, node.data, onSelect]);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLLIElement>) => {
+      if (event.key !== 'Enter' && event.key !== ' ') {
+        return;
+      }
+      event.preventDefault();
+      handleClick();
+    },
+    [handleClick]
+  );
+
+  const isSelected = leaf && selectedUid !== null && node.data?.uid === selectedUid;
+
+  const baseClass =
+    'rem-tree-node flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-left text-sm hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]';
+
+  if (leaf) {
+    return (
+      <li
+        role="treeitem"
+        aria-level={level}
+        aria-selected={isSelected === true}
+        aria-current={isSelected === true ? 'true' : undefined}
+        data-rem-leaf
+        data-rem-leaf-id={node.data?.uid ?? node.id}
+        data-testid={`rem-leaf-${node.data?.uid ?? node.id}`}
+        className={baseClass}
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+      >
+        <span className="rem-tree-node__label truncate" title={node.label}>
+          {node.label}
+        </span>
+        <span className="rem-tree-node__meta text-xs text-slate-500">
+          {node.data !== undefined ? shortCode(node.data.uid) : ''}
+        </span>
+      </li>
+    );
+  }
+
+  return (
+    <li
+      role="treeitem"
+      aria-level={level}
+      aria-expanded={expanded}
+      data-rem-group
+      data-rem-group-id={node.id}
+      className="rem-tree-node rem-tree-node--group mt-1"
+    >
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-controls={`rem-tree-group-${node.id}`}
+        onClick={() => setExpanded((prev) => !prev)}
+        className={baseClass}
+      >
+        <span className="rem-tree-node__label font-semibold text-slate-800">{node.label}</span>
+        <span aria-hidden="true" className="rem-tree-node__caret text-slate-400">
+          {expanded ? '▾' : '▸'}
+        </span>
+      </button>
+      <ul
+        role="group"
+        id={`rem-tree-group-${node.id}`}
+        aria-label={t('rem.sidebar.heading')}
+        className="rem-tree-node__children ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-2"
+      >
+        {node.children?.map((child) => (
+          <RemTreeNode
+            key={child.id}
+            node={child}
+            level={level + 1}
+            selectedUid={selectedUid}
+            onSelect={onSelect}
+            t={t}
+          />
+        ))}
+      </ul>
+    </li>
+  );
+}
+
+/**
+ * Strip the long Doorstop prefix (`stakeholder_001` → `s_001`) for
+ * stakeholder leaves where `node.label` is the human name. RF / RNF
+ * leaves already carry their `RF-AUTH-001` code as the label.
+ */
+function shortCode(uid: string): string {
+  if (uid.startsWith('stakeholder_')) {
+    return `s_${uid.slice('stakeholder_'.length)}`;
+  }
+  return uid;
+}
+
+/**
+ * Memoized so re-renders are cheap when only one leaf's
+ * `aria-current` flips. The component is otherwise pure.
+ */
+export const RemTreeNode = memo(RemTreeNodeInner);
+RemTreeNode.displayName = 'RemTreeNode';
+
+export default RemTreeNode;
