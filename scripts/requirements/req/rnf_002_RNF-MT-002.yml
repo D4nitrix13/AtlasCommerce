@@ -1,0 +1,16 @@
+# RNF: RNF-MT-002 - Resolución de tenant por dominio (Host header)
+# Generado por migrate_to_doorstop.py
+rnf_002:
+  title: "Resolución de tenant por dominio (Host header)"
+  rationale: "El middleware ResolveStoreFromDomain del backend identifica el tenant actual según el header Host del request. Caddy hace reverse proxy según el dominio declarado en su Caddyfile."
+  priority: "H"
+  status: "verified"
+  category: "Mantenibilidad / Seguridad"
+  code: "RNF-MT-002"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"

@@ -1,0 +1,22 @@
+# RF: RF-CAT-024 - Gestión de marcas (admin)
+# Generado por migrate_to_doorstop.py
+rf_014:
+  title: "Gestión de marcas (admin)"
+  rationale: "El admin puede crear, editar y eliminar marcas. Frontend: /admin/catalog/brands."
+  priority: "M"
+  status: "implemented"
+  module: "Catálogo"
+  code: "RF-CAT-024"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-PERF-022
+    - RNF-PERF-023
+    - RNF-USA-040
+  estabilidad: "alta"

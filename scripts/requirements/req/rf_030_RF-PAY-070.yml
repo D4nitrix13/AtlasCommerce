@@ -1,0 +1,20 @@
+# RF: RF-PAY-070 - CRUD de métodos de pago
+# Generado por migrate_to_doorstop.py
+rf_030:
+  title: "CRUD de métodos de pago"
+  rationale: "El admin configura métodos de pago disponibles por tienda. Frontend: /admin/payments/methods."
+  priority: "H"
+  status: "implemented"
+  module: "Pagos"
+  code: "RF-PAY-070"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-SEC-010
+    - RNF-SEC-012
+    - RNF-SEC-014
+  estabilidad: "alta"

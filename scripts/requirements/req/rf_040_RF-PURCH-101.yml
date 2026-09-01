@@ -1,0 +1,19 @@
+# RF: RF-PURCH-101 - Órdenes de compra
+# Generado por migrate_to_doorstop.py
+rf_040:
+  title: "Órdenes de compra"
+  rationale: "El admin crea órdenes de compra a proveedores para reposición de stock. Frontend: /admin/purchases/orders."
+  priority: "M"
+  status: "implemented"
+  module: "Compras"
+  code: "RF-PURCH-101"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-PERF-021
+    - RNF-REL-061
+  estabilidad: "alta"

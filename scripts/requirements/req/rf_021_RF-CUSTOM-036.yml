@@ -1,0 +1,23 @@
+# RF: RF-CUSTOM-036 - Definición de áreas de impresión por producto
+# Generado por migrate_to_doorstop.py
+rf_021:
+  title: "Definición de áreas de impresión por producto"
+  rationale: "El admin define las zonas donde se puede estampar/grabar en cada producto. Backend: PrintAreaController."
+  priority: "H"
+  status: "implemented"
+  module: "Personalización"
+  code: "RF-CUSTOM-036"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-PERF-023
+    - RNF-SEC-014
+    - RNF-USA-040
+    - RNF-USA-041
+  estabilidad: "alta"

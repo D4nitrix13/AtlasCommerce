@@ -1,0 +1,23 @@
+# RF: RF-CUSTOM-032 - Biblioteca de fuentes
+# Generado por migrate_to_doorstop.py
+rf_017:
+  title: "Biblioteca de fuentes"
+  rationale: "El usuario puede elegir entre fuentes pre-cargadas en sus diseños. Backend: DesignFontController."
+  priority: "M"
+  status: "implemented"
+  module: "Personalización"
+  code: "RF-CUSTOM-032"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-PERF-023
+    - RNF-SEC-014
+    - RNF-USA-040
+    - RNF-USA-041
+  estabilidad: "alta"

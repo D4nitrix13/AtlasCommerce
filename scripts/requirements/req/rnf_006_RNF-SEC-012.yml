@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-012 - Hashing de passwords con bcrypt
+# Generado por migrate_to_doorstop.py
+rnf_006:
+  title: "Hashing de passwords con bcrypt"
+  rationale: "Passwords nunca se almacenan en plaintext. Hashing via bcrypt con salt por defecto de Laravel."
+  priority: "H"
+  status: "verified"
+  category: "Seguridad"
+  code: "RNF-SEC-012"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
