@@ -421,11 +421,18 @@ const en: Translations = {
   'format.empty': '—',
   'format.date.locale': 'en-US',
 
-  // ─── rem viewer (Batch 2b · REQ-08) ──────────────────────────────────
+  // ─── rem viewer (Batch 2b · REQ-08 + Batch 2c corrective) ────────────
+  // Batch 2c added the 13 keys the components referenced but the
+  // original namespace omitted: sidebar empty state, skeleton copy,
+  // shell landmark aria-labels, error.load.* variants, and the
+  // dynamic `rem.detail.status.<value>` keys for the 5-status enum.
   'rem.title': 'REM Viewer',
   'rem.sidebar.heading': 'Requirements',
   'rem.sidebar.search.placeholder': 'Search by code, title, or module',
   'rem.sidebar.search.clear': 'Clear search',
+  'rem.sidebar.empty.heading': 'No results found',
+  'rem.sidebar.empty.body':
+    'Try different terms or clear the search to see all requirements.',
   'rem.tree.stakeholders': 'Stakeholders',
   'rem.tree.functional': 'Functional requirements',
   'rem.tree.nonfunctional': 'Non-functional requirements',
@@ -437,6 +444,11 @@ const en: Translations = {
   'rem.detail.category': 'Category',
   'rem.detail.priority': 'Priority',
   'rem.detail.status': 'Status',
+  'rem.detail.status.pending': 'Pending',
+  'rem.detail.status.in-analysis': 'In analysis',
+  'rem.detail.status.approved': 'Approved',
+  'rem.detail.status.implemented': 'Implemented',
+  'rem.detail.status.verified': 'Verified',
   'rem.detail.verifiedBy': 'Verified by',
   'rem.detail.sources': 'Sources/Dependencies',
   'rem.detail.rationale': 'Description',
@@ -449,8 +461,15 @@ const en: Translations = {
   'rem.print.full': 'Full report',
   'rem.print.coverTitle': 'REM — Panda Estampados',
   'rem.empty.title': 'No results',
+  'rem.skeleton.loading': 'Loading viewer...',
   'rem.error.title': 'Could not load requirements',
   'rem.error.codeUnknown': 'Requirement not found',
+  'rem.error.load.title': 'Could not load requirements',
+  'rem.error.load.body':
+    'Check the requirement YAML files or contact support if the problem persists.',
+  'rem.shell.header': 'Viewer header',
+  'rem.shell.main': 'Selected requirement detail',
+  'rem.shell.footer': 'Viewer footer',
   'rem.pd.label': 'To Define',
   'rem.sources.empty.ariaLabel': 'No sources',
   'rem.cover.dateFormat': 'en-NI',
