@@ -37,13 +37,26 @@
 interface Props {
   /** Browser tab + `<header>` heading text. */
   title: string;
+  /**
+   * Locale code used for the `<html lang>` attribute (REQ-08#1). The
+   * page reads it from `Astro.params.locale` and forwards it here so
+   * the SSR output advertises the correct language to assistive tech.
+   * Defaults to `'es'` for backward compat with the previous
+   * hard-coded `<html lang="es">`.
+   */
+  locale?: 'es' | 'en';
   /** Optional aria-label override for the <nav> landmark. */
   navLabel?: string;
   /** Optional translator (Batch 2b wires real i18n). */
   t?: (key: string) => string;
 }
 
-const { title, navLabel = 'rem.sidebar.heading', t = (k: string) => k } = Astro.props;
+const {
+  title,
+  locale = 'es',
+  navLabel = 'rem.sidebar.heading',
+  t = (k: string) => k,
+} = Astro.props;
 
 /**
  * Vite resolves the CSS file via its import and emits a hashed asset
@@ -57,7 +70,7 @@ const { title, navLabel = 'rem.sidebar.heading', t = (k: string) => k } = Astro.
 const cssHref = '/src/styles/rem-print.css';
 ---
 
-<html lang="es">
+<html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
