@@ -29,6 +29,7 @@ import type { APIRoute } from 'astro';
 
 import { clearLoaderCache, loadAllRequirements } from '../../../lib/rem/loader';
 import { buildDetailRows, getFieldRowVariant, type RowSpec } from '../../../lib/rem/format';
+import { buildCodeToUidMap, codeToHref } from '../../../lib/rem/links';
 import { getServerDictionary } from '../../../i18n/server';
 import { SUPPORTED_LOCALES, type Locale } from '../../../i18n/config';
 import type { Requirement, Stakeholder } from '../../../lib/rem/types';
