@@ -89,13 +89,13 @@ export function RemRfForm({
       className="rem-rf-form flex flex-col gap-3"
       data-testid="rem-rf-form"
     >
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-slate-700">{t("rem.form.code.label")}</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-700">{t("rem.form.code.label")}</span>
         <input
           type="text"
           data-testid="rem-rf-form-code"
           {...register("code")}
-          className="rounded-md border border-slate-300 px-2 py-1 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-[#2D9D8E] focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
         {errors.code !== undefined ? (
           <span role="alert" className="text-xs text-red-700">
@@ -104,13 +104,13 @@ export function RemRfForm({
         ) : null}
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-slate-700">{t("rem.form.title.label")}</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-700">{t("rem.form.title.label")}</span>
         <input
           type="text"
           data-testid="rem-rf-form-title"
           {...register("title")}
-          className="rounded-md border border-slate-300 px-2 py-1 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-[#2D9D8E] focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
         {errors.title !== undefined ? (
           <span role="alert" className="text-xs text-red-700">
@@ -119,12 +119,12 @@ export function RemRfForm({
         ) : null}
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-slate-700">{t("rem.form.priority.label")}</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-700">{t("rem.form.priority.label")}</span>
         <select
           data-testid="rem-rf-form-priority"
           {...register("priority")}
-          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors hover:border-slate-400 focus:border-[#2D9D8E] focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         >
           {PRIORITIES.map((p) => (
             <option key={p} value={p}>
@@ -134,12 +134,12 @@ export function RemRfForm({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-slate-700">{t("rem.form.status.label")}</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-700">{t("rem.form.status.label")}</span>
         <select
           data-testid="rem-rf-form-status"
           {...register("status")}
-          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors hover:border-slate-400 focus:border-[#2D9D8E] focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -149,13 +149,13 @@ export function RemRfForm({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-slate-700">{t("rem.form.module.label")}</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-700">{t("rem.form.module.label")}</span>
         <input
           type="text"
           data-testid="rem-rf-form-module"
           {...register("module")}
-          className="rounded-md border border-slate-300 px-2 py-1 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-[#2D9D8E] focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
         {errors.module !== undefined ? (
           <span role="alert" className="text-xs text-red-700">
@@ -164,30 +164,35 @@ export function RemRfForm({
         ) : null}
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-slate-700">{t("rem.form.rationale.label")}</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-700">{t("rem.form.rationale.label")}</span>
         <textarea
           data-testid="rem-rf-form-rationale"
           {...register("rationale")}
           rows={3}
-          className="rounded-md border border-slate-300 px-2 py-1 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-[#2D9D8E] focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
       </label>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="-mx-8 -mb-8 mt-2 flex items-center justify-end gap-3 rounded-b-2xl border-t border-slate-200 bg-slate-50 px-8 py-4">
         <button
           type="button"
           data-testid="rem-rf-form-cancel"
           onClick={onCancel}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
         >
           {t("rem.crud.cancel")}
         </button>
         <button
           type="submit"
           data-testid="rem-rf-form-submit"
-          className="rounded-md border border-[#2D9D8E] bg-[#2D9D8E] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#24897B]"
+          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#2D9D8E] to-[#258777] px-5 py-2 text-sm font-semibold text-white shadow-md transition-all hover:from-[#258777] hover:to-[#1E6F62] hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:from-slate-300 disabled:to-slate-300 disabled:shadow-none"
         >
+          {mode === "create" ? (
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M10 4 L10 16 M4 10 L16 10" />
+            </svg>
+          ) : null}
           {t(mode === "create" ? "rem.crud.create.submit" : "rem.crud.edit.submit")}
         </button>
       </div>

@@ -202,24 +202,61 @@ export function RemEditDialog({
       data-rem-edit-mode={mode}
       data-rem-edit-kind={kind}
       aria-labelledby="rem-edit-dialog-title"
-      className="rem-edit-dialog w-full max-w-lg rounded-lg border border-slate-300 bg-white p-6 text-left shadow-xl backdrop:bg-slate-900/40"
+      className="rem-edit-dialog w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 text-left shadow-2xl backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     >
-      <div className="rem-edit-dialog__inner flex flex-col gap-4">
-        <header className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <h2
-            id="rem-edit-dialog-title"
-            className="text-lg font-semibold text-slate-900"
-          >
+      <div className="rem-edit-dialog__inner flex flex-col gap-5">
+        <header className="rem-edit-dialog__header -mx-8 -mt-8 mb-2 flex items-center justify-between rounded-t-2xl border-b border-slate-200 bg-gradient-to-r from-[#2D9D8E]/10 via-white to-white px-8 py-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2D9D8E]/15 text-lg font-bold text-[#1E6F62]">
+              {kind === 'rf' ? '⚡' : kind === 'rnf' ? '⚙' : '👤'}
+            </span>
+            <div>
+              <h2
+                id="rem-edit-dialog-title"
+                className="text-xl font-bold tracking-tight text-slate-900"
+              >
+                {t(
+                  mode === 'create'
+                    ? kind === 'stakeholder'
+                      ? 'rem.dialog.create.stakeholder'
+                      : 'rem.dialog.create.heading'
+                    : kind === 'stakeholder'
+                      ? 'rem.dialog.edit.stakeholder'
+                      : 'rem.dialog.edit.heading',
+                )}
+              </h2>
+              <p className="text-xs text-slate-500">
+                {kind === 'rf'
+                  ? 'Requisito funcional'
+                  : kind === 'rnf'
+                    ? 'Requisito no funcional'
+                    : 'Stakeholder'}
+                {' · '}
+                {mode === 'create' ? 'Crear nuevo' : `Editar ${uid ?? ''}`}
+              </p>
+            </div>
+          </div>
             {t(titleKey)}
           </h2>
-          <button
+<button
             type="button"
-            data-testid="rem-edit-dialog-close"
-            aria-label={t('rem.crud.cancel')}
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+            aria-label={t('rem.dialog.close')}
+            data-testid="rem-edit-dialog-close"
+            className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
           >
-            ✕
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M5 5 L15 15 M15 5 L5 15" />
+            </svg>
           </button>
         </header>
 
