@@ -107,29 +107,34 @@ function renderPlainCell(value: string | string[]): string {
  * browser would get from `RemFieldRow.astro`. The 3-variant contract
  * (`pd`, `no-links`, `plain`) matches `getFieldRowVariant` exactly.
  */
-function renderRow(row: RowSpec): string {
+function renderRow(row: RowSpec, accentIndex: number): string {
   const isLinksRow = row.field === 'fuentes';
   const resolved = resolveCellValue(row.value);
   const variant = getFieldRowVariant(resolved, { isLinksRow });
 
   let html: string;
   if (variant === 'pd') {
-    html = `<span class="rem-pd-badge inline-flex items-center rounded-full bg-[#fef3c7] px-2 py-0.5 text-xs font-medium text-[#92400e]">PD</span>`;
+    html = `<span class="rem-pd-badge inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900 ring-1 ring-inset ring-amber-300"><svg class="mr-1 h-3 w-3" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><circle cx="6" cy="6" r="3"/></svg>PD</span>`;
   } else if (variant === 'no-links') {
-    html = `<span aria-label="Sin fuentes" class="rem-no-links inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#fee2e2] text-base font-bold text-[#b91c1c]">?</span>`;
+    html = `<span aria-label="Sin fuentes" class="rem-no-links inline-flex h-7 w-7 items-center justify-center rounded-full bg-red-100 text-base font-bold text-red-700 ring-1 ring-inset ring-red-300">?</span>`;
+  } else if (Array.isArray(resolved)) {
+    const chips = resolved.map(
+      (entry) =>
+        `<span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-700">${escapeHtml(entry)}</span>`,
+    ).join('');
+    html = `<span class="flex flex-wrap gap-1.5">${chips}</span>`;
   } else {
-    // `resolved` is `string | string[]` here (variant='plain' requires
-    // a non-null, non-empty-on-links value).
-    html = renderPlainCell(resolved as string | string[]);
+    html = `<span>${escapeHtml(resolved)}</span>`;
   }
 
+  const rowBg = accentIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/40';
   const labelClass =
-    'rem-detail-row__label w-1/4 border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 align-top';
+    'rem-detail-row__label w-1/4 border-b border-slate-200 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 align-top';
   const valueClass =
-    'rem-detail-row__value w-3/4 border-b border-slate-200 px-3 py-2 text-sm text-slate-900 align-top whitespace-pre-wrap break-words';
+    `rem-detail-row__value w-3/4 border-b border-slate-200 px-4 py-3 text-sm text-slate-900 align-top whitespace-pre-wrap break-words ${rowBg}`;
 
   return (
-    `<tr role="row" data-rem-row data-rem-row-variant="${variant}">` +
+    `<tr role="row" data-rem-row data-rem-row-variant="${variant}" class="group transition-colors hover:bg-[#2D9D8E]/5">` +
     `<th scope="row" class="${labelClass}">${escapeHtml(row.labelKey)}</th>` +
     `<td class="${valueClass}">${html}</td>` +
     `</tr>`
@@ -183,7 +188,7 @@ function renderDetailPanel(
   const titleClass = 'rem-detail__header-title text-2xl font-semibold text-slate-900';
   const tableClass = 'rem-detail__table w-full border-collapse text-left';
 
-  const body = rows.map(renderRow).join('');
+  const body = rows.map((row, idx) => renderRow(row, idx)).join('');
 
   return (
     `<section data-rem-detail-render data-rem-detail-kind="${kind}" ` +
