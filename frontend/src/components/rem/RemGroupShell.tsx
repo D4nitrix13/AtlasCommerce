@@ -28,6 +28,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactElement,
@@ -112,6 +113,13 @@ export interface RemGroupShellProps {
  * Single collapsible `<details>` wrapper for one of the three
  * top-level groups. Reads/writes `expandedStorageKey(groupId)` on
  * toggle; mounts open by default.
+ *
+ * Hydration strategy: the initial render (SSR + client first paint)
+ * uses `open=false` to match the server output. After mount, a
+ * `useLayoutEffect` reads `localStorage` and flips `open` to match
+ * the persisted state. This keeps SSR/client markup identical (no
+ * `suppressHydrationWarning` workaround needed) while still
+ * respecting the user's collapsed-group preferences across reloads.
  */
 export function RemGroupShell({
   groupId,
@@ -120,7 +128,17 @@ export function RemGroupShell({
   onCreate,
 }: RemGroupShellProps): ReactElement {
   const storageKey = expandedStorageKey(groupId);
-  const [open, setOpen] = useState<boolean>(() => readStoredOpen(storageKey));
+  // SSR + first client paint: always collapsed. useLayoutEffect below
+  // lifts persisted state on mount (before the browser commits the
+  // first paint).
+  const [open, setOpen] = useState<boolean>(false);
+  useLayoutEffect(() => {
+    setOpen(readStoredOpen(storageKey));
+    // Intentionally empty deps — we only want this to run once on
+    // mount. Re-syncing on subsequent renders would fight the user's
+    // own clicks.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync to a `storage` event so multi-tab toggles pick up the new
   // state without a reload (REQ-13 contract; v2 keeps the cross-tab
@@ -155,12 +173,6 @@ export function RemGroupShell({
       data-rem-group-top={groupId}
       open={open}
       onToggle={handleToggle}
-      // The `open` attribute depends on localStorage which the SSR has
-      // no access to (`readStoredOpen` falls back to the default during
-      // SSR). Suppress the hydration warning so React 18 lets the
-      // client-side state take over without warning spam on first mount
-      // after a reload. See `readStoredOpen` for the SSR contract.
-      suppressHydrationWarning
       className="rem-group-shell group mb-2 rounded-md border border-slate-300 bg-white"
     >
       <summary
@@ -228,7 +240,13 @@ export function RemNestedGroup({
   children,
 }: RemNestedGroupProps): ReactElement {
   const storageKey = nestedExpandedStorageKey(groupId, bucketName);
-  const [open, setOpen] = useState<boolean>(() => readStoredOpen(storageKey));
+  // Matches SSR + first client paint; useLayoutEffect lifts persisted
+  // state on mount (see RemGroupShell comment for full rationale).
+  const [open, setOpen] = useState<boolean>(false);
+  useLayoutEffect(() => {
+    setOpen(readStoredOpen(storageKey));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -256,8 +274,6 @@ export function RemNestedGroup({
       data-rem-group-nest={`${groupId}.${bucketName}`}
       open={open}
       onToggle={handleToggle}
-      // See top-level `details` above — SSR has no localStorage.
-      suppressHydrationWarning
       className="rem-group-nested group mb-1 rounded border border-slate-200 bg-white"
     >
       <summary className="rem-group-nested__summary flex cursor-pointer list-none items-center gap-2 rounded-t bg-gradient-to-r from-slate-50 to-white px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:from-slate-100 hover:to-slate-50 hover:text-[#1E6F62]">
