@@ -488,7 +488,10 @@ const en: Translations = {
   'rem.crud.write.error':
     'Could not save the change. Please try again in a few seconds.',
   'rem.dialog.create.heading': 'New requirement',
+  'rem.dialog.create.stakeholder': 'New stakeholder',
   'rem.dialog.edit.heading': 'Edit requirement',
+  'rem.dialog.edit.stakeholder': 'Edit stakeholder',
+  'rem.dialog.close': 'Close',
   'rem.form.code.label': 'Code',
   'rem.form.code.invalid': 'Invalid format (e.g. RF-AUTH-001).',
   'rem.form.code.required': 'Code is required.',
