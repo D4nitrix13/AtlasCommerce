@@ -17,9 +17,11 @@
 
 import RemFieldRow from './RemFieldRow.astro';
 import { buildDetailRows } from '../../lib/rem/format';
+import { buildCodeToUidMap, codeToHref } from '../../lib/rem/links';
 import { getServerDictionary } from '../../i18n/server';
 import { SUPPORTED_LOCALES, type Locale } from '../../i18n/config';
 import type { Requirement, Stakeholder } from '../../lib/rem/types';
+import type { RemDataset } from '../../lib/rem/types';
 
 interface Props {
   /** The item to display — an RF, RNF, or stakeholder. */
@@ -28,16 +30,36 @@ interface Props {
   stakeholders?: Stakeholder[];
   /** Translator — same shape as React `useTranslations()`'s `t`. */
   t?: (key: string) => string;
+  /** Active locale for deep-link href construction (`/es/rem?id=...`). */
+  locale?: string;
+  /** Full dataset so we can link chips by code (RF-AUTH-001 → rf_NNN). */
+  dataset?: RemDataset;
 }
 
-const { item, stakeholders = [], t: tProp } = Astro.props;
+const { item, stakeholders = [], t: tProp, locale, dataset } = Astro.props;
+
+// Build the code→uid map once at render time so each chip in the
+// Fuentes/Dependencias row can render an internal <a> with the right
+// href. Cheap linear pass; safer than a regex on the codes.
+const codeToUid = dataset !== undefined
+  ? buildCodeToUidMap(dataset)
+  : new Map<string, string>();
+
+// Resolve locale with priority: middleware `Astro.locals.locale` >
+// `locale` prop > 'es' fallback. Single declaration used by the
+// translator below AND by the chip-link hrefs.
+const resolvedLocale: Locale =
+  (Astro.locals.locale as Locale | undefined) ??
+  (locale !== undefined
+    ? ((SUPPORTED_LOCALES as readonly string[]).includes(locale)
+        ? (locale as Locale)
+        : 'es')
+    : 'es');
 
 // Build a locale-aware fallback translator from the server dictionary
 // (set by the project middleware via `Astro.locals.locale`). The page
 // route and the API endpoint both pass `t`; this fallback prevents
 // identity-key rendering if either forgets.
-const resolvedLocale: Locale =
-  (Astro.locals.locale as Locale | undefined) ?? 'es';
 const dictionary = getServerDictionary(resolvedLocale);
 const fallbackT = (key: string): string =>
   (dictionary as Record<string, string>)[key] ?? key;
@@ -111,6 +133,8 @@ const headerTitle = `${header.code ?? '?'} — ${header.title ?? 'Sin título'}`
             value={rowValueToString(row.value)}
             isLinksRow={row.field === 'fuentes'}
             accentIndex={idx}
+            codeToUid={codeToUid}
+            locale={resolvedLocale}
           />
         ))
       }
