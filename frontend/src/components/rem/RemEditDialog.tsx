@@ -236,9 +236,7 @@ export function RemEditDialog({
               </p>
             </div>
           </div>
-            {t(titleKey)}
-          </h2>
-<button
+          <button
             type="button"
             onClick={onClose}
             aria-label={t('rem.dialog.close')}
