@@ -89,13 +89,11 @@
     background: white !important;
   }
 
-  /* F3-locked: paginate per requirement, keep rows together. */
-  .rem-detail {
-    page-break-after: always;
-    page-break-inside: avoid;
-    break-after: page;
-    break-inside: avoid;
-  }
+  /* F3-locked (full-report scope only): per-detail page-break-before.
+     In single scope the detail flows naturally — we only avoid
+     breaking inside a row, not AFTER the row (which would create
+     blank trailing pages). The full-report block below re-enables
+     the per-detail page break. */
   .rem-detail-row {
     break-inside: avoid;
   }
