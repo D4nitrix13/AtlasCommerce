@@ -155,6 +155,12 @@ export function RemGroupShell({
       data-rem-group-top={groupId}
       open={open}
       onToggle={handleToggle}
+      // The `open` attribute depends on localStorage which the SSR has
+      // no access to (`readStoredOpen` falls back to the default during
+      // SSR). Suppress the hydration warning so React 18 lets the
+      // client-side state take over without warning spam on first mount
+      // after a reload. See `readStoredOpen` for the SSR contract.
+      suppressHydrationWarning
       className="rem-group-shell group mb-2 rounded-md border border-slate-300 bg-white"
     >
       <summary
@@ -250,6 +256,8 @@ export function RemNestedGroup({
       data-rem-group-nest={`${groupId}.${bucketName}`}
       open={open}
       onToggle={handleToggle}
+      // See top-level `details` above — SSR has no localStorage.
+      suppressHydrationWarning
       className="rem-group-nested group mb-1 rounded border border-slate-200 bg-white"
     >
       <summary className="rem-group-nested__summary flex cursor-pointer list-none items-center gap-2 rounded-t bg-gradient-to-r from-slate-50 to-white px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:from-slate-100 hover:to-slate-50 hover:text-[#1E6F62]">
