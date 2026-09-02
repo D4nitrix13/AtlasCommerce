@@ -430,8 +430,8 @@ const en: Translations = {
   'rem.sidebar.heading': 'Requirements',
   'rem.sidebar.search.placeholder': 'Search by code, title, or module',
   'rem.sidebar.search.clear': 'Clear search',
-  'rem.sidebar.expandAll': 'Expand',
-  'rem.sidebar.collapseAll': 'Collapse',
+  'rem.sidebar.expandAll': 'Expand all',
+  'rem.sidebar.collapseAll': 'Collapse all',
   'rem.sidebar.empty.heading': 'No results found',
   'rem.sidebar.empty.body':
     'Try different terms or clear the search to see all requirements.',
