@@ -44,31 +44,33 @@ import {
 
 /**
  * Parse a stored value into a boolean. Tolerates `'open' | 'closed'`
- * (legacy literals) and `'' | null | undefined` (default-open).
+ * literals and `'' | null | undefined` (default-CLOSED).
  *
  * Whitespace is stripped so a future build that wrote
  * `localStorage.setItem(key, ' closed ')` still parses correctly.
  */
 function parseStoredOpenState(raw: string | null): boolean {
   if (raw === null || raw === undefined) {
-    return true; // default-open per REQ-13#5
+    return false; // default-CLOSED: all groups start collapsed
   }
   const trimmed = raw.trim();
-  if (trimmed === '' || trimmed === 'open' || trimmed === '1') {
+  if (trimmed === 'open' || trimmed === '1') {
     return true;
   }
-  if (trimmed === 'closed' || trimmed === '0') {
+  if (trimmed === '' || trimmed === 'closed' || trimmed === '0') {
     return false;
   }
-  // Unknown values fall back to default-open rather than throwing —
+  // Unknown values fall back to default-closed rather than throwing —
   // see REQ-13#4 (format drift tolerance).
-  return true;
+  return false;
 }
 
 /** Read a stored open-state; SSR-safe (returns the default when no window). */
 function readStoredOpen(key: string): boolean {
   if (typeof window === 'undefined') {
-    return true;
+    // SSR default = closed (matches client default; avoids hydration
+    // mismatch for first-time visitors).
+    return false;
   }
   return parseStoredOpenState(window.localStorage.getItem(key));
 }
@@ -79,14 +81,10 @@ function writeStoredOpen(key: string, open: boolean): void {
     return;
   }
   try {
-    // We persist only the `closed` value; default-open is the
-    // implicit default when the key is missing. This keeps storage
-    // minimal and avoids polluting keys on first-visit (REQ-13#5).
-    if (open) {
-      window.localStorage.removeItem(key);
-    } else {
-      window.localStorage.setItem(key, 'closed');
-    }
+    // Always persist the explicit state ('open' OR 'closed') so the
+    // default-closed first-visit experience is recoverable on reload
+    // (the user can expand a group and have it stay expanded).
+    window.localStorage.setItem(key, open ? 'open' : 'closed');
   } catch {
     // localStorage may throw in Safari private mode or in the
     // jsdom polyfill — never crash the sidebar over a persist.
