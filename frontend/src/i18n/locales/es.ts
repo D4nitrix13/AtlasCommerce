@@ -490,7 +490,10 @@ const es: Translations = {
   'rem.crud.write.error':
     'No se pudo guardar el cambio. Reintentá en unos segundos.',
   'rem.dialog.create.heading': 'Nuevo requisito',
+  'rem.dialog.create.stakeholder': 'Nuevo stakeholder',
   'rem.dialog.edit.heading': 'Editar requisito',
+  'rem.dialog.edit.stakeholder': 'Editar stakeholder',
+  'rem.dialog.close': 'Cerrar',
   'rem.form.code.label': 'Código',
   'rem.form.code.invalid': 'Formato inválido (ej: RF-AUTH-001).',
   'rem.form.code.required': 'El código es obligatorio.',
