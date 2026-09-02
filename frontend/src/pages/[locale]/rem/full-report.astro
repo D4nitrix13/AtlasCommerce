@@ -1,0 +1,394 @@
+---
+/**
+ * pages/[locale]/rem/full-report.astro
+ *
+ * Route `/<locale>/rem/full-report` — server-rendered "Informe
+ * completo" deliverable for the Avance 2 (REQ-07).
+ *
+ * Layout (per page):
+ *   - Page 1: Cover (title, authors, tutor, abstract, totals).
+ *   - Page 2: TOC (every stakeholder, RF, RNF with their final-page anchor).
+ *   - Page 3+: Each stakeholder block (1 per page).
+ *   - Page N+: Each RF (1 per page).
+ *   - Final page: RNF (1 per page each).
+ *
+ * Auto-print: when `?auto_print=1` is in the URL, a small inline
+ * script calls `window.print()` after the document loads. This lets the
+ * RemPrintButton open this URL in a new window and trigger the print
+ * dialog automatically.
+ *
+ * `prerender = false` because we read `scripts/requirements/req/*.yml`
+ * at request time via `loadAllRequirements()`. If we ever migrate to
+ * static, switch to `prerender = true` and read the YAMLs at build.
+ */
+
+export const prerender = false;
+
+import { loadAllRequirements } from '../../../lib/rem/loader';
+import { buildCodeToUidMap, codeToHref } from '../../../lib/rem/links';
+import { buildDetailRows, type RowSpec } from '../../../lib/rem/format';
+import { getServerDictionary } from '../../../i18n/server';
+import { SUPPORTED_LOCALES, type Locale } from '../../../i18n/config';
+import {
+  getRemStaticPaths,
+} from '../../../lib/rem/page-route';
+import type {
+  Requirement,
+  Stakeholder,
+} from '../../../lib/rem/types';
+import RemFieldRow from '../../../components/rem/RemFieldRow.astro';
+
+export const getStaticPaths = getRemStaticPaths;
+
+const rawLocale = Astro.params.locale;
+const locale: Locale =
+  rawLocale !== undefined && (SUPPORTED_LOCALES as readonly string[]).includes(rawLocale)
+    ? (rawLocale as Locale)
+    : 'es';
+
+// Page-side translator with identity fallback.
+const dictionary = getServerDictionary(locale);
+const t = (key: string): string => {
+  const value = (dictionary as Record<string, string>)[key];
+  return value ?? key;
+};
+
+// Load the full dataset; a loader failure renders a plain error page
+// (no <RemError> component needed because there's no interactive
+// sidebar to coordinate with).
+let dataset: ReturnType<typeof loadAllRequirements> | null = null;
+let loaderError: string | null = null;
+try {
+  dataset = loadAllRequirements();
+} catch (cause) {
+  loaderError =
+    cause instanceof Error && cause.name === 'RemParseError'
+      ? `load:parse-error:${(cause as { path?: string }).path ?? 'unknown'}`
+      : 'load:unknown';
+}
+
+// Auto-print flag — read once on SSR so the inline script can include
+// the right boolean in the rendered HTML without a runtime read.
+const autoPrint = Astro.url.searchParams.get('auto_print') === '1';
+
+// Build the code→uid map once for the deep-link generation in each
+// detail row. Cheap (linear in dataset size; sub-millisecond).
+const safeDataset = dataset ?? { rf: [], rnf: [], stakeholders: [] };
+const codeToUid = buildCodeToUidMap(safeDataset);
+
+// Sort stakeholders / RF / RNF by UID for stable pagination.
+const sortedStakeholders = [...safeDataset.stakeholders].sort((a, b) =>
+  a.uid.localeCompare(b.uid, 'es')
+);
+const sortedRf = [...safeDataset.rf].sort((a, b) =>
+  a.uid.localeCompare(b.uid, 'es')
+);
+const sortedRnf = [...safeDataset.rnf].sort((a, b) =>
+  a.uid.localeCompare(b.uid, 'es')
+);
+
+// Page-number prediction for the TOC. The exact pagination depends on
+// each item's row count which we only know at render time. We compute
+// the prefix counts:
+//   cover                    = 1 page
+//   toc                      = 1 page
+//   stakeholders             = 1 page per stakeholder
+//   rf (functional)          = 1 page per RF (most fit on 1 page)
+//   rnf (non-functional)     = 1 page per RNF
+//
+// This gives a rough anchor the student can reference when reading
+// the printed report. We renumber after generation when the file
+// is opened in Word later (the student uses this anchor to cross-ref
+// the printed output).
+const PAGE_COVER = 1;
+const PAGE_TOC = 2;
+const stakeBase = PAGE_TOC + 1;
+const rfBase = stakeBase + sortedStakeholders.length;
+const rnfBase = rfBase + sortedRf.length;
+
+function pageOf(stakeIndex: number): number {
+  return stakeBase + stakeIndex;
+}
+function pageOfRf(rfIndex: number): number {
+  return rfBase + rfIndex;
+}
+function pageOfRnf(rnfIndex: number): number {
+  return rnfBase + rnfIndex;
+}
+
+/**
+ * Render a single detail page for one item (stakeholder / RF / RNF).
+ * Mirrors the row specs produced by `buildDetailRows` from
+ * `lib/rem/format.ts` so the printed report matches the on-screen
+ * detail panel exactly (the student can use either source as the
+ * authoritative one).
+ */
+function detailRows(item: Requirement | Stakeholder): RowSpec[] {
+  return buildDetailRows(item, t, safeDataset.stakeholders);
+}
+function rowValueToString(value: RowSpec['value']): string | string[] | null {
+  if (value === null) return null;
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'object' && value !== null && (value as { kind?: string }).kind === 'stakeholders') {
+    return (value as { names: string[] }).names.join(', ');
+  }
+  return null;
+}
+
+const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+const title = t('rem.fullReport.title');
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <!--
+      Inline the print stylesheet so the browser picks it up
+      immediately on Ctrl+P (no extra HTTP request needed before the
+      dialog opens). The ~1-2 KB overhead is acceptable for an
+      academic deliverable opened directly from a new tab.
+    -->
+    <style is:inline set:html={`@media print { @page { size: A4; margin: 18mm 16mm; } body * { visibility: hidden; } .rem-full-page, .rem-full-page * { visibility: visible; } .rem-full-page { position: absolute; left: 0; right: 0; top: 0; padding: 0; } .rem-full-cover { page-break-after: always; } .rem-full-toc { page-break-after: always; } .rem-full-detail-page { page-break-before: always; page-break-inside: avoid; } }`} />
+  </head>
+  <body class="rem-full-report-body bg-white font-sans text-slate-900">
+    {loaderError !== null ? (
+      <section class="rem-full-page rem-full-error p-12">
+        <h1 class="text-2xl font-semibold text-red-700">{t('rem.error.title')}</h1>
+        <p class="mt-2 font-mono text-sm text-slate-700">{loaderError}</p>
+      </section>
+    ) : (
+      <div class="rem-full-report">
+        {/* ─── Page 1: Cover ─────────────────────────────────────── */}
+        <section class="rem-full-page rem-full-cover min-h-[80vh] px-12 py-16">
+          <header class="mb-8">
+            <p class="text-sm font-semibold uppercase tracking-widest text-[#2D9D8E]">
+              {t('rem.fullReport.eyebrow')}
+            </p>
+            <h1 class="mt-2 text-4xl font-bold leading-tight text-slate-900">
+              {title}
+            </h1>
+            <p class="mt-2 text-base text-slate-600">
+              {t('rem.fullReport.subtitle')}
+            </p>
+          </header>
+
+          <section class="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
+            <div>
+              <p class="font-semibold uppercase tracking-wide text-slate-500">
+                {t('rem.fullReport.system')}
+              </p>
+              <p class="text-slate-900">E-Commerce Multitienda Panda Estampados / Kitsune</p>
+              <p class="text-slate-600">ECM-PEK v1.0.0</p>
+            </div>
+            <div>
+              <p class="font-semibold uppercase tracking-wide text-slate-500">
+                {t('rem.fullReport.course')}
+              </p>
+              <p class="text-slate-900">Ingeniería de Software I</p>
+              <p class="text-slate-600">Grupo 4T6-COM-S</p>
+            </div>
+            <div>
+              <p class="font-semibold uppercase tracking-wide text-slate-500">
+                {t('rem.fullReport.authors')}
+              </p>
+              <ul class="text-slate-900">
+                <li>Br. Daniel Benjamín Pérez Morales</li>
+                <li>Br. Andy Joe Sánchez Calero</li>
+                <li>Br. Jeremy Joshua Pérez Gonzales</li>
+              </ul>
+            </div>
+            <div>
+              <p class="font-semibold uppercase tracking-wide text-slate-500">
+                {t('rem.fullReport.tutor')}
+              </p>
+              <p class="text-slate-900">Ing. Araceli Torres López</p>
+              <p class="text-slate-600">Septiembre · {today}</p>
+            </div>
+          </section>
+
+          <section class="mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 p-8">
+            <p class="font-semibold uppercase tracking-wide text-slate-500">
+              {t('rem.fullReport.totals')}
+            </p>
+            <ul class="mt-4 grid grid-cols-2 gap-4 text-base">
+              <li class="flex justify-between border-b border-slate-200 py-2">
+                <span>{t('rem.fullReport.rfCount')}</span>
+                <span class="font-mono font-semibold">{sortedRf.length}</span>
+              </li>
+              <li class="flex justify-between border-b border-slate-200 py-2">
+                <span>{t('rem.fullReport.rnfCount')}</span>
+                <span class="font-mono font-semibold">{sortedRnf.length}</span>
+              </li>
+              <li class="flex justify-between border-b border-slate-200 py-2">
+                <span>{t('rem.fullReport.stakeCount')}</span>
+                <span class="font-mono font-semibold">{sortedStakeholders.length}</span>
+              </li>
+              <li class="flex justify-between border-b border-slate-200 py-2">
+                <span>{t('rem.fullReport.totalCount')}</span>
+                <span class="font-mono font-semibold">
+                  {sortedRf.length + sortedRnf.length + sortedStakeholders.length}
+                </span>
+              </li>
+            </ul>
+          </section>
+        </section>
+
+        {/* ─── Page 2: TOC ───────────────────────────────────────── */}
+        <section class="rem-full-page rem-full-toc px-12 py-12">
+          <h2 class="mb-6 text-2xl font-bold text-slate-900">
+            {t('rem.fullReport.toc')}
+          </h2>
+
+          <div class="grid grid-cols-[1fr_2.5fr_auto] gap-x-6 gap-y-1 text-sm">
+            <h3 class="col-span-3 mt-4 border-b border-slate-300 pb-2 font-semibold uppercase tracking-wide text-[#2D9D8E]">
+              {t('rem.tree.stakeholders')} ({sortedStakeholders.length})
+            </h3>
+            {
+              sortedStakeholders.map((s, idx) => (
+                <>
+                  <span class="font-mono text-slate-700">{s.uid}</span>
+                  <span class="text-slate-900">{s.name}</span>
+                  <span class="text-right font-mono text-slate-500">{pageOf(idx)}</span>
+                </>
+              ))
+            }
+
+            <h3 class="col-span-3 mt-8 border-b border-slate-300 pb-2 font-semibold uppercase tracking-wide text-[#2D9D8E]">
+              {t('rem.tree.functional')} ({sortedRf.length})
+            </h3>
+            {
+              sortedRf.map((r, idx) => (
+                <>
+                  <span class="font-mono text-slate-700">{r.code}</span>
+                  <span class="text-slate-900">{r.title}</span>
+                  <span class="text-right font-mono text-slate-500">{pageOfRf(idx)}</span>
+                </>
+              ))
+            }
+
+            <h3 class="col-span-3 mt-8 border-b border-slate-300 pb-2 font-semibold uppercase tracking-wide text-[#2D9D8E]">
+              {t('rem.tree.nonfunctional')} ({sortedRnf.length})
+            </h3>
+            {
+              sortedRnf.map((r, idx) => (
+                <>
+                  <span class="font-mono text-slate-700">{r.code}</span>
+                  <span class="text-slate-900">{r.title}</span>
+                  <span class="text-right font-mono text-slate-500">{pageOfRnf(idx)}</span>
+                </>
+              ))
+            }
+          </div>
+        </section>
+
+        {/* ─── Stakeholder pages ─────────────────────────────────── */}
+        {
+          sortedStakeholders.map((s) => (
+            <section class="rem-full-page rem-full-detail-page px-12 py-12">
+              <header class="mb-6 border-b border-slate-200 pb-4">
+                <p class="text-sm font-semibold uppercase tracking-widest text-[#2D9D8E]">
+                  {t('rem.tree.stakeholders')} · <span class="font-mono">{s.uid}</span>
+                </p>
+                <h2 class="mt-1 text-3xl font-bold text-slate-900">{s.name}</h2>
+              </header>
+              <table class="w-full border-collapse text-left text-sm">
+                <tbody>
+                  {detailRows(s).map((row, i) => (
+                    <RemFieldRow
+                      label={row.labelKey}
+                      value={rowValueToString(row.value)}
+                      isLinksRow={row.field === 'fuentes'}
+                      accentIndex={i}
+                      codeToUid={codeToUid}
+                      locale={locale}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ))
+        }
+
+        {/* ─── RF pages ────────────────────────────────────────── */}
+        {
+          sortedRf.map((r) => (
+            <section class="rem-full-page rem-full-detail-page px-12 py-12">
+              <header class="mb-6 border-b border-slate-200 pb-4">
+                <p class="text-sm font-semibold uppercase tracking-widest text-[#2D9D8E]">
+                  {t('rem.tree.functional')} · <span class="font-mono">{r.code}</span>
+                </p>
+                <h2 class="mt-1 text-3xl font-bold text-slate-900">{r.title}</h2>
+                <p class="mt-1 text-xs text-slate-500">
+                  {t('rem.tree.module')}: <span class="font-mono">{r.module ?? '—'}</span>
+                </p>
+              </header>
+              <table class="w-full border-collapse text-left text-sm">
+                <tbody>
+                  {detailRows(r).map((row, i) => (
+                    <RemFieldRow
+                      label={row.labelKey}
+                      value={rowValueToString(row.value)}
+                      isLinksRow={row.field === 'fuentes'}
+                      accentIndex={i}
+                      codeToUid={codeToUid}
+                      locale={locale}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ))
+        }
+
+        {/* ─── RNF pages ───────────────────────────────────────── */}
+        {
+          sortedRnf.map((r) => (
+            <section class="rem-full-page rem-full-detail-page px-12 py-12">
+              <header class="mb-6 border-b border-slate-200 pb-4">
+                <p class="text-sm font-semibold uppercase tracking-widest text-[#2D9D8E]">
+                  {t('rem.tree.nonfunctional')} · <span class="font-mono">{r.code}</span>
+                </p>
+                <h2 class="mt-1 text-3xl font-bold text-slate-900">{r.title}</h2>
+                <p class="mt-1 text-xs text-slate-500">
+                  {t('rem.tree.functional') === t('rem.tree.nonfunctional') ? '' : ''}
+                  {t('rem.tree.module') === t('rem.tree.module') ? '' : ''}
+                  {t('rem.fullReport.rnfCategory')}: <span class="font-mono">{r.category ?? '—'}</span>
+                </p>
+              </header>
+              <table class="w-full border-collapse text-left text-sm">
+                <tbody>
+                  {detailRows(r).map((row, i) => (
+                    <RemFieldRow
+                      label={row.labelKey}
+                      value={rowValueToString(row.value)}
+                      isLinksRow={row.field === 'fuentes'}
+                      accentIndex={i}
+                      codeToUid={codeToUid}
+                      locale={locale}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ))
+        }
+      </div>
+    )}
+
+    {
+      autoPrint && loaderError === null ? (
+        <script is:inline>
+          // auto_print=1 → open the print dialog after the document fully
+          // loads. ~500ms gives the browser time to lay out the cover before
+          // the dialog blocks the main thread.
+          window.addEventListener('load', function () {
+            setTimeout(function () { window.print(); }, 500);
+          });
+        </script>
+      ) : null
+    }
+  </body>
+</html>

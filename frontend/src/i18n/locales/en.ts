@@ -519,6 +519,22 @@ const en: Translations = {
   'rem.form.stakeholder.role.label': 'Role',
   'rem.form.stakeholder.organization.label': 'Organization',
   'rem.form.stakeholder.notes.label': 'Notes',
+
+  // Full-report endpoint (Informe completo)
+  'rem.fullReport.title': 'Requirements Report',
+  'rem.fullReport.eyebrow': 'Milestone 2 · Software Engineering I',
+  'rem.fullReport.subtitle': 'E-Commerce Multi-Store Panda Estampados / Kitsune',
+  'rem.fullReport.system': 'System',
+  'rem.fullReport.course': 'Course',
+  'rem.fullReport.authors': 'Authors',
+  'rem.fullReport.tutor': 'Tutor',
+  'rem.fullReport.totals': 'Summary',
+  'rem.fullReport.rfCount': 'Functional Requirements',
+  'rem.fullReport.rnfCount': 'Non-Functional Requirements',
+  'rem.fullReport.stakeCount': 'Stakeholders',
+  'rem.fullReport.totalCount': 'Total artifacts',
+  'rem.fullReport.toc': 'Requirements Index',
+  'rem.fullReport.rnfCategory': 'Category',
 };
 
 export default en;
