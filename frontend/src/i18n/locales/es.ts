@@ -432,8 +432,8 @@ const es: Translations = {
   'rem.sidebar.heading': 'Requisitos',
   'rem.sidebar.search.placeholder': 'Buscar por código, título o módulo',
   'rem.sidebar.search.clear': 'Limpiar búsqueda',
-  'rem.sidebar.expandAll': 'Expandir',
-  'rem.sidebar.collapseAll': 'Colapsar',
+  'rem.sidebar.expandAll': 'Expandir todo',
+  'rem.sidebar.collapseAll': 'Colapsar todo',
   'rem.sidebar.empty.heading': 'Búsqueda sin resultados',
   'rem.sidebar.empty.body':
     'Probá con otros términos o limpiá la búsqueda para ver todos los requisitos.',

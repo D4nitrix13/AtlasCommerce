@@ -514,8 +514,8 @@ export function RemSidebar({
         <button
           type="button"
           data-testid="rem-sidebar-expand-all"
-          aria-label={t('rem.sidebar.expandAll')}
-          title={t('rem.sidebar.expandAll')}
+          aria-label="Expandir todas las secciones"
+          title="Expandir todas las secciones (Stakeholders + Requisitos Funcionales + Requisitos No Funcionales y sus módulos)"
           onClick={setAllOpen}
           className="rem-sidebar-toolbar__btn flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1.5 font-medium text-slate-700 transition-colors hover:bg-[#2D9D8E]/10 hover:text-[#1E6F62] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
         >
@@ -528,8 +528,8 @@ export function RemSidebar({
         <button
           type="button"
           data-testid="rem-sidebar-collapse-all"
-          aria-label={t('rem.sidebar.collapseAll')}
-          title={t('rem.sidebar.collapseAll')}
+          aria-label="Colapsar todas las secciones"
+          title="Colapsar todas las secciones (se cierran los 3 grupos top-level y los buckets de cada módulo)"
           onClick={setAllClosed}
           className="rem-sidebar-toolbar__btn flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1.5 font-medium text-slate-700 transition-colors hover:bg-[#2D9D8E]/10 hover:text-[#1E6F62] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
         >
