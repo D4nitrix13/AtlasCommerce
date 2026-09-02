@@ -490,7 +490,22 @@ export type TranslationKey =
   | 'rem.form.stakeholder.title.label'
   | 'rem.form.stakeholder.role.label'
   | 'rem.form.stakeholder.organization.label'
-  | 'rem.form.stakeholder.notes.label';
+  | 'rem.form.stakeholder.notes.label'
+  // Full-report endpoint (Informe completo)
+  | 'rem.fullReport.title'
+  | 'rem.fullReport.eyebrow'
+  | 'rem.fullReport.subtitle'
+  | 'rem.fullReport.system'
+  | 'rem.fullReport.course'
+  | 'rem.fullReport.authors'
+  | 'rem.fullReport.tutor'
+  | 'rem.fullReport.totals'
+  | 'rem.fullReport.rfCount'
+  | 'rem.fullReport.rnfCount'
+  | 'rem.fullReport.stakeCount'
+  | 'rem.fullReport.totalCount'
+  | 'rem.fullReport.toc'
+  | 'rem.fullReport.rnfCategory';
 
 /**
  * Mapa de traducciones: cada key mapea al string traducido.

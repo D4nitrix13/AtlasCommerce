@@ -521,6 +521,22 @@ const es: Translations = {
   'rem.form.stakeholder.role.label': 'Rol',
   'rem.form.stakeholder.organization.label': 'Organización',
   'rem.form.stakeholder.notes.label': 'Notas',
+
+  // Full-report endpoint (Informe completo)
+  'rem.fullReport.title': 'Informe de Requisitos',
+  'rem.fullReport.eyebrow': 'Avance 2 · Ingeniería de Software I',
+  'rem.fullReport.subtitle': 'E-Commerce Multitienda Panda Estampados / Kitsune',
+  'rem.fullReport.system': 'Sistema',
+  'rem.fullReport.course': 'Curso',
+  'rem.fullReport.authors': 'Autores',
+  'rem.fullReport.tutor': 'Tutor',
+  'rem.fullReport.totals': 'Resumen',
+  'rem.fullReport.rfCount': 'Requisitos Funcionales',
+  'rem.fullReport.rnfCount': 'Requisitos No Funcionales',
+  'rem.fullReport.stakeCount': 'Stakeholders',
+  'rem.fullReport.totalCount': 'Total de artefactos',
+  'rem.fullReport.toc': 'Índice de Requisitos',
+  'rem.fullReport.rnfCategory': 'Categoría',
 };
 
 export default es;

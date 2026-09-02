@@ -4,25 +4,44 @@
  * React island: print-to-PDF trigger (REQ-06 + REQ-07).
  *
  * Two buttons:
- *   - "Imprimir PDF" → `body[data-rem-scope="single"]` (default) →
- *     `window.print()`. Used when the user wants the current selection
- *     only.
+ *   - "Imprimir PDF" → sets `body[data-rem-scope="single"]` → calls
+ *     `window.print()`. Prints the currently selected detail only.
  *
- *   - "Informe completo" → flips `body[data-rem-scope="full"]` first
- *     so the print stylesheet (`styles/rem-print.css`, `@media print`)
- *     generates a cover page + TOC + every requirement paginated.
+ *   - "Informe completo" → navigates (new tab) to
+ *     `/${locale}/rem/full-report?auto_print=1`. The dedicated
+ *     endpoint renders cover + TOC + all 78 items, and the query
+ *     param auto-triggers `window.print()` after the document loads.
+ *     This is a much cleaner UX than the previous approach (which
+ *     only flipped a CSS scope and printed the current single item
+ *     with "full" rules pointing at non-existent cover/TOC elements).
  *
  * DP2 locked: `window.print()` only. No new npm packages (no
  * `react-to-print`). Chromium primary per NFR-08; Firefox/Safari will
  * fall back to browser screenshots.
  *
  * The buttons are siblings inside the `<RemLayout>` header-actions
- * slot, so the layout (Batch 2b) wires them. For unit tests we render
+ * slot, so the layout wires them. For unit tests we render
  * them in isolation.
  */
 
 import { useCallback, useState, type ReactElement } from 'react';
 import { useTranslations } from '../../i18n';
+import { SUPPORTED_LOCALES, type Locale } from '../../i18n/config';
+
+/**
+ * Resolve the active locale from `window.location.pathname` (the
+ * middleware-prefixed URL is `/<locale>/rem/...`). Falls back to
+ * `DEFAULT_LOCALE` on SSR or unparseable paths.
+ */
+function resolveActiveLocale(): Locale {
+  if (typeof window === 'undefined') return 'es';
+  const match = window.location.pathname.match(/^\/(es|en)(\/|$)/);
+  if (match === null || match[1] === undefined) return 'es';
+  const candidate = match[1];
+  return (SUPPORTED_LOCALES as readonly string[]).includes(candidate)
+    ? (candidate as Locale)
+    : 'es';
+}
 
 export type RemPrintScope = 'single' | 'full';
 
@@ -35,9 +54,11 @@ export type RemPrintScope = 'single' | 'full';
 const PRINT_DEADLINE_MS = 100;
 
 /**
- * Apply a `data-rem-scope` attribute on `<body>` so the print
- * stylesheet can branch on `@media print` rules. Reset on full
- * completion.
+ * Apply a `data-rem-scope` attribute on `<body>` so the (legacy)
+ * print stylesheet can branch on `@media print` rules for the
+ * single-mode print path. The full-report endpoint does NOT need
+ * this because it uses the inline print stylesheet on the dedicated
+ * `/rem/full-report` route.
  */
 function setScope(scope: RemPrintScope): void {
   if (typeof document !== 'undefined') {
@@ -46,19 +67,14 @@ function setScope(scope: RemPrintScope): void {
 }
 
 export function RemPrintButton(): ReactElement {
-  // Serializable translator (see RemSidebar.tsx for the same pattern).
+  // Serializable translator + locale URL builder.
   const { t } = useTranslations();
+  const locale = resolveActiveLocale();
   const [busy, setBusy] = useState(false);
 
-  const triggerPrint = useCallback((scope: RemPrintScope) => {
-    setScope(scope);
+  const triggerSingle = useCallback(() => {
+    setScope('single');
     const t0 = performance.now();
-    // Defer `window.print()` to the next macrotask so the click
-    // handler returns synchronously and the spec's 100 ms timing
-    // window (REQ-06#1) measures only the scheduling latency, not
-    // the native dialog's blocking time. In a real browser the
-    // dialog itself is modal, but the spec measures how fast we get
-    // TO the dialog, not how fast the dialog closes.
     setTimeout(() => {
       try {
         window.print();
@@ -75,15 +91,28 @@ export function RemPrintButton(): ReactElement {
     }, 0);
   }, []);
 
+  const triggerFull = useCallback(() => {
+    setBusy(true);
+    // Open in a new tab so the sidebar keeps its current selection.
+    // The endpoint auto-triggers window.print() when ?auto_print=1.
+    const url = `/${locale}/rem/full-report?auto_print=1`;
+    const win = window.open(url, '_blank', 'noopener,noreferrer');
+    if (win === null) {
+      // Popup blocked — fall back to same-tab navigation.
+      window.location.href = url;
+    }
+    setBusy(false);
+  }, [locale]);
+
   const handleSingle = useCallback(() => {
     setBusy(true);
-    triggerPrint('single');
-  }, [triggerPrint]);
+    triggerSingle();
+  }, [triggerSingle]);
 
   const handleFull = useCallback(() => {
     setBusy(true);
-    triggerPrint('full');
-  }, [triggerPrint]);
+    triggerFull();
+  }, [triggerFull]);
 
   return (
     <div className="rem-print-button flex items-center gap-2" data-rem-print>
