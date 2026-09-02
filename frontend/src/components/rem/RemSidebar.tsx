@@ -34,7 +34,15 @@ import { RemKebabMenu, type RemKebabKind } from './RemKebabMenu';
 import { RemEditDialog, type RemEditKind, type RemEditMode } from './RemEditDialog';
 import { match as searchMatch } from '../../lib/rem/search';
 import { buildTree } from '../../lib/rem/tree';
-import type { Kind, RemDataset, Requirement, Stakeholder, TreeNode } from '../../lib/rem/types';
+import {
+  expandedStorageKey,
+  nestedExpandedStorageKey,
+  type Kind,
+  type RemDataset,
+  type Requirement,
+  type Stakeholder,
+  type TreeNode,
+} from '../../lib/rem/types';
 import type { Locale } from '../../i18n/config';
 import { useTranslations } from '../../i18n';
 
@@ -306,6 +314,63 @@ export function RemSidebar({
     setDialog((prev) => ({ ...prev, open: false }));
   }, []);
 
+  /**
+   * Compute every `rem.viewer.expanded.*` storage key the tree can
+   * produce. Powers the "Expandir todo" / "Colapsar todo" toolbar
+   * buttons — we write each key explicitly so a first-visit session
+   * (no keys yet) gets the right state on reload.
+   */
+  const allExpandedKeys = useMemo<readonly string[]>(() => {
+    const keys: string[] = [];
+    keys.push(expandedStorageKey('stakeholders'));
+    keys.push(expandedStorageKey('rf'));
+    keys.push(expandedStorageKey('rnf'));
+    const rfModules = new Set<string>();
+    for (const rf of dataset.rf) {
+      if (rf.module !== undefined && rf.module.trim() !== '') {
+        rfModules.add(rf.module);
+      }
+    }
+    for (const mod of rfModules) {
+      keys.push(nestedExpandedStorageKey('rf', mod));
+    }
+    const rnfCategories = new Set<string>();
+    for (const rnf of dataset.rnf) {
+      if (rnf.category !== undefined && rnf.category.trim() !== '') {
+        rnfCategories.add(rnf.category);
+      }
+    }
+    for (const cat of rnfCategories) {
+      keys.push(nestedExpandedStorageKey('rnf', cat));
+    }
+    return keys;
+  }, [dataset]);
+
+  /**
+   * Write every expanded key with the same state, then reload so the
+   * `<details>` elements re-read from storage on next mount. We use a
+   * full reload (vs dispatching a synthetic `storage` event) because
+   * Vite HMR + native `<details>` don't always re-render on the
+   * same-tab dispatch reliably across jsdom + real browsers.
+   */
+  const setAllExpanded = useCallback(
+    (state: 'open' | 'closed') => {
+      if (typeof window === 'undefined') return;
+      try {
+        for (const key of allExpandedKeys) {
+          window.localStorage.setItem(key, state);
+        }
+      } catch {
+        // localStorage may throw in Safari private mode — ignore.
+      }
+      window.location.reload();
+    },
+    [allExpandedKeys],
+  );
+
+  const setAllOpen = useCallback(() => setAllExpanded('open'), [setAllExpanded]);
+  const setAllClosed = useCallback(() => setAllExpanded('closed'), [setAllExpanded]);
+
   // On successful CRUD: refresh the tree region via SSR re-fetch
   // (DD5 lock — design §4 step 8). Capture `scrollTop` from the
   // tree-region scroll container BEFORE the swap so we can restore it
@@ -441,6 +506,39 @@ export function RemSidebar({
         onKeyDown={handleSearchKeyDown}
         className="rem-search w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
       />
+
+      <div
+        data-testid="rem-sidebar-toolbar"
+        className="flex items-center gap-1 rounded-md border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-1 text-xs shadow-sm"
+      >
+        <button
+          type="button"
+          data-testid="rem-sidebar-expand-all"
+          aria-label={t('rem.sidebar.expandAll')}
+          title={t('rem.sidebar.expandAll')}
+          onClick={setAllOpen}
+          className="rem-sidebar-toolbar__btn flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1.5 font-medium text-slate-700 transition-colors hover:bg-[#2D9D8E]/10 hover:text-[#1E6F62] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 6 L8 10 L12 6" />
+          </svg>
+          <span>{t('rem.sidebar.expandAll')}</span>
+        </button>
+        <span className="h-5 w-px bg-slate-200" aria-hidden="true" />
+        <button
+          type="button"
+          data-testid="rem-sidebar-collapse-all"
+          aria-label={t('rem.sidebar.collapseAll')}
+          title={t('rem.sidebar.collapseAll')}
+          onClick={setAllClosed}
+          className="rem-sidebar-toolbar__btn flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1.5 font-medium text-slate-700 transition-colors hover:bg-[#2D9D8E]/10 hover:text-[#1E6F62] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D9D8E]"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M6 4 L12 8 L6 12" />
+          </svg>
+          <span>{t('rem.sidebar.collapseAll')}</span>
+        </button>
+      </div>
 
       {showEmpty ? (
         <section
