@@ -405,6 +405,8 @@ export type TranslationKey =
   | 'rem.sidebar.heading'
   | 'rem.sidebar.search.placeholder'
   | 'rem.sidebar.search.clear'
+  | 'rem.sidebar.expandAll'
+  | 'rem.sidebar.collapseAll'
   | 'rem.sidebar.empty.heading'
   | 'rem.sidebar.empty.body'
   | 'rem.tree.stakeholders'
