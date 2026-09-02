@@ -202,7 +202,7 @@ export function RemEditDialog({
       data-rem-edit-mode={mode}
       data-rem-edit-kind={kind}
       aria-labelledby="rem-edit-dialog-title"
-      className="rem-edit-dialog w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 text-left shadow-2xl backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
+      className="rem-edit-dialog fixed top-1/2 left-1/2 m-0 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 bg-white p-8 text-left shadow-2xl backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     >
       <div className="rem-edit-dialog__inner flex flex-col gap-5">
         <header className="rem-edit-dialog__header -mx-8 -mt-8 mb-2 flex items-center justify-between rounded-t-2xl border-b border-slate-200 bg-gradient-to-r from-[#2D9D8E]/10 via-white to-white px-8 py-4">
