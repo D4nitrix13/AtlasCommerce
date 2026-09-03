@@ -1,5 +1,4 @@
 # RNF: RNF-MAIN-053 - Conventional Commits en español
-# Generado por migrate_to_doorstop.py
 rnf_023:
   title: "Conventional Commits en español"
   rationale: "Todos los commits siguen Conventional Commits con cuerpo en español. Scopes: backend, frontend, docs, infra, ci."
@@ -15,3 +14,4 @@ rnf_023:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

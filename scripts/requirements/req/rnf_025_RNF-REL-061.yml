@@ -1,5 +1,4 @@
 # RNF: RNF-REL-061 - Healthchecks en todos los servicios
-# Generado por migrate_to_doorstop.py
 rnf_025:
   title: "Healthchecks en todos los servicios"
   rationale: "PostgreSQL, Redis, PHP-FPM tienen healthcheck. Dependencias se esperan antes de levantar (depends_on: condition: service_healthy)."
@@ -15,3 +14,4 @@ rnf_025:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

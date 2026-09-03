@@ -1,5 +1,4 @@
 # RF: RF-SHIP-080 - CRUD de zonas de envío
-# Generado por migrate_to_doorstop.py
 rf_034:
   title: "CRUD de zonas de envío"
   rationale: "El admin define zonas geográficas y sus tarifas. Frontend: /admin/shipping/zones."
@@ -19,3 +18,4 @@ rf_034:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

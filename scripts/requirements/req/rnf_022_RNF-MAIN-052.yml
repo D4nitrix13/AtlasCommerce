@@ -1,5 +1,4 @@
 # RNF: RNF-MAIN-052 - Static analysis con phpstan nivel 5+
-# Generado por migrate_to_doorstop.py
 rnf_022:
   title: "Static analysis con phpstan nivel 5+"
   rationale: "phpstan corre en CI. Errores tipo undefined son detectados antes de llegar a prod."
@@ -15,3 +14,4 @@ rnf_022:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

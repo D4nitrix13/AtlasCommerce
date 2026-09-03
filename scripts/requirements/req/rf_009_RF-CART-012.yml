@@ -1,5 +1,4 @@
 # RF: RF-CART-012 - Visualizar contenido del carrito
-# Generado por migrate_to_doorstop.py
 rf_009:
   title: "Visualizar contenido del carrito"
   rationale: "El usuario puede ver el contenido del carrito con totales. Frontend: /cart.astro."
@@ -23,3 +22,4 @@ rf_009:
     - RNF-USA-042
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

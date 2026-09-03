@@ -1,5 +1,4 @@
 # RF: RF-TAX-110 - Configuración de impuestos
-# Generado por migrate_to_doorstop.py
 rf_041:
   title: "Configuración de impuestos"
   rationale: "El admin define reglas de impuestos por zona/país. Frontend: /admin/settings/taxes."
@@ -20,3 +19,4 @@ rf_041:
     - RNF-PERF-021
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

@@ -1,5 +1,4 @@
 # RNF: RNF-SCAL-032 - Imágenes Docker con versiones pineadas
-# Generado por migrate_to_doorstop.py
 rnf_016:
   title: "Imágenes Docker con versiones pineadas"
   rationale: "docker/versions.env centraliza las versiones de imágenes. Cambiar una versión es 1 línea, reproducible en todos los stages."
@@ -15,3 +14,4 @@ rnf_016:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

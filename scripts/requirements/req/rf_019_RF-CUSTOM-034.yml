@@ -1,5 +1,4 @@
 # RF: RF-CUSTOM-034 - Subida de assets por el usuario
-# Generado por migrate_to_doorstop.py
 rf_019:
   title: "Subida de assets por el usuario"
   rationale: "El usuario puede subir imágenes propias para usar en el diseño. Backend: DesignAssetController. Storage: FTP + filesystem."
@@ -23,3 +22,4 @@ rf_019:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

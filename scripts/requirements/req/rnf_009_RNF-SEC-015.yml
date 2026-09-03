@@ -1,5 +1,4 @@
 # RNF: RNF-SEC-015 - RBAC con scoping por tenant
-# Generado por migrate_to_doorstop.py
 rnf_009:
   title: "RBAC con scoping por tenant"
   rationale: "Los permisos y roles de usuarios están scoped al tenant donde fueron creados. No hay roles cross-tenant."
@@ -15,3 +14,4 @@ rnf_009:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

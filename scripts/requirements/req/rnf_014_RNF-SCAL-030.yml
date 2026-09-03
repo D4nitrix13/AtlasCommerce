@@ -1,5 +1,4 @@
 # RNF: RNF-SCAL-030 - Escalado independiente por tienda
-# Generado por migrate_to_doorstop.py
 rnf_014:
   title: "Escalado independiente por tienda"
   rationale: "Cada tienda corre como Docker stack separado. Se puede escalar 1 tienda sin tocar las otras."
@@ -15,3 +14,4 @@ rnf_014:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

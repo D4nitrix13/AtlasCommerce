@@ -1,5 +1,4 @@
 # RF: RF-AUTH-003 - Recuperación de password por email
-# Generado por migrate_to_doorstop.py
 rf_003:
   title: "Recuperación de password por email"
   rationale: "El usuario puede solicitar un email para resetear su contraseña. Backend: PasswordResetTokenController. Frontend: /[locale]/account/auth/forgot-password.astro"
@@ -21,3 +20,4 @@ rf_003:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

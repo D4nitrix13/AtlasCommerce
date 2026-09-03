@@ -1,5 +1,4 @@
 # RF: RF-STOR-130 - Multi-tienda con resolución por dominio
-# Generado por migrate_to_doorstop.py
 rf_043:
   title: "Multi-tienda con resolución por dominio"
   rationale: "El sistema corre múltiples tiendas independientes; cada request se rutea al tenant correcto según el Host header (Caddy + middleware Laravel)."
@@ -22,3 +21,4 @@ rf_043:
     - RNF-SEC-013
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

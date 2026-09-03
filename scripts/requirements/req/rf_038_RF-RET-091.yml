@@ -1,5 +1,4 @@
 # RF: RF-RET-091 - Admin gestiona return request
-# Generado por migrate_to_doorstop.py
 rf_038:
   title: "Admin gestiona return request"
   rationale: "El admin aprueba, rechaza o inspecciona devoluciones. Frontend: /admin/returns. Backend: ReturnRequestController, ReturnRequestItemController."
@@ -19,3 +18,4 @@ rf_038:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

@@ -1,5 +1,4 @@
 # RF: RF-SYS-150 - Notificaciones internas
-# Generado por migrate_to_doorstop.py
 rf_047:
   title: "Notificaciones internas"
   rationale: "Sistema de notificaciones in-app + email para admin (pedidos nuevos, stock bajo, etc.). Frontend: /admin/system/notifications."
@@ -20,3 +19,4 @@ rf_047:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

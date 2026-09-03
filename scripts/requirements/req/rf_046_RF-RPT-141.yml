@@ -1,5 +1,4 @@
 # RF: RF-RPT-141 - Reportes de inventario
-# Generado por migrate_to_doorstop.py
 rf_046:
   title: "Reportes de inventario"
   rationale: "Reporte de stock actual, valorización, productos sin stock. Frontend: /admin/inventory."
@@ -22,3 +21,4 @@ rf_046:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

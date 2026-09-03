@@ -1,5 +1,4 @@
 # RF: RF-AUTH-001 - Login con email y contraseña
-# Generado por migrate_to_doorstop.py
 rf_001:
   title: "Login con email y contraseña"
   rationale: "El usuario puede autenticarse en la tienda con email y contraseña. Backend: AuthController. Frontend: /[locale]/account/auth/login.astro"
@@ -21,3 +20,4 @@ rf_001:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

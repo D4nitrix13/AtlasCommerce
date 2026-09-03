@@ -1,5 +1,4 @@
 # RF: RF-AUTH-004 - Autenticación de dos factores TOTP
-# Generado por migrate_to_doorstop.py
 rf_004:
   title: "Autenticación de dos factores TOTP"
   rationale: "El usuario puede activar MFA basado en TOTP (RFC 6238). Backend: TotpController."
@@ -21,3 +20,4 @@ rf_004:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

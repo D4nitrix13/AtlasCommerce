@@ -1,5 +1,4 @@
 # RNF: RNF-SEC-014 - Sin credenciales hardcoded
-# Generado por migrate_to_doorstop.py
 rnf_008:
   title: "Sin credenciales hardcoded"
   rationale: "Passwords y secrets se leen de archivos .env (gitignored). Los .env.example solo tienen placeholders."
@@ -15,3 +14,4 @@ rnf_008:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

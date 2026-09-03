@@ -1,5 +1,4 @@
 # RF: RF-RPT-140 - Reportes de ventas
-# Generado por migrate_to_doorstop.py
 rf_045:
   title: "Reportes de ventas"
   rationale: "Dashboard y reportes exportables (CSV/PDF) de ventas por período. Frontend: /admin/reports."
@@ -22,3 +21,4 @@ rf_045:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

@@ -1,5 +1,4 @@
 # RF: RF-SALES-050 - Crear orden desde checkout
-# Generado por migrate_to_doorstop.py
 rf_023:
   title: "Crear orden desde checkout"
   rationale: "El cliente confirma el carrito, completa datos y crea la orden. Backend: OrderController. Frontend: /checkout.astro."
@@ -20,3 +19,4 @@ rf_023:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

@@ -1,5 +1,4 @@
 # RF: RF-CART-011 - Quitar items del carrito
-# Generado por migrate_to_doorstop.py
 rf_008:
   title: "Quitar items del carrito"
   rationale: "El usuario puede remover items del carrito. Backend: CartItemController."
@@ -23,3 +22,4 @@ rf_008:
     - RNF-USA-042
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

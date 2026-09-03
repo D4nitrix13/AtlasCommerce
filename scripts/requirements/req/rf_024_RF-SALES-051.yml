@@ -1,5 +1,4 @@
 # RF: RF-SALES-051 - Detalle de orden (cliente y admin)
-# Generado por migrate_to_doorstop.py
 rf_024:
   title: "Detalle de orden (cliente y admin)"
   rationale: "El cliente ve sus órdenes; el admin ve todas. Frontend: /admin/sales/orders/[id].astro."
@@ -20,3 +19,4 @@ rf_024:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"
