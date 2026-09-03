@@ -1,0 +1,19 @@
+# RF: RF-CAT-029 - Precios mayoristas (wholesale)
+rf_056:
+  title: "Precios mayoristas (wholesale)"
+  rationale: "El sistema soporta una lista de precios alternativa para clientes wholesale (Customer.customer_type='wholesale'). El WholesalePricingService resuelve el precio segun (product_id, customer_type, quantity, store_id); el PDP muestra el precio aplicable al tipo de cliente actual."
+  priority: "H"
+  status: "in-analysis"
+  module: "Catalogo"
+  category: "Catalogo y Compras"
+  code: "RF-CAT-029"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Servicio WholesalePricingService + modelo WholesalePrice implementados. Pendiente: endpoint para que admin configure tiers de precio + RF documentando el flujo B2B (Panda Estampados vende tanto retail como mayorista)."

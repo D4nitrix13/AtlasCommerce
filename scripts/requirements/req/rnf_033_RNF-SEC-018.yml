@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-018 - CSRF en rutas web stateful
+rnf_033:
+  title: "CSRF en rutas web stateful"
+  rationale: "Las rutas web (admin Astro + Laravel web) requieren token CSRF en formularios POST/PUT/DELETE via VerifyCsrfToken middleware. Las rutas /api/* usan Sanctum stateful auth o bearer tokens (excluidas de CSRF). El frontend Astro incluye <meta name='csrf-token'> y lo envia via header X-CSRF-TOKEN."
+  priority: "M"
+  status: "in-analysis"
+  category: "Seguridad"
+  code: "RNF-SEC-018"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Sanctum cubre API; el panel admin usa formularios web que requieren CSRF. Pendiente verificar el middleware VerifyCsrfToken y su correcta inclusion en formularios del frontend Astro."

@@ -1,0 +1,19 @@
+# RF: RF-CART-013 - Lista de deseos (wishlist)
+rf_057:
+  title: "Lista de deseos (wishlist)"
+  rationale: "El cliente guarda productos en una wishlist persistente por usuario. Items con precio-al-momento-de-agregar (snapshot) y disponibilidad actual; permite mover item a carrito en un click. Compartible via link publico (token UUID)."
+  priority: "M"
+  status: "in-analysis"
+  module: "Carrito"
+  category: "Catalogo y Compras"
+  code: "RF-CART-013"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Modelos Wishlist + WishlistItem + WishlistResource listos. Endpoints wishlists declarado en frontend. Tablas y DTOs existen; falta controller + rutas + RF. Feature estandar de e-commerce B2C."

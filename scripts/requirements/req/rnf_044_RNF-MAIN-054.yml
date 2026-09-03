@@ -1,0 +1,16 @@
+# RNF: RNF-MAIN-054 - Versionado de API explicito (URL prefix /v1/)
+rnf_044:
+  title: "Versionado de API explicito (URL prefix /v1/)"
+  rationale: "Todas las rutas API bajo /api/v1/ prefix; las breaking changes se sirven en /api/v2/ con periodo de deprecation de 6 meses (header Deprecation + Sunset). El versionado se valida en routes/api.php y se testea que ningun controller referencia paths sin version."
+  priority: "M"
+  status: "in-analysis"
+  category: "Mantenibilidad"
+  code: "RNF-MAIN-054"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Las rutas actuales son /api/... planas; imposible evolucionar API sin romper clientes mobile. Decision arquitectonica pendiente desde hace 2 sprints."

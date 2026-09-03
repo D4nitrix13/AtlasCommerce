@@ -1,0 +1,19 @@
+# RF: RF-AUTH-008 - Asignacion de roles y permisos (admin)
+rf_050:
+  title: "Asignacion de roles y permisos (admin)"
+  rationale: "El admin asigna roles (admin, manager, editor, viewer) a usuarios dentro de su tienda; cada rol declara un set de permisos sobre los modulos (products:read, products:write, orders:refund, etc.). Implementado via Role + Permission + PermissionRole. Verificado por middleware CheckPermission y tests/Feature/Auth/CheckPermissionMiddlewareTest.php."
+  priority: "H"
+  status: "in-analysis"
+  module: "Autenticacion"
+  category: "Identidad y Acceso"
+  code: "RF-AUTH-008"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/roles/index.astro ya esta declarado y los modelos estan listos. Pendiente gap: no existe RoleController ni rutas en routes/api.php para que el admin opere el RBAC desde el panel; sin esto el rol admin es hardcoded."

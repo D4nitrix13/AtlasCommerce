@@ -1,0 +1,19 @@
+# RF: RF-MKT-060 - Cupones de descuento
+rf_061:
+  title: "Cupones de descuento"
+  rationale: "El admin crea cupones (codigo alfanumerico, porcentaje o monto fijo, vigencia, usos maximos, restricciones por categoria/producto/cliente-tipo). El cliente aplica el cupon en checkout y el descuento se refleja en OrderItem. El modelo CouponUsage registra cada aplicacion para auditoria."
+  priority: "H"
+  status: "in-analysis"
+  module: "Marketing"
+  category: "Catalogo y Compras"
+  code: "RF-MKT-060"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/marketing/coupons/index.astro + modelos Coupon + CouponUsage + recursos listos. Pendiente: logica de aplicacion en CheckoutService + endpoint publico POST /coupons/validate; sin esto el feature es visible pero no usable."

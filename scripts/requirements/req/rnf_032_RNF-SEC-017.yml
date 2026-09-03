@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-017 - Cabeceras de seguridad HTTP (CSP, HSTS, X-Frame-Options)
+rnf_032:
+  title: "Cabeceras de seguridad HTTP (CSP, HSTS, X-Frame-Options)"
+  rationale: "Todas las respuestas HTTP del backend incluyen: Content-Security-Policy (default-src 'self'; img-src https: data:; script-src 'self' 'nonce-...'), X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy (geolocation=(), camera=()). Implementado via middleware SecurityHeaders aplicado globalmente."
+  priority: "H"
+  status: "in-analysis"
+  category: "Seguridad"
+  code: "RNF-SEC-017"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Cumple OWASP Secure Headers Project. Caddy ya aplica HSTS automatico pero CSP/XCTO/XFO/Referrer-Policy no estaban definidos a nivel app; gap visible en las respuestas de Laravel."

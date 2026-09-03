@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-020 - Rotacion programada de secrets (APP_KEY, pasarela pago)
+rnf_035:
+  title: "Rotacion programada de secrets (APP_KEY, pasarela pago)"
+  rationale: "Politica: APP_KEY rotada cada 180 dias, credenciales de pasarela de pago cada 90 dias, DB passwords anualmente. Procedimiento: (1) emitir nuevo secret, (2) deploy con ambos en paralelo, (3) migrar trafico, (4) retirar el viejo. Documentado en docs/runbooks/secret-rotation.md."
+  priority: "M"
+  status: "in-analysis"
+  category: "Seguridad"
+  code: "RNF-SEC-020"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "RNF-SEC-014 cubre 'no hardcoded' pero no la rotacion periodica. Sin runbook, la rotacion se posterga hasta incidente."

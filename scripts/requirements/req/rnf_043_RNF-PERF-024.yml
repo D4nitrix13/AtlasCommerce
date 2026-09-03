@@ -1,0 +1,16 @@
+# RNF: RNF-PERF-024 - Prevencion de N+1 en listados via eager loading obligatorio
+rnf_043:
+  title: "Prevencion de N+1 en listados via eager loading obligatorio"
+  rationale: "Todos los controllers de listado (ProductController::index, OrderController::index, etc.) usan with() explicito para relaciones mostradas. Test de arquitectura falla si una relacion usada en la vista no aparece en el with() del controller (detecta via inspeccion de la query log)."
+  priority: "M"
+  status: "in-analysis"
+  category: "Rendimiento"
+  code: "RNF-PERF-024"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "RNF-PERF-022 cubre paginacion pero no eager loading sistematico. Detectado riesgo: listados sin with() degradan a N+1 con volumen real (100 ordenes x 5 items = 501 queries); phpstan no detecta esto."

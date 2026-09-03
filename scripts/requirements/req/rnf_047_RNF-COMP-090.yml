@@ -1,0 +1,16 @@
+# RNF: RNF-COMP-090 - Browsers soportados (Baseline 2024)
+rnf_047:
+  title: "Browsers soportados (Baseline 2024)"
+  rationale: "Soporte oficial: Chrome/Edge >= 121, Firefox >= 122, Safari >= 17.4, Samsung Internet >= 24 (todos Baseline 2024). No se soporta IE11 ni Safari < 16. Los polyfills se limitan a los requeridos por Baseline. La build de Astro + esbuild declara target ES2022."
+  priority: "M"
+  status: "in-analysis"
+  category: "Compatibilidad"
+  code: "RNF-COMP-090"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "RNF-USA-040 cubre responsive; sin baseline explicito de browsers el equipo gasta esfuerzo en polyfills innecesarios (Ej: -ms-transform para IE11) y tooling asume targets antiguos."

@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-021 - Headers anti-clickjacking en admin
+rnf_036:
+  title: "Headers anti-clickjacking en admin"
+  rationale: "El subdominio /admin/* envia X-Frame-Options: DENY y CSP frame-ancestors 'none' para impedir que cualquier pagina externa embeba el panel admin en un iframe. Verificado por tests e2e + audit automatizado semanal con Mozilla Observatory."
+  priority: "M"
+  status: "in-analysis"
+  category: "Seguridad"
+  code: "RNF-SEC-021"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Cumplimiento OWASP. El admin maneja datos sensibles (precios, refunds); clickjacking permitira a un atacante inducir acciones del admin via UI redress."

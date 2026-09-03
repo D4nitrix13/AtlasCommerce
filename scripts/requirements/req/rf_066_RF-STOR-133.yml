@@ -1,0 +1,19 @@
+# RF: RF-STOR-133 - Redes sociales y canales de venta
+rf_066:
+  title: "Redes sociales y canales de venta"
+  rationale: "El admin configura las redes sociales de la tienda (Instagram, Facebook, TikTok, WhatsApp Business) que aparecen en footer y OpenGraph tags. Ademas declara canales de venta propios (Marketplace, Tienda fisica) con sus comisiones y reglas de stock."
+  priority: "L"
+  status: "in-analysis"
+  module: "Tiendas"
+  category: "Identidad y Acceso"
+  code: "RF-STOR-133"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Modelos StoreSocialLink + SalesChannel listos. Feature declarada en el dominio pero sin flujo documentado ni endpoints; las redes sociales son input clave de marketing."

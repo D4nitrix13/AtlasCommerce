@@ -1,0 +1,16 @@
+# RNF: RNF-USA-044 - Emails transaccionales internacionalizados
+rnf_042:
+  title: "Emails transaccionales internacionalizados"
+  rationale: "Las notificaciones (PasswordResetCodeNotification, OrderConfirmation, ShipmentDispatched, RefundProcessed) usan el locale del cliente (Customer.user.locale o Accept-Language del request). Implementado via Notifications::locale($userLocale) antes del send()."
+  priority: "M"
+  status: "in-analysis"
+  category: "Usabilidad"
+  code: "RNF-USA-044"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "RNF-USA-041 cubre UI pero los emails de Notifications/ siempre salian en espanol; gap visible para clientes EN que reciben el email en espanol."

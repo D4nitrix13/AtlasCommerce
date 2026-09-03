@@ -1,0 +1,19 @@
+# RF: RF-CAT-026 - CRUD admin de productos
+rf_053:
+  title: "CRUD admin de productos"
+  rationale: "El admin crea/edita productos con variantes, atributos, imagenes, tags, precios y configuracion de stock por warehouse. Soporta publicacion (draft/active/archived) y asociacion a multiples tiendas via ProductStore. Genera slug unico por tienda."
+  priority: "H"
+  status: "in-analysis"
+  module: "Catalogo"
+  category: "Catalogo y Compras"
+  code: "RF-CAT-026"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/catalog/products/ completo. Modelo Product + relaciones listos. Pendiente: ProductController con endpoints REST; sin esto no se puede operar el catalogo (gap critico porque bloquea la salida a produccion)."

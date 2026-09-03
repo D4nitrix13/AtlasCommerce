@@ -1,0 +1,16 @@
+# RNF: RNF-REL-064 - Healthcheck de Caddy y balanceo
+rnf_038:
+  title: "Healthcheck de Caddy y balanceo"
+  rationale: "Endpoint /health en Caddy devuelve 200 si: (1) Caddy responde, (2) al menos una instancia PHP-FPM upstream reachable, (3) PostgreSQL y Redis healthcheck pasan. Usado por load balancer externo para detectar instancias degradadas."
+  priority: "L"
+  status: "in-analysis"
+  category: "Fiabilidad"
+  code: "RNF-REL-064"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Solo PG/Redis/PHP-FPM tienen healthcheck propio; Caddy no exponia /health. Mejora observabilidad del edge y permite auto-removal de nodos degradados."

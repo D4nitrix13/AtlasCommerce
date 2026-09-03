@@ -1,0 +1,16 @@
+# RNF: RNF-OBS-071 - Tracing distribuido con OpenTelemetry
+rnf_039:
+  title: "Tracing distribuido con OpenTelemetry"
+  rationale: "Cada request lleva un trace_id (W3C tracecontext) propagado a: PHP (server), Redis (MULTI/EXEC), pasarela de pago (header), Mailpit/email service, jobs en cola. Spans se exportan a OTLP collector (Tempo/Jaeger). Sampling: 100% en errores, 10% en requests exitosos."
+  priority: "M"
+  status: "pending"
+  category: "Observabilidad"
+  code: "RNF-OBS-071"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Util para diagnosticar latencia cross-service (PHP -> Redis -> pasarela de pago). Sin tracing, una latencia de 3s es un misterio; con tracing se ve que 2.8s vienen del gateway de pago."

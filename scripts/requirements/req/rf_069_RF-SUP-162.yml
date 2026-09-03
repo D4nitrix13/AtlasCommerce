@@ -1,0 +1,19 @@
+# RF: RF-SUP-162 - Preguntas sobre producto (Q&A)
+rf_069:
+  title: "Preguntas sobre producto (Q&A)"
+  rationale: "El cliente autenticado pregunta publicamente sobre un producto; otros clientes o el staff responden. Las Q&A aprobadas son visibles en el PDP bajo 'Preguntas frecuentes'. El modelo ProductQuestion soporta threading (parent_id)."
+  priority: "L"
+  status: "in-analysis"
+  module: "Soporte"
+  category: "Plataforma"
+  code: "RF-SUP-162"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/support/questions/index.astro + modelo ProductQuestion listos. Similar a resenas; el flujo Q&A no esta ni documentado ni implementado."

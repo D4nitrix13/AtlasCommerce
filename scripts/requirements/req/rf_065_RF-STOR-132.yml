@@ -1,0 +1,19 @@
+# RF: RF-STOR-132 - Modo mantenimiento por tienda
+rf_065:
+  title: "Modo mantenimiento por tienda"
+  rationale: "El admin activa/desactiva maintenance_mode en su tienda. Cuando esta activo, el storefront publico muestra una pagina de 'volveremos pronto' y el admin sigue operando. El cron job limpia carts abandonados durante el down."
+  priority: "M"
+  status: "in-analysis"
+  module: "Tiendas"
+  category: "Identidad y Acceso"
+  code: "RF-STOR-132"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Campo maintenance_mode existe en el modelo Store; sin controller ni UI admin para toggle. Gap menor pero recurrente en produccion (deploys, stock take)."

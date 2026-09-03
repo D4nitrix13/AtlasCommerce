@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-019 - Escaneo de dependencias (composer audit + npm audit)
+rnf_034:
+  title: "Escaneo de dependencias (composer audit + npm audit)"
+  rationale: "CI ejecuta 'composer audit' (PHP) y 'npm audit --audit-level=high' (Node) en cada PR; falla el build si hay vulnerabilidades high/critical sin resolver. Renovate bot genera PRs automaticos para updates con labels 'security' que disparan re-run inmediato."
+  priority: "H"
+  status: "in-analysis"
+  category: "Seguridad"
+  code: "RNF-SEC-019"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Cumplimiento OWASP A06:2021 (Vulnerable and Outdated Components). RNF-MAIN-051 cubre lint pero no SCA; sin esto las CVEs en dependencias pasan desapercibidas hasta incidente."

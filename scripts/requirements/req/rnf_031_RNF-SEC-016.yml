@@ -1,0 +1,16 @@
+# RNF: RNF-SEC-016 - Rate limiting en endpoints sensibles
+rnf_031:
+  title: "Rate limiting en endpoints sensibles"
+  rationale: "Los endpoints /auth/login, /auth/totp/verify, /auth/recovery-codes regeneracion y /auth/login/email-otp tienen rate limiters definidos en AppServiceProvider::configureRateLimiting() con claves por (email+IP) o (user+IP). Limites tipicos: 5 intentos / 5 min / IP para login, 10/5min para TOTP verify, 5/h para recovery-codes."
+  priority: "H"
+  status: "implemented"
+  category: "Seguridad"
+  code: "RNF-SEC-016"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Cumplimiento OWASP A04:2021 (Insecure Design). Los limiters existen en codigo pero no estaban documentados como RNF; ahora formalizados para auditoria."
