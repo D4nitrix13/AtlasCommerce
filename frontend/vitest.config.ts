@@ -22,12 +22,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
-      // REM viewer (NFR-05) gates: `lib/rem/**` + `components/rem/**`
-      // must stay above 85% lines. We list the REM-specific paths
-      // alongside the broader `src/**/*.{ts,tsx}` so coverage
-      // measurement is exhaustive for the whole frontend while the
-      // thresholds stay tight.
-      include: ["src/**/*.{ts,tsx}", "src/lib/rem/**", "src/components/rem/**"],
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "src/**/*.d.ts",
         "src/types/**",
