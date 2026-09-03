@@ -6,6 +6,7 @@ rf_046:
   priority: "H"
   status: "implemented"
   module: "Reportes"
+  category: "Plataforma"
   code: "RF-RPT-141"
   verified-by:
     - stakeholder_001
@@ -20,3 +21,4 @@ rf_046:
     - RNF-PERF-022
     - RNF-USA-040
   estabilidad: "alta"
+  urgencia: "importante"

@@ -6,3 +6,4 @@ stakeholder_001:
   role: "developer"
   organization: "Panda Estampados + Kitsune"
   notes: "Lider del equipo y desarrollador full-stack de Panda Estampados + Kitsune. Gestiona todos los servicios del stack: backend Laravel, frontend Astro/React, infraestructura Docker multi-instancia, PostgreSQL, Redis, Caddy y pipeline CI/CD. Owner de los modulos Auth, Customers, Sales, Inventory, Payments, Shipping, Returns, Purchases, Multi-Store, System y de la arquitectura tecnica completa. Toda la programacion del proyecto pasa por el."
+  urgencia: "importante"

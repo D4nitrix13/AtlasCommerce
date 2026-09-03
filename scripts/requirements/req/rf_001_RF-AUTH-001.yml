@@ -6,6 +6,7 @@ rf_001:
   priority: "H"
   status: "implemented"
   module: "Autenticación"
+  category: "Identidad y Acceso"
   code: "RF-AUTH-001"
   verified-by:
     - stakeholder_001
@@ -19,3 +20,4 @@ rf_001:
     - RNF-SEC-012
     - RNF-SEC-014
   estabilidad: "alta"
+  urgencia: "importante"

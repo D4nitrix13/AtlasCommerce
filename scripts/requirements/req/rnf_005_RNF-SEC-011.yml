@@ -14,3 +14,4 @@ rnf_005:
   fuentes: []
   dependencias: []
   estabilidad: "PD"
+  urgencia: "importante"

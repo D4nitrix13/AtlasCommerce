@@ -6,6 +6,7 @@ rf_007:
   priority: "H"
   status: "implemented"
   module: "Carrito"
+  category: "Catálogo y Compras"
   code: "RF-CART-010"
   verified-by:
     - stakeholder_001
@@ -21,3 +22,4 @@ rf_007:
     - RNF-USA-040
     - RNF-USA-042
   estabilidad: "alta"
+  urgencia: "importante"

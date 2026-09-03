@@ -6,6 +6,7 @@ rf_027:
   priority: "H"
   status: "implemented"
   module: "Inventario"
+  category: "Logística y Post-venta"
   code: "RF-INV-060"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_027:
     - RNF-REL-061
     - RNF-REL-062
   estabilidad: "alta"
+  urgencia: "importante"

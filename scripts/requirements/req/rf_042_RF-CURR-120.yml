@@ -6,6 +6,7 @@ rf_042:
   priority: "H"
   status: "implemented"
   module: "Monedas"
+  category: "Transacciones"
   code: "RF-CURR-120"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_042:
   dependencias:
     - RNF-PERF-021
   estabilidad: "alta"
+  urgencia: "importante"

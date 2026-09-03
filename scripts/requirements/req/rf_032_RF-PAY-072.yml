@@ -6,6 +6,7 @@ rf_032:
   priority: "M"
   status: "implemented"
   module: "Pagos"
+  category: "Transacciones"
   code: "RF-PAY-072"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_032:
     - RNF-SEC-012
     - RNF-SEC-014
   estabilidad: "alta"
+  urgencia: "puede esperar"

@@ -6,6 +6,7 @@ rf_028:
   priority: "H"
   status: "implemented"
   module: "Inventario"
+  category: "Logística y Post-venta"
   code: "RF-INV-061"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_028:
     - RNF-REL-061
     - RNF-REL-062
   estabilidad: "alta"
+  urgencia: "importante"
