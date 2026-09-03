@@ -8,37 +8,37 @@ archivos `req/rf_*.yml` y `req/rnf_*.yml`.
 
 ## stakeholder_001 — Daniel Benjamin Perez Morales
 
-| Campo          | Valor |
-| -------------- | ----- |
-| **UID**        | `stakeholder_001` |
-| **NOMBRE**     | Daniel Benjamin Perez Morales |
-| **TÍTULO**     | Lider / Desarrollador Full-Stack |
-| **ROL**        | `developer` |
-| **ORGANIZACIÓN** | Panda Estampados + Kitsune |
-| **NOTAS**      | Lider del equipo y desarrollador full-stack de Panda Estampados + Kitsune. Gestiona todos los servicios del stack: backend Laravel, frontend Astro/React, infraestructura Docker multi-instancia, PostgreSQL, Redis, Caddy y pipeline CI/CD. Owner de los modulos Auth, Customers, Sales, Inventory, Payments, Shipping, Returns, Purchases, Multi-Store, System y de la arquitectura tecnica completa. Toda la programacion del proyecto pasa por el. |
+| Campo            | Valor                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **UID**          | `stakeholder_001`                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **NOMBRE**       | Daniel Benjamin Perez Morales                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **TÍTULO**       | Lider / Desarrollador Full-Stack                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **ROL**          | `developer`                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **ORGANIZACIÓN** | Panda Estampados + Kitsune                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **NOTAS**        | Lider del equipo y desarrollador full-stack de Panda Estampados + Kitsune. Gestiona todos los servicios del stack: backend Laravel, frontend Astro/React, infraestructura Docker multi-instancia, PostgreSQL, Redis, Caddy y pipeline CI/CD. Owner de los modulos Auth, Customers, Sales, Inventory, Payments, Shipping, Returns, Purchases, Multi-Store, System y de la arquitectura tecnica completa. Toda la programacion del proyecto pasa por el. |
 
 ---
 
 ## stakeholder_002 — Andy Joe Sanchez Calero
 
-| Campo          | Valor |
-| -------------- | ----- |
-| **UID**        | `stakeholder_002` |
-| **NOMBRE**     | Andy Joe Sanchez Calero |
-| **TÍTULO**     | Diseno UX/UI + Catalog Manager |
-| **ROL**        | `developer` |
-| **ORGANIZACIÓN** | Panda Estampados + Kitsune |
-| **NOTAS**      | Disenador UX/UI y Catalog Manager para Panda Estampados + Kitsune. Prototipos y wireframes de los flujos (checkout, custom design editor, admin). Alta y mantenimiento del catalogo (productos, categorias, descripciones, fotos, SEO). Coherencia visual entre Panda Estampados y Kitsune (paleta, layout). Validacion de responsive y accesibilidad en flujos clave. |
+| Campo            | Valor                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UID**          | `stakeholder_002`                                                                                                                                                                                                                                                                                                                                                      |
+| **NOMBRE**       | Andy Joe Sanchez Calero                                                                                                                                                                                                                                                                                                                                                |
+| **TÍTULO**       | Diseno UX/UI + Catalog Manager                                                                                                                                                                                                                                                                                                                                         |
+| **ROL**          | `developer`                                                                                                                                                                                                                                                                                                                                                            |
+| **ORGANIZACIÓN** | Panda Estampados + Kitsune                                                                                                                                                                                                                                                                                                                                             |
+| **NOTAS**        | Disenador UX/UI y Catalog Manager para Panda Estampados + Kitsune. Prototipos y wireframes de los flujos (checkout, custom design editor, admin). Alta y mantenimiento del catalogo (productos, categorias, descripciones, fotos, SEO). Coherencia visual entre Panda Estampados y Kitsune (paleta, layout). Validacion de responsive y accesibilidad en flujos clave. |
 
 ---
 
 ## stakeholder_003 — Jeremy Joshua Perez Gonzales
 
-| Campo          | Valor |
-| -------------- | ----- |
-| **UID**        | `stakeholder_003` |
-| **NOMBRE**     | Jeremy Joshua Perez Gonzales |
-| **TÍTULO**     | QA Tester + Documentation |
-| **ROL**        | `developer` |
-| **ORGANIZACIÓN** | Panda Estampados + Kitsune |
-| **NOTAS**      | QA Tester y Documentation para Panda Estampados + Kitsune. Ejecucion de tests manuales contra los RF (functional + edge cases). Mantenimiento de tests E2E (Playwright) y unitarios (Vitest). Auditoria de WCAG, performance, accesibilidad. Documentacion: manuales de usuario, help center, onboarding admin. |
+| Campo            | Valor                                                                                                                                                                                                                                                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UID**          | `stakeholder_003`                                                                                                                                                                                                                                                                                               |
+| **NOMBRE**       | Jeremy Joshua Perez Gonzales                                                                                                                                                                                                                                                                                    |
+| **TÍTULO**       | QA Tester + Documentation                                                                                                                                                                                                                                                                                       |
+| **ROL**          | `developer`                                                                                                                                                                                                                                                                                                     |
+| **ORGANIZACIÓN** | Panda Estampados + Kitsune                                                                                                                                                                                                                                                                                      |
+| **NOTAS**        | QA Tester y Documentation para Panda Estampados + Kitsune. Ejecucion de tests manuales contra los RF (functional + edge cases). Mantenimiento de tests E2E (Playwright) y unitarios (Vitest). Auditoria de WCAG, performance, accesibilidad. Documentacion: manuales de usuario, help center, onboarding admin. |
