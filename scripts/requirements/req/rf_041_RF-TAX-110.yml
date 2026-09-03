@@ -6,6 +6,7 @@ rf_041:
   priority: "H"
   status: "implemented"
   module: "Impuestos"
+  category: "Transacciones"
   code: "RF-TAX-110"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_041:
   dependencias:
     - RNF-PERF-021
   estabilidad: "alta"
+  urgencia: "importante"

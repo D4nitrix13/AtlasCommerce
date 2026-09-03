@@ -14,3 +14,4 @@ rnf_020:
   fuentes: []
   dependencias: []
   estabilidad: "PD"
+  urgencia: "crítica"

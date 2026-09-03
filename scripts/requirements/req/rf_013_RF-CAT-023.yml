@@ -6,6 +6,7 @@ rf_013:
   priority: "H"
   status: "implemented"
   module: "Catálogo"
+  category: "Catálogo y Compras"
   code: "RF-CAT-023"
   verified-by:
     - stakeholder_001
@@ -20,3 +21,4 @@ rf_013:
     - RNF-PERF-023
     - RNF-USA-040
   estabilidad: "alta"
+  urgencia: "importante"

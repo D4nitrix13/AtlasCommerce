@@ -6,3 +6,4 @@ stakeholder_003:
   role: "developer"
   organization: "Panda Estampados + Kitsune"
   notes: "QA Tester y Documentation para Panda Estampados + Kitsune. Ejecucion de tests manuales contra los RF (functional + edge cases). Mantenimiento de tests E2E (Playwright) y unitarios (Vitest). Auditoria de WCAG, performance, accesibilidad. Documentacion: manuales de usuario, help center, onboarding admin."
+  urgencia: "importante"

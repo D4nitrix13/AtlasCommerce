@@ -6,6 +6,7 @@ rf_047:
   priority: "M"
   status: "implemented"
   module: "Sistema"
+  category: "Plataforma"
   code: "RF-SYS-150"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_047:
     - RNF-SEC-014
     - RNF-REL-062
   estabilidad: "alta"
+  urgencia: "puede esperar"

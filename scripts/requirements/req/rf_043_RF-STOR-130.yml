@@ -6,6 +6,7 @@ rf_043:
   priority: "H"
   status: "implemented"
   module: "Multi-Store"
+  category: "Identidad y Acceso"
   code: "RF-STOR-130"
   verified-by:
     - stakeholder_001
@@ -20,3 +21,4 @@ rf_043:
     - RNF-SCAL-030
     - RNF-SEC-013
   estabilidad: "alta"
+  urgencia: "importante"

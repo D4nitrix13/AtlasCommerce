@@ -6,6 +6,7 @@ rf_030:
   priority: "H"
   status: "implemented"
   module: "Pagos"
+  category: "Transacciones"
   code: "RF-PAY-070"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_030:
     - RNF-SEC-012
     - RNF-SEC-014
   estabilidad: "alta"
+  urgencia: "importante"

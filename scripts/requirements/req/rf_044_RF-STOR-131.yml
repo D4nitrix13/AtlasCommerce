@@ -6,6 +6,7 @@ rf_044:
   priority: "M"
   status: "implemented"
   module: "Multi-Store"
+  category: "Identidad y Acceso"
   code: "RF-STOR-131"
   verified-by:
     - stakeholder_001
@@ -22,3 +23,4 @@ rf_044:
     - RNF-SCAL-030
     - RNF-SEC-013
   estabilidad: "alta"
+  urgencia: "puede esperar"

@@ -6,6 +6,7 @@ rf_035:
   priority: "H"
   status: "implemented"
   module: "Envíos"
+  category: "Logística y Post-venta"
   code: "RF-SHIP-081"
   verified-by:
     - stakeholder_001
@@ -17,3 +18,4 @@ rf_035:
     - RNF-PERF-021
     - RNF-REL-061
   estabilidad: "alta"
+  urgencia: "importante"

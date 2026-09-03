@@ -6,6 +6,7 @@ rf_037:
   priority: "M"
   status: "implemented"
   module: "Devoluciones"
+  category: "Logística y Post-venta"
   code: "RF-RET-090"
   verified-by:
     - stakeholder_001
@@ -17,3 +18,4 @@ rf_037:
     - RNF-OBS-070
     - RNF-SEC-014
   estabilidad: "alta"
+  urgencia: "puede esperar"

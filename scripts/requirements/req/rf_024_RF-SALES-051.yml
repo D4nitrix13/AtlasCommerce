@@ -6,6 +6,7 @@ rf_024:
   priority: "H"
   status: "implemented"
   module: "Ventas"
+  category: "Catálogo y Compras"
   code: "RF-SALES-051"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_024:
     - RNF-USA-040
     - RNF-REL-062
   estabilidad: "alta"
+  urgencia: "importante"

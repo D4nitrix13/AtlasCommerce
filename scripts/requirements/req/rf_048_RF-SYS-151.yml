@@ -6,6 +6,7 @@ rf_048:
   priority: "H"
   status: "implemented"
   module: "Sistema"
+  category: "Plataforma"
   code: "RF-SYS-151"
   verified-by:
     - stakeholder_001
@@ -18,3 +19,4 @@ rf_048:
     - RNF-SEC-014
     - RNF-REL-062
   estabilidad: "alta"
+  urgencia: "importante"

@@ -6,6 +6,7 @@ rf_021:
   priority: "H"
   status: "implemented"
   module: "Personalización"
+  category: "Gestión de Usuarios"
   code: "RF-CUSTOM-036"
   verified-by:
     - stakeholder_001
@@ -21,3 +22,4 @@ rf_021:
     - RNF-USA-040
     - RNF-USA-041
   estabilidad: "alta"
+  urgencia: "importante"
