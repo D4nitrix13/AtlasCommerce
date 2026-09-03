@@ -1,5 +1,4 @@
 # RF: RF-CAT-023 - Variantes de producto (color, talla, etc.)
-# Generado por migrate_to_doorstop.py
 rf_013:
   title: "Variantes de producto (color, talla, etc.)"
   rationale: "Cada producto puede tener múltiples variantes con su propio SKU, precio y stock. Backend: ProductController + admin/catalog/variants."
@@ -22,3 +21,4 @@ rf_013:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

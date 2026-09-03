@@ -1,5 +1,4 @@
 # RF: RF-PURCH-100 - CRUD de proveedores
-# Generado por migrate_to_doorstop.py
 rf_039:
   title: "CRUD de proveedores"
   rationale: "El admin registra proveedores con sus datos fiscales. Frontend: /admin/purchases/suppliers."
@@ -19,3 +18,4 @@ rf_039:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

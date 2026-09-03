@@ -1,5 +1,4 @@
 # RF: RF-INV-061 - Stock por producto y almacén
-# Generado por migrate_to_doorstop.py
 rf_028:
   title: "Stock por producto y almacén"
   rationale: "El sistema lleva el stock por variante de producto en cada almacén. Frontend: /admin/inventory/stock."
@@ -20,3 +19,4 @@ rf_028:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

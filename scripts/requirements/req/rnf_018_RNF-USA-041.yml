@@ -1,5 +1,4 @@
 # RNF: RNF-USA-041 - Multi-locale por tienda
-# Generado por migrate_to_doorstop.py
 rnf_018:
   title: "Multi-locale por tienda"
   rationale: "Cada tienda soporta múltiples locales (frontend/src/i18n/). Routing por /[locale]/."
@@ -16,3 +15,4 @@ rnf_018:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

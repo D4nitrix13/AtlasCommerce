@@ -1,5 +1,4 @@
 # RNF: RNF-MAIN-051 - Linting y formato automatizado
-# Generado por migrate_to_doorstop.py
 rnf_021:
   title: "Linting y formato automatizado"
   rationale: "Backend: pint (PSR-12). Frontend: eslint + prettier. CI bloquea PRs con errores."
@@ -15,3 +14,4 @@ rnf_021:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

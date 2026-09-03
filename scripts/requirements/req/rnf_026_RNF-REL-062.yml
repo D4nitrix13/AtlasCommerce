@@ -1,5 +1,4 @@
 # RNF: RNF-REL-062 - Logs estructurados a stderr
-# Generado por migrate_to_doorstop.py
 rnf_026:
   title: "Logs estructurados a stderr"
   rationale: "Backend emite logs a stderr (LOG_CHANNEL=stderr) capturados por docker compose logs. Parseables por cualquier aggregator."
@@ -15,3 +14,4 @@ rnf_026:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

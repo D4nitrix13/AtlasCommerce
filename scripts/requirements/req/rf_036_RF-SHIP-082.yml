@@ -1,5 +1,4 @@
 # RF: RF-SHIP-082 - Crear shipment para una orden
-# Generado por migrate_to_doorstop.py
 rf_036:
   title: "Crear shipment para una orden"
   rationale: "Genera un envío contra el courier configurado con número de tracking. Backend: ShipmentController."
@@ -19,3 +18,4 @@ rf_036:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

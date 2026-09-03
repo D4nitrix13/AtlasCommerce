@@ -1,5 +1,4 @@
 # RF: RF-SALES-052 - Generación de facturas
-# Generado por migrate_to_doorstop.py
 rf_025:
   title: "Generación de facturas"
   rationale: "El sistema genera facturas en PDF para cada orden. Frontend: /admin/sales/invoices."
@@ -20,3 +19,4 @@ rf_025:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

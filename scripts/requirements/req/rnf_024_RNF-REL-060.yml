@@ -1,5 +1,4 @@
 # RNF: RNF-REL-060 - Backups de BD por instancia
-# Generado por migrate_to_doorstop.py
 rnf_024:
   title: "Backups de BD por instancia"
   rationale: "Cada instancia tiene su volumen db-data. Backup script: scripts/docker-stack.sh db-backup. Restaurable con db-restore."
@@ -15,3 +14,4 @@ rnf_024:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

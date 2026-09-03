@@ -1,5 +1,4 @@
 # RF: RF-RET-090 - Cliente solicita devolución
-# Generado por migrate_to_doorstop.py
 rf_037:
   title: "Cliente solicita devolución"
   rationale: "El cliente puede abrir una solicitud de devolución sobre una orden entregada. Frontend: /account."
@@ -19,3 +18,4 @@ rf_037:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

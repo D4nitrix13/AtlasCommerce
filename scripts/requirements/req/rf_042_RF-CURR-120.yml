@@ -1,5 +1,4 @@
 # RF: RF-CURR-120 - Multi-moneda por tienda
-# Generado por migrate_to_doorstop.py
 rf_042:
   title: "Multi-moneda por tienda"
   rationale: "Cada tienda puede operar en múltiples monedas con tasas de cambio configurables. Frontend: /admin/settings/currencies."
@@ -20,3 +19,4 @@ rf_042:
     - RNF-PERF-021
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

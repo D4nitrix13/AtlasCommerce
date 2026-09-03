@@ -1,5 +1,4 @@
 # RF: RF-AUTH-006 - Login con redes sociales (OAuth)
-# Generado por migrate_to_doorstop.py
 rf_006:
   title: "Login con redes sociales (OAuth)"
   rationale: "El usuario puede autenticarse usando proveedores OAuth (Google, Facebook, etc.). Backend: SocialAuthController."
@@ -21,3 +20,4 @@ rf_006:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

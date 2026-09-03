@@ -1,5 +1,4 @@
 # RF: RF-SHIP-081 - CRUD de empresas de envío
-# Generado por migrate_to_doorstop.py
 rf_035:
   title: "CRUD de empresas de envío"
   rationale: "El admin configura couriers (local, nacional, internacional). Frontend: /admin/shipping/companies."
@@ -19,3 +18,4 @@ rf_035:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

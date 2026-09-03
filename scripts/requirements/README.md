@@ -1,111 +1,89 @@
 # scripts/requirements/
 
-Datos de gestion de requisitos del proyecto Panda Estampados + Kitsune
-migrados a [Doorstop](https://doorstop.readthedocs.io/) (100% scriptable,
-versionado en git, genera reportes HTML/PDF de traceability).
+Fuente de verdad de los requisitos del proyecto Panda Estampados + Kitsune.
+Versionada en git como archivos YAML individuales, sin tooling intermedio.
 
 ## Estructura
 
 ```
 scripts/requirements/
-├── README.md                    este archivo
-├── .doorstop.yml                config de Doorstop
-├── migrate_to_doorstop.py       genera req/ desde los seeds JSON
-├── seed_stakeholders.json       3 integrantes del equipo Panda+Kitsune
-├── seed_rf.json                 48 requisitos funcionales
-├── seed_rnf.json                30 requisitos no funcionales
-├── req/                         requirements en formato Doorstop (.yml)
-│   ├── stakeholder_001_daniel.yml
-│   ├── stakeholder_002_andy.yml
-│   ├── stakeholder_003_jeremy.yml
-│   ├── rf_001_RF-AUTH-001.yml
-│   ├── ... (48 RF)
-│   └── rnf_001_... (30 RNF)
-├── docs/requirements/            reporte HTML generado por Doorstop
-│   ├── index.html
-│   ├── traceability.html
-│   └── traceability.csv
-└── .venv/                        venv con doorstop instalado
+├── README.md            este archivo
+├── STAKEHOLDERS.md      tabla de los 3 integrantes del equipo
+└── req/                 requirements funcionales y no funcionales (.yml)
+    ├── rf_001_RF-AUTH-001.yml    (48 requisitos funcionales)
+    ├── ...
+    └── rnf_030_RNF-PORT-082.yml  (30 requisitos no funcionales)
 ```
 
-## Uso
+Total: **48 RF + 30 RNF = 78 requirements**. Los 3 stakeholders del
+equipo se documentan en `STAKEHOLDERS.md` y se referencian desde los
+campos `autores` / `verified-by` / `fuentes` de los YAML.
 
-### Generar los requirements
+## Formato de cada .yml
 
-```bash
-cd scripts/requirements
-source .venv/bin/activate
-python migrate_to_doorstop.py
-```
-
-### Validar la base
-
-```bash
-doorstop
-```
-
-### Generar reporte HTML de traceability
-
-```bash
-doorstop publish all docs/requirements
-```
-
-Esto regenera `docs/requirements/` con:
-- `index.html` — vista por item
-- `traceability.html` — matriz de traceability entre todos los items
-- `traceability.csv` — misma matriz en CSV
-
-## Estructura de cada .yml
-
-Doorstop usa el prefijo `REQ` configurado en `.doorstop.yml`. Cada
-archivo .yml tiene un UID unico (`stakeholder_001`, `rf_001`, `rnf_001`).
-Los links entre items se hacen con campos especiales como `verified-by`,
-`satisfies`, `links`.
+Los YAMLs siguen la tabla del reporte de avance (REM 1.2.2): cada
+requisito tiene un UID, módulo, categoría, versión, autores, fuentes,
+dependencias, descripción (rationale), importancia (priority), urgencia,
+estado (status), estabilidad y comentarios.
 
 Ejemplo `req/rf_001_RF-AUTH-001.yml`:
 
 ```yaml
+# RF: RF-AUTH-001 - Login con email y contrasena
 rf_001:
-  title: "Login con email y contraseña"
+  title: "Login con email y contrasena"
   rationale: "El usuario puede autenticarse en la tienda..."
   priority: "H"
   status: "implemented"
   module: "Autenticacion"
+  category: "Identidad y Acceso"
   code: "RF-AUTH-001"
-  links: []
   verified-by:
     - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RF-AUTH-002
+  estabilidad: "alta"
+  urgencia: "importante"
+  comentarios: "Ninguno"
 ```
 
-## Regenerar todo desde cero
+## Categorias
 
-```bash
-python migrate_to_doorstop.py   # borra req/ y regenera los .yml
-doorstop                        # valida
-doorstop publish all docs/requirements  # regenera docs/
-```
+Los **48 RF** se agrupan en 6 categorias funcionales:
 
-Los `seed_*.json` son la fuente de verdad y no se tocan.
+| Categoria | Modulos |
+| --- | --- |
+| Identidad y Acceso | Autenticacion, Multi-Store |
+| Gestion de Usuarios | Personalizacion |
+| Catalogo y Compras | Catalogo, Carrito, Ventas, Compras |
+| Logistica y Post-venta | Envios, Devoluciones, Inventario |
+| Transacciones | Pagos, Impuestos, Monedas |
+| Plataforma | Sistema, Reportes |
 
-## Por que Doorstop (no REM / Tuleap)
+Los **30 RNF** usan categorias ISO 25010 (Seguridad, Mantenibilidad,
+Usabilidad, Fiabilidad, Rendimiento, Portabilidad, Observabilidad,
+Escalabilidad).
 
-- **100% scriptable**: todo son archivos .yml en git
-- **Sin UI**: cero clicks, todo desde CLI
-- **Versionado**: cada change de un requirement es un commit
-- **Reportes automaticos**: traceability HTML/CSV
-- **Cero infra**: no requiere DB ni servidor
+## Campos
 
-REM era de 2004, requeria Wine/OTVDM, tenia UI fragil y no permitia
-scripting. Tuleap era mas moderno pero su REST API no soportaba
-crear trackers programaticamente. Doorstop evita ambos problemas.
-
-## Para visualizar el reporte
-
-Una vez generados los HTML en `docs/requirements/`:
-
-```bash
-xdg-open docs/requirements/index.html
-# o servir con python:
-cd docs/requirements && python3 -m http.server 8000
-# luego abrir http://localhost:8000/
-```
+| Campo | Descripcion |
+| --- | --- |
+| `title` | Titulo corto del requisito |
+| `rationale` | Descripcion / proposito del requisito |
+| `priority` | Importancia: `H` (alta), `M` (media), `L` (baja) |
+| `status` | Estado: `pending`, `in-analysis`, `approved`, `implemented`, `verified` |
+| `module` | Modulo funcional del RF (no aplica a RNF) |
+| `category` | Categoria funcional (RF) o ISO 25010 (RNF) |
+| `code` | Codigo legible: `RF-AUTH-001`, `RNF-SEC-010` |
+| `verified-by` | Stakeholders UID que verifican (RF) |
+| `version` | Version del requisito (`1.0`) |
+| `autores` | Stakeholders UID que escribieron |
+| `fuentes` | Codigos de historias de usuario fuente (`HU-NN`) |
+| `dependencias` | Codigos de otros requisitos prerequisito |
+| `estabilidad` | `alta` o `PD` (Por Definir) |
+| `urgencia` | `critica`, `importante`, `puede esperar` |
+| `comentarios` | Notas libres (default `Ninguno`) |

@@ -1,5 +1,4 @@
 # RF: RF-AUTH-002 - Registro de nuevos usuarios (signup)
-# Generado por migrate_to_doorstop.py
 rf_002:
   title: "Registro de nuevos usuarios (signup)"
   rationale: "Un visitante puede crear una cuenta nueva en la tienda. Frontend: /[locale]/account/auth/signup.astro"
@@ -21,3 +20,4 @@ rf_002:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

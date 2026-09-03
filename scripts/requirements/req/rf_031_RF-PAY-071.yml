@@ -1,5 +1,4 @@
 # RF: RF-PAY-071 - Procesar pago en checkout
-# Generado por migrate_to_doorstop.py
 rf_031:
   title: "Procesar pago en checkout"
   rationale: "Procesa el pago con el proveedor configurado durante el checkout. Backend: PaymentController."
@@ -20,3 +19,4 @@ rf_031:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

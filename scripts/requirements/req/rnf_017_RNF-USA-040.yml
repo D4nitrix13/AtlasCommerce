@@ -1,5 +1,4 @@
 # RNF: RNF-USA-040 - UI responsive (mobile + desktop)
-# Generado por migrate_to_doorstop.py
 rnf_017:
   title: "UI responsive (mobile + desktop)"
   rationale: "Tailwind CSS 4 con breakpoints mobile-first. La tienda y el admin funcionan desde 360px hasta 4K."
@@ -16,3 +15,4 @@ rnf_017:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
+  comentarios: "Ninguno"

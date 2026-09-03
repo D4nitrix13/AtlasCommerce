@@ -1,5 +1,4 @@
 # RF: RF-CUSTOM-035 - Render de mockup del diseño
-# Generado por migrate_to_doorstop.py
 rf_020:
   title: "Render de mockup del diseño"
   rationale: "El sistema genera un mockup visual del diseño aplicado al área de impresión. Backend: DesignMockupRenderController."
@@ -23,3 +22,4 @@ rf_020:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

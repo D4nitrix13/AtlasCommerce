@@ -1,5 +1,4 @@
 # RF: RF-CART-010 - Agregar items al carrito
-# Generado por migrate_to_doorstop.py
 rf_007:
   title: "Agregar items al carrito"
   rationale: "El usuario puede agregar productos al carrito con su variante. Backend: CartItemController."
@@ -23,3 +22,4 @@ rf_007:
     - RNF-USA-042
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

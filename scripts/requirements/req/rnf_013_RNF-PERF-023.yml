@@ -1,5 +1,4 @@
 # RNF: RNF-PERF-023 - Optimización de imágenes en frontend
-# Generado por migrate_to_doorstop.py
 rnf_013:
   title: "Optimización de imágenes en frontend"
   rationale: "Astro image optimization para assets críticos. WebP/AVIF automático. Documentado en docs/IMAGE_OPTIMIZATION.md."
@@ -16,3 +15,4 @@ rnf_013:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"

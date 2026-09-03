@@ -1,5 +1,4 @@
 # RNF: RNF-PERF-022 - Paginación obligatoria en listados
-# Generado por migrate_to_doorstop.py
 rnf_012:
   title: "Paginación obligatoria en listados"
   rationale: "Ninguna respuesta admin retorna >100 items sin paginar (convención enforced por code review)."
@@ -15,3 +14,4 @@ rnf_012:
   dependencias: []
   estabilidad: "PD"
   urgencia: "crítica"
+  comentarios: "Ninguno"

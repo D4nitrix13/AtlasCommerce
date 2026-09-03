@@ -1,5 +1,4 @@
 # RF: RF-CAT-022 - Listado y navegación por categorías
-# Generado por migrate_to_doorstop.py
 rf_012:
   title: "Listado y navegación por categorías"
   rationale: "El visitante puede filtrar productos por categoría. Frontend: /categories/[slug].astro."
@@ -22,3 +21,4 @@ rf_012:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
+  comentarios: "Ninguno"

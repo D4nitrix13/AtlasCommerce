@@ -1,5 +1,4 @@
 # RF: RF-PAY-072 - Gestión de cuotas / installments
-# Generado por migrate_to_doorstop.py
 rf_032:
   title: "Gestión de cuotas / installments"
   rationale: "El admin configura planes de cuotas. Frontend: /admin/payments/installments."
@@ -20,3 +19,4 @@ rf_032:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
+  comentarios: "Ninguno"
