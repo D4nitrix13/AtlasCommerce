@@ -18,4 +18,4 @@ rf_037:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Returns/ReturnRequestController.php::store`. El cliente solo puede solicitar return sobre órdenes entregadas y dentro de la ventana configurada por tienda; cada item genera `ReturnRequestItem` con motivo y evidencia adjunta."

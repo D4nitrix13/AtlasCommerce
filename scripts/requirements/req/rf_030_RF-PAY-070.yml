@@ -19,4 +19,4 @@ rf_030:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelo `PaymentMethod` por tienda (RNF-MT-001). Soporta múltiples proveedores con credenciales encriptadas en reposo (RNF-SEC-014); cada método declara capacidades (capture, refund, installments) consumidas por RF-PAY-071/072/073."

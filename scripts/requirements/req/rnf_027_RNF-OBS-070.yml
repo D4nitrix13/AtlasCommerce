@@ -14,4 +14,4 @@ rnf_027:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Audit log verificado vía modelo `Audit` + trait `LogsActivity`; captura actor, action, before/after diff. Visible en `frontend/src/pages/[locale]/admin/system/audits/`. Pendiente: definir política de retención (ej. 2 años) y exportar a storage inmutable."

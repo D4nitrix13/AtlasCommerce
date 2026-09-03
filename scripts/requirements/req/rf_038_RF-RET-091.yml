@@ -18,4 +18,4 @@ rf_038:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Returns/ReturnRequestController.php` + `ReturnRequestItemController.php`. Vista admin cubre approve/reject/inspect; al aprobar se enlaza con Refund (RF-PAY-073)."

@@ -14,4 +14,4 @@ rnf_009:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "RBAC verificado vía modelos `Role`, `Permission`, `PermissionRole` y middleware `CheckPermission`. Los permisos se asignan al rol, no al usuario directo, y están scoped por tenant (`store_id`); no existe un rol global cross-tenant."

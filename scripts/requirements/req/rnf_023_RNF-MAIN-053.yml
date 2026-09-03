@@ -14,4 +14,4 @@ rnf_023:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Verificado por `conventional-commits-and-prs` skill; el husky/commitlint falla commits sin tipo(scope) válido. Scopes permitidos: `backend`, `frontend`, `docs`, `infra`, `ci`. Cuerpo en español sin romper tooling porque el header sigue siendo parseable."

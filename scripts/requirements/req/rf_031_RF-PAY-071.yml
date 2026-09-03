@@ -19,4 +19,4 @@ rf_031:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Payments/PaymentController.php` orquestado por `PaymentService`. Usa el gateway configurado en RF-PAY-070; registra `PaymentTransaction` por cada intento y reconcilia vía `InvoicePayment`. Cumplimiento PCI-DSS: el PAN nunca toca el backend."

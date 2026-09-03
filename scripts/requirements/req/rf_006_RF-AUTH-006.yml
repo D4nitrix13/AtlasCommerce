@@ -20,4 +20,4 @@ rf_006:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Auth/SocialAuthController.php` + `app/Services/Auth/SocialAccountService.php`. Sigue el patrón estándar OAuth2 redirect/callback y vincula cuentas vía `SocialAccount` por (provider, provider_user_id). El logout invalida solo la sesión Sanctum local, no la del IdP."

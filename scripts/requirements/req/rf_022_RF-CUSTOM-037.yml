@@ -22,4 +22,4 @@ rf_022:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Customization/ProductCustomizationController.php`. Cada producto puede declarar opciones (color base, material) que el cliente elige antes de entrar al editor. Las opciones determinan qué print areas y paletas están disponibles."

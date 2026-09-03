@@ -20,4 +20,4 @@ rf_002:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Auth/AuthController.php::register`. Crea usuario + Customer + UserStore atómicamente dentro de transacción y emite token Sanctum scoped al tenant. La validación con FormRequest rechaza emails duplicados y aplica el RNF-SEC-012 antes de persistir."

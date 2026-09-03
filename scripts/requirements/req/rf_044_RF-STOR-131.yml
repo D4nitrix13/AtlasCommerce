@@ -23,4 +23,4 @@ rf_044:
     - RNF-SEC-013
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía `backend/app/Http/Controllers/Api/Storefront/ThemeController.php::show`. Modelo `StoreTheme` con tokens (color primario, logo, layout) consumidos por el theme adapter (`src/lib/theme.ts`); cada tenant override los defaults del workspace package."

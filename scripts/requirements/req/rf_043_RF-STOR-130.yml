@@ -21,4 +21,4 @@ rf_043:
     - RNF-SEC-013
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Middleware/ResolveStoreFromDomain.php` + Caddy reverse proxy por dominio. El middleware consulta `StoreDomain` por Host, setea el store context y activa RLS (RNF-MT-002); aislamiento físico de BD por tienda (RNF-MT-001) blinda data leak cross-tenant."

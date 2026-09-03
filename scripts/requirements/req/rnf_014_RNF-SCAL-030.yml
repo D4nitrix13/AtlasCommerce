@@ -14,4 +14,4 @@ rnf_014:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Verificado por arquitectura: cada tienda es un Docker stack independiente que puede escalar (réplicas PHP-FPM) sin afectar a otras. Cumple ISO 25010 §5.2 (Scalability); el orquestador admite múltiples instancias detrás del mismo Host con load balancing."

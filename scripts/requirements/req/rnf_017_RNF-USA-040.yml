@@ -15,4 +15,4 @@ rnf_017:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Tailwind CSS 4 con breakpoints mobile-first; probados 360px (móvil chico) hasta 4K. Cumplimiento WCAG 2.2 §2.5.5 (target size) en botones admin; pendiente gap documentar formalmente el nivel de conformidad WCAG objetivo (¿AA?)."

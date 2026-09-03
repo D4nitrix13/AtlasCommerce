@@ -21,4 +21,4 @@ rf_046:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía `frontend/src/pages/[locale]/admin/inventory/index.astro` con snapshot materializado de `inventory` para valorización FIFO. Detecta productos sin stock y bajo stock mínimo (umbral configurable por tienda); alimenta decisiones de compra (RF-PURCH-101)."

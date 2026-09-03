@@ -14,4 +14,4 @@ rnf_004:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Cumplimiento OWASP A07:2021. Sanctum emite tokens `plainTextToken` una sola vez; en `personal_access_tokens` se persiste solo el hash SHA-256. Los tokens están scoped por tenant vía `tokenable` + `BelongsToStore`. Verificado por `tests/Feature/Auth/SecurityBoundariesTest.php`."

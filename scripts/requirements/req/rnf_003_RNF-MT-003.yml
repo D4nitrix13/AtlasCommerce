@@ -14,4 +14,4 @@ rnf_003:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Verificado por configuración: cada instancia declara sus propias networks (`internal`, `external`) y volúmenes en `docker/instances/<store>/docker-compose.yml`. No hay `volumes_from` ni `network_mode: service:*` cross-tenant; cumple principio de menor privilegio (NIST SP 800-53 AC-4)."

@@ -14,4 +14,4 @@ rnf_015:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Bind mounts configurados en `docker/instances/*/docker-compose.yml` para `backend/`, `frontend/`, `storage/`. Editar en host → reflejado en contenedor sin rebuild. Solo dev: en prod se copia el código a la imagen (inmutable) para reproducibilidad."

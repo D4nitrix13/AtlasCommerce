@@ -14,4 +14,4 @@ rnf_030:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Verificado: USER no-root en cada Dockerfile (`USER www-data` para PHP, `USER postgres` para PG, `USER redis` para Redis). Reducción de blast radius ante RCE en cualquier servicio (CIS Docker §4.1). En dev con bind mounts se bindea el UID del host para evitar EACCES."

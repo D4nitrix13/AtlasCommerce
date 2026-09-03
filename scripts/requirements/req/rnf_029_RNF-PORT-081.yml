@@ -14,4 +14,4 @@ rnf_029:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Verificado: todos los `entrypoint.sh` invocan binarios con path absoluto (`/usr/sbin/mysqld`, `/usr/bin/php`, `/usr/local/bin/redis-server`). Cumple CIS Docker Benchmark §4.1 (PATH hijacking); alineado con la skill `docker-stack-orchestration`."

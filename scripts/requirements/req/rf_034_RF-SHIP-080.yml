@@ -18,4 +18,4 @@ rf_034:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelo `ShippingZone` con rangos de CP/país. Las zonas se evalúan server-side durante el checkout para calcular tarifas; conviven con métodos por zona (RF-SHIP-081) para resolver la matriz zone × company × method."

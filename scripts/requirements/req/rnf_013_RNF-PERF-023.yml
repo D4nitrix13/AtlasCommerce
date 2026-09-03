@@ -15,4 +15,4 @@ rnf_013:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado con `<Image />` de Astro para assets críticos; WebP/AVIF automático. Documentado en `docs/IMAGE_OPTIMIZATION.md`. Pendiente gap: auditar que TODAS las imágenes de producto pasen por este pipeline; las servidas vía `AssetController` no están optimizadas."

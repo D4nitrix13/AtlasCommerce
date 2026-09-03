@@ -18,4 +18,4 @@ rf_036:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Shipping/ShipmentController.php` orquestado por `ShipmentService`. Genera shipment contra el courier configurado (RF-SHIP-081), persiste número de tracking y expone transiciones `ship`/`deliver`/`cancel` con máquina de estados."

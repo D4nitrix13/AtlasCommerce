@@ -14,4 +14,4 @@ rnf_026:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "`LOG_CHANNEL=stderr` con formatter JSON estructurado; cada request lleva `request_id` (UUID v4) propagado a todos los logs. Cumple 12-factor app §11 (Logs como event stream); parseable por cualquier aggregator (Loki, ELK)."

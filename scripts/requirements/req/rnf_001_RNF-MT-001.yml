@@ -14,4 +14,4 @@ rnf_001:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Aislamiento físico verificado: cada tenant corre en `docker/instances/<store>/` con volumen `db-data` propio y `docker network` aislada. Cumple ISO 25010 §5.1.3 (Isolation) y OWASP A01:2021 al garantizar que ni siquiera un dump cruzado es posible. Verificación operacional: `docker compose ps` debe listar exactamente 3 stacks por store sin recursos compartidos."

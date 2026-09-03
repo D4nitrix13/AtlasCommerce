@@ -22,4 +22,4 @@ rf_021:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Customization/PrintAreaController.php`. Modelo `PrintArea` con coordenadas normalizadas [0..1] para soportar variantes de tamaño; las áreas restringen qué assets puede contener el cliente."

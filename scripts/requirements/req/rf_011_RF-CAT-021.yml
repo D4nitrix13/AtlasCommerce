@@ -21,4 +21,4 @@ rf_011:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Storefront/ProductController.php::show`. Resuelve por slug con fallback 404, devuelve producto + variantes + imágenes + customización habilitada. La respuesta se sirve con cache Redis por slug y se invalida al actualizar stock o precio (RNF-REL-061)."

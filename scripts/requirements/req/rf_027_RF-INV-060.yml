@@ -19,4 +19,4 @@ rf_027:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía `frontend/src/pages/[locale]/admin/inventory/warehouses/index.astro` y modelo `Warehouse`. Cada warehouse pertenece a un store (RNF-MT-001) y admite soft delete. Pendiente: el CRUD backend del warehouse no figura en `routes/api.php` actual."

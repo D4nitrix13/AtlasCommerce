@@ -19,4 +19,4 @@ rf_023:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Sales/OrderController.php::store` orquestado por `CheckoutService`. Transacción atómica: valida stock (RF-INV-061), crea Order + Items, descuenta inventario y registra OrderStatusHistory. Consumido por `frontend/src/pages/checkout.astro`."

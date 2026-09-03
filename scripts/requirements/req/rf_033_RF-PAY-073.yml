@@ -19,4 +19,4 @@ rf_033:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Payments/RefundController.php` orquestado por `RefundService`. Refund total o parcial vinculado al Payment original; actualiza `InvoicePayment.balance` y queda bloqueado por la consistencia del ledger (RNF-REL-062)."

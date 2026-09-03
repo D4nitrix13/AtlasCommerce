@@ -19,4 +19,4 @@ rf_028:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelo `Inventory` (warehouse_id + product_variant_id + quantity). Las lecturas de stock son server-authoritative: checkout (RF-SALES-050) y add-to-cart (RF-CART-010) consultan esta tabla antes de confirmar; concurrencia via row-level lock para evitar oversell."

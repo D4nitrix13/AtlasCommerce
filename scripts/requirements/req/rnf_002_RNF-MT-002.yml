@@ -14,4 +14,4 @@ rnf_002:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Middleware/ResolveStoreFromDomain.php` con cache de resolución en Redis (RNF-PERF-021). Caddy hace la primera capa (routing por Host) y el middleware valida `StoreDomain.active=true` antes de setear el context."
