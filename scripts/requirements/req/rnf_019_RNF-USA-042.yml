@@ -15,4 +15,4 @@ rnf_019:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía `app/Exceptions/Handler.php` con map de excepciones → mensajes user-friendly; nunca se filtra stack trace al cliente en `APP_ENV=production`. Respuestas JSON estructuradas `{ message, errors? }` para consumo del frontend."

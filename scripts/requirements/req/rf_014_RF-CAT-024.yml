@@ -21,4 +21,4 @@ rf_014:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `frontend/src/pages/[locale]/admin/catalog/brands/index.astro`. Modelo `Brand` con slug automático (`HasSlug` concern) y soft delete; la marca filtra productos vía `Product.brand_id`. Pendiente documentar formalmente el endpoint backend (no incluido en `routes/api.php` actual)."

@@ -19,4 +19,4 @@ rf_029:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelo `InventoryMovement` (tipo: in/out/transfer/adjustment). Cada movimiento referencia el `reason` y opcional `purchase_order_id` o `return_request_id` para trazabilidad; reversibilidad vía movimiento compensatorio (no edición)."

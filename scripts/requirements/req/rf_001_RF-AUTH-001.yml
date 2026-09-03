@@ -20,4 +20,4 @@ rf_001:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Auth/AuthController.php::login`. Cubre OWASP A07:2021. Las credenciales se validan con bcrypt cost 12 y el rate limiter `login` (5/5min/IP+email) blinda contra brute force. Verificado por `backend/tests/Feature/AuthApiTest.php`."

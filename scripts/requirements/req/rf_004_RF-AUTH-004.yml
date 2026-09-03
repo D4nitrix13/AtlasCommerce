@@ -20,4 +20,4 @@ rf_004:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Auth/TotpController.php` + `app/Services/Auth/TotpService.php`. Genera secret base32, valida códigos según RFC 6238 con ventana de ±1 step y persiste setup en `two_factor_settings`. El rate limiter `totp-verify` (10/5min/IP) blinda contra fuerza bruta."

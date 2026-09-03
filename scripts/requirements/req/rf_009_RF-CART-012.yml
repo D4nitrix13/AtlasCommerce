@@ -22,4 +22,4 @@ rf_009:
     - RNF-USA-042
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Carts/CartController.php::show`. Devuelve items con subtotales, impuestos por zona (RF-TAX-110) y costo de envío estimado. La respuesta está cacheada en Redis bajo la key del cart_id (RNF-PERF-021) para evitar recálculos en cada navegación."

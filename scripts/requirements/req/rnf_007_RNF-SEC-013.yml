@@ -14,4 +14,4 @@ rnf_007:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Cumplimiento RFC 6797 (HSTS) + Let's Encrypt automático vía Caddy `auto_https=on`. Redirección HTTP→HTTPS configurada en `Caddyfile`; HSTS header aplicado por default. En dev se acepta HTTP para evitar fricción con certs self-signed."

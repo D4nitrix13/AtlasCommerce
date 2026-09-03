@@ -14,4 +14,4 @@ rnf_012:
   dependencias: []
   estabilidad: "PD"
   urgencia: "crítica"
-  comentarios: "Ninguno"
+  comentarios: "Bloqueado por convención no formalizada: la regla \"≤100 items por respuesta\" existe en code review pero no hay enforcement automático. Pendiente gap: crear un middleware/policy `MaxResultCount` que falle tests si una respuesta excede el límite."

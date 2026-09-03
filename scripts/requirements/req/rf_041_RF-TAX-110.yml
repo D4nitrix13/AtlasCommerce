@@ -19,4 +19,4 @@ rf_041:
     - RNF-PERF-021
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelos `Tax` + `ProductTax`. Las reglas (por país/zona/producto) se evalúan server-side en checkout y se reflejan en la factura (RF-SALES-052); cumplimiento de cálculo fiscal server-authoritative."

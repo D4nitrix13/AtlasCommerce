@@ -18,4 +18,4 @@ rf_035:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelo `ShippingCompany`. Cada empresa declara API key del courier (encriptada, RNF-SEC-014) y métodos disponibles; la generación del shipment (RF-SHIP-082) consume estos endpoints. Pendiente documentar formalmente la integración con tracking webhooks."

@@ -20,4 +20,4 @@ rf_005:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Auth/RecoveryCodeController.php` + `app/Services/Auth/RecoveryCodeService.php`. Cada código se hashea con bcrypt antes de persistir (modelo `RecoveryCode`) y se marcan `consumed_at` al usarlos, evitando replay. Cubre la contingencia de pérdida del dispositivo TOTP según OWASP A02."

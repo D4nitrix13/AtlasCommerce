@@ -22,4 +22,4 @@ rf_007:
     - RNF-USA-042
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Carts/CartItemController.php::store`. Usa `CartLineKeyService` para identificadores estables de línea (variante + custom design) y devuelve el carrito recalculado con totales server-side. Alínea con la regla \"el cálculo confiable siempre viene del backend\" del frontend AGENTS."

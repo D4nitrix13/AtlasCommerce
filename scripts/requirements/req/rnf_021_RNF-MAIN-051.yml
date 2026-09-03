@@ -14,4 +14,4 @@ rnf_021:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Verificado: pint (PSR-12) en backend vía `composer lint`; ESLint + Prettier en frontend. CI ejecuta ambos y falla si hay diff; pre-commit hook configurable acelera el feedback local. Estándar de estilo enforced como guard rail."

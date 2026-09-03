@@ -19,4 +19,4 @@ rf_047:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía `frontend/src/pages/[locale]/admin/system/notifications/index.astro` + modelo `Notification`. Disparadores: nueva orden (RF-SALES-050), stock bajo (RF-INV-061), refund (RF-PAY-073); canal in-app + email (queue en Redis). Los logs a stderr (RNF-REL-062) registran cada disparo para auditoría."

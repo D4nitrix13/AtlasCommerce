@@ -14,4 +14,4 @@ rnf_010:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Verificado: `SESSION_DRIVER=redis` en `.env` y `config/session.php`; conexión dedicada vía `REDIS_SESSION_CONNECTION`. Resuelve el problema EACCES con bind mounts UID-mismatch. Sesiones sobreviven reinicios del contenedor PHP."

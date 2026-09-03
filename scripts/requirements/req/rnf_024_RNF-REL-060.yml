@@ -14,4 +14,4 @@ rnf_024:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Backups vía `scripts/docker-stack.sh db-backup` con `pg_dump` por instancia; volumen `db-data` copiado off-site. Pendiente gap: documentar RPO (ej. diario) y RTO objetivo (ej. <1h) como SLA contractual."

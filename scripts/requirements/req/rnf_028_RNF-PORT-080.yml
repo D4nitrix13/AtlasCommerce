@@ -14,4 +14,4 @@ rnf_028:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Stack validado en Ubuntu 22.04 LTS y Debian 12; depende solo de kernel features estándar (cgroups v2, namespaces, overlayfs). El skill `docker-stack-orchestration` documenta las versiones exactas en `docker/versions.env`. Cumple ISO 25010 §5.1.6."

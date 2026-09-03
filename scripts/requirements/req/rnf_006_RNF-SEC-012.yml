@@ -14,4 +14,4 @@ rnf_006:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Cumplimiento OWASP A02:2021 (cryptographic failures). Hashing vía `Hash::make()` con bcrypt cost 12 (configurable vía `BCRYPT_ROUNDS`); Sanctum persiste tokens hasheados. Tests de seguridad validan que ningún endpoint devuelve el hash ni acepta plaintext en updates."

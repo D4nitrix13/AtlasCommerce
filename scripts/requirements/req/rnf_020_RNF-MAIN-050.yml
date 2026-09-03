@@ -14,4 +14,4 @@ rnf_020:
   dependencias: []
   estabilidad: "PD"
   urgencia: "crítica"
-  comentarios: "Ninguno"
+  comentarios: "Bloqueado: el umbral del 70% no está enforced en CI. PHPUnit + Vitest + Playwright existen pero `composer test` no falla si coverage < 70%. Pendiente gap: añadir `pcov` + check en pre-commit para bloquear PRs que bajen coverage."

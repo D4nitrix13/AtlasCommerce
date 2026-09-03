@@ -21,4 +21,4 @@ rf_013:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Storefront/ProductController.php`. Modelo `ProductVariant` con SKU, precio y stock propios, atributos por `VariantAttributeValue`. La selección de variante en PDP dispara una llamada a `/products/{slug}/price` para refrescar sin recargar la página."

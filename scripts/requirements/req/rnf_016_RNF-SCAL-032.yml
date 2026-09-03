@@ -14,4 +14,4 @@ rnf_016:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Centralizado en `docker/versions.env` consumido por todos los `docker-compose.yml`. Cambiar una versión es 1 línea; previene drift entre dev/prod. Pendiente gap: integrar Renovate o Dependabot para PRs automáticos con gates de CI."

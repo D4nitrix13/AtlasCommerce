@@ -14,4 +14,4 @@ rnf_022:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado con phpstan nivel 5 en `composer.json`; detecta undefined methods, wrong types y dead code antes de runtime. Pendiente gap: subir a nivel 8 gradualmente; añadir baseline para ignorar errores legacy. Cumple ISO 25010 §5.1.4."

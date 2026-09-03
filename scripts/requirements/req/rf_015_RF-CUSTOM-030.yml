@@ -22,4 +22,4 @@ rf_015:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Customization/CustomDesignController.php`. Canvas persistido como JSON estructurado (no imagen) con `DesignSnapshotService`, habilitando re-render determinístico. El snapshot queda vinculado al OrderCustomDesign (RF-SALES-053) para reproducibilidad post-compra."

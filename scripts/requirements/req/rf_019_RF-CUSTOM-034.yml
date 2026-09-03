@@ -22,4 +22,4 @@ rf_019:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Customization/DesignAssetController.php` con almacenamiento en filesystem del tenant (RNF-MT-001). Validación MIME estricta (png/jpg/svg) y tamaño máximo; el path se sanitiza para evitar directory traversal (OWASP A03:2021)."

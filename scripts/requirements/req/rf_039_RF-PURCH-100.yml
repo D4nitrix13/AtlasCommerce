@@ -18,4 +18,4 @@ rf_039:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelo `Supplier` con datos fiscales y condiciones de pago. Los proveedores se referencian desde `PurchaseOrder` para trazabilidad de reposición; soft delete preserva histórico. Pendiente: el CRUD backend de suppliers no figura en `routes/api.php`."

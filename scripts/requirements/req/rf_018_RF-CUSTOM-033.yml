@@ -22,4 +22,4 @@ rf_018:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Customization/DesignGraphicController.php`. Los cliparts son assets binarios catalogados con tags para búsqueda. Pendiente: actualmente sin endpoint público de búsqueda/filtrado por categoría para el editor."

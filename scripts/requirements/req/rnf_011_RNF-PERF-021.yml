@@ -14,4 +14,4 @@ rnf_011:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "`CACHE_STORE=redis` + `php artisan config:cache` en producción. Cache de queries, config y vistas reduce latencia del primer hit; las claves usan prefijo del tenant para evitar colisiones cross-store. TTL explícito en cada llamada `Cache::remember()`."

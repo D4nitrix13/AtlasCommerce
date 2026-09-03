@@ -19,4 +19,4 @@ rf_048:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía `frontend/src/pages/[locale]/admin/system/audits/index.astro` + modelo `Audit` con trait `LogsActivity`. Captura diff antes/después en operaciones CRUD admin; inmutable (no UPDATE/DELETE permitidos a nivel policy). Cumplimiento ISO 25010 (Observabilidad) + respaldo para RNF-OBS-070."

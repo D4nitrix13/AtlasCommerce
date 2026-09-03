@@ -18,4 +18,4 @@ rf_040:
     - RNF-REL-061
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelo `Purchase` + `PurchaseItem`. Al recibir la orden se genera `InventoryMovement` (RF-INV-062) que actualiza el stock; el flujo cierra el ciclo reposición → venta. Alineado con el dominio B2B de Panda Estampados."

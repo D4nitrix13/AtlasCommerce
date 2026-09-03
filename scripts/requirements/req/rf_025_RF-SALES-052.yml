@@ -19,4 +19,4 @@ rf_025:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Sales/OrderController.php` con generación de PDF server-side. Numeración correlativa por tenant con reset anual según normativa fiscal local; el PDF se almacena en el volumen del tenant (RNF-MT-001) y se sirve firmado."

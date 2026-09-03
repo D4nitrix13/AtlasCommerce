@@ -14,4 +14,4 @@ rnf_005:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Soporte de MFA (TOTP + recovery codes) verificado vía RF-AUTH-004/005. Pendiente gap: la obligatoriedad para el rol admin no está forzada a nivel policy (un admin puede operar sin 2FA activado). RFC 6238 como referencia técnica para el algoritmo."

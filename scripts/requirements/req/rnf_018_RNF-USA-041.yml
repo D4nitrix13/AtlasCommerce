@@ -15,4 +15,4 @@ rnf_018:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Routing `/[locale]/` con catálogos de strings en `src/i18n/`; cada tienda declara locales soportados en `Store.setting`. Pendiente gap: emails transaccionales no están internacionalizados aún (siempre español)."

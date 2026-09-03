@@ -21,4 +21,4 @@ rf_012:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Storefront/ProductController.php` con query param `category`. La navegación jerárquica usa la closure table del modelo `Category` para resolver subárboles en una sola query; paginación idéntica a RF-CAT-020 (RNF-PERF-022)."

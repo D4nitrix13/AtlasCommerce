@@ -20,4 +20,4 @@ rf_003:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Auth/PasswordResetTokenController.php`. Los tokens se almacenan hasheados (modelo `OtpChallenge`) y expiran por TTL. Alineado con NIST SP 800-63B (no leakage del email en respuestas) y validado por `AuthApiTest::test_forgot_password_flow`."

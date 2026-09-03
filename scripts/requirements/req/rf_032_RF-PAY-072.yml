@@ -19,4 +19,4 @@ rf_032:
     - RNF-SEC-014
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía planes configurables (cuotas, interés, sin interés). Aplica solo a métodos que lo soportan (RF-PAY-070 capabilities); el cálculo de cuotas e interés lo realiza el gateway, el backend solo registra el plan aceptado para trazabilidad fiscal."

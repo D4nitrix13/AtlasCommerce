@@ -14,4 +14,4 @@ rnf_008:
   dependencias: []
   estabilidad: "PD"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Verificado por `.gitignore` en raíz + `.env.example` solo con placeholders. GitHub secret scanning habilitado en el repo; el `.dockerignore` excluye `.env*` del contexto. Pendiente gap: no hay rotación programada de secrets documentada (recomendable cada 90 días para `APP_KEY` y credenciales de pasarela de pago)."

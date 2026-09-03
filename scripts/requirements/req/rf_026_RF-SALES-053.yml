@@ -19,4 +19,4 @@ rf_026:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Sales/OrderCustomDesignController.php`. Vincula el `CustomDesign` final aprobado al OrderItem, preservando el snapshot (no la imagen) para permitir reproducibilidad. Garantiza que producción ve lo que aprobó el cliente."

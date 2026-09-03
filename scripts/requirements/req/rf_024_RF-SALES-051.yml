@@ -19,4 +19,4 @@ rf_024:
     - RNF-REL-062
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Sales/OrderController.php::show`. Carga order + items + status history + shipment + payments con eager loading para evitar N+1. Las transiciones pasan por máquina de estados documentada en `OrderStatusHistory` (RNF-OBS-070)."

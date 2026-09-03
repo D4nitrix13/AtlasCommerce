@@ -19,4 +19,4 @@ rf_042:
     - RNF-PERF-021
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía modelos `Currency` + `ExchangeRate`. Conversión server-side con snapshot de tasa al momento de la orden (no al pago) para evitar disputas por fluctuación; cada tienda declara su moneda base y aceptadas. Pendiente: documentar formalmente el redondeo bancario aplicado."

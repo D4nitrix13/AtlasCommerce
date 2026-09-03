@@ -21,4 +21,4 @@ rf_045:
     - RNF-USA-040
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado vía `frontend/src/pages/[locale]/admin/reports/index.astro` con agregaciones server-side sobre `orders` + `payments`. Exportación CSV/PDF streaming para no saturar memoria en reportes anuales; ventana temporal parametrizable con caché corta en Redis (RNF-PERF-021)."

@@ -22,4 +22,4 @@ rf_008:
     - RNF-USA-042
   estabilidad: "alta"
   urgencia: "importante"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Carts/CartItemController.php::destroy`. Elimina la línea y devuelve el carrito actualizado; el frontend solo refleja el estado recalculado. Idempotente: una segunda llamada al mismo item retorna 404 sin corromper el carrito."

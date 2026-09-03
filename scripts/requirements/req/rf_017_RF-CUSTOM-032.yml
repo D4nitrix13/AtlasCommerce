@@ -22,4 +22,4 @@ rf_017:
     - RNF-USA-041
   estabilidad: "alta"
   urgencia: "puede esperar"
-  comentarios: "Ninguno"
+  comentarios: "Implementado en `backend/app/Http/Controllers/Api/Customization/DesignFontController.php`. Las fuentes se almacenan como assets estáticos y se sirven vía `AssetController` con cache largo (inmutable). Validación en upload: solo extensiones de fuente permitidas (woff2/ttf) y tamaño máximo."
