@@ -1,0 +1,17 @@
+# RNF: RNF-MT-003 - Aislamiento total entre instancias Docker
+# Generado por migrate_to_doorstop.py
+rnf_003:
+  title: "Aislamiento total entre instancias Docker"
+  rationale: "Cada tienda corre como Docker stack independiente (red + volúmenes propios). No hay shared state entre tenants."
+  priority: "H"
+  status: "verified"
+  category: "Seguridad / Portabilidad"
+  code: "RNF-MT-003"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"

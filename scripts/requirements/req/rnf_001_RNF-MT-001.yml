@@ -1,0 +1,17 @@
+# RNF: RNF-MT-001 - Aislamiento de BD por tenant
+# Generado por migrate_to_doorstop.py
+rnf_001:
+  title: "Aislamiento de BD por tenant"
+  rationale: "Cada instancia de tienda (tenant) tiene su propia base de datos PostgreSQL dedicada, sin compartir conexiones ni esquemas. Implementado via docker/instances/<store>/ con volúmenes aislados."
+  priority: "H"
+  status: "verified"
+  category: "Mantenibilidad / Portabilidad"
+  code: "RNF-MT-001"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"

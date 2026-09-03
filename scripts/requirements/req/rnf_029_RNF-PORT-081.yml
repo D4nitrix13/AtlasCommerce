@@ -1,0 +1,17 @@
+# RNF: RNF-PORT-081 - Binarios con rutas absolutas en entrypoints
+# Generado por migrate_to_doorstop.py
+rnf_029:
+  title: "Binarios con rutas absolutas en entrypoints"
+  rationale: "Todos los entrypoint.sh invocan binarios con path absoluto (/usr/sbin/mysqld, /usr/bin/php). Evita PATH hijacking."
+  priority: "H"
+  status: "verified"
+  category: "Seguridad / Portabilidad"
+  code: "RNF-PORT-081"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"

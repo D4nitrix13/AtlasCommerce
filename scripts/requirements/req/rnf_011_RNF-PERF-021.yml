@@ -1,0 +1,17 @@
+# RNF: RNF-PERF-021 - Cache de aplicación en Redis
+# Generado por migrate_to_doorstop.py
+rnf_011:
+  title: "Cache de aplicación en Redis"
+  rationale: "El cache store por defecto es Redis (CACHE_STORE=redis). Reduce carga en PostgreSQL para consultas repetidas."
+  priority: "H"
+  status: "verified"
+  category: "Rendimiento"
+  code: "RNF-PERF-021"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"

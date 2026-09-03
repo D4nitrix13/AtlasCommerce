@@ -1,0 +1,9 @@
+# Stakeholder: Andy Joe Sanchez Calero
+# Generado por migrate_to_doorstop.py
+stakeholder_002:
+  name: "Andy Joe Sanchez Calero"
+  title: "Diseno UX/UI + Catalog Manager"
+  role: "developer"
+  organization: "Panda Estampados + Kitsune"
+  notes: "Disenador UX/UI y Catalog Manager para Panda Estampados + Kitsune. Prototipos y wireframes de los flujos (checkout, custom design editor, admin). Alta y mantenimiento del catalogo (productos, categorias, descripciones, fotos, SEO). Coherencia visual entre Panda Estampados y Kitsune (paleta, layout). Validacion de responsive y accesibilidad en flujos clave."
+  urgencia: "importante"

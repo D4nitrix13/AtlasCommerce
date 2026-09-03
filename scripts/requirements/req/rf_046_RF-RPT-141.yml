@@ -1,0 +1,24 @@
+# RF: RF-RPT-141 - Reportes de inventario
+# Generado por migrate_to_doorstop.py
+rf_046:
+  title: "Reportes de inventario"
+  rationale: "Reporte de stock actual, valorización, productos sin stock. Frontend: /admin/inventory."
+  priority: "H"
+  status: "implemented"
+  module: "Reportes"
+  category: "Plataforma"
+  code: "RF-RPT-141"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-OBS-070
+    - RNF-PERF-022
+    - RNF-USA-040
+  estabilidad: "alta"
+  urgencia: "importante"

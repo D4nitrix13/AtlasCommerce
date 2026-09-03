@@ -1,0 +1,22 @@
+# RF: RF-INV-060 - CRUD de almacenes
+# Generado por migrate_to_doorstop.py
+rf_027:
+  title: "CRUD de almacenes"
+  rationale: "El admin crea y administra almacenes físicos. Frontend: /admin/inventory/warehouses."
+  priority: "H"
+  status: "implemented"
+  module: "Inventario"
+  category: "Logística y Post-venta"
+  code: "RF-INV-060"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-PERF-021
+    - RNF-REL-061
+    - RNF-REL-062
+  estabilidad: "alta"
+  urgencia: "importante"
