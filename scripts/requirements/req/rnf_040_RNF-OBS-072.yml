@@ -1,0 +1,16 @@
+# RNF: RNF-OBS-072 - Metricas de negocio en tiempo real
+rnf_040:
+  title: "Metricas de negocio en tiempo real"
+  rationale: "Metricas expuestas via /metrics (Prometheus format): orders_per_minute, conversion_rate (sessions/orders), cart_abandonment_rate, average_order_value, payment_failure_rate, refund_rate. Alertas: orders_per_minute < 1 por 5min (posible caida), refund_rate > 5% (fraude o bug)."
+  priority: "M"
+  status: "pending"
+  category: "Observabilidad"
+  code: "RNF-OBS-072"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "RF-RPT-140/141 cubre reporting batch; no hay metricas en tiempo real para alertas. Gap entre reportes batch y telemetria operativa; Prometheus/Grafana no desplegados."

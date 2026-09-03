@@ -1,0 +1,19 @@
+# RF: RF-AUTH-007 - Login passwordless con OTP por email
+rf_049:
+  title: "Login passwordless con OTP por email"
+  rationale: "El usuario inicia sesion ingresando su email; el sistema envia un codigo de 6 digitos al correo (TTL 10 min) que el cliente intercambia por un token Sanctum. Cubre el caso 'no recuerdo mi contrasena' sin pasar por el wizard de recovery."
+  priority: "M"
+  status: "in-analysis"
+  module: "Autenticacion"
+  category: "Identidad y Acceso"
+  code: "RF-AUTH-007"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "El modelo OtpChallenge ya contempla el caso 'email_otp' y los rate limiters relacionados (totp-verify, login) existen en AppServiceProvider. Pendiente: exponer POST /auth/login/email-otp con el endpoint que consume el codigo y emite Sanctum token. Cubre FIDO2 passwordless start (sin terminar FIDO2 real)."

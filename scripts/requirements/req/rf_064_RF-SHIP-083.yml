@@ -1,0 +1,19 @@
+# RF: RF-SHIP-083 - Tracking publico por numero de guia
+rf_064:
+  title: "Tracking publico por numero de guia"
+  rationale: "El cliente consulta el estado de su envio en una pagina publica (sin login) ingresando el numero de tracking + email de la orden (doble factor de validacion). Devuelve historial de transitos del courier (poll API cada 30 min cacheado)."
+  priority: "M"
+  status: "in-analysis"
+  module: "Envios"
+  category: "Logistica y Post-venta"
+  code: "RF-SHIP-083"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Modelo Shipment ya tiene tracking_number y status; falta endpoint publico GET /tracking/{number} + UI. Reduce tickets de soporte 'donde esta mi pedido'."

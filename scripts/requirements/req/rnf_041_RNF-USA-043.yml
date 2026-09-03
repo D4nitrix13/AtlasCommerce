@@ -1,0 +1,16 @@
+# RNF: RNF-USA-043 - Conformidad WCAG 2.2 nivel AA declarada
+rnf_041:
+  title: "Conformidad WCAG 2.2 nivel AA declarada"
+  rationale: "Todos los flujos publicos (auth, catalogo, PDP, carrito, checkout) cumplen WCAG 2.2 nivel AA. Validacion automatizada via axe-core en CI (regression block) + auditoria manual anual con usuario asistida por screen reader. Reporte de accesibilidad publicado en /accessibility."
+  priority: "H"
+  status: "in-analysis"
+  category: "Usabilidad"
+  code: "RNF-USA-043"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "RNF-USA-040 cubre responsive pero no declaracion formal de conformidad. ISO 3000 y la European Accessibility Act (EAA 2025) lo exigen para e-commerce."

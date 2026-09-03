@@ -1,0 +1,16 @@
+# RNF: RNF-PORT-083 - Imagenes Docker multi-arquitectura (amd64 + arm64)
+rnf_045:
+  title: "Imagenes Docker multi-arquitectura (amd64 + arm64)"
+  rationale: "Todas las imagenes del stack (PHP, Caddy, Postgres-exporter, Mailpit) se construyen para linux/amd64 y linux/arm64 via docker buildx. Manifests multi-arch subidos al registry. Validacion: 'docker manifest inspect' confirma ambas arquitecturas."
+  priority: "L"
+  status: "pending"
+  category: "Portabilidad"
+  code: "RNF-PORT-083"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Las imagenes se construyen solo para amd64; Macs M-series y AWS Graviton no las usan nativas (emulacion con penalty de CPU). docker buildx resuelve con --platform; no documentado ni verificado."

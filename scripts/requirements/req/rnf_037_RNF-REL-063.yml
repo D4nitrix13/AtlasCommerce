@@ -1,0 +1,16 @@
+# RNF: RNF-REL-063 - SLA de RPO y RTO documentado
+rnf_037:
+  title: "SLA de RPO y RTO documentado"
+  rationale: "RPO (Recovery Point Objective): max 1 hora de datos perdidos en caso de desastre (backups cada hora + WAL shipping continuo). RTO (Recovery Time Objective): restaurar servicio en menos de 4 horas desde declaracion del incidente. Compromiso contractual documentado en SLA cliente."
+  priority: "M"
+  status: "in-analysis"
+  category: "Fiabilidad"
+  code: "RNF-REL-063"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "RNF-REL-060 cubre backup pero no cuanto se pierde ni cuanto tarda restaurar. Sin SLA contractual, un incidente deja al negocio sin respuesta clara al cliente."

@@ -1,0 +1,19 @@
+# RF: RF-SUP-160 - Tickets de soporte (cliente y admin)
+rf_067:
+  title: "Tickets de soporte (cliente y admin)"
+  rationale: "El cliente abre tickets sobre una orden o producto especifico, asigna categoria (envio, pago, producto, cuenta) y adjunta archivos. El admin responde desde el panel; cada ticket tiene historial de mensajes visible para ambas partes. SLA configurable por tienda."
+  priority: "M"
+  status: "in-analysis"
+  module: "Soporte"
+  category: "Plataforma"
+  code: "RF-SUP-160"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/support/tickets/{index,tickets}/*.astro + modelos SupportTicket + SupportTicketMessage + recursos listos. Sin controller; el soporte al cliente es feature esperada por el cliente final."

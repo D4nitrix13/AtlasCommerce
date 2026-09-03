@@ -1,0 +1,19 @@
+# RF: RF-CAT-025 - CRUD admin de categorias
+rf_052:
+  title: "CRUD admin de categorias"
+  rationale: "El admin crea/edita/elimina categorias en arbol (closure table) con nombre, slug, descripcion SEO, imagen y categoria padre. El reorder actualiza el closure table en una sola transaccion. La eliminacion es soft-delete para preservar historial de productos."
+  priority: "M"
+  status: "in-analysis"
+  module: "Catalogo"
+  category: "Catalogo y Compras"
+  code: "RF-CAT-025"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/catalog/categories/index.astro ya esta declarado y el modelo Category con closure table esta listo. Pendiente: CategoryController + rutas REST en routes/api.php; el catalogo publico (RF-CAT-022) lee pero nadie lo escribe desde el panel."

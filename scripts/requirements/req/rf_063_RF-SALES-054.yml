@@ -1,0 +1,19 @@
+# RF: RF-SALES-054 - Cancelacion de orden por cliente
+rf_063:
+  title: "Cancelacion de orden por cliente"
+  rationale: "El cliente puede cancelar su orden dentro de la ventana configurada (default 24h post-checkout) y solo si el status es 'pending' o 'confirmed'. El reembolso (si hubo cobro) se procesa via RF-PAY-073. La cancelacion registra OrderStatusHistory con motivo y, si aplica, restock."
+  priority: "M"
+  status: "in-analysis"
+  module: "Ventas"
+  category: "Catalogo y Compras"
+  code: "RF-SALES-054"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "OrdenStatusHistory permite registrar la transicion; el endpoint publico de cancel no existe. Mejora UX (no requiere ticket a soporte) y reduce carga del admin."

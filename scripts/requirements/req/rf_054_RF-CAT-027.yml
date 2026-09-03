@@ -1,0 +1,19 @@
+# RF: RF-CAT-027 - Atributos y valores de atributo
+rf_054:
+  title: "Atributos y valores de atributo"
+  rationale: "El admin define atributos (talla, color, material) con sus valores posibles. Cada atributo se asocia a una categoria y se traduce en opciones seleccionables en el PDP (RF-CAT-023). Las combinaciones generan variantes automaticamente si el producto tiene 'auto-generate variants'."
+  priority: "M"
+  status: "in-analysis"
+  module: "Catalogo"
+  category: "Catalogo y Compras"
+  code: "RF-CAT-027"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Modelos ProductAttribute + ProductAttributeValue existen. Pendiente: AttributeController + RF explicito; sin documentar este flujo, la gestion de tallas/colores depende de conocimiento tribal del equipo."

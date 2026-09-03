@@ -1,0 +1,16 @@
+# RNF: RNF-SCAL-033 - Auto-scaling basado en metricas (queue depth + CPU)
+rnf_046:
+  title: "Auto-scaling basado en metricas (queue depth + CPU)"
+  rationale: "Si la cola Redis supera 100 jobs pendientes O CPU > 70% por 5min, el orquestador levanta una nueva instancia PHP-FPM. Si ambos bajan de 20%, retira instancias. Requiere orquestador con API (k8s, Nomad o docker swarm con plugin)."
+  priority: "L"
+  status: "pending"
+  category: "Escalabilidad"
+  code: "RNF-SCAL-033"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Cada tienda escala manual actualmente. No urgente pero necesario para B2C con picos (Black Friday, campanhas). Requiere migrar de docker-compose puro a un orquestador con scaling API."

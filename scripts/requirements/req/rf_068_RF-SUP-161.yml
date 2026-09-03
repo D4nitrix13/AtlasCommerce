@@ -1,0 +1,19 @@
+# RF: RF-SUP-161 - Resenas de producto
+rf_068:
+  title: "Resenas de producto"
+  rationale: "El cliente autenticado deja una resena (rating 1-5 + texto + fotos opcionales) sobre un producto que compro. El admin modera (approve/reject) antes de publicar. El promedio de rating se muestra en el PDP y se usa para ranking en busqueda."
+  priority: "M"
+  status: "in-analysis"
+  module: "Soporte"
+  category: "Plataforma"
+  code: "RF-SUP-161"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/support/reviews/index.astro + modelo ProductReview + recursos listos. Sin controller; las resenas son input clave para SEO y confianza en e-commerce."

@@ -1,0 +1,19 @@
+# RF: RF-MKT-061 - Promociones por producto/categoria
+rf_062:
+  title: "Promociones por producto/categoria"
+  rationale: "Reglas automaticas tipo '2x1', '3x2', 'segunda unidad 50%', '10% en categoria X' que aplican en checkout sin codigo. Las reglas tienen vigencia, prioridad y stackability (cupon + promo combinables?). Modelo Promotion con condiciones (ProductPromotion, CategoryPromotion) y calculo de descuento."
+  priority: "H"
+  status: "in-analysis"
+  module: "Marketing"
+  category: "Catalogo y Compras"
+  code: "RF-MKT-061"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Modelos Promotion + ProductPromotion + recursos listos. Frontend admin existe. Idem cupones: feature visible en admin pero sin logica en CheckoutService ni endpoints publicos."

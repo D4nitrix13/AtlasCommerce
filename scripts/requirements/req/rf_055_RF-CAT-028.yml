@@ -1,0 +1,19 @@
+# RF: RF-CAT-028 - Busqueda publica de productos
+rf_055:
+  title: "Busqueda publica de productos"
+  rationale: "El cliente busca productos por texto libre; el backend usa PostgreSQL full-text (tsvector + GIN index) sobre title, description, tags y brand. Soporta filtros (categoria, precio, atributos, en stock) y orden (relevancia, precio, novedad). Devuelve highlighted snippets y facet counts."
+  priority: "H"
+  status: "in-analysis"
+  module: "Catalogo"
+  category: "Catalogo y Compras"
+  code: "RF-CAT-028"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "El listado paginado (RF-CAT-020) cubre navegacion pero no busqueda. endpoints.ts no expone /search. Sin esto, catalogos >50 SKUs son innavegables; el estandar ISO 25010 (Adecuacidad funcional) lo requiere para e-commerce operativo."

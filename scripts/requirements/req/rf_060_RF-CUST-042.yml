@@ -1,0 +1,19 @@
+# RF: RF-CUST-042 - Exportar y borrar datos del cliente (GDPR)
+rf_060:
+  title: "Exportar y borrar datos del cliente (GDPR)"
+  rationale: "El cliente autenticado puede solicitar exportacion de sus datos personales (JSON con perfil, ordenes, direcciones, reviews) o borrado completo (anonimizacion). El borrado preserva ordenes historicas reemplazando PII por 'DELETED_USER_<hash>'. Cumplimiento GDPR Art. 15 (acceso) y Art. 17 (derecho al olvido)."
+  priority: "H"
+  status: "pending"
+  module: "Clientes"
+  category: "Gestion de Usuarios"
+  code: "RF-CUST-042"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Sin endpoint implementado. Modelo Customer tiene soft delete pero no flujo GDPR. Requerido por ley EU (GDPR) y Latinoamerica (LOPD Argentina, LGPD Brasil); clientes corporativos EU no pueden operar en plataformas no conformes."

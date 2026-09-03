@@ -1,0 +1,19 @@
+# RF: RF-AUTH-009 - Gestion de usuarios admin (CRUD)
+rf_051:
+  title: "Gestion de usuarios admin (CRUD)"
+  rationale: "El admin lista, crea, edita y desactiva usuarios del tenant. Solo accesible para usuarios con permiso users:write; permite resetear contrasena (RF-AUTH-003) y forzar activacion de 2FA (RNF-SEC-011). Soporta busqueda por email/nombre y paginacion (RNF-PERF-022)."
+  priority: "H"
+  status: "in-analysis"
+  module: "Autenticacion"
+  category: "Identidad y Acceso"
+  code: "RF-AUTH-009"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"
+  comentarios: "Frontend admin/users/index.astro declarado. Modelo User + UserStore listos. Endpoint users en endpoints.ts pero sin controller; sin esto no se pueden crear nuevos admins ni revocar accesos (riesgo de seguridad operacional)."
