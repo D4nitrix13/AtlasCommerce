@@ -302,8 +302,7 @@ const es: Translations = {
   'auth.passwordRecovery.errors.challengeExpiredLate':
     'La sesión de recuperación expiró. Volvé a empezar.',
   'auth.passwordRecovery.errors.codeInvalid': 'El código es inválido.',
-  'auth.passwordRecovery.errors.emailSubmit':
-    'No pudimos verificar tu correo. Probá de nuevo.',
+  'auth.passwordRecovery.errors.emailSubmit': 'No pudimos verificar tu correo. Probá de nuevo.',
   'auth.passwordRecovery.errors.genericFallback': 'Algo salió mal. Volvé a empezar.',
   'auth.passwordRecovery.errors.methodRequired': 'Seleccioná un método de recuperación.',
   'auth.passwordRecovery.errors.noMethodsBody':
@@ -323,8 +322,7 @@ const es: Translations = {
   'auth.passwordRecovery.steps.code.placeholderOtp': '000000',
   'auth.passwordRecovery.steps.code.placeholderRecovery': 'ABCDEFGHJK',
   'auth.passwordRecovery.steps.email.emailErrorEmpty': 'Ingresá tu correo electrónico.',
-  'auth.passwordRecovery.steps.email.emailErrorInvalid':
-    'El correo no tiene un formato válido.',
+  'auth.passwordRecovery.steps.email.emailErrorInvalid': 'El correo no tiene un formato válido.',
   'auth.passwordRecovery.steps.email.heading': 'Recuperá tu cuenta',
   'auth.passwordRecovery.steps.email.subtitle':
     'Empezamos por tu correo. Te mostraremos las opciones de recuperación disponibles.',
@@ -424,6 +422,10 @@ const es: Translations = {
 
   'format.empty': '—',
   'format.date.locale': 'es-NI',
+
+  // Las claves `rem.*` se removieron junto con el visor REM
+  // (frontend/src/{components,lib,pages}/rem/**). Ver el historial de
+  // git en feat/rem-viewer-v2 para los strings archivados.
 };
 
 export default es;

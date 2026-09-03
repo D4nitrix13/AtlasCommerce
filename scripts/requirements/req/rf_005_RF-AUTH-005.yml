@@ -1,0 +1,23 @@
+# RF: RF-AUTH-005 - Códigos de recuperación MFA
+# Generado por migrate_to_doorstop.py
+rf_005:
+  title: "Códigos de recuperación MFA"
+  rationale: "El usuario puede generar códigos de un solo uso para recuperar acceso si pierde su dispositivo TOTP. Backend: RecoveryCodeController."
+  priority: "M"
+  status: "implemented"
+  module: "Autenticación"
+  category: "Identidad y Acceso"
+  code: "RF-AUTH-005"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-SEC-010
+    - RNF-SEC-011
+    - RNF-SEC-012
+    - RNF-SEC-014
+  estabilidad: "alta"
+  urgencia: "puede esperar"

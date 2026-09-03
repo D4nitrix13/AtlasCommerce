@@ -1,0 +1,17 @@
+# RNF: RNF-SEC-010 - Autenticación API vía Sanctum
+# Generado por migrate_to_doorstop.py
+rnf_004:
+  title: "Autenticación API vía Sanctum"
+  rationale: "Todas las rutas API usan Laravel Sanctum para emitir tokens scoped por tenant. Tokens no se comparten entre instancias."
+  priority: "H"
+  status: "verified"
+  category: "Seguridad"
+  code: "RNF-SEC-010"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"

@@ -29,6 +29,13 @@ export default defineConfig({
         "src/i18n/server.ts",
         "src/**/index.ts",
       ],
+      thresholds: {
+        lines: 85,
+        functions: 85,
+        branches: 80,
+        statements: 85,
+        perFile: false,
+      },
     },
   },
 });

@@ -1,0 +1,17 @@
+# RNF: RNF-SCAL-031 - Bind mounts para hot reload en dev
+# Generado por migrate_to_doorstop.py
+rnf_015:
+  title: "Bind mounts para hot reload en dev"
+  rationale: "El backend y frontend corren con bind mounts en dev → editar código se refleja inmediatamente sin rebuild."
+  priority: "H"
+  status: "verified"
+  category: "Mantenibilidad"
+  code: "RNF-SCAL-031"
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_003
+  fuentes: []
+  dependencias: []
+  estabilidad: "PD"
+  urgencia: "importante"

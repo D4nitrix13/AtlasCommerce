@@ -1,0 +1,25 @@
+# RF: RF-CUSTOM-037 - Personalización por variantes de producto
+# Generado por migrate_to_doorstop.py
+rf_022:
+  title: "Personalización por variantes de producto"
+  rationale: "Cada producto puede tener opciones de personalización (color base, material). Backend: ProductCustomizationController."
+  priority: "M"
+  status: "implemented"
+  module: "Personalización"
+  category: "Gestión de Usuarios"
+  code: "RF-CUSTOM-037"
+  verified-by:
+    - stakeholder_001
+    - stakeholder_002
+  version: "1.0"
+  autores:
+    - stakeholder_001
+    - stakeholder_002
+  fuentes: []
+  dependencias:
+    - RNF-PERF-023
+    - RNF-SEC-014
+    - RNF-USA-040
+    - RNF-USA-041
+  estabilidad: "alta"
+  urgencia: "puede esperar"

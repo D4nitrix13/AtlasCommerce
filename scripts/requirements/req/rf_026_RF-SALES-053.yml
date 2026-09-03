@@ -1,0 +1,22 @@
+# RF: RF-SALES-053 - Asociación de diseño custom a orden
+# Generado por migrate_to_doorstop.py
+rf_026:
+  title: "Asociación de diseño custom a orden"
+  rationale: "Las órdenes con productos personalizados guardan el diseño final. Backend: OrderCustomDesignController."
+  priority: "H"
+  status: "implemented"
+  module: "Ventas"
+  category: "Catálogo y Compras"
+  code: "RF-SALES-053"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-OBS-070
+    - RNF-USA-040
+    - RNF-REL-062
+  estabilidad: "alta"
+  urgencia: "importante"

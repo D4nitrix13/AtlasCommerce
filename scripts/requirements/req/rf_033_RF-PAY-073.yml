@@ -1,0 +1,22 @@
+# RF: RF-PAY-073 - Procesar reembolso (refund)
+# Generado por migrate_to_doorstop.py
+rf_033:
+  title: "Procesar reembolso (refund)"
+  rationale: "El admin procesa refunds de pagos ya cobrados. Backend: RefundController."
+  priority: "H"
+  status: "implemented"
+  module: "Pagos"
+  category: "Transacciones"
+  code: "RF-PAY-073"
+  verified-by:
+    - stakeholder_001
+  version: "1.0"
+  autores:
+    - stakeholder_001
+  fuentes: []
+  dependencias:
+    - RNF-SEC-010
+    - RNF-SEC-012
+    - RNF-SEC-014
+  estabilidad: "alta"
+  urgencia: "importante"
