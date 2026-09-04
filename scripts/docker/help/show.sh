@@ -293,11 +293,12 @@ _ansi_strip() {
     /usr/bin/sed -r "s/\x1B\[[0-9;]*[A-Za-z]//g"
 }
 
-# _visible_len devuelve la longitud VISIBLE de un string (sin códigos ANSI).
-# Equivalente a `printf '%s' "$str" | _ansi_strip | /usr/bin/wc -c` pero
-# inline para no crear subshells innecesarios.
+# _visible_len devuelve la longitud VISIBLE de un string en CHARS
+# (no bytes). Sin códigos ANSI, "ó" cuenta como 1 char; con wc -c
+# contaría 2 bytes (UTF-8) y desalinearía las tablas con texto en
+# español. Usamos awk que cuenta chars por carácter, no bytes.
 _visible_len() {
-    printf '%s' "$1" | _ansi_strip | /usr/bin/wc -c
+    printf '%s' "$1" | _ansi_strip | /usr/bin/awk '{ print length }'
 }
 
 # _box_draw dibuja una tabla Markdown-style (|---|---|) con bordes
