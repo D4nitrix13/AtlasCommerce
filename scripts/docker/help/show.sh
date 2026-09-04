@@ -294,11 +294,13 @@ _ansi_strip() {
 }
 
 # _visible_len devuelve la longitud VISIBLE de un string en CHARS
-# (no bytes). Sin códigos ANSI, "ó" cuenta como 1 char; con wc -c
-# contaría 2 bytes (UTF-8) y desalinearía las tablas con texto en
-# español. Usamos awk que cuenta chars por carácter, no bytes.
+# (no bytes). Crítico: wc -c cuenta BYTES (ó = 2 bytes UTF-8) y awk
+# length() también cuenta bytes para multibyte. Usamos bash nativo
+# ${#var} que cuenta chars Unicode correctamente.
 _visible_len() {
-    printf '%s' "$1" | _ansi_strip | /usr/bin/awk '{ print length }'
+    local stripped
+    stripped=$(printf '%s' "$1" | _ansi_strip)
+    echo "${#stripped}"
 }
 
 # _box_draw dibuja una tabla Markdown-style (|---|---|) con bordes
