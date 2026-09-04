@@ -209,12 +209,19 @@ fi
 cmd_raw="$1"
 cmd_canonical="$(canonicalize_cmd "$cmd_raw")"
 
-# Primer arg = help/-h/--help → global help.
+# Primer arg = help/-h/--help → help global o per-comando.
 case "$cmd_raw" in
     help|-h|--help)
         # shellcheck source=scripts/docker/help/show.sh
         source "${DOCKER_DIR}/help/show.sh"
-        cmd_help
+        if [[ $# -ge 2 ]]; then
+            # `help <comando>` → help específico del comando.
+            shift  # descartar "help"
+            cmd_help "$@"
+        else
+            # Sin args → índice compacto de todos los comandos.
+            cmd_help
+        fi
         exit 0
         ;;
 esac
@@ -230,34 +237,12 @@ if ! is_known_cmd "$cmd_raw"; then
 fi
 
 # Si cualquier arg después del comando es "help" → per-command help.
-# help_args captura los args antes de "help" (ej: `up dev all help`
-# → help_args=(dev all)). Esos args se ignoran al imprimir help
-# (los cmd_help_* no filtran, solo imprimen).
+# Toda la lógica de help per-comando vive en scripts/docker/help/show.sh
+# (función `_cmd_specific_help` despachada desde `cmd_help <comando>`).
+# Acá solo detectamos el flag y delegamos.
 if args_contain_help "${@:2}"; then
-    help_args=()
-    for arg in "${@:2}"; do
-        case "$arg" in
-            help|-h|--help) break ;;
-            *) help_args+=("$arg") ;;
-        esac
-    done
-    # Cargar el registry de help per-comando.
-    registry="${DOCKER_DIR}/help/registry.sh"
-    if [[ -f "$registry" ]]; then
-        # shellcheck source=scripts/docker/help/registry.sh
-        source "$registry"
-    fi
-    # Cargar también el show.sh por si necesitamos cmd_help_como_fallback.
     # shellcheck source=scripts/docker/help/show.sh
     source "${DOCKER_DIR}/help/show.sh"
-    help_fn="cmd_help_${cmd_canonical//-/_}"
-    if declare -F "$help_fn" > /dev/null; then
-        "$help_fn" "${help_args[@]}"
-        exit 0
-    fi
-    # Fallback: help global filtrado por comando.
-    log_warn "No hay help específica para '$cmd_canonical' — mostrando help global."
-    echo
     cmd_help "$cmd_canonical"
     exit 0
 fi
