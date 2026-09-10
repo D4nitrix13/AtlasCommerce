@@ -77,7 +77,7 @@ importar `Core\Tenant\Application\StoreContextService` en código nuevo.
 
 ## Compatibilidad con plugins Composer
 
-Los plugins Composer (ej. `ecommerce-plugin-erp`) deben importar
+Los plugins Composer (ej. `atlas-commerce-plugin-erp`) deben importar
 `Core\Tenant\Application\StoreContextService` y
 `Core\Tenant\Application\RlsContextService` en lugar de las rutas legacy.
 El binding singleton del contenedor sigue disponible vía `app(...)`.

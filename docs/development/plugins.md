@@ -6,7 +6,7 @@ y se activa por tenant mediante una feature flag.
 
 ## Quick path
 
-1. Define un paquete con nombre `d4nitrix13/ecommerce-plugin-{feature}`.
+1. Define un paquete con nombre `d4nitrix13/atlas-commerce-plugin-{feature}`.
 2. Declara el `ServiceProvider` en `extra.laravel.providers`.
 3. Registra las rutas, migraciones, configuración y vistas desde el provider.
 4. Protege las rutas con un middleware que consulte la tienda actual.
@@ -14,7 +14,7 @@ y se activa por tenant mediante una feature flag.
 6. Instala el paquete en cada instancia que necesite la feature.
 
 El paquete de referencia está en
-`backend/packages/ecommerce-plugin-erp`.
+`backend/packages/atlas-commerce-plugin-erp`.
 
 ## Cuándo crear un plugin
 
@@ -36,7 +36,7 @@ core estable → feature flag → configuración por instancia → plugin
 ## Estructura mínima
 
 ```txt
-packages/ecommerce-plugin-erp/
+packages/atlas-commerce-plugin-erp/
 ├── composer.json
 ├── config/
 │   └── erp.php
@@ -49,7 +49,7 @@ packages/ecommerce-plugin-erp/
 ├── routes/
 │   └── api.php
 ├── src/
-│   ├── EcommercePluginErpServiceProvider.php
+│   ├── AtlasCommercePluginErpServiceProvider.php
 │   └── Http/
 │       ├── Controllers/
 │       └── Middleware/
@@ -68,9 +68,9 @@ provider Laravel:
 
 ```json
 {
-    "name": "d4nitrix13/ecommerce-plugin-erp",
-    "description": "ERP integration plugin for the Ecommerce platform.",
-    "type": "ecommerce-plugin",
+    "name": "d4nitrix13/atlas-commerce-plugin-erp",
+    "description": "ERP integration plugin for the AtlasCommerce platform.",
+    "type": "atlas-commerce-plugin",
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -78,13 +78,13 @@ provider Laravel:
     },
     "autoload": {
         "psr-4": {
-            "D4nitrix13\\EcommercePluginErp\\": "src/"
+            "D4nitrix13\\AtlasCommercePluginErp\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "D4nitrix13\\EcommercePluginErp\\EcommercePluginErpServiceProvider"
+                "D4nitrix13\\AtlasCommercePluginErp\\AtlasCommercePluginErpServiceProvider"
             ]
         }
     }
@@ -99,7 +99,7 @@ provider manualmente en `config/app.php` ni en `bootstrap/providers.php`.
 El provider registra todos los recursos que el plugin necesita:
 
 ```php
-final class EcommercePluginErpServiceProvider extends ServiceProvider
+final class AtlasCommercePluginErpServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
@@ -115,7 +115,7 @@ final class EcommercePluginErpServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(paths: __DIR__.'/../database/migrations');
         $this->loadViewsFrom(
             path: __DIR__.'/../resources/views',
-            namespace: 'ecommerce-plugin-erp',
+            namespace: 'atlas-commerce-plugin-erp',
         );
     }
 }
@@ -131,9 +131,9 @@ usa tags específicos:
 ```bash
 cd backend
 php artisan vendor:publish \
-  --tag=ecommerce-plugin-erp-config
+  --tag=atlas-commerce-plugin-erp-config
 php artisan vendor:publish \
-  --tag=ecommerce-plugin-erp-views
+  --tag=atlas-commerce-plugin-erp-views
 ```
 
 ## Rutas protegidas por tenant
@@ -211,7 +211,7 @@ En una aplicación que consume un paquete publicado:
 
 ```bash
 cd backend
-composer require d4nitrix13/ecommerce-plugin-erp
+composer require d4nitrix13/atlas-commerce-plugin-erp
 php artisan migrate --force
 php artisan package:discover
 ```
@@ -223,7 +223,7 @@ En desarrollo local, el backend usa un repositorio `path` con symlink:
     "repositories": [
         {
             "type": "path",
-            "url": "packages/ecommerce-plugin-erp",
+            "url": "packages/atlas-commerce-plugin-erp",
             "options": {
                 "symlink": true
             }
@@ -236,7 +236,7 @@ Luego instala la dependencia con la versión que Composer haya detectado para
 el repositorio local:
 
 ```bash
-composer update d4nitrix13/ecommerce-plugin-erp --with-dependencies
+composer update d4nitrix13/atlas-commerce-plugin-erp --with-dependencies
 ```
 
 Confirma el auto-discovery con:
@@ -260,7 +260,7 @@ Tests propios del paquete:
 ```bash
 cd backend
 vendor/bin/phpunit \
-  --configuration packages/ecommerce-plugin-erp/phpunit.xml
+  --configuration packages/atlas-commerce-plugin-erp/phpunit.xml
 ```
 
 Tests de integración del backend:
@@ -284,8 +284,8 @@ Como mínimo, los tests deben comprobar:
 
 ## Checklist de publicación
 
-- [ ] El nombre del paquete usa `ecommerce-plugin-{feature}`.
-- [ ] El paquete declara `type: ecommerce-plugin`.
+- [ ] El nombre del paquete usa `atlas-commerce-plugin-{feature}`.
+- [ ] El paquete declara `type: atlas-commerce-plugin`.
 - [ ] El namespace PSR-4 no colisiona con el core ni con otro plugin.
 - [ ] El provider está declarado en `extra.laravel.providers`.
 - [ ] Rutas, migraciones, vistas y configuración se registran desde el provider.

@@ -561,16 +561,16 @@ Composer separados.
 
 ---
 
-### F4.1 — Paquete Composer `ecommerce-plugin-erp` ✅
+### F4.1 — Paquete Composer `atlas-commerce-plugin-erp` ✅
 
 **Razón:** Plantilla funcional para crear nuevos plugins sin acoplar features
 grandes al core.
 
 **Características:**
 
-- Paquete Composer independiente bajo `backend/packages/ecommerce-plugin-erp`.
-- `composer.json` con `type: ecommerce-plugin` y auto-discovery Laravel.
-- `EcommercePluginErpServiceProvider` registra rutas, migraciones, vistas y configuración.
+- Paquete Composer independiente bajo `backend/packages/atlas-commerce-plugin-erp`.
+- `composer.json` con `type: atlas-commerce-plugin` y auto-discovery Laravel.
+- `AtlasCommercePluginErpServiceProvider` registra rutas, migraciones, vistas y configuración.
 - Endpoint de estado y migración propia de conexiones ERP.
 - Prueba independiente de metadata del paquete.
 - El backend lo consume mediante un repositorio `path` con symlink para desarrollo;
@@ -621,7 +621,7 @@ de request y no en `boot()`.
 
 - `docs/development/plugins.md`.
 - Guía paso a paso para crear un paquete Composer.
-- Ejemplo real de `ecommerce-plugin-erp`.
+- Ejemplo real de `atlas-commerce-plugin-erp`.
 - Instalación por instancia y activación por feature flag.
 - Tests de metadata, auto-discovery y aislamiento multi-tenant.
 - Checklist de publicación y validación.
