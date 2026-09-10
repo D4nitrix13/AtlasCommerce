@@ -61,7 +61,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "globals": "^15.9.0",
     "jsdom": "^30.0.1",
-    "prettier": "^3.3.3",
+    "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "svgo": "^4.0.2",
     "typescript": "^6.0.3",
