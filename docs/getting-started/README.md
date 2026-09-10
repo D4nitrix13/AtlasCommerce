@@ -23,8 +23,8 @@ sudo apt install php8.3 composer nodejs pnpm docker.io caddy
 sudo usermod -aG docker $USER
 
 # 2. Clonar e instalar
-git clone https://github.com/D4nitrix13/Ecommerce.git
-cd Ecommerce
+git clone https://github.com/D4nitrix13/AtlasCommerce.git
+cd AtlasCommerce
 cd backend && composer install
 cd ../frontend && pnpm install
 

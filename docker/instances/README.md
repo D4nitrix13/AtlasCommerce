@@ -32,8 +32,8 @@ misma base de código (este repo) pero tienen:
 
 ```bash
 # 1. Clonar el repo en el servidor
-git clone https://github.com/D4nitrix13/Ecommerce.git
-cd Ecommerce
+git clone https://github.com/D4nitrix13/AtlasCommerce.git
+cd AtlasCommerce
 
 # 2. Configurar la instancia
 cd docker/instances/mm-boutique
@@ -84,7 +84,7 @@ certificados Let's Encrypt automáticamente. Para dev local
 
 ```bash
 ssh usuario@servidor
-cd Ecommerce
+cd AtlasCommerce
 git pull
 cd docker/instances/<instancia>
 docker compose pull

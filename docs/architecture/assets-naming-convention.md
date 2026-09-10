@@ -235,7 +235,7 @@ $logo = $storeTheme->logo_path
 
 Estas cosas **NO se hacen** en este proyecto:
 
-1. ❌ **Crear `/home/d4nitrix13/Code/Ecommerce/ftp-storage/`** con
+1. ❌ **Crear `/home/d4nitrix13/Code/AtlasCommerce/ftp-storage/`** con
    imágenes de productos en el repo git. Los assets de tenant son
    datos, no código.
 2. ❌ **Servir el CSS compilado desde FTP**. El CSS va a `public/build/`,

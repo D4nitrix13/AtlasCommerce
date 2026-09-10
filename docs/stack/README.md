@@ -47,8 +47,8 @@ Resumen rápido:
 
 ```bash
 # 1. Clonar el repo
-git clone https://github.com/D4nitrix13/Ecommerce.git
-cd Ecommerce
+git clone https://github.com/D4nitrix13/AtlasCommerce.git
+cd AtlasCommerce
 
 # 2. Backend
 cd backend

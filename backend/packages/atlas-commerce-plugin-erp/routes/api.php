@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use D4nitrix13\EcommercePluginErp\Http\Controllers\ErpStatusController;
-use D4nitrix13\EcommercePluginErp\Http\Middleware\EnsureErpFeatureEnabled;
+use D4nitrix13\AtlasCommercePluginErp\Http\Controllers\ErpStatusController;
+use D4nitrix13\AtlasCommercePluginErp\Http\Middleware\EnsureErpFeatureEnabled;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('api')

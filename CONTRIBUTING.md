@@ -1,8 +1,30 @@
-# Contributing — Panda Estampados / Kitsune Store
+# Contributing — AtlasCommerce
+
+> **Software propietario.** Ver [`LICENSE`](LICENSE) antes de contribuir.
+> Al participar en este repositorio (issues, PRs, discusiones), aceptás los
+> términos de licenciamiento del proyecto.
 
 > **Quality Gate.** Este proyecto trata el código como producto, no como descarte.
 > Todo cambio debe cumplir los principios definidos aquí. Si no los cumplís, el
 > cambio no se acepta.
+
+AtlasCommerce es la plataforma monorepo sobre la que corren:
+
+- **Panda Estampados** (`panda-estampados.com`) — B2B / corporativo.
+- **Kitsune Store** (`kitsune.com`) — B2C / cultura japonesa.
+- **MM Boutique** (`mm-boutique.com`) — single-tenant.
+- **Morales Store** (`morales-store.com`) — single-tenant.
+
+Las reglas que siguen aplican a toda la organización multi-tienda. Cambios
+que rompen el contrato core (RLS multi-tenant, multi-instancia, CI
+quality-gate) requieren revisión explícita del mantenedor antes de mergear.
+
+Antes de empezar, leé también:
+
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) — cómo tratarnos.
+- [`SECURITY.md`](SECURITY.md) — cómo reportar vulnerabilidades (canal
+  privado, NO issue público).
+- [`SUPPORT.md`](SUPPORT.md) — dónde pedir ayuda.
 
 ---
 

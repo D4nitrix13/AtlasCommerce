@@ -43,8 +43,8 @@ subyacente esté disponible.
 
 ```bash
 # 1. Clonar
-git clone <repo-url> Ecommerce
-cd Ecommerce
+git clone <repo-url> AtlasCommerce
+cd AtlasCommerce
 
 # 2. Activar las skills commiteadas
 ./scripts/install-agent-skills.sh
@@ -123,7 +123,7 @@ ls ~/.config/opencode/agents/ | wc -l   # ~49
 gentle-ai skill-registry refresh --cwd . --force
 
 # Memoria operativa
-engram mem_search query="sdd-init/ecommerce" project="ecommerce"
+engram mem_search query="sdd-init/atlas-commerce" project="atlas-commerce"
 ```
 
 Si algún paso falla, revisar la sección "Solución de problemas"

@@ -53,9 +53,9 @@ COPY docker/instances/production/mm-boutique/conf/php/opcache.ini /usr/local/etc
 
 # Copiar composer files primero (cache de layers).
 COPY backend/composer.json backend/composer.lock ./
-# El plugin `d4nitrix13/ecommerce-plugin-erp` está declarado en
+# El plugin `d4nitrix13/atlas-commerce-plugin-erp` está declarado en
 # composer.json como repositorio `path` apuntando a
-# `packages/ecommerce-plugin-erp`. Durante `composer install`,
+# `packages/atlas-commerce-plugin-erp`. Durante `composer install`,
 # composer resuelve ese path relativo al WORKDIR
 # (`/var/www/html`). Si no lo copiamos, falla con "Source path
 # is not found". Lo copiamos ANTES del install.

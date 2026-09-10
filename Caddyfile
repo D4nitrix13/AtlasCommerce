@@ -1,4 +1,4 @@
-# Caddyfile — Ecommerce local (multi-instancia, single host)
+# Caddyfile — AtlasCommerce local (multi-instancia, single host)
 # ------------------------------------------------------------
 # Cubre las 6 instancias (3 prod + 3 dev). Cada instancia Docker
 # corre con IPs fijas en su red dedicada (prod) o con bind mounts

@@ -1,4 +1,4 @@
-# Scripts de Ecommerce
+# Scripts de AtlasCommerce
 
 Este directorio contiene todos los scripts operativos del proyecto.
 Cada script debe ser **corto, de una sola responsabilidad, y usar

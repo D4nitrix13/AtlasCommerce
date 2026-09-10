@@ -1,4 +1,4 @@
-# API Controllers - Ecommerce Backend
+# API Controllers — AtlasCommerce Backend
 
 Este directorio contiene los controladores API del backend Laravel para el sistema store. Los controladores reciben solicitudes HTTP del frontend, coordinan la ejecución necesaria y devuelven respuestas JSON.
 
