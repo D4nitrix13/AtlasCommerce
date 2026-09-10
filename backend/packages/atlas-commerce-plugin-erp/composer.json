@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "d4nitrix13/ecommerce-plugin-erp",
-    "description": "ERP integration plugin for the Ecommerce platform.",
-    "type": "ecommerce-plugin",
+    "name": "d4nitrix13/atlas-commerce-plugin-erp",
+    "description": "ERP integration plugin for the AtlasCommerce platform.",
+    "type": "atlas-commerce-plugin",
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -13,18 +13,18 @@
     },
     "autoload": {
         "psr-4": {
-            "D4nitrix13\\EcommercePluginErp\\": "src/"
+            "D4nitrix13\\AtlasCommercePluginErp\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "D4nitrix13\\EcommercePluginErp\\Tests\\": "tests/"
+            "D4nitrix13\\AtlasCommercePluginErp\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "D4nitrix13\\EcommercePluginErp\\EcommercePluginErpServiceProvider"
+                "D4nitrix13\\AtlasCommercePluginErp\\AtlasCommercePluginErpServiceProvider"
             ]
         }
     },

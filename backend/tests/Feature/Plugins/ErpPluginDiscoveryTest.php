@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Plugins;
 
-use D4nitrix13\EcommercePluginErp\EcommercePluginErpServiceProvider;
+use D4nitrix13\AtlasCommercePluginErp\AtlasCommercePluginErpServiceProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -17,7 +17,7 @@ final class ErpPluginDiscoveryTest extends TestCase
     public function laravel_discovers_the_erp_provider_from_composer_metadata(): void
     {
         self::assertArrayHasKey(
-            EcommercePluginErpServiceProvider::class,
+            AtlasCommercePluginErpServiceProvider::class,
             app()->getLoadedProviders(),
         );
         self::assertSame('erp', config('erp.feature'));
