@@ -1,0 +1,113 @@
+name: Bug Report
+description: Reportá un bug reproducible en AtlasCommerce. Cuanto más concreto, antes lo arreglamos.
+title: "[bug] "
+labels: ["bug", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por tomarte el tiempo de reportar este bug.
+        Cuanto más contexto nos des, más rápido lo arreglamos.
+        ⚠️ Si la vulnerabilidad es de seguridad, NO abras un issue público —
+        seguí el proceso en [`SECURITY.md`](../../SECURITY.md).
+
+  - type: dropdown
+    id: tenant
+    attributes:
+      label: "Tienda afectada"
+      description: "¿En qué tienda se reproduce?"
+      options:
+        - "Global (todas las tiendas)"
+        - "panda-estampados"
+        - "kitsune"
+        - "mm-boutique"
+        - "morales-store"
+    validations:
+      required: true
+
+  - type: input
+    id: severity
+    attributes:
+      label: "Severidad"
+      description: "Tu estimación (la ajustaremos en triage)."
+      placeholder: "low | medium | high | critical"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Resumen del bug"
+      description: "Una o dos frases describiendo el problema."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Pasos para reproducir"
+      description: |
+        Lista numerada y concreta. Incluí cualquier comando, URL,
+        credencial de testing, etc.
+      placeholder: |
+        1. Ir a `...`
+        2. Click en `...`
+        3. Ver error en `...`
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Comportamiento esperado"
+      description: "¿Qué debería haber pasado?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Comportamiento actual"
+      description: "¿Qué pasó en realidad?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs / screenshots / stack traces"
+      description: |
+        Pegá logs relevantes, anonimizando datos sensibles.
+        Para logs: `backend/storage/logs/laravel.log` (dev) o
+        `journalctl -u atlas-commerce-backend` (prod).
+      render: shell
+
+  - type: input
+    id: branch
+    attributes:
+      label: "Branch y commit"
+      description: "Ej: `master`, `abc1234`."
+      placeholder: "master @ 1a2b3c4"
+
+  - type: input
+    id: stack
+    attributes:
+      label: "Stack"
+      description: "Versiones relevantes (PHP, Laravel, Astro, Node, Postgres)."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Self-check"
+      options:
+        - label: "Busqué en issues existentes y no encontré uno igual."
+        - label: "Reproduje el bug con `master` (no feat/*)."
+        - label: "Anonimicé datos sensibles en logs/screenshots."
+        - label: "Si es de seguridad, NO abrí este issue y seguí SECURITY.md."
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Contexto adicional"
+      description: "Cualquier cosa que ayude al triage."

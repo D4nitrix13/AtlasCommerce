@@ -1,0 +1,65 @@
+version: 2
+
+updates:
+  # Frontend (Astro + React + pnpm)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Managua"
+    open-pull-requests-limit: 8
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "deps(frontend)"
+      prefix-development: "deps(frontend-dev)"
+      include: "scope"
+    groups:
+      react-minor:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      typescript-minor:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "typescript"
+          - "@types/*"
+
+  # Backend (PHP + Composer)
+  - package-ecosystem: "composer"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Managua"
+    open-pull-requests-limit: 8
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "deps(backend)"
+      prefix-development: "deps(backend-dev)"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/.github"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Managua"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "deps(ci)"

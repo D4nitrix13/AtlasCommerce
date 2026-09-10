@@ -1,0 +1,86 @@
+name: Feature Request
+description: Proponé una mejora a AtlasCommerce. Alineá con la arquitectura antes de pedir review.
+title: "[feature] "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de pedir una feature, verificá:
+        - Que no exista ya como módulo o configuración.
+        - Que esté alineado con la arquitectura multi-tienda actual.
+        - Los RFCs y `docs/architecture/` para convenciones.
+
+  - type: dropdown
+    id: tenant
+    attributes:
+      label: "Alcance"
+      description: "¿A quién aplica?"
+      options:
+        - "Core (todas las tiendas)"
+        - "Tenant específico — panda-estampados"
+        - "Tenant específico — kitsune"
+        - "Tenant específico — mm-boutique"
+        - "Tenant específico — morales-store"
+        - "Solo admin / panel interno"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: "Capa"
+      description: "¿Dónde caería el cambio?"
+      options:
+        - "Backend (Laravel / PHP)"
+        - "Frontend (Astro / React)"
+        - "Infraestructura / Docker"
+        - "Multi-tenant / dominio"
+        - "Cross-cutting (auth, pagos, envíos, etc.)"
+        - "Docs / Configuración"
+        - "Otro"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problema que resuelve"
+      description: "¿Qué dolor concreta o qué habilita? Sé específico sobre el usuario/operador afectado."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: "Solución propuesta"
+      description: "Idea de cómo se implementaría. Mencioná archivos/capas afectadas si ya las tenés en mente."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternativas consideradas"
+      description: "¿Por qué esta y no otra? Mencioná lo que descartaste."
+    validations:
+      required: true
+
+  - type: textarea
+    id: breaking
+    attributes:
+      label: "Impacto en compatibilidad"
+      description: "¿Rompe schemas, contratos API, features existentes, RLS?"
+
+  - type: input
+    id: size
+    attributes:
+      label: "Tamaño estimado"
+      description: "PR size aprox: < 100 / 100-400 / 400-800 / 800+ líneas."
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Contexto adicional"
+      description: "Links a issues, RFCs, diseños, mockups, engram observations, etc."
