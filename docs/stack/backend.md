@@ -164,7 +164,7 @@ php artisan tinker
 Archivo `backend/.env` (basado en `.env.example`):
 
 ```env
-APP_NAME=Ecommerce
+APP_NAME="AtlasCommerce"
 APP_ENV=local
 APP_KEY=base64:GENERAR_CON_php_artisan_key:generate
 APP_DEBUG=true

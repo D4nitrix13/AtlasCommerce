@@ -271,15 +271,15 @@ ANEXOS
 
 ## 7. INFORMACIÓN TÉCNICA REAL DEL PROYECTO (fuente de verdad — no inventar nada fuera de aquí)
 
-> Esta es la realidad del sistema **Ecommerce** que el alumno tiene en el
-> repositorio `/home/d4nitrix13/Code/Ecommerce/`. La IA tiene permitido
+> Esta es la realidad del sistema **AtlasCommerce** que el alumno tiene en
+> el repositorio `/home/d4nitrix13/Code/AtlasCommerce/`. La IA tiene permitido
 > referenciar esto en la monografía como descripción del proyecto **ya en
 > desarrollo**, pero NO tiene permitido inventar módulos, endpoints o
 > características que NO estén listados abajo.
 
 ### 7.1. Identidad del proyecto
 
-- **Repositorio**: monorepo `/home/d4nitrix13/Code/Ecommerce/`.
+- **Repositorio**: monorepo `/home/d4nitrix13/Code/AtlasCommerce/`.
 - **Stack global**:
   - Backend: PHP 8.4, Laravel 13.8, Sanctum (autenticación).
   - Frontend: Astro 7, React 19, Tailwind CSS 4, TypeScript.

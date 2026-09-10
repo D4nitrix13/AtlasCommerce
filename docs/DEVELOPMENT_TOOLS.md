@@ -1,7 +1,7 @@
 # Herramientas de desarrollo
 
 Este documento resume las herramientas auxiliares usadas durante el
-desarrollo del ecommerce.
+desarrollo del atlas-commerce.
 
 Incluye herramientas para:
 
@@ -173,7 +173,7 @@ cloudflared tunnel login
 Para crear un túnel permanente:
 
 ```bash
-cloudflared tunnel create ecommerce-dev
+cloudflared tunnel create atlas-commerce-dev
 ```
 
 Para listar túneles:
@@ -455,7 +455,7 @@ import { expect, test } from "@playwright/test";
 test("muestra la página principal", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page).toHaveTitle(/Ecommerce/);
+  await expect(page).toHaveTitle(/AtlasCommerce/);
 });
 ```
 
@@ -559,7 +559,7 @@ vtracer \
 Para todos los logos del repo de una vez (los 4 stores):
 
 ```bash
-cd /home/d4nitrix13/Code/Ecommerce
+cd /home/d4nitrix13/Code/AtlasCommerce
 for slug in panda-estampados kitsune mm-boutique morales-store; do
     vtracer \
         --input "frontend/public/images/stores/$slug/brand/logo.webp" \
