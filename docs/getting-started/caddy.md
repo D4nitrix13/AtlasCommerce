@@ -9,7 +9,7 @@ Crear `Caddyfile` en la raíz del proyecto (ya existe):
 
 ```caddyfile
 # ============================================================
-# Caddyfile — Ecommerce local (multi-tienda)
+# Caddyfile — AtlasCommerce local (multi-tienda)
 # ============================================================
 {
     auto_https off

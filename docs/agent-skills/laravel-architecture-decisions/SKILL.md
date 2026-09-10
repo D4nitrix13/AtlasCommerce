@@ -121,7 +121,7 @@ It should be a service when the logic:
 
 ### Examples of logic that goes in Services
 
-**Ecommerce:**
+**AtlasCommerce:**
 
 - Calculate order total.
 - Apply coupons.

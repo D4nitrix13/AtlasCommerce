@@ -63,11 +63,11 @@ Puertos internos (no expuestos al público):
 ### 1. Clonar el repo
 
 ```bash
-sudo mkdir -p /opt/ecommerce
-sudo chown $USER:$USER /opt/ecommerce
-cd /opt/ecommerce
-git clone https://github.com/D4nitrix13/Ecommerce.git
-cd Ecommerce
+sudo mkdir -p /opt/atlas-commerce
+sudo chown $USER:$USER /opt/atlas-commerce
+cd /opt/atlas-commerce
+git clone https://github.com/D4nitrix13/AtlasCommerce.git
+cd AtlasCommerce
 ```
 
 ### 2. Configurar la instancia
@@ -86,7 +86,7 @@ Valores críticos a cambiar en `.env`:
 
 ```env
 APP_KEY=                     # Generar con: docker run --rm -it \
-                             # ecommerce-core-app:latest \
+                             # atlas-commerce-core-app:latest \
                              # php artisan key:generate --show
 DB_PASSWORD=                 # Password seguro de Postgres
 PANDA_ADMIN_PASSWORD=        # Password del admin de la tienda
@@ -172,7 +172,7 @@ estos registros A.
 
 ```bash
 ssh usuario@servidor
-cd /opt/ecommerce/Ecommerce
+cd /opt/atlas-commerce/AtlasCommerce
 
 # Traer últimos cambios
 git pull
@@ -256,8 +256,8 @@ Si usás DNS-01, agregás el módulo de tu proveedor en el Caddyfile:
 Cada servidor tiene su propio cron job que dumpa la BD a S3:
 
 ```bash
-# /etc/cron.d/ecommerce-backup
-0 3 * * * root /opt/ecommerce/Ecommerce/docker/instances/<instancia>/backup.sh >> /var/log/ecommerce-backup.log 2>&1
+# /etc/cron.d/atlas-commerce-backup
+0 3 * * * root /opt/atlas-commerce/AtlasCommerce/docker/instances/<instancia>/backup.sh >> /var/log/atlas-commerce-backup.log 2>&1
 ```
 
 Script `backup.sh` (crear en cada instancia):
@@ -266,11 +266,11 @@ Script `backup.sh` (crear en cada instancia):
 #!/bin/sh
 set -e
 
-cd /opt/ecommerce/Ecommerce/docker/instances/<instancia>
+cd /opt/atlas-commerce/AtlasCommerce/docker/instances/<instancia>
 
 # Nombre del archivo
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-BACKUP_FILE="/tmp/ecommerce-${TIMESTAMP}.sql.gz"
+BACKUP_FILE="/tmp/atlas-commerce-${TIMESTAMP}.sql.gz"
 
 # Dump de la BD
 docker compose exec -T db pg_dump -U ${DB_USERNAME} ${DB_DATABASE} | gzip > "$BACKUP_FILE"
@@ -310,7 +310,7 @@ Mínimo viable:
 Por instancia:
 
 ```yaml
-# /opt/ecommerce/Ecommerce/docker/instances/<instancia>/docker-compose.monitoring.yml
+# /opt/atlas-commerce/AtlasCommerce/docker/instances/<instancia>/docker-compose.monitoring.yml
 # (opcional, para producción)
 services:
   prometheus:
@@ -444,7 +444,7 @@ El comando es idempotente: agrega Morales Store sin tocar MM Boutique.
 ```mermaid
 flowchart TD
     A[Comprar dominio + apuntar DNS] --> B[Setup servidor: Docker, Git]
-    B --> C[git clone Ecommerce]
+    B --> C[git clone AtlasCommerce]
     C --> D[cd docker/instances/<nombre>]
     D --> E[cp .env.example .env]
     E --> F[Editar .env: passwords, APP_KEY]
