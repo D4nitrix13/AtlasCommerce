@@ -1,0 +1,62 @@
+AtlasCommerce
+Copyright © 2026 Daniel Pérez (D4nitrix13). Todos los derechos reservados.
+
+================================================================================
+SOFTWARE PROPIETARIO — TODOS LOS DERECHOS RESERVADOS
+================================================================================
+
+Este software y su documentación asociada (en adelante, "el Software") son
+propiedad exclusiva de Daniel Pérez (D4nitrix13) y están protegidos por las
+leyes de propiedad intelectual y tratados internacionales aplicables.
+
+El Software NO es open source. NO se distribuye bajo ninguna licencia de código
+abierto (incluyendo, sin limitación, MIT, BSD, Apache 2.0 o GPL — referencias
+históricas de los headers originales del proyecto antes de su reclasificación
+como propietario).
+
+Queda expresamente PROHIBIDO, salvo autorización escrita previa del titular de
+los derechos:
+
+  1. Copiar, reproducir o duplicar el Software, total o parcialmente.
+  2. Modificar, adaptar, traducir, descompilar, realizar ingeniería inversa o
+     derivar obras del Software.
+  3. Redistribuir, publicar, sublicenciar, vender, alquilar, arrendar o
+     transferir el Software a terceros bajo cualquier título.
+  4. Utilizar el Software para fines comerciales sin un acuerdo escrito.
+  5. Extraer o reutilizar componentes individuales fuera del contexto del
+     Software en su forma distribuida.
+  6. Remover, alterar u ocultar cualquier aviso de copyright, marca,
+     marca registrada o leyenda de propiedad contenida en el Software.
+
+El Software se proporciona "TAL CUAL", sin garantía de ningún tipo, expresa o
+implícita, incluyendo pero sin limitarse a garantías de comerciabilidad,
+idoneidad para un propósito particular y no infracción. En ningún caso el
+titular será responsable de ningún reclamo, daño u otra responsabilidad,
+ya sea en una acción de contrato, agravio o de otro tipo, que surja de, fuera
+de o en conexión con el Software o el uso u otros tratos en el Software.
+
+================================================================================
+CONSULTAS SOBRE LICENCIAMIENTO
+================================================================================
+
+Para consultas sobre licenciamiento comercial, evaluación, integración con
+terceros o cualquier uso que no esté explícitamente autorizado arriba,
+contactar al titular de los derechos:
+
+  Daniel Pérez (D4nitrix13)
+  Email: licensing@atlas-commerce.dev
+  Repositorio: https://github.com/D4nitrix13/AtlasCommerce
+
+================================================================================
+ARCHIVOS DE TERCEROS
+================================================================================
+
+El Software puede incluir componentes de terceros con sus propias licencias.
+Dichas licencias se conservan en sus respectivos archivos LICENSE dentro del
+directorio de cada componente y no se ven afectadas por este aviso. La
+presencia de un componente de terceros NO implica la concesión de derechos
+sobre el Software en su conjunto.
+
+================================================================================
+
+Última actualización: 2026-09-09

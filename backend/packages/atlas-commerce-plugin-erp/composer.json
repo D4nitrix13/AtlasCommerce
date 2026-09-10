@@ -3,7 +3,7 @@
     "name": "d4nitrix13/atlas-commerce-plugin-erp",
     "description": "ERP integration plugin for the AtlasCommerce platform.",
     "type": "atlas-commerce-plugin",
-    "license": "MIT",
+    "license": "proprietary",
     "require": {
         "php": "^8.3",
         "laravel/framework": "^13.8"
