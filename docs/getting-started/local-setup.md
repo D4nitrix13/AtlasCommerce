@@ -21,7 +21,7 @@ Cliente                                  Tu host (127.0.0.1)
 ## 2. Script automático (recomendado)
 
 ```bash
-cd Ecommerce
+cd AtlasCommerce
 ./scripts/setup-local.sh
 ```
 

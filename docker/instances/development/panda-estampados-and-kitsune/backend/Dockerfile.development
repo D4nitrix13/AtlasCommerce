@@ -59,8 +59,8 @@ RUN /bin/chown -R www-data:www-data /var/www/html
 
 # Composer install con dev dependencies (Pint, PHPStan, IDE Helper).
 COPY backend/composer.json backend/composer.lock ./
-# El plugin `d4nitrix13/ecommerce-plugin-erp` está como repositorio
-# `path` en composer.json → necesita `packages/ecommerce-plugin-erp`
+# El plugin `d4nitrix13/atlas-commerce-plugin-erp` está como repositorio
+# `path` en composer.json → necesita `packages/atlas-commerce-plugin-erp`
 # en el WORKDIR antes del install.
 COPY backend/packages ./packages
 

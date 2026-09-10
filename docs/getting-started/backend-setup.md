@@ -14,7 +14,7 @@ php artisan key:generate
 Editá `backend/.env` con tus valores locales:
 
 ```env
-APP_NAME=Ecommerce
+APP_NAME="AtlasCommerce"
 APP_ENV=local
 APP_KEY=base64:GENERADO_POR_KEY:GENERATE
 APP_DEBUG=true

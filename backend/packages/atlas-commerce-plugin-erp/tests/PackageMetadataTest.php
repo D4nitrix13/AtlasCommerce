@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace D4nitrix13\EcommercePluginErp\Tests\Unit;
+namespace D4nitrix13\AtlasCommercePluginErp\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
@@ -16,9 +16,9 @@ final class PackageMetadataTest extends TestCase
             flags: JSON_THROW_ON_ERROR,
         );
 
-        self::assertSame('ecommerce-plugin', $package['type']);
+        self::assertSame('atlas-commerce-plugin', $package['type']);
         self::assertContains(
-            'D4nitrix13\\EcommercePluginErp\\EcommercePluginErpServiceProvider',
+            'D4nitrix13\\AtlasCommercePluginErp\\AtlasCommercePluginErpServiceProvider',
             $package['extra']['laravel']['providers'],
         );
     }

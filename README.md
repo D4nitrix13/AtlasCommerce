@@ -1,8 +1,11 @@
-# Ecommerce
+# AtlasCommerce
 
-Sistema web de gestión empresarial multi-tienda para la comercialización de
-merchandising personalizado, productos de cultura japonesa, videojuegos, anime,
-artículos textiles, cerámica, vidrio, madera, aluminio y regalos corporativos.
+Plataforma multi-tienda para la gestión y comercialización de merchandising
+personalizado, productos de cultura japonesa, videojuegos, anime, artículos
+textiles, cerámica, vidrio, madera, aluminio y regalos corporativos. Construida
+sobre Laravel 13 + Astro 7, pensada para correr múltiples tiendas (Panda
+Estampados, Kitsune, MM Boutique, Morales Store) sobre una base de código
+compartida con resolución por dominio.
 
 ## Descripción
 
@@ -44,7 +47,7 @@ su dominio.
 ## Estructura del Proyecto
 
 ```txt
-Ecommerce/
+AtlasCommerce/
 ├── backend/                  # API REST — Laravel 13
 │   ├── app/                  # Lógica de aplicación
 │   ├── database/             # Migraciones, seeds, factories
@@ -223,4 +226,19 @@ artisan/vsftpd local en tu host.
 
 ## Licencia
 
-MIT
+**Software propietario** — Copyright © 2026 Daniel Pérez (D4nitrix13). Todos
+los derechos reservados. NO es código abierto; no se distribuye bajo ninguna
+licencia pública (MIT, BSD, Apache, GPL u otra).
+
+Para licenciamiento comercial, integración con terceros o cualquier uso que
+no esté explícitamente autorizado, contactar al titular. Ver
+[`LICENSE`](LICENSE) para los términos completos y
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md),
+[`SECURITY.md`](SECURITY.md) y
+[`SUPPORT.md`](SUPPORT.md) para los procesos formales del proyecto.
+
+> ⚠️ Este proyecto contiene referencias históricas a "MIT" en headers de
+> archivos individuales (decuando el repositorio se distribuía como código
+> abierto). Esas referencias son vestigio del periodo open-source previo y
+> **no otorgan ningún permiso** bajo la licencia actual. El Software en su
+> conjunto se rige exclusivamente por el archivo `LICENSE` en la raíz.

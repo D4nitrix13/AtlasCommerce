@@ -13,7 +13,7 @@ sudo nano /etc/hosts
 Agregar al final:
 
 ```txt
-# Ecommerce local — multi-tienda
+# AtlasCommerce local — multi-tienda
 127.0.0.1   panda-estampados.com
 127.0.0.1   www.panda-estampados.com
 127.0.0.1   admin.panda-estampados.com
@@ -27,7 +27,7 @@ One-liner:
 ```bash
 sudo bash -c 'cat >> /etc/hosts <<EOF
 
-# Ecommerce local — multi-tienda
+# AtlasCommerce local — multi-tienda
 127.0.0.1   panda-estampados.com
 127.0.0.1   www.panda-estampados.com
 127.0.0.1   admin.panda-estampados.com

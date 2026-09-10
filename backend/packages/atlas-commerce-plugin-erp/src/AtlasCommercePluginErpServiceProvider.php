@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace D4nitrix13\EcommercePluginErp;
+namespace D4nitrix13\AtlasCommercePluginErp;
 
 use Illuminate\Support\ServiceProvider;
 
-final class EcommercePluginErpServiceProvider extends ServiceProvider
+final class AtlasCommercePluginErpServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
@@ -22,13 +22,13 @@ final class EcommercePluginErpServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(paths: __DIR__.'/../database/migrations');
         $this->loadViewsFrom(
             path: __DIR__.'/../resources/views',
-            namespace: 'ecommerce-plugin-erp',
+            namespace: 'atlas-commerce-plugin-erp',
         );
         $this->publishes([
             __DIR__.'/../config/erp.php' => config_path('erp.php'),
-        ], groups: 'ecommerce-plugin-erp-config');
+        ], groups: 'atlas-commerce-plugin-erp-config');
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/ecommerce-plugin-erp'),
-        ], groups: 'ecommerce-plugin-erp-views');
+            __DIR__.'/../resources/views' => resource_path('views/vendor/atlas-commerce-plugin-erp'),
+        ], groups: 'atlas-commerce-plugin-erp-views');
     }
 }

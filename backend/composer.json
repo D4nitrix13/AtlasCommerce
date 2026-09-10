@@ -7,11 +7,11 @@
         "laravel",
         "framework"
     ],
-    "license": "MIT",
+    "license": "proprietary",
     "repositories": [
         {
             "type": "path",
-            "url": "packages/ecommerce-plugin-erp",
+            "url": "packages/atlas-commerce-plugin-erp",
             "options": {
                 "symlink": true
             }
@@ -19,7 +19,7 @@
     ],
     "require": {
         "php": "^8.4",
-        "d4nitrix13/ecommerce-plugin-erp": "dev-main",
+        "d4nitrix13/atlas-commerce-plugin-erp": "dev-main",
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.0",

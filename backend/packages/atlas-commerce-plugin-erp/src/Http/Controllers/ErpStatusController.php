@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace D4nitrix13\EcommercePluginErp\Http\Controllers;
+namespace D4nitrix13\AtlasCommercePluginErp\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;

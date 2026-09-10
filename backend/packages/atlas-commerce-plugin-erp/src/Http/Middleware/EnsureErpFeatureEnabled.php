@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace D4nitrix13\EcommercePluginErp\Http\Middleware;
+namespace D4nitrix13\AtlasCommercePluginErp\Http\Middleware;
 
 use Closure;
 use Core\Tenant\Application\StoreContextService;

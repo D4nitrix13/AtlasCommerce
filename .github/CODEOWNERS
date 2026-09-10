@@ -1,0 +1,12 @@
+# Cada path requiere review de su owner antes de mergear a master.
+# Reglas de GitHub:
+#   - Formato: `<path>@<owner>`
+#   - El último patrón coincidente gana.
+#   - Comentarios con `#` son ignorados.
+#   - Sin @ al inicio hace que ese path NO requiera review (no abuse).
+#
+# AtlasCommerce — owner único en la primera fase del proyecto.
+# Cuando entren más mantenedores, separá por dominio.
+
+# Default: review del owner.
+* @D4nitrix13
