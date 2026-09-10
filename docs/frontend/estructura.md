@@ -1,4 +1,4 @@
-# Frontend Structure - Ecommerce Astro
+# Frontend Structure — AtlasCommerce Astro
 
 Este documento explica la estructura del frontend del
 ecommerce construido con `Astro`, `Tailwind`, `React` y
@@ -278,7 +278,7 @@ Estructura actual:
 src/components/
 ├── admin/
 ├── charts/
-├── ecommerce/
+├── atlas-commerce/
 ├── forms/
 ├── public/
 ├── tables/
@@ -296,7 +296,7 @@ Estructura recomendada:
 src/components/
 ├── admin/
 ├── charts/
-├── ecommerce/
+├── atlas-commerce/
 ├── forms/
 ├── storefront/
 ├── tables/
@@ -355,12 +355,12 @@ Si un componente solo se usa dentro de /admin, debe vivir
 en src/components/admin.
 ```
 
-## Sección components ecommerce
+## Sección components atlas-commerce
 
 Ubicación:
 
 ```txt
-src/components/ecommerce/
+src/components/atlas-commerce/
 ```
 
 Responsabilidad:
@@ -376,7 +376,7 @@ Responsabilidad:
 Contenido actual:
 
 ```txt
-src/components/ecommerce/
+src/components/atlas-commerce/
 ├── cart/
 └── checkout/
 ```
@@ -393,7 +393,7 @@ Regla recomendada:
 
 ```txt
 Si el componente pertenece al flujo de compra del cliente,
-debe vivir en ecommerce.
+debe vivir en atlas-commerce.
 ```
 
 ## Sección components storefront

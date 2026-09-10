@@ -52,7 +52,7 @@ frontend/
 ```txt
 ui/ ← generic, no business rules
 admin/ ← only for /admin
-ecommerce/ ← purchase flow (cart, checkout)
+atlas-commerce/ ← purchase flow (cart, checkout)
 storefront/ ← public store (header, footer, products)
 charts/ ← visualizations
 forms/ ← reusable forms
@@ -94,11 +94,11 @@ admin/
 
 > If a component is **only** used inside `/admin`, it lives here.
 
-### `src/components/ecommerce/` - purchase flow
+### `src/components/atlas-commerce/` - purchase flow
 
 ```txt
-ecommerce/cart/ # CartItem, CartSummary
-ecommerce/checkout/ # CheckoutForm
+atlas-commerce/cart/ # CartItem, CartSummary
+atlas-commerce/checkout/ # CheckoutForm
 ```
 
 ### `src/components/storefront/` - public store
