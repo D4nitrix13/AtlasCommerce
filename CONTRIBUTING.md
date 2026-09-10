@@ -1,4 +1,8 @@
-# Contributing — Panda Estampados / Kitsune Store
+# Contributing — AtlasCommerce
+
+> Plataformas: **Panda Estampados**, **Kitsune Store**, **MM Boutique** y
+> **Morales Store** corren sobre esta base común. Las reglas que siguen aplican
+> a toda la organización multi-tienda.
 
 > **Quality Gate.** Este proyecto trata el código como producto, no como descarte.
 > Todo cambio debe cumplir los principios definidos aquí. Si no los cumplís, el

@@ -1,8 +1,11 @@
-# Ecommerce
+# AtlasCommerce
 
-Sistema web de gestión empresarial multi-tienda para la comercialización de
-merchandising personalizado, productos de cultura japonesa, videojuegos, anime,
-artículos textiles, cerámica, vidrio, madera, aluminio y regalos corporativos.
+Plataforma multi-tienda para la gestión y comercialización de merchandising
+personalizado, productos de cultura japonesa, videojuegos, anime, artículos
+textiles, cerámica, vidrio, madera, aluminio y regalos corporativos. Construida
+sobre Laravel 13 + Astro 7, pensada para correr múltiples tiendas (Panda
+Estampados, Kitsune, MM Boutique, Morales Store) sobre una base de código
+compartida con resolución por dominio.
 
 ## Descripción
 
@@ -44,7 +47,7 @@ su dominio.
 ## Estructura del Proyecto
 
 ```txt
-Ecommerce/
+AtlasCommerce/
 ├── backend/                  # API REST — Laravel 13
 │   ├── app/                  # Lógica de aplicación
 │   ├── database/             # Migraciones, seeds, factories

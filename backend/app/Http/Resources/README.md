@@ -1,4 +1,4 @@
-# API Resources - Ecommerce Backend
+# API Resources — AtlasCommerce Backend
 
 Este directorio contiene los API Resources del backend Laravel. Los Resources transforman modelos Eloquent en respuestas JSON limpias, controladas y seguras para el frontend.
 

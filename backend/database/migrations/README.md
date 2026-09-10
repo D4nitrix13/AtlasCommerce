@@ -1,4 +1,4 @@
-# Migraciones del Ecommerce
+# Migraciones de AtlasCommerce
 
 Este directorio contiene las migraciones de base de datos del store definido en `APP_NAME`.
 
