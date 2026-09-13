@@ -248,7 +248,7 @@ services:
     container_name: mm-boutique-dev-pgadmin
     restart: unless-stopped
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@mm-boutique.test}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@mm-boutique.example}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
       - PGADMIN_LISTEN_PORT=80
     ports:
