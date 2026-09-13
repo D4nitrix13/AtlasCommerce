@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "859ad32e54dcf28fda7f51f42bc3693b",
+    "content-hash": "8e6ddb0a9c0f6e4788edf63a43de38bd",
     "packages": [
         {
             "name": "brick/math",
@@ -212,12 +212,12 @@
             "time": "2025-08-20T19:15:30+00:00"
         },
         {
-            "name": "d4nitrix13/ecommerce-plugin-erp",
+            "name": "d4nitrix13/atlas-commerce-plugin-erp",
             "version": "dev-main",
             "dist": {
                 "type": "path",
-                "url": "packages/ecommerce-plugin-erp",
-                "reference": "0b070cb3f2780d384de3a9824e29349fb2b63508"
+                "url": "packages/atlas-commerce-plugin-erp",
+                "reference": "a25dc671182383371d056218e8847da4aa1d1489"
             },
             "require": {
                 "laravel/framework": "^13.8",
@@ -226,28 +226,28 @@
             "require-dev": {
                 "phpunit/phpunit": "^12.5"
             },
-            "type": "ecommerce-plugin",
+            "type": "atlas-commerce-plugin",
             "extra": {
                 "laravel": {
                     "providers": [
-                        "D4nitrix13\\EcommercePluginErp\\EcommercePluginErpServiceProvider"
+                        "D4nitrix13\\AtlasCommercePluginErp\\AtlasCommercePluginErpServiceProvider"
                     ]
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "D4nitrix13\\EcommercePluginErp\\": "src/"
+                    "D4nitrix13\\AtlasCommercePluginErp\\": "src/"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "D4nitrix13\\EcommercePluginErp\\Tests\\": "tests/"
+                    "D4nitrix13\\AtlasCommercePluginErp\\Tests\\": "tests/"
                 }
             },
             "license": [
-                "MIT"
+                "proprietary"
             ],
-            "description": "ERP integration plugin for the Ecommerce platform.",
+            "description": "ERP integration plugin for the AtlasCommerce platform.",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -10165,7 +10165,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "d4nitrix13/ecommerce-plugin-erp": 20
+        "d4nitrix13/atlas-commerce-plugin-erp": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
