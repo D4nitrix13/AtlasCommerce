@@ -9,7 +9,7 @@ cmd_nuke() {
     local store="$2"
     local svc="${3:-}"
     log_warn "⚠  nuke ELIMINA VOLÚMENES. Esto borra la base de datos completa."
-    /usr/bin/read -rp "¿Confirmás? escribí 'yes' para continuar: " confirm
+    read -rp "¿Confirmás? escribí 'yes' para continuar: " confirm
     [[ "$confirm" == "yes" ]] || { log_info "Cancelado."; exit 0; }
     while IFS=$'\t' read -r inst resolved_svc; do
         if [[ -n "$resolved_svc" ]]; then

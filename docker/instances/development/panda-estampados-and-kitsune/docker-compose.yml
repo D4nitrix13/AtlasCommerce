@@ -17,10 +17,6 @@
 services:
   postgres:
     image: ${POSTGRES_IMAGE:-postgis/postgis:18-3.6}
-    # Run as postgres user (UID 999). El command: con ruta absoluta
-    # bypasea el docker-entrypoint.sh (gosu postgres), por eso hay que
-    # setear user: explícito. Sin esto, postgres rehúsa correr como root.
-    user: "999:999"
     container_name: panda-estampados-and-kitsune-dev-postgres
     restart: unless-stopped
     env_file:
@@ -28,10 +24,16 @@ services:
       - ../../../versions.env
     ports:
       - "${POSTGRES_PORT:-6432}:5432"
-    command:
-      - /usr/lib/postgresql/18/bin/postgres
-      - -c
-      - config_file=/etc/postgresql/postgresql.conf
+    # El entrypoint oficial de la imagen `postgis/postgis:18-3.6` se encarga
+    # de:
+    #   1. Correr `initdb` si $PGDATA está vacío (primera instalación).
+    #   2. Aplicar los scripts en /docker-entrypoint-initdb.d/.
+    #   3. Hacer `gosu postgres` para correr el proceso final como postgres.
+    # El `command:` pasa `postgres -c config_file=...` para que el entrypoint
+    # reconozca el primer arg como `postgres` y aplique el gosu correctamente.
+    # (Si se pasa la ruta absoluta `/usr/lib/postgresql/18/bin/postgres`, el
+    # entrypoint no la matchea contra el string `postgres` y se saltea el
+    # gosu → postgres arranca como root y refuse start.)
     volumes:
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./conf/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
