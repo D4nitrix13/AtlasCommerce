@@ -99,6 +99,20 @@ instance_env_file() {
     fi
 }
 
+# instance_env_path <name>
+# Variante de instance_env_file() que devuelve SOLO la ruta absoluta
+# al .env (sin el flag --env-file). Usada por scripts que necesitan
+# grep/awk sobre el archivo (instance_env_file no sirve porque el flag
+# seria interpretado como opción).
+instance_env_path() {
+    local name="$1"
+    local dir
+    dir="$(instance_compose_dir "$name")"
+    if [[ -f "${dir}/environment/.env" ]]; then
+        echo "${dir}/environment/.env"
+    fi
+}
+
 # resolve_targets <stage> <store> [svc]
 # Variante canónica: stage y store como args separados. Imprime
 # líneas `<instancia>\t<servicio>`, donde `<instancia>` está en

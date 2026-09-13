@@ -63,11 +63,19 @@ cmd_setup() {
         local store_of_inst="${inst#*:}"
 
         # Esperar Postgres healthy antes de cualquier comando artisan.
-        local pg_container="${inst}-postgres"
-        local attempts=0
-        local max_attempts=30
-        while ! /usr/bin/docker exec -i "$pg_container" \
-            /usr/bin/pg_isready -U "${DB_USERNAME:-postgres}" >/dev/null 2>&1; do
+        # Dev: container local <slug>-dev-postgres. Prod: DB externa, sin
+        # container local -> skipea el check (asume DB ya operativa).
+        local pg_container=""
+        if [[ "$stage_of_inst" == "development" ]]; then
+            pg_container="${store_of_inst}-dev-postgres"
+        fi
+        if [[ -n "$pg_container" ]] && \
+            /usr/bin/docker ps --format '{{.Names}}' 2>/dev/null \
+                | /usr/bin/grep -qx "$pg_container"; then
+            local attempts=0
+            local max_attempts=30
+            while ! /usr/bin/docker exec -i "$pg_container" \
+                /usr/bin/pg_isready -U "${DB_USERNAME:-${store_of_inst//-/_}}" >/dev/null 2>&1; do
             attempts=$((attempts + 1))
             if [[ $attempts -ge $max_attempts ]]; then
                 log_err "Postgres de ${inst} no respondio despues de ${max_attempts} intentos"
@@ -75,6 +83,7 @@ cmd_setup() {
             fi
             /usr/bin/sleep 1
         done
+        fi
 
         log_info "storage:link"
         docker_compose "$inst" exec -T backend \
@@ -92,7 +101,7 @@ cmd_setup() {
 
         log_info "tenants:bootstrap (seed de la instancia)"
         local seed_file
-        seed_file="$(/usr/bin/grep -E '^TENANTS_SEED_FILE=' "$(instance_env_file "$inst")" | /usr/bin/cut -d= -f2-)"
+        seed_file="$(/usr/bin/grep -E '^TENANTS_SEED_FILE=' "$(instance_env_path "$inst")" | /usr/bin/cut -d= -f2-)"
         if [[ -n "$seed_file" && -f "$(instance_compose_dir "$inst")/${seed_file#/}" ]]; then
             docker_compose "$inst" exec -T backend \
                 /usr/local/bin/php artisan tenants:bootstrap --force 2>&1 | /usr/bin/grep -E "(Creando|tenant|ERROR)" || true

@@ -92,11 +92,18 @@ cmd_seed_db() {
     # Step 1/3: Esperar Postgres healthy
     # ──────────────────────────────────────────────────────────
     log_step "1/3" "Esperando Postgres healthy"
-    local pg_container="${first_inst}-postgres"
-    local attempts=0
-    local max_attempts=30
-    while ! /usr/bin/docker exec -i "$pg_container" \
-        /usr/bin/pg_isready -U "${DB_USERNAME:-postgres}" >/dev/null 2>&1; do
+    # Dev: container local <slug>-dev-postgres. Prod: DB externa, skip.
+    local pg_container=""
+    if [[ "$stage" == "development" ]]; then
+        pg_container="${store}-dev-postgres"
+    fi
+    if [[ -n "$pg_container" ]] && \
+        /usr/bin/docker ps --format '{{.Names}}' 2>/dev/null \
+            | /usr/bin/grep -qx "$pg_container"; then
+        local attempts=0
+        local max_attempts=30
+while ! /usr/bin/docker exec -i "$pg_container" \
+        /usr/bin/pg_isready -U "${DB_USERNAME:-${store//-/_}}" >/dev/null 2>&1; do
         attempts=$((attempts + 1))
         if [[ $attempts -ge $max_attempts ]]; then
             log_err "Postgres no respondio despues de ${max_attempts} intentos (~30s)"
@@ -104,6 +111,7 @@ cmd_seed_db() {
         fi
         /usr/bin/sleep 1
     done
+    fi
     log_ok "Postgres healthy"
 
     # ──────────────────────────────────────────────────────────

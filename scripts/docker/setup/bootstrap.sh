@@ -62,11 +62,18 @@ cmd_bootstrap() {
     # Step 1/2: Esperar Postgres healthy
     # ──────────────────────────────────────────────────────────
     log_step "1/2" "Esperando Postgres healthy"
-    local pg_container="${first_inst}-postgres"
-    local attempts=0
-    local max_attempts=30
-    while ! /usr/bin/docker exec -i "$pg_container" \
-        /usr/bin/pg_isready -U "${DB_USERNAME:-postgres}" >/dev/null 2>&1; do
+    # Dev: container local <slug>-dev-postgres. Prod: DB externa, skip.
+    local pg_container=""
+    if [[ "$stage" == "development" ]]; then
+        pg_container="${store}-dev-postgres"
+    fi
+    if [[ -n "$pg_container" ]] && \
+        /usr/bin/docker ps --format '{{.Names}}' 2>/dev/null \
+            | /usr/bin/grep -qx "$pg_container"; then
+        local attempts=0
+        local max_attempts=30
+        while ! /usr/bin/docker exec -i "$pg_container" \
+            /usr/bin/pg_isready -U "${DB_USERNAME:-${store//-/_}}" >/dev/null 2>&1; do
         attempts=$((attempts + 1))
         if [[ $attempts -ge $max_attempts ]]; then
             log_err "Postgres no respondio despues de ${max_attempts} intentos (~30s)"
@@ -74,6 +81,7 @@ cmd_bootstrap() {
         fi
         /usr/bin/sleep 1
     done
+    fi
     log_ok "Postgres healthy"
 
     # ──────────────────────────────────────────────────────────
@@ -81,7 +89,7 @@ cmd_bootstrap() {
     # ──────────────────────────────────────────────────────────
     log_step "2/2" "Verificando APP_KEY"
     local app_key
-    app_key="$(/usr/bin/grep -E '^APP_KEY=' "$(instance_env_file "$first_inst")" | /usr/bin/cut -d= -f2-)"
+    app_key="$(/usr/bin/grep -E '^APP_KEY=' "$(instance_env_path "$first_inst")" | /usr/bin/cut -d= -f2-)"
     if [[ -z "$app_key" || "$app_key" == *"GENERAR_CON_KEY"* || "$app_key" == *"GENERATE"* ]]; then
         log_info "APP_KEY no seteada o es placeholder, generando..."
         docker_compose "$first_inst" exec -T backend \
