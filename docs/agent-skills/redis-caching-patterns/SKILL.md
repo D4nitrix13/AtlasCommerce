@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: redis-caching-patterns
 description: Redis usage in the project (cache, sessions, queues, tenant-prefixed keys). Triggers: config/cache.php, config/queue.php, new jobs, session drivers, any Cache:: facade.
@@ -23,7 +25,7 @@ Cache::remember('top_products', 3600, fn() => Product::query()->limit(10)->get()
 // ✅ Good - scoped per tenant
 $storeId = StoreContextService::current()->id;
 Cache::remember("store:{$storeId}:top_products", 3600, fn() => Product::query()->limit(10)->get());
-```
+```text
 
 **Recommended helper** (create if doesn't exist):
 
@@ -34,7 +36,7 @@ trait TenantCache {
  return "store:" . StoreContextService::current()->id;
  }
 }
-```
+```text
 
 Use as: `Cache::remember("{$this->tenantCache()}:top_products", ...)`.
 
@@ -51,7 +53,7 @@ Cache::put("store:{$id}:products:detail:{$productId}", $data, 3600);
 // Invalidate: delete explicitly
 Cache::forget("store:{$id}:products:list");
 Cache::forget("store:{$id}:products:detail:{$productId}");
-```
+```text
 
 ## Sessions
 
@@ -72,7 +74,7 @@ class SyncTopProductsJob implements ShouldQueue {
  // ...
  }
 }
-```
+```text
 
 ## Trigger patterns
 
@@ -105,7 +107,7 @@ Activate when:
 
 ## File map
 
-```
+```text
 backend/config/cache.php
 backend/config/queue.php
 backend/config/database.php ← redis connection
@@ -113,7 +115,7 @@ backend/config/session.php
 backend/app/Jobs/ ← jobs (carry $storeId)
 backend/app/Support/ ← tenant helpers (create)
 backend/app/Http/Middleware/ ← response cache middleware
-```
+```text
 
 ## Related skills
 

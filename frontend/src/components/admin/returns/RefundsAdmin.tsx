@@ -1,23 +1,23 @@
-import { useEffect, useState, type ReactElement } from "react";
-import { authedFetch } from "../../../lib/auth";
-import { type ApiError } from "../../../lib/api";
-import { API_ENDPOINTS } from "../../../lib/endpoints";
-import { formatMoney, formatDateTime } from "../../../lib/formatters";
-import { useTranslations } from "../../../i18n";
-import type { Refund, RefundStatus, RefundWithRelations } from "../../../types/returns";
-import type { PaginatedResponse } from "../../../types/api";
-import { REFUND_STATUS_COLORS } from "../../../types/returns";
+import { useEffect, useState, type ReactElement } from 'react';
+import { authedFetch } from '../../../lib/auth';
+import { type ApiError } from '../../../lib/api';
+import { API_ENDPOINTS } from '../../../lib/endpoints';
+import { formatMoney, formatDateTime } from '../../../lib/formatters';
+import { useTranslations } from '../../../i18n';
+import type { Refund, RefundStatus, RefundWithRelations } from '../../../types/returns';
+import type { PaginatedResponse } from '../../../types/api';
+import { REFUND_STATUS_COLORS } from '../../../types/returns';
 
 const REFUND_TRANSITIONS: Record<RefundStatus, RefundStatus[]> = {
-  pending: ["completed", "failed"],
+  pending: ['completed', 'failed'],
   completed: [],
   failed: [],
 };
 
 const STATUS_LABEL_KEYS = {
-  pending: "admin.refunds.status.pending",
-  completed: "admin.refunds.status.completed",
-  failed: "admin.refunds.status.failed",
+  pending: 'admin.refunds.status.pending',
+  completed: 'admin.refunds.status.completed',
+  failed: 'admin.refunds.status.failed',
 } as const satisfies Record<RefundStatus, string>;
 
 export default function RefundsAdmin(): ReactElement {
@@ -32,7 +32,7 @@ export default function RefundsAdmin(): ReactElement {
     setError(null);
     try {
       const response = await authedFetch<PaginatedResponse<RefundWithRelations>>(
-        API_ENDPOINTS.returns.refunds,
+        API_ENDPOINTS.returns.refunds
       );
       setRefunds(response.data);
     } catch (apiError) {
@@ -48,36 +48,32 @@ export default function RefundsAdmin(): ReactElement {
 
   const handleTransition = async (
     refund: RefundWithRelations,
-    targetStatus: RefundStatus,
+    targetStatus: RefundStatus
   ): Promise<void> => {
     setPendingId(refund.id);
     try {
       const endpoint =
-        targetStatus === "completed"
+        targetStatus === 'completed'
           ? `${API_ENDPOINTS.returns.refunds}/${refund.id}/process`
           : `${API_ENDPOINTS.returns.refunds}/${refund.id}/fail`;
 
-      await authedFetch<{ data: Refund }>(endpoint, { method: "POST" });
+      await authedFetch<{ data: Refund }>(endpoint, { method: 'POST' });
       await loadRefunds();
     } catch (apiError) {
-      window.alert(
-        (apiError as ApiError).message || "No se pudo procesar el refund.",
-      );
+      window.alert((apiError as ApiError).message || 'No se pudo procesar el refund.');
     } finally {
       setPendingId(null);
     }
   };
 
   if (isLoading) {
-    return (
-      <div className="p-8 text-center text-gray-500">{t("admin.refunds.loading")}</div>
-    );
+    return <div className="p-8 text-center text-gray-500">{t('admin.refunds.loading')}</div>;
   }
 
   if (error) {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-        {t("admin.refunds.error", { message: error })}
+        {t('admin.refunds.error', { message: error })}
       </div>
     );
   }
@@ -85,7 +81,7 @@ export default function RefundsAdmin(): ReactElement {
   if (refunds.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
-        {t("admin.refunds.table.empty")}
+        {t('admin.refunds.table.empty')}
       </div>
     );
   }
@@ -95,12 +91,12 @@ export default function RefundsAdmin(): ReactElement {
       <table className="w-full text-left text-sm">
         <thead className="bg-gray-50 text-xs uppercase text-gray-600">
           <tr>
-            <th className="px-4 py-3">{t("admin.refunds.table.id")}</th>
-            <th className="px-4 py-3">{t("admin.refunds.table.returnRequest")}</th>
-            <th className="px-4 py-3">{t("admin.refunds.table.amount")}</th>
-            <th className="px-4 py-3">{t("admin.refunds.table.status")}</th>
-            <th className="px-4 py-3">{t("admin.refunds.table.processedAt")}</th>
-            <th className="px-4 py-3 text-right">{t("admin.refunds.table.actions")}</th>
+            <th className="px-4 py-3">{t('admin.refunds.table.id')}</th>
+            <th className="px-4 py-3">{t('admin.refunds.table.returnRequest')}</th>
+            <th className="px-4 py-3">{t('admin.refunds.table.amount')}</th>
+            <th className="px-4 py-3">{t('admin.refunds.table.status')}</th>
+            <th className="px-4 py-3">{t('admin.refunds.table.processedAt')}</th>
+            <th className="px-4 py-3 text-right">{t('admin.refunds.table.actions')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">

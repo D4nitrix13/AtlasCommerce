@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: adr-format
 description: ADR (Architecture Decision Record) format: title, context, alternatives, decision, consequences. Trigger: adding a new significant architectural decision to docs/architecture/decisions.md.

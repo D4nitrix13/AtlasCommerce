@@ -1,9 +1,33 @@
 ---
 const products = [
-  { name: "Camiseta Kitsune Edición Limitada", sku: "KIT-CS-001", stock: 3, status: "Crítico", statusColor: "bg-rose-100 text-rose-700" },
-  { name: "Sudadera Negra Oversize", sku: "KIT-SD-003", stock: 5, status: "Bajo", statusColor: "bg-amber-100 text-amber-700" },
-  { name: "Gorra Bordada Kitsune", sku: "KIT-GO-002", stock: 8, status: "Bajo", statusColor: "bg-amber-100 text-amber-700" },
-  { name: "Taza Personalizada Logo", sku: "KIT-TZ-001", stock: 12, status: "Normal", statusColor: "bg-emerald-100 text-emerald-700" },
+  {
+    name: 'Camiseta Kitsune Edición Limitada',
+    sku: 'KIT-CS-001',
+    stock: 3,
+    status: 'Crítico',
+    statusColor: 'bg-rose-100 text-rose-700',
+  },
+  {
+    name: 'Sudadera Negra Oversize',
+    sku: 'KIT-SD-003',
+    stock: 5,
+    status: 'Bajo',
+    statusColor: 'bg-amber-100 text-amber-700',
+  },
+  {
+    name: 'Gorra Bordada Kitsune',
+    sku: 'KIT-GO-002',
+    stock: 8,
+    status: 'Bajo',
+    statusColor: 'bg-amber-100 text-amber-700',
+  },
+  {
+    name: 'Taza Personalizada Logo',
+    sku: 'KIT-TZ-001',
+    stock: 12,
+    status: 'Normal',
+    statusColor: 'bg-emerald-100 text-emerald-700',
+  },
 ];
 ---
 
@@ -21,7 +45,9 @@ const products = [
   <div class="overflow-x-auto">
     <table class="w-full text-left text-sm">
       <thead>
-        <tr class="border-b border-slate-100 text-xs font-medium uppercase tracking-wider text-slate-500">
+        <tr
+          class="border-b border-slate-100 text-xs font-medium uppercase tracking-wider text-slate-500"
+        >
           <th class="pb-3 pr-4">Producto</th>
           <th class="pb-3 pr-4">SKU</th>
           <th class="pb-3 pr-4 text-center">Stock</th>
@@ -29,18 +55,25 @@ const products = [
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-50">
-        {products.map((p) => (
-          <tr class="group hover:bg-slate-50/50">
-            <td class="py-3 pr-4 font-medium text-slate-900">{p.name}</td>
-            <td class="py-3 pr-4 font-mono text-xs text-slate-500">{p.sku}</td>
-            <td class="py-3 pr-4 text-center font-semibold text-slate-950">{p.stock}</td>
-            <td class="py-3">
-              <span class:list={["inline-block rounded-full px-2.5 py-0.5 text-xs font-medium", p.statusColor]}>
-                {p.status}
-              </span>
-            </td>
-          </tr>
-        ))}
+        {
+          products.map((p) => (
+            <tr class="group hover:bg-slate-50/50">
+              <td class="py-3 pr-4 font-medium text-slate-900">{p.name}</td>
+              <td class="py-3 pr-4 font-mono text-xs text-slate-500">{p.sku}</td>
+              <td class="py-3 pr-4 text-center font-semibold text-slate-950">{p.stock}</td>
+              <td class="py-3">
+                <span
+                  class:list={[
+                    'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    p.statusColor,
+                  ]}
+                >
+                  {p.status}
+                </span>
+              </td>
+            </tr>
+          ))
+        }
       </tbody>
     </table>
   </div>

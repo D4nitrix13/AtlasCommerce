@@ -1,5 +1,5 @@
 ---
-import { getServerDictionary } from "../../i18n/server";
+import { getServerDictionary } from '../../i18n/server';
 
 /**
  * Layout compartido para todas las pantallas de auth (forgot password,
@@ -27,11 +27,11 @@ interface Props {
   brandName: string;
   brandLogo?: string;
   brandLogoAlt?: string;
-  topRightLink?: "signup" | "login" | "back" | "none";
+  topRightLink?: 'signup' | 'login' | 'back' | 'none';
   signupHref?: string;
   loginHref?: string;
   backHref?: string;
-  side?: "left" | "right";
+  side?: 'left' | 'right';
   background?: string;
   showIllustration?: boolean;
 }
@@ -44,17 +44,17 @@ const {
   brandName,
   brandLogo,
   brandLogoAlt,
-  topRightLink = "none",
-  signupHref = "signup",
-  loginHref = "login",
-  backHref = "login",
-  side = "left",
-  background = "bg-white",
+  topRightLink = 'none',
+  signupHref = 'signup',
+  loginHref = 'login',
+  backHref = 'login',
+  side = 'left',
+  background = 'bg-white',
   showIllustration = true,
 } = Astro.props;
 
 const t = getServerDictionary(Astro.locals.locale);
-const isReversed = side === "right";
+const isReversed = side === 'right';
 ---
 
 <div class={`min-h-screen grid lg:grid-cols-[45%_55%] ${background}`}>
@@ -62,15 +62,15 @@ const isReversed = side === "right";
     showIllustration && (
       <aside
         class:list={[
-          "hidden lg:flex relative items-center justify-center p-12 overflow-hidden",
-          isReversed ? "lg:order-2" : "lg:order-1",
+          'hidden lg:flex relative items-center justify-center p-12 overflow-hidden',
+          isReversed ? 'lg:order-2' : 'lg:order-1',
         ]}
         style="background: radial-gradient(circle at 30% 30%, #E6F7F4 0%, #ffffff 70%);"
       >
         {/* Decoración: burbujas suaves */}
-        <div class="absolute top-10 left-10 w-20 h-20 rounded-full bg-[#8FD9CD] opacity-30"></div>
-        <div class="absolute bottom-20 right-16 w-32 h-32 rounded-full bg-[#C2EBE4] opacity-40"></div>
-        <div class="absolute top-1/3 right-10 w-12 h-12 rounded-full bg-[#5BC7B5] opacity-30"></div>
+        <div class="absolute top-10 left-10 w-20 h-20 rounded-full bg-[#8FD9CD] opacity-30" />
+        <div class="absolute bottom-20 right-16 w-32 h-32 rounded-full bg-[#C2EBE4] opacity-40" />
+        <div class="absolute top-1/3 right-10 w-12 h-12 rounded-full bg-[#5BC7B5] opacity-30" />
 
         <div class="relative z-10 max-w-md text-center">
           <img
@@ -88,75 +88,87 @@ const isReversed = side === "right";
 
   <main
     class:list={[
-      "flex items-center justify-center p-4 sm:p-8 lg:p-10",
-      isReversed ? "order-2 lg:order-1" : "lg:order-2",
+      'flex items-center justify-center p-4 sm:p-8 lg:p-10',
+      isReversed ? 'order-2 lg:order-1' : 'lg:order-2',
     ]}
   >
-    {/* max-w-4xl = ~896px: el form ocupa todo el ancho disponible sin
+    {
+      /* max-w-4xl = ~896px: el form ocupa todo el ancho disponible sin
         que el card se vea apretado en mobile/tablet. Antes max-w-2xl
-        (672px) limitaba el card a 448px en viewports chicos. */}
+        (672px) limitaba el card a 448px en viewports chicos. */
+    }
     <div class="w-full max-w-4xl">
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-10">
         <div class="flex items-center gap-3 shrink-0">
-          {brandLogo && (
-            <img
-              src={brandLogo}
-              alt={brandLogoAlt ?? brandName}
-              class="h-10 w-10 shrink-0 rounded-md bg-white object-contain p-1"
-              loading="eager"
-            />
-          )}
+          {
+            brandLogo && (
+              <img
+                src={brandLogo}
+                alt={brandLogoAlt ?? brandName}
+                class="h-10 w-10 shrink-0 rounded-md bg-white object-contain p-1"
+                loading="eager"
+              />
+            )
+          }
           <span class="whitespace-nowrap text-xl font-bold italic text-slate-900">{brandName}</span>
         </div>
         <div class="flex items-center gap-4 shrink-0">
           <slot name="topRightExtra" />
-          {topRightLink === "signup" && (
-            <a
-              href={signupHref}
-              data-auth-link="signup"
-              class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
-            >
-              <slot name="topRightLink">
-                ¿No tienes cuenta? <span class="font-semibold text-[#2D9D8E]">Regístrate</span>
-              </slot>
-            </a>
-          )}
-          {topRightLink === "login" && (
-            <a
-              href={loginHref}
-              data-auth-link="login"
-              class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
-            >
-              <slot name="topRightLink">
-                ¿Ya tienes cuenta? <span class="font-semibold text-[#2D9D8E]">Inicia sesión</span>
-              </slot>
-            </a>
-          )}
-          {topRightLink === "back" && (
-            <a
-              href={backHref}
-              data-auth-link="back"
-              class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
-            >
-              <slot name="topRightLink">
-                <span class="font-semibold text-[#2D9D8E]">← Volver a iniciar sesión</span>
-              </slot>
-            </a>
-          )}
+          {
+            topRightLink === 'signup' && (
+              <a
+                href={signupHref}
+                data-auth-link="signup"
+                class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
+              >
+                <slot name="topRightLink">
+                  ¿No tienes cuenta? <span class="font-semibold text-[#2D9D8E]">Regístrate</span>
+                </slot>
+              </a>
+            )
+          }
+          {
+            topRightLink === 'login' && (
+              <a
+                href={loginHref}
+                data-auth-link="login"
+                class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
+              >
+                <slot name="topRightLink">
+                  ¿Ya tienes cuenta? <span class="font-semibold text-[#2D9D8E]">Inicia sesión</span>
+                </slot>
+              </a>
+            )
+          }
+          {
+            topRightLink === 'back' && (
+              <a
+                href={backHref}
+                data-auth-link="back"
+                class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
+              >
+                <slot name="topRightLink">
+                  <span class="font-semibold text-[#2D9D8E]">← Volver a iniciar sesión</span>
+                </slot>
+              </a>
+            )
+          }
         </div>
       </div>
 
       <slot />
 
-      {/* Footer terms con spacing correcto. El <p> wrapper está DENTRO del slot default
+      {
+        /* Footer terms con spacing correcto. El <p> wrapper está DENTRO del slot default
           para que las páginas puedan override con su propio <p slot="terms"> sin generar
-          un <p> anidado (que el navegador cierra automáticamente, dejando wrapper vacío). */}
+          un <p> anidado (que el navegador cierra automáticamente, dejando wrapper vacío). */
+      }
       <slot name="terms">
         <p class="text-center text-xs text-slate-400 mt-8">
-          {t["auth.shell.termsPrefix"]}{" "}
-          <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.termsLink"]}</a>
-          {" "}{t["auth.shell.termsAnd"] ?? "y"}{" "}
-          <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.privacyLink"]}</a>.
+          {t['auth.shell.termsPrefix']}{' '}
+          <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.termsLink']}</a>
+          {' '}{t['auth.shell.termsAnd'] ?? 'y'}{' '}
+          <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.privacyLink']}</a>.
         </p>
       </slot>
     </div>

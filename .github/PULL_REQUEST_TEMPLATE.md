@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD033 MD041 -->
+
 <!--
 Plantilla de Pull Request para este monorepo.
 

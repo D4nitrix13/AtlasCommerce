@@ -1,25 +1,24 @@
 ---
-import AuthLayout from "../../../../layouts/AuthLayout.astro";
-import AuthShell from "../../../../components/auth/AuthShell.astro";
-import RegisterForm from "../../../../components/storefront/auth/RegisterForm";
-import LanguageSwitcher from "../../../../components/ui/LanguageSwitcher";
-import { getServerDictionary } from "../../../../i18n/server";
-import { getBrandBySlug, DEFAULT_BRAND } from "../../../../config/stores";
-import { themeToBrand } from "../../../../lib/theme";
+import AuthLayout from '../../../../layouts/AuthLayout.astro';
+import AuthShell from '../../../../components/auth/AuthShell.astro';
+import RegisterForm from '../../../../components/storefront/auth/RegisterForm';
+import LanguageSwitcher from '../../../../components/ui/LanguageSwitcher';
+import { getServerDictionary } from '../../../../i18n/server';
+import { getBrandBySlug, DEFAULT_BRAND } from '../../../../config/stores';
+import { themeToBrand } from '../../../../lib/theme';
 
 const t = getServerDictionary(Astro.locals.locale);
 
-const fallbackBrand =
-  getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+const fallbackBrand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
 const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 ---
 
-<AuthLayout title={`${t["auth.signup.shell.heading"]} · ${brand.name}`}>
+<AuthLayout title={`${t['auth.signup.shell.heading']} · ${brand.name}`}>
   <AuthShell
     illustration=`/images/amico/auth/signup.svg`
-    illustrationAlt={t["auth.shell.illustration.alt"]}
-    leftHeading={t["auth.signup.shell.leftHeading"]}
-    leftBody={t["auth.signup.shell.leftBody"]}
+    illustrationAlt={t['auth.shell.illustration.alt']}
+    leftHeading={t['auth.signup.shell.leftHeading']}
+    leftBody={t['auth.signup.shell.leftBody']}
     brandName={brand.name}
     brandLogo={brand.logoPath}
     topRightLink="login"
@@ -29,9 +28,9 @@ const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-slate-900">
-        {t["auth.signup.shell.heading"]}
+        {t['auth.signup.shell.heading']}
       </h1>
-      <p class="mt-2 text-slate-500">{t["auth.signup.shell.subtitle"]}</p>
+      <p class="mt-2 text-slate-500">{t['auth.signup.shell.subtitle']}</p>
     </div>
 
     <RegisterForm client:load />

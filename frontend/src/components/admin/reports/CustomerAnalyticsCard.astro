@@ -2,17 +2,17 @@
 const chartId = `customer-analytics-${Math.random().toString(36).slice(2)}`;
 
 const stats = [
-  { label: "Total clientes", value: "2,847", change: "+8.2%", trend: "up" },
-  { label: "Nuevos este mes", value: "142", change: "+15.3%", trend: "up" },
-  { label: "Tasa de retorno", value: "34.2%", change: "+2.1%", trend: "up" },
-  { label: "Clientes activos", value: "1,892", change: "-1.4%", trend: "down" },
+  { label: 'Total clientes', value: '2,847', change: '+8.2%', trend: 'up' },
+  { label: 'Nuevos este mes', value: '142', change: '+15.3%', trend: 'up' },
+  { label: 'Tasa de retorno', value: '34.2%', change: '+2.1%', trend: 'up' },
+  { label: 'Clientes activos', value: '1,892', change: '-1.4%', trend: 'down' },
 ];
 
 const segments = [
-  { label: "Compradores frecuentes", value: 34, color: "#059669" },
-  { label: "Ocasionales", value: 28, color: "#0ea5e9" },
-  { label: "Nuevos", value: 22, color: "#8b5cf6" },
-  { label: "Inactivos", value: 16, color: "#94a3b8" },
+  { label: 'Compradores frecuentes', value: 34, color: '#059669' },
+  { label: 'Ocasionales', value: 28, color: '#0ea5e9' },
+  { label: 'Nuevos', value: 22, color: '#8b5cf6' },
+  { label: 'Inactivos', value: 16, color: '#94a3b8' },
 ];
 ---
 
@@ -25,26 +25,27 @@ const segments = [
   </div>
 
   <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-    {stats.map((s) => (
-      <div class="rounded-xl bg-slate-50 p-3">
-        <p class="text-xs font-medium text-slate-500">{s.label}</p>
-        <p class="mt-1 text-lg font-bold text-slate-950">{s.value}</p>
-        <p class:list={[
-          "mt-0.5 text-xs font-medium",
-          s.trend === "up" ? "text-emerald-600" : "text-rose-600",
-        ]}>
-          {s.trend === "up" ? "↗" : "↘"} {s.change}
-        </p>
-      </div>
-    ))}
+    {
+      stats.map((s) => (
+        <div class="rounded-xl bg-slate-50 p-3">
+          <p class="text-xs font-medium text-slate-500">{s.label}</p>
+          <p class="mt-1 text-lg font-bold text-slate-950">{s.value}</p>
+          <p
+            class:list={[
+              'mt-0.5 text-xs font-medium',
+              s.trend === 'up' ? 'text-emerald-600' : 'text-rose-600',
+            ]}
+          >
+            {s.trend === 'up' ? '↗' : '↘'} {s.change}
+          </p>
+        </div>
+      ))
+    }
   </div>
 
   <div class="flex items-center gap-6">
     <div class="relative h-40 w-40 shrink-0">
-      <canvas
-        id={chartId}
-        data-segments={JSON.stringify(segments)}
-      ></canvas>
+      <canvas id={chartId} data-segments={JSON.stringify(segments)}></canvas>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         <span class="text-xl font-bold text-slate-950">2,847</span>
         <span class="text-xs text-slate-500">Total</span>
@@ -52,46 +53,50 @@ const segments = [
     </div>
 
     <div class="flex-1 space-y-3">
-      {segments.map((s) => (
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`}></span>
-            <span class="text-sm text-slate-600">{s.label}</span>
+      {
+        segments.map((s) => (
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`} />
+              <span class="text-sm text-slate-600">{s.label}</span>
+            </div>
+            <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
           </div>
-          <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
-        </div>
-      ))}
+        ))
+      }
     </div>
   </div>
 </section>
 
 <script>
-  import Chart from "chart.js/auto";
+  import Chart from 'chart.js/auto';
 
-  document.querySelectorAll<HTMLCanvasElement>("canvas[id^='customer-analytics']").forEach((canvas) => {
-    const segments = JSON.parse(canvas.dataset.segments || "[]");
+  document
+    .querySelectorAll<HTMLCanvasElement>("canvas[id^='customer-analytics']")
+    .forEach((canvas) => {
+      const segments = JSON.parse(canvas.dataset.segments || '[]');
 
-    new Chart(canvas, {
-      type: "doughnut",
-      data: {
-        labels: segments.map((s: { label: string }) => s.label),
-        datasets: [
-          {
-            data: segments.map((s: { value: number }) => s.value),
-            backgroundColor: segments.map((s: { color: string }) => s.color),
-            borderWidth: 0,
-            cutout: "70%",
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false },
+      new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: segments.map((s: { label: string }) => s.label),
+          datasets: [
+            {
+              data: segments.map((s: { value: number }) => s.value),
+              backgroundColor: segments.map((s: { color: string }) => s.color),
+              borderWidth: 0,
+            },
+          ],
         },
-      },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          cutout: '70%',
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+          },
+        },
+      });
     });
-  });
 </script>

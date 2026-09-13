@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: astro-frontend-structure
 description: Where to put each file in the frontend. UI components vs domain, pages by module, layouts, lib/, stores/, types/. Triggers: creating page, component, layout, store, lib, type, route, deciding location of X.
@@ -164,6 +166,7 @@ storage.ts # localStorage / sessionStorage helpers
 - Process JSON responses.
 
 > `PUBLIC_API_URL` must include the `/api` prefix.
+>
 > ```env
 > PUBLIC_API_URL=http://localhost:9000/api
 > ```

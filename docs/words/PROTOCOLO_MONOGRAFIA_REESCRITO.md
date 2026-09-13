@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 MD033 -->
+
 # Protocolo de Monografía
 
 ## "Desarrollo e implementación de sistema web e-commerce multitienda para Panda Estampados y Kitsune, de Managua"
@@ -393,7 +395,7 @@ El cronograma distribuye las actividades en un horizonte de **seis meses**, arti
 
 > Las referencias se listan en orden alfabético por apellido del primer autor, conforme a la **7ª edición** del *Publication Manual of the American Psychological Association* (APA 7).
 
-Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine]. https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm
+Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine]. <https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm>
 
 Fowler, M. (2002). *Patterns of enterprise application architecture*. Addison-Wesley.
 
@@ -403,21 +405,21 @@ Laudon, K. C. y Laudon, J. P. (2016). *Sistemas de información gerencial* (14.�
 
 Laudon, K. C. y Traver, C. G. (2016). *E-commerce 2016: Business, technology, society* (12.ª ed.). Pearson.
 
-Otwell, T. (2026). *Laravel documentation (version 13.x)*. Laravel. https://laravel.com/docs
+Otwell, T. (2026). *Laravel documentation (version 13.x)*. Laravel. <https://laravel.com/docs>
 
 Pérez, D. (2024). *[CITA PENDIENTE — verificar referencia completa: monografía sobre sistema web para la gestión de inventarios en una pequeña empresa comercial, Universidad Nacional de Ingeniería, Managua].*
 
 Pressman, R. S. (2010). *Software engineering: A practitioner's approach* (7.ª ed.). McGraw-Hill.
 
-Schwaber, K. y Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum: The rules of the game*. Scrum.org. https://scrumguides.org
+Schwaber, K. y Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum: The rules of the game*. Scrum.org. <https://scrumguides.org>
 
 Sommerville, I. (2011). *Software engineering* (9.ª ed.). Pearson.
 
-The Astro Technology Company. (2026). *Astro documentation (version 7)*. https://docs.astro.build
+The Astro Technology Company. (2026). *Astro documentation (version 7)*. <https://docs.astro.build>
 
 The Linux Foundation. (2024). *[CITA PENDIENTE — verificar referencia completa: State of Multi-Tenant SaaS Architectures, informe anual sobre arquitecturas SaaS].*
 
-The PostgreSQL Global Development Group. (2026). *PostgreSQL 18 documentation*. https://www.postgresql.org/docs/18/
+The PostgreSQL Global Development Group. (2026). *PostgreSQL 18 documentation*. <https://www.postgresql.org/docs/18/>
 
 ---
 

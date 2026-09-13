@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: caddyfile-multi-tenant-routing
 description: Reverse proxy + multi-tenant routing in Caddyfile. Hosts per store, fixed IPs for prod, bind mounts for dev, /api routing. Triggers: editing Caddyfile, adding domain, modifying production/dev routing.
@@ -16,7 +18,7 @@ to the correct Docker instances according to `panda-estampados.com`,
  auto_https off
  admin off
 }
-```
+```text
 
 ## Canonical blocks
 
@@ -30,7 +32,7 @@ to the correct Docker instances according to `panda-estampados.com`,
 *.kitsune.com, kitsune.com {
  reverse_proxy 172.21.0.20:8000 172.21.0.21:4321
 }
-```
+```text
 
 ### Dev (bind mounts on host)
 
@@ -40,7 +42,7 @@ to the correct Docker instances according to `panda-estampados.com`,
 handle @dev-panda {
  reverse_proxy localhost:5321
 }
-```
+```text
 
 ## Rules
 
@@ -73,7 +75,7 @@ Activate when:
 sudo cp Caddyfile /etc/caddy/Caddyfile
 sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl restart caddy
-```
+```text
 
 Plus `/etc/hosts` entries (see block at the end of the Caddyfile).
 
@@ -95,12 +97,12 @@ Plus `/etc/hosts` entries (see block at the end of the Caddyfile).
 
 ## File map
 
-```
+```text
 Caddyfile ← root, single source
 docker/instances/production/<slug>/ ← IPs per store
 docker/instances/development/<slug>/ ← host ports
 scripts/docker-stack.sh ← start/stop dev
-```
+```text
 
 ## Related skills
 

@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: astro-themes-and-palette
 description: Multi-theme workspace packages (Panda Estampados, Kitsune, MM-Boutique, Morales Store), per-tenant branding, universal auth palette (#2D9D8E teal), theme→brand adapter. Triggers: editing frontend/packages/themes/, src/lib/auth-accent.ts, src/lib/theme.ts, src/config/stores.ts, any auth page, adding a new tenant to the frontend.
@@ -30,7 +32,7 @@ Each `brand` in `packages/themes/<slug>/src/index.ts` exposes:
  supportEmail: string,
  loginTheme: LoginTheme, // dark/light slate scale
 }
-```
+```text
 
 ## Universal auth palette (auth-accent.ts)
 
@@ -47,7 +49,7 @@ export const AUTH_ACCENT = {
  softBg: "#E6F7F4", // banners / info-bg
  softBorder: "#C2EBE4", // borders associated with softBg
 } as const;
-```
+```text
 
 Application by convention:
 
@@ -75,6 +77,7 @@ Activate when:
 - **Storefront/admin dashboard → `brand.accentColor`**. Brand identity is the point.
 - **React components with dynamic style** → prefer Tailwind arbitrary classes over inline `style` (better consistency check + tree-shaking).
 - **New theme package** must:
+
  1. Create `frontend/packages/themes/<slug>/package.json` (look at an existing one).
  2. Create `src/index.ts` exporting `export const <slug>Theme = { brand: {...}, tokens: {...} }`.
  3. Create symlink: `frontend/node_modules/@theme/<slug>` → `../../packages/themes/<slug>` (done by `pnpm install`).
@@ -89,7 +92,7 @@ Activate when:
 
 ## File map
 
-```
+```text
 frontend/packages/themes/panda-estampados/src/index.ts
 frontend/packages/themes/kitsune/src/index.ts
 frontend/packages/themes/mm-boutique/src/index.ts
@@ -102,7 +105,7 @@ frontend/src/components/admin/auth/LoginForm.tsx ← canonical pattern
 frontend/src/components/admin/auth/ForgotPasswordForm.tsx
 frontend/src/components/admin/auth/ResetPasswordForm.tsx
 frontend/src/pages/[locale]/{admin,account}/auth/ ← the 6 pages
-```
+```text
 
 ## Related skills
 

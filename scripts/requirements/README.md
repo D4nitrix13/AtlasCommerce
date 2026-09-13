@@ -5,7 +5,7 @@ Versionada en git como archivos YAML individuales, sin tooling intermedio.
 
 ## Estructura
 
-```
+```text
 scripts/requirements/
 ├── README.md            este archivo
 ├── STAKEHOLDERS.md      tabla de los 3 integrantes del equipo
@@ -13,7 +13,7 @@ scripts/requirements/
     ├── rf_001_RF-AUTH-001.yml    (48 requisitos funcionales)
     ├── ...
     └── rnf_030_RNF-PORT-082.yml  (30 requisitos no funcionales)
-```
+```text
 
 Total: **48 RF + 30 RNF = 78 requirements**. Los 3 stakeholders del
 equipo se documentan en `STAKEHOLDERS.md` y se referencian desde los
@@ -49,7 +49,7 @@ rf_001:
   estabilidad: "alta"
   urgencia: "importante"
   comentarios: "Ninguno"
-```
+```text
 
 ## Categorias
 

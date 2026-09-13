@@ -65,6 +65,7 @@ container con `docker compose exec <svc> /usr/bin/which <nombre>`. Nunca
 asumas que `nombre` solo va a funcionar — la convención es absoluta.
 
 Para verificar el path exacto dentro del container:
+
 ```bash
 docker compose exec <svc> /usr/bin/which <binario>
 ```
@@ -212,15 +213,18 @@ o falla con un error explícito.
 | Network                  | `atlas-commerce-<inst>-<stage>`                 |
 
 Ejemplos (dev):
+
 - `panda-estampados-dev-frontend`
 - `atlas_commerce_panda_estampados_and_kitsune_dev_postgres_data`
 - `atlas-commerce-panda-estampados-dev`
 
 Ejemplos (prod):
+
 - `panda-estampados-frontend`
 - `panda-estampados-db-data`
 
 Naming consistente permite filtrar por label con un solo comando:
+
 ```bash
 docker ps --filter "label=com.docker.compose.project=panda-estampados-dev"
 ```

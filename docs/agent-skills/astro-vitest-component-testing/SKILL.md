@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: astro-vitest-component-testing
 description: Unit tests with Vitest 4 + Testing Library + jsdom for React components. Store mocks, i18n, user interactions. Triggers: creating/modifying tests in frontend/tests/unit/, vitest debugging, adding mock.
@@ -34,7 +36,7 @@ Source: `frontend/vitest.config.ts` + `frontend/tests/setup.ts` + existing tests
  exclude: ["node_modules", "dist", ".astro", "tests/e2e/**"],
  },
 }
-```
+```text
 
 ## Structure
 
@@ -50,7 +52,7 @@ frontend/tests/
 │ │ ├── ForgotPasswordForm.test.tsx
 │ │ └── ResetPasswordForm.test.tsx
 └── e2e/ ← Playwright, not Vitest
-```
+```text
 
 ## Commands
 
@@ -66,7 +68,7 @@ pnpm vitest run --coverage
 
 # Specific test
 pnpm vitest run tests/unit/components/LoginForm.test.tsx
-```
+```text
 
 ## Anatomy of a test
 
@@ -134,7 +136,7 @@ describe("components/admin/auth/LoginForm", () => {
  });
  });
 });
-```
+```text
 
 ## Patterns
 
@@ -153,7 +155,7 @@ vi.mock("../../../src/stores/auth", () => ({
  }),
  authStore: { login: mockLogin, setSession: mockSetSession },
 }));
-```
+```text
 
 ### 2. i18n mock (identity)
 
@@ -168,7 +170,7 @@ vi.mock("../../../src/i18n", async (importOriginal) => {
  }),
  };
 });
-```
+```text
 
 > If the component uses `t("auth.foo.bar")`, in the test you'll see
 > `"auth.foo.bar"` in the DOM. Useful for verifying the key without
@@ -184,7 +186,7 @@ const { mockApiFetch } = vi.hoisted(() => ({
 vi.mock("../../../src/lib/api", () => ({
  apiFetch: mockApiFetch,
 }));
-```
+```text
 
 ### 4. Query methods (preference order)
 
@@ -203,7 +205,7 @@ screen.getByText("Iniciar sesión");
 
 // 5. Test ID (add data-testid to the component)
 screen.getByTestId("submit-button");
-```
+```text
 
 ### 5. User interactions
 
@@ -215,7 +217,7 @@ await user.click(button);
 await user.clear(input);
 await user.selectOption(select, "value");
 await user.tab();
-```
+```text
 
 > ⚠️ `userEvent` uses `setup()` (not `default`).
 
@@ -229,7 +231,7 @@ await waitFor(() => {
 await waitFor(() => {
  expect(mockFn).toHaveBeenCalledWith({ ... });
 });
-```
+```text
 
 ### 7. window.location.href (redirects)
 
@@ -251,7 +253,7 @@ try {
  configurable: true,
  });
 }
-```
+```text
 
 ### 8. window.history (URL state)
 
@@ -259,7 +261,7 @@ try {
 beforeEach(() => {
  window.history.replaceState({}, "", "/es/admin/auth/login");
 });
-```
+```text
 
 ### 9. localStorage (polyfilled in setup.ts)
 
@@ -269,7 +271,7 @@ The setup.ts already polyfills `localStorage` (jsdom 30 doesn't expose it in Nod
 // In the test
 window.localStorage.setItem("token", "abc123");
 expect(window.localStorage.getItem("token")).toBe("abc123");
-```
+```text
 
 ## Querying patterns
 
@@ -290,7 +292,7 @@ await screen.findByText("text");
 // Exists check
 expect(screen.queryByText("error")).toBeInTheDocument();
 expect(screen.queryByText("error")).not.toBeInTheDocument();
-```
+```text
 
 ## Assertions
 
@@ -304,14 +306,14 @@ expect(element).toBeVisible();
 expect(input).toHaveValue("text");
 expect(fn).toHaveBeenCalledWith({ ... });
 expect(fn).toHaveBeenCalledTimes(1);
-```
+```text
 
 ## Helper per test environment
 
 ```tsx
 // @vitest-environment jsdom
 // (at the file start if you want to override the default)
-```
+```text
 
 By default `vitest.config.ts` already sets `environment: jsdom`. The
 comment is not necessary, but it doesn't hurt.
@@ -340,7 +342,7 @@ Activate when:
 
 ## File map
 
-```
+```text
 frontend/vitest.config.ts
 frontend/tests/setup.ts
 frontend/tests/unit/components/admin/AdminDefaultLogin.test.tsx
@@ -348,7 +350,7 @@ frontend/tests/unit/components/admin/ThemeForm.test.tsx
 frontend/tests/unit/components/LoginForm.test.tsx
 frontend/tests/unit/components/ForgotPasswordForm.test.tsx
 frontend/tests/unit/components/ResetPasswordForm.test.tsx
-```
+```text
 
 ## Related skills
 

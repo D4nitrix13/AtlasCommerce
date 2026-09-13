@@ -1,29 +1,22 @@
 ---
-import Icon from "../../ui/Icon.astro";
+import Icon from '../../ui/Icon.astro';
 
 interface Props {
   title: string;
   value: string;
   change: string;
-  trend?: "up" | "down";
+  trend?: 'up' | 'down';
   icon?: string;
-  accent?: "emerald" | "sky" | "amber" | "rose";
+  accent?: 'emerald' | 'sky' | 'amber' | 'rose';
 }
 
-const {
-  title,
-  value,
-  change,
-  trend = "up",
-  icon = "chart-bar",
-  accent = "emerald",
-} = Astro.props;
+const { title, value, change, trend = 'up', icon = 'chart-bar', accent = 'emerald' } = Astro.props;
 
 const accentClasses = {
-  emerald: "bg-emerald-50 text-emerald-600",
-  sky: "bg-sky-50 text-sky-600",
-  amber: "bg-amber-50 text-amber-600",
-  rose: "bg-rose-50 text-rose-600",
+  emerald: 'bg-emerald-50 text-emerald-600',
+  sky: 'bg-sky-50 text-sky-600',
+  amber: 'bg-amber-50 text-amber-600',
+  rose: 'bg-rose-50 text-rose-600',
 };
 ---
 
@@ -36,17 +29,15 @@ const accentClasses = {
       </h3>
     </div>
 
-    <div class:list={[
-      "grid h-11 w-11 place-items-center rounded-2xl",
-      accentClasses[accent],
-    ]}>
+    <div class:list={['grid h-11 w-11 place-items-center rounded-2xl', accentClasses[accent]]}>
       <Icon name={icon} class="h-5 w-5" />
     </div>
   </div>
 
   <div class="mt-3 flex items-center gap-1 text-sm">
-    <span class={trend === "up" ? "text-emerald-600" : "text-rose-600"}>
-      {trend === "up" ? "↗" : "↘"} {change}
+    <span class={trend === 'up' ? 'text-emerald-600' : 'text-rose-600'}>
+      {trend === 'up' ? '↗' : '↘'}
+      {change}
     </span>
 
     <span class="text-slate-400">vs mes anterior</span>
@@ -59,8 +50,13 @@ const accentClasses = {
         fill="none"
         stroke="currentColor"
         stroke-width="2"
-        class={accent === "emerald" ? "text-emerald-500" : accent === "sky" ? "text-sky-500" : accent === "amber" ? "text-amber-500" : "text-rose-500"}
-      />
+        class={accent === 'emerald'
+          ? 'text-emerald-500'
+          : accent === 'sky'
+            ? 'text-sky-500'
+            : accent === 'amber'
+              ? 'text-amber-500'
+              : 'text-rose-500'}></path>
     </svg>
   </div>
 </article>

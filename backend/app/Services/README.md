@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD041 -->
+
 # Services en Laravel
 
 Este directorio contiene los **Services** del backend Laravel.

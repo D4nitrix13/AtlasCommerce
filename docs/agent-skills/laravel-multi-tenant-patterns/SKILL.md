@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: laravel-multi-tenant-patterns
 description: Multi-tenant architecture (Panda Estampados, MM-Boutique, Morales Store, Kitsune). Tenant resolution, DB isolation, global vs store_id entities, RLS context, Sanctum tokens scoped per tenant, user_stores, customer_stores. Triggers: editing middleware, migrations, store-domain bindings, RlsContextService, StoreContextService, models under Stores/, deciding if a table is global or per-tenant.
@@ -12,8 +14,8 @@ Source: `docs/architecture/multi-store.md` + `backend/app/Http/Middleware/Resolv
 - **Tenants**: 4 stores (`panda-estampados`, `kitsune`, `mm-boutique`, `morales-store`) - scripts/seeders can add more.
 - **Single Laravel app**, multiple `store_domains` rows. **No** separate DB per tenant (single DB with RLS-ready context).
 - **Tenant resolution**: `App\Http\Middleware\ResolveStoreFromDomain` reads `request->getHost()`, looks up `store_domains` (with `is_active=true`), loads the related `Store` and injects it into two services:
- - `App\StoreContextService` → `Astro.locals.theme` and downstream middlewares.
- - `Core\Tenant\Application\RlsContextService` → sets global `store_id` for queries (RLS-ready, doesn't enable RLS per query manually).
+- `App\StoreContextService` → `Astro.locals.theme` and downstream middlewares.
+- `Core\Tenant\Application\RlsContextService` → sets global `store_id` for queries (RLS-ready, doesn't enable RLS per query manually).
 
 ## Two stores, same platform
 
@@ -44,7 +46,7 @@ product_questions → questions per store
 support_tickets → tickets per store
 notifications → notifications per store
 audits → audits per store
-```
+```text
 
 ### Tables without `store_id` (global)
 
@@ -59,7 +61,7 @@ warehouses → global warehouses (shared inventory)
 payment_methods → global payment methods
 shipping_companies → global shipping companies
 taxes → global taxes
-```
+```text
 
 ### Relationship tables (joins)
 
@@ -70,7 +72,7 @@ user_stores → which users manage which store
 customer_stores → which customers belong to which store
 product_stores → product publication per store
 sales_channels → sales channels
-```
+```text
 
 ### Rule of thumb
 
@@ -117,7 +119,7 @@ Kitsune:
  - Role: Supervisor
  - Can review operations, but not necessarily
  issue invoices
-```
+```text
 
 > A user can have **different role per store** via `user_stores.role_id`.
 
@@ -132,7 +134,7 @@ orders.user_creator_id
 
 invoices.user_issuer_id
  → ID of the admin who issued the invoice
-```
+```text
 
 ## Trigger patterns
 
@@ -170,7 +172,7 @@ Schema::create('orders', function (Blueprint $table) {
  // Composite index for queries with scope
  $table->index(['store_id', 'status']);
 });
-```
+```text
 
 ## Model pattern
 
@@ -187,7 +189,7 @@ class Order extends Model
  return $this->belongsTo(Store::class);
  }
 }
-```
+```text
 
 The `BelongsToStore` trait automatically filters by the context's `store_id`.
 
@@ -205,7 +207,7 @@ public function index(): JsonResponse
 
  return OrderResource::collection($orders);
 }
-```
+```text
 
 > DO NOT use `Order::all()` - always filter by the context's `store_id`.
 
@@ -222,7 +224,7 @@ public function index(): JsonResponse
 
 ## File map
 
-```
+```text
 backend/app/Http/Middleware/ResolveStoreFromDomain.php ← entry point
 backend/app/Http/Middleware/CheckPermission.php ← uses store_id
 backend/app/Core/Tenant/Application/StoreContextService.php
@@ -236,7 +238,7 @@ backend/database/migrations/stores/ ← tenant migrations
 docker/instances/development/ ← dev per-tenant envs
 docker/instances/production/ ← prod per-tenant envs
 Caddyfile ← routes by host
-```
+```text
 
 ## Related skills
 

@@ -1,11 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { apiFetch } from '../../../lib/api';
 import { useTranslations } from '../../../i18n';
-import {
-  WizardFormContainer,
-  WizardStepper,
-  WizardSuccessMessage,
-} from './ForgotPasswordWizardUi';
+import { WizardFormContainer, WizardStepper, WizardSuccessMessage } from './ForgotPasswordWizardUi';
 import {
   CodeStep,
   EmailStep,
@@ -95,20 +91,16 @@ export default function ForgotPasswordWizard({
   const handleEmailSubmit = async (next: EmailStepData): Promise<void> => {
     updateState({ isSubmitting: true, errorMessage: null });
     try {
-      const response = await apiFetch<ForgotPasswordResponse>(
-        '/auth/forgot-password',
-        { method: 'POST', body: { email: next.email } },
-      );
+      const response = await apiFetch<ForgotPasswordResponse>('/auth/forgot-password', {
+        method: 'POST',
+        body: { email: next.email },
+      });
 
       const methods = response.available_methods ?? [];
       const autoSelected: AvailableMethod | null =
         methods.length === 1 ? (methods[0] ?? null) : null;
       const nextStep: ForgotPasswordWizardStep =
-        methods.length === 0
-          ? 'method'
-          : methods.length === 1
-            ? 'code'
-            : 'method';
+        methods.length === 0 ? 'method' : methods.length === 1 ? 'code' : 'method';
 
       updateState({
         email: next.email,
@@ -219,7 +211,9 @@ export default function ForgotPasswordWizard({
       updateState({
         isSubmitting: false,
         errorMessage:
-          challengeError ?? passwordError ?? apiError.message ??
+          challengeError ??
+          passwordError ??
+          apiError.message ??
           t('auth.passwordRecovery.errors.reset'),
       });
     }
@@ -322,12 +316,12 @@ export default function ForgotPasswordWizard({
     <div className="w-full">
       <WizardStepper steps={STEP_ORDER} current={state.step} labels={stepLabels} />
       <div className="flex justify-center">
-      <WizardFormContainer>
-        {state.isComplete && (
-          <WizardSuccessMessage message={t('auth.passwordRecovery.success.redirecting')} />
-        )}
-        {renderActiveStep()}
-      </WizardFormContainer>
+        <WizardFormContainer>
+          {state.isComplete && (
+            <WizardSuccessMessage message={t('auth.passwordRecovery.success.redirecting')} />
+          )}
+          {renderActiveStep()}
+        </WizardFormContainer>
       </div>
     </div>
   );

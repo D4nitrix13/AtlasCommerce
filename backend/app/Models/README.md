@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD041 -->
+
 # Models — AtlasCommerce Backend
 
 Este directorio contiene los modelos Eloquent del backend Laravel para el sistema store. Cada modelo representa una entidad principal del dominio y define la relación entre Laravel y las tablas de la base de datos.

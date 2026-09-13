@@ -1,7 +1,7 @@
-import en from "./locales/en";
-import es from "./locales/es";
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from "./config";
-import type { Translations } from "./types";
+import en from './locales/en';
+import es from './locales/es';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from './config';
+import type { Translations } from './types';
 
 /**
  * Helper server-side para páginas .astro.

@@ -7,6 +7,11 @@ type IconProps = {
    * RegisterForm.
    */
   size?: number;
+  /**
+   * Clases Tailwind adicionales para el SVG (e.g. `size-5`, `text-white`).
+   * Aplicado al elemento raiz.
+   */
+  className?: string;
 };
 
 /**
@@ -17,7 +22,7 @@ type IconProps = {
  * 2.3) pero storefront + signup sí. Esta extracción elimina la
  * duplicación para los dos consumidores restantes.
  */
-export function GoogleIcon({ size = 18 }: IconProps): ReactElement {
+export function GoogleIcon({ size = 18, className }: IconProps): ReactElement {
   return (
     <svg
       width={size}
@@ -25,6 +30,7 @@ export function GoogleIcon({ size = 18 }: IconProps): ReactElement {
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
+      className={className}
     >
       <path
         fill="#4285F4"
@@ -50,7 +56,7 @@ export function GoogleIcon({ size = 18 }: IconProps): ReactElement {
  * Icon de Facebook (brand azul). Ver `GoogleIcon` para el rationale de
  * la extracción.
  */
-export function FacebookIcon({ size = 18 }: IconProps): ReactElement {
+export function FacebookIcon({ size = 18, className }: IconProps): ReactElement {
   return (
     <svg
       width={size}
@@ -58,6 +64,7 @@ export function FacebookIcon({ size = 18 }: IconProps): ReactElement {
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
+      className={className}
     >
       <path
         fill="#1877F2"

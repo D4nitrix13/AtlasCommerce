@@ -1,4 +1,4 @@
-import { defineMiddleware } from "astro:middleware";
+import { defineMiddleware } from 'astro:middleware';
 import {
   DEFAULT_LOCALE,
   LOCALE_FLAGS,
@@ -6,8 +6,8 @@ import {
   STORAGE_KEY,
   SUPPORTED_LOCALES,
   type Locale,
-} from "./i18n/config";
-import { LEGACY_ADMIN_AUTH_PATHS, stripLocaleFromPath } from "./lib/path-helpers";
+} from './i18n/config';
+import { LEGACY_ADMIN_AUTH_PATHS, stripLocaleFromPath } from './lib/path-helpers';
 
 /**
  * Middleware de Astro para ruteo de locale + subdominio admin.
@@ -90,19 +90,17 @@ const DEFAULT_THEME: Theme = {
  * cae a `PUBLIC_API_URL` o a `http://127.0.0.1:8000/api` por default.
  */
 function resolveInternalApiUrl(): string {
-  const fromImportMeta = (import.meta.env as Record<string, string | undefined>)
-    .INTERNAL_API_URL;
-  if (typeof fromImportMeta === "string" && fromImportMeta !== "") {
-    return fromImportMeta.replace(/\/$/, "");
+  const fromImportMeta = (import.meta.env as Record<string, string | undefined>).INTERNAL_API_URL;
+  if (typeof fromImportMeta === 'string' && fromImportMeta !== '') {
+    return fromImportMeta.replace(/\/$/, '');
   }
 
-  const fromPublic = (import.meta.env as Record<string, string | undefined>)
-    .PUBLIC_API_URL;
-  if (typeof fromPublic === "string" && fromPublic !== "") {
-    return fromPublic.replace(/\/$/, "");
+  const fromPublic = (import.meta.env as Record<string, string | undefined>).PUBLIC_API_URL;
+  if (typeof fromPublic === 'string' && fromPublic !== '') {
+    return fromPublic.replace(/\/$/, '');
   }
 
-  return "http://127.0.0.1:8000/api";
+  return 'http://127.0.0.1:8000/api';
 }
 
 /**
@@ -120,10 +118,10 @@ async function fetchThemeForHost(host: string): Promise<Theme> {
 
   try {
     const response = await fetch(url, {
-      headers: { Host: host, Accept: "application/json" },
+      headers: { Host: host, Accept: 'application/json' },
       signal: AbortSignal.timeout(1_000),
     });
-    if (! response.ok) {
+    if (!response.ok) {
       return DEFAULT_THEME;
     }
     const body = (await response.json()) as { data?: Partial<Theme> };
@@ -156,7 +154,7 @@ const ADMIN_HOST_PATTERNS = [
 ];
 
 function detectTenantFromHost(host: string): TenantContext {
-  const normalizedHost = host.split(":")[0] ?? "";
+  const normalizedHost = host.split(':')[0] ?? '';
 
   for (const pattern of ADMIN_HOST_PATTERNS) {
     const match = normalizedHost.match(pattern);
@@ -169,12 +167,10 @@ function detectTenantFromHost(host: string): TenantContext {
   }
 
   // Host normal (no admin) → storefront.
-  const parts = normalizedHost.split(".");
-  const firstLabel = parts[0] ?? "";
+  const parts = normalizedHost.split('.');
+  const firstLabel = parts[0] ?? '';
   const tenantSlug =
-    firstLabel !== "" && firstLabel !== "www" && firstLabel !== "localhost"
-      ? firstLabel
-      : null;
+    firstLabel !== '' && firstLabel !== 'www' && firstLabel !== 'localhost' ? firstLabel : null;
 
   return {
     isAdmin: false,
@@ -191,29 +187,32 @@ function detectLocalePrefix(pathname: string): Locale | null {
 
   const candidate = match[1];
 
-  return (SUPPORTED_LOCALES as readonly string[]).includes(candidate ?? "")
+  return (SUPPORTED_LOCALES as readonly string[]).includes(candidate ?? '')
     ? (candidate as Locale)
     : null;
 }
 
 function pickDefaultLocale(request: Request): Locale {
-  const cookieHeader = request.headers.get("cookie") ?? "";
+  const cookieHeader = request.headers.get('cookie') ?? '';
   const match = cookieHeader.match(/(?:^|;\s*)app\.locale=([^;]+)/);
 
   if (match !== null) {
     const cookieValue = match[1];
-    if (cookieValue !== undefined && (SUPPORTED_LOCALES as readonly string[]).includes(cookieValue)) {
+    if (
+      cookieValue !== undefined &&
+      (SUPPORTED_LOCALES as readonly string[]).includes(cookieValue)
+    ) {
       return cookieValue as Locale;
     }
   }
 
-  const acceptLanguage = request.headers.get("accept-language") ?? "";
+  const acceptLanguage = request.headers.get('accept-language') ?? '';
   const preferred = acceptLanguage
-    .split(",")
-    .map((entry) => entry.split(";")[0]?.split("-")[0]?.toLowerCase() ?? "")
+    .split(',')
+    .map((entry) => entry.split(';')[0]?.split('-')[0]?.toLowerCase() ?? '')
     .find((tag) => (SUPPORTED_LOCALES as readonly string[]).includes(tag));
 
-  if (preferred !== undefined && preferred !== "") {
+  if (preferred !== undefined && preferred !== '') {
     return preferred as Locale;
   }
 
@@ -224,7 +223,7 @@ const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
 function appendLocaleCookie(response: Response, locale: Locale): void {
   const value = `${STORAGE_KEY}=${locale}; Path=/; Max-Age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
-  response.headers.append("set-cookie", value);
+  response.headers.append('set-cookie', value);
 }
 
 /**
@@ -249,7 +248,7 @@ function mapAdminPathToInternal(pathname: string, locale: Locale): string {
     return pathname;
   }
 
-  const cleanPath = pathname === "/" ? "" : pathname;
+  const cleanPath = pathname === '/' ? '' : pathname;
 
   // Mapeo explícito de paths limpios a paths relativos al segmento
   // raíz `/`. El result final es `/${locale}${mapped}`.
@@ -257,37 +256,37 @@ function mapAdminPathToInternal(pathname: string, locale: Locale): string {
   //   `/dashboard` -> `/es/dashboard`
   // Cualquier path no listado pasa tal cual (será 404 si no existe).
   const pathMap: Record<string, string> = {
-    "/login": "/auth/login",
-    "/dashboard": "/dashboard",
-    "/users": "/users",
-    "/sales": "/sales",
-    "/purchases": "/purchases",
-    "/inventory": "/inventory",
-    "/catalog": "/catalog",
-    "/customers": "/customers",
-    "/marketing": "/marketing",
-    "/shipping": "/shipping",
-    "/support": "/support",
-    "/settings": "/settings",
-    "/reports": "/reports",
-    "/system": "/system",
-    "/notifications": "/system/notifications",
-    "/sales/orders": "/sales/orders",
-    "/sales/invoices": "/sales/invoices",
+    '/login': '/auth/login',
+    '/dashboard': '/dashboard',
+    '/users': '/users',
+    '/sales': '/sales',
+    '/purchases': '/purchases',
+    '/inventory': '/inventory',
+    '/catalog': '/catalog',
+    '/customers': '/customers',
+    '/marketing': '/marketing',
+    '/shipping': '/shipping',
+    '/support': '/support',
+    '/settings': '/settings',
+    '/reports': '/reports',
+    '/system': '/system',
+    '/notifications': '/system/notifications',
+    '/sales/orders': '/sales/orders',
+    '/sales/invoices': '/sales/invoices',
   };
 
   const mapped = pathMap[cleanPath] ?? cleanPath;
-  return mapped === "" ? `/${locale}/admin` : `/${locale}${mapped}`;
+  return mapped === '' ? `/${locale}/admin` : `/${locale}${mapped}`;
 }
 
 const PUBLIC_PATHS = [
-  "/api/",
-  "/_astro/",
-  "/_actions/",
-  "/_image",
-  "/build/",
-  "/favicon.ico",
-  "/robots.txt",
+  '/api/',
+  '/_astro/',
+  '/_actions/',
+  '/_image',
+  '/build/',
+  '/favicon.ico',
+  '/robots.txt',
 ];
 
 function isPublicPath(pathname: string): boolean {
@@ -295,13 +294,13 @@ function isPublicPath(pathname: string): boolean {
 }
 
 function isStaticAsset(pathname: string): boolean {
-  return pathname.startsWith("/_") || pathname.startsWith("/build/");
+  return pathname.startsWith('/_') || pathname.startsWith('/build/');
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const url = new URL(context.request.url);
   const pathname = url.pathname;
-  const host = context.request.headers.get("host") ?? "";
+  const host = context.request.headers.get('host') ?? '';
 
   const tenant = detectTenantFromHost(host);
 
@@ -374,7 +373,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   const targetLocale = pickDefaultLocale(context.request);
-  const redirectTo = `/${targetLocale}${pathname === "/" ? "" : pathname}${url.search ?? ""}`;
+  const redirectTo = `/${targetLocale}${pathname === '/' ? '' : pathname}${url.search ?? ''}`;
 
   const redirectResponse = context.redirect(redirectTo, 302);
   appendLocaleCookie(redirectResponse, targetLocale);

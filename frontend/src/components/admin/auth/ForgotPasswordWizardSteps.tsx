@@ -1,9 +1,6 @@
 import { useState, type ReactElement, type ChangeEvent } from 'react';
 import { Eye, EyeOff, Mail, Smartphone, KeyRound } from 'lucide-react';
-import {
-  WizardButtonRow,
-  WizardErrorMessage,
-} from './ForgotPasswordWizardUi';
+import { WizardButtonRow, WizardErrorMessage } from './ForgotPasswordWizardUi';
 import { useTranslations } from '../../../i18n';
 import type { TranslationKey } from '../../../i18n/types';
 import type { AvailableMethod } from '../../../types/auth';
@@ -75,21 +72,13 @@ export function EmailStep({
         <h2 className="text-lg font-semibold text-slate-900 mb-1">
           {t('auth.passwordRecovery.steps.email.heading')}
         </h2>
-        <p className="text-sm text-slate-500">
-          {t('auth.passwordRecovery.steps.email.subtitle')}
-        </p>
+        <p className="text-sm text-slate-500">{t('auth.passwordRecovery.steps.email.subtitle')}</p>
       </div>
 
-      <WizardErrorMessage
-        message={visibleError}
-        fieldId="wizard-email"
-      />
+      <WizardErrorMessage message={visibleError} fieldId="wizard-email" />
 
       <div>
-        <label
-          htmlFor="wizard-email"
-          className="block text-sm font-medium text-slate-700 mb-1.5"
-        >
+        <label htmlFor="wizard-email" className="block text-sm font-medium text-slate-700 mb-1.5">
           {t('auth.passwordRecovery.email.label')}
         </label>
         <input
@@ -222,12 +211,12 @@ export function MethodStep({
               }
             >
               <div className="flex items-center gap-3">
-                <div className={
-                  'shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition ' +
-                  (isSelected
-                    ? 'bg-[#2D9D8E] text-white'
-                    : 'bg-[#E6F7F4] text-[#1E6F62]')
-                }>
+                <div
+                  className={
+                    'shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition ' +
+                    (isSelected ? 'bg-[#2D9D8E] text-white' : 'bg-[#E6F7F4] text-[#1E6F62]')
+                  }
+                >
                   {METHOD_ICONS[method]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -335,10 +324,7 @@ export function CodeStep({
       <WizardErrorMessage message={errorMessage} fieldId="wizard-code" />
 
       <div>
-        <label
-          htmlFor="wizard-code"
-          className="block text-sm font-medium text-slate-700 mb-1.5"
-        >
+        <label htmlFor="wizard-code" className="block text-sm font-medium text-slate-700 mb-1.5">
           {t('auth.passwordRecovery.code.label')}
         </label>
         <input
@@ -405,8 +391,7 @@ export function PasswordStep({
   const minLengthOk = password.length >= PASSWORD_MIN_LENGTH;
   const upperLowerOk = /[A-Z]/.test(password) && /[a-z]/.test(password);
   const numberOk = /[0-9]/.test(password);
-  const passwordsMatch =
-    password !== '' && confirmPassword !== '' && password === confirmPassword;
+  const passwordsMatch = password !== '' && confirmPassword !== '' && password === confirmPassword;
   const canSubmit = minLengthOk && upperLowerOk && numberOk && passwordsMatch;
 
   const handleSubmit = (): void => {
@@ -442,7 +427,10 @@ export function PasswordStep({
       <WizardErrorMessage message={errorMessage} />
 
       <div>
-        <label htmlFor="wizard-password" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label
+          htmlFor="wizard-password"
+          className="block text-sm font-medium text-slate-700 mb-1.5"
+        >
           {t('auth.passwordRecovery.password.label')}
         </label>
         <div className="relative">
@@ -465,7 +453,11 @@ export function PasswordStep({
             onClick={() => {
               setShowPassword(!showPassword);
             }}
-            aria-label={t(showPassword ? 'auth.passwordRecovery.steps.password.hidePassword' : 'auth.passwordRecovery.steps.password.showPassword')}
+            aria-label={t(
+              showPassword
+                ? 'auth.passwordRecovery.steps.password.hidePassword'
+                : 'auth.passwordRecovery.steps.password.showPassword'
+            )}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
           >
             {showPassword ? (
@@ -504,7 +496,11 @@ export function PasswordStep({
             onClick={() => {
               setShowConfirmPassword(!showConfirmPassword);
             }}
-            aria-label={t(showConfirmPassword ? 'auth.passwordRecovery.steps.password.hidePassword' : 'auth.passwordRecovery.steps.password.showPassword')}
+            aria-label={t(
+              showConfirmPassword
+                ? 'auth.passwordRecovery.steps.password.hidePassword'
+                : 'auth.passwordRecovery.steps.password.showPassword'
+            )}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
           >
             {showConfirmPassword ? (
@@ -543,9 +539,4 @@ export function PasswordStep({
 }
 
 // Re-export the props to keep types centralized for the Wizard.
-export type {
-  EmailStepProps,
-  MethodStepProps,
-  CodeStepProps,
-  PasswordStepProps,
-};
+export type { EmailStepProps, MethodStepProps, CodeStepProps, PasswordStepProps };

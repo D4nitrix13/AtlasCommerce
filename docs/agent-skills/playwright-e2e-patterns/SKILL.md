@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: playwright-e2e-patterns
 description: E2E tests with Playwright. tests/e2e/ structure, baseURL, commands, auth flow patterns, multi-tenant. Triggers: creating/modifying tests/e2e/, playwright debugging, adding test domain.

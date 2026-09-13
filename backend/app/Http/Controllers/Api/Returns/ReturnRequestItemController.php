@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Returns;
 
 use App\Http\Controllers\Controller;
-use App\Models\ReturnRequestItem;
+use App\Models\Returns\ReturnRequestItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,7 +19,10 @@ class ReturnRequestItemController extends Controller
      */
     public function index(): JsonResponse
     {
-        //
+        return response()->json(
+            data: ['message' => 'Not implemented yet.'],
+            status: 501,
+        );
     }
 
     /**
@@ -27,7 +30,10 @@ class ReturnRequestItemController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        //
+        return response()->json(
+            data: ['message' => 'Not implemented yet.'],
+            status: 501,
+        );
     }
 
     /**
@@ -35,7 +41,10 @@ class ReturnRequestItemController extends Controller
      */
     public function show(ReturnRequestItem $returnRequestItem): JsonResponse
     {
-        //
+        return response()->json(
+            data: ['message' => 'Not implemented yet.'],
+            status: 501,
+        );
     }
 
     /**
@@ -43,7 +52,10 @@ class ReturnRequestItemController extends Controller
      */
     public function update(Request $request, ReturnRequestItem $returnRequestItem): JsonResponse
     {
-        //
+        return response()->json(
+            data: ['message' => 'Not implemented yet.'],
+            status: 501,
+        );
     }
 
     /**
@@ -51,6 +63,9 @@ class ReturnRequestItemController extends Controller
      */
     public function destroy(ReturnRequestItem $returnRequestItem): JsonResponse
     {
-        //
+        return response()->json(
+            data: ['message' => 'Not implemented yet.'],
+            status: 501,
+        );
     }
 }

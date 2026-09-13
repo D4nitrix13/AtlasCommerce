@@ -1,71 +1,71 @@
 ---
-import AdminSidebarItem from "./AdminSidebarItem.astro";
-import AdminUserMenu from "../auth/AdminUserMenu";
+import AdminSidebarItem from './AdminSidebarItem.astro';
+import AdminUserMenu from '../auth/AdminUserMenu';
 
 const currentPath = Astro.url.pathname;
 
 const menu = [
   {
-    label: "Resumen",
+    label: 'Resumen',
     items: [
-      { name: "Dashboard", href: "/admin/dashboard", icon: "squares-2x2" },
-      { name: "Reportes", href: "/admin/reports", icon: "chart-bar" },
+      { name: 'Dashboard', href: '/admin/dashboard', icon: 'squares-2x2' },
+      { name: 'Reportes', href: '/admin/reports', icon: 'chart-bar' },
     ],
   },
   {
-    label: "Comercio",
+    label: 'Comercio',
     items: [
-      { name: "Órdenes", href: "/admin/sales/orders", icon: "shopping-cart", badge: "12" },
-      { name: "Productos", href: "/admin/catalog/products", icon: "cube" },
-      { name: "Clientes", href: "/admin/customers", icon: "users" },
-      { name: "Facturas", href: "/admin/sales/invoices", icon: "document-text" },
+      { name: 'Órdenes', href: '/admin/sales/orders', icon: 'shopping-cart', badge: '12' },
+      { name: 'Productos', href: '/admin/catalog/products', icon: 'cube' },
+      { name: 'Clientes', href: '/admin/customers', icon: 'users' },
+      { name: 'Facturas', href: '/admin/sales/invoices', icon: 'document-text' },
     ],
   },
   {
-    label: "Catálogo",
+    label: 'Catálogo',
     items: [
-      { name: "Categorías", href: "/admin/catalog/categories", icon: "folder" },
-      { name: "Marcas", href: "/admin/catalog/brands", icon: "tag" },
-      { name: "Variantes", href: "/admin/catalog/variants", icon: "square-3-stack-3d" },
+      { name: 'Categorías', href: '/admin/catalog/categories', icon: 'folder' },
+      { name: 'Marcas', href: '/admin/catalog/brands', icon: 'tag' },
+      { name: 'Variantes', href: '/admin/catalog/variants', icon: 'square-3-stack-3d' },
     ],
   },
   {
-    label: "Inventario",
+    label: 'Inventario',
     items: [
-      { name: "Stock", href: "/admin/inventory/stock", icon: "archive-box" },
-      { name: "Movimientos", href: "/admin/inventory/movements", icon: "arrow-path" },
-      { name: "Depósitos", href: "/admin/inventory/warehouses", icon: "building-office" },
+      { name: 'Stock', href: '/admin/inventory/stock', icon: 'archive-box' },
+      { name: 'Movimientos', href: '/admin/inventory/movements', icon: 'arrow-path' },
+      { name: 'Depósitos', href: '/admin/inventory/warehouses', icon: 'building-office' },
     ],
   },
   {
-    label: "Compras",
+    label: 'Compras',
     items: [
-      { name: "Proveedores", href: "/admin/purchases/suppliers", icon: "truck" },
-      { name: "Compras", href: "/admin/purchases/orders", icon: "clipboard-document-list" },
+      { name: 'Proveedores', href: '/admin/purchases/suppliers', icon: 'truck' },
+      { name: 'Compras', href: '/admin/purchases/orders', icon: 'clipboard-document-list' },
     ],
   },
   {
-    label: "Marketing",
+    label: 'Marketing',
     items: [
-      { name: "Cupones", href: "/admin/marketing/coupons", icon: "ticket" },
-      { name: "Promociones", href: "/admin/marketing/promotions", icon: "gift" },
+      { name: 'Cupones', href: '/admin/marketing/coupons', icon: 'ticket' },
+      { name: 'Promociones', href: '/admin/marketing/promotions', icon: 'gift' },
     ],
   },
   {
-    label: "Soporte",
+    label: 'Soporte',
     items: [
-      { name: "Tickets", href: "/admin/support/tickets", icon: "chat-bubble-left-right" },
-      { name: "Reseñas", href: "/admin/support/reviews", icon: "star" },
-      { name: "Preguntas", href: "/admin/support/questions", icon: "question-mark-circle" },
+      { name: 'Tickets', href: '/admin/support/tickets', icon: 'chat-bubble-left-right' },
+      { name: 'Reseñas', href: '/admin/support/reviews', icon: 'star' },
+      { name: 'Preguntas', href: '/admin/support/questions', icon: 'question-mark-circle' },
     ],
   },
   {
-    label: "Sistema",
+    label: 'Sistema',
     items: [
-      { name: "Usuarios", href: "/admin/users", icon: "user" },
-      { name: "Roles", href: "/admin/roles", icon: "shield-check" },
-      { name: "Auditoría", href: "/admin/system/audits", icon: "magnifying-glass" },
-      { name: "Configuración", href: "/admin/settings", icon: "cog-6-tooth" },
+      { name: 'Usuarios', href: '/admin/users', icon: 'user' },
+      { name: 'Roles', href: '/admin/roles', icon: 'shield-check' },
+      { name: 'Auditoría', href: '/admin/system/audits', icon: 'magnifying-glass' },
+      { name: 'Configuración', href: '/admin/settings', icon: 'cog-6-tooth' },
     ],
   },
 ];
@@ -78,23 +78,25 @@ const menu = [
     white-space: nowrap;
     max-width: 300px;
     opacity: 1;
-    transition: opacity 150ms ease, max-width 200ms ease;
+    transition:
+      opacity 150ms ease,
+      max-width 200ms ease;
   }
 
-  aside[data-collapsed="true"] .sidebar-label {
+  aside[data-collapsed='true'] .sidebar-label {
     opacity: 0;
     max-width: 0;
     pointer-events: none;
   }
 
   /* ── Collapsed nav items: center icon, remove gap ── */
-  aside[data-collapsed="true"] nav a {
+  aside[data-collapsed='true'] nav a {
     justify-content: center;
     gap: 0;
   }
 
   /* ── Collapsed header: center logo icon ── */
-  aside[data-collapsed="true"] > div:first-child {
+  aside[data-collapsed='true'] > div:first-child {
     justify-content: center;
     padding-left: 0.75rem;
     padding-right: 0.75rem;
@@ -131,10 +133,7 @@ const menu = [
   }
 </style>
 
-<div
-  id="sidebar-overlay"
-  class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"
-></div>
+<div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"></div>
 
 <aside
   id="admin-sidebar"
@@ -149,27 +148,30 @@ const menu = [
 
       <div class="sidebar-label">
         <p class="text-sm font-bold text-white">Kitsune</p>
-        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-          Panel de Control
-        </p>
+        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Panel de Control</p>
       </div>
     </div>
   </div>
 
   <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
-    {menu.map((section) => (
-      <div>
-        <p class="sidebar-label mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
-          {section.label}
-        </p>
+    {
+      menu.map((section) => (
+        <div>
+          <p class="sidebar-label mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+            {section.label}
+          </p>
 
-        <div class="space-y-1">
-          {section.items.map((item) => (
-            <AdminSidebarItem {...item} active={currentPath === item.href || currentPath.startsWith(item.href + "/")} />
-          ))}
+          <div class="space-y-1">
+            {section.items.map((item) => (
+              <AdminSidebarItem
+                {...item}
+                active={currentPath === item.href || currentPath.startsWith(item.href + '/')}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    ))}
+      ))
+    }
   </nav>
 
   <div class="border-t border-white/10 p-4">
@@ -179,99 +181,105 @@ const menu = [
 
 <script>
   (function () {
-    var STORAGE_KEY = "admin-sidebar-collapsed";
-    var sidebar = document.getElementById("admin-sidebar");
-    var overlay = document.getElementById("sidebar-overlay");
-    var mainContent = document.getElementById("main-content");
-    var toggleBtns = document.querySelectorAll("[data-sidebar-toggle]");
+    const STORAGE_KEY = 'admin-sidebar-collapsed';
+    const sidebar = document.getElementById('admin-sidebar') as HTMLElement | null;
+    const overlay = document.getElementById('sidebar-overlay') as HTMLElement | null;
+    const mainContent = document.getElementById('main-content') as HTMLElement | null;
+    const toggleBtns = document.querySelectorAll<HTMLElement>('[data-sidebar-toggle]');
 
     if (!sidebar || !overlay || !mainContent) return;
 
-    function isDesktop() {
+    // Narrow TS: capturamos referencias no-null para usar dentro de callbacks
+    // donde el type narrowing no se propaga.
+    const sidebarEl: HTMLElement = sidebar;
+    const overlayEl: HTMLElement = overlay;
+    const mainContentEl: HTMLElement = mainContent;
+
+    function isDesktop(): boolean {
       return window.innerWidth >= 1024;
     }
 
-    function getCollapsed() {
-      return localStorage.getItem(STORAGE_KEY) === "true";
+    function getCollapsed(): boolean {
+      return localStorage.getItem(STORAGE_KEY) === 'true';
     }
 
-    function setCollapsed(value) {
+    function setCollapsed(value: boolean): void {
       localStorage.setItem(STORAGE_KEY, String(value));
     }
 
-    function updateToggleIcons(collapsed) {
-      toggleBtns.forEach(function (btn) {
-        var expandIcon = btn.querySelector("[data-icon-expand]");
-        var collapseIcon = btn.querySelector("[data-icon-collapse]");
+    function updateToggleIcons(collapsed: boolean): void {
+      toggleBtns.forEach(function (btn: HTMLElement) {
+        const expandIcon = btn.querySelector('[data-icon-expand]');
+        const collapseIcon = btn.querySelector('[data-icon-collapse]');
         if (expandIcon && collapseIcon) {
-          expandIcon.classList.toggle("hidden", !collapsed);
-          collapseIcon.classList.toggle("hidden", collapsed);
+          expandIcon.classList.toggle('hidden', !collapsed);
+          collapseIcon.classList.toggle('hidden', collapsed);
         }
       });
     }
 
-    function updateToggleTitle(collapsed) {
-      toggleBtns.forEach(function (btn) {
-        btn.setAttribute("title", collapsed ? "Expandir menú" : "Colapsar menú");
-        btn.setAttribute("aria-label", collapsed ? "Expandir menú" : "Colapsar menú");
+    function updateToggleTitle(collapsed: boolean): void {
+      toggleBtns.forEach(function (btn: HTMLElement) {
+        btn.setAttribute('title', collapsed ? 'Expandir menú' : 'Colapsar menú');
+        btn.setAttribute('aria-label', collapsed ? 'Expandir menú' : 'Colapsar menú');
       });
     }
 
-    function updateAriaState(expanded) {
-      toggleBtns.forEach(function (btn) {
-        btn.setAttribute("aria-expanded", String(expanded));
+    function updateAriaState(expanded: boolean): void {
+      toggleBtns.forEach(function (btn: HTMLElement) {
+        btn.setAttribute('aria-expanded', String(expanded));
       });
     }
 
-    function applyDesktopState() {
-      var collapsed = getCollapsed();
+    function applyDesktopState(): void {
+      const collapsed = getCollapsed();
 
-      sidebar.setAttribute("data-collapsed", String(collapsed));
+      sidebarEl.setAttribute('data-collapsed', String(collapsed));
 
       if (collapsed) {
-        sidebar.classList.add("w-[72px]");
-        sidebar.classList.remove("w-[260px]");
-        mainContent.classList.add("lg:pl-[72px]");
-        mainContent.classList.remove("lg:pl-[260px]");
+        sidebarEl.classList.add('w-[72px]');
+        sidebarEl.classList.remove('w-[260px]');
+        mainContentEl.classList.add('lg:pl-[72px]');
+        mainContentEl.classList.remove('lg:pl-[260px]');
       } else {
-        sidebar.classList.remove("w-[72px]");
-        sidebar.classList.add("w-[260px]");
-        mainContent.classList.remove("lg:pl-[72px]");
-        mainContent.classList.add("lg:pl-[260px]");
+        sidebarEl.classList.remove('w-[72px]');
+        sidebarEl.classList.add('w-[260px]');
+        mainContentEl.classList.remove('lg:pl-[72px]');
+        mainContentEl.classList.add('lg:pl-[260px]');
       }
 
       updateToggleIcons(collapsed);
       updateToggleTitle(collapsed);
       updateAriaState(!collapsed);
 
-      document.documentElement.classList.remove("sidebar-collapsed-init", "sidebar-expanded-init");
+      document.documentElement.classList.remove('sidebar-collapsed-init', 'sidebar-expanded-init');
     }
 
-    function toggleSidebar() {
+    function toggleSidebar(): void {
       if (isDesktop()) {
         setCollapsed(!getCollapsed());
         applyDesktopState();
       } else {
-        var isHidden = sidebar.classList.contains("-translate-x-full");
+        const isHidden = sidebarEl.classList.contains('-translate-x-full');
         if (isHidden) {
-          sidebar.classList.remove("-translate-x-full");
-          overlay.classList.remove("hidden");
+          sidebarEl.classList.remove('-translate-x-full');
+          overlayEl.classList.remove('hidden');
         } else {
-          sidebar.classList.add("-translate-x-full");
-          overlay.classList.add("hidden");
+          sidebarEl.classList.add('-translate-x-full');
+          overlayEl.classList.add('hidden');
         }
         updateAriaState(isHidden);
       }
     }
 
-    toggleBtns.forEach(function (btn) {
-      btn.addEventListener("click", toggleSidebar);
+    toggleBtns.forEach(function (btn: HTMLElement) {
+      btn.addEventListener('click', toggleSidebar);
     });
 
-    overlay.addEventListener("click", function () {
+    overlayEl.addEventListener('click', function () {
       if (!isDesktop()) {
-        sidebar.classList.add("-translate-x-full");
-        overlay.classList.add("hidden");
+        sidebar!.classList.add('-translate-x-full');
+        overlay!.classList.add('hidden');
         updateAriaState(false);
       }
     });

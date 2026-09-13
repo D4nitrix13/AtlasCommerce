@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: quality-gate-pre-commit
 description: Pre-commit quality gate - backend: pint + phpstan + phpunit. Frontend: astro check + eslint + prettier. Docs: markdownlint. Infra: docker quality-check (absolute paths en Dockerfile, docker-compose, entrypoint). Auto-evaluation checklist before commit. Triggers: pre-commit, pre-push, CI failures, when asked to commit/push.

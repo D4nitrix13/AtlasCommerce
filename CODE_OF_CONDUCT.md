@@ -92,7 +92,7 @@ y el derecho de réplica del implicado.
 Este Código de Conducta está adaptado de
 [Contributor Covenant](https://www.contributor-covenant.org), versión 2.1,
 disponible en
-https://www.contributor-covenant.org/es/version/2/1/code_of_conduct/
+<https://www.contributor-covenant.org/es/version/2/1/code_of_conduct/>
 
 Las guías de aplicación se inspiran en el
 [Código de Conducta de Mozilla](https://github.com/mozilla/diversity).
@@ -100,7 +100,7 @@ Las guías de aplicación se inspiran en el
 Para respuestas a preguntas frecuentes sobre este código de conducta, consultá
 las [FAQ de Contributor Covenant](https://www.contributor-covenant.org/faq).
 Traducciones están disponibles en
-https://www.contributor-covenant.org/translations.
+<https://www.contributor-covenant.org/translations>.
 
 ---
 

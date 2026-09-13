@@ -78,7 +78,6 @@ const es: Translations = {
   'auth.shell.privacyLink': 'Privacidad',
   'auth.shell.illustration.alt': 'Ilustración',
   'auth.shell.termsAnd': 'y',
-  'auth.shell.termsAnd': 'y',
 
   'auth.login.shell.heading': 'Inicia sesión',
   'auth.login.shell.subtitle': 'Ingresa tu correo y contraseña para acceder.',

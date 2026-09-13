@@ -15,8 +15,8 @@ export type MoneyPayload = {
   currency_code: string | null;
 };
 
-const DEFAULT_LOCALE = "es-NI";
-const DEFAULT_CURRENCY = "USD";
+const DEFAULT_LOCALE = 'es-NI';
+const DEFAULT_CURRENCY = 'USD';
 
 /**
  * Formatea un payload money del backend.
@@ -31,7 +31,7 @@ const DEFAULT_CURRENCY = "USD";
  */
 export function formatMoney(payload: MoneyPayload | null | undefined): string {
   if (!payload) {
-    return "—";
+    return '—';
   }
 
   if (payload.formatted && payload.currency_code) {
@@ -53,7 +53,7 @@ export function formatMoney(payload: MoneyPayload | null | undefined): string {
  */
 export function formatCentsAsDecimal(cents: number, currencyCode: string | null = null): string {
   const code = currencyCode ?? DEFAULT_CURRENCY;
-  const decimals = code === "JPY" ? 0 : 2;
+  const decimals = code === 'JPY' ? 0 : 2;
 
   return new Intl.NumberFormat(DEFAULT_LOCALE, {
     minimumFractionDigits: decimals,
@@ -66,13 +66,13 @@ export function formatCentsAsDecimal(cents: number, currencyCode: string | null 
  */
 export function formatDate(iso: string | null | undefined): string {
   if (!iso) {
-    return "—";
+    return '—';
   }
 
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
   }).format(new Date(iso));
 }
 
@@ -81,14 +81,14 @@ export function formatDate(iso: string | null | undefined): string {
  */
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) {
-    return "—";
+    return '—';
   }
 
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(new Date(iso));
 }

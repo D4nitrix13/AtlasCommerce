@@ -3,7 +3,7 @@
 > **Software propietario.** Ver [`LICENSE`](LICENSE) antes de contribuir.
 > Al participar en este repositorio (issues, PRs, discusiones), aceptás los
 > términos de licenciamiento del proyecto.
-
+>
 > **Quality Gate.** Este proyecto trata el código como producto, no como descarte.
 > Todo cambio debe cumplir los principios definidos aquí. Si no los cumplís, el
 > cambio no se acepta.
@@ -95,7 +95,8 @@ Ver [`frontend/AGENTS.md`](frontend/AGENTS.md) para las reglas completas
 - **Estados de UI obligatorios** — loading, error, empty, success, disabled.
 - **Sin lógica de negocio en el frontend** — el cálculo confiable viene de Laravel.
 - **Componentes de UI en `src/components/ui/`**, dominio en `src/components/{domain}/`.
-- **Accesibilidad** — `<button>` para acciones, `<label>` para inputs, `alt` en `<img>`.
+- **Accesibilidad** — `<button>` para acciones, `<label>` para inputs, `alt`
+  en `<img>`.
 
 ### SQL / Migraciones
 
@@ -242,11 +243,15 @@ Un PR se **rechaza** cuando:
 
 ## 10. Referencias
 
-- [`backend/AGENTS.md`](backend/AGENTS.md) — Reglas auto-generadas de Laravel Boost (autoritativas para el backend).
-- [`frontend/AGENTS.md`](frontend/AGENTS.md) — Reglas de frontend (tamaño, nomenclatura, estructura).
-- [`.github/workflows/quality-gate.yml`](.github/workflows/quality-gate.yml) — Pipeline de quality gate.
+- [`backend/AGENTS.md`](backend/AGENTS.md) — Reglas auto-generadas de Laravel Boost
+  (autoritativas para el backend).
+- [`frontend/AGENTS.md`](frontend/AGENTS.md) — Reglas de frontend (tamaño,
+  nomenclatura, estructura).
+- [`.github/workflows/quality-gate.yml`](.github/workflows/quality-gate.yml) — Pipeline
+  de quality gate.
 - [`backend/pint.json`](backend/pint.json) — Configuración de Pint.
-- [`backend/phpstan.neon`](backend/phpstan.neon) — Configuración de PHPStan (level 7).
+- [`backend/phpstan.neon`](backend/phpstan.neon) — Configuración de PHPStan (level
+  7).
 - [`frontend/eslint.config.js`](frontend/eslint.config.js) — Configuración de ESLint.
 - [`frontend/.prettierrc.json`](frontend/.prettierrc.json) — Configuración de Prettier.
 - [`docs/backend/TASKS.md`](docs/backend/TASKS.md) — Roadmap del backend.

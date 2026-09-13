@@ -76,9 +76,9 @@ muestra en una UI web.
 
 | Instancia dev                 | SMTP (host) | UI web                   |
 | ----------------------------- | ----------- | ------------------------ |
-| `panda-estampados-and-kitsune` | `:1025`     | http://localhost:8025    |
-| `mm-boutique`                  | `:11025`    | http://localhost:18025   |
-| `morales-store`                | `:12025`    | http://localhost:28025   |
+| `panda-estampados-and-kitsune` | `:1025`     | <http://localhost:8025>    |
+| `mm-boutique`                  | `:11025`    | <http://localhost:18025>   |
+| `morales-store`                | `:12025`    | <http://localhost:28025>   |
 
 Uso:
 
