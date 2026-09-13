@@ -237,7 +237,7 @@ services:
     container_name: morales-store-dev-pgadmin
     restart: unless-stopped
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@morales-store.test}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@morales-store.example}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
       - PGADMIN_LISTEN_PORT=80
     ports:

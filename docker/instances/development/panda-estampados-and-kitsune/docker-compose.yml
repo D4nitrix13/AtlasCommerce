@@ -264,14 +264,14 @@ services:
 
   # pgAdmin: web UI para inspeccionar Postgres (tablas, queries, schema).
   # Conectado al postgres container via la red Docker interna.
-  # Credenciales default: admin@panda-estampados-and-kitsune.test / admin.
+  # Credenciales default: admin@panda-estampados-and-kitsune.example / admin.
   # CAMBIAR EN PROD via env vars (PGADMIN_DEFAULT_PASSWORD).
   pgadmin:
     image: ${PGADMIN_IMAGE:-dpage/pgadmin4:latest}
     container_name: panda-estampados-and-kitsune-dev-pgadmin
     restart: unless-stopped
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@panda-estampados-and-kitsune.test}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@panda-estampados-and-kitsune.example}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
       - PGADMIN_LISTEN_PORT=80
     ports:
