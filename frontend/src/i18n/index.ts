@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from "react";
-import en from "./locales/en";
-import es from "./locales/es";
+import { useSyncExternalStore } from 'react';
+import en from './locales/en';
+import es from './locales/es';
 import {
   DEFAULT_LOCALE,
   LOCALE_LABELS,
@@ -8,8 +8,8 @@ import {
   STORAGE_KEY,
   SUPPORTED_LOCALES,
   type Locale,
-} from "./config";
-import type { Translations } from "./types";
+} from './config';
+import type { Translations } from './types';
 
 /**
  * Sistema i18n client-side.
@@ -38,7 +38,7 @@ export function getLocale(): Locale {
 }
 
 export function detectFromUrl(): Locale {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return DEFAULT_LOCALE;
   }
 
@@ -84,14 +84,14 @@ export function switchLocalePath(pathname: string, next: Locale): string {
   const replaced = pathname.replace(/^\/(es|en)/, `/${next}`);
 
   if (replaced === pathname) {
-    return next === DEFAULT_LOCALE ? pathname : `/${next}${pathname === "/" ? "" : pathname}`;
+    return next === DEFAULT_LOCALE ? pathname : `/${next}${pathname === '/' ? '' : pathname}`;
   }
 
   return replaced;
 }
 
 export function setLocale(locale: Locale): void {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return;
   }
 
@@ -105,16 +105,16 @@ export function setLocale(locale: Locale): void {
 }
 
 function subscribe(listener: () => void): () => void {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return () => {};
   }
 
   // Re-render cuando el pathname cambia (history navigation).
-  window.addEventListener("popstate", listener);
+  window.addEventListener('popstate', listener);
 
   // Astro client-side router emite eventos custom; el más común es
   // 'astro:after-swap'. Lo escuchamos también.
-  window.addEventListener("astro:after-swap", listener);
+  window.addEventListener('astro:after-swap', listener);
 
   // Fallback: MutationObserver sobre el <html> para detectar cambios
   // de URL via pushState (que no dispara popstate).
@@ -128,8 +128,8 @@ function subscribe(listener: () => void): () => void {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   return () => {
-    window.removeEventListener("popstate", listener);
-    window.removeEventListener("astro:after-swap", listener);
+    window.removeEventListener('popstate', listener);
+    window.removeEventListener('astro:after-swap', listener);
     observer.disconnect();
   };
 }
@@ -145,15 +145,12 @@ export function getDictionary(): Translations {
 /**
  * Traduce una key con interpolación opcional.
  */
-export function t(
-  key: keyof Translations,
-  vars?: Record<string, string | number>,
-): string {
+export function t(key: keyof Translations, vars?: Record<string, string | number>): string {
   const locale = detectFromUrl();
   const value = dictionaries[locale][key];
 
-  if (typeof value !== "string") {
-    if (typeof window !== "undefined" && import.meta.env.DEV === true) {
+  if (typeof value !== 'string') {
+    if (typeof window !== 'undefined' && import.meta.env.DEV === true) {
       console.warn(`[i18n] Missing translation for key "${String(key)}" in locale "${locale}"`);
     }
 

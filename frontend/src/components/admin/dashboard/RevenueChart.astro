@@ -1,7 +1,7 @@
 ---
 const chartId = `revenue-chart-${Math.random().toString(36).slice(2)}`;
 
-const labels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 40000, 45000, 48000];
 ---
 
@@ -9,9 +9,7 @@ const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 4
   <div class="mb-6 flex items-start justify-between gap-4">
     <div>
       <h2 class="text-lg font-bold text-slate-950">Resumen</h2>
-      <p class="text-sm text-slate-500">
-        Rendimiento mensual del año actual
-      </p>
+      <p class="text-sm text-slate-500">Rendimiento mensual del año actual</p>
     </div>
 
     <div class="flex rounded-xl bg-slate-100 p-1 text-xs font-medium">
@@ -22,35 +20,32 @@ const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 4
   </div>
 
   <div class="h-[360px]">
-    <canvas
-      id={chartId}
-      data-labels={JSON.stringify(labels)}
-      data-values={JSON.stringify(values)}
+    <canvas id={chartId} data-labels={JSON.stringify(labels)} data-values={JSON.stringify(values)}
     ></canvas>
   </div>
 </section>
 
 <script>
-  import Chart from "chart.js/auto";
+  import Chart from 'chart.js/auto';
 
   document.querySelectorAll<HTMLCanvasElement>("canvas[id^='revenue-chart']").forEach((canvas) => {
-    const labels = JSON.parse(canvas.dataset.labels || "[]");
-    const values = JSON.parse(canvas.dataset.values || "[]");
+    const labels = JSON.parse(canvas.dataset.labels || '[]');
+    const values = JSON.parse(canvas.dataset.values || '[]');
 
     new Chart(canvas, {
-      type: "line",
+      type: 'line',
       data: {
         labels,
         datasets: [
           {
-            label: "Ingresos",
+            label: 'Ingresos',
             data: values,
             fill: true,
             tension: 0.45,
             borderWidth: 2,
             pointRadius: 0,
-            borderColor: "#059669",
-            backgroundColor: "rgba(5, 150, 105, 0.10)",
+            borderColor: '#059669',
+            backgroundColor: 'rgba(5, 150, 105, 0.10)',
           },
         ],
       },
@@ -68,7 +63,7 @@ const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 4
               display: false,
             },
             ticks: {
-              color: "#64748b",
+              color: '#64748b',
             },
           },
           y: {
@@ -76,13 +71,13 @@ const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 4
               display: false,
             },
             grid: {
-              color: "#e5e7eb",
+              color: '#e5e7eb',
             },
             ticks: {
-              color: "#64748b",
+              color: '#64748b',
               callback(value) {
-                const n = typeof value === "number" ? value : Number(value);
-                return "$" + Number(n / 1000) + "k";
+                const n = typeof value === 'number' ? value : Number(value);
+                return '$' + Number(n / 1000) + 'k';
               },
             },
           },

@@ -7,14 +7,14 @@
  *   - `shipped_at` y `delivered_at` son ISO 8601 (pueden ser null).
  */
 
-import type { MoneyPayload } from "../lib/formatters";
+import type { MoneyPayload } from '../lib/formatters';
 
 export const SHIPMENT_STATUSES = [
-  "pending",
-  "shipped",
-  "in_transit",
-  "delivered",
-  "cancelled",
+  'pending',
+  'shipped',
+  'in_transit',
+  'delivered',
+  'cancelled',
 ] as const;
 
 export type ShipmentStatus = (typeof SHIPMENT_STATUSES)[number];
@@ -51,17 +51,17 @@ export type ShipmentWithRelations = Shipment & {
 };
 
 export const SHIPMENT_STATUS_LABELS: Record<ShipmentStatus, string> = {
-  pending: "Pendiente",
-  shipped: "Despachado",
-  in_transit: "En tránsito",
-  delivered: "Entregado",
-  cancelled: "Cancelado",
+  pending: 'Pendiente',
+  shipped: 'Despachado',
+  in_transit: 'En tránsito',
+  delivered: 'Entregado',
+  cancelled: 'Cancelado',
 };
 
 export const SHIPMENT_STATUS_COLORS: Record<ShipmentStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  shipped: "bg-blue-100 text-blue-800",
-  in_transit: "bg-indigo-100 text-indigo-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
+  pending: 'bg-yellow-100 text-yellow-800',
+  shipped: 'bg-blue-100 text-blue-800',
+  in_transit: 'bg-indigo-100 text-indigo-800',
+  delivered: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
 };

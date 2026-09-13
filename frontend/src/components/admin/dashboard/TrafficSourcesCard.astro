@@ -2,10 +2,10 @@
 const chartId = `traffic-chart-${Math.random().toString(36).slice(2)}`;
 
 const sources = [
-  { label: "Directo", value: 35, color: "#059669" },
-  { label: "Orgánico", value: 28, color: "#0ea5e9" },
-  { label: "Referido", value: 22, color: "#6366f1" },
-  { label: "Social", value: 15, color: "#f43f5e" },
+  { label: 'Directo', value: 35, color: '#059669' },
+  { label: 'Orgánico', value: 28, color: '#0ea5e9' },
+  { label: 'Referido', value: 22, color: '#6366f1' },
+  { label: 'Social', value: 15, color: '#f43f5e' },
 ];
 ---
 
@@ -15,10 +15,7 @@ const sources = [
 
   <div class="flex items-center gap-6">
     <div class="relative h-44 w-44 shrink-0">
-      <canvas
-        id={chartId}
-        data-sources={JSON.stringify(sources)}
-      ></canvas>
+      <canvas id={chartId} data-sources={JSON.stringify(sources)}></canvas>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         <span class="text-2xl font-bold text-slate-950">284K</span>
         <span class="text-xs text-slate-500">Visitas</span>
@@ -26,27 +23,29 @@ const sources = [
     </div>
 
     <div class="flex-1 space-y-3">
-      {sources.map((s) => (
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`}></span>
-            <span class="text-sm text-slate-600">{s.label}</span>
+      {
+        sources.map((s) => (
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`} />
+              <span class="text-sm text-slate-600">{s.label}</span>
+            </div>
+            <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
           </div>
-          <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
-        </div>
-      ))}
+        ))
+      }
     </div>
   </div>
 </section>
 
 <script>
-  import Chart from "chart.js/auto";
+  import Chart from 'chart.js/auto';
 
   document.querySelectorAll<HTMLCanvasElement>("canvas[id^='traffic-chart']").forEach((canvas) => {
-    const sources = JSON.parse(canvas.dataset.sources || "[]");
+    const sources = JSON.parse(canvas.dataset.sources || '[]');
 
     new Chart(canvas, {
-      type: "doughnut",
+      type: 'doughnut',
       data: {
         labels: sources.map((s: { label: string }) => s.label),
         datasets: [
@@ -60,7 +59,7 @@ const sources = [
       options: {
         responsive: true,
         maintainAspectRatio: true,
-        cutout: "70%",
+        cutout: '70%',
         plugins: {
           legend: { display: false },
           tooltip: { enabled: false },

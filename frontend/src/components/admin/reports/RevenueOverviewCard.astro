@@ -1,9 +1,13 @@
 ---
 const chartId = `revenue-overview-${Math.random().toString(36).slice(2)}`;
 
-const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-const currentYear = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 40000, 45000, 48000];
-const previousYear = [15000, 18000, 17000, 22000, 25000, 24000, 28000, 30000, 34000, 32000, 36000, 38000];
+const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const currentYear = [
+  18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 40000, 45000, 48000,
+];
+const previousYear = [
+  15000, 18000, 17000, 22000, 25000, 24000, 28000, 30000, 34000, 32000, 36000, 38000,
+];
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -30,96 +34,97 @@ const previousYear = [15000, 18000, 17000, 22000, 25000, 24000, 28000, 30000, 34
       id={chartId}
       data-months={JSON.stringify(months)}
       data-current={JSON.stringify(currentYear)}
-      data-previous={JSON.stringify(previousYear)}
-    ></canvas>
+      data-previous={JSON.stringify(previousYear)}></canvas>
   </div>
 </section>
 
 <script>
-  import Chart from "chart.js/auto";
+  import Chart from 'chart.js/auto';
 
-  document.querySelectorAll<HTMLCanvasElement>("canvas[id^='revenue-overview']").forEach((canvas) => {
-    const months = JSON.parse(canvas.dataset.months || "[]");
-    const currentYear = JSON.parse(canvas.dataset.current || "[]");
-    const previousYear = JSON.parse(canvas.dataset.previous || "[]");
+  document
+    .querySelectorAll<HTMLCanvasElement>("canvas[id^='revenue-overview']")
+    .forEach((canvas) => {
+      const months = JSON.parse(canvas.dataset.months || '[]');
+      const currentYear = JSON.parse(canvas.dataset.current || '[]');
+      const previousYear = JSON.parse(canvas.dataset.previous || '[]');
 
-    new Chart(canvas, {
-      type: "line",
-      data: {
-        labels: months,
-        datasets: [
-          {
-            label: "2026",
-            data: currentYear,
-            fill: true,
-            tension: 0.45,
-            borderWidth: 2,
-            pointRadius: 0,
-            borderColor: "#059669",
-            backgroundColor: "rgba(5, 150, 105, 0.08)",
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: '2026',
+              data: currentYear,
+              fill: true,
+              tension: 0.45,
+              borderWidth: 2,
+              pointRadius: 0,
+              borderColor: '#059669',
+              backgroundColor: 'rgba(5, 150, 105, 0.08)',
+            },
+            {
+              label: '2025',
+              data: previousYear,
+              fill: false,
+              tension: 0.45,
+              borderWidth: 2,
+              pointRadius: 0,
+              borderColor: '#cbd5e1',
+              backgroundColor: 'transparent',
+              borderDash: [5, 5],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label(context) {
+                  const y = context.parsed.y ?? 0;
+                  return context.dataset.label + ': $' + y.toLocaleString();
+                },
+              },
+            },
           },
-          {
-            label: "2025",
-            data: previousYear,
-            fill: false,
-            tension: 0.45,
-            borderWidth: 2,
-            pointRadius: 0,
-            borderColor: "#cbd5e1",
-            backgroundColor: "transparent",
-            borderDash: [5, 5],
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            mode: "index",
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
             intersect: false,
-            callbacks: {
-              label(context) {
-                const y = context.parsed.y ?? 0;
-                return context.dataset.label + ": $" + y.toLocaleString();
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+              ticks: {
+                color: '#64748b',
+              },
+            },
+            y: {
+              border: {
+                display: false,
+              },
+              grid: {
+                color: '#e5e7eb',
+              },
+              ticks: {
+                color: '#64748b',
+                callback(value) {
+                  const n = typeof value === 'number' ? value : Number(value);
+                  return '$' + Number(n / 1000) + 'k';
+                },
               },
             },
           },
         },
-        interaction: {
-          mode: "nearest",
-          axis: "x",
-          intersect: false,
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false,
-            },
-            ticks: {
-              color: "#64748b",
-            },
-          },
-          y: {
-            border: {
-              display: false,
-            },
-            grid: {
-              color: "#e5e7eb",
-            },
-            ticks: {
-              color: "#64748b",
-              callback(value) {
-                const n = typeof value === "number" ? value : Number(value);
-                return "$" + Number(n / 1000) + "k";
-              },
-            },
-          },
-        },
-      },
+      });
     });
-  });
 </script>

@@ -1,12 +1,37 @@
 ---
-import Icon from "../../ui/Icon.astro";
+import Icon from '../../ui/Icon.astro';
 
 const activities = [
-  { icon: "shopping-cart", text: "Nueva orden #ORD-1042 recibida", time: "Hace 5 min", color: "bg-emerald-100 text-emerald-600" },
-  { icon: "user", text: "Cliente registrado: María García", time: "Hace 12 min", color: "bg-sky-100 text-sky-600" },
-  { icon: "bolt", text: "Pago de $125.00 confirmado", time: "Hace 28 min", color: "bg-amber-100 text-amber-600" },
-  { icon: "cube", text: "Envío #SHP-892 entregado", time: "Hace 1 h", color: "bg-violet-100 text-violet-600" },
-  { icon: "star", text: "Reseña 5★ en Camiseta Kitsune", time: "Hace 2 h", color: "bg-rose-100 text-rose-600" },
+  {
+    icon: 'shopping-cart',
+    text: 'Nueva orden #ORD-1042 recibida',
+    time: 'Hace 5 min',
+    color: 'bg-emerald-100 text-emerald-600',
+  },
+  {
+    icon: 'user',
+    text: 'Cliente registrado: María García',
+    time: 'Hace 12 min',
+    color: 'bg-sky-100 text-sky-600',
+  },
+  {
+    icon: 'bolt',
+    text: 'Pago de $125.00 confirmado',
+    time: 'Hace 28 min',
+    color: 'bg-amber-100 text-amber-600',
+  },
+  {
+    icon: 'cube',
+    text: 'Envío #SHP-892 entregado',
+    time: 'Hace 1 h',
+    color: 'bg-violet-100 text-violet-600',
+  },
+  {
+    icon: 'star',
+    text: 'Reseña 5★ en Camiseta Kitsune',
+    time: 'Hace 2 h',
+    color: 'bg-rose-100 text-rose-600',
+  },
 ];
 ---
 
@@ -16,22 +41,22 @@ const activities = [
       <h2 class="text-lg font-bold text-slate-950">Actividad reciente</h2>
       <p class="text-sm text-slate-500">Últimos eventos de tu tienda</p>
     </div>
-    <a href="#" class="text-sm font-medium text-emerald-600 hover:underline">
-      Ver todo →
-    </a>
+    <a href="#" class="text-sm font-medium text-emerald-600 hover:underline"> Ver todo → </a>
   </div>
 
   <div class="space-y-4">
-    {activities.map((a) => (
-      <div class="flex items-start gap-3">
-        <div class:list={["mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg", a.color]}>
-          <Icon name={a.icon} class="h-4 w-4" />
+    {
+      activities.map((a) => (
+        <div class="flex items-start gap-3">
+          <div class:list={['mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg', a.color]}>
+            <Icon name={a.icon} class="h-4 w-4" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-slate-700">{a.text}</p>
+            <p class="text-xs text-slate-400">{a.time}</p>
+          </div>
         </div>
-        <div class="min-w-0 flex-1">
-          <p class="text-sm text-slate-700">{a.text}</p>
-          <p class="text-xs text-slate-400">{a.time}</p>
-        </div>
-      </div>
-    ))}
+      ))
+    }
   </div>
 </section>

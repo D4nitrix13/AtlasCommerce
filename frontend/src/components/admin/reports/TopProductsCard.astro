@@ -1,18 +1,24 @@
 ---
 const products = [
-  { rank: 1, name: "Camiseta Kitsune Edición Limitada", sold: 342, revenue: "$15,390", percent: 100 },
-  { rank: 2, name: "Sudadera Kitsune Negra", sold: 218, revenue: "$19,402", percent: 72 },
-  { rank: 3, name: "Pack 3 Playeras Básicas", sold: 189, revenue: "$14,175", percent: 55 },
-  { rank: 4, name: "Gorra Bordada Logo", sold: 156, revenue: "$4,992", percent: 46 },
-  { rank: 5, name: "Taza Personalizada", sold: 134, revenue: "$2,412", percent: 39 },
+  {
+    rank: 1,
+    name: 'Camiseta Kitsune Edición Limitada',
+    sold: 342,
+    revenue: '$15,390',
+    percent: 100,
+  },
+  { rank: 2, name: 'Sudadera Kitsune Negra', sold: 218, revenue: '$19,402', percent: 72 },
+  { rank: 3, name: 'Pack 3 Playeras Básicas', sold: 189, revenue: '$14,175', percent: 55 },
+  { rank: 4, name: 'Gorra Bordada Logo', sold: 156, revenue: '$4,992', percent: 46 },
+  { rank: 5, name: 'Taza Personalizada', sold: 134, revenue: '$2,412', percent: 39 },
 ];
 
 const rankColors = [
-  "bg-emerald-100 text-emerald-700",
-  "bg-sky-100 text-sky-700",
-  "bg-violet-100 text-violet-700",
-  "bg-amber-100 text-amber-700",
-  "bg-slate-100 text-slate-600",
+  'bg-emerald-100 text-emerald-700',
+  'bg-sky-100 text-sky-700',
+  'bg-violet-100 text-violet-700',
+  'bg-amber-100 text-amber-700',
+  'bg-slate-100 text-slate-600',
 ];
 ---
 
@@ -28,32 +34,33 @@ const rankColors = [
   </div>
 
   <div class="space-y-4">
-    {products.map((p, i) => (
-      <div class="flex items-center gap-4">
-        <span class:list={[
-          "grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-bold",
-          rankColors[i],
-        ]}>
-          {p.rank}
-        </span>
+    {
+      products.map((p, i) => (
+        <div class="flex items-center gap-4">
+          <span
+            class:list={[
+              'grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-bold',
+              rankColors[i],
+            ]}
+          >
+            {p.rank}
+          </span>
 
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center justify-between">
-            <p class="truncate text-sm font-medium text-slate-900">{p.name}</p>
-            <span class="ml-2 shrink-0 text-sm font-semibold text-slate-950">{p.revenue}</span>
-          </div>
-
-          <div class="mt-1.5 flex items-center gap-3">
-            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-              <div
-                class="h-full rounded-full bg-emerald-500"
-                style={`width:${p.percent}%`}
-              ></div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="truncate text-sm font-medium text-slate-900">{p.name}</p>
+              <span class="ml-2 shrink-0 text-sm font-semibold text-slate-950">{p.revenue}</span>
             </div>
-            <span class="shrink-0 text-xs text-slate-400">{p.sold} uds</span>
+
+            <div class="mt-1.5 flex items-center gap-3">
+              <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-full rounded-full bg-emerald-500" style={`width:${p.percent}%`} />
+              </div>
+              <span class="shrink-0 text-xs text-slate-400">{p.sold} uds</span>
+            </div>
           </div>
         </div>
-      </div>
-    ))}
+      ))
+    }
   </div>
 </section>

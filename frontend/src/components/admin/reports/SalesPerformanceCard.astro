@@ -2,13 +2,13 @@
 const chartId = `sales-performance-${Math.random().toString(36).slice(2)}`;
 
 const metrics = [
-  { label: "Total vendido", value: "$48,295", change: "+12.5%", trend: "up" },
-  { label: "Ticket promedio", value: "$34.20", change: "+5.3%", trend: "up" },
-  { label: "Tasa de conversión", value: "3.8%", change: "-0.4%", trend: "down" },
-  { label: "Devoluciones", value: "2.1%", change: "-0.8%", trend: "up" },
+  { label: 'Total vendido', value: '$48,295', change: '+12.5%', trend: 'up' },
+  { label: 'Ticket promedio', value: '$34.20', change: '+5.3%', trend: 'up' },
+  { label: 'Tasa de conversión', value: '3.8%', change: '-0.4%', trend: 'down' },
+  { label: 'Devoluciones', value: '2.1%', change: '-0.8%', trend: 'up' },
 ];
 
-const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const values = [4200, 3800, 5100, 4600, 6200, 7800, 5400];
 ---
 
@@ -21,92 +21,95 @@ const values = [4200, 3800, 5100, 4600, 6200, 7800, 5400];
   </div>
 
   <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-    {metrics.map((m) => (
-      <div class="rounded-xl bg-slate-50 p-3">
-        <p class="text-xs font-medium text-slate-500">{m.label}</p>
-        <p class="mt-1 text-lg font-bold text-slate-950">{m.value}</p>
-        <p class:list={[
-          "mt-0.5 text-xs font-medium",
-          m.trend === "up" ? "text-emerald-600" : "text-rose-600",
-        ]}>
-          {m.trend === "up" ? "↗" : "↘"} {m.change}
-        </p>
-      </div>
-    ))}
+    {
+      metrics.map((m) => (
+        <div class="rounded-xl bg-slate-50 p-3">
+          <p class="text-xs font-medium text-slate-500">{m.label}</p>
+          <p class="mt-1 text-lg font-bold text-slate-950">{m.value}</p>
+          <p
+            class:list={[
+              'mt-0.5 text-xs font-medium',
+              m.trend === 'up' ? 'text-emerald-600' : 'text-rose-600',
+            ]}
+          >
+            {m.trend === 'up' ? '↗' : '↘'} {m.change}
+          </p>
+        </div>
+      ))
+    }
   </div>
 
   <div class="h-[240px]">
-    <canvas
-      id={chartId}
-      data-days={JSON.stringify(days)}
-      data-values={JSON.stringify(values)}
+    <canvas id={chartId} data-days={JSON.stringify(days)} data-values={JSON.stringify(values)}
     ></canvas>
   </div>
 </section>
 
 <script>
-  import Chart from "chart.js/auto";
+  import Chart from 'chart.js/auto';
 
-  document.querySelectorAll<HTMLCanvasElement>("canvas[id^='sales-performance']").forEach((canvas) => {
-    const days = JSON.parse(canvas.dataset.days || "[]");
-    const values = JSON.parse(canvas.dataset.values || "[]");
+  document
+    .querySelectorAll<HTMLCanvasElement>("canvas[id^='sales-performance']")
+    .forEach((canvas) => {
+      const days = JSON.parse(canvas.dataset.days || '[]');
+      const values = JSON.parse(canvas.dataset.values || '[]');
 
-    new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: days,
-        datasets: [
-          {
-            label: "Ventas",
-            data: values,
-            backgroundColor: "#059669",
-            borderRadius: 8,
-            barThickness: 32,
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [
+            {
+              label: 'Ventas',
+              data: values,
+              backgroundColor: '#059669',
+              borderRadius: 8,
+              barThickness: 32,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  const y = context.parsed.y ?? 0;
+                  return '$' + y.toLocaleString();
+                },
+              },
+            },
           },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            callbacks: {
-              label(context) {
-                const y = context.parsed.y ?? 0;
-                return "$" + y.toLocaleString();
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+              ticks: {
+                color: '#64748b',
+              },
+            },
+            y: {
+              border: {
+                display: false,
+              },
+              grid: {
+                color: '#e5e7eb',
+              },
+              ticks: {
+                color: '#64748b',
+                callback(value) {
+                  const n = typeof value === 'number' ? value : Number(value);
+                  return '$' + Number(n / 1000) + 'k';
+                },
               },
             },
           },
         },
-        scales: {
-          x: {
-            grid: {
-              display: false,
-            },
-            ticks: {
-              color: "#64748b",
-            },
-          },
-          y: {
-            border: {
-              display: false,
-            },
-            grid: {
-              color: "#e5e7eb",
-            },
-            ticks: {
-              color: "#64748b",
-              callback(value) {
-                const n = typeof value === "number" ? value : Number(value);
-                return "$" + Number(n / 1000) + "k";
-              },
-            },
-          },
-        },
-      },
+      });
     });
-  });
 </script>

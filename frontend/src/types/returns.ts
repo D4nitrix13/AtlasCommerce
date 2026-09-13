@@ -4,19 +4,19 @@
  * Reflejan la shape de `ReturnRequestResource` y `RefundResource`.
  */
 
-import type { MoneyPayload } from "../lib/formatters";
+import type { MoneyPayload } from '../lib/formatters';
 
 export const RETURN_REQUEST_STATUSES = [
-  "pending",
-  "approved",
-  "rejected",
-  "completed",
-  "cancelled",
+  'pending',
+  'approved',
+  'rejected',
+  'completed',
+  'cancelled',
 ] as const;
 
 export type ReturnRequestStatus = (typeof RETURN_REQUEST_STATUSES)[number];
 
-export const REFUND_STATUSES = ["pending", "completed", "failed"] as const;
+export const REFUND_STATUSES = ['pending', 'completed', 'failed'] as const;
 
 export type RefundStatus = (typeof REFUND_STATUSES)[number];
 
@@ -81,29 +81,29 @@ export type RefundWithRelations = Refund & {
 };
 
 export const RETURN_REQUEST_STATUS_LABELS: Record<ReturnRequestStatus, string> = {
-  pending: "Pendiente",
-  approved: "Aprobada",
-  rejected: "Rechazada",
-  completed: "Completada",
-  cancelled: "Cancelada",
+  pending: 'Pendiente',
+  approved: 'Aprobada',
+  rejected: 'Rechazada',
+  completed: 'Completada',
+  cancelled: 'Cancelada',
 };
 
 export const RETURN_REQUEST_STATUS_COLORS: Record<ReturnRequestStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  approved: "bg-blue-100 text-blue-800",
-  rejected: "bg-red-100 text-red-800",
-  completed: "bg-green-100 text-green-800",
-  cancelled: "bg-gray-100 text-gray-800",
+  pending: 'bg-yellow-100 text-yellow-800',
+  approved: 'bg-blue-100 text-blue-800',
+  rejected: 'bg-red-100 text-red-800',
+  completed: 'bg-green-100 text-green-800',
+  cancelled: 'bg-gray-100 text-gray-800',
 };
 
 export const REFUND_STATUS_LABELS: Record<RefundStatus, string> = {
-  pending: "Pendiente",
-  completed: "Completado",
-  failed: "Fallido",
+  pending: 'Pendiente',
+  completed: 'Completado',
+  failed: 'Fallido',
 };
 
 export const REFUND_STATUS_COLORS: Record<RefundStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  completed: "bg-green-100 text-green-800",
-  failed: "bg-red-100 text-red-800",
+  pending: 'bg-yellow-100 text-yellow-800',
+  completed: 'bg-green-100 text-green-800',
+  failed: 'bg-red-100 text-red-800',
 };

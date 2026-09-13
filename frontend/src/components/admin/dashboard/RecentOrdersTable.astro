@@ -1,10 +1,45 @@
 ---
 const orders = [
-  { customer: "Carlos López", id: "#ORD-1042", product: "Camiseta Kitsune Edición Limitada", status: "Pagado", amount: "$45.00", statusColor: "bg-emerald-100 text-emerald-700" },
-  { customer: "Ana Martínez", id: "#ORD-1041", product: "Taza personalizada Logo", status: "Pendiente", amount: "$18.00", statusColor: "bg-amber-100 text-amber-700" },
-  { customer: "Roberto Sánchez", id: "#ORD-1040", product: "Sudadera Kitsune Negra", status: "Enviado", amount: "$89.00", statusColor: "bg-sky-100 text-sky-700" },
-  { customer: "Laura Díaz", id: "#ORD-1039", product: "Gorra bordada", status: "Pagado", amount: "$32.00", statusColor: "bg-emerald-100 text-emerald-700" },
-  { customer: "Miguel Herrera", id: "#ORD-1038", product: "Pack 3 playeras básicas", status: "Entregado", amount: "$75.00", statusColor: "bg-violet-100 text-violet-700" },
+  {
+    customer: 'Carlos López',
+    id: '#ORD-1042',
+    product: 'Camiseta Kitsune Edición Limitada',
+    status: 'Pagado',
+    amount: '$45.00',
+    statusColor: 'bg-emerald-100 text-emerald-700',
+  },
+  {
+    customer: 'Ana Martínez',
+    id: '#ORD-1041',
+    product: 'Taza personalizada Logo',
+    status: 'Pendiente',
+    amount: '$18.00',
+    statusColor: 'bg-amber-100 text-amber-700',
+  },
+  {
+    customer: 'Roberto Sánchez',
+    id: '#ORD-1040',
+    product: 'Sudadera Kitsune Negra',
+    status: 'Enviado',
+    amount: '$89.00',
+    statusColor: 'bg-sky-100 text-sky-700',
+  },
+  {
+    customer: 'Laura Díaz',
+    id: '#ORD-1039',
+    product: 'Gorra bordada',
+    status: 'Pagado',
+    amount: '$32.00',
+    statusColor: 'bg-emerald-100 text-emerald-700',
+  },
+  {
+    customer: 'Miguel Herrera',
+    id: '#ORD-1038',
+    product: 'Pack 3 playeras básicas',
+    status: 'Entregado',
+    amount: '$75.00',
+    statusColor: 'bg-violet-100 text-violet-700',
+  },
 ];
 ---
 
@@ -22,7 +57,9 @@ const orders = [
   <div class="overflow-x-auto">
     <table class="w-full text-left text-sm">
       <thead>
-        <tr class="border-b border-slate-100 text-xs font-medium uppercase tracking-wider text-slate-500">
+        <tr
+          class="border-b border-slate-100 text-xs font-medium uppercase tracking-wider text-slate-500"
+        >
           <th class="pb-3 pr-4">Cliente</th>
           <th class="pb-3 pr-4">Orden</th>
           <th class="pb-3 pr-4">Producto</th>
@@ -31,19 +68,26 @@ const orders = [
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-50">
-        {orders.map((o) => (
-          <tr class="group hover:bg-slate-50/50">
-            <td class="py-3 pr-4 font-medium text-slate-900">{o.customer}</td>
-            <td class="py-3 pr-4 text-slate-500">{o.id}</td>
-            <td class="max-w-[200px] truncate py-3 pr-4 text-slate-600">{o.product}</td>
-            <td class="py-3 pr-4">
-              <span class:list={["inline-block rounded-full px-2.5 py-0.5 text-xs font-medium", o.statusColor]}>
-                {o.status}
-              </span>
-            </td>
-            <td class="py-3 text-right font-semibold text-slate-950">{o.amount}</td>
-          </tr>
-        ))}
+        {
+          orders.map((o) => (
+            <tr class="group hover:bg-slate-50/50">
+              <td class="py-3 pr-4 font-medium text-slate-900">{o.customer}</td>
+              <td class="py-3 pr-4 text-slate-500">{o.id}</td>
+              <td class="max-w-[200px] truncate py-3 pr-4 text-slate-600">{o.product}</td>
+              <td class="py-3 pr-4">
+                <span
+                  class:list={[
+                    'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    o.statusColor,
+                  ]}
+                >
+                  {o.status}
+                </span>
+              </td>
+              <td class="py-3 text-right font-semibold text-slate-950">{o.amount}</td>
+            </tr>
+          ))
+        }
       </tbody>
     </table>
   </div>

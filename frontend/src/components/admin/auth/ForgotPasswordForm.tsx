@@ -1,6 +1,6 @@
-import { useState, type ReactElement } from "react";
-import { apiFetch } from "../../../lib/api";
-import { useTranslations } from "../../../i18n";
+import { useState, type ReactElement } from 'react';
+import { apiFetch } from '../../../lib/api';
+import { useTranslations } from '../../../i18n';
 
 /**
  * Step 1 del reset de password: ingresar email.
@@ -21,9 +21,9 @@ type ForgotPasswordFormProps = {
 };
 
 export default function ForgotPasswordForm({
-  callbackPath = "/admin/dashboard",
-  locale = "es",
-  emailPlaceholder = "tu@correo.com",
+  callbackPath = '/admin/dashboard',
+  locale = 'es',
+  emailPlaceholder = 'tu@correo.com',
   emailLabel,
   helperText,
   submitLabel,
@@ -31,21 +31,21 @@ export default function ForgotPasswordForm({
 }: ForgotPasswordFormProps): ReactElement {
   const { t } = useTranslations();
 
-  const resolvedEmailLabel = emailLabel ?? t("auth.forgot.shell.emailLabel");
-  const resolvedHelperText = helperText ?? t("auth.forgot.shell.helper");
-  const resolvedSubmitLabel = submitLabel ?? t("auth.forgot.shell.submit");
-  const resolvedSubmittingLabel = submittingLabel ?? t("auth.forgot.shell.submitLoading");
+  const resolvedEmailLabel = emailLabel ?? t('auth.forgot.shell.emailLabel');
+  const resolvedHelperText = helperText ?? t('auth.forgot.shell.helper');
+  const resolvedSubmitLabel = submitLabel ?? t('auth.forgot.shell.submit');
+  const resolvedSubmittingLabel = submittingLabel ?? t('auth.forgot.shell.submitLoading');
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const validateEmail = (value: string): string | null => {
-    if (value.trim() === "") {
-      return t("auth.passwordReset.error.emailEmpty");
+    if (value.trim() === '') {
+      return t('auth.passwordReset.error.emailEmpty');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      return t("auth.passwordReset.error.emailInvalid");
+      return t('auth.passwordReset.error.emailInvalid');
     }
     return null;
   };
@@ -61,8 +61,8 @@ export default function ForgotPasswordForm({
     setIsSubmitting(true);
     try {
       await apiFetch<{ message: string; expires_minutes: number; code?: string }>(
-        "/auth/forgot-password",
-        { method: "POST", body: { email: email.trim() } },
+        '/auth/forgot-password',
+        { method: 'POST', body: { email: email.trim() } }
       );
       const params = new URLSearchParams({
         email: email.trim(),
@@ -71,14 +71,19 @@ export default function ForgotPasswordForm({
       window.location.href = `/${locale}/admin/auth/reset-password?${params.toString()}`;
     } catch (error_) {
       const apiError = error_ as { message?: string };
-      setErrorMessage(apiError.message ?? t("auth.passwordReset.error.generic"));
+      setErrorMessage(apiError.message ?? t('auth.passwordReset.error.generic'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" noValidate aria-label={t("auth.passwordReset.title")}>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5"
+      noValidate
+      aria-label={t('auth.passwordReset.title')}
+    >
       {errorMessage !== null && (
         <div
           role="alert"
@@ -89,10 +94,7 @@ export default function ForgotPasswordForm({
       )}
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-slate-700 mb-1.5"
-        >
+        <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
           {resolvedEmailLabel}
         </label>
         <input
@@ -119,16 +121,43 @@ export default function ForgotPasswordForm({
       >
         {isSubmitting ? (
           <>
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            <svg
+              className="w-4 h-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
             </svg>
             {resolvedSubmittingLabel}
           </>
         ) : (
           <>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              ></path>
             </svg>
             {resolvedSubmitLabel}
           </>

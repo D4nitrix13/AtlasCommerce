@@ -1,29 +1,28 @@
 ---
-import AuthLayout from "../../../layouts/AuthLayout.astro";
-import LoginForm from "../../../components/admin/auth/LoginForm";
-import AuthShell from "../../../components/auth/AuthShell.astro";
-import LanguageSwitcher from "../../../components/ui/LanguageSwitcher";
-import OAuthFlashToast from "../../../components/auth/OAuthFlashToast";
-import { getServerDictionary, getServerLocale } from "../../../i18n/server";
-import { getBrandBySlug, DEFAULT_BRAND } from "../../../config/stores";
-import { themeToBrand } from "../../../lib/theme";
+import AuthLayout from '../../../layouts/AuthLayout.astro';
+import LoginForm from '../../../components/admin/auth/LoginForm';
+import AuthShell from '../../../components/auth/AuthShell.astro';
+import LanguageSwitcher from '../../../components/ui/LanguageSwitcher';
+import OAuthFlashToast from '../../../components/auth/OAuthFlashToast';
+import { getServerDictionary, getServerLocale } from '../../../i18n/server';
+import { getBrandBySlug, DEFAULT_BRAND } from '../../../config/stores';
+import { themeToBrand } from '../../../lib/theme';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
 
-const fallbackBrand =
-  getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+const fallbackBrand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
 const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
 const forgotPath = `/${locale}/admin/auth/forgot-password`;
 ---
 
-<AuthLayout title={`${t["auth.login.shell.heading"]} · ${brand.name}`}>
+<AuthLayout title={`${t['auth.login.shell.heading']} · ${brand.name}`}>
   <AuthShell
     illustration={`/images/amico/auth/login.svg`}
-    illustrationAlt={t["auth.shell.illustration.alt"]}
-    leftHeading={t["auth.login.shell.leftHeading"]}
-    leftBody={t["auth.login.shell.leftBody"]}
+    illustrationAlt={t['auth.shell.illustration.alt']}
+    leftHeading={t['auth.login.shell.leftHeading']}
+    leftBody={t['auth.login.shell.leftBody']}
     brandName={brand.name}
     brandLogo={brand.logoPath}
     topRightLink="none"
@@ -35,19 +34,18 @@ const forgotPath = `/${locale}/admin/auth/forgot-password`;
 
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-slate-900">
-        {t["auth.login.shell.heading"]}
+        {t['auth.login.shell.heading']}
       </h1>
-      <p class="mt-2 text-slate-500">{t["auth.login.shell.subtitle"]}</p>
+      <p class="mt-2 text-slate-500">{t['auth.login.shell.subtitle']}</p>
     </div>
 
     <LoginForm client:load forgotHref={forgotPath} />
 
-
     <p class="text-center text-xs text-slate-400 mt-8" slot="terms">
-      {t["auth.shell.termsPrefix"]}{" "}
-      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.termsLink"]}</a>
-      {" "}{t["auth.shell.termsAnd"] ?? "y"}{" "}
-      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.privacyLink"]}</a>.
+      {t['auth.shell.termsPrefix']}{' '}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.termsLink']}</a>
+      {' '}{t['auth.shell.termsAnd'] ?? 'y'}{' '}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.privacyLink']}</a>.
     </p>
   </AuthShell>
 </AuthLayout>

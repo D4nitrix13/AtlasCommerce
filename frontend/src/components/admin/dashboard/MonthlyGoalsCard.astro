@@ -1,8 +1,20 @@
 ---
 const goals = [
-  { label: "Ingresos mensuales", current: "$48,295", target: "$55,000", percent: 88, color: "bg-emerald-500" },
-  { label: "Nuevos clientes", current: "847", target: "1,000", percent: 85, color: "bg-emerald-500" },
-  { label: "Tasa de conversión", current: "3.8", target: "5", percent: 76, color: "bg-sky-500" },
+  {
+    label: 'Ingresos mensuales',
+    current: '$48,295',
+    target: '$55,000',
+    percent: 88,
+    color: 'bg-emerald-500',
+  },
+  {
+    label: 'Nuevos clientes',
+    current: '847',
+    target: '1,000',
+    percent: 85,
+    color: 'bg-emerald-500',
+  },
+  { label: 'Tasa de conversión', current: '3.8', target: '5', percent: 76, color: 'bg-sky-500' },
 ];
 ---
 
@@ -11,25 +23,27 @@ const goals = [
   <p class="mb-5 text-sm text-slate-500">Seguimiento de objetivos</p>
 
   <div class="space-y-5">
-    {goals.map((g) => (
-      <div>
-        <div class="flex items-center justify-between text-sm">
-          <span class="font-medium text-slate-700">{g.label}</span>
-          <span class="font-semibold text-slate-950">{g.percent}%</span>
-        </div>
+    {
+      goals.map((g) => (
+        <div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-medium text-slate-700">{g.label}</span>
+            <span class="font-semibold text-slate-950">{g.percent}%</span>
+          </div>
 
-        <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-          <div
-            class:list={["h-full rounded-full transition-all", g.color]}
-            style={`width:${g.percent}%`}
-          ></div>
-        </div>
+          <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+            <div
+              class:list={['h-full rounded-full transition-all', g.color]}
+              style={`width:${g.percent}%`}
+            />
+          </div>
 
-        <div class="mt-1 flex justify-between text-xs text-slate-400">
-          <span>{g.current}</span>
-          <span>Meta: {g.target}</span>
+          <div class="mt-1 flex justify-between text-xs text-slate-400">
+            <span>{g.current}</span>
+            <span>Meta: {g.target}</span>
+          </div>
         </div>
-      </div>
-    ))}
+      ))
+    }
   </div>
 </section>

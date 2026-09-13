@@ -1,14 +1,14 @@
 ---
-import "../styles/global.css";
-import AdminSidebar from "../components/admin/sidebar/AdminSidebar.astro";
-import AdminHeader from "../components/admin/header/AdminHeader.astro";
-import AuthGuard from "../components/admin/auth/AuthGuard";
+import '../styles/global.css';
+import AdminSidebar from '../components/admin/sidebar/AdminSidebar.astro';
+import AdminHeader from '../components/admin/header/AdminHeader.astro';
+import AuthGuard from '../components/admin/auth/AuthGuard';
 
 interface Props {
   title?: string;
 }
 
-const { title = "Admin" } = Astro.props;
+const { title = 'Admin' } = Astro.props;
 
 // Favicon per-tenant: derivado del slug del tenant detectado por el
 // middleware. Convention: /api/storefront/assets/tenants/{slug}/branding/favicon.webp.
@@ -17,7 +17,7 @@ const { title = "Admin" } = Astro.props;
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const tenantFavicon = tenantSlug
   ? `/api/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
-  : "/favicon.svg";
+  : '/favicon.svg';
 ---
 
 <html lang="es">
@@ -35,10 +35,12 @@ const tenantFavicon = tenantSlug
     <script is:inline>
       (function () {
         try {
-          var c = localStorage.getItem("admin-sidebar-collapsed") === "true";
+          var c = localStorage.getItem('admin-sidebar-collapsed') === 'true';
           var isDesktop = window.innerWidth >= 1024;
           if (isDesktop) {
-            document.documentElement.classList.add(c ? "sidebar-collapsed-init" : "sidebar-expanded-init");
+            document.documentElement.classList.add(
+              c ? 'sidebar-collapsed-init' : 'sidebar-expanded-init'
+            );
           }
         } catch (e) {}
       })();

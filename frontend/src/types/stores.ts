@@ -29,4 +29,3 @@ export interface StoreSocialLink {
   url: string;
   active: boolean;
 }
-

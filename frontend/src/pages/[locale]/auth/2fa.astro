@@ -1,17 +1,16 @@
 ---
-import AuthLayout from "../../../layouts/AuthLayout.astro";
-import TwoFactorChallengeForm from "../../../components/admin/auth/TwoFactorChallengeForm";
-import AuthShell from "../../../components/auth/AuthShell.astro";
-import LanguageSwitcher from "../../../components/ui/LanguageSwitcher";
-import { getServerDictionary, getServerLocale } from "../../../i18n/server";
-import { getBrandBySlug, DEFAULT_BRAND } from "../../../config/stores";
-import { themeToBrand } from "../../../lib/theme";
+import AuthLayout from '../../../layouts/AuthLayout.astro';
+import TwoFactorChallengeForm from '../../../components/admin/auth/TwoFactorChallengeForm';
+import AuthShell from '../../../components/auth/AuthShell.astro';
+import LanguageSwitcher from '../../../components/ui/LanguageSwitcher';
+import { getServerDictionary, getServerLocale } from '../../../i18n/server';
+import { getBrandBySlug, DEFAULT_BRAND } from '../../../config/stores';
+import { themeToBrand } from '../../../lib/theme';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
 
-const fallbackBrand =
-  getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+const fallbackBrand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
 const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
 const loginPath = `/${locale}/admin/auth/login`;
@@ -23,8 +22,8 @@ const loginPath = `/${locale}/admin/auth/login`;
  * cuando el backend responde `2fa_required` en `/auth/login`. Si falta
  * el `token`, redirigimos server-side al login.
  */
-const rawToken = Astro.url.searchParams.get("token");
-const rawRedirect = Astro.url.searchParams.get("redirect");
+const rawToken = Astro.url.searchParams.get('token');
+const rawRedirect = Astro.url.searchParams.get('redirect');
 
 if (rawToken === null) {
   return Astro.redirect(loginPath);
@@ -37,17 +36,15 @@ if (!Number.isFinite(challengeId)) {
 
 const fallbackRedirect = `/${locale}/admin/dashboard`;
 const redirectTo =
-  rawRedirect !== null && rawRedirect.startsWith(`/${locale}`)
-    ? rawRedirect
-    : fallbackRedirect;
+  rawRedirect !== null && rawRedirect.startsWith(`/${locale}`) ? rawRedirect : fallbackRedirect;
 ---
 
-<AuthLayout title={`${t["auth.twoFactor.title"]} · ${brand.name}`}>
+<AuthLayout title={`${t['auth.twoFactor.title']} · ${brand.name}`}>
   <AuthShell
     illustration={`/images/amico/auth/login.svg`}
-    illustrationAlt={t["auth.shell.illustration.alt"]}
-    leftHeading={t["auth.twoFactor.heading"]}
-    leftBody={t["auth.twoFactor.subtitle"]}
+    illustrationAlt={t['auth.shell.illustration.alt']}
+    leftHeading={t['auth.twoFactor.heading']}
+    leftBody={t['auth.twoFactor.subtitle']}
     brandName={brand.name}
     brandLogo={brand.logoPath}
     topRightLink="back"
@@ -58,22 +55,18 @@ const redirectTo =
 
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-slate-900">
-        {t["auth.twoFactor.heading"]}
+        {t['auth.twoFactor.heading']}
       </h1>
-      <p class="mt-2 text-slate-500">{t["auth.twoFactor.subtitle"]}</p>
+      <p class="mt-2 text-slate-500">{t['auth.twoFactor.subtitle']}</p>
     </div>
 
-    <TwoFactorChallengeForm
-      client:load
-      challengeId={challengeId}
-      redirectTo={redirectTo}
-    />
+    <TwoFactorChallengeForm client:load challengeId={challengeId} redirectTo={redirectTo} />
 
     <p class="text-center text-xs text-slate-400 mt-8" slot="terms">
-      {t["auth.shell.termsPrefix"]}{" "}
-      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.termsLink"]}</a>
-      {" "}{t["auth.shell.termsAnd"] ?? "y"}{" "}
-      <a href="#" class="underline hover:text-[#2D9D8E]">{t["auth.shell.privacyLink"]}</a>.
+      {t['auth.shell.termsPrefix']}{' '}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.termsLink']}</a>
+      {' '}{t['auth.shell.termsAnd'] ?? 'y'}{' '}
+      <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.privacyLink']}</a>.
     </p>
   </AuthShell>
 </AuthLayout>
