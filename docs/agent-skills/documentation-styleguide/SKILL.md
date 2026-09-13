@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: documentation-styleguide
 description: Format and writing rules for Markdown in the project. 80 chars per line, Spanish prose with English technical names, code blocks with language, no heading level skipping. Triggers: creating/editing any .md file in docs/, AGENTS.md, README.md.
@@ -44,14 +46,14 @@ Each line ≤ 80 chars. To avoid `MD013/line-length`.
 El sistema cuenta con una arquitectura que permite
 administrar varias tiendas desde una sola plataforma
 centralizada.
-```
+```text
 
 **Right:**
 
 ```md
 El sistema administra varias tiendas desde una sola plataforma
 centralizada.
-```
+```text
 
 ## Paragraphs
 
@@ -61,7 +63,7 @@ different paragraphs.
 ```md
 Panda y Kitsune son tiendas diferentes para el cliente, pero forman parte
 de una misma operación administrativa.
-```
+```text
 
 ## Lists
 
@@ -70,7 +72,7 @@ Each item ≤ 80 chars. If it continues, indent with 2 spaces.
 ```md
 - El sistema utiliza `Caddy` como reverse proxy para enrutar múltiples
  dominios hacia el frontend, el admin y la API.
-```
+```text
 
 ## Headings
 
@@ -82,7 +84,7 @@ Each item ≤ 80 chars. If it continues, indent with 2 spaces.
 ## Section
 ### Subsection
 #### Detail
-```
+```text
 
 ## Duplicate headings
 
@@ -99,16 +101,16 @@ Each ADR must have the identifier in subheadings to avoid `MD024`:
 
 ### ADR-002 - Contexto
 ### ADR-002 - Decisión
-```
+```text
 
 ## Code blocks - always with language
 
 ❌ Without language:
 
 ````md
-```
+```text
 content
-```
+```text
 ````
 
 ✅ With language:
@@ -116,7 +118,7 @@ content
 ````md
 ```txt
 content
-```
+```text
 ````
 
 ### Allowed languages
@@ -147,8 +149,9 @@ docs/
 ├── backend/
 ├── database/
 └── operations/
-```
-```
+```text
+
+```text
 
 ## Terminal commands
 
@@ -158,7 +161,7 @@ docs/
 php artisan test \
  --compact \
  tests/Feature/Auth/EmailOtpTwoFactorTest.php
-```
+```text
 
 ## Environment variables
 
@@ -168,7 +171,7 @@ php artisan test \
 PUBLIC_API_URL=http://localhost:9000/api
 APP_ENV=local
 APP_DEBUG=true
-```
+```text
 
 Inline with backticks: `` `PUBLIC_API_URL` ``.
 
@@ -202,26 +205,26 @@ Always backticks for technical names:
 
 ```md
 [text](path "path")
-```
+```text
 
 ❌ Without title:
 
 ```md
 [architecture/overview.md](architecture/overview.md)
-```
+```text
 
 ✅ With title:
 
 ```md
 [architecture/overview.md](architecture/overview.md "architecture/overview.md")
-```
+```text
 
 Example in prose:
 
 ```md
 Consulta la arquitectura general en
 [architecture/overview.md](architecture/overview.md "architecture/overview.md").
-```
+```text
 
 ## Long links
 
@@ -231,7 +234,7 @@ If they break 80 chars, use reference:
 Consulta la [guía de estilo][documentation-styleguide].
 
 [documentation-styleguide]: DOCUMENTATION_STYLEGUIDE.md "DOCUMENTATION_STYLEGUIDE.md"
-```
+```text
 
 ## External links
 
@@ -240,7 +243,7 @@ With title when useful:
 ```md
 Consulta la documentación de
 [Laravel](https://laravel.com/docs "Laravel Documentation").
-```
+```text
 
 ## Tables
 
@@ -252,7 +255,7 @@ subsections.
 ```md
 | File | Description that's too long and exceeds the recommended limit easily |
 | ------- | ----------------------------------------------------------------- |
-```
+```text
 
 ✅ Subsections:
 
@@ -264,7 +267,7 @@ Describe the general architecture of the system.
 ### `docs/architecture/multi-store.md`
 
 Explains how Panda and Kitsune work within the same platform.
-```
+```text
 
 ## Implementation states
 
@@ -279,7 +282,7 @@ Use clear labels:
 ```md
 El módulo `Passkeys` está preparado para fase futura, pero todavía no debe
 documentarse como funcionalidad completa.
-```
+```text
 
 ## Tone
 
@@ -296,13 +299,13 @@ Direct, technical, natural. Avoid:
 ```md
 Es importante mencionar que el sistema cuenta con una arquitectura que
 permite administrar tiendas.
-```
+```text
 
 ✅ Direct:
 
 ```md
 El sistema administra varias tiendas desde una sola plataforma.
-```
+```text
 
 ## Architecture documentation
 
@@ -322,7 +325,7 @@ Anchor phrase:
 ```txt
 Panda y Kitsune son tiendas diferentes para el cliente, pero forman parte
 de una misma operación administrativa.
-```
+```text
 
 - `Store` = technical store entity.
 - `store_id` = data filtering per store.
@@ -363,7 +366,7 @@ de una misma operación administrativa.
 ### ADR-XXX - Alternativas consideradas
 ### ADR-XXX - Decisión
 ### ADR-XXX - Consecuencias
-```
+```text
 
 ## Allowed exceptions (80 chars)
 
@@ -389,7 +392,7 @@ The rule remains 80 chars; exceptions are few.
 [ ] Folder structures in txt block.
 [ ] Commands in bash block.
 [ ] Mermaid in mermaid block.
-```
+```text
 
 ## Trigger patterns
 

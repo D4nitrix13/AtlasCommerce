@@ -49,6 +49,7 @@ docker compose logs -f app
 ```
 
 El primer arranque ejecuta automáticamente (via entrypoint):
+
 - Espera a que Postgres esté listo.
 - Genera `APP_KEY` si no está en `.env`.
 - Corre migraciones.

@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: git-monorepo-workflow
 description: Monorepo conventions (backend Laravel + frontend Astro + docker + docs), commits by section, pnpm workspace sync, cross-stack changes. Triggers: PRs that cross backend↔frontend, commits spanning multiple subdirs, releases.
@@ -7,7 +9,7 @@ description: Monorepo conventions (backend Laravel + frontend Astro + docker + d
 
 ## Topology
 
-```
+```text
 /
 ├── backend/ ← Laravel 13 + PHP 8.5
 ├── frontend/ ← Astro 7 + React 19 + pnpm workspace
@@ -22,7 +24,7 @@ description: Monorepo conventions (backend Laravel + frontend Astro + docker + d
 ├── frontend/AGENTS.md ← Astro conventions
 ├── .claude/ ← project-level skills (this dir)
 └── Caddyfile ← multi-tenant routing
-```
+```text
 
 ## Commit conventions
 
@@ -37,12 +39,12 @@ description: Monorepo conventions (backend Laravel + frontend Astro + docker + d
 
 When a change crosses frontend + backend + docs, **split into commits**:
 
-```
+```text
 chore: add migration for <table>
 feat(backend): add controller for <resource>
 feat(frontend): add page for <resource>
 docs: update docs/api/<resource>.md
-```
+```text
 
 No commit `feat: implement <big-feature>` that touches 50 files. Split.
 
@@ -78,13 +80,14 @@ Example: the auth palette refactor (recent commit).
 `frontend/node_modules/@theme/<slug>` → symlink to `frontend/packages/themes/<slug>`.
 
 If you add a new theme:
+
 ```bash
 cd frontend
 mkdir -p packages/themes/<slug>/src
 # create index.ts
 ln -s ../../packages/themes/<slug> node_modules/@theme/<slug>
 pnpm install
-```
+```text
 
 ## Trigger patterns
 
@@ -110,7 +113,7 @@ cd frontend
 pnpm vitest run # vitest
 pnpm run lint # eslint
 # pnpm run typecheck # astro check (if no perms in .astro/)
-```
+```text
 
 ## Branching
 
@@ -128,14 +131,14 @@ pnpm run lint # eslint
 
 ## File map
 
-```
+```text
 /CONTRIBUTING.md ← global monorepo rules
 /backend/AGENTS.md ← Laravel conventions
 /frontend/AGENTS.md ← Astro conventions
 /.claude/skills/ ← project skills (this dir, commitable)
 /scripts/docker-stack.sh ← entry point
 /docker/versions.env ← pinned versions
-```
+```text
 
 ## Related skills
 

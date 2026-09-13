@@ -7,6 +7,7 @@
 > `backend/public/` ni en `frontend/public/`.
 >
 > Esto permite:
+>
 > - **Versionarlos en git** (single source of truth, revisable en PRs).
 > - **Reutilizarlos** entre dev/prod sin duplicar storage.
 > - **Servirlos via FTP** con la convencion `tenants/{slug}/branding/`
@@ -159,6 +160,7 @@ describe el asset concreto.
 Ver `docs/architecture/assets-naming-convention.md` seccion 2.2.
 
 Resumen:
+
 - Slugs de tenant en kebab-case: `panda-estampados`, `kitsune`, etc.
 - Asset-types canonicos: `logo`, `favicon`, `og-image`, `cover`, `login-logo`.
 - Hash deterministico para uploads de admin (NO aplica a brand assets

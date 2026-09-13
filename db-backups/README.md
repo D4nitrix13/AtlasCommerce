@@ -43,6 +43,7 @@ Backups locales de PostgreSQL para desarrollo y fixtures de testing.
 `<stage>-<store>-<YYYY-MM-DD-HHMM>.sql.gz`
 
 Ejemplos:
+
 - `dev-panda-estampados-2026-08-26-1430.sql.gz`
 - `production-mm-boutique-2026-08-20-0900.sql.gz`
 
@@ -52,11 +53,13 @@ compartis entre zonas horarias, convertir manualmente.
 ## ¿Qué incluye el dump?
 
 `pg_dump --no-owner --clean --if-exists` por defecto. Eso significa:
+
 - Schema (CREATE TABLE, INDEX, etc.)
 - Data (INSERT)
 - DROP statements al inicio (--clean --if-exists)
 
 NO incluye:
+
 - Roles/usuarios de Postgres (--no-owner)
 - Permisos GRANT/REVOKE
 - Configuracion de servidor (postgresql.conf)

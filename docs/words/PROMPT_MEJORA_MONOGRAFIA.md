@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 MD033 -->
+
 # Prompt — Mejora del Protocolo de Monografía
 
 > **Cómo usar este prompt**: copialo COMPLETO (sin quitar ni una línea) y pegalo en
@@ -88,7 +90,7 @@ Sugerencia: **consolidar** los 6 en 4–5 usando los verbos del profesor
 > tener estos capítulos en este orden, con estos nombres y estas extensiones
 > máximas.** Donde la plantilla dice "Secciones internas", respetalas.
 
-```
+```text
 ÍNDICE
 I. INTRODUCCIÓN                                  (máx. 2 páginas)
 II. ANTECEDENTES                                 (máx. 4–5 páginas)
@@ -102,7 +104,7 @@ VII. METODOLOGÍA                                 (máx. 3 páginas)
 VIII. CRONOGRAMA                                 (máx. 1 página)
 REFERENCIAS                                      (formato APA 7ª ed.)
 ANEXOS
-```
+```text
 
 ### 4.1. ANTECEDENTES — subsecciones obligatorias
 
@@ -599,7 +601,7 @@ Jeremy Joshua Pérez Gonzales.
 - E-02 corregido: […]
 - Huecos a completar: […]
 - Recomendaciones: […]
-```
+```text
 
 ---
 

@@ -95,6 +95,7 @@ USER www-data   # backend PHP: usuario pre-existente en php:alpine
 ```
 
 Casos especiales:
+
 - Si el binario necesita escribir fuera de `$HOME`, el `chown`
   previo va en build time, no en entrypoint (entrypoint corre como
   no-root).

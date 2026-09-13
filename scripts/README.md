@@ -26,7 +26,7 @@ rutas absolutas para los binarios** (ver "Pautas" más abajo).
 
 ## Estructura de `docker/`
 
-```
+```text
 docker/
 ├── _lib/                        # Librería compartida (prefijo _ = interna)
 │   ├── colors.sh                # Constantes ANSI para logs
@@ -58,7 +58,7 @@ docker/
 │   └── caddy.sh                 # cmd_caddy (imprime Caddyfile)
 └── help/                        # Ayuda
     └── show.sh                  # cmd_help
-```
+```text
 
 Cada carpeta tiene UN archivo `<acción>.sh` que define UNA función
 `cmd_<acción>()`. El dispatcher en `docker-stack.sh` hace source
@@ -87,7 +87,7 @@ ${DOCKER_BIN} compose ps
 
 # ❌ Incorrecto
 docker compose ps
-```
+```text
 
 Excepción: los **built-ins** del shell (`echo`, `printf`, `cd`, `pwd`,
 `source`, `[[ ]]`) no son binarios externos, no les aplica PATH
@@ -108,7 +108,7 @@ cmd_up() {
         docker_compose "$inst" up -d --build
     done < <(resolve_targets "$@")
 }
-```
+```text
 
 ### 4. Path resolution centralizada
 
@@ -128,7 +128,7 @@ log_warn  "advertencia"
 log_err   "error"        # va a stderr
 log_cmd   "comando ejecutado"   # prefijo [cmd] dim/gris
 log_bold  "texto destacado"
-```
+```text
 
 ### 6. Errores con exit codes
 
@@ -137,7 +137,7 @@ if [[ $# -lt 3 ]]; then
     log_err "exec requiere: <instancia> <servicio> <comando...>"
     exit 1
 fi
-```
+```text
 
 ### 7. Comentarios al inicio del archivo
 
@@ -148,7 +148,7 @@ Cada script empieza con:
 # scripts/docker/<carpeta>/<archivo>.sh
 # <descripción de una línea de qué hace>
 # <más contexto si hace falta>
-```
+```text
 
 ### 8. Verificar sintaxis antes de commitear
 
@@ -157,7 +157,7 @@ bash -n scripts/docker-stack.sh
 bash -n scripts/docker/_lib/*.sh
 bash -n scripts/docker/lifecycle/*.sh
 # ...
-```
+```text
 
 ### 9. Antes de commitear cambios en `docker/instances/`
 
@@ -168,7 +168,7 @@ Correr el quality check. Bloquea el commit si encuentra violaciones:
 # Exit codes:
 #   0 → OK
 #   1 → una o más violaciones (commit debería abortar)
-```
+```text
 
 El proyecto tiene un **git hook** listo en `.githooks/pre-commit`
 (no se activa solo al clonar). Para activarlo:
@@ -176,7 +176,7 @@ El proyecto tiene un **git hook** listo en `.githooks/pre-commit`
 ```bash
 ./scripts/install-git-hooks.sh           # install (set core.hooksPath)
 ./scripts/install-git-hooks.sh --clean   # uninstall
-```
+```text
 
 Una vez instalado, el hook detecta automáticamente cuando hay
 archivos Docker staged y corre el check. Bypass consciente:
@@ -190,7 +190,7 @@ Si modificás esa tabla, el check se actualiza implícitamente.
 
 Ver ejemplos en `git log --no-pager -n5`. Formato:
 
-```
+```text
 <tipo>(<scope>): <descripción corta imperativa>
 
 <body detallado con:
@@ -199,7 +199,7 @@ Ver ejemplos en `git log --no-pager -n5`. Formato:
 - Snippets before/after cuando aplique
 - Lo que NO se cambió y por qué
 - Cómo verificar>
-```
+```text
 
 Tipos comunes: `feat`, `fix`, `refactor`, `docs`, `chore`. Idiomas:
 español para descripciones narrativas, inglés para términos técnicos.

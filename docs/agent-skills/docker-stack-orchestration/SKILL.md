@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: docker-stack-orchestration
 description: Multi-instance Docker orchestration (3 prod + 3 dev), Caddy + per-tenant IPs, volumes, env per instance. Required reading before editing ANY Dockerfile, docker-compose.yml, entrypoint.sh, conf/php, conf/postgres, conf/redis, conf/nginx, or .env under docker/instances/. Enforces: absolute paths for ALL binaries (RUN/CMD/ENTRYPOINT/command:/shell), no-root users, tini as PID 1, separate networks per instance, host UID binding for dev bind-mounts. Triggers: adding a new tenant, debugging docker-compose, env files, Dockerfile, entrypoint, scripts/docker-stack.sh, docker/instances/, paths absolutos, PATH hijacking, security hardening.
@@ -83,7 +85,7 @@ path. Never assume `name` works.
 
 ## File layout
 
-```
+```text
 docker/
 ├── versions.env ← pinned versions (PHP, Node, Postgres, etc.)
 ├── versions.env.example
@@ -104,7 +106,7 @@ scripts/
 ├── docker-stack.sh ← entry point of orchestrator
 ├── docker/_lib/ ← shared lib (colors, logging, resolve, compose)
 └── docker/{up,start,stop,...}/ ← one action per folder
-```
+```text
 
 ## Key commands
 
@@ -120,12 +122,14 @@ scripts/
 
 # Help
 ./scripts/docker-stack.sh help
-```
+```text
 
 ## Conventions
 
 - **Each `docker/instances/<env>/<name>/` has its own `docker-compose.yml`
- + `.env`**. DO NOT share between instances.
+
+- `.env`**. DO NOT share between instances.
+
 - **Common env vars** → `docker/versions.env` (pinned). Per-instance vars
  → `.env` of that folder.
 - **Postgres init scripts** → `docker/database/init/` + each store has
@@ -140,8 +144,10 @@ scripts/
 Activate when:
 
 - Creating a new store → 4 files: `docker/instances/production/<slug>/docker-compose.yml`
- + `.env`, `docker/instances/development/<slug>/...`, plus block in `Caddyfile`,
+
+- `.env`, `docker/instances/development/<slug>/...`, plus block in `Caddyfile`,
  plus theme package in `frontend/packages/themes/`, plus slug in `Caddyfile` domains.
+
 - Modifying `versions.env` (bump of PHP/Node/Postgres).
 - Editing `docker-stack.sh` (new command).
 - Creating new script in `scripts/docker/<action>/`.

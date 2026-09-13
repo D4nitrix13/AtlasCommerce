@@ -178,8 +178,8 @@ completo. Resumen:
 
 | Servicio | URL |
 | --- | --- |
-| Frontend | http://localhost:5321 |
-| API | http://localhost:9000/api |
+| Frontend | <http://localhost:5321> |
+| API | <http://localhost:9000/api> |
 | Postgres | `localhost:6432` |
 | Redis | `localhost:7379` |
 | FTP | `localhost:2121` |

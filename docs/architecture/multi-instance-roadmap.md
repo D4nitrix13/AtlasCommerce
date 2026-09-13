@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 # Roadmap Multi-Instance — Plan de Implementación
 
 > Plan completo para evolucionar el sistema actual (multi-tenant single

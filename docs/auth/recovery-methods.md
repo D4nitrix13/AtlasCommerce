@@ -21,7 +21,7 @@ wizard de recuperación.
 
 ## Arquitectura
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  Frontend (React) — ForgotPasswordWizard                    │
 │  4 estados: email → method → code → password                │
@@ -52,26 +52,26 @@ wizard de recuperación.
 │      → cambia password, marca token/challenge consumido    │
 │      → emite Sanctum token (auto-login)                     │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 ## Flujo por método
 
 ### Email OTP (default)
 
-```
+```text
 1. POST /auth/forgot-password { email }
    → 200 OK + (dev) code en JSON
    → email con código de 6 dígitos
 
 2. POST /auth/reset-password { email, code, password, ... }
    → 200 OK { token, user }
-```
+```text
 
 Sigue funcionando como hasta ahora. Compatible hacia atrás.
 
 ### Recovery codes (2-step)
 
-```
+```text
 1. POST /auth/forgot-password { email }
    → 200 OK con mensaje genérico
 
@@ -82,11 +82,11 @@ Sigue funcionando como hasta ahora. Compatible hacia atrás.
 3. POST /auth/reset-password { email, challenge_token, password, ... }
    → 200 OK { token, user }
    → marca el OtpChallenge como consumido
-```
+```text
 
 ### TOTP (2-step)
 
-```
+```text
 1. POST /auth/forgot-password { email }
    → 200 OK con mensaje genérico
 
@@ -95,7 +95,7 @@ Sigue funcionando como hasta ahora. Compatible hacia atrás.
 
 3. POST /auth/reset-password { email, challenge_token, password, ... }
    → 200 OK { token, user }
-```
+```text
 
 ## Cómo generar recovery codes
 
@@ -122,7 +122,7 @@ momento de la generación — no se vuelven a mostrar.
 #   warehouse@morales-store.test → 2FA sin recovery codes
 #   admin@kitsune.test           → 2FA + recovery codes
 php artisan db:seed --class=RecoveryCodesTestSeeder
-```
+```text
 
 El seeder imprime los recovery codes en una caja decorada a stdout.
 **Solo se muestran una vez** — copialos antes de cerrar la terminal.
@@ -137,7 +137,7 @@ php artisan tinker --execute '...'
 curl -X POST http://admin.panda-estampados.com/api/auth/reset-password \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@panda-estampados.test","code":"123456","password":"NewPwd12345abc","password_confirmation":"NewPwd12345abc"}'
-```
+```text
 
 ### 3. Probar el flujo recovery code (2-step)
 
@@ -153,7 +153,7 @@ curl -X POST http://admin.panda-estampados.com/api/auth/reset-password \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@panda-estampados.test","challenge_token":42,"password":"NewPwd12345abc","password_confirmation":"NewPwd12345abc"}'
 # → { "token": "...", "user": {...} }
-```
+```text
 
 ### 4. Probar el flujo TOTP (2-step)
 
@@ -169,7 +169,7 @@ node -e "const otplib = require('otplib'); console.log(otplib.authenticator.gene
 
 # Después el flow es idéntico al de recovery code pero usando
 # /auth/recover-via-totp.
-```
+```text
 
 ### 5. Tests automatizados
 
@@ -182,7 +182,7 @@ php artisan test --group=auth
 
 # Suite completa
 php artisan test --compact
-```
+```text
 
 ## Consideraciones de seguridad
 
@@ -207,10 +207,10 @@ Cada challenge emitido por `recover-via-*` se persiste en
 consumido por `reset-password` emite un `Log::info` con
 `user_id + challenge_id + challenge_type`. Esto permite detectar:
 
-- Patrones de brute force (varios recover-* desde la misma IP sin
++ Patrones de brute force (varios recover-* desde la misma IP sin
   reset exitoso).
-- Uso sospechoso de recovery codes (user consume 5 codes en 1 hora).
-- Challenges emitidos pero nunca consumidos (posible robo de token).
++ Uso sospechoso de recovery codes (user consume 5 codes en 1 hora).
++ Challenges emitidos pero nunca consumidos (posible robo de token).
 
 ### No se envía email de notification
 
@@ -245,54 +245,59 @@ posteriores).
 ### `POST /auth/recover-via-recovery-code`
 
 **Body**:
+
 ```json
 {
   "email": "admin@panda-estampados.test",
   "code": "ABCDEFGHJK"
 }
-```
+```text
 
 **Response 200**:
+
 ```json
 {
   "challenge_token": 42,
   "expires_at": "2026-08-23T15:30:00+00:00",
   "expires_minutes": 10
 }
-```
+```text
 
 **Errores 422**:
-- `{"errors": {"email": [...]}}` — email faltante o formato inválido.
-- `{"errors": {"code": ["El recovery code es inválido o ya fue usado."]}}`
-- `{"errors": {"code": ["Tu cuenta no tiene recovery codes disponibles."]}}`
-- `{"errors": {"code": ["Demasiados intentos. Probá de nuevo en N segundos."]}}`
++ `{"errors": {"email": [...]}}` — email faltante o formato inválido.
++ `{"errors": {"code": ["El recovery code es inválido o ya fue usado."]}}`
++ `{"errors": {"code": ["Tu cuenta no tiene recovery codes disponibles."]}}`
++ `{"errors": {"code": ["Demasiados intentos. Probá de nuevo en N segundos."]}}`
 
 ### `POST /auth/recover-via-totp`
 
 **Body**:
+
 ```json
 {
   "email": "admin@panda-estampados.test",
   "code": "123456"
 }
-```
+```text
 
 **Response 200**:
+
 ```json
 {
   "challenge_token": 43,
   "expires_at": "2026-08-23T15:30:00+00:00",
   "expires_minutes": 10
 }
-```
+```text
 
 **Errores 422**:
-- `{"errors": {"code": ["El código TOTP es inválido."]}}`
-- `{"errors": {"code": ["Tu cuenta no tiene 2FA habilitada."]}}`
++ `{"errors": {"code": ["El código TOTP es inválido."]}}`
++ `{"errors": {"code": ["Tu cuenta no tiene 2FA habilitada."]}}`
 
 ### `POST /auth/reset-password` (modo challenge_token)
 
 **Body**:
+
 ```json
 {
   "email": "admin@panda-estampados.test",
@@ -301,9 +306,10 @@ posteriores).
   "password_confirmation": "NewPwd12345abc",
   "device_name": "web-admin"
 }
-```
+```text
 
 **Response 200**:
+
 ```json
 {
   "token": "1|abc123...",
@@ -317,8 +323,8 @@ posteriores).
     "permissions": []
   }
 }
-```
+```text
 
 **Errores 422**:
-- `{"errors": {"challenge_token": ["El challenge es inválido, expiró o ya fue consumido."]}}`
-- `{"errors": {"password": [...]}}` — validación de complejidad.
++ `{"errors": {"challenge_token": ["El challenge es inválido, expiró o ya fue consumido."]}}`
++ `{"errors": {"password": [...]}}` — validación de complejidad.

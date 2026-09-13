@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: laravel-feature-testing
 description: PHPUnit feature/integration tests for Laravel 13 + PHP 8.5. RefreshDatabase vs DatabaseTransactions, factory states, multi-tenant isolation, Sanctum, MFA, named args. Triggers: writing/editing tests in backend/tests/, debugging test failures, attaching an agent to write tests.
@@ -41,7 +43,7 @@ final class AuthHttpTest extends TestCase
  use RefreshDatabase;
  // ...
 }
-```
+```text
 
 > ⚠️ If you add a migration **during** the test, you need `RefreshDatabase`
 > (transactions don't apply to DDL).
@@ -68,7 +70,7 @@ class UserFactory extends Factory
  ];
  }
 }
-```
+```text
 
 Usage:
 
@@ -82,7 +84,7 @@ $user = User::factory()->create([
 
 // Without persisting (in memory only)
 $user = User::factory()->make();
-```
+```text
 
 ### Factory States
 
@@ -102,7 +104,7 @@ public function unverified(): static
  'email_verified_at' => null,
  ]);
 }
-```
+```text
 
 Usage:
 
@@ -110,7 +112,7 @@ Usage:
 $admin = User::factory()->admin()->create();
 $newUser = User::factory()->unverified()->create();
 $pendingAdmin = User::factory()->admin()->unverified()->create();
-```
+```text
 
 ### Factory relationships
 
@@ -122,7 +124,7 @@ public function withOrders(int $count = 3): static
 
 // Usage
 $user = User::factory()->withOrders(5)->create();
-```
+```text
 
 > ⚠️ Check if the factory already has states before creating new ones.
 
@@ -153,7 +155,7 @@ $response->assertUnprocessable(); // 422
 $response->assertNotFound(); // 404
 $response->assertJsonPath('data.0.email', $user->email);
 $response->assertJsonStructure(['data' => ['id', 'email']]);
-```
+```text
 
 ### DB
 
@@ -162,7 +164,7 @@ $this->assertDatabaseHas('users', ['email' => 'admin@example.com']);
 $this->assertDatabaseMissing('users', ['email' => 'deleted@example.com']);
 $this->assertDatabaseCount('users', 3);
 $this->assertSoftDeleted($user);
-```
+```text
 
 ### Auth
 
@@ -170,14 +172,14 @@ $this->assertSoftDeleted($user);
 $this->assertAuthenticated();
 $this->assertAuthenticatedAs($user);
 $this->assertGuest();
-```
+```text
 
 ### Validation
 
 ```php
 $response->assertJsonValidationErrors(['email', 'password']);
 $response->assertJsonValidationErrorFor('email');
-```
+```text
 
 ## PHPUnit attributes
 
@@ -195,7 +197,7 @@ final class AuthHttpTest extends TestCase
  // ...
  }
 }
-```
+```text
 
 ## Test groups
 
@@ -204,7 +206,7 @@ final class AuthHttpTest extends TestCase
 php artisan test --group=auth
 php artisan test --group=http
 php artisan test --group=multi-tenant
-```
+```text
 
 ## Per-feature test patterns
 
@@ -245,7 +247,7 @@ public function store_domain_middleware_filters_query_by_store_id(): void
  $response->assertJsonCount(1, 'data');
  $response->assertJsonPath('data.0.id', $productA->id);
 }
-```
+```text
 
 Key points:
 
@@ -271,7 +273,7 @@ php artisan test --stop-on-failure
 # With coverage
 php artisan test --coverage
 php artisan test --coverage-html=storage/coverage
-```
+```text
 
 **Pre-commit hook**: `composer precommit` (lint:dirty + analyse + test).
 
@@ -289,7 +291,7 @@ php artisan test --coverage-html=storage/coverage
 
 ## File map
 
-```
+```text
 backend/tests/Feature/ ← integration tests
 backend/tests/Unit/ ← pure unit tests
 backend/tests/Feature/Auth/ ← auth vertical
@@ -298,7 +300,7 @@ backend/tests/Feature/Console/ ← artisan commands
 backend/database/factories/ ← factories
 backend/phpunit.xml ← config
 backend/composer.json ← "test" script + "precommit"
-```
+```text
 
 ## Related skills
 

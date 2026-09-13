@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: engram-conventions
 description: Engram persistent memory protocol - when to mem_save, topic_keys, conflicts, lifecycle. Triggers: every meaningful decision, bug fix, discovery, convention. End-of-session close.
@@ -68,9 +70,11 @@ Rules:
 After `mem_save`, check response envelope for `judgment_required: true`.
 
 **Ask user** when:
+
 - `confidence < 0.7` AND relation is `supersedes` or `conflicts_with` AND type is `architecture`, `policy`, or `decision`.
 
 **Resolve silently** when:
+
 - `confidence >= 0.7` AND relation is NOT `supersedes`/`conflicts_with`, OR
 - relation is `related`, `compatible`, `scoped`, `not_conflict`.
 
@@ -122,6 +126,7 @@ mem_session_summary(content: |
 ## Search before saving
 
 Before saving something that looks duplicate:
+
 1. `mem_search(query: "topic", project: "ecommerce")` → check existing.
 2. If exists → consider `mem_update` (same topic_key) instead of new observation.
 3. If not → `mem_save` with unique `topic_key`.

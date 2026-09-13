@@ -46,7 +46,7 @@ optimizadas con SVGO. Convertir a WebP a 1x resolution (500x500) ocuparía
     "prebuild": "pnpm run optimize:svgs"
   }
 }
-```
+```text
 
 - **`optimize:svgs`**: corre SVGO con `--multipass` (estable: el output
   ya no se puede comprimir más con otra pasada) sobre todos los SVGs
@@ -69,7 +69,7 @@ pnpm --filter frontend optimize:svgs
 git diff frontend/public/images/auth/
 
 # Si está OK, commiteá junto al componente que lo usa.
-```
+```text
 
 SVGO en este proyecto aplica los siguientes presets de optimización:
 
@@ -105,7 +105,7 @@ que el típico 30-50% que se ve en SVGs hechos a mano.
 
 ## Estructura de assets
 
-```
+```text
 frontend/public/images/
 ├── auth/                    # Ilustraciones globales del design system
 │   ├── login-amico.svg
@@ -121,7 +121,7 @@ frontend/public/images/
 │   ├── mm-boutique/
 │   └── morals-store/
 └── README.md               # Este archivo
-```
+```text
 
 **Precedencia de assets de auth**:
 
@@ -143,7 +143,7 @@ pnpm run optimize:svgs
 
 # Después
 du -sh public/images/
-```
+```text
 
 Para confirmar que el sitio sigue renderizando igual después de la
 optimización:
@@ -155,7 +155,7 @@ pnpm run build
 
 # 2. Verificá visualmente con Playwright
 # 3. Diff de bytes de la carpeta dist/ antes y después
-```
+```text
 
 ## Métricas reales (este proyecto)
 
