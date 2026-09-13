@@ -111,8 +111,8 @@ volumes:
   - ../../../../frontend:/app
 
   # Named volumes: estado que persiste entre `up`/`down`.
-  - ecommerce_<inst>_dev_postgres_data:/var/lib/postgresql
-  - ecommerce_<inst>_dev_storage:/var/www/html/storage
+  - atlas_commerce_<inst>_dev_postgres_data:/var/lib/postgresql
+  - atlas_commerce_<inst>_dev_storage:/var/www/html/storage
 
   # Anonymous volumes: enmascaran caches efímeros sobre el bind-mount.
   # Recreados vacíos en cada `up`. Ideales para .vite/, .astro/,
@@ -134,7 +134,7 @@ puedan coexistir sin pisarse IPs.
 ```yaml
 networks:
   panda-estampados-dev:
-    name: ecommerce-panda-estampados-dev
+    name: atlas-commerce-panda-estampados-dev
 
 # Y para prod con IPs fijas:
 networks:
@@ -208,13 +208,13 @@ o falla con un error explícito.
 |--------------------------|--------------------------------------------|
 | `container_name`         | `<instancia>-<stage>-<servicio>` (dev)     |
 |                          | `<instancia-corto>-<servicio>` (prod)      |
-| Named volume             | `ecommerce_<inst>_<stage>_<concern>`       |
-| Network                  | `ecommerce-<inst>-<stage>`                 |
+| Named volume             | `atlas_commerce_<inst>_<stage>_<concern>`       |
+| Network                  | `atlas-commerce-<inst>-<stage>`                 |
 
 Ejemplos (dev):
 - `panda-estampados-dev-frontend`
-- `ecommerce_panda_estampados_dev_postgres_data`
-- `ecommerce-panda-estampados-dev`
+- `atlas_commerce_panda_estampados_and_kitsune_dev_postgres_data`
+- `atlas-commerce-panda-estampados-dev`
 
 Ejemplos (prod):
 - `panda-estampados-frontend`

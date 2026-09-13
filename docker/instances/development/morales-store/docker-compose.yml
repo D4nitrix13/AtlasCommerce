@@ -38,7 +38,7 @@ services:
     volumes:
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./conf/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      - ecommerce_morales_store_dev_postgres_data:/var/lib/postgresql
+      - atlas_commerce_morales_store_dev_postgres_data:/var/lib/postgresql
       - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -60,7 +60,7 @@ services:
     # Named en /data para evitar volumenes anonimos de la imagen redis:7-alpine.
     volumes:
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-      - ecommerce_morales_store_dev_redis_data:/data
+      - atlas_commerce_morales_store_dev_redis_data:/data
     ports:
       - "${REDIS_PORT:-7379}:6379"
     healthcheck:
@@ -91,9 +91,9 @@ services:
       - PASV_ADDRESS=${FTP_PASV_ADDRESS:-127.0.0.1}
     # Named para los VOLUMEs anonimos de la imagen fauria/vsftpd.
     volumes:
-      - ecommerce_morales_store_dev_ftp_home:/home/vsftpd
-      - ecommerce_morales_store_dev_ftp_data:/srv/ftp
-      - ecommerce_morales_store_dev_ftp_logs:/var/log/vsftpd
+      - atlas_commerce_morales_store_dev_ftp_home:/home/vsftpd
+      - atlas_commerce_morales_store_dev_ftp_data:/srv/ftp
+      - atlas_commerce_morales_store_dev_ftp_logs:/var/log/vsftpd
     networks:
       - morales-store-dev
 
@@ -115,9 +115,9 @@ services:
       - environment/.env
     volumes:
       - ../../../../backend:/var/www/html
-      - ecommerce_morales_store_dev_storage:/var/www/html/storage
-      - ecommerce_morales_store_dev_bootstrap:/var/www/html/bootstrap/cache
-      - ecommerce_morales_store_dev_logs:/var/log/php
+      - atlas_commerce_morales_store_dev_storage:/var/www/html/storage
+      - atlas_commerce_morales_store_dev_bootstrap:/var/www/html/bootstrap/cache
+      - atlas_commerce_morales_store_dev_logs:/var/log/php
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -196,16 +196,16 @@ services:
     volumes:
       - ../../../../frontend:/app
       - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
-      - ecommerce_morales_store_dev_node_modules:/app/node_modules
-      - ecommerce_morales_store_dev_pnpm_store:/app/.pnpm-store
+      - atlas_commerce_morales_store_dev_node_modules:/app/node_modules
+      - atlas_commerce_morales_store_dev_pnpm_store:/app/.pnpm-store
       # Named volumes shadow the bind-mount so stale .astro/ or
       # .vite/ caches from the host don't break the dev server with
       # phantom lock files. Named (vs anonymous) so they survive
       # between `up` runs and can be cleaned up surgically with
       # `docker volume rm <name>` when a stale lock file breaks the
       # startup (incident 2026-08-17).
-      - ecommerce_morales_store_dev_astro_cache:/app/.astro
-      - ecommerce_morales_store_dev_vite_cache:/app/node_modules/.vite
+      - atlas_commerce_morales_store_dev_astro_cache:/app/.astro
+      - atlas_commerce_morales_store_dev_vite_cache:/app/node_modules/.vite
     environment:
       - NODE_ENV=development
       - HOST=0.0.0.0
@@ -243,7 +243,7 @@ services:
     ports:
       - "${PGADMIN_PORT:-8050}:80"
     volumes:
-      - ecommerce_morales_store_dev_pgadmin_data:/var/lib/pgadmin
+      - atlas_commerce_morales_store_dev_pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
@@ -257,7 +257,7 @@ services:
     ports:
       - "${REDIS_INSIGHT_PORT:-8540}:5540"
     volumes:
-      - ecommerce_morales_store_dev_redis_insight_data:/db
+      - atlas_commerce_morales_store_dev_redis_insight_data:/db
     depends_on:
       - redis
     networks:
@@ -270,46 +270,46 @@ services:
     ports:
       - "${FILEBROWSER_PORT:-11080}:80"
     volumes:
-      - ecommerce_morales_store_dev_ftp_data:/srv/ftp:ro
-      - ecommerce_morales_store_dev_filebrowser_config:/config
-      - ecommerce_morales_store_dev_filebrowser_db:/database
+      - atlas_commerce_morales_store_dev_ftp_data:/srv/ftp:ro
+      - atlas_commerce_morales_store_dev_filebrowser_config:/config
+      - atlas_commerce_morales_store_dev_filebrowser_db:/database
     networks:
       - morales-store-dev
 
 networks:
   morales-store-dev:
-    name: ecommerce-morales-store-dev
+    name: atlas-commerce-morales-store-dev
 
 volumes:
-  ecommerce_morales_store_dev_postgres_data:
-    name: ecommerce_morales_store_dev_postgres_data
-  ecommerce_morales_store_dev_storage:
-    name: ecommerce_morales_store_dev_storage
-  ecommerce_morales_store_dev_bootstrap:
-    name: ecommerce_morales_store_dev_bootstrap
-  ecommerce_morales_store_dev_logs:
-    name: ecommerce_morales_store_dev_logs
-  ecommerce_morales_store_dev_redis_data:
-    name: ecommerce_morales_store_dev_redis_data
-  ecommerce_morales_store_dev_redis_insight_data:
-    name: ecommerce_morales_store_dev_redis_insight_data
-  ecommerce_morales_store_dev_ftp_data:
-    name: ecommerce_morales_store_dev_ftp_data
-  ecommerce_morales_store_dev_ftp_home:
-    name: ecommerce_morales_store_dev_ftp_home
-  ecommerce_morales_store_dev_ftp_logs:
-    name: ecommerce_morales_store_dev_ftp_logs
-  ecommerce_morales_store_dev_pgadmin_data:
-    name: ecommerce_morales_store_dev_pgadmin_data
-  ecommerce_morales_store_dev_filebrowser_config:
-    name: ecommerce_morales_store_dev_filebrowser_config
-  ecommerce_morales_store_dev_filebrowser_db:
-    name: ecommerce_morales_store_dev_filebrowser_db
-  ecommerce_morales_store_dev_node_modules:
-    name: ecommerce_morales_store_dev_node_modules
-  ecommerce_morales_store_dev_pnpm_store:
-    name: ecommerce_morales_store_dev_pnpm_store
-  ecommerce_morales_store_dev_astro_cache:
-    name: ecommerce_morales_store_dev_astro_cache
-  ecommerce_morales_store_dev_vite_cache:
-    name: ecommerce_morales_store_dev_vite_cache
+  atlas_commerce_morales_store_dev_postgres_data:
+    name: atlas_commerce_morales_store_dev_postgres_data
+  atlas_commerce_morales_store_dev_storage:
+    name: atlas_commerce_morales_store_dev_storage
+  atlas_commerce_morales_store_dev_bootstrap:
+    name: atlas_commerce_morales_store_dev_bootstrap
+  atlas_commerce_morales_store_dev_logs:
+    name: atlas_commerce_morales_store_dev_logs
+  atlas_commerce_morales_store_dev_redis_data:
+    name: atlas_commerce_morales_store_dev_redis_data
+  atlas_commerce_morales_store_dev_redis_insight_data:
+    name: atlas_commerce_morales_store_dev_redis_insight_data
+  atlas_commerce_morales_store_dev_ftp_data:
+    name: atlas_commerce_morales_store_dev_ftp_data
+  atlas_commerce_morales_store_dev_ftp_home:
+    name: atlas_commerce_morales_store_dev_ftp_home
+  atlas_commerce_morales_store_dev_ftp_logs:
+    name: atlas_commerce_morales_store_dev_ftp_logs
+  atlas_commerce_morales_store_dev_pgadmin_data:
+    name: atlas_commerce_morales_store_dev_pgadmin_data
+  atlas_commerce_morales_store_dev_filebrowser_config:
+    name: atlas_commerce_morales_store_dev_filebrowser_config
+  atlas_commerce_morales_store_dev_filebrowser_db:
+    name: atlas_commerce_morales_store_dev_filebrowser_db
+  atlas_commerce_morales_store_dev_node_modules:
+    name: atlas_commerce_morales_store_dev_node_modules
+  atlas_commerce_morales_store_dev_pnpm_store:
+    name: atlas_commerce_morales_store_dev_pnpm_store
+  atlas_commerce_morales_store_dev_astro_cache:
+    name: atlas_commerce_morales_store_dev_astro_cache
+  atlas_commerce_morales_store_dev_vite_cache:
+    name: atlas_commerce_morales_store_dev_vite_cache

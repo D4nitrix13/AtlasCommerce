@@ -37,7 +37,7 @@ services:
     volumes:
       - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./conf/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      - ecommerce_panda_estampados_and_kitsune_dev_postgres_data:/var/lib/postgresql
+      - atlas_commerce_panda_estampados_and_kitsune_dev_postgres_data:/var/lib/postgresql
       - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -63,7 +63,7 @@ services:
     # con volumes de nuestras propias servicios.
     volumes:
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-      - ecommerce_panda_estampados_and_kitsune_dev_redis_data:/data
+      - atlas_commerce_panda_estampados_and_kitsune_dev_redis_data:/data
     ports:
       - "${REDIS_PORT:-7379}:6379"
     healthcheck:
@@ -100,9 +100,9 @@ services:
     #   /srv/ftp      → ftp_data  (uploads reales, ya estaba)
     #   /var/log/vsftpd → ftp_logs (logs del daemon vsftpd)
     volumes:
-      - ecommerce_panda_estampados_and_kitsune_dev_ftp_home:/home/vsftpd
-      - ecommerce_panda_estampados_and_kitsune_dev_ftp_data:/srv/ftp
-      - ecommerce_panda_estampados_and_kitsune_dev_ftp_logs:/var/log/vsftpd
+      - atlas_commerce_panda_estampados_and_kitsune_dev_ftp_home:/home/vsftpd
+      - atlas_commerce_panda_estampados_and_kitsune_dev_ftp_data:/srv/ftp
+      - atlas_commerce_panda_estampados_and_kitsune_dev_ftp_logs:/var/log/vsftpd
     networks:
       - panda-estampados-and-kitsune-dev
 
@@ -128,9 +128,9 @@ services:
       # assets:sync-from-public lee y sube al FTP. Bind-mount para que
       # los cambios en el host se vean inmediatamente en el container.
       - ../../../../brand-assets:/var/www/html/brand-assets
-      - ecommerce_panda_estampados_and_kitsune_dev_storage:/var/www/html/storage
-      - ecommerce_panda_estampados_and_kitsune_dev_bootstrap:/var/www/html/bootstrap/cache
-      - ecommerce_panda_estampados_and_kitsune_dev_logs:/var/log/php
+      - atlas_commerce_panda_estampados_and_kitsune_dev_storage:/var/www/html/storage
+      - atlas_commerce_panda_estampados_and_kitsune_dev_bootstrap:/var/www/html/bootstrap/cache
+      - atlas_commerce_panda_estampados_and_kitsune_dev_logs:/var/log/php
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -215,16 +215,16 @@ services:
     volumes:
       - ../../../../frontend:/app
       - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
-      - ecommerce_panda_estampados_and_kitsune_dev_node_modules:/app/node_modules
-      - ecommerce_panda_estampados_and_kitsune_dev_pnpm_store:/app/.pnpm-store
+      - atlas_commerce_panda_estampados_and_kitsune_dev_node_modules:/app/node_modules
+      - atlas_commerce_panda_estampados_and_kitsune_dev_pnpm_store:/app/.pnpm-store
       # Named volumes enmascaran el bind-mount para que caches stale
       # (Astro `.astro/dev.json`, Vite `.vite/`) del host no rompan el
       # dev server con phantom lock files. Named (no anonymous) para
       # identificarlos en `docker volume ls` y permitir purgado
       # quirúrgico con `docker volume rm <name>` cuando el lock file
       # stale rompe el arranque (incident 2026-08-17).
-      - ecommerce_panda_estampados_and_kitsune_dev_astro_cache:/app/.astro
-      - ecommerce_panda_estampados_and_kitsune_dev_vite_cache:/app/node_modules/.vite
+      - atlas_commerce_panda_estampados_and_kitsune_dev_astro_cache:/app/.astro
+      - atlas_commerce_panda_estampados_and_kitsune_dev_vite_cache:/app/node_modules/.vite
     environment:
       - NODE_ENV=development
       - HOST=0.0.0.0
@@ -277,7 +277,7 @@ services:
     ports:
       - "${PGADMIN_PORT:-6050}:80"
     volumes:
-      - ecommerce_panda_estampados_and_kitsune_dev_pgadmin_data:/var/lib/pgadmin
+      - atlas_commerce_panda_estampados_and_kitsune_dev_pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
@@ -294,7 +294,7 @@ services:
     ports:
       - "${REDIS_INSIGHT_PORT:-6540}:5540"
     volumes:
-      - ecommerce_panda_estampados_and_kitsune_dev_redis_insight_data:/db
+      - atlas_commerce_panda_estampados_and_kitsune_dev_redis_insight_data:/db
     depends_on:
       - redis
     networks:
@@ -311,46 +311,46 @@ services:
     ports:
       - "${FILEBROWSER_PORT:-9080}:80"
     volumes:
-      - ecommerce_panda_estampados_and_kitsune_dev_ftp_data:/srv/ftp:ro
-      - ecommerce_panda_estampados_and_kitsune_dev_filebrowser_config:/config
-      - ecommerce_panda_estampados_and_kitsune_dev_filebrowser_db:/database
+      - atlas_commerce_panda_estampados_and_kitsune_dev_ftp_data:/srv/ftp:ro
+      - atlas_commerce_panda_estampados_and_kitsune_dev_filebrowser_config:/config
+      - atlas_commerce_panda_estampados_and_kitsune_dev_filebrowser_db:/database
     networks:
       - panda-estampados-and-kitsune-dev
 
 networks:
   panda-estampados-and-kitsune-dev:
-    name: ecommerce-panda-estampados-and-kitsune-dev
+    name: atlas-commerce-panda-estampados-and-kitsune-dev
 
 volumes:
-  ecommerce_panda_estampados_and_kitsune_dev_postgres_data:
-    name: ecommerce_panda_estampados_and_kitsune_dev_postgres_data
-  ecommerce_panda_estampados_and_kitsune_dev_storage:
-    name: ecommerce_panda_estampados_and_kitsune_dev_storage
-  ecommerce_panda_estampados_and_kitsune_dev_bootstrap:
-    name: ecommerce_panda_estampados_and_kitsune_dev_bootstrap
-  ecommerce_panda_estampados_and_kitsune_dev_logs:
-    name: ecommerce_panda_estampados_and_kitsune_dev_logs
-  ecommerce_panda_estampados_and_kitsune_dev_redis_data:
-    name: ecommerce_panda_estampados_and_kitsune_dev_redis_data
-  ecommerce_panda_estampados_and_kitsune_dev_redis_insight_data:
-    name: ecommerce_panda_estampados_and_kitsune_dev_redis_insight_data
-  ecommerce_panda_estampados_and_kitsune_dev_ftp_data:
-    name: ecommerce_panda_estampados_and_kitsune_dev_ftp_data
-  ecommerce_panda_estampados_and_kitsune_dev_ftp_home:
-    name: ecommerce_panda_estampados_and_kitsune_dev_ftp_home
-  ecommerce_panda_estampados_and_kitsune_dev_ftp_logs:
-    name: ecommerce_panda_estampados_and_kitsune_dev_ftp_logs
-  ecommerce_panda_estampados_and_kitsune_dev_pgadmin_data:
-    name: ecommerce_panda_estampados_and_kitsune_dev_pgadmin_data
-  ecommerce_panda_estampados_and_kitsune_dev_filebrowser_config:
-    name: ecommerce_panda_estampados_and_kitsune_dev_filebrowser_config
-  ecommerce_panda_estampados_and_kitsune_dev_filebrowser_db:
-    name: ecommerce_panda_estampados_and_kitsune_dev_filebrowser_db
-  ecommerce_panda_estampados_and_kitsune_dev_node_modules:
-    name: ecommerce_panda_estampados_and_kitsune_dev_node_modules
-  ecommerce_panda_estampados_and_kitsune_dev_pnpm_store:
-    name: ecommerce_panda_estampados_and_kitsune_dev_pnpm_store
-  ecommerce_panda_estampados_and_kitsune_dev_astro_cache:
-    name: ecommerce_panda_estampados_and_kitsune_dev_astro_cache
-  ecommerce_panda_estampados_and_kitsune_dev_vite_cache:
-    name: ecommerce_panda_estampados_and_kitsune_dev_vite_cache
+  atlas_commerce_panda_estampados_and_kitsune_dev_postgres_data:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_postgres_data
+  atlas_commerce_panda_estampados_and_kitsune_dev_storage:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_storage
+  atlas_commerce_panda_estampados_and_kitsune_dev_bootstrap:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_bootstrap
+  atlas_commerce_panda_estampados_and_kitsune_dev_logs:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_logs
+  atlas_commerce_panda_estampados_and_kitsune_dev_redis_data:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_redis_data
+  atlas_commerce_panda_estampados_and_kitsune_dev_redis_insight_data:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_redis_insight_data
+  atlas_commerce_panda_estampados_and_kitsune_dev_ftp_data:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_ftp_data
+  atlas_commerce_panda_estampados_and_kitsune_dev_ftp_home:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_ftp_home
+  atlas_commerce_panda_estampados_and_kitsune_dev_ftp_logs:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_ftp_logs
+  atlas_commerce_panda_estampados_and_kitsune_dev_pgadmin_data:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_pgadmin_data
+  atlas_commerce_panda_estampados_and_kitsune_dev_filebrowser_config:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_filebrowser_config
+  atlas_commerce_panda_estampados_and_kitsune_dev_filebrowser_db:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_filebrowser_db
+  atlas_commerce_panda_estampados_and_kitsune_dev_node_modules:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_node_modules
+  atlas_commerce_panda_estampados_and_kitsune_dev_pnpm_store:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_pnpm_store
+  atlas_commerce_panda_estampados_and_kitsune_dev_astro_cache:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_astro_cache
+  atlas_commerce_panda_estampados_and_kitsune_dev_vite_cache:
+    name: atlas_commerce_panda_estampados_and_kitsune_dev_vite_cache
