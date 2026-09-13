@@ -48,6 +48,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Password Reset TTL
+    |--------------------------------------------------------------------------
+    |
+    | Tiempo de vida del token de reset de contraseña, en minutos.
+    | Override via .env con PASSWORD_RESET_TTL_MINUTES=<valor>.
+    |
+    */
+
+    'password_reset_ttl_minutes' => (int) env(key: 'PASSWORD_RESET_TTL_MINUTES', default: 15),
+
+    /*
+    |--------------------------------------------------------------------------
     | User Providers
     |--------------------------------------------------------------------------
     |

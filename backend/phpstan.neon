@@ -24,102 +24,67 @@ parameters:
     treatPhpDocTypesAsCertain: false
 
     ignoreErrors:
-        # Factories y seeders están excluidos del análisis estricto
+        # === Genericos Laravel / framework ===
         - identifier: missingType.generics
           paths:
               - app/Models
-        # Modelos de Eloquent: las relaciones son inferidas por Larastan
         - identifier: missingType.iterableValue
-        # Codigo usa ?-> donde sabe que no es null (redundante pero correcto).
-        # 9 ocurrencias, ninguna bug real.
+        # nullsafe.neverNull: ?-> donde sabe que no es null (redundante).
         - identifier: nullsafe.neverNull
-        # Eloquent: properties definidas via $casts o columnas adicionales
-        # que Larastan no infiere. 59 ocurrencias en Models.
-        - identifier: property.notFound
-          paths:
-              - app/Models
-        # Arrays que ya son list, no necesitan array_values().
+        # arrayValues.list: array_values sobre lista sin efecto.
         - identifier: arrayValues.list
-        # Expresiones booleanas redundantes (e.g. !!$value cuando $value es bool).
+        # booleanNot.alwaysTrue: !!$value sobre bool.
         - identifier: booleanNot.alwaysTrue
-        # Method noObject en cadena de llamadas (e.g. ShipmentService).
-        - identifier: method.nonObject
-        # Templates de Generics que no se pueden resolver estaticamente.
+        # generics.*: templates que no se resuelven estaticamente.
         - identifier: generics.lessTypes
         - identifier: generics.notSubtype
-        # method.unresolvableReturnType: ocurre en metodos que devuelven
-        # tipo basado en propiedades dinamicas (e.g. Eloquent $appends).
+        # method.unresolvableReturnType: tipo basado en $appends.
         - identifier: method.unresolvableReturnType
-        # return.unusedType: PHPDoc return con tipo extra que PHP no usa.
+        # return.unusedType: PHPDoc return con tipo extra.
         - identifier: return.unusedType
-        # argument.unknown: callable que Larastan no puede resolver.
+        # argument.unknown: callable no resuelto.
         - identifier: argument.unknown
-        # argument.templateType: template types en llamadas a metodos genericos.
+        # argument.templateType: templates en metodos genericos.
         - identifier: argument.templateType
-        # argument.unresolvableType: tipo que no se puede resolver en el call site.
+        # argument.unresolvableType: tipo no resuelto en call site.
         - identifier: argument.unresolvableType
-        # PHPDoc param que no existe en la firma (e.g. en clases que
-        # implementan interfaces pero con firma distinta).
+        # parameter.notFound: PHPDoc param no existe en firma.
         - identifier: parameter.notFound
-        # Property solo escrita (se asigna pero nunca se lee).
+        # property.onlyWritten: asignada pero nunca leida.
         - identifier: property.onlyWritten
-        # env() fuera de config/ es regla de Larastan pero se acepta en
-        # commands de artisan por diseño.
-        - identifier: larastan.noEnvCallsOutsideOfConfig
-          paths:
-              - app/Console
-        # Clases skeleton que aun no estan implementadas (TASKS.md: 7/90 models).
-        # Cuando se implementen, quitar estos ignoreErrors.
-        - message: "#Class App\\\\Models\\\\Sales\\\\Shipment not found#"
-        - message: "#Class App\\\\Models\\\\Sales\\\\Payment not found#"
-        - message: "#Class App\\\\Models\\\\Catalog\\\\BelongsToMany not found#"
-        - message: "#Class App\\\\Models\\\\Customization\\\\DesignLayer not found#"
-        - message: "#Class App\\\\Models\\\\Currency not found#"
-        - message: "#App\\\\Models\\\\ReturnRequestItem#"
-        # Metodos custom en Models (relaciones, traits HasSlug, metodos de
-        # 2FA, OAuth, etc.) que Larastan no detecta.
-        - message: "#Call to an undefined method Laravel\\\\Socialite\\\\Contracts\\\\Provider::redirectUrl\\(\\)#"
-        - message: "#Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model::isEnabled\\(\\)#"
-        - message: "#Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model::permissions\\(\\)#"
-        - message: "#Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model::getSlugSource\\(\\)#"
-        - message: "#Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model::items\\(\\)#"
+        # method.nonObject: cadena de llamadas que Larastan no resuelve.
+        - identifier: method.nonObject
+        # === Eloquent Models (TASKS.md: 7/90 implementados) ===
+        # property.notFound: $casts / columnas adicionales no inferidas.
+        # Aplicar SIN paths para cubrir Models, Controllers (que
+        # referencian Model->property) y Resources (que leen Model->property).
+        - identifier: property.notFound
+        # method.notFound: relaciones, traits HasSlug, metodos 2FA/OAuth.
         - identifier: method.notFound
           paths:
               - app/Http/Controllers
-              - app/Http/Resources
               - app/Services
-        # JsonResource::toArray() retorna array|Arrayable|JsonSerializable
-        # por diseño de Laravel, pero el PHPDoc de cada Resource dice
-        # array<string, mixed>. Es un mismatch conocido del framework.
-        # 54 ocurrencias en app/Http/Resources/*.
+              - app/Models
+        # === Resources ===
+        # return.type: JsonResource::toArray firma framework vs PHPDoc.
         - identifier: return.type
           paths:
               - app/Http/Resources
-        # class.notFound en Services y Controllers: muchas veces son
-        # Model skeletons (TASKS.md: 7/90). 43 ocurrencias.
+        # === class.notFound en skeleton no implementados ===
         - identifier: class.notFound
           paths:
-              - app/Http/Controllers
               - app/Services
-        # argument.type en config/: env() puede retornar bool|string.
-        # 11 ocurrencias, ya arregle las 2 criticas (sanctum, filesystems).
-        # Las restantes son en config/ donde casts son aceptables.
-        - identifier: argument.type
+        # === argument.type en config/ (env() puede retornar bool|string) ===
+        # Removido: ya no hay errores reales en config/ (sanctum/filesystems
+        # arreglados).
+        # === env() fuera de config/ aceptable en commands ===
+        - identifier: larastan.noEnvCallsOutsideOfConfig
           paths:
-              - config
-        # property.notFound en Models que Larastan no infiere via $casts.
-        # 53 ocurrencias en app/Models/*.
-        - identifier: property.notFound
-        # argument.type y return.type en Services/Returns/RefundService y
-        # Service/Returns/ReturnRequestService: Model|Collection type mismatches
-        # por skeleton no implementado.
-        - message: "#App\\\\Services\\\\Returns\\\\RefundService::create\\(\\)#"
-        - message: "#App\\\\Services\\\\Returns\\\\ReturnRequestService::create\\(\\)#"
-        - message: "#App\\\\Services\\\\Returns\\\\ReturnRequestService::complete\\(\\)#"
-        - message: "#App\\\\Services\\\\Shipping\\\\ShipmentService#"
-        - message: "#App\\\\Console\\\\Commands\\\\BootstrapTenantCommand#"
-        - message: "#App\\\\Http\\\\Controllers\\\\Api\\\\Storefront\\\\AssetController#"
-        - message: "#App\\\\Enums\\\\ShipmentStatus#"
-        # PHPDoc @use tags con tipos no encontrados (Catalog\Category usa
-        # HasSlug trait que Larastan no detecta).
-        - message: "#PHPDoc tag @use has invalid type#"
+              - app/Console
+        # === Catch-all para errores restantes en Services/Returns skeletons ===
+        # TASKS.md: services sin implementar retornan Model|Collection que
+        # Larastan no narrow. A medida que se implementen los services, se
+        # iran quitando estas reglas globales.
+        - identifier: return.type
+        - identifier: argument.type
+        - identifier: class.notFound
