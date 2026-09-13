@@ -17,6 +17,15 @@ require __DIR__.'/../vendor/autoload.php';
 
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
+// Override error_reporting ANTES del bootstrap de Laravel.
+// HandleExceptions::bootstrap() hace error_reporting(-1) (todos los
+// niveles), lo que captura warnings de PHP (incluido el de tempnam()
+// que Laravel hace via Filesystem.php:222) y los convierte en 500
+// Internal Server Error. Excluimos E_WARNING, E_DEPRECATED y
+// E_USER_DEPRECATED para que esos warnings se registren pero no
+// exploten como exceptions.
+error_reporting(E_ALL & ~E_WARNING & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $app->handleRequest(Request::capture());
