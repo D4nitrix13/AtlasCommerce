@@ -35,7 +35,7 @@ Este monorepo soporta múltiples tiendas (Panda Estampados, Kitsune Store,
 MM Boutique, Morales Store). Si el problema afecta a una tienda
 **específica**, aclaralo en el título del issue:
 
-```
+```text
 [tenant:panda-estampados] <descripción>
 ```
 
