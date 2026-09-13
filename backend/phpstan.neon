@@ -14,9 +14,9 @@ parameters:
         - vendor
         - storage
         - bootstrap/cache
-        - _ide_helper.php
-        - _ide_helper_models.php
-        - .phpstorm.meta.php
+        - _ide_helper.php (?)
+        - _ide_helper_models.php (?)
+        - .phpstorm.meta.php (?)
         - database/seeders
         - database/factories
         - database/migrations
