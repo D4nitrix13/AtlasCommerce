@@ -146,18 +146,23 @@ sudo ss -tlnp | grep ':21 '
 
 1. **Editar el `.env`** de la instancia. Ejemplo para dev, cambiar el
    backend a `:9001`:
+
    ```ini
    BACKEND_PORT=9001
    ```
+
 2. **Reconstruir / reiniciar** la instancia:
+
    ```bash
    ./scripts/docker-stack.sh down dev
    ./scripts/docker-stack.sh build dev
    ./scripts/docker-stack.sh start dev
    ```
+
    No siempre hace falta `build` (solo si cambió un Dockerfile). Para
    cambios de puerto alcanza con `down` + `start`.
 3. **Verificar** que el nuevo puerto está publicado:
+
    ```bash
    ./scripts/docker-stack.sh ps
    ```

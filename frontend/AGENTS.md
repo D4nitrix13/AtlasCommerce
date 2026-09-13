@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 # Frontend Rules — Kitsune Store
 
 **Stack:** Astro 7 + React 19 + Tailwind CSS 4 + TypeScript 6 + Zod 4 + react-hook-form + Chart.js 4

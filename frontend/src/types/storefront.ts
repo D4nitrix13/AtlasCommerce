@@ -1,6 +1,5 @@
-import type { Store } from "./stores";
+import type { Store } from './stores';
 
 export interface StorefrontContext {
   store: Store;
 }
-

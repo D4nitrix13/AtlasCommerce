@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD041 -->
+
 # Notifications en Laravel
 
 Este directorio contiene las **Notifications** del backend Laravel.

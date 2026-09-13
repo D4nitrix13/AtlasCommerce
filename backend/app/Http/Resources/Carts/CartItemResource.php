@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources\Carts;
 
 use App\Http\Resources\Catalog\ProductResource;
-use App\Models\Currency;
+use App\Models\Settings\Currency;
 use App\Support\MoneyFormatter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

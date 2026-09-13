@@ -1,13 +1,13 @@
 ---
-import AdminLayout from "../../../../layouts/AdminLayout.astro";
-import ShipmentsAdmin from "../../../../components/admin/shipments/ShipmentsAdmin";
-import es from "../../../../i18n/locales/es";
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import ShipmentsAdmin from '../../../../components/admin/shipments/ShipmentsAdmin';
+import es from '../../../../i18n/locales/es';
 ---
 
-<AdminLayout title={es["admin.shipments.title"] + " · Admin"}>
+<AdminLayout title={es['admin.shipments.title'] + ' · Admin'}>
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-slate-900">{es["admin.shipments.title"]}</h1>
-    <p class="mt-1 text-sm text-slate-500">{es["admin.shipments.subtitle"]}</p>
+    <h1 class="text-2xl font-bold text-slate-900">{es['admin.shipments.title']}</h1>
+    <p class="mt-1 text-sm text-slate-500">{es['admin.shipments.subtitle']}</p>
   </div>
 
   <ShipmentsAdmin client:load />

@@ -1,18 +1,16 @@
 ---
-import AdminLayout from "../../../../layouts/AdminLayout.astro";
-import MetricCard from "../../../../components/admin/dashboard/MetricCard.astro";
-import RevenueChart from "../../../../components/admin/dashboard/RevenueChart.astro";
-import TrafficSourcesCard from "../../../../components/admin/dashboard/TrafficSourcesCard.astro";
-import MonthlyGoalsCard from "../../../../components/admin/dashboard/MonthlyGoalsCard.astro";
-import RecentOrdersTable from "../../../../components/admin/dashboard/RecentOrdersTable.astro";
-import RecentActivityCard from "../../../../components/admin/dashboard/RecentActivityCard.astro";
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import MetricCard from '../../../../components/admin/dashboard/MetricCard.astro';
+import RevenueChart from '../../../../components/admin/dashboard/RevenueChart.astro';
+import TrafficSourcesCard from '../../../../components/admin/dashboard/TrafficSourcesCard.astro';
+import MonthlyGoalsCard from '../../../../components/admin/dashboard/MonthlyGoalsCard.astro';
+import RecentOrdersTable from '../../../../components/admin/dashboard/RecentOrdersTable.astro';
+import RecentActivityCard from '../../../../components/admin/dashboard/RecentActivityCard.astro';
 ---
 
 <AdminLayout title="Dashboard | Admin">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
-      Dashboard
-    </h1>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">Dashboard</h1>
 
     <p class="mt-1 text-sm text-slate-500">
       Bienvenido de nuevo. Esto es lo que está pasando en tu ecommerce hoy.
@@ -28,13 +26,7 @@ import RecentActivityCard from "../../../../components/admin/dashboard/RecentAct
       accent="emerald"
     />
 
-    <MetricCard
-      title="Usuarios activos"
-      value="2,847"
-      change="+8.2%"
-      icon="users"
-      accent="sky"
-    />
+    <MetricCard title="Usuarios activos" value="2,847" change="+8.2%" icon="users" accent="sky" />
 
     <MetricCard
       title="Órdenes totales"
@@ -45,13 +37,7 @@ import RecentActivityCard from "../../../../components/admin/dashboard/RecentAct
       accent="rose"
     />
 
-    <MetricCard
-      title="Visitas"
-      value="284K"
-      change="+24.7%"
-      icon="eye"
-      accent="amber"
-    />
+    <MetricCard title="Visitas" value="284K" change="+24.7%" icon="eye" accent="amber" />
   </section>
 
   <section class="mt-5 grid gap-5 xl:grid-cols-3">

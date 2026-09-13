@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 # Code Review Prompt
 
 This is a reusable prompt template that activates the project's skill
@@ -14,6 +16,7 @@ when you want the agent to review code.
 4. Submit it as a request to the agent.
 
 The agent will:
+
 - Load the relevant skills.
 - Read the code in context.
 - Find issues categorized by severity.

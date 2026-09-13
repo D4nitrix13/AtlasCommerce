@@ -20,7 +20,7 @@ return [
     |
     */
 
-    'stateful' => explode(separator: ',', string: env(key: 'SANCTUM_STATEFUL_DOMAINS', default: sprintf(
+    'stateful' => explode(separator: ',', string: (string) env(key: 'SANCTUM_STATEFUL_DOMAINS', default: sprintf(
         '%s%s',
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
         Sanctum::currentApplicationUrlWithPort(),

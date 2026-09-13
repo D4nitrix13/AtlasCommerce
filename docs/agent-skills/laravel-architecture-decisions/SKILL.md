@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: laravel-architecture-decisions
 description: When to use Controller vs Service vs Model vs Notification vs Command vs Job vs Resource vs FormRequest vs Migration in Laravel. Responsibility rules + artisan commands to create each. Triggers: creating Controller, Service, Model, Notification, Command, Job, Resource, FormRequest, Blade view.

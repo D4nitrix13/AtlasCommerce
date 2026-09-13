@@ -211,7 +211,14 @@ test.describe('Login: 2FA challenge flow', () => {
 
     // Generar código TOTP a partir del secret del seeder vía otplib.
     // El import dinámico evita errores de parse si el package no está.
-    const { authenticator } = await import('otplib');
+    // @ts-expect-error otplib no tiene types declarados (proposito del shim
+// en src/types/otplib-augment.d.ts), pero no esta instalado en node_modules.
+const { authenticator } = (await import('otplib' as never)) as unknown as {
+  authenticator: {
+    generate: (secret: string) => string;
+    verify: (params: { token: string; secret: string }) => boolean;
+  };
+};
     const code = authenticator.generate(secret as string);
 
     await page.locator('#totp-code').fill(code);

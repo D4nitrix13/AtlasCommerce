@@ -1,4 +1,4 @@
-import { DEFAULT_BRAND, type LoginTheme, type StoreBrand } from "../config/stores";
+import { DEFAULT_BRAND, type LoginTheme, type StoreBrand } from '../config/stores';
 
 /**
  * Theme visual de una tienda tal como lo consume el frontend.

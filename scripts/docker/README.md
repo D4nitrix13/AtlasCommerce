@@ -218,6 +218,7 @@ O atomicamente:
 ### db-backup genera archivo vacio
 
 Posibles causas:
+
 1. La BD esta vacia (sin tablas) — pg_dump genera solo comentarios
 2. El rol/user no existe — usa el slug derivado del store
 3. El container no esta corriendo — corre `docker compose ps` primero

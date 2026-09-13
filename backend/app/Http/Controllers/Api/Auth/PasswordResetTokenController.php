@@ -137,7 +137,7 @@ class PasswordResetTokenController extends Controller
         RateLimiter::hit(key: $throttleKey, decaySeconds: 300);
 
         $currentStoreId = $storeContext->getStoreId();
-        $ttlMinutes = (int) env(key: 'PASSWORD_RESET_TTL_MINUTES', default: self::DEFAULT_TTL_MINUTES);
+        $ttlMinutes = (int) config(key: 'auth.password_reset_ttl_minutes', default: self::DEFAULT_TTL_MINUTES);
 
         /** @var User|null $user */
         $user = User::query()

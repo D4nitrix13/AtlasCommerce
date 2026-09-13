@@ -259,8 +259,8 @@ Estas cosas **NO se hacen** en este proyecto:
 - `backend/config/brand.php` — paths default de categoría C.
 - `backend/app/Models/Stores/StoreTheme.php` — modelo que guarda los
   paths de categoría A.
-- `backend/database/migrations/stores/2026_08_02_000002_create_store_themes_table.php` —
-  schema de la tabla que guarda los paths de categoría A.
+- `backend/database/migrations/stores/2026_08_02_000002_create_store_themes_table.php`
+  — schema de la tabla que guarda los paths de categoría A.
 - `backend/database/migrations/2026_06_28_193338_create_media_table.php` —
   tabla `media` (Spatie MediaLibrary) para uploads asociados a modelos.
 - `docs/architecture/multi-store.md` — qué assets se comparten vs se

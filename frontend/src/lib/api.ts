@@ -38,7 +38,7 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
    * FormData se omite (lo pone el browser con boundary), si no se
    * fuerza a `application/json`.
    */
-  body?: BodyInit | Record<string, unknown> | null;
+  body?: BodyInit | Record<string, unknown> | unknown[] | null;
 };
 
 function resolveApiUrl(endpoint: string): string {

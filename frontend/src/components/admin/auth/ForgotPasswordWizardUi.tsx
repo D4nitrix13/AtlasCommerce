@@ -63,11 +63,7 @@ export function WizardStepper({ steps, current, labels }: WizardStepperProps): R
                       : 'size-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-semibold'
                 }
               >
-                {isComplete ? (
-                  <span aria-hidden="true">✓</span>
-                ) : (
-                  index + 1
-                )}
+                {isComplete ? <span aria-hidden="true">✓</span> : index + 1}
               </div>
               <span
                 className={
@@ -261,9 +257,7 @@ type WizardSuccessMessageProps = {
  * `status` en vez de `alert` para no interrumpir agresivamente al
  * screen reader.
  */
-export function WizardSuccessMessage({
-  message,
-}: WizardSuccessMessageProps): ReactElement | null {
+export function WizardSuccessMessage({ message }: WizardSuccessMessageProps): ReactElement | null {
   if (message === null) {
     return null;
   }

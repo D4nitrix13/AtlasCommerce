@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
+
 ---
 name: conventional-commits-and-prs
 description: Conventional Commits enforced in this project - Spanish message body, type(scope) format, scopes backend/frontend/docs/infra/ci. Branch naming feat/<scope>-desc. PR template with Qué cambia/Por qué/Cómo se prueba/Checklist. Triggers: every commit, every PR, branch creation, merge.

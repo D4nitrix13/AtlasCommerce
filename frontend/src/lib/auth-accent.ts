@@ -22,11 +22,11 @@
  * propaga a todos los flujos de auth.
  */
 export const AUTH_ACCENT = {
-  primary: "#2D9D8E",
-  hover: "#258777",
-  dark: "#1E6F62",
-  softBg: "#E6F7F4",
-  softBorder: "#C2EBE4",
+  primary: '#2D9D8E',
+  hover: '#258777',
+  dark: '#1E6F62',
+  softBg: '#E6F7F4',
+  softBorder: '#C2EBE4',
 } as const;
 
 export type AuthAccent = (typeof AUTH_ACCENT)[keyof typeof AUTH_ACCENT];

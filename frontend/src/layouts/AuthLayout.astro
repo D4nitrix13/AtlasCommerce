@@ -1,11 +1,11 @@
 ---
-import "../styles/global.css";
+import '../styles/global.css';
 
 interface Props {
   title?: string;
 }
 
-const { title = "Login" } = Astro.props;
+const { title = 'Login' } = Astro.props;
 
 // Favicon per-tenant: derivado del slug del tenant detectado por el
 // middleware. Convention: /api/storefront/assets/tenants/{slug}/branding/favicon.webp.
@@ -14,7 +14,7 @@ const { title = "Login" } = Astro.props;
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const tenantFavicon = tenantSlug
   ? `/api/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
-  : "/favicon.svg";
+  : '/favicon.svg';
 ---
 
 <html lang="es">
@@ -29,7 +29,8 @@ const tenantFavicon = tenantSlug
       rel="stylesheet"
     />
     <title>{title}</title>
-    {/*
+    {
+      /*
       CR2: CSRF bootstrap para Sanctum stateful cookies.
 
       Sanctum protege los POST con double-submit cookie: el backend
@@ -47,7 +48,8 @@ const tenantFavicon = tenantSlug
       inline script (no externo) para que funcione aunque Vite tarde en
       compilar el bundle React. Astro inyecta el script sin esperar el
       hydration de cualquier componente React hijo.
-    */}
+    */
+    }
     <script>
       // CSRF bootstrap inline. NO depende del bundle React (puede correr
       // antes que cualquier componente hidrate).
@@ -56,8 +58,7 @@ const tenantFavicon = tenantSlug
           // Construimos el path absoluto en runtime — el endpoint vive
           // en el mismo origin del browser, así que usamos el origin del
           // location actual (que respeta el host del dev server, no de Caddy).
-          var endpoint =
-            window.location.origin + '/sanctum/csrf-cookie';
+          var endpoint = window.location.origin + '/sanctum/csrf-cookie';
 
           // fetch con credentials: 'include' para que el browser envíe
           // Y reciba cookies httpOnly del backend (Sanctum las emite así

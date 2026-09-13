@@ -1,12 +1,12 @@
-import { useState, type ReactElement } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState, type ReactElement } from 'react';
+import { ChevronDown } from 'lucide-react';
 import {
   LOCALE_FLAGS,
   LOCALE_LABELS,
   SUPPORTED_LOCALES,
   useTranslations,
   type Locale,
-} from "../../i18n";
+} from '../../i18n';
 
 /**
  * Tokens opcionales para que el dropdown no rompa el look del padre.
@@ -29,25 +29,25 @@ export type LanguageSwitcherTheme = {
 };
 
 const DARK_THEME: LanguageSwitcherTheme = {
-  surface: "#0F172A",
-  text: "#FFFFFF",
-  activeText: "#DC2626",
-  border: "rgba(255, 255, 255, 0.10)",
+  surface: '#0F172A',
+  text: '#FFFFFF',
+  activeText: '#DC2626',
+  border: 'rgba(255, 255, 255, 0.10)',
 };
 
 const LIGHT_THEME: LanguageSwitcherTheme = {
-  surface: "#FFFFFF",
-  text: "#0F172A",
-  activeText: "#2D9D8E",
-  border: "#E5E7EB",
-  summaryColor: "#475569",
-  summaryHoverColor: "#0F172A",
+  surface: '#FFFFFF',
+  text: '#0F172A',
+  activeText: '#2D9D8E',
+  border: '#E5E7EB',
+  summaryColor: '#475569',
+  summaryHoverColor: '#0F172A',
 };
 
 type LanguageSwitcherProps = {
-  theme?: "dark" | "light" | LanguageSwitcherTheme;
+  theme?: 'dark' | 'light' | LanguageSwitcherTheme;
   /** Layout: "dropdown" (default) | "inline" (botones planos ES/EN). */
-  variant?: "dropdown" | "inline";
+  variant?: 'dropdown' | 'inline';
 };
 
 const THEME_MAP = {
@@ -61,21 +61,20 @@ const THEME_MAP = {
  * `/en/admin/shipping`). El middleware se encarga del resto.
  */
 export default function LanguageSwitcher({
-  theme = "dark",
-  variant = "dropdown",
+  theme = 'dark',
+  variant = 'dropdown',
 }: LanguageSwitcherProps): ReactElement {
   const { locale, setLocale } = useTranslations();
   const [open, setOpen] = useState(false);
 
-  const resolvedTheme: LanguageSwitcherTheme =
-    typeof theme === "string" ? THEME_MAP[theme] : theme;
+  const resolvedTheme: LanguageSwitcherTheme = typeof theme === 'string' ? THEME_MAP[theme] : theme;
 
   const handleSelect = (next: Locale): void => {
     setOpen(false);
     setLocale(next);
   };
 
-  if (variant === "inline") {
+  if (variant === 'inline') {
     return (
       <div className="flex items-center gap-2 text-xs font-medium">
         {SUPPORTED_LOCALES.map((candidate) => (
@@ -89,8 +88,7 @@ export default function LanguageSwitcher({
             className="rounded px-2 py-1 transition focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/30"
             style={{
               color: candidate === locale ? resolvedTheme.activeText : resolvedTheme.text,
-              backgroundColor:
-                candidate === locale ? "#E6F7F4" : "transparent",
+              backgroundColor: candidate === locale ? '#E6F7F4' : 'transparent',
               fontWeight: candidate === locale ? 600 : 400,
             }}
           >
@@ -142,17 +140,16 @@ export default function LanguageSwitcher({
               }}
               className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition hover:bg-slate-50"
               style={{
-                color:
-                  candidate === locale
-                    ? resolvedTheme.activeText
-                    : resolvedTheme.text,
+                color: candidate === locale ? resolvedTheme.activeText : resolvedTheme.text,
                 fontWeight: candidate === locale ? 600 : 400,
               }}
             >
               <span aria-hidden="true">{LOCALE_FLAGS[candidate]}</span>
               <span>{LOCALE_LABELS[candidate]}</span>
               {candidate === locale && (
-                <span aria-hidden="true" className="ml-auto text-[10px]">✓</span>
+                <span aria-hidden="true" className="ml-auto text-[10px]">
+                  ✓
+                </span>
               )}
             </button>
           </li>
