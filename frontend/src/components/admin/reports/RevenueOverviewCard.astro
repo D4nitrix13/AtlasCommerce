@@ -83,7 +83,8 @@ const previousYear = [15000, 18000, 17000, 22000, 25000, 24000, 28000, 30000, 34
             intersect: false,
             callbacks: {
               label(context) {
-                return context.dataset.label + ": $" + context.parsed.y.toLocaleString();
+                const y = context.parsed.y ?? 0;
+                return context.dataset.label + ": $" + y.toLocaleString();
               },
             },
           },
@@ -112,7 +113,8 @@ const previousYear = [15000, 18000, 17000, 22000, 25000, 24000, 28000, 30000, 34
             ticks: {
               color: "#64748b",
               callback(value) {
-                return "$" + Number(value / 1000) + "k";
+                const n = typeof value === "number" ? value : Number(value);
+                return "$" + Number(n / 1000) + "k";
               },
             },
           },

@@ -54,13 +54,13 @@ const sources = [
             data: sources.map((s: { value: number }) => s.value),
             backgroundColor: sources.map((s: { color: string }) => s.color),
             borderWidth: 0,
-            cutout: "70%",
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: true,
+        cutout: "70%",
         plugins: {
           legend: { display: false },
           tooltip: { enabled: false },

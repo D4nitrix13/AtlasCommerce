@@ -44,7 +44,12 @@ const EMAIL_USER = process.env.E2E_EMAIL_USER ?? 'ops@mm-boutique.test';
  * Usa `otplib` via dynamic import (mismo patrón que login.spec.ts).
  */
 async function generateTotpCode(secretBase32: string): Promise<string> {
-  const { authenticator } = await import('otplib');
+  const { authenticator } = (await import(/* @vite-ignore */ 'otplib' as string)) as unknown as {
+  authenticator: {
+    generate: (secret: string) => string;
+    verify: (params: { token: string; secret: string }) => boolean;
+  };
+};
   return authenticator.generate(secretBase32);
 }
 

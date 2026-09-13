@@ -211,7 +211,12 @@ test.describe('Login: 2FA challenge flow', () => {
 
     // Generar código TOTP a partir del secret del seeder vía otplib.
     // El import dinámico evita errores de parse si el package no está.
-    const { authenticator } = await import('otplib');
+    const { authenticator } = (await import(/* @vite-ignore */ 'otplib' as string)) as unknown as {
+  authenticator: {
+    generate: (secret: string) => string;
+    verify: (params: { token: string; secret: string }) => boolean;
+  };
+};
     const code = authenticator.generate(secret as string);
 
     await page.locator('#totp-code').fill(code);

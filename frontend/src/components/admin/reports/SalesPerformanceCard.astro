@@ -75,7 +75,8 @@ const values = [4200, 3800, 5100, 4600, 6200, 7800, 5400];
           tooltip: {
             callbacks: {
               label(context) {
-                return "$" + context.parsed.y.toLocaleString();
+                const y = context.parsed.y ?? 0;
+                return "$" + y.toLocaleString();
               },
             },
           },
@@ -99,7 +100,8 @@ const values = [4200, 3800, 5100, 4600, 6200, 7800, 5400];
             ticks: {
               color: "#64748b",
               callback(value) {
-                return "$" + Number(value / 1000) + "k";
+                const n = typeof value === "number" ? value : Number(value);
+                return "$" + Number(n / 1000) + "k";
               },
             },
           },

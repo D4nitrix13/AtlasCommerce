@@ -81,7 +81,8 @@ const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 4
             ticks: {
               color: "#64748b",
               callback(value) {
-                return "$" + Number(value / 1000) + "k";
+                const n = typeof value === "number" ? value : Number(value);
+                return "$" + Number(n / 1000) + "k";
               },
             },
           },

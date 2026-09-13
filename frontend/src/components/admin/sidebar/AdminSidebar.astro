@@ -179,30 +179,36 @@ const menu = [
 
 <script>
   (function () {
-    var STORAGE_KEY = "admin-sidebar-collapsed";
-    var sidebar = document.getElementById("admin-sidebar");
-    var overlay = document.getElementById("sidebar-overlay");
-    var mainContent = document.getElementById("main-content");
-    var toggleBtns = document.querySelectorAll("[data-sidebar-toggle]");
+    const STORAGE_KEY = "admin-sidebar-collapsed";
+    const sidebar = document.getElementById("admin-sidebar") as HTMLElement | null;
+    const overlay = document.getElementById("sidebar-overlay") as HTMLElement | null;
+    const mainContent = document.getElementById("main-content") as HTMLElement | null;
+    const toggleBtns = document.querySelectorAll<HTMLElement>("[data-sidebar-toggle]");
 
     if (!sidebar || !overlay || !mainContent) return;
 
-    function isDesktop() {
+    // Narrow TS: capturamos referencias no-null para usar dentro de callbacks
+    // donde el type narrowing no se propaga.
+    const sidebarEl: HTMLElement = sidebar;
+    const overlayEl: HTMLElement = overlay;
+    const mainContentEl: HTMLElement = mainContent;
+
+    function isDesktop(): boolean {
       return window.innerWidth >= 1024;
     }
 
-    function getCollapsed() {
+    function getCollapsed(): boolean {
       return localStorage.getItem(STORAGE_KEY) === "true";
     }
 
-    function setCollapsed(value) {
+    function setCollapsed(value: boolean): void {
       localStorage.setItem(STORAGE_KEY, String(value));
     }
 
-    function updateToggleIcons(collapsed) {
-      toggleBtns.forEach(function (btn) {
-        var expandIcon = btn.querySelector("[data-icon-expand]");
-        var collapseIcon = btn.querySelector("[data-icon-collapse]");
+    function updateToggleIcons(collapsed: boolean): void {
+      toggleBtns.forEach(function (btn: HTMLElement) {
+        const expandIcon = btn.querySelector("[data-icon-expand]");
+        const collapseIcon = btn.querySelector("[data-icon-collapse]");
         if (expandIcon && collapseIcon) {
           expandIcon.classList.toggle("hidden", !collapsed);
           collapseIcon.classList.toggle("hidden", collapsed);
@@ -210,34 +216,34 @@ const menu = [
       });
     }
 
-    function updateToggleTitle(collapsed) {
-      toggleBtns.forEach(function (btn) {
+    function updateToggleTitle(collapsed: boolean): void {
+      toggleBtns.forEach(function (btn: HTMLElement) {
         btn.setAttribute("title", collapsed ? "Expandir menú" : "Colapsar menú");
         btn.setAttribute("aria-label", collapsed ? "Expandir menú" : "Colapsar menú");
       });
     }
 
-    function updateAriaState(expanded) {
-      toggleBtns.forEach(function (btn) {
+    function updateAriaState(expanded: boolean): void {
+      toggleBtns.forEach(function (btn: HTMLElement) {
         btn.setAttribute("aria-expanded", String(expanded));
       });
     }
 
-    function applyDesktopState() {
-      var collapsed = getCollapsed();
+    function applyDesktopState(): void {
+      const collapsed = getCollapsed();
 
-      sidebar.setAttribute("data-collapsed", String(collapsed));
+      sidebarEl.setAttribute("data-collapsed", String(collapsed));
 
       if (collapsed) {
-        sidebar.classList.add("w-[72px]");
-        sidebar.classList.remove("w-[260px]");
-        mainContent.classList.add("lg:pl-[72px]");
-        mainContent.classList.remove("lg:pl-[260px]");
+        sidebarEl.classList.add("w-[72px]");
+        sidebarEl.classList.remove("w-[260px]");
+        mainContentEl.classList.add("lg:pl-[72px]");
+        mainContentEl.classList.remove("lg:pl-[260px]");
       } else {
-        sidebar.classList.remove("w-[72px]");
-        sidebar.classList.add("w-[260px]");
-        mainContent.classList.remove("lg:pl-[72px]");
-        mainContent.classList.add("lg:pl-[260px]");
+        sidebarEl.classList.remove("w-[72px]");
+        sidebarEl.classList.add("w-[260px]");
+        mainContentEl.classList.remove("lg:pl-[72px]");
+        mainContentEl.classList.add("lg:pl-[260px]");
       }
 
       updateToggleIcons(collapsed);
@@ -247,31 +253,31 @@ const menu = [
       document.documentElement.classList.remove("sidebar-collapsed-init", "sidebar-expanded-init");
     }
 
-    function toggleSidebar() {
+    function toggleSidebar(): void {
       if (isDesktop()) {
         setCollapsed(!getCollapsed());
         applyDesktopState();
       } else {
-        var isHidden = sidebar.classList.contains("-translate-x-full");
+        const isHidden = sidebarEl.classList.contains("-translate-x-full");
         if (isHidden) {
-          sidebar.classList.remove("-translate-x-full");
-          overlay.classList.remove("hidden");
+          sidebarEl.classList.remove("-translate-x-full");
+          overlayEl.classList.remove("hidden");
         } else {
-          sidebar.classList.add("-translate-x-full");
-          overlay.classList.add("hidden");
+          sidebarEl.classList.add("-translate-x-full");
+          overlayEl.classList.add("hidden");
         }
         updateAriaState(isHidden);
       }
     }
 
-    toggleBtns.forEach(function (btn) {
+    toggleBtns.forEach(function (btn: HTMLElement) {
       btn.addEventListener("click", toggleSidebar);
     });
 
-    overlay.addEventListener("click", function () {
+    overlayEl.addEventListener("click", function () {
       if (!isDesktop()) {
-        sidebar.classList.add("-translate-x-full");
-        overlay.classList.add("hidden");
+        sidebar!.classList.add("-translate-x-full");
+        overlay!.classList.add("hidden");
         updateAriaState(false);
       }
     });
