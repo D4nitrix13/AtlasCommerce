@@ -246,9 +246,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
 */
 
 Route::middleware(['store.domain'])->prefix('storefront')->group(function (): void {
-    Route::get('/products', [StorefrontProductController::class, 'index']);
-    Route::get('/products/{slug}', [StorefrontProductController::class, 'show']);
-    Route::get('/products/{slug}/price', [StorefrontProductController::class, 'price']);
+    Route::get('/products/search', [StorefrontProductController::class, 'search'])
+        ->name('storefront.products.search');
+    Route::get('/products', [StorefrontProductController::class, 'index'])
+        ->name('storefront.products.index');
+    Route::get('/products/{slug}', [StorefrontProductController::class, 'show'])
+        ->name('storefront.products.show');
+    Route::get('/products/{slug}/price', [StorefrontProductController::class, 'price'])
+        ->name('storefront.products.price');
     Route::get('/theme', [StorefrontThemeController::class, 'show']);
     // Proxy de assets del tenant desde FTP al browser.
     // El {path} acepta slashes via where() regex para que coincida

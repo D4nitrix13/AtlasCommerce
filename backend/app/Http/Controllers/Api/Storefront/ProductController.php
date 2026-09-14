@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Storefront;
 
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Product;
+use App\Services\Catalog\ProductSearchService;
 use App\Services\Catalog\WholesalePricingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,6 +37,58 @@ class ProductController extends Controller
         })->get();
 
         return response()->json($products);
+    }
+
+    /**
+     * Búsqueda pública de productos con ranking por relevancia.
+     *
+     * RF-CAT-028 — Soporta tolerancia (ILIKE sobre múltiples campos)
+     * y paginación. El tenant se resuelve por el middleware `store.domain`.
+     *
+     * Query params:
+     *   - q:        string requerida (mín 1 char tras trim).
+     *   - page:     int >= 1 (default 1).
+     *   - per_page: int entre 1 y 50 (default 20).
+     *
+     * Response:
+     *   {
+     *     "data": [Product, ...],
+     *     "meta": { "current_page", "per_page", "total", "last_page", "query" }
+     *   }
+     */
+    public function search(
+        Request $request,
+        ProductSearchService $search,
+    ): JsonResponse {
+        $store = $request->attributes->get('store');
+
+        $validated = $request->validate(rules: [
+            'q' => ['required', 'string', 'min:1', 'max:200'],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:'.ProductSearchService::MAX_PER_PAGE],
+        ]);
+
+        $query = (string) $validated['q'];
+        $page = (int) ($validated['page'] ?? 1);
+        $perPage = (int) ($validated['per_page'] ?? ProductSearchService::DEFAULT_PER_PAGE);
+
+        $paginator = $search->search(
+            store: $store,
+            query: $query,
+            page: $page,
+            perPage: $perPage,
+        );
+
+        return response()->json(data: [
+            'data' => $paginator->items(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+                'query' => trim($query),
+            ],
+        ]);
     }
 
     /**
