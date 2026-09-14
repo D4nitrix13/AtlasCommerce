@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
@@ -312,6 +313,32 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('categories/{category}', [CategoryController::class, 'destroy'])
             ->middleware('permission:catalog.manage')
             ->name('admin.categories.destroy');
+
+        /*
+        | Marcas (RF-CAT-024). CRUD admin con `catalog.manage`.
+        | Globales. FK products.brand_id es nullOnDelete — borrar no
+        | falla aunque haya productos asociados (quedan con brand_id null).
+        */
+
+        Route::get('brands', [BrandController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.brands.index');
+
+        Route::post('brands', [BrandController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.brands.store');
+
+        Route::get('brands/{brand}', [BrandController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.brands.show');
+
+        Route::put('brands/{brand}', [BrandController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.brands.update');
+
+        Route::delete('brands/{brand}', [BrandController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.brands.destroy');
     });
 
     /*
