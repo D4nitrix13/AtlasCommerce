@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -221,6 +222,43 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('users/{user}', [UserController::class, 'destroy'])
             ->middleware('permission:auth.users.manage')
             ->name('admin.users.destroy');
+
+        /*
+        | RF-CAT-026: CRUD admin de productos. Requiere
+        | `catalog.manage` (admin slug bypasea).
+        */
+
+        Route::get('products', [ProductController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.index');
+
+        Route::post('products', [ProductController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.store');
+
+        Route::get('products/{product}', [ProductController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.show');
+
+        Route::put('products/{product}', [ProductController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.update');
+
+        Route::post('products/{product}/archive', [ProductController::class, 'archive'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.archive');
+
+        Route::post('products/{product}/publish', [ProductController::class, 'publish'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.publish');
+
+        Route::put('products/{product}/stores', [ProductController::class, 'syncStores'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.stores.sync');
+
+        Route::delete('products/{product}', [ProductController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.destroy');
     });
 
     /*
