@@ -382,22 +382,22 @@ rf:
     verificado_por: []
     comentarios: "RF en análisis. Tabla `categories` existe; falta UI CRUD completa."
 
-  - code: RF-CAT-026
+- code: RF-CAT-026
     title: "CRUD admin de productos"
     module: "Catálogo"
     category: "Catálogo y Compras"
     priority: H
     importancia: vital
     urgencia: inmediata
-    estado: en análisis
+    estado: en construcción
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, Catalog Manager)"
     dependencias: ["RNF-SEC-015", "RF-CAT-023"]
-    descripcion: "El admin podrá crear, listar, editar, archivar y eliminar productos, asociándolos a categorías, marcas y variantes."
-    verificado_por: []
-    comentarios: "RF en análisis. Modelos `Product` y `ProductStore` ya existen; falta CRUD UI completo."
+    descripcion: "El admin puede crear, listar, editar, archivar y eliminar productos, asociándolos a categorías, marcas y variantes."
+    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
+    comentarios: "Implementado MVP admin. Endpoints en /api/admin/products: index (paginated con filtros q/is_active/category_id/brand_id/store_id/with_trashed), show, store, update, archive, publish, syncStores (atómico), destroy. Aislamiento por tenant vía product_stores.store_id. Validaciones: slug kebab-case único, sku único, FKs existentes (category/brand/currency/store). Resource AdminProductResource expone cost_cents + is_active + published_at. Verificado por `tests/Feature/Admin/ProductControllerTest.php` (19 tests, 55 assertions). Pendiente: variantes CRUD, imágenes CRUD, categorías/marcas CRUD, frontend admin UI."
 
   - code: RF-CAT-027
     title: "Atributos y valores de atributo"
@@ -2124,9 +2124,9 @@ resumen:
   total_rf: 69
   total_rnf: 47
   total: 116
-  rf_por_estado:
-    en construcción (implemented): 49
-    en análisis (in-analysis): 20
+rf_por_estado:
+    en construcción (implemented): 51
+    en análisis (in-analysis): 18
     pendiente (pending): 0
   rnf_por_estado:
     verificado (verified): 25
