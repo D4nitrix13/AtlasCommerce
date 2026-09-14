@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Auth\SocialAuthController;
 use App\Http\Controllers\Api\Auth\TotpController;
 use App\Http\Controllers\Api\Carts\CartController;
 use App\Http\Controllers\Api\Carts\CartItemController;
+use App\Http\Controllers\Api\Customers\AccountDataController;
 use App\Http\Controllers\Api\Payments\PaymentController;
 use App\Http\Controllers\Api\Returns\RefundController;
 use App\Http\Controllers\Api\Returns\ReturnRequestController;
@@ -124,6 +125,28 @@ Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {
+    /*
+    |--------------------------------------------------------------------------
+    | Account (GDPR)
+    |--------------------------------------------------------------------------
+    |
+    | RF-CUST-042: exportación + borrado de datos personales del cliente
+    | autenticado (derecho de acceso y olvido, GDPR + Ley 896 Nicaragua).
+    |
+    */
+
+    Route::get('account/data-export', [AccountDataController::class, 'export'])
+        ->name('account.data-export');
+
+    Route::post('account/deletion-request', [AccountDataController::class, 'requestDeletion'])
+        ->name('account.deletion-request');
+
+    Route::delete('account', [AccountDataController::class, 'destroy'])
+        ->name('account.destroy');
+
+    Route::post('account/deletion-cancel', [AccountDataController::class, 'cancelDeletion'])
+        ->name('account.deletion-cancel');
+
     /*
     |--------------------------------------------------------------------------
     | Cart
