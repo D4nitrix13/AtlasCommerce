@@ -171,7 +171,8 @@ final class CustomerDeletionService
         }
 
         $user->forceFill(attributes: [
-            'name' => 'Deleted User',
+            'first_name' => 'Deleted',
+            'last_name' => 'User',
             'email' => sprintf('deleted-%s@anonymized.invalid', (string) Str::uuid()),
             'password' => Hash::make(value: Str::random(length: 64)),
         ])->save();

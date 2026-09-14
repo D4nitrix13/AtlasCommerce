@@ -209,7 +209,8 @@ final class AccountDataControllerTest extends TestCase
 
         // El User vinculado también queda anonimizado.
         $userFresh = $this->user->fresh();
-        $this->assertSame('Deleted User', $userFresh->name);
+        $this->assertSame('Deleted', $userFresh->first_name);
+        $this->assertSame('User', $userFresh->last_name);
         $this->assertStringStartsWith('deleted-', $userFresh->email);
     }
 
