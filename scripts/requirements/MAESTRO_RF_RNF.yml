@@ -423,17 +423,17 @@ rf:
     priority: H
     importancia: vital
     urgencia: importante
-    estado: en análisis
+    estado: en construcción
     estabilidad: podría cambiar
-    autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Andy Joe Sanchez Calero (stakeholder_002)", "Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_002 (Andy, Catalog Manager)"
       - "Google Search Central — search box y sitelinks"
       - "PostgreSQL pg_trgm — fuzzy search"
     dependencias: ["RNF-PERF-024", "RNF-USA-042"]
     descripcion: "El visitante podrá buscar productos por nombre, descripción o SKU, con tolerancia a typos y ranking por relevancia."
-    verificado_por: []
-    comentarios: "RF en análisis. Considerar Meilisearch o Typesense si el set crece."
+    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    comentarios: "Implementado MVP en backend. Endpoint `GET /api/storefront/products/search?q=&page=&per_page=` con ranking en tiers (SKU exacto 100 → SKU contiene 90 → name starts-with 80 → title starts-with 70 → name contains 50 → title contains 40 → desc contains 30 → pubdesc contains 20). Aislamiento por tenant via product_stores.store_id. Filtra solo is_active + published_at + is_visible. Paginación 1-50 items/página (default 20). Verificado por `tests/Feature/Storefront/StorefrontProductSearchTest.php` (17 tests, 47 assertions). Pendiente: FULL TEXT SEARCH nativo PG con tsvector + GIN, fuzzy con pg_trgm, Meilisearch/Typesense si el set crece >50K."
 
   - code: RF-CAT-029
     title: "Precios mayoristas (wholesale)"
@@ -2125,8 +2125,8 @@ resumen:
   total_rnf: 47
   total: 116
   rf_por_estado:
-    en construcción (implemented): 47
-    en análisis (in-analysis): 22
+    en construcción (implemented): 48
+    en análisis (in-analysis): 21
     pendiente (pending): 0
   rnf_por_estado:
     verificado (verified): 25
