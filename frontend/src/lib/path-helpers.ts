@@ -11,25 +11,25 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from '../i18n/config';
  */
 
 /**
- * Set de paths admin/auth CANONICALS (sin prefijo de locale ni `/admin/`).
+ * Set de paths auth CANONICALS (sin prefijo de locale ni `/admin/`).
  *
  * Si un usuario no autenticado llega a cualquiera de estos paths,
- * AuthGuard NO redirige. Cualquier otra ruta `/auth/...` o `/admin/...`
- * sí dispara redirect al login con `?redirect=`.
+ * AuthGuard NO redirige al login. Cualquier otra ruta `/account/...`
+ * (o path privado) sí dispara redirect al login con `?redirect=`.
  *
- * Histórico: antes vivían como `/admin/auth/*` (subfolder mirror del URL).
- * Como los archivos Astro viven en `src/pages/[locale]/auth/` (sin
- * `admin/`) y el middleware redirige el path legacy `/admin/auth/*` →
- * `/auth/*` cuando el host es `admin.*`, el set de paths públicos
- * ahora son estos. Ver `LEGACY_ADMIN_AUTH_PATHS` abajo para los paths
- * legacy (usados solo por el middleware para redirigir el tráfico viejo).
+ * Los pages viven en `src/pages/[locale]/account/*` y el middleware
+ * reescribe los paths limpios (`/login`) al path interno canónico
+ * (`/es/account/login`). Ver `LEGACY_ADMIN_AUTH_PATHS` abajo para
+ * los paths legacy `/admin/auth/*` que se siguen aceptando vía
+ * redirect 301 (compatibilidad con links viejos).
  */
 export const PUBLIC_ADMIN_PATHS: ReadonlySet<string> = new Set<string>([
-  '/auth/login',
-  '/auth/forgot-password',
-  '/auth/reset-password',
-  '/auth/reset-success',
-  '/auth/2fa',
+  '/account/login',
+  '/account/signup',
+  '/account/forgot-password',
+  '/account/reset-password',
+  '/account/reset-success',
+  '/account/2fa',
 ]);
 
 /**
@@ -53,10 +53,10 @@ export const LEGACY_ADMIN_AUTH_PATHS: ReadonlySet<string> = new Set<string>([
  *
  *   stripLocaleFromPath("/es/admin/dashboard")
  *     → { locale: "es", barePath: "/admin/dashboard" }
- *   stripLocaleFromPath("/es/auth/login")
- *     → { locale: "es", barePath: "/auth/login" }
- *   stripLocaleFromPath("/auth/login")
- *     → { locale: "es", barePath: "/auth/login" }   (fallback)
+ *   stripLocaleFromPath("/es/account/login")
+ *     → { locale: "es", barePath: "/account/login" }
+ *   stripLocaleFromPath("/account/login")
+ *     → { locale: "es", barePath: "/account/login" }   (fallback)
  *   stripLocaleFromPath("/")
  *     → { locale: "es", barePath: "/" }                  (fallback)
  */
