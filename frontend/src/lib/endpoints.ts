@@ -24,8 +24,8 @@ export const API_ENDPOINTS = {
       },
 
       recoveryCodes: {
-        index: '/auth/2fa/recovery-codes',
-        regenerate: '/auth/2fa/recovery-codes/regenerate',
+        index: '/auth/recovery-codes',
+        regenerate: '/auth/recovery-codes/regenerate',
       },
 
       disable: '/auth/2fa/disable',
@@ -42,6 +42,12 @@ export const API_ENDPOINTS = {
   customers: {
     customers: '/customers',
     addresses: '/customer-addresses',
+  },
+
+  storefront: {
+    productSearch: '/storefront/products/search',
+    products: '/storefront/products',
+    theme: '/storefront/theme',
   },
 
   catalog: {
