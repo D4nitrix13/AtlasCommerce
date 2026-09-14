@@ -1,0 +1,29 @@
+---
+/**
+ * RF-CAT-028 UI — Página de búsqueda pública de productos.
+ *
+ * Esta página es un wrapper Astro mínimo que monta el React island
+ * `SearchPage`. Toda la lógica interactiva (input debounced, fetch,
+ * paginación, URL sync) vive en el componente.
+ *
+ * Multi-tenant:
+ *   - El middleware `store.domain` ya resolvió el tenant activo.
+ *   - El React island hace fetch con `credentials: 'include'` y la
+ *     cookie httpOnly del session viaja automáticamente al backend.
+ *
+ * SSR:
+ *   La página renderiza un shell ligero en SSR (título + subtítulo
+ *   vía getServerDictionary) y deja que el React island pinte el resto.
+ *   El locale inicial se pasa como prop para evitar mismatch entre el
+ *   SSR y el primer render del cliente.
+ */
+import Layout from '../../../layouts/Layout.astro';
+import SearchPage from '../../../components/storefront/search/SearchPage';
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+---
+
+<Layout title={t['storefront.search.title']}>
+  <SearchPage locale={Astro.locals.locale} client:only="react" />
+</Layout>
