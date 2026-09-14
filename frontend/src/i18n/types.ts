@@ -388,6 +388,22 @@ export type TranslationKey =
   | 'admin.refunds.status.completed'
   | 'admin.refunds.status.failed'
 
+  // ─── storefront: search ─────────────────────────────────────────────
+  | 'storefront.search.title'
+  | 'storefront.search.subtitle'
+  | 'storefront.search.placeholder'
+  | 'storefront.search.button'
+  | 'storefront.search.loading'
+  | 'storefront.search.error'
+  | 'storefront.search.empty'
+  | 'storefront.search.emptyHint'
+  | 'storefront.search.resultsCount'
+  | 'storefront.search.noResultsFor'
+  | 'storefront.search.previous'
+  | 'storefront.search.next'
+  | 'storefront.search.page'
+  | 'storefront.search.of'
+
   // ─── formatters ──────────────────────────────────────────────────────
   | 'format.empty'
   | 'format.date.locale';

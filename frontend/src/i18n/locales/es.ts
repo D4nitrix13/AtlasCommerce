@@ -419,6 +419,21 @@ const es: Translations = {
   'admin.refunds.status.completed': 'Completado',
   'admin.refunds.status.failed': 'Fallido',
 
+  'storefront.search.title': 'Buscar productos',
+  'storefront.search.subtitle': 'Encontrá lo que necesitás en nuestro catálogo.',
+  'storefront.search.placeholder': 'Buscar por nombre, descripción o SKU…',
+  'storefront.search.button': 'Buscar',
+  'storefront.search.loading': 'Buscando productos…',
+  'storefront.search.error': 'No pudimos completar la búsqueda. Probá de nuevo.',
+  'storefront.search.empty': 'Sin resultados',
+  'storefront.search.emptyHint': 'Probá con otras palabras o revisá la ortografía.',
+  'storefront.search.resultsCount': '{count} resultados',
+  'storefront.search.noResultsFor': 'Sin resultados para "{query}"',
+  'storefront.search.previous': 'Anterior',
+  'storefront.search.next': 'Siguiente',
+  'storefront.search.page': 'Página',
+  'storefront.search.of': 'de',
+
   'format.empty': '—',
   'format.date.locale': 'es-NI',
 

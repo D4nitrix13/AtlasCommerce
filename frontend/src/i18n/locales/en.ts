@@ -418,6 +418,21 @@ const en: Translations = {
   'admin.refunds.status.completed': 'Completed',
   'admin.refunds.status.failed': 'Failed',
 
+  'storefront.search.title': 'Search products',
+  'storefront.search.subtitle': 'Find what you need across our catalog.',
+  'storefront.search.placeholder': 'Search by name, description or SKU…',
+  'storefront.search.button': 'Search',
+  'storefront.search.loading': 'Searching products…',
+  'storefront.search.error': 'Search failed. Please try again.',
+  'storefront.search.empty': 'No results',
+  'storefront.search.emptyHint': 'Try different keywords or check your spelling.',
+  'storefront.search.resultsCount': '{count} results',
+  'storefront.search.noResultsFor': 'No results for "{query}"',
+  'storefront.search.previous': 'Previous',
+  'storefront.search.next': 'Next',
+  'storefront.search.page': 'Page',
+  'storefront.search.of': 'of',
+
   'format.empty': '—',
   'format.date.locale': 'en-US',
 

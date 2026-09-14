@@ -416,7 +416,7 @@ rf:
     verificado_por: []
     comentarios: "RF en análisis. Tablas `attributes` y `attribute_values` ya existen."
 
-  - code: RF-CAT-028
+- code: RF-CAT-028
     title: "Búsqueda pública de productos"
     module: "Catálogo"
     category: "Catálogo y Compras"
@@ -425,15 +425,15 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: podría cambiar
-    autores: ["Andy Joe Sanchez Calero (stakeholder_002)", "Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Andy Joe Sanchez Calero (stakeholder_2), Daniel Benjamin Perez Morales (stakeholder_1)"]
     fuentes:
-      - "stakeholder_002 (Andy, Catalog Manager)"
+      - "stakeholder_2 (Andy, Catalog Manager)"
       - "Google Search Central — search box y sitelinks"
       - "PostgreSQL pg_trgm — fuzzy search"
     dependencias: ["RNF-PERF-024", "RNF-USA-042"]
     descripcion: "El visitante podrá buscar productos por nombre, descripción o SKU, con tolerancia a typos y ranking por relevancia."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
-    comentarios: "Implementado MVP en backend. Endpoint `GET /api/storefront/products/search?q=&page=&per_page=` con ranking en tiers (SKU exacto 100 → SKU contiene 90 → name starts-with 80 → title starts-with 70 → name contains 50 → title contains 40 → desc contains 30 → pubdesc contains 20). Aislamiento por tenant via product_stores.store_id. Filtra solo is_active + published_at + is_visible. Paginación 1-50 items/página (default 20). Verificado por `tests/Feature/Storefront/StorefrontProductSearchTest.php` (17 tests, 47 assertions). Pendiente: FULL TEXT SEARCH nativo PG con tsvector + GIN, fuzzy con pg_trgm, Meilisearch/Typesense si el set crece >50K."
+    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
+    comentarios: "Implementado MVP backend + frontend. Backend: `GET /api/storefront/products/search?q=&page=&per_page=` con ranking en tiers (SKU exacto 100 → SKU contiene 90 → name starts-with 80 → title starts-with 70 → name contains 50 → title contains 40 → desc contains 30 → pubdesc contains 20). Aislamiento por tenant via product_stores.store_id. Filtra solo is_active + published_at + is_visible. Paginación 1-50 items/página (default 20). Backend verificado por `tests/Feature/Storefront/StorefrontProductSearchTest.php` (17 tests, 47 assertions). Frontend: página `/[locale]/search` con SearchBar + ResultsList + Pagination. Debounce 300ms. URL sync (`?q=&page=`). Estados loading/error/empty/success. Custom hooks `useDebouncedSearch` y `useUrlStateSync` extraídos. Lint + astro check limpios (excepto FormEvent deprecated usado en todo el repo). Pendiente: FULL TEXT SEARCH nativo PG con tsvector + GIN, fuzzy con pg_trgm, Meilisearch/Typesense si el set crece >50K."
 
   - code: RF-CAT-029
     title: "Precios mayoristas (wholesale)"
