@@ -32,6 +32,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $phone
  * @property bool $is_active
  * @property Carbon $registered_at
+ * @property Carbon|null $anonymized_at
+ * @property Carbon|null $deletion_requested_at
+ * @property Carbon|null $deletion_token_expires_at
  */
 use Laravel\Sanctum\HasApiTokens;
 
@@ -50,11 +53,23 @@ class Customer extends Model
         'email',
         'phone',
         'is_active',
+        'anonymized_at',
+        'deletion_requested_at',
+        'deletion_token_hash',
+        'deletion_token_expires_at',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'registered_at' => 'datetime',
+        'anonymized_at' => 'datetime',
+        'deletion_requested_at' => 'datetime',
+        'deletion_token_expires_at' => 'datetime',
+    ];
+
+    protected $hidden = [
+        'deletion_token_hash',
+        'deletion_token_expires_at',
     ];
 
     /**
@@ -115,6 +130,35 @@ class Customer extends Model
      */
     public function scopeByEmail(Builder $query, string $email): Builder
     {
-        return $query->where(column: 'email', value: $email);
+        return $query->where(column: 'email', operator: '=', value: $email);
+    }
+
+    /**
+     * Filtra clientes que ya fueron anonimizados (PII reemplazada).
+     *
+     * @param  Builder<Customer>  $query  Consulta del modelo.
+     * @return Builder<Customer>
+     */
+    public function scopeAnonymized(Builder $query): Builder
+    {
+        return $query->whereNotNull('anonymized_at');
+    }
+
+    /**
+     * ¿La cuenta ya pasó por el flujo GDPR de borrado y fue anonimizada?
+     */
+    public function isAnonymized(): bool
+    {
+        return $this->anonymized_at !== null;
+    }
+
+    /**
+     * ¿Hay un token de borrado activo (no expirado) pendiente de confirmar?
+     */
+    public function hasPendingDeletionToken(): bool
+    {
+        return $this->deletion_token_hash !== null
+            && $this->deletion_token_expires_at !== null
+            && $this->deletion_token_expires_at->isFuture();
     }
 }

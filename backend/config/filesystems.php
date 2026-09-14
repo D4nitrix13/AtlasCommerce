@@ -73,8 +73,14 @@ return [
             // tenants/{slug}/branding/ y shared/ cuando los necesita.
             // Documentado en docs/architecture/assets-naming-convention.md §2.4.
             // Sobre-escribible via env si una instancia necesita otra ruta.
-            'root' => env('FTP_ROOT', '/srv/ftp'),
-            'passive' => (bool) env('FTP_PASSIVE', true),
+            'root' => env('FTP_ROOT', '/'),
+            // PASV mode falla en Docker networking: el vsftpd responde
+            // con pasv_address=127.0.0.1 que es localhost del FTP container
+            // y el backend no puede alcanzarlo. PORT mode funciona porque
+            // el cliente abre la conexion de datos desde su IP hacia el
+            // puerto que el servidor le indica (sin intervencion de NAT).
+            // Override via env FTP_PASSIVE=true|false si se necesita PASV.
+            'passive' => (bool) env('FTP_PASSIVE', false),
             'ssl' => (bool) env('FTP_SSL', false),
             'timeout' => (int) env('FTP_TIMEOUT', 30),
             'throw' => false,

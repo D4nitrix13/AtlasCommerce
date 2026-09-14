@@ -89,11 +89,25 @@ cmd_setup() {
         docker_compose "$inst" exec -T backend \
             /usr/local/bin/php artisan storage:link 2>&1 | /usr/bin/grep -v "^\[No exception" || true
 
-        log_info "cache:clear + config:clear"
+        # CRITICAL: el volumen storage/ se crea como root en el build,
+        # pero PHP-FPM corre como UID 1000 (host user). Sin el chown,
+        # view:clear falla y el primer 404/500 rompe porque PHP no puede
+        # escribir los views compilados en storage/framework/views/.
+        log_info "chown storage 1000:1000 (PHP-FPM user)"
+        docker_compose "$inst" exec -u root -T backend \
+            /bin/chown -R 1000:1000 /var/www/html/storage 2>&1 || true
+
+        log_info "cache:clear + config:clear + view:clear"
         docker_compose "$inst" exec -T backend \
             /usr/local/bin/php artisan cache:clear 2>&1 | /usr/bin/grep -v "^$" || true
         docker_compose "$inst" exec -T backend \
             /usr/local/bin/php artisan config:clear 2>&1 | /usr/bin/grep -v "^$" || true
+        docker_compose "$inst" exec -T backend \
+            /usr/local/bin/php artisan view:clear 2>&1 | /usr/bin/grep -v "^$" || true
+
+        log_info "assets:sync-from-public (logos + favicons al FTP)"
+        docker_compose "$inst" exec -T backend \
+            /usr/local/bin/php artisan assets:sync-from-public --force 2>&1 | /usr/bin/grep -E "(Subido|Resumen)" || true
 
         log_info "migrate --force"
         docker_compose "$inst" exec -T backend \

@@ -153,7 +153,7 @@ services:
       - FTP_PORT=21
       - FTP_USERNAME=${FTP_USERNAME:-dev-ftp}
       - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
-      - FTP_ROOT=/srv/ftp
+      - FTP_ROOT=/
       - LOG_CHANNEL=stderr
     extra_hosts:
       - "host.docker.internal:host-gateway"
