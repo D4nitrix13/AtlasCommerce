@@ -42,4 +42,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
-    })->create();
+    })
+    ->withProviders([
+        App\Providers\AppServiceProvider::class,
+        App\Providers\ViewNamespaceServiceProvider::class,
+    ])
+    ->create();
