@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\RoleController;
+use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\PasswordResetTokenController;
 use App\Http\Controllers\Api\Auth\RecoveryCodeController;
@@ -187,6 +188,39 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::put('roles/{role}/permissions', [RoleController::class, 'syncPermissions'])
             ->middleware('permission:auth.roles.manage')
             ->name('admin.roles.permissions.sync');
+
+        /*
+        | RF-AUTH-009: CRUD admin de usuarios internos. Requiere
+        | `auth.users.manage` (admin slug bypasea).
+        */
+
+        Route::get('users', [UserController::class, 'index'])
+            ->middleware('permission:auth.users.manage')
+            ->name('admin.users.index');
+
+        Route::post('users', [UserController::class, 'store'])
+            ->middleware('permission:auth.users.manage')
+            ->name('admin.users.store');
+
+        Route::get('users/{user}', [UserController::class, 'show'])
+            ->middleware('permission:auth.users.manage')
+            ->name('admin.users.show');
+
+        Route::put('users/{user}', [UserController::class, 'update'])
+            ->middleware('permission:auth.users.manage')
+            ->name('admin.users.update');
+
+        Route::post('users/{user}/suspend', [UserController::class, 'suspend'])
+            ->middleware('permission:auth.users.manage')
+            ->name('admin.users.suspend');
+
+        Route::post('users/{user}/reactivate', [UserController::class, 'reactivate'])
+            ->middleware('permission:auth.users.manage')
+            ->name('admin.users.reactivate');
+
+        Route::delete('users/{user}', [UserController::class, 'destroy'])
+            ->middleware('permission:auth.users.manage')
+            ->name('admin.users.destroy');
     });
 
     /*

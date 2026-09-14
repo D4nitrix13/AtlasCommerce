@@ -197,15 +197,15 @@ rf:
     priority: H
     importancia: vital
     urgencia: inmediata
-    estado: en análisis
+    estado: en construcción
     estabilidad: podría cambiar
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-AUTH-008", "RNF-SEC-015"]
     descripcion: "El sistema deberá permitir a un admin crear, listar, editar, suspender y eliminar usuarios internos, asociándolos a una o más tiendas."
-    verificado_por: []
-    comentarios: "RF en análisis. Tabla `users` y `user_stores` ya existen."
+    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    comentarios: "Implementado MVP admin. Endpoints en /api/admin/users: index (paginated con filtros q/role_id/store_id/is_active), show, store, update, suspend, reactivate, destroy. Aislamiento por tenant vía user_stores.store_id. Protecciones: no self-action (suspend/reactivate/destroy), no auto-demote, no borrar al ÚNICO admin del tenant (lockout), no asignar stores fuera del scope del admin. Permiso requerido: `auth.users.manage` (admin bypasea). Verificado por `tests/Feature/Admin/UserControllerTest.php` (22 tests, 54 assertions). Pendiente: UI admin, endpoint dedicado para reset password."
 
   # ===== Módulo: Carrito (CART) =====
   - code: RF-CART-010
