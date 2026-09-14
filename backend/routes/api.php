@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\RoleController;
@@ -285,6 +286,32 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])
             ->middleware('permission:catalog.manage')
             ->name('admin.variants.destroy');
+
+        /*
+        | Categorías (RF-CAT-025). CRUD admin con `catalog.manage`.
+        | Globales (no tenant-scoped — el filtro por tenant ocurre vía
+        | products.category_id + product_stores.store_id).
+        */
+
+        Route::get('categories', [CategoryController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.categories.index');
+
+        Route::post('categories', [CategoryController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.categories.store');
+
+        Route::get('categories/{category}', [CategoryController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.categories.show');
+
+        Route::put('categories/{category}', [CategoryController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.categories.update');
+
+        Route::delete('categories/{category}', [CategoryController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.categories.destroy');
     });
 
     /*
