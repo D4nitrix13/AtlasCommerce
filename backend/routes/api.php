@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -259,6 +260,31 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('products/{product}', [ProductController::class, 'destroy'])
             ->middleware('permission:catalog.manage')
             ->name('admin.products.destroy');
+
+        /*
+        | Variantes de producto (RF-CAT-027 backend). CRUD admin con
+        | `catalog.manage`. Aislamiento por tenant vía product padre.
+        */
+
+        Route::get('variants', [ProductVariantController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.variants.index');
+
+        Route::post('variants', [ProductVariantController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.variants.store');
+
+        Route::get('variants/{variant}', [ProductVariantController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.variants.show');
+
+        Route::put('variants/{variant}', [ProductVariantController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.variants.update');
+
+        Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.variants.destroy');
     });
 
     /*
