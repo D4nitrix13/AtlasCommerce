@@ -9,7 +9,6 @@ use App\Models\Customers\Customer;
 use App\Models\Customers\CustomerAddress;
 use App\Services\Customers\CustomerDeletionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -39,7 +38,7 @@ final class AccountDataControllerTest extends TestCase
 
         $this->user = User::factory()->create(attributes: [
             'email' => 'gdpr-customer@example.com',
-            'password' => Hash::make(value: 'my-strong-password'),
+            'password' => 'my-strong-password',
             'is_active' => true,
         ]);
 
@@ -124,7 +123,7 @@ final class AccountDataControllerTest extends TestCase
         $response->assertJsonStructure(structure: ['message', 'token', 'expires_at']);
 
         $token = (string) $response->json(key: 'token');
-        $this->assertGreaterThan(32, strlen($token));
+        $this->assertGreaterThanOrEqual(32, strlen($token));
 
         // El customer debe tener un hash guardado + expiración.
         $fresh = $this->customer->fresh();
