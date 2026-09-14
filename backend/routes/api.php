@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\PasswordResetTokenController;
 use App\Http\Controllers\Api\Auth\RecoveryCodeController;
@@ -146,6 +147,47 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::post('account/deletion-cancel', [AccountDataController::class, 'cancelDeletion'])
         ->name('account.deletion-cancel');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin (RF-AUTH-008)
+    |--------------------------------------------------------------------------
+    |
+    | CRUD admin de roles y catálogo de permisos.
+    | Requiere `auth:sanctum` + `permission:auth.roles.manage`
+    | (los admins con slug `admin` bypasean el check).
+    |
+    */
+
+    Route::prefix('admin')->group(function (): void {
+        Route::get('permissions', [RoleController::class, 'listPermissions'])
+            ->middleware('permission:auth.permissions.manage')
+            ->name('admin.permissions.index');
+
+        Route::get('roles', [RoleController::class, 'index'])
+            ->middleware('permission:auth.roles.manage')
+            ->name('admin.roles.index');
+
+        Route::post('roles', [RoleController::class, 'store'])
+            ->middleware('permission:auth.roles.manage')
+            ->name('admin.roles.store');
+
+        Route::get('roles/{role}', [RoleController::class, 'show'])
+            ->middleware('permission:auth.roles.manage')
+            ->name('admin.roles.show');
+
+        Route::put('roles/{role}', [RoleController::class, 'update'])
+            ->middleware('permission:auth.roles.manage')
+            ->name('admin.roles.update');
+
+        Route::delete('roles/{role}', [RoleController::class, 'destroy'])
+            ->middleware('permission:auth.roles.manage')
+            ->name('admin.roles.destroy');
+
+        Route::put('roles/{role}/permissions', [RoleController::class, 'syncPermissions'])
+            ->middleware('permission:auth.roles.manage')
+            ->name('admin.roles.permissions.sync');
+    });
 
     /*
     |--------------------------------------------------------------------------

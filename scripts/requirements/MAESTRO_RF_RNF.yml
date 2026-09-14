@@ -179,7 +179,7 @@ rf:
     priority: H
     importancia: vital
     urgencia: inmediata
-    estado: en análisis
+    estado: en construcción
     estabilidad: podría cambiar
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
@@ -187,8 +187,8 @@ rf:
       - "NIST RBAC — Role Based Access Control (INCITS 359)"
     dependencias: ["RNF-SEC-015"]
     descripcion: "El sistema deberá permitir a un admin asignar uno o varios roles a un usuario, y editar qué permisos componen cada rol."
-    verificado_por: []
-    comentarios: "RF en análisis. Modelo `Role`, `Permission`, `PermissionRole`, `UserStore` ya existen en el repo. Falta CRUD admin y UI."
+    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    comentarios: "Implementado MVP admin (composición role↔permission). Endpoints en /api/admin/: GET/POST /roles, GET/PUT /roles/{role}, DELETE /roles/{role}, PUT /roles/{role}/permissions, GET /permissions. Todos detrás de `permission:auth.roles.manage` (admin slug bypasea). Protecciones: rol `admin` no se puede eliminar ni renombrar. Soft delete con cleanup de FKs en users.role_id. Resources RoleResource y PermissionResource mejorados. Verificado por `tests/Feature/Admin/RoleControllerTest.php` (21 tests, 224 assertions). Pendiente: UI admin (RF-AUTH-009), asignación user↔role."
 
   - code: RF-AUTH-009
     title: "Gestión de usuarios admin (CRUD)"
@@ -2125,8 +2125,8 @@ resumen:
   total_rnf: 47
   total: 116
   rf_por_estado:
-    en construcción (implemented): 48
-    en análisis (in-analysis): 21
+    en construcción (implemented): 49
+    en análisis (in-analysis): 20
     pendiente (pending): 0
   rnf_por_estado:
     verificado (verified): 25
