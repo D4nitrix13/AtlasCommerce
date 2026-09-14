@@ -231,16 +231,16 @@ function appendLocaleCookie(response: Response, locale: Locale): void {
  * con prefijo `/[locale]/...`.
  *
  * El usuario ve `admin.kitsune.com/login`. Astro necesita apuntar a
- * `/es/auth/login` (page real en `src/pages/[locale]/auth/`).
+ * `/es/account/login` (page real en `src/pages/[locale]/account/`).
  *
  * Solo se aplica cuando `isAdmin = true` y la URL no tiene ya prefijo
  * de locale ni está en assets.
  *
- * Historia: antes los archivos vivían en `src/pages/[locale]/admin/auth/`
- * (path interno `/[locale]/admin/auth/...`). Después del refactor, viven
- * en `src/pages/[locale]/auth/` (path interno `/[locale]/auth/...`) — el
- * prefijo `/admin/` quedó redundante porque el subdomain `admin.` ya
- * marca el contexto.
+ * Historia: las páginas auth vivían en `src/pages/[locale]/auth/`
+ * (path interno `/[locale]/auth/...`). Después de este refactor viven
+ * en `src/pages/[locale]/account/` — el prefijo `/account/` agrupa
+ * toda la gestión de la cuenta (login, signup, profile, etc.) y el
+ * subdomain `admin.` ya marca el contexto admin, sin duplicar namespace.
  */
 function mapAdminPathToInternal(pathname: string, locale: Locale): string {
   // Ya tiene prefijo de locale → no tocar.
@@ -252,11 +252,11 @@ function mapAdminPathToInternal(pathname: string, locale: Locale): string {
 
   // Mapeo explícito de paths limpios a paths relativos al segmento
   // raíz `/`. El result final es `/${locale}${mapped}`.
-  //   `/login`     -> `/es/auth/login` (page existe en src/pages/[locale]/auth/login.astro)
+  //   `/login`     -> `/es/account/login` (page existe en src/pages/[locale]/account/login.astro)
   //   `/dashboard` -> `/es/dashboard`
   // Cualquier path no listado pasa tal cual (será 404 si no existe).
   const pathMap: Record<string, string> = {
-    '/login': '/auth/login',
+    '/login': '/account/login',
     '/dashboard': '/dashboard',
     '/users': '/users',
     '/sales': '/sales',
@@ -327,8 +327,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
       //     (`/[locale]/admin/...`) y genere URLs válidas al cambiar.
       //   - Compartir/bookmarkear una URL siempre incluya la locale
       //     (evita que el receptor vea otro idioma por Accept-Language).
-      //   - Sea imposible terminar en URLs inválidas como `/en/auth/login`
-      //     (que 404 porque el page real vive en `/en/admin/auth/login`).
+      //   - Sea imposible terminar en URLs inválidas como `/en/admin/auth/login`
+      //     (que 404 porque el page real vive en `/en/account/login`).
       // Preservar query string (ej: ?tab=register en /login).
       const canonicalPath = mapAdminPathToInternal(pathname, locale) + url.search;
       context.locals.locale = locale;
@@ -340,13 +340,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // URL tiene locale → dejar que Astro rutee, solo setear locale.
     context.locals.locale = localeFromUrl;
 
-    // Redirect legacy `/<locale>/admin/auth/*` → `/<locale>/auth/*`.
-    // Después del refactor los archivos viven en `src/pages/[locale]/auth/`
+    // Redirect legacy `/<locale>/admin/auth/*` → `/<locale>/account/*`.
+    // Después del refactor los archivos viven en `src/pages/[locale]/account/`
     // (no en `admin/auth/`), pero links viejos pueden apuntar al path
     // con `/admin/`. Redirigimos 301 al canónico para no 404.
     const { barePath } = stripLocaleFromPath(pathname);
     if (LEGACY_ADMIN_AUTH_PATHS.has(barePath)) {
-      const canonical = barePath.replace(/^\/admin/, '');
+      const canonical = barePath.replace(/^\/admin\/auth/, '/account');
       const newPath = `/${localeFromUrl}${canonical === '/' ? '' : canonical}` + url.search;
       return context.redirect(newPath, 301);
     }

@@ -1,12 +1,12 @@
 ---
-import AuthLayout from '../../../../layouts/AuthLayout.astro';
-import AuthShell from '../../../../components/auth/AuthShell.astro';
-import StorefrontLoginForm from '../../../../components/storefront/auth/StorefrontLoginForm';
-import LanguageSwitcher from '../../../../components/ui/LanguageSwitcher';
-import OAuthFlashToast from '../../../../components/auth/OAuthFlashToast';
-import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
-import { getBrandBySlug, DEFAULT_BRAND } from '../../../../config/stores';
-import { themeToBrand } from '../../../../lib/theme';
+import AuthLayout from '../../../layouts/AuthLayout.astro';
+import AuthShell from '../../../components/auth/AuthShell.astro';
+import StorefrontLoginForm from '../../../components/storefront/auth/StorefrontLoginForm';
+import LanguageSwitcher from '../../../components/ui/LanguageSwitcher';
+import OAuthFlashToast from '../../../components/auth/OAuthFlashToast';
+import { getServerDictionary, getServerLocale } from '../../../i18n/server';
+import { getBrandBySlug, DEFAULT_BRAND } from '../../../config/stores';
+import { themeToBrand } from '../../../lib/theme';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
