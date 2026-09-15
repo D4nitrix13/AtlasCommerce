@@ -1113,22 +1113,22 @@ rf:
     verificado_por: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado. Modelo `StoreTheme` + endpoint `/storefront/theme`."
 
-  - code: RF-STOR-132
+- code: RF-STOR-132
     title: "Modo mantenimiento por tienda"
     module: "Multi-Store"
     category: "Aislamiento por Marca"
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-STOR-130"]
-    descripcion: "El admin podrá activar el modo mantenimiento por tienda, mostrando una página de \"estamos trabajando\" en el storefront sin afectar al admin."
+    descripcion: "El admin podrá activar el modo mantenimiento por tienda, mostrando una página de "estamos trabajando" en el storefront sin afectar al admin."
     verificado_por: []
-    comentarios: "RF en análisis. Campo `maintenance_mode` ya existe en `stores`."
+    comentarios: "Backend completo. /api/admin/stores (CRUD con name/email/phone/description/tax_rate/colors/is_active) + POST /admin/stores/{store}/maintenance (toggle explícito). Aislamiento por tenant. Permisos stores.view + stores.manage. 12 tests Feature, 29 assertions (#73). Pendiente: middleware que bloquee requests al storefront cuando maintenance_mode=true + UI admin para el toggle + cron que limpie carts abandonados durante el down."
 
   - code: RF-STOR-133
     title: "Redes sociales y canales de venta"
