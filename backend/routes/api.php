@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductImageController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
+use App\Http\Controllers\Api\Admin\PromotionController;
+use App\Http\Controllers\Api\Admin\PromotionProductController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\WholesalePriceController;
@@ -318,6 +320,35 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('coupons/{coupon}', [CouponController::class, 'destroy'])
             ->middleware('permission:marketing.manage')
             ->name('admin.coupons.destroy');
+
+        /*
+        | RF-MKT-061: CRUD admin de promociones + sync de productos
+        | asociados. Requiere `marketing.manage`.
+        */
+
+        Route::get('promotions', [PromotionController::class, 'index'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.promotions.index');
+
+        Route::post('promotions', [PromotionController::class, 'store'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.promotions.store');
+
+        Route::get('promotions/{promotion}', [PromotionController::class, 'show'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.promotions.show');
+
+        Route::put('promotions/{promotion}', [PromotionController::class, 'update'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.promotions.update');
+
+        Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.promotions.destroy');
+
+        Route::post('promotions/{promotion}/products', [PromotionProductController::class, 'sync'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.promotions.products.sync');
 
         /*
         | RF-CAT-026: CRUD admin de productos. Requiere
