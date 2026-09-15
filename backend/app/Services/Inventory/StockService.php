@@ -10,6 +10,7 @@ use App\Models\Inventory\InventoryMovement;
 use App\Models\Inventory\Warehouse;
 use App\Models\Returns\ReturnRequest;
 use App\Models\Sales\Invoice;
+use App\Models\Sales\Order;
 use RuntimeException;
 
 /**
@@ -37,6 +38,8 @@ final class StockService
     private const MOVEMENT_TYPE_SALE = 'sale';
 
     private const MOVEMENT_TYPE_RETURN = 'return';
+
+    private const MOVEMENT_TYPE_CANCELLATION = 'cancellation';
 
     /**
      * Decrementa el stock de todos los items de una invoice liquidada.
@@ -116,6 +119,50 @@ final class StockService
                 warehouse: $warehouse,
                 movementType: self::MOVEMENT_TYPE_RETURN,
                 reason: "return:request:{$returnRequest->id}:item:{$item->id}",
+                user: null,
+                direction: 1,
+            );
+        }
+    }
+
+    /**
+     * Revierte el stock descontado al liquidar las invoices de una orden cancelada.
+     *
+     * Espejo de `decrementForInvoice()` pero en dirección +1. La idempotencia
+     * se ancla al id de la orden (no al de la invoice) porque una cancelación
+     * puede revertir stock asociado a múltiples invoices de la misma orden.
+     *
+     * @throws RuntimeException Cuando no hay almacén activo configurado.
+     * @throws InventoryRecordNotFoundException
+     */
+    public function incrementForOrderCancellation(Order $order): void
+    {
+        $order->loadMissing('items');
+
+        if ($order->items->isEmpty()) {
+            return;
+        }
+
+        if ($this->alreadyProcessed(prefix: "cancellation:order:{$order->id}:")) {
+            return;
+        }
+
+        $warehouse = $this->resolveDefaultWarehouse();
+
+        if ($warehouse === null) {
+            throw new RuntimeException(
+                'No hay almacén activo configurado. Configure uno antes de aceptar cancelaciones.',
+            );
+        }
+
+        foreach ($order->items as $item) {
+            $this->applyChange(
+                productId: (int) $item->product_id,
+                productVariantId: $item->product_variant_id !== null ? (int) $item->product_variant_id : null,
+                quantity: (int) $item->quantity,
+                warehouse: $warehouse,
+                movementType: self::MOVEMENT_TYPE_CANCELLATION,
+                reason: "cancellation:order:{$order->id}:item:{$item->id}",
                 user: null,
                 direction: 1,
             );
