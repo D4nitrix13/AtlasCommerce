@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Sales;
 
+use App\Enums\OrderStatus;
 use App\Models\Carts\Cart;
 use App\Models\Carts\CartItem;
 use App\Models\Catalog\Product;
@@ -169,7 +170,7 @@ final class CheckoutService
                 'total_in_base_currency_cents' => (int) round(
                     $subtotalCents * (float) $exchangeRate,
                 ),
-                'status' => 'pending',
+                'status' => OrderStatus::Pending,
                 'notes' => $notes,
                 'ordered_at' => now(),
             ]);

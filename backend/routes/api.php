@@ -444,6 +444,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
     |
     */
 
+    // RF-SALES-054: cancelación hard de orden (shipments + invoices + stock revert).
+    // Debe ir antes del apiResource para que /orders/{order}/cancel no
+    // colisione con la ruta show /orders/{order}.
+    Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])
+        ->middleware('permission:sales.orders.cancel')
+        ->name('orders.cancel');
+
     Route::apiResource('orders', OrderController::class);
 
     /*
