@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Auth\TotpController;
 use App\Http\Controllers\Api\Carts\CartController;
 use App\Http\Controllers\Api\Carts\CartItemController;
 use App\Http\Controllers\Api\Customers\AccountDataController;
+use App\Http\Controllers\Api\Customers\CustomerAddressController;
 use App\Http\Controllers\Api\Marketing\CouponValidateController;
 use App\Http\Controllers\Api\Payments\PaymentController;
 use App\Http\Controllers\Api\Returns\RefundController;
@@ -161,6 +162,35 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::post('account/deletion-cancel', [AccountDataController::class, 'cancelDeletion'])
         ->name('account.deletion-cancel');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Account (RF-CUST-041): libro de direcciones del cliente autenticado
+    |--------------------------------------------------------------------------
+    |
+    | El cliente gestiona sus propias direcciones para auto-fill en
+    | checkout (RF-SALES-050). Multi-dirección: oficina, casa, etc.
+    | Sólo el cliente autenticado puede operar sobre SUS direcciones.
+    |
+    */
+
+    Route::get('account/addresses', [CustomerAddressController::class, 'index'])
+        ->name('account.addresses.index');
+
+    Route::post('account/addresses', [CustomerAddressController::class, 'store'])
+        ->name('account.addresses.store');
+
+    Route::get('account/addresses/{address}', [CustomerAddressController::class, 'show'])
+        ->name('account.addresses.show');
+
+    Route::put('account/addresses/{address}', [CustomerAddressController::class, 'update'])
+        ->name('account.addresses.update');
+
+    Route::delete('account/addresses/{address}', [CustomerAddressController::class, 'destroy'])
+        ->name('account.addresses.destroy');
+
+    Route::post('account/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])
+        ->name('account.addresses.primary');
 
     /*
     |--------------------------------------------------------------------------
