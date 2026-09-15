@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetContro
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
+use App\Http\Controllers\Api\Wishlist\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -194,6 +195,34 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::post('account/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])
         ->name('account.addresses.primary');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Wishlist (RF-CART-013): listas de deseos del cliente autenticado
+    |--------------------------------------------------------------------------
+    |
+    | El cliente gestiona sus listas (Favoritos, Navidad, etc.) y los
+    | productos en cada una. Items se agregan vía sub-endpoint.
+    |
+    */
+
+    Route::get('account/wishlists', [WishlistController::class, 'index'])
+        ->name('account.wishlists.index');
+
+    Route::post('account/wishlists', [WishlistController::class, 'store'])
+        ->name('account.wishlists.store');
+
+    Route::get('account/wishlists/{wishlist}', [WishlistController::class, 'show'])
+        ->name('account.wishlists.show');
+
+    Route::delete('account/wishlists/{wishlist}', [WishlistController::class, 'destroy'])
+        ->name('account.wishlists.destroy');
+
+    Route::post('account/wishlists/{wishlist}/items', [WishlistController::class, 'addItem'])
+        ->name('account.wishlists.items.add');
+
+    Route::delete('account/wishlists/{wishlist}/items/{item}', [WishlistController::class, 'removeItem'])
+        ->name('account.wishlists.items.remove');
 
     /*
     |--------------------------------------------------------------------------
