@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Admin\PromotionController;
 use App\Http\Controllers\Api\Admin\PromotionProductController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\StoreController;
+use App\Http\Controllers\Api\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\WholesalePriceController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
+use App\Http\Controllers\Api\Support\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -403,6 +405,31 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('admin.stores.maintenance');
 
         /*
+        | RF-SUP-160: CRUD admin de tickets de soporte.
+        | Lectura requiere `support.view`, mutaciones `support.manage`.
+        */
+
+        Route::get('support/tickets', [AdminSupportTicketController::class, 'index'])
+            ->middleware('permission:support.view')
+            ->name('admin.support.tickets.index');
+
+        Route::get('support/tickets/{ticket}', [AdminSupportTicketController::class, 'show'])
+            ->middleware('permission:support.view')
+            ->name('admin.support.tickets.show');
+
+        Route::put('support/tickets/{ticket}', [AdminSupportTicketController::class, 'update'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.update');
+
+        Route::post('support/tickets/{ticket}/reply', [AdminSupportTicketController::class, 'reply'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.reply');
+
+        Route::post('support/tickets/{ticket}/close', [AdminSupportTicketController::class, 'close'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.close');
+
+        /*
         | RF-CAT-026: CRUD admin de productos. Requiere
         | `catalog.manage` (admin slug bypasea).
         */
@@ -621,6 +648,28 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::post('coupons/validate', [CouponValidateController::class, 'validate'])
         ->name('coupons.validate');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Support (RF-SUP-160): tickets del cliente autenticado
+    |--------------------------------------------------------------------------
+    |
+    | El cliente opera sólo sobre SUS tickets. El admin usa los endpoints
+    | /admin/support/tickets/* para responder y cerrar.
+    |
+    */
+
+    Route::get('support/tickets', [SupportTicketController::class, 'index'])
+        ->name('support.tickets.index');
+
+    Route::post('support/tickets', [SupportTicketController::class, 'store'])
+        ->name('support.tickets.store');
+
+    Route::get('support/tickets/{ticket}', [SupportTicketController::class, 'show'])
+        ->name('support.tickets.show');
+
+    Route::post('support/tickets/{ticket}/reply', [SupportTicketController::class, 'reply'])
+        ->name('support.tickets.reply');
 
     /*
     |--------------------------------------------------------------------------
