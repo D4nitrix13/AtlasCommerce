@@ -267,8 +267,8 @@ rf:
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
@@ -276,7 +276,7 @@ rf:
     dependencias: ["RF-AUTH-002"]
     descripcion: "El usuario registrado podrá guardar productos en una lista de deseos para consultarlos o moverlos al carrito más tarde."
     verificado_por: []
-    comentarios: "RF en análisis. Migración `wishlists` ya existe (2026_06_28_200101)."
+    comentarios: "Backend completo. /api/account/wishlists (CRUD + add/remove item). is_default exclusivo transaccional. Add idempotente (firstOrCreate). Cliente sólo opera sobre SUS listas (cross-customer → 404). 10 tests Feature, 23 assertions (#77). Pendiente: share por link público (token UUID) + mover item a carrito en un click."
 
   # ===== Módulo: Catálogo (CAT) =====
   - code: RF-CAT-020
