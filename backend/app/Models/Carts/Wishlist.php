@@ -8,6 +8,7 @@ use App\Models\Concerns\BelongsToStore;
 use App\Models\Customers\Customer;
 use App\Models\Stores\Store;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Wishlist extends Model
 {
     use BelongsToStore;
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [

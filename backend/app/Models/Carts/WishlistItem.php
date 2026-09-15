@@ -6,6 +6,7 @@ namespace App\Models\Carts;
 
 use App\Models\Catalog\Product;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,9 +22,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class WishlistItem extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'wishlist_id',
         'product_id',
+        'added_at',
     ];
 
     protected $casts = [
