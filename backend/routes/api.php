@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Admin\AttributeController;
 use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
@@ -339,6 +340,32 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('brands/{brand}', [BrandController::class, 'destroy'])
             ->middleware('permission:catalog.manage')
             ->name('admin.brands.destroy');
+
+        /*
+        | Atributos (RF-CAT-027). CRUD admin con `catalog.manage`.
+        | Las asignaciones atributo↔product viven en un controller
+        | separado (ProductAttributeValueController) — ver siguiente.
+        */
+
+        Route::get('attributes', [AttributeController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attributes.index');
+
+        Route::post('attributes', [AttributeController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attributes.store');
+
+        Route::get('attributes/{attribute}', [AttributeController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attributes.show');
+
+        Route::put('attributes/{attribute}', [AttributeController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attributes.update');
+
+        Route::delete('attributes/{attribute}', [AttributeController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attributes.destroy');
     });
 
     /*
