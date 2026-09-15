@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Admin\PromotionController;
 use App\Http\Controllers\Api\Admin\PromotionProductController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\StoreController;
+use App\Http\Controllers\Api\Admin\StoreSocialLinkController;
 use App\Http\Controllers\Api\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\WholesalePriceController;
@@ -481,6 +482,26 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('stores/{store}/maintenance', [StoreController::class, 'toggleMaintenance'])
             ->middleware('permission:stores.manage')
             ->name('admin.stores.maintenance');
+
+        /*
+        | RF-STOR-133: redes sociales de la tienda. Requiere `stores.manage`.
+        */
+
+        Route::get('stores/{store}/social-links', [StoreSocialLinkController::class, 'index'])
+            ->middleware('permission:stores.manage')
+            ->name('admin.stores.social-links.index');
+
+        Route::post('stores/{store}/social-links', [StoreSocialLinkController::class, 'store'])
+            ->middleware('permission:stores.manage')
+            ->name('admin.stores.social-links.store');
+
+        Route::put('stores/{store}/social-links/{link}', [StoreSocialLinkController::class, 'update'])
+            ->middleware('permission:stores.manage')
+            ->name('admin.stores.social-links.update');
+
+        Route::delete('stores/{store}/social-links/{link}', [StoreSocialLinkController::class, 'destroy'])
+            ->middleware('permission:stores.manage')
+            ->name('admin.stores.social-links.destroy');
 
         /*
         | RF-SUP-161: moderación admin de reseñas de producto.
