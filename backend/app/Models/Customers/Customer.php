@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Models\Customers;
 
 use App\Models\Auth\User;
+use App\Models\Sales\Order;
+use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 /**
@@ -86,6 +89,28 @@ class Customer extends Model
     public function addresses(): HasMany
     {
         return $this->hasMany(CustomerAddress::class);
+    }
+
+    /**
+     * Tiendas en las que el cliente tiene historial (pivot `customer_stores`).
+     *
+     * Un cliente puede estar registrado en varias tiendas — la afiliación
+     * se crea al asociar la primera orden. Usado por el admin para
+     * aislamiento por tenant.
+     */
+    public function stores(): BelongsToMany
+    {
+        return $this->belongsToMany(related: Store::class, table: 'customer_stores')
+            ->withTimestamps();
+    }
+
+    /**
+     * Órdenes del cliente (en cualquier tienda — el admin filtra por
+     * tenant vía `stores` si necesita limitar).
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(related: Order::class);
     }
 
     /**
