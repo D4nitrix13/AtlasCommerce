@@ -80,6 +80,10 @@ class PermissionsCatalogSeeder extends Seeder
             'stores.view',
             'stores.manage',
         ],
+        'support' => [
+            'support.view',
+            'support.manage',
+        ],
     ];
 
     public function run(): void
@@ -125,6 +129,7 @@ class PermissionsCatalogSeeder extends Seeder
             'inventory.view',
             'inventory.movements.view',
             'stores.view',
+            'support.view',
         ];
 
         $staffRole = Role::query()->updateOrCreate(
