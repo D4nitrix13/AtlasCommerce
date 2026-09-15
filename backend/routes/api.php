@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Admin\SupportTicketController as AdminSupportTicket
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\WholesalePriceController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Auth\EmailOtpController;
 use App\Http\Controllers\Api\Auth\PasswordResetTokenController;
 use App\Http\Controllers\Api\Auth\RecoveryCodeController;
 use App\Http\Controllers\Api\Auth\SocialAuthController;
@@ -118,6 +119,23 @@ Route::middleware(['store.domain'])->group(function (): void {
     // 6 dígitos del authenticator app. Emite el Sanctum token.
     Route::post('auth/2fa/verify-totp-login', [AuthController::class, 'verifyTotpLogin'])
         ->name('auth.2fa.verify-totp-login');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Login passwordless con OTP por email (RF-AUTH-007)
+    |--------------------------------------------------------------------------
+    |
+    | Flujo: el cliente ingresa su email, recibe código de 6 dígitos,
+    | lo intercambia por un Sanctum token. Cubre 'no recuerdo mi contraseña'
+    | sin pasar por el wizard de recovery tradicional.
+    |
+    */
+
+    Route::post('auth/login/email-otp/request', [EmailOtpController::class, 'request'])
+        ->name('auth.login.email-otp.request');
+
+    Route::post('auth/login/email-otp/verify', [EmailOtpController::class, 'verify'])
+        ->name('auth.login.email-otp.verify');
 
     /*
     |--------------------------------------------------------------------------
