@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class ProductAttribute extends Model
 {
+    protected $table = 'attributes';
+
     protected $fillable = [
         'name',
         'slug',
