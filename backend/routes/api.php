@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetContro
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
+use App\Http\Controllers\Api\Tracking\TrackingController;
 use App\Http\Controllers\Api\Wishlist\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -115,6 +116,20 @@ Route::middleware(['store.domain'])->group(function (): void {
     // 6 dígitos del authenticator app. Emite el Sanctum token.
     Route::post('auth/2fa/verify-totp-login', [AuthController::class, 'verifyTotpLogin'])
         ->name('auth.2fa.verify-totp-login');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tracking público (RF-SHIP-083)
+    |--------------------------------------------------------------------------
+    |
+    | El cliente consulta el estado de su envío SIN login. Doble factor:
+    | tracking_code + email de la orden. Misma respuesta 404 si el código
+    | no existe O si el email no matchea (no leak de existencia).
+    |
+    */
+
+    Route::get('tracking/{tracking_code}', [TrackingController::class, 'show'])
+        ->name('tracking.show');
 });
 
 Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
