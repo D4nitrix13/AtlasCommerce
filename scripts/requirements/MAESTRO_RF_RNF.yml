@@ -2125,8 +2125,8 @@ resumen:
   total_rnf: 47
   total: 116
 rf_por_estado:
-    en construcción (implemented): 53
-    en análisis (in-analysis): 16
+    en construcción (implemented): 54
+    en análisis (in-analysis): 15
     pendiente (pending): 0
   rnf_por_estado:
     verificado (verified): 25
