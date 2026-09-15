@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Admin\CustomerController;
 use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductImageController;
+use App\Http\Controllers\Api\Admin\ProductReviewController as AdminProductReviewController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\PromotionController;
 use App\Http\Controllers\Api\Admin\PromotionProductController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Api\Payments\PaymentController;
 use App\Http\Controllers\Api\Returns\RefundController;
 use App\Http\Controllers\Api\Returns\ReturnRequestController;
 use App\Http\Controllers\Api\Returns\ReturnRequestItemController;
+use App\Http\Controllers\Api\Reviews\ProductReviewController;
 use App\Http\Controllers\Api\Sales\OrderController;
 use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetController;
@@ -130,6 +132,20 @@ Route::middleware(['store.domain'])->group(function (): void {
 
     Route::get('tracking/{tracking_code}', [TrackingController::class, 'show'])
         ->name('tracking.show');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reviews (RF-SUP-161): reseñas de producto
+    |--------------------------------------------------------------------------
+    |
+    | Endpoints públicos para listar reseñas aprobadas de un producto.
+    | El cliente autenticado crea reseñas vía POST /products/{product}/reviews
+    | (definido en el grupo auth:sanctum más abajo).
+    |
+    */
+
+    Route::get('products/{product}/reviews', [ProductReviewController::class, 'indexForProduct'])
+        ->name('products.reviews.index');
 });
 
 Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
@@ -449,6 +465,31 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('admin.stores.maintenance');
 
         /*
+        | RF-SUP-161: moderación admin de reseñas de producto.
+        | Lectura requiere `support.view`, acciones requieren `support.manage`.
+        */
+
+        Route::get('reviews', [AdminProductReviewController::class, 'index'])
+            ->middleware('permission:support.view')
+            ->name('admin.reviews.index');
+
+        Route::get('reviews/{review}', [AdminProductReviewController::class, 'show'])
+            ->middleware('permission:support.view')
+            ->name('admin.reviews.show');
+
+        Route::post('reviews/{review}/approve', [AdminProductReviewController::class, 'approve'])
+            ->middleware('permission:support.manage')
+            ->name('admin.reviews.approve');
+
+        Route::post('reviews/{review}/reject', [AdminProductReviewController::class, 'reject'])
+            ->middleware('permission:support.manage')
+            ->name('admin.reviews.reject');
+
+        Route::delete('reviews/{review}', [AdminProductReviewController::class, 'destroy'])
+            ->middleware('permission:support.manage')
+            ->name('admin.reviews.destroy');
+
+        /*
         | RF-SUP-160: CRUD admin de tickets de soporte.
         | Lectura requiere `support.view`, mutaciones `support.manage`.
         */
@@ -714,6 +755,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::post('support/tickets/{ticket}/reply', [SupportTicketController::class, 'reply'])
         ->name('support.tickets.reply');
+
+    // RF-SUP-161: cliente autenticado crea reseñas.
+    Route::post('products/{product}/reviews', [ProductReviewController::class, 'store'])
+        ->name('products.reviews.store');
+
+    // RF-SUP-161: cliente lista SUS reseñas (incluye pendientes).
+    Route::get('account/reviews', [ProductReviewController::class, 'indexForCustomer'])
+        ->name('account.reviews.index');
 
     /*
     |--------------------------------------------------------------------------
