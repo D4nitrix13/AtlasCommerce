@@ -72,6 +72,14 @@ class PermissionsCatalogSeeder extends Seeder
             'catalog.view',
             'catalog.manage',
         ],
+        'marketing' => [
+            'marketing.view',
+            'marketing.manage',
+        ],
+        'stores' => [
+            'stores.view',
+            'stores.manage',
+        ],
     ];
 
     public function run(): void
@@ -116,6 +124,7 @@ class PermissionsCatalogSeeder extends Seeder
             'customers.write',
             'inventory.view',
             'inventory.movements.view',
+            'stores.view',
         ];
 
         $staffRole = Role::query()->updateOrCreate(

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\PromotionController;
 use App\Http\Controllers\Api\Admin\PromotionProductController;
 use App\Http\Controllers\Api\Admin\RoleController;
+use App\Http\Controllers\Api\Admin\StoreController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\WholesalePriceController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -379,6 +380,27 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('promotions/{promotion}/products', [PromotionProductController::class, 'sync'])
             ->middleware('permission:marketing.manage')
             ->name('admin.promotions.products.sync');
+
+        /*
+        | RF-STOR-132: CRUD admin de tiendas + toggle de modo
+        | mantenimiento. Requiere `stores.manage`.
+        */
+
+        Route::get('stores', [StoreController::class, 'index'])
+            ->middleware('permission:stores.view')
+            ->name('admin.stores.index');
+
+        Route::get('stores/{store}', [StoreController::class, 'show'])
+            ->middleware('permission:stores.view')
+            ->name('admin.stores.show');
+
+        Route::put('stores/{store}', [StoreController::class, 'update'])
+            ->middleware('permission:stores.manage')
+            ->name('admin.stores.update');
+
+        Route::post('stores/{store}/maintenance', [StoreController::class, 'toggleMaintenance'])
+            ->middleware('permission:stores.manage')
+            ->name('admin.stores.maintenance');
 
         /*
         | RF-CAT-026: CRUD admin de productos. Requiere
