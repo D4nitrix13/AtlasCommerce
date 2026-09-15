@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\Admin\AttributeController;
 use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\Admin\CustomerController;
 use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductImageController;
@@ -228,6 +229,41 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('users/{user}', [UserController::class, 'destroy'])
             ->middleware('permission:auth.users.manage')
             ->name('admin.users.destroy');
+
+        /*
+        | RF-CUST-040: CRUD admin de clientes. Lectura requiere
+        | `customers.view`, mutaciones requieren `customers.write`
+        | (admin slug bypasea). Aislamiento por tenant via
+        | pivot `customer_stores`.
+        */
+
+        Route::get('customers', [CustomerController::class, 'index'])
+            ->middleware('permission:customers.view')
+            ->name('admin.customers.index');
+
+        Route::post('customers', [CustomerController::class, 'store'])
+            ->middleware('permission:customers.write')
+            ->name('admin.customers.store');
+
+        Route::get('customers/{customer}', [CustomerController::class, 'show'])
+            ->middleware('permission:customers.view')
+            ->name('admin.customers.show');
+
+        Route::put('customers/{customer}', [CustomerController::class, 'update'])
+            ->middleware('permission:customers.write')
+            ->name('admin.customers.update');
+
+        Route::post('customers/{customer}/suspend', [CustomerController::class, 'suspend'])
+            ->middleware('permission:customers.write')
+            ->name('admin.customers.suspend');
+
+        Route::post('customers/{customer}/reactivate', [CustomerController::class, 'reactivate'])
+            ->middleware('permission:customers.write')
+            ->name('admin.customers.reactivate');
+
+        Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])
+            ->middleware('permission:customers.write')
+            ->name('admin.customers.destroy');
 
         /*
         | RF-CAT-026: CRUD admin de productos. Requiere
