@@ -794,8 +794,8 @@ rf:
     priority: H
     importancia: vital
     urgencia: importante
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
@@ -803,7 +803,7 @@ rf:
     dependencias: ["RF-CART-010", "RNF-SEC-015"]
     descripcion: "El admin podrá crear cupones (código alfanumérico) con descuento fijo o porcentual, fecha de vigencia, límite de usos y restricción por tienda."
     verificado_por: []
-    comentarios: "RF en análisis. Servicio `CheckoutCouponCalculationTest` ya existe, lo sugiere implementado parcialmente."
+    comentarios: "Backend completo. Admin: /api/admin/coupons (CRUD con code UPPERCASE normalizado, code inmutable en update, soft-delete). Público: POST /api/coupons/validate (valida cupón contra carrito y devuelve discount_cents; NO aplica). Nuevo CouponService con findForCode + calculateDiscountCents + validateForCart — patrón Shipping/ReturnRequest. CheckoutService refactorizado para delegar (silencia cupones inválidos — regla MVP). Permisos marketing.view + marketing.manage. 20 tests Feature (10 admin + 10 validate), 45 assertions (#67). Pendiente: aplicar cupón en storefront checkout UI + auto-apply con sesión."
 
   - code: RF-MKT-061
     title: "Promociones por producto/categoría"
