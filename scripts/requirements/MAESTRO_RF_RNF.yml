@@ -1243,8 +1243,8 @@ rf:
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
@@ -1252,7 +1252,7 @@ rf:
     dependencias: ["RF-SALES-050"]
     descripcion: "El cliente podrá dejar una reseña (calificación + comentario) sobre un producto comprado; el admin podrá moderarlas."
     verificado_por: []
-    comentarios: "RF en análisis."
+    comentarios: "Backend completo. Admin: /api/admin/reviews (CRUD + approve/reject) con aislamiento por tenant. Cliente: POST /products/{product}/reviews (duplicado → 409), GET /account/reviews. Público: GET /products/{product}/reviews (sólo aprobadas, max 50). Validación rating 1-5, comment ≥ 10 chars. 14 tests Feature, 29 assertions (#81). Pendiente: fotos, reacciones, reply admin, ranking por rating en búsqueda."
 
   - code: RF-SUP-162
     title: "Preguntas sobre producto (Q&A)"
