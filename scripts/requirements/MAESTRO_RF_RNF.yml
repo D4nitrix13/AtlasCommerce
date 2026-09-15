@@ -812,15 +812,15 @@ rf:
     priority: H
     importancia: vital
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
     dependencias: ["RF-CAT-022", "RNF-SEC-015"]
     descripcion: "El admin podrá crear promociones automáticas (ej. 2x1, descuento por categoría, envío gratis) que se aplican al carrito sin código."
     verificado_por: []
-    comentarios: "RF en análisis."
+    comentarios: "Backend admin completo. /api/admin/promotions (CRUD) + /api/admin/promotions/{promotion}/products (sync attach/detach). Aislamiento por tenant (globales vs scoped). PromotionService con isApplicable + calculateDiscountCents (percentage/fixed). Bug fix pre-existente: Promotion model ahora usa HasFactory. 21 tests (13 controller + 8 service unit), 44 assertions (#69). Pendiente: integración con CheckoutService (auto-apply al carrito del storefront), soporte para buy_x_get_y, filtros por categoría."
 
   # ===== Módulo: Pagos (PAY) =====
   - code: RF-PAY-070
