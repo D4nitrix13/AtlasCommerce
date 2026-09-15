@@ -39,6 +39,10 @@ class PermissionsCatalogSeeder extends Seeder
             'sales.invoices.view',
             'sales.invoices.manage',
         ],
+        'customers' => [
+            'customers.view',
+            'customers.write',
+        ],
         'payments' => [
             'payments.payments.view',
             'payments.payments.create',
@@ -108,6 +112,8 @@ class PermissionsCatalogSeeder extends Seeder
             'returns.return_requests.view',
             'returns.return_requests.approve',
             'returns.return_requests.reject',
+            'customers.view',
+            'customers.write',
             'inventory.view',
             'inventory.movements.view',
         ];
