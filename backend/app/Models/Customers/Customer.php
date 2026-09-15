@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Customers;
 
 use App\Models\Auth\User;
+use App\Models\Carts\Wishlist;
 use App\Models\Sales\Order;
 use App\Models\Stores\Store;
 use Carbon\Carbon;
@@ -111,6 +112,14 @@ class Customer extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(related: Order::class);
+    }
+
+    /**
+     * Listas de deseos del cliente.
+     */
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(related: Wishlist::class);
     }
 
     /**
