@@ -41,6 +41,7 @@ use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
+use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
 use App\Http\Controllers\Api\Tracking\TrackingController;
 use App\Http\Controllers\Api\Wishlist\WishlistController;
@@ -165,6 +166,10 @@ Route::middleware(['store.domain'])->group(function (): void {
 
     Route::get('products/{product}/reviews', [ProductReviewController::class, 'indexForProduct'])
         ->name('products.reviews.index');
+
+    // RF-SUP-162: público lista Q&A respondidas.
+    Route::get('products/{product}/questions', [ProductQuestionController::class, 'indexForProduct'])
+        ->name('products.questions.index');
 });
 
 Route::middleware(['store.domain', 'auth:sanctum'])->group(function (): void {
@@ -529,6 +534,27 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('admin.reviews.destroy');
 
         /*
+        | RF-SUP-162: moderación admin de Q&A de producto. Permisos:
+        | support.view (read), support.manage (answer/delete).
+        */
+
+        Route::get('questions', [AdminProductQuestionController::class, 'index'])
+            ->middleware('permission:support.view')
+            ->name('admin.questions.index');
+
+        Route::get('questions/{question}', [AdminProductQuestionController::class, 'show'])
+            ->middleware('permission:support.view')
+            ->name('admin.questions.show');
+
+        Route::put('questions/{question}/answer', [AdminProductQuestionController::class, 'answer'])
+            ->middleware('permission:support.manage')
+            ->name('admin.questions.answer');
+
+        Route::delete('questions/{question}', [AdminProductQuestionController::class, 'destroy'])
+            ->middleware('permission:support.manage')
+            ->name('admin.questions.destroy');
+
+        /*
         | RF-SUP-160: CRUD admin de tickets de soporte.
         | Lectura requiere `support.view`, mutaciones `support.manage`.
         */
@@ -802,6 +828,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
     // RF-SUP-161: cliente lista SUS reseñas (incluye pendientes).
     Route::get('account/reviews', [ProductReviewController::class, 'indexForCustomer'])
         ->name('account.reviews.index');
+
+    // RF-SUP-162: cliente autenticado hace pregunta sobre producto.
+    Route::post('products/{product}/questions', [ProductQuestionController::class, 'store'])
+        ->name('products.questions.store');
+
+    // RF-SUP-162: cliente lista SUS preguntas (incluye pendientes).
+    Route::get('account/questions', [ProductQuestionController::class, 'indexForCustomer'])
+        ->name('account.questions.index');
 
     /*
     |--------------------------------------------------------------------------
