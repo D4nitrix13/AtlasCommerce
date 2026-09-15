@@ -9,6 +9,7 @@ use App\Models\Concerns\BelongsToStore;
 use App\Models\Stores\Store;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -35,6 +36,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Promotion extends Model
 {
     use BelongsToStore;
+    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
