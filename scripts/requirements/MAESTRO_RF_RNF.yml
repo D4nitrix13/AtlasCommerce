@@ -1027,8 +1027,8 @@ rf:
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
@@ -1036,7 +1036,7 @@ rf:
     dependencias: ["RF-SHIP-082"]
     descripcion: "El cliente podrá consultar el estado de su envío (en preparación, en tránsito, entregado) ingresando el número de guía en una página pública."
     verificado_por: []
-    comentarios: "RF en análisis."
+    comentarios: "Backend completo. GET /api/tracking/{tracking_code}?email=... público, doble factor (tracking_code + email de la orden), cross-tenant 404, no leak de existencia. status_label legible en español. 6 tests Feature, 16 assertions (#79). Pendiente: integración courier API para estimated_delivery_at + historial de tránsitos."
 
   # ===== Módulo: Impuestos (TAX) =====
   - code: RF-TAX-110
