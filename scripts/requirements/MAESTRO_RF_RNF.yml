@@ -1137,15 +1137,15 @@ rf:
     priority: L
     importancia: deseable
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: volátil
+    estado: en construcción
+    estabilidad: estable
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
     dependencias: ["RF-STOR-130"]
     descripcion: "El admin podrá registrar las redes sociales de la tienda y configurar canales de venta (Instagram Shop, WhatsApp Catalog, etc.)."
     verificado_por: []
-    comentarios: "RF en análisis. Modelo `StoreSocialLink` y `SalesChannel` ya existen."
+    comentarios: "Backend completo (parte 1). /api/admin/stores/{store}/social-links (CRUD con platform enum: instagram/facebook/tiktok/whatsapp/youtube/x/linkedin/other). Aislamiento por tenant + cross-store 404. 8 tests Feature, 19 assertions (#85). Pendiente: SalesChannel (parte 2 — comisiones + stock rules) + OpenGraph meta tags."
 
   # ===== Módulo: Reportes (RPT) =====
   - code: RF-RPT-140
