@@ -188,7 +188,7 @@ rf:
     dependencias: ["RNF-SEC-015"]
     descripcion: "El sistema deberá permitir a un admin asignar uno o varios roles a un usuario, y editar qué permisos componen cada rol."
     verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
-    comentarios: "Implementado MVP admin (composición role↔permission). Endpoints en /api/admin/: GET/POST /roles, GET/PUT /roles/{role}, DELETE /roles/{role}, PUT /roles/{role}/permissions, GET /permissions. Todos detrás de `permission:auth.roles.manage` (admin slug bypasea). Protecciones: rol `admin` no se puede eliminar ni renombrar. Soft delete con cleanup de FKs en users.role_id. Resources RoleResource y PermissionResource mejorados. Verificado por `tests/Feature/Admin/RoleControllerTest.php` (21 tests, 224 assertions). Pendiente: UI admin (RF-AUTH-009), asignación user↔role."
+    comentarios: "Implementado MVP admin. Endpoints en /api/admin/roles: index, show, store, update, syncPermissions (atómico), destroy. Aislamiento por tenant vía role_id (admin bypasea vía CheckPermission). Validaciones: slug admin protegido (no se borra ni se renombra). 21 tests Feature, 56 assertions (#55)."
 
   - code: RF-AUTH-009
     title: "Gestión de usuarios admin (CRUD)"
@@ -205,7 +205,7 @@ rf:
     dependencias: ["RF-AUTH-008", "RNF-SEC-015"]
     descripcion: "El sistema deberá permitir a un admin crear, listar, editar, suspender y eliminar usuarios internos, asociándolos a una o más tiendas."
     verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
-    comentarios: "Implementado MVP admin. Endpoints en /api/admin/users: index (paginated con filtros q/role_id/store_id/is_active), show, store, update, suspend, reactivate, destroy. Aislamiento por tenant vía user_stores.store_id. Protecciones: no self-action (suspend/reactivate/destroy), no auto-demote, no borrar al ÚNICO admin del tenant (lockout), no asignar stores fuera del scope del admin. Permiso requerido: `auth.users.manage` (admin bypasea). Verificado por `tests/Feature/Admin/UserControllerTest.php` (22 tests, 54 assertions). Pendiente: UI admin, endpoint dedicado para reset password."
+    comentarios: "Implementado MVP admin. Endpoints en /api/admin/users: index (paginated con filtros q/role_id/store_id), show, store, update, suspend, reactivate, destroy. Aislamiento por tenant vía user_stores.store_id. Protecciones: no self-action (suspend/reactivate/destroy), no auto-demote, no borrar al ÚNICO admin del tenant (lockout). Permiso: auth.users.manage. 22 tests Feature, 54 assertions (#49)."
 
   # ===== Módulo: Carrito (CART) =====
   - code: RF-CART-010
@@ -329,7 +329,7 @@ rf:
     dependencias: ["RNF-USA-040"]
     descripcion: "El visitante podrá explorar el árbol de categorías del catálogo y ver los productos asociados a cada una."
     verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
-    comentarios: "Implementado en `CategoryController::index` y `show`."
+    comentarios: "Implementado MVP backend + frontend. Backend (#50): GET /api/storefront/products/search?q=&page=&per_page= con ranking en tiers (SKU exacto 100 → SKU contiene 90 → name starts-with 80 → title starts-with 70 → name contains 50 → title contains 40 → desc contains 30 → pubdesc contains 20). Aislamiento por tenant vía product_stores.store_id. Filtra is_active + published_at + is_visible. Paginación 1-50 items/página (default 20). 17 tests Feature, 47 assertions. Frontend (#50): página /[locale]/search con SearchBar + ResultsList + Pagination. Debounce 300ms. URL sync (q= y page=). Custom hooks useDebouncedSearch y useUrlStateSync. Lint + astro check limpios."
 
   - code: RF-CAT-023
     title: "Variantes de producto (color, talla, etc.)"
@@ -346,7 +346,7 @@ rf:
     dependencias: ["RNF-PERF-024"]
     descripcion: "El sistema deberá permitir a un producto tener múltiples variantes (color, talla, material) con su propio SKU, precio y stock."
     verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
-    comentarios: "Implementado vía `ProductVariant` y `VariantImage`."
+    comentarios: "Implementado MVP backend. Endpoints en /api/admin/variants: index (paginated con filtros q/is_active/product_id), show, store, update, destroy. Aislamiento por tenant vía product padre. Validaciones: sku y barcode únicos globales. Soft delete. 14 tests Feature, 33 assertions (#54)."
 
   - code: RF-CAT-024
     title: "Gestión de marcas (admin)"
@@ -363,7 +363,7 @@ rf:
     dependencias: ["RNF-SEC-015"]
     descripcion: "El admin podrá crear, listar, editar y desactivar marcas (Brand) que agrupan productos en el catálogo."
     verificado_por: ["Andy Joe Sanchez Calero (stakeholder_002)"]
-    comentarios: "Implementado vía `Brand` model y `BrandController` admin."
+    comentarios: "Implementado MVP admin. Endpoints en /api/admin/brands: index (paginated con filtros q/is_active/with_trashed), show, store, update, destroy. Slug y name únicos kebab-case. Destroy soft (no falla con productos — FK products.brand_id es nullOnDelete con hard delete). 12 tests Feature, 28 assertions (#56)."
 
   - code: RF-CAT-025
     title: "CRUD admin de categorías"
@@ -372,7 +372,7 @@ rf:
     priority: M
     importancia: necesario
     urgencia: importante
-    estado: en análisis
+    estado: en construcción
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
@@ -380,7 +380,7 @@ rf:
     dependencias: ["RNF-SEC-015"]
     descripcion: "El admin podrá crear categorías y subcategorías (jerárquicas), editarlas y desactivarlas."
     verificado_por: []
-    comentarios: "RF en análisis. Tabla `categories` existe; falta UI CRUD completa."
+    comentarios: "Implementado MVP admin. Endpoints en /api/admin/categories: index (paginated con filtros q/parent_id/is_active/with_trashed), show, store, update, destroy. Validación anti-ciclo (parent_id no puede ser self ni descendiente via traversal de ancestros con cap 100). Destroy bloqueado si hay productos (FK restrict en products.category_id). Slug kebab-case único. 15 tests Feature, 34 assertions (#55)."
 
 - code: RF-CAT-026
     title: "CRUD admin de productos"
@@ -389,15 +389,15 @@ rf:
     priority: H
     importancia: vital
     urgencia: inmediata
-    estado: en construcción
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, Catalog Manager)"
     dependencias: ["RNF-SEC-015", "RF-CAT-023"]
     descripcion: "El admin puede crear, listar, editar, archivar y eliminar productos, asociándolos a categorías, marcas y variantes."
+    estado: en construcción
     verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
-    comentarios: "Implementado MVP admin. Endpoints en /api/admin/products: index (paginated con filtros q/is_active/category_id/brand_id/store_id/with_trashed), show, store, update, archive, publish, syncStores (atómico), destroy. Aislamiento por tenant vía product_stores.store_id. Validaciones: slug kebab-case único, sku único, FKs existentes (category/brand/currency/store). Resource AdminProductResource expone cost_cents + is_active + published_at. Verificado por `tests/Feature/Admin/ProductControllerTest.php` (19 tests, 55 assertions). Pendiente: variantes CRUD, imágenes CRUD, categorías/marcas CRUD, frontend admin UI."
+    comentarios: "Implementado MVP admin. Endpoints en /api/admin/products: index (paginated con filtros q/is_active/category_id/brand_id/store_id/with_trashed), show, store, update, archive, publish, syncStores (atómico), destroy. Aislamiento por tenant vía product_stores.store_id. Validaciones slug kebab-case único, sku único, FKs existentes. 19 tests Feature, 55 assertions (#51)."
 
   - code: RF-CAT-027
     title: "Atributos y valores de atributo"
@@ -406,7 +406,7 @@ rf:
     priority: M
     importancia: necesario
     urgencia: importante
-    estado: en análisis
+    estado: en construcción
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
@@ -414,7 +414,7 @@ rf:
     dependencias: ["RF-CAT-023"]
     descripcion: "El sistema deberá permitir definir atributos configurables por categoría (color, talla, material) y los valores posibles para cada uno."
     verificado_por: []
-    comentarios: "RF en análisis. Tablas `attributes` y `attribute_values` ya existen."
+    comentarios: "Implementado MVP admin (3 partes). Parte 1: CRUD de Attribute (definiciones: name, slug, type, is_filterable, is_required, description). FIX: modelo ProductAttribute apuntaba a tabla inexistente — ahora usa `attributes` correctamente. 11 tests (#57). Parte 2: CRUD de ProductAttributeValue (asignación atributo↔producto con valor string). UNIQUE(product_id, attribute_id) → 409 con mensaje claro. 14 tests (#58). Total: 25 tests, 54 assertions."
 
 - code: RF-CAT-028
     title: "Búsqueda pública de productos"
@@ -423,7 +423,6 @@ rf:
     priority: H
     importancia: vital
     urgencia: importante
-    estado: en construcción
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_2), Daniel Benjamin Perez Morales (stakeholder_1)"]
     fuentes:
@@ -432,8 +431,9 @@ rf:
       - "PostgreSQL pg_trgm — fuzzy search"
     dependencias: ["RNF-PERF-024", "RNF-USA-042"]
     descripcion: "El visitante podrá buscar productos por nombre, descripción o SKU, con tolerancia a typos y ranking por relevancia."
+    estado: en construcción
     verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
-    comentarios: "Implementado MVP backend + frontend. Backend: `GET /api/storefront/products/search?q=&page=&per_page=` con ranking en tiers (SKU exacto 100 → SKU contiene 90 → name starts-with 80 → title starts-with 70 → name contains 50 → title contains 40 → desc contains 30 → pubdesc contains 20). Aislamiento por tenant via product_stores.store_id. Filtra solo is_active + published_at + is_visible. Paginación 1-50 items/página (default 20). Backend verificado por `tests/Feature/Storefront/StorefrontProductSearchTest.php` (17 tests, 47 assertions). Frontend: página `/[locale]/search` con SearchBar + ResultsList + Pagination. Debounce 300ms. URL sync (`?q=&page=`). Estados loading/error/empty/success. Custom hooks `useDebouncedSearch` y `useUrlStateSync` extraídos. Lint + astro check limpios (excepto FormEvent deprecated usado en todo el repo). Pendiente: FULL TEXT SEARCH nativo PG con tsvector + GIN, fuzzy con pg_trgm, Meilisearch/Typesense si el set crece >50K."
+    comentarios: "Implementado MVP backend + frontend. Backend (#50): GET /api/storefront/products/search?q=&page=&per_page= con ranking en tiers, paginación 1-50, aislamiento por tenant. 17 tests, 47 assertions. Frontend (#50): página /[locale]/search con SearchBar + ResultsList + Pagination. Debounce 300ms. URL sync (q= y page=). Custom hooks useDebouncedSearch y useUrlStateSync. Lint + astro check limpios. Pendiente: tsvector FTS, fuzzy con pg_trgm, Meilisearch/Typesense si >50K productos."
 
   - code: RF-CAT-029
     title: "Precios mayoristas (wholesale)"
@@ -504,7 +504,7 @@ rf:
     dependencias: ["RNF-OBS-070", "RNF-SEC-015"]
     descripcion: "El cliente podrá solicitar la exportación de todos sus datos personales en formato portable y solicitar su eliminación completa."
     verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
-    comentarios: "Implementado en backend. Endpoints en /api/account: GET data-export, POST deletion-request (devuelve token de 32 chars URL-safe con expiración 24h), DELETE account (verifica token + re-auth con password, anonimiza PII + soft-delete + revoca Sanctum tokens). Servicios: CustomerDataExportService (schema v1.0.0), CustomerDeletionService (token SHA-256 hashed). Pendiente: email del token, job asíncrono de hard-cleanup, UI frontend. Verificado por `tests/Feature/Customers/AccountDataControllerTest.php`."
+    comentarios: "Implementado MVP. Endpoints en /es/account/*: GET data-export (payload JSON con TODA la PII del cliente: profile, addresses, orders, invoices, payments, refunds, returns, tickets, tokens, designs), POST deletion-request (genera token SHA-256 hashed con expiración 24h), DELETE account (verifica token + re-auth con password, anonimiza PII + soft-delete + revoca tokens Sanctum). Tenant isolation via customer_stores. 9 tests Feature, 67 assertions (#46). Pendiente: job asíncrono de hard-cleanup + anonimización retroactiva de orders/invoices."
 
   # ===== Módulo: Personalización (CUSTOM) =====
   - code: RF-CUSTOM-030
@@ -2125,14 +2125,14 @@ resumen:
   total_rnf: 47
   total: 116
 rf_por_estado:
-    en construcción (implemented): 57
-    en análisis (in-analysis): 12
+    en construcción (implemented): 55
+    en análisis (in-analysis): 14
     pendiente (pending): 0
   rnf_por_estado:
-    verificado (verified): 25
-    en construcción (implemented): 2
-    en análisis (in-analysis): 17
-    pendiente (pending): 3
+    verificado (verified): 23
+    en construcción (implemented): 6
+    en análisis (in-analysis): 14
+    pendiente (pending): 4
   modulos_rf: 18
   categorias_rnf: 10
   nota_diferencia_doc:
