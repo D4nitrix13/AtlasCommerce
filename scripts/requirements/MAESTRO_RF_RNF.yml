@@ -1261,15 +1261,15 @@ rf:
     priority: L
     importancia: deseable
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: volátil
+    estado: en construcción
+    estabilidad: estable
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
     dependencias: ["RF-CAT-021"]
     descripcion: "El visitante podrá hacer preguntas sobre un producto; el admin o la comunidad podrá responderlas públicamente."
     verificado_por: []
-    comentarios: "RF en análisis."
+    comentarios: "Backend completo. Admin: /api/admin/questions (CRUD + answer). Cliente: POST /products/{product}/questions, GET /account/questions. Público: GET /products/{product}/questions (sólo respondidas, max 50). Aislamiento por tenant. 5 tests Feature, 11 assertions (#87). Pendiente: threading (parent_id en modelo), notificaciones al cliente."
 
 # -----------------------------------------------------------------------------
 # REQUISITOS NO FUNCIONALES (RNF) — 47
