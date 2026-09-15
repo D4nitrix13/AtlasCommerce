@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Sales;
 
+use App\Exceptions\Sales\InvalidOrderTransitionException;
+use App\Exceptions\Sales\OrderNotCancellableException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Sales\CancelOrderRequest;
 use App\Http\Requests\Sales\CheckoutRequest;
 use App\Http\Resources\Sales\OrderResource;
 use App\Models\Carts\Cart;
@@ -14,6 +17,7 @@ use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Order;
 use App\Models\Shipping\ShippingZone;
 use App\Services\Sales\CheckoutService;
+use App\Services\Sales\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,6 +31,7 @@ class OrderController extends Controller
 {
     public function __construct(
         private readonly CheckoutService $checkout,
+        private readonly OrderService $orders,
     ) {}
 
     /**
@@ -112,6 +117,36 @@ class OrderController extends Controller
         return (new OrderResource($order->load(['items', 'invoices.items', 'currency'])))
             ->response()
             ->setStatusCode(201);
+    }
+
+    /**
+     * Cancela una orden (cancelación hard con rollback completo).
+     *
+     * Body opcional:
+     *   - observation (string, max 500 chars) — nota del admin para el historial.
+     *
+     * Respuesta 200 con `OrderResource` (items + invoices + shipments + status history).
+     *
+     * Errores:
+     *   - 422 si la transición de estado no es válida o si un shipment está en estado no cancelable.
+     *   - 403 si el usuario no tiene el permiso `sales.orders.cancel` (validado por middleware).
+     *   - 404 si la orden no existe.
+     */
+    public function cancel(CancelOrderRequest $request, Order $order): JsonResponse
+    {
+        try {
+            $cancelled = $this->orders->cancel(
+                order: $order,
+                user: $request->user(),
+                observation: $request->input('observation'),
+            );
+        } catch (InvalidOrderTransitionException|OrderNotCancellableException $e) {
+            return response()->json(data: ['message' => $e->getMessage()], status: 422);
+        }
+
+        return (new OrderResource(
+            $cancelled->load(['items', 'invoices.items', 'shipments']),
+        ))->response();
     }
 
     /**

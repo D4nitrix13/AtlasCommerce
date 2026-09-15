@@ -35,6 +35,7 @@ class PermissionsCatalogSeeder extends Seeder
         'sales' => [
             'sales.orders.view',
             'sales.orders.manage',
+            'sales.orders.cancel',
             'sales.invoices.view',
             'sales.invoices.manage',
         ],
@@ -97,6 +98,7 @@ class PermissionsCatalogSeeder extends Seeder
         // Rol staff: permisos operativos básicos (NO incluye admin-bypass).
         $staffPermissions = [
             'sales.orders.view',
+            'sales.orders.cancel',
             'sales.invoices.view',
             'payments.payments.view',
             'payments.refunds.view',

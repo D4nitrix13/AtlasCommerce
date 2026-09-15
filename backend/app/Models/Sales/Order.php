@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models\Sales;
 
+use App\Enums\OrderStatus;
 use App\Models\Auth\User;
 use App\Models\Concerns\BelongsToStore;
 use App\Models\Concerns\LogsActivity;
 use App\Models\Customers\Customer;
 use App\Models\Customers\CustomerAddress;
 use App\Models\Settings\Currency;
+use App\Models\Shipping\Shipment;
 use App\Models\Stores\SalesChannel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -41,7 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $total_cents
  * @property string $exchange_rate_snapshot
  * @property int $total_in_base_currency_cents
- * @property string $status
+ * @property OrderStatus $status
  * @property Carbon $ordered_at
  * @property string|null $notes
  */
@@ -81,6 +83,7 @@ class Order extends Model
         'total_in_base_currency_cents' => 'integer',
         'exchange_rate_snapshot' => 'decimal:8',
         'ordered_at' => 'datetime',
+        'status' => OrderStatus::class,
     ];
 
     public function customer(): BelongsTo
@@ -135,22 +138,22 @@ class Order extends Model
 
     public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', 'pending');
+        return $query->where(column: 'status', operator: '=', value: OrderStatus::Pending->value);
     }
 
     public function scopeProcessing(Builder $query): Builder
     {
-        return $query->where('status', 'processing');
+        return $query->where(column: 'status', operator: '=', value: OrderStatus::Processing->value);
     }
 
     public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where('status', 'completed');
+        return $query->where(column: 'status', operator: '=', value: OrderStatus::Completed->value);
     }
 
     public function scopeCancelled(Builder $query): Builder
     {
-        return $query->where('status', 'cancelled');
+        return $query->where(column: 'status', operator: '=', value: OrderStatus::Cancelled->value);
     }
 
     public function scopeByCustomer(Builder $query, int $customerId): Builder
