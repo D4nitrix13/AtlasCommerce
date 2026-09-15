@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\Admin\AttributeController;
 use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\RoleController;
@@ -366,6 +367,32 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('attributes/{attribute}', [AttributeController::class, 'destroy'])
             ->middleware('permission:catalog.manage')
             ->name('admin.attributes.destroy');
+
+        /*
+        | Valores de atributo asignados a productos (RF-CAT-027 parte 2).
+        | CRUD admin con `catalog.manage`. Aislamiento por tenant vía
+        | product padre (mismo patrón que variants).
+        */
+
+        Route::get('attribute-values', [ProductAttributeValueController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attribute-values.index');
+
+        Route::post('attribute-values', [ProductAttributeValueController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attribute-values.store');
+
+        Route::get('attribute-values/{attributeValue}', [ProductAttributeValueController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attribute-values.show');
+
+        Route::put('attribute-values/{attributeValue}', [ProductAttributeValueController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attribute-values.update');
+
+        Route::delete('attribute-values/{attributeValue}', [ProductAttributeValueController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.attribute-values.destroy');
     });
 
     /*
