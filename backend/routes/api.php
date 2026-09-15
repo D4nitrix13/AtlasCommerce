@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Admin\ProductImageController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\UserController;
@@ -393,6 +394,33 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('attribute-values/{attributeValue}', [ProductAttributeValueController::class, 'destroy'])
             ->middleware('permission:catalog.manage')
             ->name('admin.attribute-values.destroy');
+
+        /*
+        | Imágenes de producto (RF-CAT-022). CRUD admin con `catalog.manage`.
+        | Nested bajo /products/{product}/ porque siempre pertenecen a un
+        | producto. Lógica especial: solo una imagen primaria por producto,
+        | sort_order auto-asignado al final si no se pasa.
+        */
+
+        Route::get('products/{product}/images', [ProductImageController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.images.index');
+
+        Route::post('products/{product}/images', [ProductImageController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.images.store');
+
+        Route::get('products/{product}/images/{image}', [ProductImageController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.images.show');
+
+        Route::put('products/{product}/images/{image}', [ProductImageController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.images.update');
+
+        Route::delete('products/{product}/images/{image}', [ProductImageController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.images.destroy');
     });
 
     /*

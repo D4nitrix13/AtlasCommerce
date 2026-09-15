@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $id
  * @property int $product_id
- * @property string $url
+ * @property string $image_url
  * @property string|null $alt_text
  * @property int $sort_order
  * @property bool $is_primary
@@ -27,7 +27,7 @@ class ProductImage extends Model
 {
     protected $fillable = [
         'product_id',
-        'url',
+        'image_url',
         'alt_text',
         'sort_order',
         'is_primary',
