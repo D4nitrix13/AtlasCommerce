@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Admin\ProductImageController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\WholesalePriceController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\PasswordResetTokenController;
 use App\Http\Controllers\Api\Auth\RecoveryCodeController;
@@ -264,6 +265,32 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])
             ->middleware('permission:customers.write')
             ->name('admin.customers.destroy');
+
+        /*
+        | RF-CAT-029: CRUD admin de precios mayoristas. Requiere
+        | `catalog.manage` (admin slug bypasea). Aislamiento por
+        | tenant via store_id.
+        */
+
+        Route::get('wholesale-prices', [WholesalePriceController::class, 'index'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.wholesale-prices.index');
+
+        Route::post('wholesale-prices', [WholesalePriceController::class, 'store'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.wholesale-prices.store');
+
+        Route::get('wholesale-prices/{wholesalePrice}', [WholesalePriceController::class, 'show'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.wholesale-prices.show');
+
+        Route::put('wholesale-prices/{wholesalePrice}', [WholesalePriceController::class, 'update'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.wholesale-prices.update');
+
+        Route::delete('wholesale-prices/{wholesalePrice}', [WholesalePriceController::class, 'destroy'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.wholesale-prices.destroy');
 
         /*
         | RF-CAT-026: CRUD admin de productos. Requiere
