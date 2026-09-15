@@ -1226,15 +1226,15 @@ rf:
     priority: M
     importancia: necesario
     urgencia: importante
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-AUTH-002", "RNF-SEC-015"]
     descripcion: "El cliente podrá abrir un ticket de soporte desde su cuenta; el admin podrá responder, asignar y cerrar tickets."
     verificado_por: []
-    comentarios: "RF en análisis."
+    comentarios: "Backend completo. Admin: /api/admin/support/tickets (index/show/update/reply/close) con filtros status/priority. Cliente: /api/support/tickets (index/store/show/reply propios). SoporteTicketService con create (primer mensaje en TX), reply (auto open→in_progress), close. Aislamiento tenant (admin) + cross-customer 404 (cliente). 18 tests (9 admin + 9 customer), 39 assertions (#75). Pendiente: attachments, SLA tracking, asignación a agentes específicos, reopen."
 
   - code: RF-SUP-161
     title: "Reseñas de producto"
