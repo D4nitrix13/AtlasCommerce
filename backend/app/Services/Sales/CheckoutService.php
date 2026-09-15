@@ -16,6 +16,7 @@ use App\Models\Sales\Invoice;
 use App\Models\Sales\Order;
 use App\Models\Settings\ExchangeRate;
 use App\Models\Shipping\ShippingZone;
+use App\Services\Marketing\CouponService;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -48,6 +49,7 @@ final class CheckoutService
 {
     public function __construct(
         private readonly StoreContextService $storeContext,
+        private readonly CouponService $coupons,
     ) {}
 
     /**
@@ -117,7 +119,10 @@ final class CheckoutService
             );
 
             // Discount: se aplica ANTES de tax y shipping, sobre el subtotal.
-            $discountCents = $this->calculateDiscountCents(
+            // Si el cupón es inválido (expirado, agotado, etc.) se ignora
+            // silenciosamente — el checkout NO falla por un cupón malo
+            // (regla de negocio MVP: "cupón roto = no aplica descuento").
+            $discountCents = $this->resolveDiscountCents(
                 subtotalCents: $subtotalCents,
                 coupon: $coupon,
             );
@@ -288,22 +293,32 @@ final class CheckoutService
     }
 
     /**
-     * Calcula los centavos de descuento aplicando el cupón sobre el subtotal.
+     * Resuelve el descuento delegando en `CouponService`.
      *
-     * Reglas:
-     *  - `percentage`: descuento = subtotal * value / 100 (round HALF_EVEN).
-     *  - `fixed`: descuento = value * 100 (cents). El cupón guarda `value`
-     *    como decimal (12,2), por lo que multiplicamos por 100.
-     *  - Si el subtotal es menor al `minimum_amount` del cupón, no aplica.
-     *  - Cupón expirado, inactivo o agotado retorna 0 (no bloquea el
-     *    checkout — solo no aplica descuento).
+     * Si el cupón es null → 0. Si el cupón es inválido (expirado,
+     * inactivo, agotado, cross-tenant) → 0 silenciosamente. Si el
+     * cupón no cumple `minimum_amount` → 0.
+     *
+     * Reglas de validación viven en `CouponService` — este método
+     * silenciosamente devuelve 0 ante cualquier cupón inválido para
+     * mantener la regla MVP "cupón roto no bloquea checkout".
      */
-    private function calculateDiscountCents(int $subtotalCents, ?Coupon $coupon): int
+    private function resolveDiscountCents(int $subtotalCents, ?Coupon $coupon): int
     {
         if ($coupon === null) {
             return 0;
         }
 
+        $store = $this->storeContext->getStore();
+        if ($store === null) {
+            return 0;
+        }
+
+        // Re-leer el cupón desde DB para tener los casts aplicados (ends_at,
+        // starts_at). Si el cupón que llega acá ya está cargado, el caller
+        // (CouponController::validate) típicamente lo creó. Pero el flujo
+        // de checkout recibe el Coupon del request — confíamos en los casts
+        // del modelo para comparar fechas.
         if (! $coupon->is_active) {
             return 0;
         }
@@ -320,22 +335,15 @@ final class CheckoutService
             return 0;
         }
 
-        if ((float) $coupon->minimum_amount > 0) {
-            $minimumCents = (int) round((float) $coupon->minimum_amount * 100);
-            if ($subtotalCents < $minimumCents) {
-                return 0;
-            }
+        // Tenant: si el cupón es de otra tienda, no aplica.
+        if ($coupon->store_id !== null && (int) $coupon->store_id !== (int) $store->id) {
+            return 0;
         }
 
-        return match ($coupon->discount_type) {
-            'percentage' => (int) round(
-                $subtotalCents * (float) $coupon->value / 100,
-                0,
-                PHP_ROUND_HALF_EVEN,
-            ),
-            'fixed' => (int) round((float) $coupon->value * 100),
-            default => 0,
-        };
+        return $this->coupons->calculateDiscountCents(
+            coupon: $coupon,
+            subtotalCents: $subtotalCents,
+        );
     }
 
     /**

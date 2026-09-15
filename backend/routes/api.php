@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\Admin\AttributeController;
 use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Admin\CustomerController;
 use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Api\Auth\TotpController;
 use App\Http\Controllers\Api\Carts\CartController;
 use App\Http\Controllers\Api\Carts\CartItemController;
 use App\Http\Controllers\Api\Customers\AccountDataController;
+use App\Http\Controllers\Api\Marketing\CouponValidateController;
 use App\Http\Controllers\Api\Payments\PaymentController;
 use App\Http\Controllers\Api\Returns\RefundController;
 use App\Http\Controllers\Api\Returns\ReturnRequestController;
@@ -293,6 +295,31 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('admin.wholesale-prices.destroy');
 
         /*
+        | RF-MKT-060: CRUD admin de cupones + endpoint público de validación.
+        | Admin requiere `marketing.manage`. El validate es público.
+        */
+
+        Route::get('coupons', [CouponController::class, 'index'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.coupons.index');
+
+        Route::post('coupons', [CouponController::class, 'store'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.coupons.store');
+
+        Route::get('coupons/{coupon}', [CouponController::class, 'show'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.coupons.show');
+
+        Route::put('coupons/{coupon}', [CouponController::class, 'update'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.coupons.update');
+
+        Route::delete('coupons/{coupon}', [CouponController::class, 'destroy'])
+            ->middleware('permission:marketing.manage')
+            ->name('admin.coupons.destroy');
+
+        /*
         | RF-CAT-026: CRUD admin de productos. Requiere
         | `catalog.manage` (admin slug bypasea).
         */
@@ -497,6 +524,20 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::apiResource('carts', CartController::class);
     Route::apiResource('carts.items', CartItemController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Marketing (coupons)
+    |--------------------------------------------------------------------------
+    |
+    | Endpoints públicos del cliente para validar cupones en checkout.
+    | El cupón NO se aplica acá — sólo se valida y devuelve el descuento
+    | que aplicaría al carrito actual.
+    |
+    */
+
+    Route::post('coupons/validate', [CouponValidateController::class, 'validate'])
+        ->name('coupons.validate');
 
     /*
     |--------------------------------------------------------------------------
