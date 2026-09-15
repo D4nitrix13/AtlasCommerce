@@ -161,8 +161,8 @@ rf:
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "HU-07 [pendiente confirmar]"
@@ -170,7 +170,7 @@ rf:
     dependencias: ["RNF-SEC-010"]
     descripcion: "El sistema deberá permitir a un usuario autenticarse recibiendo un código de un solo uso en su email, sin necesidad de recordar contraseña."
     verificado_por: []
-    comentarios: "RF en análisis. Sin código aún. Considerar como mejora de DX para próximos hitos."
+    comentarios: "Backend completo. POST /auth/login/email-otp/request { email } envía código de 6 dígitos (TTL 10min, rate 3/min). POST /auth/login/email-otp/verify { email, code } valida + emite Sanctum token (max 5 attempts). Code plain NUNCA se persiste (solo bcrypt). Anti-enumeration: misma respuesta exista o no el email. 9 tests Feature, 20 assertions (#83). Pendiente: webauthn/passkeys reales, magic-link."
 
   - code: RF-AUTH-008
     title: "Asignación de roles y permisos (admin)"
