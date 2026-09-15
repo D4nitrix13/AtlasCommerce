@@ -8,20 +8,29 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Resource para representar una dirección de envío o facturación de un cliente.
+ * Resource de dirección para el cliente autenticado (RF-CUST-041).
  *
- * Contiene la información de una dirección registrada, incluyendo
- * nombre receptor, línea de dirección, ciudad, código postal y país.
+ * @mixin \App\Models\Customers\CustomerAddress
  */
 class CustomerAddressResource extends JsonResource
 {
     /**
-     * Transforma el resource en un array para la respuesta JSON.
-     *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->resource->id,
+            'customer_id' => $this->resource->customer_id,
+            'address_type' => $this->resource->address_type,
+            'country' => $this->resource->country,
+            'department' => $this->resource->department,
+            'municipality' => $this->resource->municipality,
+            'detailed_address' => $this->resource->detailed_address,
+            'reference' => $this->resource->reference,
+            'is_primary' => (bool) $this->resource->is_primary,
+            'created_at' => $this->resource->created_at?->toIso8601String(),
+            'updated_at' => $this->resource->updated_at?->toIso8601String(),
+        ];
     }
 }
