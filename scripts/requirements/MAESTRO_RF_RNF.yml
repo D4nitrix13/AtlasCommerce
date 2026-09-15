@@ -442,8 +442,8 @@ rf:
     priority: H
     importancia: vital
     urgencia: importante
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: en construcción
+    estabilidad: estable
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev) — modelo B2B de Panda Estampados"
@@ -451,7 +451,7 @@ rf:
     dependencias: ["RF-AUTH-002", "RF-CAT-023", "RNF-SEC-015"]
     descripcion: "El sistema deberá permitir definir precios mayoristas por volumen (ej. 10+ unidades = X% descuento) y mostrarlos a clientes B2B autenticados."
     verificado_por: []
-    comentarios: "RF en análisis. Servicio `WholesalePricingService` ya existe con tests."
+    comentarios: "Backend completo. WholesalePricingService + WholesalePriceController admin: CRUD de tiers (product_id, store_id, min_qty, price_cents) con aislamiento por tenant, validación unique (product, store, qty) → 422, update solo price_cents. Permiso catalog.manage. 10 tests Feature, 23 assertions (#65). Pendiente: integración con el flujo B2B en storefront (precio aplicable al customer_type del cliente autenticado en PDP). Pendiente doc oficial del flujo B2B."
 
   # ===== Módulo: Clientes (CUST) =====
   - code: RF-CUST-040
