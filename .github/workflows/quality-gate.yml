@@ -201,7 +201,7 @@ jobs:
   ci-summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [backend-quality, frontend-quality, docs-quality, infra-quality]
+    needs: [backend-quality, frontend-quality, docs-quality, infra-quality, dependencies-audit]
     if: always()
     steps:
       - name: Summary
@@ -214,12 +214,70 @@ jobs:
           echo "| Frontend (Astro)  | ${{ needs.frontend-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Docs (Markdown)   | ${{ needs.docs-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Infra (Docker)    | ${{ needs.infra-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependencies audit | ${{ needs.dependencies-audit.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Si algo fallo, corre los comandos locales del job 'Pre-commit local check info'." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ needs.backend-quality.result }}" != "success" ] || \
              [ "${{ needs.frontend-quality.result }}" != "success" ] || \
              [ "${{ needs.docs-quality.result }}" != "success" ] || \
-             [ "${{ needs.infra-quality.result }}" != "success" ]; then
+             [ "${{ needs.infra-quality.result }}" != "success" ] || \
+             [ "${{ needs.dependencies-audit.result }}" != "success" ]; then
             exit 1
           fi
+
+  dependencies-audit:
+    name: Dependency Audit (composer + pnpm)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: composer audit (PHP deps)
+        working-directory: backend
+        # --no-dev evita auditar paquetes de testing; --audit-format json
+        # produce output parseable. Falla el job si hay vulns high/critical.
+        run: |
+          set -e
+          composer install --no-progress --no-interaction --prefer-dist --no-dev --quiet
+          composer audit --no-dev --format=json > audit-backend.json 2>&1 || AUDIT_EXIT=$?
+          # Mostrar resumen en cualquier caso
+          composer audit --no-dev --format=plain || true
+          # Fallar solo si hay advisories high/critical
+          if [ "${AUDIT_EXIT:-0}" != "0" ]; then
+            echo "::error::composer audit encontró vulnerabilidades — ver audit-backend.json"
+            jq '.advisories | to_entries[] | select(.value.severity == "high" or .value.severity == "critical")' audit-backend.json || true
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+
+      - name: Cache pnpm
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: pnpm-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - name: pnpm audit (Node deps)
+        working-directory: frontend
+        # pnpm audit --audit-level=high falla solo si hay high/critical.
+        run: pnpm audit --audit-level=high
