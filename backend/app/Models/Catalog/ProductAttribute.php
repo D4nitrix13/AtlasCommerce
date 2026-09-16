@@ -65,7 +65,8 @@ class ProductAttribute extends Model
      */
     public function scopeFilterable(Builder $query): Builder
     {
-        return $query->where(column: 'is_filterable', value: true);
+        // Args posicionales: ver note en Promotion::scopeActive.
+        return $query->where('is_filterable', true);
     }
 
     /**
@@ -76,7 +77,7 @@ class ProductAttribute extends Model
      */
     public function scopeRequired(Builder $query): Builder
     {
-        return $query->where(column: 'is_required', value: true);
+        return $query->where('is_required', true);
     }
 
     /**

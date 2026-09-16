@@ -147,9 +147,11 @@ class Store extends Model
      */
     public function hasFeature(string $slug): bool
     {
+        // Args posicionales: ver note en Promotion::scopeActive sobre
+        // named-arg `value: true` con columnas boolean en PostgreSQL.
         return $this->features()
-            ->where(column: 'slug', operator: '=', value: $slug)
-            ->where(column: 'is_active', operator: '=', value: true)
+            ->where('slug', $slug)
+            ->where('is_active', true)
             ->exists();
     }
 

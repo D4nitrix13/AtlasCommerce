@@ -161,8 +161,8 @@ class ProductImageController extends Controller
     private function clearPrimaryFlag(int $productId): void
     {
         ProductImage::query()
-            ->where(column: 'product_id', operator: '=', value: $productId)
-            ->where(column: 'is_primary', operator: '=', value: true)
+            ->where('product_id', $productId)
+            ->where('is_primary', true)
             ->update(['is_primary' => false]);
     }
 

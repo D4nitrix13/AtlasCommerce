@@ -116,25 +116,29 @@ class Coupon extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where(column: 'is_active', value: true);
+        // Args posicionales: named-arg `value: true` produce `is_active IS NULL`
+        // en PostgreSQL con cast boolean (binding del true se pierde).
+        return $query->where('is_active', true);
     }
 
     /**
      * Filtra cupones vigentes (activos, no expirados, con usos disponibles).
+     *
+     * Misma nota sobre named-args vs posicional — ver scopeActive.
      *
      * @param  Builder<Coupon>  $query  Consulta del modelo.
      * @return Builder<Coupon>
      */
     public function scopeValid(Builder $query): Builder
     {
-        return $query->where(column: 'is_active', value: true)
+        return $query->where('is_active', true)
             ->where(function ($q): void {
-                $q->whereNull(columns: 'starts_at')
-                    ->orWhere(column: 'starts_at', operator: '<=', value: now());
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q): void {
-                $q->whereNull(columns: 'ends_at')
-                    ->orWhere(column: 'ends_at', operator: '>=', value: now());
+                $q->whereNull('ends_at')
+                    ->orWhere('ends_at', '>=', now());
             });
     }
 

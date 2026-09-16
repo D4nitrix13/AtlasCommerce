@@ -85,7 +85,8 @@ class ProductReview extends Model
      */
     public function scopeApproved(Builder $query): Builder
     {
-        return $query->where(column: 'is_approved', value: true);
+        // Args posicionales: ver note en Promotion::scopeActive.
+        return $query->where('is_approved', true);
     }
 
     /**
@@ -96,7 +97,7 @@ class ProductReview extends Model
      */
     public function scopePending(Builder $query): Builder
     {
-        return $query->where(column: 'is_approved', value: false);
+        return $query->where('is_approved', false);
     }
 
     /**
