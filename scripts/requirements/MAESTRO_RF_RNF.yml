@@ -2106,14 +2106,14 @@ rnf:
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
+    estado: verificado
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
     fuentes:
       - "web.dev — Baseline 2024"
       - "Can I Use — compatibility data"
     dependencias: []
-    descripcion: "El storefront y el panel admin deberán funcionar en Chrome/Edge ≥ 120, Firefox ≥ 121, Safari ≥ 17.4, con graceful degradation en navegadores anteriores."
+    descripcion: "Implementado vía frontend/.browserslistrc + browserslist@^4.28 en devDeps (PR #101). Production targets: Chrome ≥ 107, Firefox ≥ 115, Safari ≥ 16.4, Edge ≥ 107 (Baseline 2024). Dev targets: last 2 versions para DX. CI: `npx browserslist --coverage` valida que la config resuelve correctamente. Doc completa en `docs/frontend/browsers-support.md` con tabla de browsers soportados/no soportados y policy de upgrade."
     verificado_por: []
     comentarios: "RNF en análisis."
 

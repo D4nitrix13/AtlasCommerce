@@ -1,0 +1,34 @@
+# Browserslist — Baseline 2024 (RF-COMP-090)
+#
+# Define los browsers soportados oficialmente. Baseline 2024 = browsers
+# con >0.5% de uso global Y released en los últimos 2.5 años.
+# Equivale a: Chrome ≥ 107, Firefox ≥ 115, Safari ≥ 16.4, Edge ≥ 107.
+#
+# Esta configuración se usa por:
+#   - Vite/Astro para targets de Babel/postcss-preset-env.
+#   - Autoprefixer (si está configurado).
+#   - Cualquier tool con plugin de browserslist.
+#
+# Para agregar un browser, agregalo acá Y actualizar docs/frontend/browsers-support.md.
+
+[production]
+# Baseline 2024 (Q1 2024 snapshot).
+chrome >= 107
+firefox >= 115
+safari >= 16.4
+edge >= 107
+# No incluimos IE11 ni browsers legacy. Edge "legacy" (EdgeHTML) está EOL.
+# Opera está cubierto por Chrome ≥ 107 (mismo engine).
+# Samsung Internet incluido vía and_chr ≥ 107.
+
+[development]
+# Dev usa últimos 2 versiones para DX rápido. La compilación production
+# respeta [production].
+last 2 chrome versions
+last 2 firefox versions
+last 2 safari versions
+last 2 edge versions
+
+# Mobile.
+ios_saf >= 16.4
+android >= 107
