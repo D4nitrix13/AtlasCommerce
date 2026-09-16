@@ -51,23 +51,19 @@ class PasswordResetCodeNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * Construye el mensaje de correo.
+     * Construye el mensaje de correo (RF-USA-044: i18n via LocalizedMail).
      *
-     * Renderiza la vista Markdown `resources/views/emails/auth/password-reset-code.blade.php`.
+     * Subject + body en locale del User. Si el User no tiene locale,
+     * cae a app()->getLocale() y luego 'es'.
+     *
+     * Renderiza la vista Markdown `resources/views/emails/auth/password-reset-code.blade.php`
+     * (que debe usar `__()` directives para los textos hardcoded).
      */
     public function toMail(mixed $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject(subject: "Código de recuperación — {$this->appName}")
-            ->markdown(
-                view: 'emails.auth.password-reset-code',
-                data: [
-                    'appName' => $this->appName,
-                    'code' => $this->code,
-                    'expiresMinutes' => $this->expiresMinutes,
-                    'supportEmail' => $this->supportEmail,
-                    'userName' => $notifiable->first_name ?? null,
-                ],
-            );
+        return \App\Support\LocalizedMail::for($notifiable, 'auth.password_reset_code')
+            ->withCode($this->code, 'code_label')
+            ->expiresIn($this->expiresMinutes)
+            ->toMailMessage(appName: $this->appName);
     }
 }
