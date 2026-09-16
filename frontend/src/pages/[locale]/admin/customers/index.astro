@@ -1,0 +1,24 @@
+---
+/**
+ * Página admin de clientes (RF-CUST-040).
+ *
+ * Wrapper Astro que monta el React island `CustomersAdmin`. La lógica
+ * de fetch + filtros + modal de detalle vive en el componente.
+ *
+ * Permiso: el backend filtra por tenant via `accessibleStoreIds()` y
+ * `CheckPermission` middleware. El frontend sólo consume la respuesta.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import CustomersAdmin from '../../../../components/admin/customers/CustomersAdmin';
+---
+
+<AdminLayout title="Clientes | Admin">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">Clientes</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Gestioná los clientes del tenant activo.
+    </p>
+  </div>
+
+  <CustomersAdmin client:only="react" />
+</AdminLayout>

@@ -42,6 +42,10 @@ export const API_ENDPOINTS = {
   admin: {
     stores: '/admin/stores',
     storeMaintenance: (id: number | string) => `/admin/stores/${id}/maintenance`,
+    customers: '/admin/customers',
+    customer: (id: number | string) => `/admin/customers/${id}`,
+    customerSuspend: (id: number | string) => `/admin/customers/${id}/suspend`,
+    customerReactivate: (id: number | string) => `/admin/customers/${id}/reactivate`,
   },
 
   customers: {
