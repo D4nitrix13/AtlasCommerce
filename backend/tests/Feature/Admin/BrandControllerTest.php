@@ -82,7 +82,7 @@ final class BrandControllerTest extends TestCase
     #[Test]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/brands');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands');
         $response->assertStatus(status: 401);
     }
 
@@ -91,7 +91,7 @@ final class BrandControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/brands');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands');
         $response->assertStatus(status: 403);
     }
 
@@ -102,7 +102,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/brands');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 3);
@@ -116,7 +116,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/brands?q=nike');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands?q=nike');
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }
@@ -129,7 +129,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/brands?is_active=1');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands?is_active=1');
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }
@@ -139,7 +139,7 @@ final class BrandControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/brands', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/brands', data: [
             'name' => 'Nike',
             'slug' => 'nike',
             'description' => 'Ropa deportiva',
@@ -157,7 +157,7 @@ final class BrandControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/brands', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/brands', data: [
             'name' => 'Test',
             'slug' => 'Invalid Slug With Spaces',
         ]);
@@ -173,7 +173,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/brands', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/brands', data: [
             'name' => 'Nike',
             'slug' => 'nike-different',
         ]);
@@ -189,7 +189,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/brands', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/brands', data: [
             'name' => 'B',
             'slug' => 'a-same',
         ]);
@@ -205,7 +205,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/brands/'.$brand->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/brands/'.$brand->id, data: [
             'name' => 'Renombrada',
         ]);
 
@@ -225,7 +225,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/brands/'.$brand->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/brands/'.$brand->id);
 
         $response->assertNoContent();
         $this->assertNull(Brand::query()->find($brand->id));
@@ -243,7 +243,7 @@ final class BrandControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/brands?with_trashed=1');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands?with_trashed=1');
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }

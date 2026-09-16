@@ -85,7 +85,7 @@ final class OAuthRoundTripTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -109,7 +109,7 @@ final class OAuthRoundTripTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/account/auth/login'],
         );
 
@@ -145,7 +145,7 @@ final class OAuthRoundTripTest extends TestCase
         // Sobreescribimos host via server — Laravel test lo expone en $_SERVER.
         $response = $this->call(
             method: 'GET',
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             server: [
                 'HTTP_HOST' => 'admin.panda-estampados.com',
                 'HTTP_REFERER' => 'http://admin.panda-estampados.com/es/admin/auth/login',

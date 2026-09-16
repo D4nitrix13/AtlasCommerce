@@ -73,7 +73,7 @@ final class AdminThemeApiTest extends TestCase
     #[Test]
     public function get_theme_returns_defaults_when_not_configured(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.short_name', expect: null);
@@ -91,7 +91,7 @@ final class AdminThemeApiTest extends TestCase
             'accent_color' => '#DC2626',
         ]);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.short_name', expect: 'Panda');
@@ -102,7 +102,7 @@ final class AdminThemeApiTest extends TestCase
     #[Test]
     public function patch_theme_creates_new_theme(): void
     {
-        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/admin/theme', data: [
+        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/v1/admin/theme', data: [
             'short_name' => 'Panda',
             'logo_path' => '/images/panda/logo.webp',
             'accent_color' => '#DC2626',
@@ -131,7 +131,7 @@ final class AdminThemeApiTest extends TestCase
             'accent_color' => '#000000',
         ]);
 
-        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/admin/theme', data: [
+        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/v1/admin/theme', data: [
             'short_name' => 'New Name',
             'accent_color' => '#FFFFFF',
         ]);
@@ -150,7 +150,7 @@ final class AdminThemeApiTest extends TestCase
     #[Test]
     public function patch_theme_validates_color_format(): void
     {
-        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/admin/theme', data: [
+        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/v1/admin/theme', data: [
             'accent_color' => 'not-a-hex',
         ]);
 
@@ -161,7 +161,7 @@ final class AdminThemeApiTest extends TestCase
     #[Test]
     public function patch_theme_validates_email_format(): void
     {
-        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/admin/theme', data: [
+        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/v1/admin/theme', data: [
             'support_email' => 'not-an-email',
         ]);
 
@@ -180,7 +180,7 @@ final class AdminThemeApiTest extends TestCase
         ]);
 
         // Solo actualizamos el color, el resto queda igual.
-        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/admin/theme', data: [
+        $response = $this->patchJson(uri: 'http://panda-estampados.com/api/v1/admin/theme', data: [
             'accent_color' => '#FF00FF',
         ]);
 
@@ -194,7 +194,7 @@ final class AdminThemeApiTest extends TestCase
     public function get_theme_with_unknown_host_returns_404(): void
     {
         // Host que no matchea ningun store.
-        $response = $this->getJson(uri: 'http://unknown-domain.com/api/admin/theme');
+        $response = $this->getJson(uri: 'http://unknown-domain.com/api/v1/admin/theme');
 
         $response->assertStatus(status: 404);
     }

@@ -537,23 +537,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
         /*
         | RF-SUP-162: moderación admin de Q&A de producto. Permisos:
         | support.view (read), support.manage (answer/delete).
+        |
+        | NOTA: AdminProductQuestionController no existe todavía
+        | (sólo ProductQuestionController para storefront + cliente).
+        | Las rutas se registran cuando se cree el controller admin.
         */
-
-        Route::get('questions', [AdminProductQuestionController::class, 'index'])
-            ->middleware('permission:support.view')
-            ->name('admin.questions.index');
-
-        Route::get('questions/{question}', [AdminProductQuestionController::class, 'show'])
-            ->middleware('permission:support.view')
-            ->name('admin.questions.show');
-
-        Route::put('questions/{question}/answer', [AdminProductQuestionController::class, 'answer'])
-            ->middleware('permission:support.manage')
-            ->name('admin.questions.answer');
-
-        Route::delete('questions/{question}', [AdminProductQuestionController::class, 'destroy'])
-            ->middleware('permission:support.manage')
-            ->name('admin.questions.destroy');
 
         /*
         | RF-SUP-160: CRUD admin de tickets de soporte.

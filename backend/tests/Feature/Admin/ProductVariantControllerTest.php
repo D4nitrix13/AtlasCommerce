@@ -123,7 +123,7 @@ final class ProductVariantControllerTest extends TestCase
     #[Test]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/variants');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants');
         $response->assertStatus(status: 401);
     }
 
@@ -138,7 +138,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/variants');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants');
         $response->assertStatus(status: 403);
     }
 
@@ -161,7 +161,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/variants');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
@@ -180,7 +180,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/variants?product_id='.$this->product->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants?product_id='.$this->product->id);
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
@@ -202,7 +202,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/variants?q=azul');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants?q=azul');
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }
@@ -215,7 +215,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/variants/'.$outsider->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants/'.$outsider->id);
         $response->assertStatus(status: 404);
     }
 
@@ -224,7 +224,7 @@ final class ProductVariantControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/variants', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/variants', data: [
             'product_id' => $this->product->id,
             'name' => 'Talla L',
             'sku' => 'CAM-L-01',
@@ -247,7 +247,7 @@ final class ProductVariantControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/variants', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/variants', data: [
             'product_id' => 99999,
             'name' => 'Test',
             'sku' => 'TEST-01',
@@ -267,7 +267,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/variants', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/variants', data: [
             'product_id' => $this->product->id,
             'name' => 'Otra',
             'sku' => 'DUPE-01',
@@ -284,7 +284,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/variants', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/variants', data: [
             'product_id' => $otherProduct->id,
             'name' => 'Outsider',
             'sku' => 'OUT-01',
@@ -304,7 +304,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/variants/'.$variant->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/variants/'.$variant->id, data: [
             'name' => 'Renombrada',
             'price_cents' => 9999,
         ]);
@@ -325,7 +325,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/variants/'.$outsider->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/variants/'.$outsider->id, data: [
             'name' => 'Hacked',
         ]);
 
@@ -341,7 +341,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/variants/'.$variant->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/variants/'.$variant->id);
         $response->assertNoContent();
 
         $this->assertNull(ProductVariant::query()->find($variant->id));
@@ -356,7 +356,7 @@ final class ProductVariantControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/variants?with_trashed=1');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants?with_trashed=1');
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }

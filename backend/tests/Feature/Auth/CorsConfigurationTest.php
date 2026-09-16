@@ -35,7 +35,7 @@ final class CorsConfigurationTest extends TestCase
      */
     private function makePreflightRequest(
         string $origin,
-        string $path = '/api/auth/me',
+        string $path = '/api/v1/auth/me',
         string $requestHeaders = 'content-type,x-xsrf-token',
         array $extraServer = [],
     ): Request {

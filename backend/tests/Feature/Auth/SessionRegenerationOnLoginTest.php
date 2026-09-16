@@ -152,7 +152,7 @@ final class SessionRegenerationOnLoginTest extends TestCase
         $response = $this->withHeaders([
             'Origin' => 'http://'.self::HOST,
             'X-XSRF-TOKEN' => $bootstrap['XSRF-TOKEN'] ?? '',
-        ])->postJson('http://'.self::HOST.'/api/auth/login', [
+        ])->postJson('http://'.self::HOST.'/api/v1/auth/login', [
             'email' => self::USER_EMAIL,
             'password' => self::USER_PASSWORD,
             'device_name' => 'session-fixation-test',
@@ -191,7 +191,7 @@ final class SessionRegenerationOnLoginTest extends TestCase
         $loginResponse = $this->withHeaders([
             'Origin' => 'http://'.self::HOST,
             'X-XSRF-TOKEN' => $bootstrap['XSRF-TOKEN'] ?? '',
-        ])->postJson('http://'.self::HOST.'/api/auth/login', [
+        ])->postJson('http://'.self::HOST.'/api/v1/auth/login', [
             'email' => self::USER_EMAIL,
             'password' => self::USER_PASSWORD,
         ]);
@@ -213,7 +213,7 @@ final class SessionRegenerationOnLoginTest extends TestCase
         $verifyResponse = $this->withHeaders([
             'Origin' => 'http://'.self::HOST,
             'X-XSRF-TOKEN' => $bootstrap['XSRF-TOKEN'] ?? '',
-        ])->postJson('http://'.self::HOST.'/api/auth/2fa/verify-totp-login', [
+        ])->postJson('http://'.self::HOST.'/api/v1/auth/2fa/verify-totp-login', [
             'challenge_token' => $challengeToken,
             'code' => $this->totpCodeFor($secret),
         ]);

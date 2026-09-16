@@ -99,7 +99,7 @@ final class UserControllerTest extends TestCase
     #[Test]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/users');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users');
         $response->assertStatus(status: 401);
     }
 
@@ -108,7 +108,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/users');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users');
         $response->assertStatus(status: 403);
     }
 
@@ -132,7 +132,7 @@ final class UserControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/users');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 4); // admin + staff + 2 nuevos
@@ -153,7 +153,7 @@ final class UserControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/users?q=mario');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users?q=mario');
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }
@@ -163,7 +163,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->staff->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->staff->id);
 
         $response->assertOk();
         $response->assertJsonStructure(structure: [
@@ -182,7 +182,7 @@ final class UserControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/users/'.$outsider->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$outsider->id);
         $response->assertStatus(status: 404);
     }
 
@@ -191,7 +191,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/users', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/users', data: [
             'email' => 'nuevo@panda-estampados.com',
             'password' => 'secret-password-123',
             'first_name' => 'Nuevo',
@@ -214,7 +214,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/users', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/users', data: [
             'email' => $this->staff->email,
             'password' => 'secret-password',
             'first_name' => 'Dup',
@@ -230,7 +230,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/users', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/users', data: [
             'email' => 'intruder@panda-estampados.com',
             'password' => 'secret-password',
             'first_name' => 'X',
@@ -246,7 +246,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/users', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/users', data: [
             'email' => 'newuser@panda-estampados.com',
             'password' => 'secret-password',
             'first_name' => 'X',
@@ -263,7 +263,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->staff->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->staff->id, data: [
             'email' => 'staff-renamed@panda-estampados.com',
             'role_id' => $this->adminRole->id,
         ]);
@@ -279,7 +279,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->staff->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->staff->id, data: [
             'store_ids' => [],
         ]);
 
@@ -293,7 +293,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->admin->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->admin->id, data: [
             'role_id' => $this->staffRole->id,
         ]);
 
@@ -306,7 +306,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->staff->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->staff->id, data: [
             'store_ids' => [$this->storeB->id],
         ]);
 
@@ -318,7 +318,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->staff->id.'/suspend');
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->staff->id.'/suspend');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.is_active', expect: false);
@@ -331,7 +331,7 @@ final class UserControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->staff->id.'/reactivate');
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->staff->id.'/reactivate');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.is_active', expect: true);
@@ -342,7 +342,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->admin->id.'/suspend');
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->admin->id.'/suspend');
 
         $response->assertStatus(status: 500);
         $response->assertJsonFragment(['message' => 'No podés suspenderte a vos mismo.']);
@@ -353,7 +353,7 @@ final class UserControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->staff->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->staff->id);
 
         $response->assertNoContent();
         $this->assertNull(User::query()->find($this->staff->id));
@@ -372,7 +372,7 @@ final class UserControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->admin->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->admin->id);
 
         $response->assertStatus(status: 500);
         $response->assertJsonFragment(['message' => 'No podés eliminarte a vos mismo.']);
@@ -393,7 +393,7 @@ final class UserControllerTest extends TestCase
         ]);
         $otherTenantAdmin->stores()->syncWithoutDetaching(ids: [$this->storeB->id]);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/users/'.$this->admin->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$this->admin->id);
 
         $response->assertStatus(status: 500);
         $response->assertJsonFragment(['message' => 'No podés borrar al ÚNICO admin del tenant.']);
@@ -412,7 +412,7 @@ final class UserControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/users/'.$secondAdmin->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$secondAdmin->id);
 
         $response->assertNoContent();
         $this->assertNull(User::query()->find($secondAdmin->id));
@@ -431,7 +431,7 @@ final class UserControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/users/'.$extra->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/users/'.$extra->id);
 
         $response->assertNoContent();
     }

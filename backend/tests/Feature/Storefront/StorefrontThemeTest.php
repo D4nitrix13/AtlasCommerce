@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Tests del endpoint público `GET /api/storefront/theme`.
+ * Tests del endpoint público `GET /api/v1/storefront/theme`.
  *
  * Verifica que:
  *   - Devuelve el theme configurado para el store actual.
@@ -65,7 +65,7 @@ final class StorefrontThemeTest extends TestCase
             'support_email' => 'support@panda-estampados.test',
         ]);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/storefront/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.short_name', expect: 'Panda');
@@ -77,7 +77,7 @@ final class StorefrontThemeTest extends TestCase
     #[Test]
     public function returns_defaults_when_store_has_no_theme(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/storefront/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.short_name', expect: null);
@@ -98,7 +98,7 @@ final class StorefrontThemeTest extends TestCase
             ],
         ]);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/storefront/theme');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.tokens.font_family', expect: 'Inter');
@@ -109,7 +109,7 @@ final class StorefrontThemeTest extends TestCase
     #[Test]
     public function returns_404_when_host_does_not_match_a_store(): void
     {
-        $response = $this->getJson(uri: 'http://unknown-domain.com/api/storefront/theme');
+        $response = $this->getJson(uri: 'http://unknown-domain.com/api/v1/storefront/theme');
 
         $response->assertStatus(status: 404);
     }
@@ -138,11 +138,11 @@ final class StorefrontThemeTest extends TestCase
             'accent_color' => '#7C3AED',
         ]);
 
-        $panda = $this->getJson(uri: 'http://panda-estampados.com/api/storefront/theme');
+        $panda = $this->getJson(uri: 'http://panda-estampados.com/api/v1/storefront/theme');
         $panda->assertJsonPath(path: 'data.short_name', expect: 'Panda');
         $panda->assertJsonPath(path: 'data.accent_color', expect: '#DC2626');
 
-        $kitsune = $this->getJson(uri: 'http://kitsune.com/api/storefront/theme');
+        $kitsune = $this->getJson(uri: 'http://kitsune.com/api/v1/storefront/theme');
         $kitsune->assertJsonPath(path: 'data.short_name', expect: 'Kitsune');
         $kitsune->assertJsonPath(path: 'data.accent_color', expect: '#7C3AED');
     }

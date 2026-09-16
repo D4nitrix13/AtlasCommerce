@@ -73,7 +73,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_with_valid_credentials_returns_token_and_user(): void
     {
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
             'device_name' => 'jest-test',
@@ -103,7 +103,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_with_wrong_password_returns_422_with_validation_error(): void
     {
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'wrong-password',
         ]);
@@ -115,7 +115,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_with_unknown_email_returns_422_with_validation_error(): void
     {
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'unknown@example.com',
             'password' => 'secret-password',
         ]);
@@ -129,7 +129,7 @@ final class AuthHttpTest extends TestCase
     {
         $this->user->update(['is_active' => false]);
 
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
         ]);
@@ -141,7 +141,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_validates_email_format(): void
     {
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'not-an-email',
             'password' => 'secret-password',
         ]);
@@ -153,7 +153,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_validates_password_min_length(): void
     {
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'short',
         ]);
@@ -167,7 +167,7 @@ final class AuthHttpTest extends TestCase
     {
         // Host `unknown.example.com` no está en `store_domains`.
         $response = $this->postJson(
-            uri: 'http://unknown.example.com/api/auth/login',
+            uri: 'http://unknown.example.com/api/v1/auth/login',
             data: [
                 'email' => 'test@example.com',
                 'password' => 'secret-password',
@@ -194,7 +194,7 @@ final class AuthHttpTest extends TestCase
 
         // User sigue siendo de $this->store, intenta entrar a otherStore.
         $response = $this->postJson(
-            uri: 'http://other.example.com/api/auth/login',
+            uri: 'http://other.example.com/api/v1/auth/login',
             data: [
                 'email' => 'test@example.com',
                 'password' => 'secret-password',
@@ -208,7 +208,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function login_from_store_user_belongs_to_succeeds(): void
     {
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
         ]);
@@ -222,7 +222,7 @@ final class AuthHttpTest extends TestCase
     {
         Sanctum::actingAs($this->user, abilities: ['*']);
 
-        $response = $this->getJson('/api/auth/me');
+        $response = $this->getJson('/api/v1/auth/me');
 
         $response->assertOk();
         $response->assertJsonPath('user.email', 'test@example.com');
@@ -232,7 +232,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function me_without_token_returns_401(): void
     {
-        $response = $this->getJson('/api/auth/me');
+        $response = $this->getJson('/api/v1/auth/me');
 
         $response->assertStatus(401);
     }
@@ -242,7 +242,7 @@ final class AuthHttpTest extends TestCase
     {
         Sanctum::actingAs($this->user, abilities: ['*']);
 
-        $response = $this->postJson('/api/auth/logout');
+        $response = $this->postJson('/api/v1/auth/logout');
 
         $response->assertOk();
         $response->assertJsonPath('message', 'Sesión cerrada.');
@@ -254,7 +254,7 @@ final class AuthHttpTest extends TestCase
     #[Test]
     public function logout_without_token_returns_401(): void
     {
-        $response = $this->postJson('/api/auth/logout');
+        $response = $this->postJson('/api/v1/auth/logout');
 
         $response->assertStatus(401);
     }
@@ -285,7 +285,7 @@ final class AuthHttpTest extends TestCase
 
         Sanctum::actingAs($staffUser, abilities: ['*']);
 
-        $response = $this->getJson('/api/auth/me');
+        $response = $this->getJson('/api/v1/auth/me');
 
         $response->assertOk();
         $response->assertJsonPath('user.role.slug', 'staff');
@@ -298,7 +298,7 @@ final class AuthHttpTest extends TestCase
         // El admin NO tiene registro público. Los admins se crean
         // desde el seeder backend (admin@<slug>.com / password) o
         // desde el dashboard por otro admin via UserController.
-        $response = $this->postJson(uri: '/api/auth/register', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/register', data: [
             'first_name' => 'New',
             'last_name' => 'User',
             'email' => 'new-admin@example.com',
@@ -320,7 +320,7 @@ final class AuthHttpTest extends TestCase
 
         $response = $this->withHeaders(headers: [
             'Authorization' => "Bearer {$token->plainTextToken}",
-        ])->getJson('/api/auth/me');
+        ])->getJson('/api/v1/auth/me');
 
         $response->assertStatus(401);
     }
@@ -337,7 +337,7 @@ final class AuthHttpTest extends TestCase
 
         $response = $this->withHeaders(headers: [
             'Authorization' => "Bearer {$token->plainTextToken}",
-        ])->getJson('/api/auth/me');
+        ])->getJson('/api/v1/auth/me');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'user.email', expect: 'test@example.com');
@@ -359,7 +359,7 @@ final class AuthHttpTest extends TestCase
 
         $response = $this->withHeaders(headers: [
             'Authorization' => "Bearer {$token->plainTextToken}",
-        ])->getJson('/api/auth/me');
+        ])->getJson('/api/v1/auth/me');
 
         $response->assertOk();
 
@@ -378,7 +378,7 @@ final class AuthHttpTest extends TestCase
         // 5 intentos fallidos seguidos → el 6º debe ser bloqueado con
         // mensaje "Demasiados intentos".
         for ($i = 0; $i < 5; $i++) {
-            $response = $this->postJson(uri: '/api/auth/login', data: [
+            $response = $this->postJson(uri: '/api/v1/auth/login', data: [
                 'email' => 'test@example.com',
                 'password' => 'wrong-password',
             ]);
@@ -387,7 +387,7 @@ final class AuthHttpTest extends TestCase
         }
 
         // 6º intento: debe ser bloqueado por throttle.
-        $response = $this->postJson(uri: '/api/auth/login', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'wrong-password',
         ]);
@@ -405,21 +405,21 @@ final class AuthHttpTest extends TestCase
         // 4 fallos + 1 éxito → el contador se resetea y un fallo posterior
         // NO debe ser bloqueado por throttle.
         for ($i = 0; $i < 4; $i++) {
-            $this->postJson(uri: '/api/auth/login', data: [
+            $this->postJson(uri: '/api/v1/auth/login', data: [
                 'email' => 'test@example.com',
                 'password' => 'wrong-password',
             ])->assertStatus(422);
         }
 
         // Login exitoso (resetea el contador).
-        $this->postJson(uri: '/api/auth/login', data: [
+        $this->postJson(uri: '/api/v1/auth/login', data: [
             'email' => 'test@example.com',
             'password' => 'secret-password',
         ])->assertOk();
 
         // 5 fallos más no deben disparar throttle (contador reseteado).
         for ($i = 0; $i < 4; $i++) {
-            $this->postJson(uri: '/api/auth/login', data: [
+            $this->postJson(uri: '/api/v1/auth/login', data: [
                 'email' => 'test@example.com',
                 'password' => 'wrong-password',
             ])->assertStatus(422);

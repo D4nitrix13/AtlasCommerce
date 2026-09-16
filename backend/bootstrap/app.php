@@ -15,8 +15,14 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
+        using: function (): void {
+            // Versión actual: /api/v1/* (RF-MAIN-054).
+            Route::middleware('api')
+                ->prefix('api/v1')
+                ->group(__DIR__.'/../routes/api.php');
+        },
+        apiPrefix: '',
         web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )

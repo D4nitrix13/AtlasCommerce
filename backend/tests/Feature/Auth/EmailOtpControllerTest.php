@@ -65,7 +65,7 @@ final class EmailOtpControllerTest extends TestCase
     #[TestAttr]
     public function request_sends_notification_for_existing_email(): void
     {
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/request', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/request', data: [
             'email' => 'cliente@example.com',
         ]);
 
@@ -90,7 +90,7 @@ final class EmailOtpControllerTest extends TestCase
     #[TestAttr]
     public function request_with_unknown_email_returns_same_response(): void
     {
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/request', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/request', data: [
             'email' => 'unknown@example.com',
         ]);
 
@@ -111,7 +111,7 @@ final class EmailOtpControllerTest extends TestCase
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/verify', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/verify', data: [
             'email' => 'cliente@example.com',
             'code' => $code,
         ]);
@@ -135,7 +135,7 @@ final class EmailOtpControllerTest extends TestCase
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/verify', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/verify', data: [
             'email' => 'cliente@example.com',
             'code' => '999999',
         ]);
@@ -154,7 +154,7 @@ final class EmailOtpControllerTest extends TestCase
             'expires_at' => now()->subMinutes(5),
         ]);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/verify', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/verify', data: [
             'email' => 'cliente@example.com',
             'code' => '111111',
         ]);
@@ -165,7 +165,7 @@ final class EmailOtpControllerTest extends TestCase
     #[TestAttr]
     public function verify_with_unknown_email_returns_422(): void
     {
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/verify', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/verify', data: [
             'email' => 'unknown@example.com',
             'code' => '123456',
         ]);
@@ -187,7 +187,7 @@ final class EmailOtpControllerTest extends TestCase
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/verify', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/verify', data: [
             'email' => 'cliente@example.com',
             'code' => $code,
         ]);
@@ -201,7 +201,7 @@ final class EmailOtpControllerTest extends TestCase
     #[TestAttr]
     public function request_validates_email(): void
     {
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/request', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/request', data: [
             'email' => 'not-an-email',
         ]);
 
@@ -212,7 +212,7 @@ final class EmailOtpControllerTest extends TestCase
     #[TestAttr]
     public function verify_validates_code_format(): void
     {
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/auth/login/email-otp/verify', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/auth/login/email-otp/verify', data: [
             'email' => 'cliente@example.com',
             'code' => 'abc', // muy corto y no-numérico
         ]);

@@ -56,7 +56,7 @@ final class StoreMaintenanceModeTest extends TestCase
     #[Test]
     public function active_storefront_request_passes_through(): void
     {
-        $response = $this->getJson(uri: "http://{$this->host}/api/storefront/promotions");
+        $response = $this->getJson(uri: "http://{$this->host}/api/v1/storefront/promotions");
 
         $response->assertOk();
     }
@@ -66,7 +66,7 @@ final class StoreMaintenanceModeTest extends TestCase
     {
         $this->store->update(['maintenance_mode' => true]);
 
-        $response = $this->get(uri: "http://{$this->host}/api/storefront/promotions");
+        $response = $this->get(uri: "http://{$this->host}/api/v1/storefront/promotions");
 
         $response->assertStatus(503);
         $content = (string) $response->getContent();
@@ -83,7 +83,7 @@ final class StoreMaintenanceModeTest extends TestCase
         // que la duplicación de chequeo NO ocurre acá.
         $this->store->update(['is_active' => false]);
 
-        $response = $this->getJson(uri: "http://{$this->host}/api/storefront/promotions");
+        $response = $this->getJson(uri: "http://{$this->host}/api/v1/storefront/promotions");
 
         $response->assertStatus(404);
     }
@@ -99,7 +99,7 @@ final class StoreMaintenanceModeTest extends TestCase
         // (No testeamos el endpoint específico porque requiere auth;
         // el middleware no debería aplicarse a ese grupo).
         $response = $this->getJson(
-            uri: 'http://admin.test/api/admin/stores',
+            uri: 'http://admin.test/api/v1/admin/stores',
         );
         // El middleware store.domain devuelve 404 (admin.test no existe),
         // pero NO 503 — eso prueba que maintenance NO se aplicó.

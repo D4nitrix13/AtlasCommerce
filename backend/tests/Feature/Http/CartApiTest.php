@@ -53,8 +53,8 @@ final class CartApiTest extends TestCase
     #[Test]
     public function guest_cannot_access_cart_endpoints(): void
     {
-        $this->getJson('/api/carts')->assertUnauthorized();
-        $this->postJson('/api/carts')->assertUnauthorized();
+        $this->getJson('/api/v1/carts')->assertUnauthorized();
+        $this->postJson('/api/v1/carts')->assertUnauthorized();
     }
 
     #[Test]
@@ -63,7 +63,7 @@ final class CartApiTest extends TestCase
         Sanctum::actingAs($this->user);
 
         // Primer store → crea cart (201 Created).
-        $response = $this->postJson('/api/carts');
+        $response = $this->postJson('/api/v1/carts');
         $response->assertCreated();
         $response->assertJsonPath('data.status', 'active');
         $response->assertJsonPath('data.store_id', $this->store->id);
@@ -78,7 +78,7 @@ final class CartApiTest extends TestCase
         ]);
 
         // Segundo store (mismo contexto) → idempotente, devuelve el mismo.
-        $this->postJson('/api/carts')
+        $this->postJson('/api/v1/carts')
             ->assertOk()
             ->assertJsonPath('data.id', $cartId);
     }
@@ -96,7 +96,7 @@ final class CartApiTest extends TestCase
             ->create(attributes: ['base_price_cents' => 25_00]);
 
         // Agregar 2 unidades.
-        $response = $this->postJson("/api/carts/{$cart->id}/items", [
+        $response = $this->postJson("/api/v1/carts/{$cart->id}/items", [
             'product_id' => $product->id,
             'quantity' => 2,
         ]);
@@ -114,7 +114,7 @@ final class CartApiTest extends TestCase
         ]);
 
         // Subtotal del cart se actualiza.
-        $this->getJson("/api/carts/{$cart->id}")
+        $this->getJson("/api/v1/carts/{$cart->id}")
             ->assertJsonPath('data.subtotal_cents', 5000)
             ->assertJsonPath('data.items_count', 1);
     }
@@ -129,12 +129,12 @@ final class CartApiTest extends TestCase
             ->for($this->currency, 'currency')
             ->create(attributes: ['base_price_cents' => 10_00]);
 
-        $this->postJson("/api/carts/{$cart->id}/items", [
+        $this->postJson("/api/v1/carts/{$cart->id}/items", [
             'product_id' => $product->id, 'quantity' => 1,
         ])->assertCreated();
 
         // Segunda vez: 200 OK porque actualiza cantidad (no crea item).
-        $this->postJson("/api/carts/{$cart->id}/items", [
+        $this->postJson("/api/v1/carts/{$cart->id}/items", [
             'product_id' => $product->id, 'quantity' => 3,
         ])->assertOk();
 
@@ -161,7 +161,7 @@ final class CartApiTest extends TestCase
             ->for($product)
             ->create(attributes: ['price_cents' => 12_50]);
 
-        $response = $this->postJson("/api/carts/{$cart->id}/items", [
+        $response = $this->postJson("/api/v1/carts/{$cart->id}/items", [
             'product_id' => $product->id,
             'product_variant_id' => $variant->id,
             'quantity' => 1,
@@ -185,7 +185,7 @@ final class CartApiTest extends TestCase
             ->for($this->currency, 'currency')
             ->create();
 
-        $this->postJson("/api/carts/{$cart->id}/items", [
+        $this->postJson("/api/v1/carts/{$cart->id}/items", [
             'product_id' => $product->id, 'quantity' => 1,
         ])->assertStatus(422);
     }
@@ -201,7 +201,7 @@ final class CartApiTest extends TestCase
             ->for($this->currency)
             ->create();
 
-        $this->getJson("/api/carts/{$cart->id}")->assertForbidden();
+        $this->getJson("/api/v1/carts/{$cart->id}")->assertForbidden();
     }
 
     #[Test]
@@ -219,7 +219,7 @@ final class CartApiTest extends TestCase
 
         // El global scope BelongsToStore filtra este cart porque su store_id
         // no coincide con el contexto actual.
-        $this->getJson("/api/carts/{$cartInOtherStore->id}")
+        $this->getJson("/api/v1/carts/{$cartInOtherStore->id}")
             ->assertNotFound();
     }
 }

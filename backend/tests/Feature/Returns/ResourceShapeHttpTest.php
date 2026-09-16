@@ -191,7 +191,7 @@ final class ResourceShapeHttpTest extends TestCase
         );
         app(ReturnRequestService::class)->approve(returnRequest: $returnRequest);
 
-        $response = $this->getJson("/api/return-requests/{$returnRequest->id}");
+        $response = $this->getJson("/api/v1/return-requests/{$returnRequest->id}");
 
         $response->assertOk();
         $response->assertJsonPath('data.id', $returnRequest->id);
@@ -221,7 +221,7 @@ final class ResourceShapeHttpTest extends TestCase
             items: [['product_id' => $this->product->id, 'quantity' => 1]],
         );
 
-        $response = $this->postJson("/api/return-requests/{$returnRequest->id}/approve");
+        $response = $this->postJson("/api/v1/return-requests/{$returnRequest->id}/approve");
         $response->assertOk();
         $response->assertJsonPath('data.status', ReturnRequestStatus::Approved->value);
     }
@@ -248,7 +248,7 @@ final class ResourceShapeHttpTest extends TestCase
             amountCents: 25_00,
         );
 
-        $response = $this->getJson("/api/refunds/{$refund->id}");
+        $response = $this->getJson("/api/v1/refunds/{$refund->id}");
 
         $response->assertOk();
         $response->assertJsonPath('data.id', $refund->id);
@@ -281,7 +281,7 @@ final class ResourceShapeHttpTest extends TestCase
         );
         app(ReturnRequestService::class)->approve(returnRequest: $returnRequest);
 
-        $response = $this->postJson(uri: '/api/refunds', data: [
+        $response = $this->postJson(uri: '/api/v1/refunds', data: [
             'return_request_id' => $returnRequest->id,
             'amount_cents' => 25_00,
         ]);
@@ -291,7 +291,7 @@ final class ResourceShapeHttpTest extends TestCase
 
         $refundId = $response->json('data.id');
 
-        $processResponse = $this->postJson("/api/refunds/{$refundId}/process");
+        $processResponse = $this->postJson("/api/v1/refunds/{$refundId}/process");
         $processResponse->assertOk();
         $processResponse->assertJsonPath('data.status', RefundStatus::Completed->value);
         $processResponse->assertJsonStructure(['data' => ['refunded_at']]);
@@ -330,7 +330,7 @@ final class ResourceShapeHttpTest extends TestCase
             'status' => RefundStatus::Pending,
         ]);
 
-        $response = $this->postJson("/api/refunds/{$overRefund->id}/process");
+        $response = $this->postJson("/api/v1/refunds/{$overRefund->id}/process");
         $response->assertStatus(422);
     }
 

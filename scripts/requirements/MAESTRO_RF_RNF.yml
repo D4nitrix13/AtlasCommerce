@@ -1876,13 +1876,13 @@ rnf:
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
+    estado: verificado
     estabilidad: podría cambiar
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "Buenas prácticas REST API — Microsoft API Guidelines"
     dependencias: []
-    descripcion: "Todos los endpoints de la API estarán bajo el prefijo `/api/v1/`, dejando libre `/api/` para futuras versiones."
+    descripcion: "Implementado vía bootstrap/app.php con \`using:\` callback + prefix \`api/v1\` (PR #98). Todas las rutas están bajo /api/v1/*. Frontend (src/lib/endpoints.ts) actualizado con prefijo /v1/. Tests Feature migrados. Breaking change deliberado — sin aliases legacy /api/* en este PR (proyecto pre-producción). DOCUMENTACION.md y docs/api/actualizados. Cubierto por PR #98."
     verificado_por: []
     comentarios: "RNF en análisis. Convencionalmente bien, pero requiere migración de rutas actuales."
 

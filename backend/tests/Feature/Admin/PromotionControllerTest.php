@@ -94,7 +94,7 @@ final class PromotionControllerTest extends TestCase
     #[TestAttr]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/promotions');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/promotions');
         $response->assertStatus(status: 401);
     }
 
@@ -103,7 +103,7 @@ final class PromotionControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->unauthorized, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/promotions');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/promotions');
         $response->assertStatus(status: 403);
     }
 
@@ -116,7 +116,7 @@ final class PromotionControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/promotions');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/promotions');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 2);
@@ -134,7 +134,7 @@ final class PromotionControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}");
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.name', expect: 'Con Productos');
@@ -147,7 +147,7 @@ final class PromotionControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/promotions',
+            uri: 'http://panda-estampados.com/api/v1/admin/promotions',
             data: [
                 'name' => 'Verano 2026',
                 'description' => 'Promo de verano',
@@ -170,7 +170,7 @@ final class PromotionControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/promotions',
+            uri: 'http://panda-estampados.com/api/v1/admin/promotions',
             data: [
                 'name' => 'Kitsune Promo',
                 'discount_type' => 'percentage',
@@ -188,7 +188,7 @@ final class PromotionControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/promotions',
+            uri: 'http://panda-estampados.com/api/v1/admin/promotions',
             data: [
                 'name' => 'Tipo Invalido',
                 'discount_type' => 'bogus',
@@ -209,7 +209,7 @@ final class PromotionControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}",
             data: [
                 'name' => 'Renombrado',
                 'value' => 30,
@@ -230,7 +230,7 @@ final class PromotionControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}")
             ->assertNoContent();
 
         $this->assertSoftDeleted(table: 'promotions', data: ['id' => $promotion->id]);
@@ -243,7 +243,7 @@ final class PromotionControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/promotions/{$otherPromotion->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/promotions/{$otherPromotion->id}");
 
         $response->assertStatus(status: 404);
     }
@@ -257,7 +257,7 @@ final class PromotionControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}/products",
+            uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}/products",
             data: [
                 'action' => 'attach',
                 'product_ids' => [$this->product->id, $product2->id],
@@ -269,14 +269,14 @@ final class PromotionControllerTest extends TestCase
 
         // Idempotente: segundo attach de los mismos no duplica.
         $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}/products",
+            uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}/products",
             data: [
                 'action' => 'attach',
                 'product_ids' => [$this->product->id],
             ],
         )->assertOk();
 
-        $verify = $this->getJson(uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}");
+        $verify = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}");
         $verify->assertJsonCount(2, 'data.product_ids');
     }
 
@@ -289,7 +289,7 @@ final class PromotionControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}/products",
+            uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}/products",
             data: [
                 'action' => 'detach',
                 'product_ids' => [$this->product->id],
@@ -308,7 +308,7 @@ final class PromotionControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/promotions/{$promotion->id}/products",
+            uri: "http://panda-estampados.com/api/v1/admin/promotions/{$promotion->id}/products",
             data: [
                 'action' => 'attach',
                 'product_ids' => [99999],

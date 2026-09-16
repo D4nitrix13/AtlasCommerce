@@ -277,18 +277,18 @@ Request → Route → Controller → Model → Database
            Response JSON
 ```
 
-### Rutas API (todas bajo `/api/`, protegidas con `auth:sanctum`)
+### Rutas API (todas bajo `/api/v1/`, protegidas con `auth:sanctum`)
 
 | Método   | Ruta                          | Acción                 |
 | -------- | ----------------------------- | ---------------------- |
-| `GET`    | `/api/products`               | Listar productos       |
-| `POST`   | `/api/products`               | Crear producto         |
-| `GET`    | `/api/products/{id}`          | Ver producto           |
-| `PUT`    | `/api/products/{id}`          | Actualizar producto    |
-| `DELETE` | `/api/products/{id}`          | Eliminar producto      |
-| `GET`    | `/api/products/{id}/images`   | Imágenes del producto  |
-| `POST`   | `/api/products/{id}/images`   | Agregar imagen         |
-| `GET`    | `/api/products/{id}/variants` | Variantes del producto |
+| `GET`    | `/api/v1/products`               | Listar productos       |
+| `POST`   | `/api/v1/products`               | Crear producto         |
+| `GET`    | `/api/v1/products/{id}`          | Ver producto           |
+| `PUT`    | `/api/v1/products/{id}`          | Actualizar producto    |
+| `DELETE` | `/api/v1/products/{id}`          | Eliminar producto      |
+| `GET`    | `/api/v1/products/{id}/images`   | Imágenes del producto  |
+| `POST`   | `/api/v1/products/{id}/images`   | Agregar imagen         |
+| `GET`    | `/api/v1/products/{id}/variants` | Variantes del producto |
 
 **El mismo patrón aplica para todos los recursos:** users, roles, permissions, brands, categories, customers, orders, invoices, payments, shipments, coupons, promotions, taxes, return_requests, support_tickets, audits, notifications, currencies, exchange_rates, store_settings, etc.
 
@@ -296,16 +296,16 @@ Request → Route → Controller → Model → Database
 
 Algunos recursos usan rutas anidadas:
 
-- `/api/products/{id}/images` → ProductImageController
-- `/api/products/{id}/variants` → ProductVariantController
-- `/api/customers/{id}/addresses` → CustomerAddressController
-- `/api/orders/{id}/items` → OrderItemController
-- `/api/orders/{id}/status-histories` → OrderStatusHistoryController
-- `/api/invoices/{id}/items` → InvoiceItemController
-- `/api/purchases/{id}/items` → PurchaseItemController
-- `/api/carts/{id}/items` → CartItemController
-- `/api/wishlists/{id}/items` → WishlistItemController
-- `/api/shipments/{id}/tracking` → ShipmentTrackingController
+- `/api/v1/products/{id}/images` → ProductImageController
+- `/api/v1/products/{id}/variants` → ProductVariantController
+- `/api/v1/customers/{id}/addresses` → CustomerAddressController
+- `/api/v1/orders/{id}/items` → OrderItemController
+- `/api/v1/orders/{id}/status-histories` → OrderStatusHistoryController
+- `/api/v1/invoices/{id}/items` → InvoiceItemController
+- `/api/v1/purchases/{id}/items` → PurchaseItemController
+- `/api/v1/carts/{id}/items` → CartItemController
+- `/api/v1/wishlists/{id}/items` → WishlistItemController
+- `/api/v1/shipments/{id}/tracking` → ShipmentTrackingController
 
 ### Middleware
 
@@ -444,133 +444,133 @@ php artisan route:list         # Listar todas las rutas
 
 | Método   | Ruta                    | Descripción              |
 | -------- | ----------------------- | ------------------------ |
-| GET/POST | `/api/users`            | CRUD de usuarios         |
-| GET/POST | `/api/roles`            | CRUD de roles            |
-| GET/POST | `/api/permissions`      | CRUD de permisos         |
-| GET/POST | `/api/permission-roles` | Asignar permisos a roles |
+| GET/POST | `/api/v1/users`            | CRUD de usuarios         |
+| GET/POST | `/api/v1/roles`            | CRUD de roles            |
+| GET/POST | `/api/v1/permissions`      | CRUD de permisos         |
+| GET/POST | `/api/v1/permission-roles` | Asignar permisos a roles |
 
 ### Catálogo
 
 | Método   | Ruta                            | Descripción            |
 | -------- | ------------------------------- | ---------------------- |
-| GET/POST | `/api/brands`                   | CRUD de marcas         |
-| GET/POST | `/api/categories`               | CRUD de categorías     |
-| GET/POST | `/api/products`                 | CRUD de productos      |
-| GET/POST | `/api/products/{id}/images`     | Imágenes del producto  |
-| GET/POST | `/api/products/{id}/variants`   | Variantes del producto |
-| GET/POST | `/api/products/{id}/attributes` | Atributos del producto |
-| GET/POST | `/api/product-attribute-values` | Valores de atributo    |
-| GET/POST | `/api/variant-attribute-values` | Valores de variante    |
+| GET/POST | `/api/v1/brands`                   | CRUD de marcas         |
+| GET/POST | `/api/v1/categories`               | CRUD de categorías     |
+| GET/POST | `/api/v1/products`                 | CRUD de productos      |
+| GET/POST | `/api/v1/products/{id}/images`     | Imágenes del producto  |
+| GET/POST | `/api/v1/products/{id}/variants`   | Variantes del producto |
+| GET/POST | `/api/v1/products/{id}/attributes` | Atributos del producto |
+| GET/POST | `/api/v1/product-attribute-values` | Valores de atributo    |
+| GET/POST | `/api/v1/variant-attribute-values` | Valores de variante    |
 
 ### Clientes
 
 | Método   | Ruta                            | Descripción             |
 | -------- | ------------------------------- | ----------------------- |
-| GET/POST | `/api/customers`                | CRUD de clientes        |
-| GET/POST | `/api/customers/{id}/addresses` | Direcciones del cliente |
+| GET/POST | `/api/v1/customers`                | CRUD de clientes        |
+| GET/POST | `/api/v1/customers/{id}/addresses` | Direcciones del cliente |
 
 ### Inventario
 
 | Método   | Ruta                       | Descripción            |
 | -------- | -------------------------- | ---------------------- |
-| GET/POST | `/api/warehouses`          | CRUD de almacenes      |
-| GET/POST | `/api/inventories`         | Consulta de inventario |
-| GET/POST | `/api/inventory-movements` | Movimientos de stock   |
+| GET/POST | `/api/v1/warehouses`          | CRUD de almacenes      |
+| GET/POST | `/api/v1/inventories`         | Consulta de inventario |
+| GET/POST | `/api/v1/inventory-movements` | Movimientos de stock   |
 
 ### Compras
 
 | Método   | Ruta                        | Descripción         |
 | -------- | --------------------------- | ------------------- |
-| GET/POST | `/api/suppliers`            | CRUD de proveedores |
-| GET/POST | `/api/purchases`            | CRUD de compras     |
-| GET/POST | `/api/purchases/{id}/items` | Ítems de compra     |
+| GET/POST | `/api/v1/suppliers`            | CRUD de proveedores |
+| GET/POST | `/api/v1/purchases`            | CRUD de compras     |
+| GET/POST | `/api/v1/purchases/{id}/items` | Ítems de compra     |
 
 ### Carritos
 
 | Método   | Ruta                        | Descripción       |
 | -------- | --------------------------- | ----------------- |
-| GET/POST | `/api/carts`                | CRUD de carritos  |
-| GET/POST | `/api/carts/{id}/items`     | Ítems del carrito |
-| GET/POST | `/api/wishlists`            | CRUD de wishlists |
-| GET/POST | `/api/wishlists/{id}/items` | Ítems de wishlist |
+| GET/POST | `/api/v1/carts`                | CRUD de carritos  |
+| GET/POST | `/api/v1/carts/{id}/items`     | Ítems del carrito |
+| GET/POST | `/api/v1/wishlists`            | CRUD de wishlists |
+| GET/POST | `/api/v1/wishlists/{id}/items` | Ítems de wishlist |
 
 ### Ventas
 
 | Método   | Ruta                                  | Descripción           |
 | -------- | ------------------------------------- | --------------------- |
-| GET/POST | `/api/orders`                         | CRUD de pedidos       |
-| GET/POST | `/api/orders/{id}/items`              | Ítems del pedido      |
-| GET/POST | `/api/orders/{id}/status-histories`   | Historial de estados  |
-| GET/POST | `/api/invoices`                       | CRUD de facturas      |
-| GET/POST | `/api/invoices/{id}/items`            | Ítems de factura      |
-| GET/POST | `/api/invoices/{id}/status-histories` | Historial de facturas |
+| GET/POST | `/api/v1/orders`                         | CRUD de pedidos       |
+| GET/POST | `/api/v1/orders/{id}/items`              | Ítems del pedido      |
+| GET/POST | `/api/v1/orders/{id}/status-histories`   | Historial de estados  |
+| GET/POST | `/api/v1/invoices`                       | CRUD de facturas      |
+| GET/POST | `/api/v1/invoices/{id}/items`            | Ítems de factura      |
+| GET/POST | `/api/v1/invoices/{id}/status-histories` | Historial de facturas |
 
 ### Pagos
 
 | Método   | Ruta                        | Descripción         |
 | -------- | --------------------------- | ------------------- |
-| GET/POST | `/api/payments`             | CRUD de pagos       |
-| GET/POST | `/api/payment-methods`      | Métodos de pago     |
-| GET/POST | `/api/payment-transactions` | Transacciones       |
-| GET/POST | `/api/payment-installments` | Cuotas              |
-| GET/POST | `/api/invoice-payments`     | Pivote factura-pago |
+| GET/POST | `/api/v1/payments`             | CRUD de pagos       |
+| GET/POST | `/api/v1/payment-methods`      | Métodos de pago     |
+| GET/POST | `/api/v1/payment-transactions` | Transacciones       |
+| GET/POST | `/api/v1/payment-installments` | Cuotas              |
+| GET/POST | `/api/v1/invoice-payments`     | Pivote factura-pago |
 
 ### Envío
 
 | Método   | Ruta                           | Descripción       |
 | -------- | ------------------------------ | ----------------- |
-| GET/POST | `/api/shipping-companies`      | Empresas de envío |
-| GET/POST | `/api/shipping-zones`          | Zonas geográficas |
-| GET/POST | `/api/shipments`               | Envíos            |
-| GET/POST | `/api/shipments/{id}/tracking` | Seguimiento       |
+| GET/POST | `/api/v1/shipping-companies`      | Empresas de envío |
+| GET/POST | `/api/v1/shipping-zones`          | Zonas geográficas |
+| GET/POST | `/api/v1/shipments`               | Envíos            |
+| GET/POST | `/api/v1/shipments/{id}/tracking` | Seguimiento       |
 
 ### Marketing
 
 | Método   | Ruta                      | Descripción               |
 | -------- | ------------------------- | ------------------------- |
-| GET/POST | `/api/coupons`            | CRUD de cupones           |
-| GET/POST | `/api/coupon-usages`      | Usos de cupón             |
-| GET/POST | `/api/promotions`         | CRUD de promociones       |
-| GET/POST | `/api/product-promotions` | Pivote producto-promoción |
+| GET/POST | `/api/v1/coupons`            | CRUD de cupones           |
+| GET/POST | `/api/v1/coupon-usages`      | Usos de cupón             |
+| GET/POST | `/api/v1/promotions`         | CRUD de promociones       |
+| GET/POST | `/api/v1/product-promotions` | Pivote producto-promoción |
 
 ### Impuestos
 
 | Método   | Ruta                 | Descripción              |
 | -------- | -------------------- | ------------------------ |
-| GET/POST | `/api/taxes`         | CRUD de impuestos        |
-| GET/POST | `/api/product-taxes` | Pivote producto-impuesto |
+| GET/POST | `/api/v1/taxes`         | CRUD de impuestos        |
+| GET/POST | `/api/v1/product-taxes` | Pivote producto-impuesto |
 
 ### Devoluciones
 
 | Método   | Ruta                        | Descripción               |
 | -------- | --------------------------- | ------------------------- |
-| GET/POST | `/api/return-requests`      | Solicitudes de devolución |
-| GET/POST | `/api/return-request-items` | Ítems de devolución       |
-| GET/POST | `/api/refunds`              | Reembolsos                |
+| GET/POST | `/api/v1/return-requests`      | Solicitudes de devolución |
+| GET/POST | `/api/v1/return-request-items` | Ítems de devolución       |
+| GET/POST | `/api/v1/refunds`              | Reembolsos                |
 
 ### Soporte
 
 | Método   | Ruta                           | Descripción            |
 | -------- | ------------------------------ | ---------------------- |
-| GET/POST | `/api/support-tickets`         | Tickets de soporte     |
-| GET/POST | `/api/support-ticket-messages` | Mensajes del ticket    |
-| GET/POST | `/api/product-reviews`         | Reseñas de productos   |
-| GET/POST | `/api/product-questions`       | Preguntas de productos |
+| GET/POST | `/api/v1/support-tickets`         | Tickets de soporte     |
+| GET/POST | `/api/v1/support-ticket-messages` | Mensajes del ticket    |
+| GET/POST | `/api/v1/product-reviews`         | Reseñas de productos   |
+| GET/POST | `/api/v1/product-questions`       | Preguntas de productos |
 
 ### Sistema
 
 | Método    | Ruta                 | Descripción              |
 | --------- | -------------------- | ------------------------ |
-| GET       | `/api/audits`        | Auditoría (solo lectura) |
-| GET/PATCH | `/api/notifications` | Notificaciones           |
+| GET       | `/api/v1/audits`        | Auditoría (solo lectura) |
+| GET/PATCH | `/api/v1/notifications` | Notificaciones           |
 
 ### Configuración
 
 | Método   | Ruta                  | Descripción             |
 | -------- | --------------------- | ----------------------- |
-| GET/POST | `/api/currencies`     | Monedas                 |
-| GET/POST | `/api/exchange-rates` | Tasas de cambio         |
-| GET/POST | `/api/store-settings` | Configuración de tienda |
+| GET/POST | `/api/v1/currencies`     | Monedas                 |
+| GET/POST | `/api/v1/exchange-rates` | Tasas de cambio         |
+| GET/POST | `/api/v1/store-settings` | Configuración de tienda |
 
 ---
 
