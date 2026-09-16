@@ -433,6 +433,27 @@ const en: Translations = {
   'storefront.search.page': 'Page',
   'storefront.search.of': 'of',
 
+  // ─── storefront: cart ────────────────────────────────────────────────
+  'storefront.cart.title': 'Your cart',
+  'storefront.cart.empty': 'Your cart is empty.',
+  'storefront.cart.emptyHint': 'Browse the catalog and add some products.',
+  'storefront.cart.coupon.label': 'Discount code',
+  'storefront.cart.coupon.placeholder': 'Enter your code',
+  'storefront.cart.coupon.apply': 'Apply',
+  'storefront.cart.coupon.applying': 'Applying...',
+  'storefront.cart.coupon.applied': 'Coupon "{code}" applied',
+  'storefront.cart.coupon.remove': 'Remove',
+  'storefront.cart.coupon.discount': 'Discount',
+  'storefront.cart.coupon.error.empty': 'Enter a code.',
+  'storefront.cart.coupon.error.invalid': 'Invalid code.',
+  'storefront.cart.coupon.error.minAmount': 'Coupon requires a minimum amount.',
+  'storefront.cart.coupon.error.expired': 'Coupon is expired or exhausted.',
+  'storefront.cart.coupon.error.generic': 'Could not apply coupon.',
+  'storefront.cart.subtotal': 'Subtotal',
+  'storefront.cart.discount': 'Discount',
+  'storefront.cart.total': 'Total',
+  'storefront.cart.checkout': 'Checkout',
+
   'format.empty': '—',
   'format.date.locale': 'en-US',
 

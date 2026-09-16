@@ -434,6 +434,27 @@ const es: Translations = {
   'storefront.search.page': 'Página',
   'storefront.search.of': 'de',
 
+  // ─── storefront: cart ────────────────────────────────────────────────
+  'storefront.cart.title': 'Tu carrito',
+  'storefront.cart.empty': 'Tu carrito está vacío.',
+  'storefront.cart.emptyHint': 'Explorá el catálogo y agregá productos.',
+  'storefront.cart.coupon.label': 'Código de descuento',
+  'storefront.cart.coupon.placeholder': 'Ingresá tu código',
+  'storefront.cart.coupon.apply': 'Aplicar',
+  'storefront.cart.coupon.applying': 'Aplicando...',
+  'storefront.cart.coupon.applied': 'Cupón "{code}" aplicado',
+  'storefront.cart.coupon.remove': 'Quitar',
+  'storefront.cart.coupon.discount': 'Descuento',
+  'storefront.cart.coupon.error.empty': 'Ingresá un código.',
+  'storefront.cart.coupon.error.invalid': 'El código no es válido.',
+  'storefront.cart.coupon.error.minAmount': 'El cupón requiere un monto mínimo.',
+  'storefront.cart.coupon.error.expired': 'El cupón está vencido o agotado.',
+  'storefront.cart.coupon.error.generic': 'No se pudo aplicar el cupón.',
+  'storefront.cart.subtotal': 'Subtotal',
+  'storefront.cart.discount': 'Descuento',
+  'storefront.cart.total': 'Total',
+  'storefront.cart.checkout': 'Ir a checkout',
+
   'format.empty': '—',
   'format.date.locale': 'es-NI',
 
