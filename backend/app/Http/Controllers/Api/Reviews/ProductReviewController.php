@@ -77,8 +77,8 @@ class ProductReviewController extends Controller
     public function indexForProduct(Request $request, Product $product): JsonResponse
     {
         $rows = DB::table('product_reviews')
-            ->where(column: 'product_id', operator: '=', value: $product->id)
-            ->where(column: 'is_approved', operator: '=', value: true)
+            ->where('product_id', $product->id)
+            ->where('is_approved', true)
             ->whereNull('deleted_at')
             ->orderByDesc('reviewed_at')
             ->limit(50)

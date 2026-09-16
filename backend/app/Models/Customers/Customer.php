@@ -140,7 +140,8 @@ class Customer extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where(column: 'is_active', value: true);
+        // Args posicionales: ver note en Promotion::scopeActive.
+        return $query->where('is_active', true);
     }
 
     /**

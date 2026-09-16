@@ -64,7 +64,8 @@ class CustomerAddress extends Model
      */
     public function scopePrimary(Builder $query): Builder
     {
-        return $query->where(column: 'is_primary', value: true);
+        // Args posicionales: ver note en Promotion::scopeActive.
+        return $query->where('is_primary', true);
     }
 
     /**

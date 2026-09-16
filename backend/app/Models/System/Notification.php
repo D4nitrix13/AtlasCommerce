@@ -83,7 +83,8 @@ class Notification extends Model
      */
     public function scopeUnread(Builder $query): Builder
     {
-        return $query->where(column: 'is_read', value: false);
+        // Args posicionales: ver note en Promotion::scopeActive.
+        return $query->where('is_read', false);
     }
 
     /**

@@ -127,10 +127,10 @@ class ProductController extends Controller
     ): JsonResponse {
         $store = $request->attributes->get('store');
 
-        $product = Product::where(column: 'slug', operator: '=', value: $slug)
-            ->whereHas(relation: 'stores', callback: function ($query) use ($store): void {
-                $query->where(column: 'store_id', operator: '=', value: $store->id)
-                    ->where(column: 'is_visible', operator: '=', value: true);
+        $product = Product::where('slug', $slug)
+            ->whereHas('stores', function ($query) use ($store): void {
+                $query->where('store_id', $store->id)
+                    ->where('is_visible', true);
             })
             ->firstOrFail();
 
