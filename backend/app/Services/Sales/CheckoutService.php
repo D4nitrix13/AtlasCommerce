@@ -16,7 +16,9 @@ use App\Models\Sales\Invoice;
 use App\Models\Sales\Order;
 use App\Models\Settings\ExchangeRate;
 use App\Models\Shipping\ShippingZone;
+use App\Models\Stores\Store;
 use App\Services\Marketing\CouponService;
+use App\Services\Marketing\PromotionService;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -43,13 +45,19 @@ use RuntimeException;
  * Decisiones MVP (no production-ready):
  * - Impuestos = 0% (configurar `taxes` está fuera de scope).
  * - Shipping = 0 (se calcula en un paso posterior; ver `PHASE 5` futuro).
- * - No aplica cupones; queda para v2.
+ *
+ * Descuentos (RF-MKT-060 + RF-MKT-061):
+ * - Cupón (explícito, tipeado por el cliente) y promociones automáticas
+ *   se ACUMULAN: el descuento total = cupón + promos aplicables.
+ * - Si ambos son 0 → sin descuento.
+ * - Descuento total nunca excede el subtotal (sanity cap).
  */
 final class CheckoutService
 {
     public function __construct(
         private readonly StoreContextService $storeContext,
         private readonly CouponService $coupons,
+        private readonly PromotionService $promotions,
     ) {}
 
     /**
@@ -118,19 +126,35 @@ final class CheckoutService
                 storeId: (int) $storeId,
             );
 
-            // Discount: se aplica ANTES de tax y shipping, sobre el subtotal.
+            // Discount: cupón (RF-MKT-060) + promociones automáticas (RF-MKT-061).
+            // Cupón se aplica ANTES de tax/shipping, sobre el subtotal.
             // Si el cupón es inválido (expirado, agotado, etc.) se ignora
             // silenciosamente — el checkout NO falla por un cupón malo
             // (regla de negocio MVP: "cupón roto = no aplica descuento").
-            $discountCents = $this->resolveDiscountCents(
+            $couponDiscountCents = $this->resolveDiscountCents(
                 subtotalCents: $subtotalCents,
                 coupon: $coupon,
             );
 
+            // Promociones automáticas: se evalúan sobre cada item del carrito
+            // y se acumulan al descuento del cupón (no son excluyentes).
+            $promoDiscountCents = $this->resolvePromotionDiscountCents(
+                cart: $cart,
+                store: $store,
+            );
+
+            $discountCents = $couponDiscountCents + $promoDiscountCents;
+
+            // Sanity: el descuento total nunca puede exceder el subtotal.
+            if ($discountCents > $subtotalCents) {
+                $discountCents = $subtotalCents;
+            }
+
             $totalCents = $subtotalCents - $discountCents + $taxCents + $shippingCents;
 
-            // Registrar uso del cupón si se aplicó.
-            if ($coupon !== null && $discountCents > 0) {
+            // Registrar uso del cupón si se aplicó (las promociones NO se registran —
+            // son automáticas, sin contador de uso).
+            if ($coupon !== null && $couponDiscountCents > 0) {
                 CouponUsage::create([
                     'coupon_id' => $coupon->id,
                     'customer_id' => $cart->customer_id,
@@ -344,6 +368,22 @@ final class CheckoutService
             coupon: $coupon,
             subtotalCents: $subtotalCents,
         );
+    }
+
+    /**
+     * Resuelve el descuento por promociones automáticas (RF-MKT-061).
+     *
+     * Si no hay tienda activa en el contexto, retorna 0 silenciosamente.
+     * Si el carrito está vacío, retorna 0 (delegado al servicio).
+     * Si no hay promociones aplicables, retorna 0.
+     */
+    private function resolvePromotionDiscountCents(Cart $cart, ?Store $store): int
+    {
+        if ($store === null) {
+            return 0;
+        }
+
+        return $this->promotions->calculateForCart(cart: $cart, store: $store);
     }
 
     /**
