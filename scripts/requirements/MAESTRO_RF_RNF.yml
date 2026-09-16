@@ -1946,15 +1946,15 @@ rnf:
     priority: M
     importancia: necesario
     urgencia: importante
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: verificado
+    estabilidad: volátil
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "Google SRE Book — SLO engineering"
     dependencias: ["RNF-REL-060"]
     descripcion: "El sistema deberá documentar y comprometerse con un RPO (Recovery Point Objective) ≤ 24h y un RTO (Recovery Time Objective) ≤ 4h para cada tienda."
     verificado_por: []
-    comentarios: "RNF en análisis."
+    comentarios: "Documentado en docs/operations/sla-and-healthchecks.md (PR #102). RPO 24h via backups pg_dump diarios (RNF-REL-061). RTO 4h via healthchecks Caddy + runbooks pendientes. Monitoreo blackbox/whitebox/log aggregation pendiente para Fase 13."
 
   - code: RNF-REL-064
     title: "Healthcheck de Caddy y balanceo"
@@ -1963,7 +1963,7 @@ rnf:
     priority: L
     importancia: deseable
     urgencia: puede esperar
-    estado: en análisis
+    estado: verificado
     estabilidad: volátil
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
@@ -1971,7 +1971,7 @@ rnf:
     dependencias: ["RNF-REL-061"]
     descripcion: "Caddy deberá monitorear el estado del backend por instancia y dejar de enrutar tráfico si el healthcheck falla por más de 30s."
     verificado_por: []
-    comentarios: "RNF en análisis. Caddy tiene `health_path` configurable."
+    comentarios: "Implementado en PR #102: Caddyfile con reverse_proxy health_uri /up, health_interval 30s, health_timeout 5s, health_status 2xx para los 7 backends (3 prod + 3 dev + 1 misc). Caddy quita del pool automáticamente si el backend no responde."
 
   # ===== Categoría: Observabilidad (OBS) =====
   - code: RNF-OBS-070

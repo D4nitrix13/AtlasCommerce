@@ -133,15 +133,23 @@ http:// {
 	# not path /api/auth/login /api/auth/2fa/verify-totp-login /api/auth/recovery-codes/regenerate /api/auth/forgot-password /api/auth/reset-password
 	# rate_limit @api_general api_default_zone 60r/m
 
-	# -----------------------------------------------------------
+		# -----------------------------------------------------------
 	# DEVELOPMENT — puertos publicados en el host
 	# -----------------------------------------------------------
 
 	# Panda + Kitsune dev (mismo stack dev multi-tenant)
+	# RF-REL-064: health_uri /up + health_interval 30s.
+	# Si el backend no responde 2xx en 5s, Caddy lo marca unhealthy
+	# y deja de rutear tráfico hasta que vuelva a responder.
 	@panda_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	@panda_dev host admin.panda-estampados.com www.panda-estampados.com panda-estampados.com admin.kitsune.com www.kitsune.com kitsune.com
 	handle @panda_dev_api {
-		reverse_proxy localhost:9000
+		reverse_proxy localhost:9000 {
+			health_uri /up
+			health_interval 30s
+			health_timeout 5s
+			health_status 2xx
+		}
 	}
 	handle @panda_dev {
 		reverse_proxy localhost:5321
@@ -151,7 +159,12 @@ http:// {
 	@mm_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	@mm_dev host admin.mm-boutique.com www.mm-boutique.com mm-boutique.com
 	handle @mm_dev_api {
-		reverse_proxy localhost:10000
+		reverse_proxy localhost:10000 {
+			health_uri /up
+			health_interval 30s
+			health_timeout 5s
+			health_status 2xx
+		}
 	}
 	handle @mm_dev {
 		reverse_proxy localhost:6321
@@ -161,7 +174,12 @@ http:// {
 	@morales_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	@morales_dev host admin.morales-store.com www.morales-store.com morales-store.com
 	handle @morales_dev_api {
-		reverse_proxy localhost:11000
+		reverse_proxy localhost:11000 {
+			health_uri /up
+			health_interval 30s
+			health_timeout 5s
+			health_status 2xx
+		}
 	}
 	handle @morales_dev {
 		reverse_proxy localhost:7321
@@ -175,7 +193,12 @@ http:// {
 	@panda_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	@panda host panda-estampados.com www.panda-estampados.com admin.panda-estampados.com
 	handle @panda_api {
-		reverse_proxy 172.21.0.20:8000
+		reverse_proxy 172.21.0.20:8000 {
+			health_uri /up
+			health_interval 30s
+			health_timeout 5s
+			health_status 2xx
+		}
 	}
 	handle @panda {
 		reverse_proxy 172.21.0.21:4321
@@ -190,7 +213,12 @@ http:// {
 	@mm_boutique_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	@mm_boutique host mm-boutique.com www.mm-boutique.com admin.mm-boutique.com
 	handle @mm_boutique_api {
-		reverse_proxy 172.22.0.20:8000
+		reverse_proxy 172.22.0.20:8000 {
+			health_uri /up
+			health_interval 30s
+			health_timeout 5s
+			health_status 2xx
+		}
 	}
 	handle @mm_boutique {
 		reverse_proxy 172.22.0.21:4321
@@ -200,7 +228,12 @@ http:// {
 	@morales_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
 	@morales host morales-store.com www.morales-store.com admin.morales-store.com
 	handle @morales_api {
-		reverse_proxy 172.23.0.20:8000
+		reverse_proxy 172.23.0.20:8000 {
+			health_uri /up
+			health_interval 30s
+			health_timeout 5s
+			health_status 2xx
+		}
 	}
 	handle @morales {
 		reverse_proxy 172.23.0.21:4321
