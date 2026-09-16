@@ -154,6 +154,12 @@ jobs:
         working-directory: frontend
         run: pnpm run test -- --reporter=verbose
 
+      - name: Browserslist validation (RF-COMP-090)
+        working-directory: frontend
+        # Si .browserslistrc está malformado o apunta a browsers no
+        # soportados, este comando falla con error claro.
+        run: npx browserslist --coverage
+
   docs-quality:
     name: Docs (Markdown)
     runs-on: ubuntu-latest
