@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ResolveStoreFromDomain;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetSessionDomainFromHost;
 use App\Http\Middleware\StoreMaintenanceMode;
 use Illuminate\Foundation\Application;
@@ -29,6 +30,12 @@ return Application::configure(basePath: dirname(__DIR__))
             SetSessionDomainFromHost::class,
             EnsureFrontendRequestsAreStateful::class,
         ]);
+
+        // SecurityHeaders: aplica a TODAS las responses (web + api).
+        // Defense-in-depth — Caddyfile ya emite estos headers para el
+        // frontend HTML; acá los re-aplicamos a responses API/HTML
+        // del backend (RF-SEC-017 + RF-SEC-021).
+        $middleware->append(SecurityHeaders::class);
 
         $middleware->alias([
             'store.domain' => ResolveStoreFromDomain::class,
