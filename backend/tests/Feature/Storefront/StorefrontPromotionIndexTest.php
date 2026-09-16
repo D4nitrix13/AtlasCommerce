@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Tests del endpoint público `GET /api/storefront/promotions` (RF-MKT-061).
+ * Tests del endpoint público `GET /api/v1/storefront/promotions` (RF-MKT-061).
  *
  * Cubre:
  *  - Happy: devuelve promos vigentes del tenant.
@@ -147,7 +147,7 @@ final class StorefrontPromotionIndexTest extends TestCase
     #[Test]
     public function unknown_host_returns_404(): void
     {
-        $response = $this->getJson(uri: 'http://unknown.test/api/storefront/promotions');
+        $response = $this->getJson(uri: 'http://unknown.test/api/v1/storefront/promotions');
 
         $response->assertNotFound();
     }
@@ -157,6 +157,6 @@ final class StorefrontPromotionIndexTest extends TestCase
      */
     private function url(): string
     {
-        return "http://{$this->host}/api/storefront/promotions";
+        return "http://{$this->host}/api/v1/storefront/promotions";
     }
 }

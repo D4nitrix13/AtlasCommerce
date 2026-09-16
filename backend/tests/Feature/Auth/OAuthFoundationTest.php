@@ -132,7 +132,7 @@ final class OAuthFoundationTest extends TestCase
 
     private function createRequest(): \Illuminate\Http\Request
     {
-        return \Illuminate\Http\Request::create(uri: '/api/auth/social/google/redirect');
+        return \Illuminate\Http\Request::create(uri: '/api/v1/auth/social/google/redirect');
     }
 
     // ---------------------------------------------------------------------

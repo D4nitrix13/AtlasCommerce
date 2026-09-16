@@ -94,7 +94,7 @@ final class StoreControllerTest extends TestCase
     #[TestAttr]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/stores');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/stores');
         $response->assertStatus(status: 401);
     }
 
@@ -103,7 +103,7 @@ final class StoreControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->unauthorized, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/stores');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/stores');
         $response->assertStatus(status: 403);
     }
 
@@ -112,7 +112,7 @@ final class StoreControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/stores');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/stores');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
@@ -124,7 +124,7 @@ final class StoreControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}");
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.name', expect: $this->storeA->name);
@@ -136,7 +136,7 @@ final class StoreControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/stores/{$this->storeB->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeB->id}");
 
         $response->assertStatus(status: 404);
     }
@@ -147,7 +147,7 @@ final class StoreControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}",
             data: [
                 'description' => 'Tienda actualizada',
                 'tax_rate' => 15.0,
@@ -167,7 +167,7 @@ final class StoreControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}",
             data: [
                 'primary_color' => 'rojo',
             ],
@@ -183,7 +183,7 @@ final class StoreControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}",
             data: [
                 'tax_rate' => 150,
             ],
@@ -201,7 +201,7 @@ final class StoreControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/maintenance",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/maintenance",
             data: ['enabled' => true],
         );
 
@@ -218,7 +218,7 @@ final class StoreControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/maintenance",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/maintenance",
             data: ['enabled' => false],
         );
 
@@ -232,7 +232,7 @@ final class StoreControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/maintenance",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/maintenance",
             data: [],
         );
 
@@ -246,7 +246,7 @@ final class StoreControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeB->id}/maintenance",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeB->id}/maintenance",
             data: ['enabled' => true],
         );
 

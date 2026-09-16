@@ -102,7 +102,7 @@ final class CustomerControllerTest extends TestCase
     #[TestAttr]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/customers');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers');
         $response->assertStatus(status: 401);
     }
 
@@ -111,7 +111,7 @@ final class CustomerControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->unauthorized, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/customers');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers');
         $response->assertStatus(status: 403);
     }
 
@@ -124,7 +124,7 @@ final class CustomerControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/customers');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 2);
@@ -143,11 +143,11 @@ final class CustomerControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $byQ = $this->getJson(uri: 'http://panda-estampados.com/api/admin/customers?q=maria');
+        $byQ = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers?q=maria');
         $byQ->assertJsonPath(path: 'meta.total', expect: 1);
         $byQ->assertJsonPath(path: 'data.0.email', expect: 'maria@example.com');
 
-        $byType = $this->getJson(uri: 'http://panda-estampados.com/api/admin/customers?customer_type=wholesale');
+        $byType = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers?customer_type=wholesale');
         $byType->assertJsonPath(path: 'meta.total', expect: 1);
         $byType->assertJsonPath(path: 'data.0.customer_type', expect: 'wholesale');
     }
@@ -162,7 +162,7 @@ final class CustomerControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/customers/{$customer->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/customers/{$customer->id}");
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.email', expect: 'comprador@example.com');
@@ -178,7 +178,7 @@ final class CustomerControllerTest extends TestCase
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/customers',
+            uri: 'http://panda-estampados.com/api/v1/admin/customers',
             data: [
                 'first_name' => 'Ana',
                 'last_name' => 'García',
@@ -205,7 +205,7 @@ final class CustomerControllerTest extends TestCase
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/customers',
+            uri: 'http://panda-estampados.com/api/v1/admin/customers',
             data: [
                 'first_name' => 'Otro',
                 'last_name' => 'Tienda',
@@ -227,7 +227,7 @@ final class CustomerControllerTest extends TestCase
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/customers',
+            uri: 'http://panda-estampados.com/api/v1/admin/customers',
             data: [
                 'first_name' => 'Dup',
                 'last_name' => 'Test',
@@ -249,7 +249,7 @@ final class CustomerControllerTest extends TestCase
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/customers/{$customer->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/customers/{$customer->id}",
             data: [
                 'customer_type' => 'vip',
                 'phone' => '+54999887766',
@@ -270,11 +270,11 @@ final class CustomerControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $suspend = $this->postJson(uri: "http://panda-estampados.com/api/admin/customers/{$customer->id}/suspend");
+        $suspend = $this->postJson(uri: "http://panda-estampados.com/api/v1/admin/customers/{$customer->id}/suspend");
         $suspend->assertOk();
         $suspend->assertJsonPath(path: 'data.is_active', expect: false);
 
-        $reactivate = $this->postJson(uri: "http://panda-estampados.com/api/admin/customers/{$customer->id}/reactivate");
+        $reactivate = $this->postJson(uri: "http://panda-estampados.com/api/v1/admin/customers/{$customer->id}/reactivate");
         $reactivate->assertOk();
         $reactivate->assertJsonPath(path: 'data.is_active', expect: true);
     }
@@ -286,17 +286,17 @@ final class CustomerControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/admin/customers/{$customer->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/admin/customers/{$customer->id}")
             ->assertNoContent();
 
         $this->assertSoftDeleted(table: 'customers', data: ['id' => $customer->id]);
 
         // Por defecto NO aparece en el listado (sin with_trashed).
-        $list = $this->getJson(uri: 'http://panda-estampados.com/api/admin/customers');
+        $list = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers');
         $list->assertJsonPath(path: 'meta.total', expect: 0);
 
         // Con with_trashed=1 sí aparece.
-        $listAll = $this->getJson(uri: 'http://panda-estampados.com/api/admin/customers?with_trashed=1');
+        $listAll = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers?with_trashed=1');
         $listAll->assertJsonPath(path: 'meta.total', expect: 1);
     }
 
@@ -307,7 +307,7 @@ final class CustomerControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/customers/{$otherCustomer->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/customers/{$otherCustomer->id}");
 
         $response->assertStatus(status: 404);
     }

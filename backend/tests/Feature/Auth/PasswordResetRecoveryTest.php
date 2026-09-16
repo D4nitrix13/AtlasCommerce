@@ -151,7 +151,7 @@ final class PasswordResetRecoveryTest extends TestCase
         // available_methods (formato legacy). Documentamos el
         // comportamiento actual para no atarnos a un cambio que el
         // controller aún no emite.
-        $response = $this->postJson(uri: self::HOST.'/api/auth/forgot-password', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/forgot-password', data: [
             'email' => $emailOnly->email,
         ]);
         $response->assertOk();
@@ -160,7 +160,7 @@ final class PasswordResetRecoveryTest extends TestCase
         // preferred_recovery_method='email' (default de factory) y
         // devuelve 200 OK. El método de recovery NO es del flow
         // challenge_token; eso se valida en otro test.
-        $response = $this->postJson(uri: self::HOST.'/api/auth/forgot-password', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/forgot-password', data: [
             'email' => $full['user']->email,
         ]);
         $response->assertOk();
@@ -175,7 +175,7 @@ final class PasswordResetRecoveryTest extends TestCase
             withRecoveryCodes: true,
         );
 
-        $response = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
             'email' => $user->email,
             'code' => $codes[0],
         ]);
@@ -206,7 +206,7 @@ final class PasswordResetRecoveryTest extends TestCase
             withRecoveryCodes: true,
         );
 
-        $response = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
             'email' => $user->email,
             'code' => 'AAAAAAAAAA',
         ]);
@@ -227,7 +227,7 @@ final class PasswordResetRecoveryTest extends TestCase
         // 5 intentos con códigos inválidos. El throttle permite hasta
         // RECOVER_MAX_ATTEMPTS=5 por IP antes de bloquear.
         for ($i = 0; $i < 5; $i++) {
-            $response = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+            $response = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
                 'email' => $user->email,
                 'code' => 'BBBBBBBBBB',
             ]);
@@ -235,7 +235,7 @@ final class PasswordResetRecoveryTest extends TestCase
         }
 
         // 6º intento: throttle bloquea.
-        $response = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
             'email' => $user->email,
             'code' => 'CCCCCCCCCC',
         ]);
@@ -261,7 +261,7 @@ final class PasswordResetRecoveryTest extends TestCase
         $totpService = app(abstract: TotpService::class);
         $code = $this->generateTotpForSecret(secret: $secret);
 
-        $response = $this->postJson(uri: self::HOST.'/api/auth/recover-via-totp', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-totp', data: [
             'email' => $user->email,
             'code' => $code,
         ]);
@@ -285,7 +285,7 @@ final class PasswordResetRecoveryTest extends TestCase
             withRecoveryCodes: false,
         );
 
-        $response = $this->postJson(uri: self::HOST.'/api/auth/recover-via-totp', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-totp', data: [
             'email' => $user->email,
             'code' => '000000',
         ]);
@@ -304,7 +304,7 @@ final class PasswordResetRecoveryTest extends TestCase
         );
 
         // Step 1: recover-via-recovery-code
-        $recoverResponse = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+        $recoverResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
             'email' => $user->email,
             'code' => $codes[0],
         ]);
@@ -312,7 +312,7 @@ final class PasswordResetRecoveryTest extends TestCase
         $challengeToken = $recoverResponse->json('challenge_token');
 
         // Step 2: reset-password con challenge_token
-        $resetResponse = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
+        $resetResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/reset-password', data: [
             'email' => $user->email,
             'challenge_token' => $challengeToken,
             'password' => 'BrandNewPassword1234',
@@ -345,7 +345,7 @@ final class PasswordResetRecoveryTest extends TestCase
             withRecoveryCodes: true,
         );
 
-        $recoverResponse = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+        $recoverResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
             'email' => $user->email,
             'code' => $codes[0],
         ]);
@@ -356,7 +356,7 @@ final class PasswordResetRecoveryTest extends TestCase
             ->where(column: 'id', operator: '=', value: $challengeToken)
             ->update(['expires_at' => now()->subMinutes(value: 5)]);
 
-        $resetResponse = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
+        $resetResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/reset-password', data: [
             'email' => $user->email,
             'challenge_token' => $challengeToken,
             'password' => 'BrandNewPassword1234',
@@ -376,14 +376,14 @@ final class PasswordResetRecoveryTest extends TestCase
             withRecoveryCodes: true,
         );
 
-        $recoverResponse = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+        $recoverResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
             'email' => $user->email,
             'code' => $codes[0],
         ]);
         $challengeToken = $recoverResponse->json('challenge_token');
 
         // Primer reset consume el challenge.
-        $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
+        $this->postJson(uri: self::HOST.'/api/v1/auth/reset-password', data: [
             'email' => $user->email,
             'challenge_token' => $challengeToken,
             'password' => 'BrandNewPassword1234',
@@ -391,7 +391,7 @@ final class PasswordResetRecoveryTest extends TestCase
         ])->assertOk();
 
         // Segundo intento con el mismo challenge token: ya consumido.
-        $resetResponse = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
+        $resetResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/reset-password', data: [
             'email' => $user->email,
             'challenge_token' => $challengeToken,
             'password' => 'AnotherNewPassword1234',
@@ -414,7 +414,7 @@ final class PasswordResetRecoveryTest extends TestCase
         $originalPassword = 'password';
 
         // Step 1: recover-via-recovery-code
-        $step1 = $this->postJson(uri: self::HOST.'/api/auth/recover-via-recovery-code', data: [
+        $step1 = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-recovery-code', data: [
             'email' => $user->email,
             'code' => $codes[0],
         ]);
@@ -422,7 +422,7 @@ final class PasswordResetRecoveryTest extends TestCase
         $challengeToken = $step1->json('challenge_token');
 
         // Step 2: reset-password con challenge_token
-        $step2 = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
+        $step2 = $this->postJson(uri: self::HOST.'/api/v1/auth/reset-password', data: [
             'email' => $user->email,
             'challenge_token' => $challengeToken,
             'password' => 'E2EFullFlowPassword1234',
@@ -453,7 +453,7 @@ final class PasswordResetRecoveryTest extends TestCase
         $code = $this->generateTotpForSecret(secret: $secret);
 
         // Step 1: recover-via-totp
-        $step1 = $this->postJson(uri: self::HOST.'/api/auth/recover-via-totp', data: [
+        $step1 = $this->postJson(uri: self::HOST.'/api/v1/auth/recover-via-totp', data: [
             'email' => $user->email,
             'code' => $code,
         ]);
@@ -461,7 +461,7 @@ final class PasswordResetRecoveryTest extends TestCase
         $challengeToken = $step1->json('challenge_token');
 
         // Step 2: reset-password con challenge_token
-        $step2 = $this->postJson(uri: self::HOST.'/api/auth/reset-password', data: [
+        $step2 = $this->postJson(uri: self::HOST.'/api/v1/auth/reset-password', data: [
             'email' => $user->email,
             'challenge_token' => $challengeToken,
             'password' => 'E2ETotpFlowPassword1234',

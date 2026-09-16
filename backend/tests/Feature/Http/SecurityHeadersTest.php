@@ -54,7 +54,7 @@ final class SecurityHeadersTest extends TestCase
     #[Test]
     public function storefront_response_has_all_security_headers(): void
     {
-        $response = $this->getJson(uri: "http://{$this->host}/api/storefront/promotions");
+        $response = $this->getJson(uri: "http://{$this->host}/api/v1/storefront/promotions");
 
         $response->assertOk();
 
@@ -89,7 +89,7 @@ final class SecurityHeadersTest extends TestCase
     public function hsts_header_absent_in_test_environment(): void
     {
         // APP_ENV=testing por defecto en phpunit.xml → no HSTS.
-        $response = $this->getJson(uri: "http://{$this->host}/api/storefront/promotions");
+        $response = $this->getJson(uri: "http://{$this->host}/api/v1/storefront/promotions");
 
         $response->assertOk();
         $this->assertNull($response->headers->get('Strict-Transport-Security'));
@@ -101,7 +101,7 @@ final class SecurityHeadersTest extends TestCase
         // Forzar production y verificar HSTS.
         $this->app->detectEnvironment(fn (): string => 'production');
 
-        $response = $this->getJson(uri: "http://{$this->host}/api/storefront/promotions");
+        $response = $this->getJson(uri: "http://{$this->host}/api/v1/storefront/promotions");
 
         $response->assertOk();
         $hsts = $response->headers->get('Strict-Transport-Security');
@@ -113,7 +113,7 @@ final class SecurityHeadersTest extends TestCase
     #[Test]
     public function csp_does_not_allow_unsafe_object_sources(): void
     {
-        $response = $this->getJson(uri: "http://{$this->host}/api/storefront/promotions");
+        $response = $this->getJson(uri: "http://{$this->host}/api/v1/storefront/promotions");
 
         $csp = $response->headers->get('Content-Security-Policy');
         $this->assertNotNull($csp);
@@ -127,7 +127,7 @@ final class SecurityHeadersTest extends TestCase
         // Test con un path admin (404 porque host no existe, pero el
         // middleware debería ejecutarse antes del route binding y los
         // headers deberían estar en el response).
-        $response = $this->getJson(uri: 'http://admin.test/api/admin/stores');
+        $response = $this->getJson(uri: 'http://admin.test/api/v1/admin/stores');
 
         $this->assertSame('DENY', $response->headers->get('X-Frame-Options'));
     }

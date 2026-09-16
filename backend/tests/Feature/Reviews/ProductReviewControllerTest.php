@@ -71,7 +71,7 @@ final class ProductReviewControllerTest extends TestCase
     public function store_requires_authentication(): void
     {
         $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/reviews",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/reviews",
             data: ['rating' => 5, 'comment' => 'Excelente producto.'],
         )->assertStatus(status: 401);
     }
@@ -82,7 +82,7 @@ final class ProductReviewControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/reviews",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/reviews",
             data: ['rating' => 5, 'comment' => 'Excelente producto.'],
         );
 
@@ -102,7 +102,7 @@ final class ProductReviewControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/reviews",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/reviews",
             data: ['rating' => 3, 'comment' => 'Cambié de opinión.'],
         );
 
@@ -115,7 +115,7 @@ final class ProductReviewControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/reviews",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/reviews",
             data: ['rating' => 7],
         );
 
@@ -129,7 +129,7 @@ final class ProductReviewControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/reviews",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/reviews",
             data: ['rating' => 5, 'comment' => 'ok'],
         );
 
@@ -153,7 +153,7 @@ final class ProductReviewControllerTest extends TestCase
 
         // Sin auth.
         $response = $this->getJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/reviews",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/reviews",
         );
 
         $response->assertOk();
@@ -177,7 +177,7 @@ final class ProductReviewControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/account/reviews');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/account/reviews');
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');

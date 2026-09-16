@@ -74,7 +74,7 @@ final class CustomerAddressControllerTest extends TestCase
     #[TestAttr]
     public function it_requires_authentication(): void
     {
-        $this->getJson(uri: 'http://panda-estampados.com/api/account/addresses')
+        $this->getJson(uri: 'http://panda-estampados.com/api/v1/account/addresses')
             ->assertStatus(status: 401);
     }
 
@@ -89,7 +89,7 @@ final class CustomerAddressControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/account/addresses');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/account/addresses');
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');
@@ -101,7 +101,7 @@ final class CustomerAddressControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/account/addresses',
+            uri: 'http://panda-estampados.com/api/v1/account/addresses',
             data: [
                 'address_type' => 'billing',
                 'country' => 'Nicaragua',
@@ -124,7 +124,7 @@ final class CustomerAddressControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/account/addresses',
+            uri: 'http://panda-estampados.com/api/v1/account/addresses',
             data: [
                 'address_type' => 'invalid',
                 'country' => 'Nicaragua',
@@ -142,7 +142,7 @@ final class CustomerAddressControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->getJson(
-            uri: "http://panda-estampados.com/api/account/addresses/{$this->address->id}",
+            uri: "http://panda-estampados.com/api/v1/account/addresses/{$this->address->id}",
         );
 
         $response->assertOk();
@@ -155,7 +155,7 @@ final class CustomerAddressControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/account/addresses/{$this->address->id}",
+            uri: "http://panda-estampados.com/api/v1/account/addresses/{$this->address->id}",
             data: [
                 'department' => 'León',
             ],
@@ -180,7 +180,7 @@ final class CustomerAddressControllerTest extends TestCase
         $this->assertTrue((bool) $other->is_primary);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/account/addresses/{$this->address->id}/primary",
+            uri: "http://panda-estampados.com/api/v1/account/addresses/{$this->address->id}/primary",
         );
 
         $response->assertOk();
@@ -201,7 +201,7 @@ final class CustomerAddressControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $this->postJson(
-            uri: 'http://panda-estampados.com/api/account/addresses',
+            uri: 'http://panda-estampados.com/api/v1/account/addresses',
             data: [
                 'address_type' => 'shipping',
                 'country' => 'Nicaragua',
@@ -219,7 +219,7 @@ final class CustomerAddressControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $this->deleteJson(
-            uri: "http://panda-estampados.com/api/account/addresses/{$this->address->id}",
+            uri: "http://panda-estampados.com/api/v1/account/addresses/{$this->address->id}",
         )->assertNoContent();
 
         $this->assertSoftDeleted(table: 'customer_addresses', data: ['id' => $this->address->id]);
@@ -236,16 +236,16 @@ final class CustomerAddressControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $this->getJson(
-            uri: "http://panda-estampados.com/api/account/addresses/{$otherAddress->id}",
+            uri: "http://panda-estampados.com/api/v1/account/addresses/{$otherAddress->id}",
         )->assertStatus(status: 404);
 
         $this->putJson(
-            uri: "http://panda-estampados.com/api/account/addresses/{$otherAddress->id}",
+            uri: "http://panda-estampados.com/api/v1/account/addresses/{$otherAddress->id}",
             data: ['department' => 'Hack'],
         )->assertStatus(status: 404);
 
         $this->postJson(
-            uri: "http://panda-estampados.com/api/account/addresses/{$otherAddress->id}/primary",
+            uri: "http://panda-estampados.com/api/v1/account/addresses/{$otherAddress->id}/primary",
         )->assertStatus(status: 404);
     }
 
@@ -255,7 +255,7 @@ final class CustomerAddressControllerTest extends TestCase
         $userWithoutCustomer = User::factory()->create();
         Sanctum::actingAs($userWithoutCustomer);
 
-        $this->getJson(uri: 'http://panda-estampados.com/api/account/addresses')
+        $this->getJson(uri: 'http://panda-estampados.com/api/v1/account/addresses')
             ->assertStatus(status: 404);
     }
 }

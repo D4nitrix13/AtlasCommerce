@@ -18,7 +18,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Tests del endpoint público `GET /api/storefront/products/search`.
+ * Tests del endpoint público `GET /api/v1/storefront/products/search`.
  *
  * RF-CAT-028 — Búsqueda pública de productos con ranking por relevancia.
  *
@@ -103,7 +103,7 @@ final class StorefrontProductSearchTest extends TestCase
     public function returns_404_when_store_domain_does_not_resolve(): void
     {
         // Sin StoreDomain que matchee `unknown.test` → 404 por middleware.
-        $response = $this->getJson(uri: 'http://unknown.test/api/storefront/products/search?q=camiseta');
+        $response = $this->getJson(uri: 'http://unknown.test/api/v1/storefront/products/search?q=camiseta');
         $response->assertStatus(status: 404);
     }
 
@@ -373,7 +373,7 @@ final class StorefrontProductSearchTest extends TestCase
      */
     private function url(?string $q, int $page = 1, int $perPage = 20): string
     {
-        $base = 'http://panda-estampados.com/api/storefront/products/search';
+        $base = 'http://panda-estampados.com/api/v1/storefront/products/search';
 
         $params = array_filter([
             'q' => $q,

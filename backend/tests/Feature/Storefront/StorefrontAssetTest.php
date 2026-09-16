@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Tests del endpoint público `GET /api/storefront/assets/{path}`.
+ * Tests del endpoint público `GET /api/v1/storefront/assets/{path}`.
  *
  * Verifica que:
  *   - Sirve el archivo del disk `ftp` cuando el path es valido.
@@ -78,7 +78,7 @@ final class StorefrontAssetTest extends TestCase
 
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets/tenants/panda-estampados/branding/logo.webp');
+        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp');
 
         $response->assertOk();
         $response->assertHeader(name: 'Content-Type', value: 'image/webp');
@@ -99,7 +99,7 @@ final class StorefrontAssetTest extends TestCase
         // Intentar acceder como panda-estampados.
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets/tenants/kitsune/branding/logo.webp');
+        ])->get(uri: '/api/v1/storefront/assets/tenants/kitsune/branding/logo.webp');
 
         $response->assertForbidden();
     }
@@ -109,7 +109,7 @@ final class StorefrontAssetTest extends TestCase
     {
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets/tenants/panda-estampados/branding/missing.webp');
+        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/missing.webp');
 
         $response->assertNotFound();
     }
@@ -119,7 +119,7 @@ final class StorefrontAssetTest extends TestCase
     {
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets/tenants/panda-estampados/../../../etc/passwd');
+        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/../../../etc/passwd');
 
         $response->assertForbidden();
     }
@@ -135,7 +135,7 @@ final class StorefrontAssetTest extends TestCase
 
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets/shared/icons/social/facebook.webp');
+        ])->get(uri: '/api/v1/storefront/assets/shared/icons/social/facebook.webp');
 
         $response->assertOk();
         $this->assertSame(expected: $contents, actual: $response->getContent());
@@ -155,7 +155,7 @@ final class StorefrontAssetTest extends TestCase
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
             'HTTP_IF_NONE_MATCH' => $expectedEtag,
-        ])->get(uri: '/api/storefront/assets/tenants/panda-estampados/branding/logo.webp');
+        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp');
 
         $response->assertStatus(code: 304);
         $this->assertSame(expected: $expectedEtag, actual: $response->headers->get(key: 'ETag'));
@@ -171,7 +171,7 @@ final class StorefrontAssetTest extends TestCase
 
         $response = $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets//tenants/panda-estampados/brand/logo.webp');
+        ])->get(uri: '/api/v1/storefront/assets//tenants/panda-estampados/brand/logo.webp');
 
         $response->assertOk();
     }
@@ -192,7 +192,7 @@ final class StorefrontAssetTest extends TestCase
         // Hacer el request: dispara cache miss + lectura FTP + escritura en cache.
         $this->withServerVariables(serverVariables: [
             'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/storefront/assets/tenants/panda-estampados/branding/logo.webp')
+        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp')
             ->assertOk();
 
         // Despues del request: cache existe.

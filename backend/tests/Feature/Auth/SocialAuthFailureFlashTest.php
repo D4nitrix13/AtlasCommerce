@@ -94,7 +94,7 @@ final class SocialAuthFailureFlashTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -137,7 +137,7 @@ final class SocialAuthFailureFlashTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/account/auth/login'],
         );
 
@@ -172,7 +172,7 @@ final class SocialAuthFailureFlashTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/en/account/auth/login'],
         );
 

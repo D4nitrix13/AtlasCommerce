@@ -80,7 +80,7 @@ final class SocialAuthTenantGateTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -109,7 +109,7 @@ final class SocialAuthTenantGateTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -131,7 +131,7 @@ final class SocialAuthTenantGateTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/account/auth/login'],
         );
 

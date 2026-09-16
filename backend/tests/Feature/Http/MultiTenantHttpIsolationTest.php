@@ -96,17 +96,17 @@ final class MultiTenantHttpIsolationTest extends TestCase
             'subtotal_cents' => 1000,
         ]);
 
-        // GET /api/carts en contexto A: solo ve cart A.
+        // GET /api/v1/carts en contexto A: solo ve cart A.
         app(StoreContextService::class)->setStore($this->storeA);
-        $response = $this->getJson('/api/carts');
+        $response = $this->getJson('/api/v1/carts');
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
         $this->assertSame($cartA->id, $response->json('data.0.id'));
         $this->assertSame($this->storeA->id, $response->json('data.0.store_id'));
 
-        // GET /api/carts en contexto B: solo ve cart B.
+        // GET /api/v1/carts en contexto B: solo ve cart B.
         app(StoreContextService::class)->setStore($this->storeB);
-        $response = $this->getJson('/api/carts');
+        $response = $this->getJson('/api/v1/carts');
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
         $this->assertSame($cartB->id, $response->json('data.0.id'));
@@ -130,7 +130,7 @@ final class MultiTenantHttpIsolationTest extends TestCase
             ->create();
 
         // El cart está oculto por el global scope, así que findOrFail lanza 404.
-        $this->postJson("/api/carts/{$cartInB->id}/items", [
+        $this->postJson("/api/v1/carts/{$cartInB->id}/items", [
             'product_id' => $product->id,
             'quantity' => 1,
         ])->assertNotFound();
@@ -145,11 +145,11 @@ final class MultiTenantHttpIsolationTest extends TestCase
 
         // Context A: cart de B invisible.
         app(StoreContextService::class)->setStore($this->storeA);
-        $this->getJson("/api/carts/{$cartInB->id}")->assertNotFound();
+        $this->getJson("/api/v1/carts/{$cartInB->id}")->assertNotFound();
 
         // Context B: visible.
         app(StoreContextService::class)->setStore($this->storeB);
-        $this->getJson("/api/carts/{$cartInB->id}")->assertOk();
+        $this->getJson("/api/v1/carts/{$cartInB->id}")->assertOk();
     }
 
     #[Test]
@@ -176,7 +176,7 @@ final class MultiTenantHttpIsolationTest extends TestCase
 
         // Context A → 404 (cart invisible).
         app(StoreContextService::class)->setStore($this->storeA);
-        $this->postJson(uri: '/api/orders', data: [
+        $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $cartInB->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
@@ -184,7 +184,7 @@ final class MultiTenantHttpIsolationTest extends TestCase
 
         // Context B → 201.
         app(StoreContextService::class)->setStore($this->storeB);
-        $this->postJson(uri: '/api/orders', data: [
+        $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $cartInB->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,

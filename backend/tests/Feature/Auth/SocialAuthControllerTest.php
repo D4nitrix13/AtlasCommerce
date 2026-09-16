@@ -41,7 +41,7 @@ final class SocialAuthControllerTest extends TestCase
         parent::setUp();
 
         // Tienda + dominio para que el middleware `store.domain`
-        // resuelva el contexto (las rutas /api/auth/social/* están
+        // resuelva el contexto (las rutas /api/v1/auth/social/* están
         // dentro de ese grupo en routes/api.php).
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
@@ -73,7 +73,7 @@ final class SocialAuthControllerTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/redirect',
+            uri: '/api/v1/auth/social/google/redirect',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -90,7 +90,7 @@ final class SocialAuthControllerTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/facebook/redirect',
+            uri: '/api/v1/auth/social/facebook/redirect',
             headers: ['referer' => 'http://localhost/es/account/auth/login'],
         );
 
@@ -105,7 +105,7 @@ final class SocialAuthControllerTest extends TestCase
         // llegar al facade (provider guard). El test verifica que
         // NUNCA se llama Socialite porque la respuesta es 400
         // inmediata.
-        $response = $this->get(uri: '/api/auth/social/github/redirect');
+        $response = $this->get(uri: '/api/v1/auth/social/github/redirect');
 
         $response->assertStatus(400);
         $response->assertJsonFragment(data: ['message' => "Provider 'github' no soportado."]);
@@ -118,7 +118,7 @@ final class SocialAuthControllerTest extends TestCase
         // cookie de sesión. Defense-in-depth (R2 del proposal): el
         // redirect endpoint debe cortar temprano si no hay session
         // antes de delegar a Socialite.
-        $response = $this->get(uri: '/api/auth/social/google/redirect');
+        $response = $this->get(uri: '/api/v1/auth/social/google/redirect');
 
         $response->assertStatus(400);
         $payload = $response->json();
@@ -131,7 +131,7 @@ final class SocialAuthControllerTest extends TestCase
     {
         // PR 1: callback sigue siendo 501. Solo validamos el guard
         // del provider (igual semántica que redirect).
-        $response = $this->get(uri: '/api/auth/social/github/callback');
+        $response = $this->get(uri: '/api/v1/auth/social/github/callback');
 
         $response->assertStatus(400);
         $response->assertJsonFragment(data: ['message' => "Provider 'github' no soportado."]);
@@ -151,7 +151,7 @@ final class SocialAuthControllerTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/account/auth/login'],
         );
 

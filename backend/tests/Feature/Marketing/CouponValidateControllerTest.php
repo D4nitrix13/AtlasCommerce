@@ -22,7 +22,7 @@ use PHPUnit\Framework\Attributes\Test as TestAttr;
 use Tests\TestCase;
 
 /**
- * Tests del endpoint público `POST /api/coupons/validate` (RF-MKT-060).
+ * Tests del endpoint público `POST /api/v1/coupons/validate` (RF-MKT-060).
  *
  * Cubre:
  *  - 401 sin token (la ruta requiere autenticación porque opera sobre
@@ -95,7 +95,7 @@ final class CouponValidateControllerTest extends TestCase
     #[TestAttr]
     public function it_returns_401_without_authentication(): void
     {
-        $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => 'PROMO10',
             'cart_id' => $this->cart->id,
         ])->assertStatus(status: 401);
@@ -112,7 +112,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => $coupon->code,
             'cart_id' => $this->cart->id,
         ]);
@@ -136,7 +136,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => $coupon->code,
             'cart_id' => $this->cart->id,
         ]);
@@ -153,7 +153,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => strtolower($coupon->code),
             'cart_id' => $this->cart->id,
         ]);
@@ -166,7 +166,7 @@ final class CouponValidateControllerTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => 'NOEXISTE',
             'cart_id' => $this->cart->id,
         ]);
@@ -185,7 +185,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => $coupon->code,
             'cart_id' => $this->cart->id,
         ]);
@@ -205,7 +205,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => $coupon->code,
             'cart_id' => $this->cart->id,
         ]);
@@ -225,7 +225,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => $coupon->code,
             'cart_id' => $this->cart->id,
         ]);
@@ -242,7 +242,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => $coupon->code,
             'cart_id' => $this->cart->id,
         ]);
@@ -262,7 +262,7 @@ final class CouponValidateControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/coupons/validate', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/coupons/validate', data: [
             'code' => $coupon->code,
             'cart_id' => $this->cart->id,
         ]);

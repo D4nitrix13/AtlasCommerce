@@ -1,156 +1,156 @@
 export const API_ENDPOINTS = {
   auth: {
-    login: '/auth/login',
-    register: '/auth/register',
-    logout: '/auth/logout',
-    me: '/auth/me',
+    login: '/v1/auth/login',
+    register: '/v1/auth/register',
+    logout: '/v1/auth/logout',
+    me: '/v1/auth/me',
 
     twoFactor: {
-      status: '/auth/2fa',
+      status: '/v1/auth/2fa',
 
       email: {
-        send: '/auth/2fa/email/send',
-        verify: '/auth/2fa/email/verify',
+        send: '/v1/auth/2fa/email/send',
+        verify: '/v1/auth/2fa/email/verify',
       },
 
       totp: {
-        setup: '/auth/2fa/totp/setup',
-        verify: '/auth/2fa/totp/verify',
+        setup: '/v1/auth/2fa/totp/setup',
+        verify: '/v1/auth/2fa/totp/verify',
       },
 
       passkeys: {
-        registerOptions: '/auth/2fa/passkeys/register/options',
-        register: '/auth/2fa/passkeys/register',
+        registerOptions: '/v1/auth/2fa/passkeys/register/options',
+        register: '/v1/auth/2fa/passkeys/register',
       },
 
       recoveryCodes: {
-        index: '/auth/recovery-codes',
-        regenerate: '/auth/recovery-codes/regenerate',
+        index: '/v1/auth/recovery-codes',
+        regenerate: '/v1/auth/recovery-codes/regenerate',
       },
 
-      disable: '/auth/2fa/disable',
+      disable: '/v1/auth/2fa/disable',
     },
   },
 
   access: {
-    users: '/users',
-    roles: '/roles',
-    permissions: '/permissions',
-    permissionRoles: '/permission-roles',
+    users: '/v1/users',
+    roles: '/v1/roles',
+    permissions: '/v1/permissions',
+    permissionRoles: '/v1/permission-roles',
   },
 
   admin: {
-    stores: '/admin/stores',
+    stores: '/v1/admin/stores',
     storeMaintenance: (id: number | string) => `/admin/stores/${id}/maintenance`,
-    customers: '/admin/customers',
+    customers: '/v1/admin/customers',
     customer: (id: number | string) => `/admin/customers/${id}`,
     customerSuspend: (id: number | string) => `/admin/customers/${id}/suspend`,
     customerReactivate: (id: number | string) => `/admin/customers/${id}/reactivate`,
   },
 
   customers: {
-    customers: '/customers',
-    addresses: '/customer-addresses',
-    accountAddresses: '/account/addresses',
+    customers: '/v1/customers',
+    addresses: '/v1/customer-addresses',
+    accountAddresses: '/v1/account/addresses',
     accountAddress: (id: number | string) => `/account/addresses/${id}`,
     accountAddressPrimary: (id: number | string) => `/account/addresses/${id}/primary`,
   },
 
   storefront: {
-    productSearch: '/storefront/products/search',
-    products: '/storefront/products',
-    theme: '/storefront/theme',
+    productSearch: '/v1/storefront/products/search',
+    products: '/v1/storefront/products',
+    theme: '/v1/storefront/theme',
   },
 
   catalog: {
-    products: '/products',
-    categories: '/categories',
-    brands: '/brands',
-    images: '/product-images',
-    variants: '/product-variants',
-    attributes: '/product-attributes',
-    attributeValues: '/product-attribute-values',
-    variantAttributeValues: '/variant-attribute-values',
+    products: '/v1/products',
+    categories: '/v1/categories',
+    brands: '/v1/brands',
+    images: '/v1/product-images',
+    variants: '/v1/product-variants',
+    attributes: '/v1/product-attributes',
+    attributeValues: '/v1/product-attribute-values',
+    variantAttributeValues: '/v1/variant-attribute-values',
   },
 
   inventory: {
-    inventories: '/inventories',
-    movements: '/inventory-movements',
-    warehouses: '/warehouses',
+    inventories: '/v1/inventories',
+    movements: '/v1/inventory-movements',
+    warehouses: '/v1/warehouses',
   },
 
   purchases: {
-    suppliers: '/suppliers',
-    purchases: '/purchases',
-    items: '/purchase-items',
+    suppliers: '/v1/suppliers',
+    purchases: '/v1/purchases',
+    items: '/v1/purchase-items',
   },
 
   carts: {
-    carts: '/carts',
-    items: '/cart-items',
-    wishlists: '/wishlists',
-    wishlistItems: '/wishlist-items',
+    carts: '/v1/carts',
+    items: '/v1/cart-items',
+    wishlists: '/v1/wishlists',
+    wishlistItems: '/v1/wishlist-items',
   },
 
   sales: {
-    orders: '/orders',
-    orderItems: '/order-items',
-    orderStatusHistories: '/order-status-histories',
+    orders: '/v1/orders',
+    orderItems: '/v1/order-items',
+    orderStatusHistories: '/v1/order-status-histories',
 
-    invoices: '/invoices',
-    invoiceItems: '/invoice-items',
-    invoiceStatusHistories: '/invoice-status-histories',
+    invoices: '/v1/invoices',
+    invoiceItems: '/v1/invoice-items',
+    invoiceStatusHistories: '/v1/invoice-status-histories',
   },
 
   payments: {
-    methods: '/payment-methods',
-    payments: '/payments',
-    invoicePayments: '/invoice-payments',
-    installments: '/payment-installments',
-    transactions: '/payment-transactions',
+    methods: '/v1/payment-methods',
+    payments: '/v1/payments',
+    invoicePayments: '/v1/invoice-payments',
+    installments: '/v1/payment-installments',
+    transactions: '/v1/payment-transactions',
   },
 
   shipping: {
-    companies: '/shipping-companies',
-    zones: '/shipping-zones',
-    shipments: '/shipments',
-    trackings: '/shipment-trackings',
+    companies: '/v1/shipping-companies',
+    zones: '/v1/shipping-zones',
+    shipments: '/v1/shipments',
+    trackings: '/v1/shipment-trackings',
   },
 
   marketing: {
-    coupons: '/coupons',
-    couponsValidate: '/coupons/validate',
-    couponUsages: '/coupon-usages',
-    promotions: '/promotions',
-    productPromotions: '/product-promotions',
+    coupons: '/v1/coupons',
+    couponsValidate: '/v1/coupons/validate',
+    couponUsages: '/v1/coupon-usages',
+    promotions: '/v1/promotions',
+    productPromotions: '/v1/product-promotions',
   },
 
   taxes: {
-    taxes: '/taxes',
-    productTaxes: '/product-taxes',
+    taxes: '/v1/taxes',
+    productTaxes: '/v1/product-taxes',
   },
 
   returns: {
-    requests: '/return-requests',
-    items: '/return-request-items',
-    refunds: '/refunds',
+    requests: '/v1/return-requests',
+    items: '/v1/return-request-items',
+    refunds: '/v1/refunds',
   },
 
   support: {
-    tickets: '/support-tickets',
-    messages: '/support-ticket-messages',
-    reviews: '/product-reviews',
-    questions: '/product-questions',
+    tickets: '/v1/support-tickets',
+    messages: '/v1/support-ticket-messages',
+    reviews: '/v1/product-reviews',
+    questions: '/v1/product-questions',
   },
 
   system: {
-    audits: '/audits',
-    notifications: '/notifications',
+    audits: '/v1/audits',
+    notifications: '/v1/notifications',
   },
 
   settings: {
-    store: '/store-settings',
-    currencies: '/currencies',
-    exchangeRates: '/exchange-rates',
+    store: '/v1/store-settings',
+    currencies: '/v1/currencies',
+    exchangeRates: '/v1/exchange-rates',
   },
 } as const;

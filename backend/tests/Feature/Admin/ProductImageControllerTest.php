@@ -148,7 +148,7 @@ final class ProductImageControllerTest extends TestCase
     #[Test]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images');
         $response->assertStatus(status: 401);
     }
 
@@ -157,7 +157,7 @@ final class ProductImageControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images');
         $response->assertStatus(status: 403);
     }
 
@@ -170,7 +170,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 2);
@@ -181,7 +181,7 @@ final class ProductImageControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->otherProduct->id.'/images');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->otherProduct->id.'/images');
 
         $response->assertStatus(status: 404);
     }
@@ -194,7 +194,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images?is_primary=1');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images?is_primary=1');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
@@ -207,7 +207,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images/'.$image->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id);
 
         $response->assertStatus(status: 404);
     }
@@ -219,7 +219,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: [
             'image_url' => 'https://cdn.example.com/new.jpg',
             'alt_text' => 'New',
         ]);
@@ -234,7 +234,7 @@ final class ProductImageControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: [
             'image_url' => 'https://cdn.example.com/x.jpg',
             'sort_order' => 10,
         ]);
@@ -248,7 +248,7 @@ final class ProductImageControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: [
             'image_url' => '',
         ]);
 
@@ -263,7 +263,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: [
             'image_url' => 'https://cdn.example.com/new-primary.jpg',
             'is_primary' => true,
         ]);
@@ -285,7 +285,7 @@ final class ProductImageControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->otherProduct->id.'/images', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->otherProduct->id.'/images', data: [
             'image_url' => 'https://cdn.example.com/x.jpg',
         ]);
 
@@ -299,7 +299,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images/'.$image->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id, data: [
             'alt_text' => 'Renombrado',
             'sort_order' => 99,
         ]);
@@ -317,7 +317,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images/'.$new->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$new->id, data: [
             'is_primary' => true,
         ]);
 
@@ -336,7 +336,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images/'.$image->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id);
 
         $response->assertNoContent();
         $this->assertNull(ProductImage::query()->find($image->id));
@@ -349,7 +349,7 @@ final class ProductImageControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/products/'.$this->product->id.'/images/'.$image->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id);
 
         $response->assertStatus(status: 404);
     }

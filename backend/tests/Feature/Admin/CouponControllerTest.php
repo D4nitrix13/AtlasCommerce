@@ -99,7 +99,7 @@ final class CouponControllerTest extends TestCase
     #[TestAttr]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/coupons');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/coupons');
         $response->assertStatus(status: 401);
     }
 
@@ -108,7 +108,7 @@ final class CouponControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->unauthorized, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/coupons');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/coupons');
         $response->assertStatus(status: 403);
     }
 
@@ -121,7 +121,7 @@ final class CouponControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/coupons');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/coupons');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 2);
@@ -137,7 +137,7 @@ final class CouponControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/coupons',
+            uri: 'http://panda-estampados.com/api/v1/admin/coupons',
             data: [
                 'code' => 'summer-2026', // lowercase, debe normalizarse
                 'discount_type' => 'percentage',
@@ -159,7 +159,7 @@ final class CouponControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/coupons',
+            uri: 'http://panda-estampados.com/api/v1/admin/coupons',
             data: [
                 'code' => 'DUPLICADO',
                 'discount_type' => 'percentage',
@@ -178,7 +178,7 @@ final class CouponControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/coupons',
+            uri: 'http://panda-estampados.com/api/v1/admin/coupons',
             data: [
                 'code' => 'OTROTIENDA',
                 'discount_type' => 'percentage',
@@ -198,7 +198,7 @@ final class CouponControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/coupons/{$coupon->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/coupons/{$coupon->id}",
             data: [
                 'value' => 20.0,
                 'is_active' => false,
@@ -218,7 +218,7 @@ final class CouponControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/admin/coupons/{$coupon->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/admin/coupons/{$coupon->id}")
             ->assertNoContent();
 
         $this->assertSoftDeleted(table: 'coupons', data: ['id' => $coupon->id]);
@@ -231,7 +231,7 @@ final class CouponControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/coupons/{$otherCoupon->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/coupons/{$otherCoupon->id}");
 
         $response->assertStatus(status: 404);
     }
@@ -243,7 +243,7 @@ final class CouponControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/coupons/{$globalCoupon->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/coupons/{$globalCoupon->id}");
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.code', expect: 'GLOBAL15');

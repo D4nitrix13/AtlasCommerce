@@ -17,10 +17,10 @@ use Tests\TestCase;
  *
  * Cubre el caso de uso real:
  *   1. Seeder crea admin@<slug>.com / password.
- *   2. POST /api/auth/login con esas credenciales → 200 OK + token.
- *   3. GET /api/auth/me con el token → 200 OK + user payload.
- *   4. POST /api/auth/logout → token revocado, /me devuelve 401.
- *   5. POST /api/auth/login con la password vieja después del cambio → 401.
+ *   2. POST /api/v1/auth/login con esas credenciales → 200 OK + token.
+ *   3. GET /api/v1/auth/me con el token → 200 OK + user payload.
+ *   4. POST /api/v1/auth/logout → token revocado, /me devuelve 401.
+ *   5. POST /api/v1/auth/login con la password vieja después del cambio → 401.
  *
  * Cada test corre en su propio dominio (admin.<slug>.com) para que el
  * middleware `store.domain` resuelva la tienda correcta.
@@ -59,7 +59,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
     public function admin_can_login_with_default_credentials(string $slug): void
     {
         $response = $this->postJson(
-            "http://admin.{$slug}.com/api/auth/login",
+            "http://admin.{$slug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'password',
@@ -91,7 +91,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
     public function admin_login_fails_with_wrong_password(string $slug): void
     {
         $response = $this->postJson(
-            "http://admin.{$slug}.com/api/auth/login",
+            "http://admin.{$slug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'WRONG-password',
@@ -106,7 +106,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
     public function login_fails_for_unknown_store_host(): void
     {
         $response = $this->postJson(
-            'http://unknown.example.com/api/auth/login',
+            'http://unknown.example.com/api/v1/auth/login',
             [
                 'email' => 'admin@panda-estampados.com',
                 'password' => 'password',
@@ -127,7 +127,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         $otherSlug = array_values(array: $otherSlugs)[0];
 
         $response = $this->postJson(
-            "http://admin.{$otherSlug}.com/api/auth/login",
+            "http://admin.{$otherSlug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'password',
@@ -146,7 +146,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         $slug = 'panda-estampados';
 
         $loginResponse = $this->postJson(
-            "http://admin.{$slug}.com/api/auth/login",
+            "http://admin.{$slug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'password',
@@ -159,7 +159,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
 
         $meResponse = $this->withHeaders([
             'Authorization' => "Bearer {$token}",
-        ])->getJson("http://admin.{$slug}.com/api/auth/me");
+        ])->getJson("http://admin.{$slug}.com/api/v1/auth/me");
 
         $meResponse->assertOk();
         $meResponse->assertJsonPath('user.email', "admin@{$slug}.com");
@@ -171,7 +171,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
 
         $logoutResponse = $this->withHeaders([
             'Authorization' => "Bearer {$token}",
-        ])->postJson("http://admin.{$slug}.com/api/auth/logout");
+        ])->postJson("http://admin.{$slug}.com/api/v1/auth/logout");
 
         $logoutResponse->assertOk();
         $logoutResponse->assertJsonPath('message', 'Sesión cerrada.');
@@ -191,7 +191,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         ]);
 
         $newResponse = $this->postJson(
-            "http://admin.{$slug}.com/api/auth/login",
+            "http://admin.{$slug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'New-Secure-Pass-2026',
@@ -200,7 +200,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         $newResponse->assertOk();
 
         $oldResponse = $this->postJson(
-            "http://admin.{$slug}.com/api/auth/login",
+            "http://admin.{$slug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'password',
@@ -215,7 +215,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         $slug = 'panda-estampados';
 
         $response = $this->postJson(
-            "http://{$slug}.com/api/auth/login",
+            "http://{$slug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'password',
@@ -232,7 +232,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         $slug = 'panda-estampados';
 
         $loginResponse = $this->postJson(
-            "http://admin.{$slug}.com/api/auth/login",
+            "http://admin.{$slug}.com/api/v1/auth/login",
             [
                 'email' => "admin@{$slug}.com",
                 'password' => 'password',
@@ -243,7 +243,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
 
         $meFromPublic = $this->withHeaders([
             'Authorization' => "Bearer {$token}",
-        ])->getJson("http://{$slug}.com/api/auth/me");
+        ])->getJson("http://{$slug}.com/api/v1/auth/me");
 
         $meFromPublic->assertOk();
         $meFromPublic->assertJsonPath('user.email', "admin@{$slug}.com");

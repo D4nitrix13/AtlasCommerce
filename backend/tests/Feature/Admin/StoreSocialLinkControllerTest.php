@@ -84,7 +84,7 @@ final class StoreSocialLinkControllerTest extends TestCase
     #[TestAttr]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links");
         $response->assertStatus(status: 401);
     }
 
@@ -93,7 +93,7 @@ final class StoreSocialLinkControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->unauthorized, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links");
         $response->assertStatus(status: 403);
     }
 
@@ -103,7 +103,7 @@ final class StoreSocialLinkControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links",
             data: [
                 'platform' => 'instagram',
                 'url' => 'https://instagram.com/pandaestampados',
@@ -124,7 +124,7 @@ final class StoreSocialLinkControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links",
             data: [
                 'platform' => 'myspace', // not in enum
                 'url' => 'https://example.com',
@@ -141,7 +141,7 @@ final class StoreSocialLinkControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links",
             data: [
                 'platform' => 'instagram',
                 'url' => 'not-a-url',
@@ -165,7 +165,7 @@ final class StoreSocialLinkControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links/{$link->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links/{$link->id}",
             data: [
                 'url' => 'https://instagram.com/new',
                 'sort_order' => 5,
@@ -191,7 +191,7 @@ final class StoreSocialLinkControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $this->deleteJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links/{$link->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links/{$link->id}",
         )->assertNoContent();
 
         $this->assertDatabaseMissing(table: 'store_social_links', data: ['id' => $link->id]);
@@ -211,7 +211,7 @@ final class StoreSocialLinkControllerTest extends TestCase
 
         // Admin de storeA intenta editar link de storeB → 404.
         $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/stores/{$this->storeA->id}/social-links/{$linkInB->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/stores/{$this->storeA->id}/social-links/{$linkInB->id}",
             data: ['url' => 'https://hack.com'],
         )->assertStatus(status: 404);
     }
