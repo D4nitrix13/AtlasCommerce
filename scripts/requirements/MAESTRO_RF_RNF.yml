@@ -486,7 +486,7 @@ rf:
     dependencias: ["RF-AUTH-002"]
     descripcion: "El cliente podrá registrar múltiples direcciones de envío, marcar una como predeterminada y editarlas/ eliminarlas."
     verificado_por: []
-    comentarios: "Backend completo. /api/account/addresses (CRUD + endpoint /primary que desmarca las demás del cliente en TX). Aislamiento: cliente sólo opera sobre SUS direcciones (cross-customer → 404). address_type enum: shipping/billing/other. is_primary exclusivo. DELETE soft + NO auto-asigna otra principal. 11 tests Feature, 29 assertions (#71). Frontend account/addresses/index.astro pendiente para UX completa."
+    comentarios: "Backend completo. /api/account/addresses (CRUD + endpoint /primary que desmarca las demás del cliente en TX). Aislamiento: cliente sólo opera sobre SUS direcciones (cross-customer → 404). address_type enum: shipping/billing/other. is_primary exclusivo. DELETE soft + NO auto-asigna otra principal. 11 tests Feature, 29 assertions (#71). Cierre (PR #93): frontend /[locale]/account/addresses/index.astro + componente AddressesManager (lista + modal form alta/edita + setPrimary + delete con confirmación). Aislamiento por backend; validaciones mínimas en cliente (required fields). 24 keys i18n nuevas (es + en): account.addresses.*. 8 tests Vitest."
 
   - code: RF-CUST-042
     title: "Exportar y borrar datos del cliente (GDPR)"

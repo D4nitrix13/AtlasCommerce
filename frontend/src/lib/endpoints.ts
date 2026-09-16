@@ -47,6 +47,9 @@ export const API_ENDPOINTS = {
   customers: {
     customers: '/customers',
     addresses: '/customer-addresses',
+    accountAddresses: '/account/addresses',
+    accountAddress: (id: number | string) => `/account/addresses/${id}`,
+    accountAddressPrimary: (id: number | string) => `/account/addresses/${id}/primary`,
   },
 
   storefront: {

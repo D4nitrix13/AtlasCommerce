@@ -1,0 +1,27 @@
+---
+/**
+ * Página de libro de direcciones del cliente autenticado (RF-CUST-041).
+ *
+ * Wrapper Astro que monta el React island `AddressesManager`. La lógica
+ * CRUD vive en el componente (fetch, modal, validaciones, delete).
+ *
+ * Auth: el backend exige Sanctum token + Customer asociado al User.
+ * Si no hay sesión, el usuario verá la respuesta del backend como
+ * 401/404 (handled por el componente).
+ */
+import AuthLayout from '../../../../layouts/AuthLayout.astro';
+import AddressesManager from '../../../../components/account/addresses/AddressesManager';
+---
+
+<AuthLayout title="Mis direcciones | AtlasCommerce">
+  <main class="mx-auto max-w-3xl px-4 py-8">
+    <h1 class="mb-2 text-2xl font-bold text-neutral-900">
+      Mis direcciones
+    </h1>
+    <p class="mb-6 text-sm text-neutral-600">
+      Gestioná tus direcciones de envío y facturación.
+    </p>
+
+    <AddressesManager client:only="react" />
+  </main>
+</AuthLayout>
