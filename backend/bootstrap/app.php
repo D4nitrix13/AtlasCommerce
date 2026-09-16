@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SetSessionDomainFromHost;
+use App\Http\Middleware\StoreMaintenanceMode;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'store.domain' => ResolveStoreFromDomain::class,
+            'store.maintenance' => StoreMaintenanceMode::class,
             'permission' => CheckPermission::class,
             // CR2: alias de la middleware de Sanctum para uso futuro en
             // rutas específicas si fuera necesario (ej: rutas con auth

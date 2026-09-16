@@ -419,6 +419,20 @@ const es: Translations = {
   'admin.refunds.status.completed': 'Completado',
   'admin.refunds.status.failed': 'Fallido',
 
+  // ─── admin: stores ────────────────────────────────────────────────
+  'admin.stores.title': 'Tiendas',
+  'admin.stores.subtitle': 'Gestionar tiendas y modo mantenimiento.',
+  'admin.stores.loading': 'Cargando tiendas...',
+  'admin.stores.error': 'No se pudieron cargar las tiendas.',
+  'admin.stores.forbidden': 'No tenés permiso para gestionar esta tienda.',
+  'admin.stores.generic': 'Ocurrió un error al actualizar el modo mantenimiento.',
+  'admin.stores.empty': 'No hay tiendas accesibles.',
+  'admin.stores.disabled': 'Tienda desactivada — no se puede modificar mantenimiento.',
+  'admin.stores.maintenanceOn': 'En mantenimiento',
+  'admin.stores.maintenanceOff': 'Activa',
+  'admin.stores.enableMaintenance': 'Activar mantenimiento',
+  'admin.stores.disableMaintenance': 'Desactivar mantenimiento',
+
   'storefront.search.title': 'Buscar productos',
   'storefront.search.subtitle': 'Encontrá lo que necesitás en nuestro catálogo.',
   'storefront.search.placeholder': 'Buscar por nombre, descripción o SKU…',

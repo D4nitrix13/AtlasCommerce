@@ -388,6 +388,20 @@ export type TranslationKey =
   | 'admin.refunds.status.completed'
   | 'admin.refunds.status.failed'
 
+  // ─── admin: stores ───────────────────────────────────────────────────
+  | 'admin.stores.title'
+  | 'admin.stores.subtitle'
+  | 'admin.stores.loading'
+  | 'admin.stores.error'
+  | 'admin.stores.forbidden'
+  | 'admin.stores.generic'
+  | 'admin.stores.empty'
+  | 'admin.stores.disabled'
+  | 'admin.stores.maintenanceOn'
+  | 'admin.stores.maintenanceOff'
+  | 'admin.stores.enableMaintenance'
+  | 'admin.stores.disableMaintenance'
+
   // ─── storefront: search ─────────────────────────────────────────────
   | 'storefront.search.title'
   | 'storefront.search.subtitle'

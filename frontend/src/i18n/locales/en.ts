@@ -418,6 +418,20 @@ const en: Translations = {
   'admin.refunds.status.completed': 'Completed',
   'admin.refunds.status.failed': 'Failed',
 
+  // ─── admin: stores ────────────────────────────────────────────────
+  'admin.stores.title': 'Stores',
+  'admin.stores.subtitle': 'Manage stores and maintenance mode.',
+  'admin.stores.loading': 'Loading stores...',
+  'admin.stores.error': 'Could not load stores.',
+  'admin.stores.forbidden': 'You do not have permission to manage this store.',
+  'admin.stores.generic': 'An error occurred while updating maintenance mode.',
+  'admin.stores.empty': 'No accessible stores.',
+  'admin.stores.disabled': 'Store disabled — maintenance cannot be modified.',
+  'admin.stores.maintenanceOn': 'Under maintenance',
+  'admin.stores.maintenanceOff': 'Active',
+  'admin.stores.enableMaintenance': 'Enable maintenance',
+  'admin.stores.disableMaintenance': 'Disable maintenance',
+
   'storefront.search.title': 'Search products',
   'storefront.search.subtitle': 'Find what you need across our catalog.',
   'storefront.search.placeholder': 'Search by name, description or SKU…',
