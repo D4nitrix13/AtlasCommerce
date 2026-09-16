@@ -84,7 +84,7 @@ final class SocialAuthStateCsrfTest extends TestCase
         \Laravel\Socialite\Facades\Socialite::swap($manager);
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://admin.localhost/es/admin/auth/login'],
         );
 
@@ -114,7 +114,7 @@ final class SocialAuthStateCsrfTest extends TestCase
         \Laravel\Socialite\Facades\Socialite::swap($manager);
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/account/auth/login'],
         );
 
@@ -138,7 +138,7 @@ final class SocialAuthStateCsrfTest extends TestCase
         );
 
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 

@@ -107,7 +107,7 @@ final class SocialAuthTotpRoutingTest extends TestCase
 
         // Act.
         $response = $this->get(
-            uri: '/api/auth/social/google/callback',
+            uri: '/api/v1/auth/social/google/callback',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -119,7 +119,7 @@ final class SocialAuthTotpRoutingTest extends TestCase
         $response->assertJsonPath(path: 'method', expect: 'totp');
 
         // Sin Bearer token (R11 — el frontend DEBE llamar
-        // `POST /api/auth/2fa/verify-totp-login` con el challenge_token
+        // `POST /api/v1/auth/2fa/verify-totp-login` con el challenge_token
         // para obtener el token final).
         $response->assertJsonMissingPath('token');
 

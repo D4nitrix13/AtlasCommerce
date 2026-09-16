@@ -82,7 +82,7 @@ final class WishlistControllerTest extends TestCase
     #[TestAttr]
     public function it_requires_authentication(): void
     {
-        $this->getJson(uri: 'http://panda-estampados.com/api/account/wishlists')
+        $this->getJson(uri: 'http://panda-estampados.com/api/v1/account/wishlists')
             ->assertStatus(status: 401);
     }
 
@@ -94,7 +94,7 @@ final class WishlistControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/account/wishlists');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/account/wishlists');
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');
@@ -107,7 +107,7 @@ final class WishlistControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/account/wishlists',
+            uri: 'http://panda-estampados.com/api/v1/account/wishlists',
             data: ['name' => 'Navidad'],
         );
 
@@ -123,7 +123,7 @@ final class WishlistControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $this->postJson(
-            uri: 'http://panda-estampados.com/api/account/wishlists',
+            uri: 'http://panda-estampados.com/api/v1/account/wishlists',
             data: ['name' => 'Nueva por defecto', 'is_default' => true],
         )->assertCreated();
 
@@ -135,7 +135,7 @@ final class WishlistControllerTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/account/wishlists/{$this->wishlist->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/account/wishlists/{$this->wishlist->id}");
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.name', expect: 'Favoritos');
@@ -146,7 +146,7 @@ final class WishlistControllerTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/account/wishlists/{$this->wishlist->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/account/wishlists/{$this->wishlist->id}")
             ->assertNoContent();
 
         $this->assertSoftDeleted(table: 'wishlists', data: ['id' => $this->wishlist->id]);
@@ -158,14 +158,14 @@ final class WishlistControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $first = $this->postJson(
-            uri: "http://panda-estampados.com/api/account/wishlists/{$this->wishlist->id}/items",
+            uri: "http://panda-estampados.com/api/v1/account/wishlists/{$this->wishlist->id}/items",
             data: ['product_id' => $this->product->id],
         );
         $first->assertCreated();
 
         // Segundo add: mismo producto → no duplica, mismo id.
         $second = $this->postJson(
-            uri: "http://panda-estampados.com/api/account/wishlists/{$this->wishlist->id}/items",
+            uri: "http://panda-estampados.com/api/v1/account/wishlists/{$this->wishlist->id}/items",
             data: ['product_id' => $this->product->id],
         );
         $second->assertCreated();
@@ -184,7 +184,7 @@ final class WishlistControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/account/wishlists/{$this->wishlist->id}/items/{$item->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/account/wishlists/{$this->wishlist->id}/items/{$item->id}")
             ->assertNoContent();
 
         $this->assertDatabaseMissing(table: 'wishlist_items', data: ['id' => $item->id]);
@@ -204,7 +204,7 @@ final class WishlistControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/account/wishlists/{$this->wishlist->id}/items/{$item->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/account/wishlists/{$this->wishlist->id}/items/{$item->id}")
             ->assertStatus(status: 404);
     }
 
@@ -219,7 +219,7 @@ final class WishlistControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $this->getJson(uri: "http://panda-estampados.com/api/account/wishlists/{$otherWishlist->id}")
+        $this->getJson(uri: "http://panda-estampados.com/api/v1/account/wishlists/{$otherWishlist->id}")
             ->assertStatus(status: 404);
     }
 }

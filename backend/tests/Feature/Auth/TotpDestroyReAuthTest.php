@@ -138,7 +138,7 @@ final class TotpDestroyReAuthTest extends TestCase
 
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/auth/2fa/totp', data: [
+        $response = $this->deleteJson(uri: '/api/v1/auth/2fa/totp', data: [
             'password' => 'secret-password',
         ]);
 
@@ -153,7 +153,7 @@ final class TotpDestroyReAuthTest extends TestCase
         // rechazado: sin 2FA, solo password es válido.
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/auth/2fa/totp', data: [
+        $response = $this->deleteJson(uri: '/api/v1/auth/2fa/totp', data: [
             'current_totp_code' => '123456',
         ]);
 
@@ -171,7 +171,7 @@ final class TotpDestroyReAuthTest extends TestCase
 
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/auth/2fa/totp', data: [
+        $response = $this->deleteJson(uri: '/api/v1/auth/2fa/totp', data: [
             'current_totp_code' => $wrongCode === $this->totpCodeFor($secret)
                 ? '000000'
                 : $wrongCode,
@@ -187,7 +187,7 @@ final class TotpDestroyReAuthTest extends TestCase
         // User NO tiene 2FA activa; DELETE con password incorrecto debe fallar.
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/auth/2fa/totp', data: [
+        $response = $this->deleteJson(uri: '/api/v1/auth/2fa/totp', data: [
             'password' => 'wrong-password',
         ]);
 
@@ -207,7 +207,7 @@ final class TotpDestroyReAuthTest extends TestCase
 
         Log::spy();
 
-        $response = $this->deleteJson(uri: '/api/auth/2fa/totp', data: [
+        $response = $this->deleteJson(uri: '/api/v1/auth/2fa/totp', data: [
             'current_totp_code' => $validCode,
         ]);
 
@@ -244,7 +244,7 @@ final class TotpDestroyReAuthTest extends TestCase
     public function test_destroy_returns_401_when_unauthenticated(): void
     {
         // Sin Sanctum::actingAs → middleware auth responde 401.
-        $response = $this->deleteJson(uri: '/api/auth/2fa/totp', data: [
+        $response = $this->deleteJson(uri: '/api/v1/auth/2fa/totp', data: [
             'password' => 'secret-password',
         ]);
 

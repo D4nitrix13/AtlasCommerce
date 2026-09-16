@@ -143,7 +143,7 @@ final class TwoFactorLoginFlowTest extends TestCase
     {
         ['user' => $user] = $this->userWith2fa('2fauser@panda-estampados.com');
 
-        $response = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
             'email' => $user->email,
             'password' => 'password',
             'device_name' => 'integration-test',
@@ -170,14 +170,14 @@ final class TwoFactorLoginFlowTest extends TestCase
     {
         ['user' => $user, 'secret' => $secret] = $this->userWith2fa('2fauser@panda-estampados.com');
 
-        $loginResponse = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+        $loginResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
             'email' => $user->email,
             'password' => 'password',
             'device_name' => 'integration-test',
         ]);
         $challengeToken = (int) $loginResponse->json('challenge_token');
 
-        $verifyResponse = $this->postJson(uri: self::HOST.'/api/auth/2fa/verify-totp-login', data: [
+        $verifyResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/2fa/verify-totp-login', data: [
             'challenge_token' => $challengeToken,
             'code' => $this->totpCodeFor($secret),
         ]);
@@ -198,13 +198,13 @@ final class TwoFactorLoginFlowTest extends TestCase
     {
         ['user' => $user] = $this->userWith2fa('2fauser@panda-estampados.com');
 
-        $loginResponse = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+        $loginResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
             'email' => $user->email,
             'password' => 'password',
         ]);
         $challengeToken = (int) $loginResponse->json('challenge_token');
 
-        $verifyResponse = $this->postJson(uri: self::HOST.'/api/auth/2fa/verify-totp-login', data: [
+        $verifyResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/2fa/verify-totp-login', data: [
             'challenge_token' => $challengeToken,
             'code' => '000000', // código deliberadamente incorrecto
         ]);
@@ -224,7 +224,7 @@ final class TwoFactorLoginFlowTest extends TestCase
     {
         ['user' => $user] = $this->userWith2fa('2fauser@panda-estampados.com');
 
-        $loginResponse = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+        $loginResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -235,7 +235,7 @@ final class TwoFactorLoginFlowTest extends TestCase
             'expires_at' => now()->subMinutes(10),
         ]);
 
-        $verifyResponse = $this->postJson(uri: self::HOST.'/api/auth/2fa/verify-totp-login', data: [
+        $verifyResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/2fa/verify-totp-login', data: [
             'challenge_token' => $challengeToken,
             'code' => '123456',
         ]);
@@ -249,20 +249,20 @@ final class TwoFactorLoginFlowTest extends TestCase
     {
         ['user' => $user, 'secret' => $secret] = $this->userWith2fa('2fauser@panda-estampados.com');
 
-        $loginResponse = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+        $loginResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
             'email' => $user->email,
             'password' => 'password',
         ]);
         $challengeToken = (int) $loginResponse->json('challenge_token');
 
         // Primer verify consume el challenge.
-        $this->postJson(uri: self::HOST.'/api/auth/2fa/verify-totp-login', data: [
+        $this->postJson(uri: self::HOST.'/api/v1/auth/2fa/verify-totp-login', data: [
             'challenge_token' => $challengeToken,
             'code' => $this->totpCodeFor($secret),
         ])->assertOk();
 
         // Segundo verify con el MISMO challenge debe fallar.
-        $secondVerify = $this->postJson(uri: self::HOST.'/api/auth/2fa/verify-totp-login', data: [
+        $secondVerify = $this->postJson(uri: self::HOST.'/api/v1/auth/2fa/verify-totp-login', data: [
             'challenge_token' => $challengeToken,
             'code' => $this->totpCodeFor($secret),
         ]);
@@ -275,7 +275,7 @@ final class TwoFactorLoginFlowTest extends TestCase
     public function login_without_2fa_returns_token_directly(): void
     {
         // admin@panda-estampados.com es creado por DefaultAdminSeeder SIN 2FA.
-        $response = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+        $response = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
             'email' => 'admin@panda-estampados.com',
             'password' => 'password',
             'device_name' => 'integration-test',
@@ -301,13 +301,13 @@ final class TwoFactorLoginFlowTest extends TestCase
         // incorrecto o challenge consumido, pero todos cuentan para el
         // throttle IP-based.
         for ($i = 0; $i < 10; $i++) {
-            $loginResponse = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+            $loginResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
                 'email' => $user->email,
                 'password' => 'password',
             ]);
             $challengeToken = (int) $loginResponse->json('challenge_token');
 
-            $verifyResponse = $this->postJson(uri: self::HOST.'/api/auth/2fa/verify-totp-login', data: [
+            $verifyResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/2fa/verify-totp-login', data: [
                 'challenge_token' => $challengeToken,
                 'code' => $i % 2 === 0 ? '000000' : $this->totpCodeFor($secret),
             ]);
@@ -329,13 +329,13 @@ final class TwoFactorLoginFlowTest extends TestCase
         }
 
         // 11º intento: nuevo login → challenge, pero verify debe ser bloqueado.
-        $loginResponse = $this->postJson(uri: self::HOST.'/api/auth/login', data: [
+        $loginResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/login', data: [
             'email' => $user->email,
             'password' => 'password',
         ]);
         $challengeToken = (int) $loginResponse->json('challenge_token');
 
-        $verifyResponse = $this->postJson(uri: self::HOST.'/api/auth/2fa/verify-totp-login', data: [
+        $verifyResponse = $this->postJson(uri: self::HOST.'/api/v1/auth/2fa/verify-totp-login', data: [
             'challenge_token' => $challengeToken,
             'code' => $this->totpCodeFor($secret),
         ]);

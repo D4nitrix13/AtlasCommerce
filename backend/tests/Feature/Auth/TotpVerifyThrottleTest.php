@@ -21,7 +21,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Tests del throttle IP-based para POST /api/auth/2fa/totp/verify (H4 del review).
+ * Tests del throttle IP-based para POST /api/v1/auth/2fa/totp/verify (H4 del review).
  *
  * Defense-in-depth: aunque TotpService::verify ya valida ventana ±1 step,
  * un atacante podría iterar sobre codes random. El throttle limita a
@@ -91,7 +91,7 @@ final class TotpVerifyThrottleTest extends TestCase
         // por lo que verify chequea TOTP y responde "Código inválido"
         // si el code es wrong.
         for ($i = 0; $i < 10; $i++) {
-            $response = $this->postJson(uri: '/api/auth/2fa/totp/verify', data: [
+            $response = $this->postJson(uri: '/api/v1/auth/2fa/totp/verify', data: [
                 'code' => '000000',
             ]);
 
@@ -102,7 +102,7 @@ final class TotpVerifyThrottleTest extends TestCase
         }
 
         // 11º intento: debe ser bloqueado por throttle con "Demasiados intentos".
-        $response = $this->postJson(uri: '/api/auth/2fa/totp/verify', data: [
+        $response = $this->postJson(uri: '/api/v1/auth/2fa/totp/verify', data: [
             'code' => '000000',
         ]);
 

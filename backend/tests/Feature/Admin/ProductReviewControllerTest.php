@@ -79,7 +79,7 @@ final class ProductReviewControllerTest extends TestCase
     #[TestAttr]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/reviews');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/reviews');
         $response->assertStatus(status: 401);
     }
 
@@ -88,7 +88,7 @@ final class ProductReviewControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->unauthorized, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/reviews');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/reviews');
         $response->assertStatus(status: 403);
     }
 
@@ -111,10 +111,10 @@ final class ProductReviewControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $onlyApproved = $this->getJson(uri: 'http://panda-estampados.com/api/admin/reviews?is_approved=true');
+        $onlyApproved = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/reviews?is_approved=true');
         $onlyApproved->assertJsonPath(path: 'meta.total', expect: 1);
 
-        $byProduct = $this->getJson(uri: "http://panda-estampados.com/api/admin/reviews?product_id={$this->product->id}");
+        $byProduct = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/reviews?product_id={$this->product->id}");
         $byProduct->assertJsonPath(path: 'meta.total', expect: 2);
     }
 
@@ -129,7 +129,7 @@ final class ProductReviewControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: "http://panda-estampados.com/api/admin/reviews/{$review->id}/approve");
+        $response = $this->postJson(uri: "http://panda-estampados.com/api/v1/admin/reviews/{$review->id}/approve");
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.is_approved', expect: true);
@@ -146,7 +146,7 @@ final class ProductReviewControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: "http://panda-estampados.com/api/admin/reviews/{$review->id}/reject");
+        $response = $this->postJson(uri: "http://panda-estampados.com/api/v1/admin/reviews/{$review->id}/reject");
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.is_approved', expect: false);
@@ -163,7 +163,7 @@ final class ProductReviewControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/admin/reviews/{$review->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/admin/reviews/{$review->id}")
             ->assertNoContent();
 
         $this->assertSoftDeleted(table: 'product_reviews', data: ['id' => $review->id]);
@@ -181,7 +181,7 @@ final class ProductReviewControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/reviews/{$review->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/reviews/{$review->id}");
 
         $response->assertStatus(status: 404);
     }

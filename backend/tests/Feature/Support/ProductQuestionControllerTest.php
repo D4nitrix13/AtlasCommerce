@@ -64,7 +64,7 @@ final class ProductQuestionControllerTest extends TestCase
     public function store_requires_authentication(): void
     {
         $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/questions",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/questions",
             data: ['question' => '¿Tienen stock en talla M?'],
         )->assertStatus(status: 401);
     }
@@ -75,7 +75,7 @@ final class ProductQuestionControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/questions",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/questions",
             data: ['question' => '¿Tienen stock en talla M?'],
         );
 
@@ -90,7 +90,7 @@ final class ProductQuestionControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/questions",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/questions",
             data: ['question' => 'ok'],
         );
 
@@ -116,7 +116,7 @@ final class ProductQuestionControllerTest extends TestCase
 
         // Sin auth.
         $response = $this->getJson(
-            uri: "http://panda-estampados.com/api/products/{$this->product->id}/questions",
+            uri: "http://panda-estampados.com/api/v1/products/{$this->product->id}/questions",
         );
 
         $response->assertOk();
@@ -138,7 +138,7 @@ final class ProductQuestionControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/account/questions');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/account/questions');
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');

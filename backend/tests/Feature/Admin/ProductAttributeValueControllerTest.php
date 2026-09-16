@@ -139,7 +139,7 @@ final class ProductAttributeValueControllerTest extends TestCase
     #[Test]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/attribute-values');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values');
         $response->assertStatus(status: 401);
     }
 
@@ -153,7 +153,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/attribute-values');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values');
         $response->assertStatus(status: 403);
     }
 
@@ -165,7 +165,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/attribute-values');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
@@ -178,7 +178,7 @@ final class ProductAttributeValueControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/attribute-values?product_id='.$this->otherProduct->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values?product_id='.$this->otherProduct->id);
 
         $response->assertStatus(status: 403);
     }
@@ -196,7 +196,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/attribute-values?attribute_id='.$this->attribute->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values?attribute_id='.$this->attribute->id);
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
@@ -209,7 +209,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/attribute-values/'.$value->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values/'.$value->id);
 
         $response->assertStatus(status: 404);
     }
@@ -219,7 +219,7 @@ final class ProductAttributeValueControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/attribute-values', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values', data: [
             'product_id' => $this->product->id,
             'attribute_id' => $this->attribute->id,
             'value' => 'Rojo',
@@ -242,7 +242,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/attribute-values', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values', data: [
             'product_id' => $this->product->id,
             'attribute_id' => $this->attribute->id,
             'value' => 'Azul',
@@ -257,7 +257,7 @@ final class ProductAttributeValueControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/attribute-values', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values', data: [
             'product_id' => $this->otherProduct->id,
             'attribute_id' => $this->attribute->id,
             'value' => 'Rojo',
@@ -271,7 +271,7 @@ final class ProductAttributeValueControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/attribute-values', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values', data: [
             'product_id' => $this->product->id,
             'attribute_id' => 99999,
             'value' => 'Rojo',
@@ -286,7 +286,7 @@ final class ProductAttributeValueControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/attribute-values', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values', data: [
             'product_id' => $this->product->id,
             'attribute_id' => $this->attribute->id,
             'value' => '',
@@ -303,7 +303,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/attribute-values/'.$assignment->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values/'.$assignment->id, data: [
             'value' => 'Modificado',
         ]);
 
@@ -321,7 +321,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/attribute-values/'.$assignment->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values/'.$assignment->id);
 
         $response->assertNoContent();
         $this->assertNull(ProductAttributeValue::query()->find($assignment->id));
@@ -334,7 +334,7 @@ final class ProductAttributeValueControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/attribute-values/'.$assignment->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values/'.$assignment->id);
 
         $response->assertStatus(status: 404);
     }

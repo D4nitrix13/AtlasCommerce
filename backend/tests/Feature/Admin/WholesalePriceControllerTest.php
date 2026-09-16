@@ -106,7 +106,7 @@ final class WholesalePriceControllerTest extends TestCase
     #[TestAttr]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/wholesale-prices');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/wholesale-prices');
         $response->assertStatus(status: 401);
     }
 
@@ -115,7 +115,7 @@ final class WholesalePriceControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->unauthorized, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/wholesale-prices');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/wholesale-prices');
         $response->assertStatus(status: 403);
     }
 
@@ -135,7 +135,7 @@ final class WholesalePriceControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/wholesale-prices');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/wholesale-prices');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
@@ -154,10 +154,10 @@ final class WholesalePriceControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $byProduct = $this->getJson(uri: "http://panda-estampados.com/api/admin/wholesale-prices?product_id={$this->product->id}");
+        $byProduct = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/wholesale-prices?product_id={$this->product->id}");
         $byProduct->assertJsonPath(path: 'meta.total', expect: 1);
 
-        $byStore = $this->getJson(uri: "http://panda-estampados.com/api/admin/wholesale-prices?store_id={$this->storeA->id}");
+        $byStore = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/wholesale-prices?store_id={$this->storeA->id}");
         $byStore->assertJsonPath(path: 'meta.total', expect: 2);
     }
 
@@ -167,7 +167,7 @@ final class WholesalePriceControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/wholesale-prices',
+            uri: 'http://panda-estampados.com/api/v1/admin/wholesale-prices',
             data: [
                 'product_id' => $this->product->id,
                 'store_id' => $this->storeA->id,
@@ -189,7 +189,7 @@ final class WholesalePriceControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/wholesale-prices',
+            uri: 'http://panda-estampados.com/api/v1/admin/wholesale-prices',
             data: [
                 'product_id' => $this->product->id,
                 'store_id' => $this->storeB->id,
@@ -214,7 +214,7 @@ final class WholesalePriceControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/wholesale-prices',
+            uri: 'http://panda-estampados.com/api/v1/admin/wholesale-prices',
             data: [
                 'product_id' => $this->product->id,
                 'store_id' => $this->storeA->id,
@@ -243,7 +243,7 @@ final class WholesalePriceControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: "http://panda-estampados.com/api/admin/wholesale-prices/{$price->id}",
+            uri: "http://panda-estampados.com/api/v1/admin/wholesale-prices/{$price->id}",
             data: [
                 'price_cents' => 12_00,
                 // product_id / store_id / min_qty ignorados aunque se envíen.
@@ -271,7 +271,7 @@ final class WholesalePriceControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $this->deleteJson(uri: "http://panda-estampados.com/api/admin/wholesale-prices/{$price->id}")
+        $this->deleteJson(uri: "http://panda-estampados.com/api/v1/admin/wholesale-prices/{$price->id}")
             ->assertNoContent();
 
         $this->assertDatabaseMissing(table: 'wholesale_prices', data: ['id' => $price->id]);
@@ -288,7 +288,7 @@ final class WholesalePriceControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/admin/wholesale-prices/{$otherPrice->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/wholesale-prices/{$otherPrice->id}");
 
         $response->assertStatus(status: 404);
     }

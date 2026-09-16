@@ -66,7 +66,7 @@ final class CheckoutApiTest extends TestCase
     {
         $cart = Cart::factory()->for($this->customer)->for($this->store)->for($this->currency)->create();
 
-        $this->postJson(uri: '/api/orders', data: [
+        $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $cart->id,
             'shipping_address_id' => 1,
             'payment_method_id' => $this->paymentMethod->id,
@@ -93,7 +93,7 @@ final class CheckoutApiTest extends TestCase
             'subtotal_cents' => $product->base_price_cents * 2,
         ]);
 
-        $response = $this->postJson(uri: '/api/orders', data: [
+        $response = $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $cart->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
@@ -160,7 +160,7 @@ final class CheckoutApiTest extends TestCase
         $address = $this->makeAddress();
         $cart = Cart::factory()->for($this->customer)->for($this->store)->for($this->currency)->create();
 
-        $this->postJson(uri: '/api/orders', data: [
+        $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $cart->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
@@ -181,7 +181,7 @@ final class CheckoutApiTest extends TestCase
 
         $address = $this->makeAddress();
 
-        $this->postJson(uri: '/api/orders', data: [
+        $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $cart->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,
@@ -201,7 +201,7 @@ final class CheckoutApiTest extends TestCase
             ->for($this->currency)
             ->create();
 
-        $this->postJson(uri: '/api/orders', data: [
+        $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $cart->id,
             'shipping_address_id' => $foreignAddress->id,
             'payment_method_id' => $this->paymentMethod->id,
@@ -214,7 +214,7 @@ final class CheckoutApiTest extends TestCase
         Sanctum::actingAs($this->user);
 
         // Body vacío → 422 por validación de campos.
-        $this->postJson('/api/orders', [])
+        $this->postJson('/api/v1/orders', [])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['cart_id', 'shipping_address_id', 'payment_method_id']);
     }
@@ -252,7 +252,7 @@ final class CheckoutApiTest extends TestCase
             ->for($this->currency)
             ->create();
 
-        $this->postJson(uri: '/api/orders', data: [
+        $this->postJson(uri: '/api/v1/orders', data: [
             'cart_id' => $otherCart->id,
             'shipping_address_id' => $address->id,
             'payment_method_id' => $this->paymentMethod->id,

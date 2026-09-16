@@ -171,7 +171,7 @@ final class StatefulCookieFlowTest extends TestCase
         $response = $this->withHeaders([
             'Origin' => 'http://panda-estampados.test',
             'X-XSRF-TOKEN' => $bootstrap['cookies']['XSRF-TOKEN'] ?? '',
-        ])->postJson(uri: 'http://panda-estampados.test/api/auth/login', data: [
+        ])->postJson(uri: 'http://panda-estampados.test/api/v1/auth/login', data: [
             'email' => 'admin@panda-estampados.test',
             'password' => 'secret-password',
             'device_name' => 'stateful-test',
@@ -208,7 +208,7 @@ final class StatefulCookieFlowTest extends TestCase
         $loginResponse = $this->withHeaders([
             'Origin' => 'http://panda-estampados.test',
             'X-XSRF-TOKEN' => $bootstrap['cookies']['XSRF-TOKEN'] ?? '',
-        ])->postJson(uri: 'http://panda-estampados.test/api/auth/login', data: [
+        ])->postJson(uri: 'http://panda-estampados.test/api/v1/auth/login', data: [
             'email' => 'admin@panda-estampados.test',
             'password' => 'secret-password',
             'device_name' => 'stateful-test',
@@ -230,7 +230,7 @@ final class StatefulCookieFlowTest extends TestCase
             value: $cookies[$sessionCookieName],
         )->withHeaders([
             'Origin' => 'http://panda-estampados.test',
-        ])->getJson(uri: 'http://panda-estampados.test/api/auth/me');
+        ])->getJson(uri: 'http://panda-estampados.test/api/v1/auth/me');
 
         $meResponse->assertOk();
         $meResponse->assertJsonPath('user.email', 'admin@panda-estampados.test');
@@ -244,7 +244,7 @@ final class StatefulCookieFlowTest extends TestCase
         $loginResponse = $this->withHeaders([
             'Origin' => 'http://panda-estampados.test',
             'X-XSRF-TOKEN' => $bootstrap['cookies']['XSRF-TOKEN'] ?? '',
-        ])->postJson(uri: 'http://panda-estampados.test/api/auth/login', data: [
+        ])->postJson(uri: 'http://panda-estampados.test/api/v1/auth/login', data: [
             'email' => 'admin@panda-estampados.test',
             'password' => 'secret-password',
             'device_name' => 'stateful-test',
@@ -268,7 +268,7 @@ final class StatefulCookieFlowTest extends TestCase
         )->withHeaders([
             'Origin' => 'http://panda-estampados.test',
             'X-XSRF-TOKEN' => $loginXsrf,
-        ])->postJson(uri: 'http://panda-estampados.test/api/auth/logout');
+        ])->postJson(uri: 'http://panda-estampados.test/api/v1/auth/logout');
 
         $logoutResponse->assertOk();
         $logoutResponse->assertJsonPath('message', 'Sesión cerrada.');
@@ -302,7 +302,7 @@ final class StatefulCookieFlowTest extends TestCase
         $loginResponse = $this->withHeaders([
             'Origin' => 'http://panda-estampados.test',
             'X-XSRF-TOKEN' => $bootstrap['cookies']['XSRF-TOKEN'] ?? '',
-        ])->postJson(uri: 'http://panda-estampados.test/api/auth/login', data: [
+        ])->postJson(uri: 'http://panda-estampados.test/api/v1/auth/login', data: [
             'email' => 'admin@panda-estampados.test',
             'password' => 'secret-password',
             'device_name' => 'cross-subdomain-test',
@@ -336,7 +336,7 @@ final class StatefulCookieFlowTest extends TestCase
         $loginResponse = $this->withHeaders([
             'Origin' => 'http://panda-estampados.test',
             'X-XSRF-TOKEN' => $bootstrap['cookies']['XSRF-TOKEN'] ?? '',
-        ])->postJson(uri: 'http://panda-estampados.test/api/auth/login', data: [
+        ])->postJson(uri: 'http://panda-estampados.test/api/v1/auth/login', data: [
             'email' => 'admin@panda-estampados.test',
             'password' => 'secret-password',
             'device_name' => 'cross-tenant-test',

@@ -87,7 +87,7 @@ final class RoleControllerTest extends TestCase
     #[Test]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/roles');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/roles');
         $response->assertStatus(status: 401);
     }
 
@@ -96,7 +96,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->nonAdmin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/roles');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/roles');
 
         $response->assertStatus(status: 403);
     }
@@ -118,7 +118,7 @@ final class RoleControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/roles');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/roles');
 
         $response->assertOk();
         $response->assertJsonStructure(structure: [
@@ -138,7 +138,7 @@ final class RoleControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/roles?q=vende');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/roles?q=vende');
         $response->assertOk();
 
         $slugs = collect($response->json(key: 'data'))->pluck('slug')->all();
@@ -151,7 +151,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/roles/'.$this->staffRole->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$this->staffRole->id);
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.slug', expect: 'staff');
@@ -172,7 +172,7 @@ final class RoleControllerTest extends TestCase
             ->all();
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/admin/roles',
+            uri: 'http://panda-estampados.com/api/v1/admin/roles',
             data: [
                 'name' => 'Catalog Manager',
                 'slug' => 'catalog-manager',
@@ -194,7 +194,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/roles', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/roles', data: [
             'name' => 'Bad Slug',
             'slug' => 'Invalid Slug With Spaces',
         ]);
@@ -208,7 +208,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/roles', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/roles', data: [
             'name' => 'Otro Admin',
             'slug' => 'admin',
         ]);
@@ -222,7 +222,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/roles', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/roles', data: [
             'name' => 'Custom Role',
             'slug' => 'custom-role',
             'permissions' => ['catalog.view', 'non.existent.permission'],
@@ -243,7 +243,7 @@ final class RoleControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/roles/'.$role->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$role->id, data: [
             'name' => 'Renombrado',
             'is_active' => false,
         ]);
@@ -263,7 +263,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/roles/'.$this->adminRole->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$this->adminRole->id, data: [
             'slug' => 'super-admin',
         ]);
 
@@ -288,7 +288,7 @@ final class RoleControllerTest extends TestCase
 
         $newSlugs = ['catalog.manage', 'inventory.view'];
         $response = $this->putJson(
-            uri: 'http://panda-estampados.com/api/admin/roles/'.$role->id.'/permissions',
+            uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$role->id.'/permissions',
             data: ['permissions' => $newSlugs],
         );
 
@@ -307,7 +307,7 @@ final class RoleControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: 'http://panda-estampados.com/api/admin/roles/'.$this->staffRole->id.'/permissions',
+            uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$this->staffRole->id.'/permissions',
             data: ['permissions' => []],
         );
 
@@ -322,7 +322,7 @@ final class RoleControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $response = $this->putJson(
-            uri: 'http://panda-estampados.com/api/admin/roles/'.$this->staffRole->id.'/permissions',
+            uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$this->staffRole->id.'/permissions',
             data: ['permissions' => ['catalog.view', 'fake.permission']],
         );
 
@@ -341,7 +341,7 @@ final class RoleControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/roles/'.$role->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$role->id);
         $response->assertNoContent();
 
         $this->assertSoftDeleted(table: 'roles', data: ['id' => $role->id]);
@@ -352,7 +352,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/roles/'.$this->adminRole->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$this->adminRole->id);
 
         $response->assertStatus(status: 500);
         $response->assertJsonFragment(['message' => 'El rol "admin" no puede eliminarse (es crítico para el bypass de permisos).']);
@@ -375,7 +375,7 @@ final class RoleControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/roles/'.$role->id)
+        $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$role->id)
             ->assertNoContent();
 
         $this->assertNull($user->fresh()->role_id);
@@ -386,7 +386,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/permissions');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/permissions');
 
         $response->assertOk();
         $response->assertJsonStructure(structure: [
@@ -414,7 +414,7 @@ final class RoleControllerTest extends TestCase
 
         Sanctum::actingAs(user: $plain, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/permissions');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/permissions');
         $response->assertStatus(status: 403);
     }
 
@@ -429,7 +429,7 @@ final class RoleControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/roles/'.$role->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/roles/'.$role->id, data: [
             'slug' => 'renamed-slug',
         ]);
 
@@ -442,7 +442,7 @@ final class RoleControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/permissions');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/permissions');
         $response->assertOk();
     }
 }

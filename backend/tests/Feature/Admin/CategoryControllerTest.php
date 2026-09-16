@@ -73,7 +73,7 @@ final class CategoryControllerTest extends TestCase
     #[Test]
     public function index_requires_authentication(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/categories');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories');
         $response->assertStatus(status: 401);
     }
 
@@ -82,7 +82,7 @@ final class CategoryControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/categories');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories');
         $response->assertStatus(status: 403);
     }
 
@@ -93,7 +93,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/categories');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 3);
@@ -107,7 +107,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/categories?q=camiseta');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories?q=camiseta');
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }
@@ -120,7 +120,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/admin/categories?parent_id='.$root->id);
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories?parent_id='.$root->id);
         $response->assertOk();
         $response->assertJsonPath(path: 'meta.total', expect: 1);
     }
@@ -130,7 +130,7 @@ final class CategoryControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/categories', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/categories', data: [
             'name' => 'Remeras',
             'slug' => 'remeras',
             'description' => 'Remeras de todo tipo',
@@ -148,7 +148,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/categories', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/categories', data: [
             'name' => 'Remeras Manga Corta',
             'slug' => 'remeras-manga-corta',
             'parent_id' => $root->id,
@@ -163,7 +163,7 @@ final class CategoryControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/categories', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/categories', data: [
             'name' => 'Test',
             'slug' => 'Invalid Slug With Spaces',
         ]);
@@ -179,7 +179,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/categories', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/categories', data: [
             'name' => 'Otra',
             'slug' => 'duplicate-slug',
         ]);
@@ -193,7 +193,7 @@ final class CategoryControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->postJson(uri: 'http://panda-estampados.com/api/admin/categories', data: [
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/categories', data: [
             'name' => 'Hija',
             'slug' => 'hija',
             'parent_id' => 99999,
@@ -210,7 +210,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/categories/'.$category->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/categories/'.$category->id, data: [
             'name' => 'Renombrada',
         ]);
 
@@ -225,7 +225,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/categories/'.$category->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/categories/'.$category->id, data: [
             'parent_id' => $category->id,
         ]);
 
@@ -244,7 +244,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->putJson(uri: 'http://panda-estampados.com/api/admin/categories/'.$root->id, data: [
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/categories/'.$root->id, data: [
             'parent_id' => $grandchild->id,
         ]);
 
@@ -259,7 +259,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/categories/'.$category->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/categories/'.$category->id);
 
         $response->assertNoContent();
         $this->assertNull(Category::query()->find($category->id));
@@ -277,7 +277,7 @@ final class CategoryControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/admin/categories/'.$category->id);
+        $response = $this->deleteJson(uri: 'http://panda-estampados.com/api/v1/admin/categories/'.$category->id);
 
         $response->assertStatus(status: 500);
         $response->assertJsonFragment(['message' => 'No podés eliminar la categoría porque tiene productos asociados. Reasigná los productos primero.']);

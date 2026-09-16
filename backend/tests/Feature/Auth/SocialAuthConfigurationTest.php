@@ -59,7 +59,7 @@ final class SocialAuthConfigurationTest extends TestCase
         // inicia y el controller corta con oauth_state_required antes
         // de llegar al check de provider).
         $response = $this->get(
-            uri: '/api/auth/social/google/redirect',
+            uri: '/api/v1/auth/social/google/redirect',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -80,7 +80,7 @@ final class SocialAuthConfigurationTest extends TestCase
         config()->set('services.google.client_secret', null);
 
         $response = $this->get(
-            uri: '/api/auth/social/google/redirect',
+            uri: '/api/v1/auth/social/google/redirect',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -99,7 +99,7 @@ final class SocialAuthConfigurationTest extends TestCase
         config()->set('services.google.client_secret', 'test-secret');
 
         $response = $this->get(
-            uri: '/api/auth/social/google/redirect',
+            uri: '/api/v1/auth/social/google/redirect',
             headers: ['referer' => 'http://localhost/es/admin/auth/login'],
         );
 
@@ -113,7 +113,7 @@ final class SocialAuthConfigurationTest extends TestCase
         // Test movido desde SocialAuthControllerTest — vive acá
         // porque es un guard de config (provider no aprobado) más
         // que de comportamiento del redirect propiamente dicho.
-        $response = $this->get(uri: '/api/auth/social/twitter/redirect');
+        $response = $this->get(uri: '/api/v1/auth/social/twitter/redirect');
 
         $response->assertStatus(400);
         $response->assertJsonFragment(data: ['message' => "Provider 'twitter' no soportado."]);

@@ -19,7 +19,7 @@ use Tests\TestCase;
  *
  * RF-CUST-042 — Exportar y borrar datos del cliente.
  *
- * Los endpoints viven en /api/account/* y requieren autenticación
+ * Los endpoints viven en /api/v1/account/* y requieren autenticación
  * Sanctum (User con Customer vinculado).
  */
 #[Group('customers')]
@@ -55,7 +55,7 @@ final class AccountDataControllerTest extends TestCase
     #[Test]
     public function export_requires_authentication(): void
     {
-        $response = $this->getJson(uri: '/api/account/data-export');
+        $response = $this->getJson(uri: '/api/v1/account/data-export');
 
         $response->assertStatus(status: 401);
     }
@@ -71,7 +71,7 @@ final class AccountDataControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->getJson(uri: '/api/account/data-export');
+        $response = $this->getJson(uri: '/api/v1/account/data-export');
 
         $response->assertOk();
         $response->assertJsonStructure(structure: [
@@ -107,7 +107,7 @@ final class AccountDataControllerTest extends TestCase
 
         Sanctum::actingAs(user: $adminOnly, abilities: ['*']);
 
-        $response = $this->getJson(uri: '/api/account/data-export');
+        $response = $this->getJson(uri: '/api/v1/account/data-export');
 
         $response->assertStatus(status: 404);
     }
@@ -117,7 +117,7 @@ final class AccountDataControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->postJson(uri: '/api/account/deletion-request');
+        $response = $this->postJson(uri: '/api/v1/account/deletion-request');
 
         $response->assertStatus(status: 202);
         $response->assertJsonStructure(structure: ['message', 'token', 'expires_at']);
@@ -138,7 +138,7 @@ final class AccountDataControllerTest extends TestCase
     {
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/account', data: []);
+        $response = $this->deleteJson(uri: '/api/v1/account', data: []);
 
         $response->assertStatus(status: 422);
         $response->assertJsonValidationErrors(errors: ['token', 'password']);
@@ -152,7 +152,7 @@ final class AccountDataControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/account', data: [
+        $response = $this->deleteJson(uri: '/api/v1/account', data: [
             'token' => str_repeat(string: 'a', times: 64),
             'password' => 'my-strong-password',
         ]);
@@ -169,7 +169,7 @@ final class AccountDataControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/account', data: [
+        $response = $this->deleteJson(uri: '/api/v1/account', data: [
             'token' => $token,
             'password' => 'WRONG-PASSWORD',
         ]);
@@ -186,7 +186,7 @@ final class AccountDataControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->deleteJson(uri: '/api/account', data: [
+        $response = $this->deleteJson(uri: '/api/v1/account', data: [
             'token' => $token,
             'password' => 'my-strong-password',
         ]);
@@ -223,7 +223,7 @@ final class AccountDataControllerTest extends TestCase
 
         Sanctum::actingAs(user: $this->user, abilities: ['*']);
 
-        $response = $this->postJson(uri: '/api/account/deletion-cancel');
+        $response = $this->postJson(uri: '/api/v1/account/deletion-cancel');
 
         $response->assertOk();
         $this->assertFalse($this->customer->fresh()->hasPendingDeletionToken());

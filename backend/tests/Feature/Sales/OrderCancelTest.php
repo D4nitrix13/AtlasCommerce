@@ -347,6 +347,6 @@ final class OrderCancelTest extends TestCase
 
     private function cancelUrl(int $orderId): string
     {
-        return "http://panda-estampados.com/api/orders/{$orderId}/cancel";
+        return "http://panda-estampados.com/api/v1/orders/{$orderId}/cancel";
     }
 }
