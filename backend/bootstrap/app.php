@@ -7,6 +7,7 @@ use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetSessionDomainFromHost;
 use App\Http\Middleware\StoreMaintenanceMode;
+use App\Http\Middleware\ValidateStatefulCsrf;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -35,6 +36,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             SetSessionDomainFromHost::class,
             EnsureFrontendRequestsAreStateful::class,
+            // RF-SEC-018: CSRF para requests stateful. Skip si Bearer token.
+            ValidateStatefulCsrf::class,
         ]);
 
         // SecurityHeaders: aplica a TODAS las responses (web + api).
