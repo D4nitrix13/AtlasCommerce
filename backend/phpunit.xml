@@ -42,5 +42,11 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!--
+          Hosts que Sanctum trata como stateful (cookie auth). En tests
+          necesitamos el .test para que EnsureFrontendRequestsAreStateful
+          agregue StartSession y dispare CSRF validation.
+        -->
+        <env name="SANCTUM_STATEFUL_DOMAINS" value="localhost,localhost:3000,localhost:4321,panda-estampados.test,www.panda-estampados.test,admin.panda-estampados.test,kitsune.test,www.kitsune.test,admin.kitsune.test"/>
     </php>
 </phpunit>
