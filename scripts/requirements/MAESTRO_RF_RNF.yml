@@ -1485,15 +1485,15 @@ rnf:
     priority: M
     importancia: necesario
     urgencia: importante
-    estado: en análisis
+    estado: verificado
     estabilidad: podría cambiar
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Cross-Site Request Forgery Prevention Cheat Sheet"
     dependencias: []
-    descripcion: "Las rutas web que mutan estado (no API) requerirán token CSRF válido."
+    descripcion: "Implementado vía middleware `ValidateStatefulCsrf` (PR #99). Registrado en `bootstrap/app.php` después de `EnsureFrontendRequestsAreStateful` en el grupo api. Lógica condicional: valida CSRF sólo cuando (a) método es state-mutating (POST/PUT/PATCH/DELETE) Y (b) hay sesión activa (host en SANCTUM_STATEFUL_DOMAINS). Bearer token (stateless) salta el check. 6 tests Feature. Doc completa en `docs/api/csrf-protection.md`. Frontend ya envía `X-XSRF-TOKEN` automáticamente via axios withCredentials."
     verificado_por: []
-    comentarios: "RNF en análisis. Sanctum ya provee esto para rutas stateful; revisar que esté activo globalmente."
+    comentarios: "Implementado vía middleware `ValidateStatefulCsrf` (PR #99). Registrado en `bootstrap/app.php` después de `EnsureFrontendRequestsAreStateful` en el grupo api. Lógica condicional: valida CSRF sólo cuando (a) método es state-mutating (POST/PUT/PATCH/DELETE) Y (b) hay sesión activa (host en SANCTUM_STATEFUL_DOMAINS). Bearer token (stateless) salta el check. 6 tests Feature. Doc completa en `docs/api/csrf-protection.md`. Frontend ya envía `X-XSRF-TOKEN` automáticamente via axios withCredentials."
 
   - code: RNF-SEC-019
     title: "Escaneo de dependencias (composer audit + npm audit)"
