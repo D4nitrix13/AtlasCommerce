@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\Sales;
 use App\Exceptions\Sales\InvalidOrderTransitionException;
 use App\Exceptions\Sales\OrderNotCancellableException;
 use App\Http\Controllers\Controller;
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Requests\Sales\CancelOrderRequest;
 use App\Http\Requests\Sales\CheckoutRequest;
 use App\Http\Resources\Sales\OrderResource;
@@ -29,6 +30,8 @@ use Illuminate\Http\Request;
  */
 class OrderController extends Controller
 {
+    use CursorPaginates;
+
     public function __construct(
         private readonly CheckoutService $checkout,
         private readonly OrderService $orders,
@@ -45,12 +48,19 @@ class OrderController extends Controller
     {
         $customer = $this->resolveCustomer($request);
 
-        $orders = Order::with(['items', 'invoices', 'currency'])
+        $query = Order::with(['items', 'invoices', 'currency'])
             ->where('customer_id', $customer->id)
+            // RF-PERF-022: cursor pagination. `id` como tiebreaker para
+            // que el cursor sea estable cuando dos órdenes comparten
+            // el mismo `ordered_at` (created_at ties).
             ->orderByDesc('ordered_at')
-            ->paginate(15);
+            ->orderByDesc('id');
 
-        return OrderResource::collection($orders)->response();
+        return $this->cursorPaginatedResponse(
+            request: $request,
+            query: $query,
+            resourceClass: OrderResource::class,
+        );
     }
 
     /**

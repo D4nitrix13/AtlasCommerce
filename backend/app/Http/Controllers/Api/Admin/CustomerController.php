@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Requests\Customers\Admin\CustomerStoreRequest;
 use App\Http\Requests\Customers\Admin\CustomerUpdateRequest;
 use App\Http\Resources\Customers\AdminCustomerResource;
@@ -31,6 +32,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CustomerController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/customers
      *
@@ -87,19 +89,15 @@ class CustomerController extends Controller
             $query->withTrashed();
         }
 
-        $paginator = $query
-            ->orderBy('email')
-            ->paginate(perPage: $perPage);
+        // RF-PERF-022: cursor pagination. El último orderBy (`id`) debe
+        // ser único e indexado para que el cursor sea estable.
+        $query->orderBy('email')->orderBy('id');
 
-        return response()->json(data: [
-            'data' => AdminCustomerResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request,
+            query: $query,
+            resourceClass: AdminCustomerResource::class,
+        );
     }
 
     /**

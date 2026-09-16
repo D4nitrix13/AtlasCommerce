@@ -127,8 +127,8 @@ final class CustomerControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 2);
         $emails = collect(value: $response->json('data'))->pluck('email')->all();
+        $this->assertCount(2, $emails);
         $this->assertContains(needle: 'a@example.com', haystack: $emails);
         $this->assertContains(needle: 'b@example.com', haystack: $emails);
         $this->assertNotContains(needle: 'c@example.com', haystack: $emails);
@@ -144,11 +144,11 @@ final class CustomerControllerTest extends TestCase
         Sanctum::actingAs(user: $this->staff, abilities: ['*']);
 
         $byQ = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers?q=maria');
-        $byQ->assertJsonPath(path: 'meta.total', expect: 1);
+        $byQ->assertJsonCount(1, 'data');
         $byQ->assertJsonPath(path: 'data.0.email', expect: 'maria@example.com');
 
         $byType = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers?customer_type=wholesale');
-        $byType->assertJsonPath(path: 'meta.total', expect: 1);
+        $byType->assertJsonCount(1, 'data');
         $byType->assertJsonPath(path: 'data.0.customer_type', expect: 'wholesale');
     }
 
@@ -293,11 +293,11 @@ final class CustomerControllerTest extends TestCase
 
         // Por defecto NO aparece en el listado (sin with_trashed).
         $list = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers');
-        $list->assertJsonPath(path: 'meta.total', expect: 0);
+        $list->assertJsonCount(0, 'data');
 
         // Con with_trashed=1 sí aparece.
         $listAll = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/customers?with_trashed=1');
-        $listAll->assertJsonPath(path: 'meta.total', expect: 1);
+        $listAll->assertJsonCount(1, 'data');
     }
 
     #[TestAttr]
