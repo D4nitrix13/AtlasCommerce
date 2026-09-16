@@ -1510,7 +1510,7 @@ rnf:
     dependencias: []
     descripcion: "El pipeline de CI ejecutará `composer audit` y `pnpm audit` en cada PR; los PRs con vulnerabilidades altas no se podrán mergear."
     verificado_por: []
-    comentarios: "RNF en análisis. Quality gate actual no incluye este paso; sugerir añadir."
+    comentarios: "Implementado en quality-gate.yml (PR #96): job `dependencies-audit` que corre `composer audit --no-dev --audit-level=high` y `pnpm audit --audit-level=high`. Falla el CI si hay vulnerabilidades high/critical en deps PHP (composer.lock) o Node (pnpm-lock.yaml). Reporta advisories en JSON + plain. Renovate bot queda fuera de scope por ahora (manual upgrade workflow). Cubierto por PR #96."
 
   - code: RNF-SEC-020
     title: "Rotación programada de secrets (APP_KEY, pasarela pago)"
