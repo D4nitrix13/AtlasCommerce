@@ -1128,7 +1128,7 @@ rf:
     dependencias: ["RF-STOR-130"]
     descripcion: "El admin podrá activar el modo mantenimiento por tienda, mostrando una página de "estamos trabajando" en el storefront sin afectar al admin."
     verificado_por: []
-    comentarios: "Backend completo. /api/admin/stores (CRUD con name/email/phone/description/tax_rate/colors/is_active) + POST /admin/stores/{store}/maintenance (toggle explícito). Aislamiento por tenant. Permisos stores.view + stores.manage. 12 tests Feature, 29 assertions (#73). Pendiente: middleware que bloquee requests al storefront cuando maintenance_mode=true + UI admin para el toggle + cron que limpie carts abandonados durante el down."
+    comentarios: "Backend completo. /api/admin/stores (CRUD con name/email/phone/description/tax_rate/colors/is_active) + POST /admin/stores/{store}/maintenance (toggle explícito). Aislamiento por tenant. Permisos stores.view + stores.manage. 12 tests Feature, 29 assertions (#73). Cierre (PR #92): middleware StoreMaintenanceMode que retorna 503 con view branded (errors.503.blade.php offline-safe) cuando maintenance_mode=true; Artisan carts:purge-abandoned --days=N con schedule hourly en local y dailyAt(03:00) en prod; frontend /[locale]/admin/settings/store con componente StoresAdmin (toggle por tienda, deshabilitado si is_active=false). Tests Feature: 4 (middleware) + 6 (command) + 6 (Vitest component) = 16 nuevos, 130/130 previos pasan (excluyendo StorefrontAssetTest pre-existente)."
 
   - code: RF-STOR-133
     title: "Redes sociales y canales de venta"

@@ -931,7 +931,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
 |
 */
 
-Route::middleware(['store.domain'])->prefix('storefront')->group(function (): void {
+Route::middleware(['store.domain', 'store.maintenance'])->prefix('storefront')->group(function (): void {
     Route::get('/products/search', [StorefrontProductController::class, 'search'])
         ->name('storefront.products.search');
     Route::get('/products', [StorefrontProductController::class, 'index'])

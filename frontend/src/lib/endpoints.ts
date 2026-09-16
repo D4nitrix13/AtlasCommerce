@@ -39,6 +39,11 @@ export const API_ENDPOINTS = {
     permissionRoles: '/permission-roles',
   },
 
+  admin: {
+    stores: '/admin/stores',
+    storeMaintenance: (id: number | string) => `/admin/stores/${id}/maintenance`,
+  },
+
   customers: {
     customers: '/customers',
     addresses: '/customer-addresses',
