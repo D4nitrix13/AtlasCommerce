@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Marketing;
 
+use App\Models\Carts\Cart;
 use App\Models\Catalog\Product;
 use App\Models\Marketing\Promotion;
 use App\Models\Stores\Store;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
  * Responsabilidades:
  *  - Determinar si una promoción está vigente (activa + ventana temporal + tenant).
  *  - Calcular el descuento en centavos que aplicaría a un producto.
+ *  - Calcular el descuento total que aplicaría a un carrito completo.
  *
  * Reglas:
  *  - Si la promoción pertenece a una tienda (`store_id` no nulo), sólo
@@ -81,5 +83,67 @@ final class PromotionService
             'fixed' => (int) round((float) $promotion->value * 100),
             default => 0,
         };
+    }
+
+    /**
+     * Calcula el descuento total (en centavos) que las promociones
+     * automáticas aplican a un carrito entero.
+     *
+     * Para cada item del carrito:
+     *  - Carga las promociones del producto (eager loading opcional).
+     *  - Filtra por `isApplicable` (vigencia + tenant).
+     *  - Toma el mayor descuento unitario entre las promos aplicables
+     *    (no se acumulan múltiples promos sobre el mismo item).
+     *  - Multiplica por la cantidad del item.
+     *  - Acota al subtotal del item (defensivo: nunca devuelve más de
+     *    lo que cuesta la línea).
+     *
+     * El descuento se acumula sobre todos los items y se retorna como
+     * un único entero en centavos. Si no hay promos aplicables, retorna 0.
+     *
+     * Uso esperado: lo invoca `CheckoutService` al consolidar el
+     * descuento total junto al cupón.
+     */
+    public function calculateForCart(Cart $cart, Store $store): int
+    {
+        if ($cart->items->isEmpty()) {
+            return 0;
+        }
+
+        $totalDiscountCents = 0;
+
+        foreach ($cart->items as $item) {
+            $product = $item->product;
+            if ($product === null) {
+                continue;
+            }
+
+            if (! $product->relationLoaded('promotions')) {
+                $product->load('promotions');
+            }
+
+            $bestDiscountPerUnit = 0;
+            foreach ($product->promotions as $promotion) {
+                $discountPerUnit = $this->calculateDiscountCents(
+                    promotion: $promotion,
+                    product: $product,
+                    store: $store,
+                );
+
+                if ($discountPerUnit > $bestDiscountPerUnit) {
+                    $bestDiscountPerUnit = $discountPerUnit;
+                }
+            }
+
+            $itemDiscount = $bestDiscountPerUnit * (int) $item->quantity;
+            $itemSubtotal = (int) $item->subtotal_cents;
+            if ($itemDiscount > $itemSubtotal) {
+                $itemDiscount = $itemSubtotal;
+            }
+
+            $totalDiscountCents += $itemDiscount;
+        }
+
+        return $totalDiscountCents;
     }
 }
