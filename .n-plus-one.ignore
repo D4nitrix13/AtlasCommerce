@@ -1,0 +1,15 @@
+# Whitelist para scripts/check-n-plus-one.sh
+#
+# Cada línea es un path:line exacta de un falso positivo conocido.
+# El script la ignora automáticamente. NO abuse de esto — agregue solo
+# cuando verificó manualmente que NO es N+1 (ej: relación ya eager-loaded
+# vía load()/with(), o el método no es una relación real).
+#
+# Formato: una entrada por línea, comentario opcional arriba.
+# Ejemplo:
+#   backend/app/Services/Foo/BarService.php:42
+
+# OrderService.php:91 — $invoice->paidAmountCents() es un método del
+# modelo Invoice (no una relación). Las invoices fueron eager-loaded vía
+# $order->invoices()->get() en línea 89.
+backend/app/Services/Sales/OrderService.php:91
