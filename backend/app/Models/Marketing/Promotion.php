@@ -101,30 +101,36 @@ class Promotion extends Model
     /**
      * Filtra promociones activas.
      *
+     * NOTA: usar `where('is_active', true)` posicional. Con named-arg
+     * `value: true` Laravel genera `is_active IS NULL` en PostgreSQL
+     * con cast `boolean` (binding del true se pierde). Ver PR #XX.
+     *
      * @param  Builder<Promotion>  $query  Consulta del modelo.
      * @return Builder<Promotion>
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where(column: 'is_active', value: true);
+        return $query->where('is_active', true);
     }
 
     /**
      * Filtra promociones vigentes (activas y dentro de la ventana temporal).
+     *
+     * Misma nota sobre named-args vs posicional — ver scopeActive.
      *
      * @param  Builder<Promotion>  $query  Consulta del modelo.
      * @return Builder<Promotion>
      */
     public function scopeValid(Builder $query): Builder
     {
-        return $query->where(column: 'is_active', value: true)
+        return $query->where('is_active', true)
             ->where(function ($q): void {
-                $q->whereNull(columns: 'starts_at')
-                    ->orWhere(column: 'starts_at', operator: '<=', value: now());
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q): void {
-                $q->whereNull(columns: 'ends_at')
-                    ->orWhere(column: 'ends_at', operator: '>=', value: now());
+                $q->whereNull('ends_at')
+                    ->orWhere('ends_at', '>=', now());
             });
     }
 

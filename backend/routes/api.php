@@ -40,6 +40,7 @@ use App\Http\Controllers\Api\Sales\OrderController;
 use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
+use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
@@ -939,6 +940,8 @@ Route::middleware(['store.domain'])->prefix('storefront')->group(function (): vo
         ->name('storefront.products.show');
     Route::get('/products/{slug}/price', [StorefrontProductController::class, 'price'])
         ->name('storefront.products.price');
+    Route::get('/promotions', [StorefrontPromotionController::class, 'index'])
+        ->name('storefront.promotions.index');
     Route::get('/theme', [StorefrontThemeController::class, 'show']);
     // Proxy de assets del tenant desde FTP al browser.
     // El {path} acepta slashes via where() regex para que coincida

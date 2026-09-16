@@ -6,6 +6,7 @@ namespace App\Models\Catalog;
 
 use App\Models\Concerns\HasSlug;
 use App\Models\Inventory\Inventory;
+use App\Models\Marketing\Promotion;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
 use Carbon\Carbon;
@@ -100,6 +101,21 @@ class Product extends Model
             related: ProductStore::class,
             table: 'product_stores',
         )->withPivot(columns: ['is_visible']);
+    }
+
+    /**
+     * Promociones automáticas asociadas al producto (RF-MKT-061).
+     *
+     * Relación N:N via `product_promotion`. Usada por
+     * `PromotionService::calculateForCart()` para resolver el descuento
+     * aplicable a cada item del carrito.
+     */
+    public function promotions(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: Promotion::class,
+            table: 'product_promotion',
+        );
     }
 
     public function inventories(): HasMany
