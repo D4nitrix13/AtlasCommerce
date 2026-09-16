@@ -1596,9 +1596,9 @@ rnf:
       - "OWASP API4:2023"
       - "Buenas prácticas REST"
     dependencias: []
-    descripcion: "Todos los endpoints que devuelven colecciones (productos, órdenes, clientes) implementarán paginación cursor-based con un máximo de 50 items por página."
+    descripcion: "Implementado vía trait `App\\Http\\Concerns\\CursorPaginates` (PR #100). El trait provee `cursorPaginatedResponse(request, query, resourceClass)` que aplica cursor pagination con shape consistente { data, meta: { next_cursor, prev_cursor, has_more, per_page } }. perPage clamp 1..100. Migrados como ejemplo: Admin/CustomerController, Sales/OrderController. 8 tests Feature cubren shape, clamp, has_more, navegación multi-página, cursor inválido. Doc completa en `docs/backend/cursor-pagination.md`. Pendiente: migrar el resto de los controllers (~18) en PRs siguientes — el trait ya está disponible para adopción incremental."
     verificado_por: []
-    comentarios: "RNF en análisis. Paginación ya usada en `ProductController::index`; falta generalizar."
+    comentarios: "Implementado vía trait `App\\Http\\Concerns\\CursorPaginates` (PR #100). El trait provee `cursorPaginatedResponse(request, query, resourceClass)` que aplica cursor pagination con shape consistente { data, meta: { next_cursor, prev_cursor, has_more, per_page } }. perPage clamp 1..100. Migrados como ejemplo: Admin/CustomerController, Sales/OrderController. 8 tests Feature cubren shape, clamp, has_more, navegación multi-página, cursor inválido. Doc completa en `docs/backend/cursor-pagination.md`. Pendiente: migrar el resto de los controllers (~18) en PRs siguientes — el trait ya está disponible para adopción incremental."
 
   - code: RNF-PERF-023
     title: "Optimización de imágenes en frontend"
