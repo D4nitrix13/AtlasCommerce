@@ -1625,14 +1625,14 @@ rnf:
     priority: M
     importancia: necesario
     urgencia: importante
-    estado: en análisis
-    estabilidad: podría cambiar
+    estado: verificado
+    estabilidad: estable
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
     fuentes:
       - "Laravel — Eager Loading"
       - "Buenas prácticas ORM"
     dependencias: ["RNF-PERF-022"]
-    descripcion: "Todo listado que use relaciones deberá declararlas con `with()` para evitar queries N+1; un linter en CI advertirá de accesos a relaciones en loops."
+    descripcion: "Implementado vía scripts/check-n-plus-one.sh + job `n-plus-one-check` en quality-gate.yml (PR #97). El script escanea `backend/app/` buscando foreach loops que accedan a relaciones Eloquent sin eager-loading. Denylist interna cubre atributos y métodos comunes (id, *_at, update, save, etc); whitelist en `.n-plus-one.ignore` para falsos positivos. Documentación completa en `docs/backend/n-plus-one-prevention.md`. Estado actual del codebase: 0 N+1 detectados."
     verificado_por: []
     comentarios: "RNF en análisis."
 
