@@ -1476,7 +1476,7 @@ rnf:
     dependencias: ["RNF-SEC-013"]
     descripcion: "Todas las responses HTTP incluirán cabeceras CSP, HSTS, X-Frame-Options, X-Content-Type-Options y Referrer-Policy configuradas de forma segura."
     verificado_por: []
-    comentarios: "RNF en análisis. Cabeceras parcialmente configuradas en Caddyfile (R1 review 2026-08-15)."
+    comentarios: "Implementado vía middleware SecurityHeaders (apéndice global) + Caddyfile (edge). Headers: CSP default-src 'self' + object-src 'none' + frame-ancestors 'none', X-Frame-Options DENY (cubre RF-SEC-021), X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy bloqueando features no usadas, HSTS max-age=31536000 solo en producción. 5 tests Feature. Caddyfile ya emite estos headers para HTML responses; el middleware los re-aplica a responses API JSON del backend (defense-in-depth). Cubierto por PR #95."
 
   - code: RNF-SEC-018
     title: "CSRF en rutas web stateful"
@@ -1545,7 +1545,7 @@ rnf:
     dependencias: ["RNF-SEC-017"]
     descripcion: "El panel admin emitirá `X-Frame-Options: DENY` (o `frame-ancestors 'none'` en CSP) para impedir embeber en iframes."
     verificado_por: []
-    comentarios: "RNF en análisis. Caddyfile ya emite X-Frame-Options SAMEORIGIN globalmente."
+    comentarios: "Cubierto por SecurityHeaders middleware (PR #95): X-Frame-Options DENY global. Refuerza la SAMEORIGIN del Caddyfile con DENY estricto (admin no debe ser embebido nunca). Cubre RF-SEC-021."
 
   # ===== Categoría: Performance (PERF) =====
   - code: RNF-PERF-020
