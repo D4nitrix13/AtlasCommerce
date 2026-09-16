@@ -1788,15 +1788,15 @@ rnf:
     priority: M
     importancia: necesario
     urgencia: puede esperar
-    estado: en análisis
+    estado: verificado
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
     dependencias: ["RNF-USA-041"]
-    descripcion: "Los emails transaccionales (confirmación de orden, recuperación de password, etc.) se enviarán en el idioma del usuario, no solo en el idioma de la tienda."
+    descripcion: "Implementado vía App\\Support\\LocalizedMail (PR #104). Helper que envuelve Laravel MailMessage con localización automática basada en User->locale → App::getLocale() → fallback 'es'. 14 keys de traducción en backend/lang/{es,en}/emails.php (auth.email_otp, auth.password_reset_code). EmailOtpLoginNotification + PasswordResetCodeNotification migradas. 7 tests Feature. Doc completa en docs/backend/emails-i18n.md. Pendiente: migrar vistas Blade con `__()` directives + emails customer-facing (orden, shipping, invoice)."
     verificado_por: []
-    comentarios: "RNF en análisis."
+    comentarios: "Implementado en PR #104."
 
   # ===== Categoría: Mantenibilidad (MAIN) =====
   - code: RNF-MAIN-050
