@@ -107,6 +107,7 @@ export const API_ENDPOINTS = {
 
   marketing: {
     coupons: '/coupons',
+    couponsValidate: '/coupons/validate',
     couponUsages: '/coupon-usages',
     promotions: '/promotions',
     productPromotions: '/product-promotions',

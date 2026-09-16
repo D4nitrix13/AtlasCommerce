@@ -1,0 +1,38 @@
+---
+/**
+ * Página pública del carrito de compras.
+ *
+ * Wrapper Astro que monta el React island `CouponInput`. La lógica
+ * completa del carrito (items, totales, checkout) vive en componentes
+ * específicos que se irán agregando en PRs subsiguientes. Este PR
+ * introduce la entrada de cupón como bloque independiente.
+ *
+ * i18n: el título se renderiza server-side vía `getServerDictionary`
+ * para evitar mismatch con el primer render del React island.
+ */
+import Layout from '../../layouts/Layout.astro';
+import CouponInput from '../../components/storefront/cart/CouponInput';
+import { getServerDictionary } from '../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+---
+
+<Layout title={t['storefront.cart.title']}>
+  <main class="mx-auto max-w-3xl px-4 py-8">
+    <h1 class="mb-6 text-2xl font-bold text-neutral-900">
+      {t['storefront.cart.title']}
+    </h1>
+
+    <div class="flex flex-col gap-6">
+      <p class="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-6 text-center text-sm text-neutral-600">
+        {t['storefront.cart.empty']}
+        <br />
+        <span class="mt-1 inline-block text-xs text-neutral-500">
+          {t['storefront.cart.emptyHint']}
+        </span>
+      </p>
+
+      <CouponInput client:only="react" />
+    </div>
+  </main>
+</Layout>

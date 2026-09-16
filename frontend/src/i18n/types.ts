@@ -404,6 +404,27 @@ export type TranslationKey =
   | 'storefront.search.page'
   | 'storefront.search.of'
 
+  // ─── storefront: cart ────────────────────────────────────────────────
+  | 'storefront.cart.title'
+  | 'storefront.cart.empty'
+  | 'storefront.cart.emptyHint'
+  | 'storefront.cart.coupon.label'
+  | 'storefront.cart.coupon.placeholder'
+  | 'storefront.cart.coupon.apply'
+  | 'storefront.cart.coupon.applying'
+  | 'storefront.cart.coupon.applied'
+  | 'storefront.cart.coupon.remove'
+  | 'storefront.cart.coupon.discount'
+  | 'storefront.cart.coupon.error.empty'
+  | 'storefront.cart.coupon.error.invalid'
+  | 'storefront.cart.coupon.error.minAmount'
+  | 'storefront.cart.coupon.error.expired'
+  | 'storefront.cart.coupon.error.generic'
+  | 'storefront.cart.subtotal'
+  | 'storefront.cart.discount'
+  | 'storefront.cart.total'
+  | 'storefront.cart.checkout'
+
   // ─── formatters ──────────────────────────────────────────────────────
   | 'format.empty'
   | 'format.date.locale';
