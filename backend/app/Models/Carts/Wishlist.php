@@ -89,6 +89,7 @@ class Wishlist extends Model
      */
     public function scopeDefault(Builder $query): Builder
     {
-        return $query->where(column: 'is_default', value: true);
+        // Args posicionales: ver note en Promotion::scopeActive.
+        return $query->where('is_default', true);
     }
 }

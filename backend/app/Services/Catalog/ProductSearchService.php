@@ -94,9 +94,9 @@ final class ProductSearchService
         return Product::query()
             ->select('products.*')
             ->join('product_stores', 'product_stores.product_id', '=', 'products.id')
-            ->where(column: 'product_stores.store_id', operator: '=', value: $store->id)
-            ->where(column: 'product_stores.is_visible', operator: '=', value: true)
-            ->where(column: 'products.is_active', operator: '=', value: true)
+            ->where('product_stores.store_id', $store->id)
+            ->where('product_stores.is_visible', true)
+            ->where('products.is_active', true)
             ->whereNotNull('products.published_at')
             ->where('products.published_at', operator: '<=', value: now())
             ->where(function ($q) use ($containsNeedle): void {
