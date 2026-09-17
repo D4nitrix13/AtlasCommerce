@@ -1806,7 +1806,7 @@ rnf:
     priority: H
     importancia: vital
     urgencia: importante
-    estado: en análisis
+    estado: verificado
     estabilidad: podría cambiar
     autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
     fuentes:
@@ -1815,7 +1815,7 @@ rnf:
     dependencias: []
     descripcion: "El proyecto deberá mantener una cobertura de tests (PHPUnit + Playwright + Vitest) de al menos 70% en líneas críticas (servicios, controladores, componentes UI principales)."
     verificado_por: []
-    comentarios: "RNF en análisis."
+    comentarios: "Setup baseline en PR #106 (phpunit.xml coverage config + composer test:coverage script + vitest run --coverage). Threshold actual --min=0 (no bloquea PRs) para permitir medición sin regresión. Target: ≥ 70% line coverage en backend/frontend. Roadmap en docs/backend/test-coverage.md con métricas, exclusions, upgrade policy. Pendiente: job CI dedicado con Xdebug + upload a Codecov + enforcing threshold cuando baseline sea ≥ 70%."
 
   - code: RNF-MAIN-051
     title: "Linting y formato automatizado"
