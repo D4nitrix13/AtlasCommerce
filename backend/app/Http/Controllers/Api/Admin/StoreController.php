@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stores\Admin\StoreUpdateRequest;
 use App\Http\Resources\Stores\AdminStoreResource;
@@ -25,6 +26,7 @@ use Illuminate\Http\Request;
  */
 class StoreController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/stores
      */
@@ -36,15 +38,9 @@ class StoreController extends Controller
 
         $paginator = $query->paginate(perPage: (int) $request->query('per_page', 20));
 
-        return response()->json(data: [
-            'data' => AdminStoreResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: AdminStoreResource::class,
+        );
     }
 
     /**

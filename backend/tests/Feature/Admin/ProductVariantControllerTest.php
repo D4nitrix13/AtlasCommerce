@@ -164,7 +164,7 @@ final class ProductVariantControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
         $ids = collect($response->json(key: 'data'))->pluck('id')->all();
         $this->assertContains(needle: $variant->id, haystack: $ids);
         $this->assertNotContains(needle: $outsider->id, haystack: $ids);
@@ -183,7 +183,7 @@ final class ProductVariantControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants?product_id='.$this->product->id);
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -204,7 +204,7 @@ final class ProductVariantControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants?q=azul');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -358,6 +358,6 @@ final class ProductVariantControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/variants?with_trashed=1');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Shipping;
 
 use App\Exceptions\Shipping\InvalidShipmentTransitionException;
+use App\Http\Concerns\CursorPaginates;
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Shipping\ShipmentResource;
 use App\Models\Shipping\Shipment;
@@ -19,21 +21,25 @@ use Illuminate\Http\JsonResponse;
  */
 class ShipmentController extends Controller
 {
+
+    use CursorPaginates;
     private const DEFAULT_PAGE_SIZE = 25;
 
     public function __construct(
         private readonly ShipmentService $shipments,
     ) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $shipments = Shipment::query()
+        $query = Shipment::query()
             ->with(['shippingCompany', 'shippingZone', 'currency'])
-            ->orderByDesc('id')
-            ->paginate(perPage: self::DEFAULT_PAGE_SIZE);
+            ->orderByDesc('id');
 
-        return ShipmentResource::collection(resource: $shipments)
-            ->response();
+        return $this->cursorPaginatedResponse(
+            request: $request,
+            query: $query,
+            resourceClass: ShipmentResource::class,
+        );
     }
 
     public function show(Shipment $shipment): JsonResponse

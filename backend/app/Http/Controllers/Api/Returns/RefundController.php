@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Returns;
 
 use App\Exceptions\Returns\InvalidRefundTransitionException;
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Returns\RefundResource;
 use App\Models\Payments\PaymentMethod;
@@ -25,6 +26,7 @@ use RuntimeException;
  */
 class RefundController extends Controller
 {
+    use CursorPaginates;
     private const DEFAULT_PAGE_SIZE = 25;
 
     public function __construct(

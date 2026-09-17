@@ -138,7 +138,7 @@ final class WholesalePriceControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/wholesale-prices');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[TestAttr]
@@ -155,10 +155,10 @@ final class WholesalePriceControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $byProduct = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/wholesale-prices?product_id={$this->product->id}");
-        $byProduct->assertJsonPath(path: 'meta.total', expect: 1);
+        $byProduct->assertJsonCount(1, 'data');
 
         $byStore = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/wholesale-prices?store_id={$this->storeA->id}");
-        $byStore->assertJsonPath(path: 'meta.total', expect: 2);
+        $byStore->assertJsonCount(2, 'data');
     }
 
     #[TestAttr]

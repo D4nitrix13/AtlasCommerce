@@ -168,7 +168,7 @@ final class ProductAttributeValueControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
         $value = $response->json(key: 'data.0.value');
         $this->assertSame(expected: 'Rojo', actual: $value);
     }
@@ -199,7 +199,7 @@ final class ProductAttributeValueControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attribute-values?attribute_id='.$this->attribute->id);
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]

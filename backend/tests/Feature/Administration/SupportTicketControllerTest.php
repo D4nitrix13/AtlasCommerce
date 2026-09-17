@@ -126,7 +126,7 @@ final class SupportTicketControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/support/tickets');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[TestAttr]
@@ -142,10 +142,10 @@ final class SupportTicketControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $openOnly = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/support/tickets?status=open');
-        $openOnly->assertJsonPath(path: 'meta.total', expect: 1);
+        $openOnly->assertJsonCount(1, 'data');
 
         $urgent = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/support/tickets?priority=urgent');
-        $urgent->assertJsonPath(path: 'meta.total', expect: 1);
+        $urgent->assertJsonCount(1, 'data');
     }
 
     #[TestAttr]
