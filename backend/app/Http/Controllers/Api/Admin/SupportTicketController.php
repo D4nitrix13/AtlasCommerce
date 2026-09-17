@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Support\Admin\SupportTicketUpdateRequest;
 use App\Http\Requests\Support\SupportTicketReplyRequest;
@@ -29,6 +30,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class SupportTicketController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/support/tickets
      */
@@ -49,15 +51,9 @@ class SupportTicketController extends Controller
         $paginator = $query->orderByDesc('created_at')
             ->paginate(perPage: (int) $request->query('per_page', 20));
 
-        return response()->json(data: [
-            'data' => AdminSupportTicketResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: AdminSupportTicketResource::class,
+        );
     }
 
     /**

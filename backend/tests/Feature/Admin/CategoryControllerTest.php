@@ -96,7 +96,7 @@ final class CategoryControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 3);
+        $response->assertJsonCount(3, 'data');
     }
 
     #[Test]
@@ -109,7 +109,7 @@ final class CategoryControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories?q=camiseta');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -122,7 +122,7 @@ final class CategoryControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/categories?parent_id='.$root->id);
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]

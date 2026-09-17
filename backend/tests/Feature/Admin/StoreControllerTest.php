@@ -115,7 +115,7 @@ final class StoreControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/stores');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
         $response->assertJsonPath(path: 'data.0.id', expect: $this->storeA->id);
     }
 

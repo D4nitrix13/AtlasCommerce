@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RolePermissionsSyncRequest;
 use App\Http\Requests\Admin\RoleStoreRequest;
@@ -42,6 +43,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class RoleController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/roles
      *
@@ -76,17 +78,11 @@ class RoleController extends Controller
 
         $paginator = $query
             ->orderBy('name')
-            ->paginate(perPage: $perPage);
+            ->cursorPaginate($perPage);
 
-        return response()->json(data: [
-            'data' => RoleResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: RoleResource::class,
+        );
     }
 
     /**

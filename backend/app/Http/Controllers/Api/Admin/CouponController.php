@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Marketing\Admin\CouponStoreRequest;
 use App\Http\Requests\Marketing\Admin\CouponUpdateRequest;
@@ -31,6 +32,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CouponController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/coupons
      *
@@ -68,17 +70,11 @@ class CouponController extends Controller
 
         $paginator = $query
             ->orderBy('code')
-            ->paginate(perPage: $perPage);
+            ->cursorPaginate($perPage);
 
-        return response()->json(data: [
-            'data' => AdminCouponResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: AdminCouponResource::class,
+        );
     }
 
     /**

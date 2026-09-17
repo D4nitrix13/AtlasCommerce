@@ -124,7 +124,7 @@ final class CouponControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/coupons');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 2);
+        $response->assertJsonCount(2, 'data');
         $codes = collect(value: $response->json('data'))->pluck('code')->all();
         $this->assertContains(needle: 'GLOBAL10', haystack: $codes);
         $this->assertContains(needle: 'PANDA10', haystack: $codes);

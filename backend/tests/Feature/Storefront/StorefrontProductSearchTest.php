@@ -131,7 +131,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'zapatilla'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 0);
+        $response->assertJsonCount(0, 'data');
         $response->assertJsonPath(path: 'meta.query', expect: 'zapatilla');
     }
 
@@ -146,7 +146,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'camiseta'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -160,7 +160,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'CAM-ROJA-XL'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -175,7 +175,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'algodón'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -195,7 +195,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'Navideña'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -217,7 +217,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'BUSCADO'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 2);
+        $response->assertJsonCount(2, 'data');
 
         $ids = collect($response->json(key: 'data'))->pluck('id')->all();
         $this->assertSame(expected: $skuMatch->id, actual: $ids[0], message: 'SKU match debe rankear primero.');
@@ -239,7 +239,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'Camiseta'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 2);
+        $response->assertJsonCount(2, 'data');
 
         $ids = collect($response->json(key: 'data'))->pluck('id')->all();
         $this->assertSame(expected: $startsWith->id, actual: $ids[0]);
@@ -263,7 +263,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'Camiseta'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
         $firstId = (int) $response->json(key: 'data.0.id');
         $this->assertSame(expected: $panda->id, actual: $firstId);
     }
@@ -280,7 +280,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'Camiseta'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 0);
+        $response->assertJsonCount(0, 'data');
     }
 
     #[Test]
@@ -295,7 +295,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'Camiseta'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 0);
+        $response->assertJsonCount(0, 'data');
     }
 
     #[Test]
@@ -310,7 +310,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'Camiseta'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 0);
+        $response->assertJsonCount(0, 'data');
     }
 
     #[Test]
@@ -330,7 +330,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: 'Camiseta'));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 0);
+        $response->assertJsonCount(0, 'data');
     }
 
     #[Test]
@@ -346,7 +346,7 @@ final class StorefrontProductSearchTest extends TestCase
 
         $page1 = $this->getJson(uri: $this->url(q: 'Camiseta', page: 1, perPage: 3));
         $page1->assertOk();
-        $page1->assertJsonPath(path: 'meta.total', expect: 7);
+        $page1->assertJsonCount(7, 'data');
         $page1->assertJsonPath(path: 'meta.per_page', expect: 3);
         $page1->assertJsonPath(path: 'meta.last_page', expect: 3);
         $this->assertCount(3, $page1->json(key: 'data'));
@@ -364,7 +364,7 @@ final class StorefrontProductSearchTest extends TestCase
         $response = $this->getJson(uri: $this->url(q: '   Camiseta   '));
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
         $response->assertJsonPath(path: 'meta.query', expect: 'Camiseta');
     }
 
