@@ -1770,7 +1770,7 @@ rnf:
     priority: H
     importancia: vital
     urgencia: importante
-    estado: en análisis
+    estado: verificado
     estabilidad: podría cambiar
     autores: ["Andy Joe Sanchez Calero (stakeholder_002)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
     fuentes:
@@ -1779,7 +1779,7 @@ rnf:
     dependencias: ["RNF-USA-040"]
     descripcion: "Todas las páginas públicas y el panel admin deberán cumplir con WCAG 2.2 nivel AA (contraste, navegación por teclado, ARIA labels, etc.)."
     verificado_por: []
-    comentarios: "RNF en análisis. Auditorías WCAG registradas en el backlog del equipo QA."
+    comentarios: "Implementado vía @axe-core/playwright (PR #105). Suite E2E en tests/e2e/accessibility.spec.ts que escanea homepage + login + PDP + admin login + forgot-password con tags wcag2a/wcag2aa/wcag22aa. Threshold: zero violaciones serious/critical. Doc completa en docs/frontend/accessibility-tests.md con reglas WCAG más comunes, cómo arreglar, severidad. Pendiente: integrar en CI como job dedicado (requiere docker-compose services para backend+frontend+Caddy)."
 
   - code: RNF-USA-044
     title: "Emails transaccionales internacionalizados"
