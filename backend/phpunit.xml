@@ -49,4 +49,21 @@
         -->
         <env name="SANCTUM_STATEFUL_DOMAINS" value="localhost,localhost:3000,localhost:4321,panda-estampados.test,www.panda-estampados.test,admin.panda-estampados.test,kitsune.test,www.kitsune.test,admin.kitsune.test"/>
     </php>
+
+    <!-- Coverage: ver docs/backend/test-coverage.md -->
+    <coverage>
+        <include>
+            <directory suffix=".php">app</directory>
+        </include>
+        <exclude>
+            <directory suffix="Factory.php">database/factories</directory>
+            <directory suffix="Seeder.php">database/seeders</directory>
+            <file>app/Console/Kernel.php</file>
+        </exclude>
+        <report>
+            <text outputFile="php://stdout"/>
+            <html outputDirectory="backend/coverage"/>
+            <clover outputFile="backend/coverage/clover.xml"/>
+        </report>
+    </coverage>
 </phpunit>
