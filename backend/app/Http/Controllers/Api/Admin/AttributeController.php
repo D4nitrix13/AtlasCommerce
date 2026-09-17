@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AttributeStoreRequest;
 use App\Http\Requests\Admin\AttributeUpdateRequest;
@@ -32,6 +33,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class AttributeController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/attributes
      *
@@ -66,17 +68,11 @@ class AttributeController extends Controller
 
         $paginator = $query
             ->orderBy('name')
-            ->paginate(perPage: $perPage);
+            ->cursorPaginate($perPage);
 
-        return response()->json(data: [
-            'data' => AdminAttributeResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: AdminAttributeResource::class,
+        );
     }
 
     /**

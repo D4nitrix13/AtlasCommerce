@@ -105,7 +105,7 @@ final class BrandControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 3);
+        $response->assertJsonCount(3, 'data');
     }
 
     #[Test]
@@ -118,7 +118,7 @@ final class BrandControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands?q=nike');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -131,7 +131,7 @@ final class BrandControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands?is_active=1');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -245,6 +245,6 @@ final class BrandControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/brands?with_trashed=1');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 }

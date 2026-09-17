@@ -135,7 +135,7 @@ final class UserControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 4); // admin + staff + 2 nuevos
+        $response->assertJsonCount(4, 'data'); // admin + staff + 2 nuevos
         $ids = collect($response->json(key: 'data'))->pluck('id')->all();
         $this->assertNotContains(needle: $outsider->id, haystack: $ids);
     }
@@ -155,7 +155,7 @@ final class UserControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/users?q=mario');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]

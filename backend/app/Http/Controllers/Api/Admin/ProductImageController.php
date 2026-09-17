@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductImageStoreRequest;
 use App\Http\Requests\Admin\ProductImageUpdateRequest;
@@ -34,6 +35,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ProductImageController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/products/{product}/images
      *
@@ -57,17 +59,11 @@ class ProductImageController extends Controller
 
         $paginator = $query
             ->ordered()
-            ->paginate(perPage: $perPage);
+            ->cursorPaginate($perPage);
 
-        return response()->json(data: [
-            'data' => AdminProductImageResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: AdminProductImageResource::class,
+        );
     }
 
     /**

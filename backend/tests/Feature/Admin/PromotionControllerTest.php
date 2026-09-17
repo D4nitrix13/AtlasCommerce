@@ -119,7 +119,7 @@ final class PromotionControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/promotions');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 2);
+        $response->assertJsonCount(2, 'data');
         $names = collect(value: $response->json('data'))->pluck('name')->all();
         $this->assertContains(needle: 'Global Promo', haystack: $names);
         $this->assertContains(needle: 'Panda Promo', haystack: $names);

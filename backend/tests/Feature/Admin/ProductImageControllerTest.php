@@ -173,7 +173,7 @@ final class ProductImageControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 2);
+        $response->assertJsonCount(2, 'data');
     }
 
     #[Test]
@@ -197,7 +197,7 @@ final class ProductImageControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images?is_primary=1');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]

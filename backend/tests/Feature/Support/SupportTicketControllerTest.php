@@ -83,7 +83,7 @@ final class SupportTicketControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/support/tickets');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[TestAttr]

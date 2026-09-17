@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\WholesalePriceStoreRequest;
 use App\Http\Requests\Admin\WholesalePriceUpdateRequest;
@@ -36,6 +37,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class WholesalePriceController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/wholesale-prices
      *
@@ -75,17 +77,11 @@ class WholesalePriceController extends Controller
             ->orderBy('product_id')
             ->orderBy('store_id')
             ->orderBy('min_qty')
-            ->paginate(perPage: $perPage);
+            ->cursorPaginate($perPage);
 
-        return response()->json(data: [
-            'data' => AdminWholesalePriceResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: AdminWholesalePriceResource::class,
+        );
     }
 
     /**

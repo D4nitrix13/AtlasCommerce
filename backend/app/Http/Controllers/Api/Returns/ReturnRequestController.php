@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Returns;
 
 use App\Exceptions\Returns\InvalidReturnTransitionException;
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Returns\ReturnRequestResource;
 use App\Models\Returns\ReturnRequest;
@@ -23,6 +24,7 @@ use RuntimeException;
  */
 class ReturnRequestController extends Controller
 {
+    use CursorPaginates;
     private const DEFAULT_PAGE_SIZE = 25;
 
     public function __construct(

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Support\ProductReviewResource;
 use App\Models\Auth\User as UserModel;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ProductReviewController extends Controller
 {
+    use CursorPaginates;
     /**
      * GET /admin/reviews
      */
@@ -46,17 +48,11 @@ class ProductReviewController extends Controller
         }
 
         $paginator = $query->orderByDesc('reviewed_at')
-            ->paginate(perPage: $perPage);
+            ->cursorPaginate($perPage);
 
-        return response()->json(data: [
-            'data' => ProductReviewResource::collection(resource: $paginator->getCollection())->resolve(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
-        ]);
+        return $this->cursorPaginatedResponse(
+            request: $request, query: $query, resourceClass: ProductReviewResource::class,
+        );
     }
 
     /**

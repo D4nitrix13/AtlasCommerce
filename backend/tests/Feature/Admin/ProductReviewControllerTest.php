@@ -112,10 +112,10 @@ final class ProductReviewControllerTest extends TestCase
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);
 
         $onlyApproved = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/reviews?is_approved=true');
-        $onlyApproved->assertJsonPath(path: 'meta.total', expect: 1);
+        $onlyApproved->assertJsonCount(1, 'data');
 
         $byProduct = $this->getJson(uri: "http://panda-estampados.com/api/v1/admin/reviews?product_id={$this->product->id}");
-        $byProduct->assertJsonPath(path: 'meta.total', expect: 2);
+        $byProduct->assertJsonCount(2, 'data');
     }
 
     #[TestAttr]

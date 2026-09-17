@@ -109,7 +109,7 @@ final class AttributeControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attributes');
 
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 3);
+        $response->assertJsonCount(3, 'data');
     }
 
     #[Test]
@@ -122,7 +122,7 @@ final class AttributeControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attributes?q=color');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
@@ -135,7 +135,7 @@ final class AttributeControllerTest extends TestCase
 
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/attributes?type=text');
         $response->assertOk();
-        $response->assertJsonPath(path: 'meta.total', expect: 1);
+        $response->assertJsonCount(1, 'data');
     }
 
     #[Test]
