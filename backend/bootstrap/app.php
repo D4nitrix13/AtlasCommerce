@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthController;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CorrelationIdMiddleware;
 use App\Http\Middleware\ResolveStoreFromDomain;
@@ -22,9 +23,22 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::middleware('api')
                 ->prefix('api/v1')
                 ->group(__DIR__.'/../routes/api.php');
+
+            // Web routes (welcome + health endpoints operacionales).
+            // NOTA: cuando se usa `using:` closure en withRouting, los
+            // parámetros `web:` y `health:` se IGNORAN silenciosamente
+            // — Laravel solo corre la closure del usuario. Por eso los
+            // cargamos explícitamente acá. Bug pre-existente detectado
+            // en Fase 13 PR2: el Caddyfile referencia /up (PR #102,
+            // RF-REL-064) pero la ruta nunca se registraba.
+            Route::middleware('web')->group(__DIR__.'/../routes/web.php');
+
+            // /up — alias histórico de liveness. El Caddyfile de
+            // producción lo usa como health_uri; mantener para no
+            // romper el SLA RF-REL-064 ya desplegado.
+            Route::get('/up', [HealthController::class, 'live'])->name('up');
         },
         apiPrefix: '',
-        web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )

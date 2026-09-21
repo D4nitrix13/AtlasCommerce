@@ -29,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         // servicios comparten la misma instancia de correlación
         // (RF-OBS-130 — Fase 13).
         $this->app->singleton(LogContext::class);
+
+        // RF-OBS-131 — Fase 13 PR2: HealthController recibe las concretas
+        // por DI y construye el HealthChecker en runtime. Esto evita
+        // tener que registrar el contrato HealthCheck en el container
+        // y mantiene el orquestador testeable con doubles anónimos.
     }
 
     /**
