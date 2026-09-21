@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\Shipping;
 
 use App\Exceptions\Shipping\InvalidShipmentTransitionException;
 use App\Http\Concerns\CursorPaginates;
-use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Shipping\ShipmentResource;
 use App\Models\Shipping\Shipment;
@@ -21,8 +20,8 @@ use Illuminate\Http\JsonResponse;
  */
 class ShipmentController extends Controller
 {
-
     use CursorPaginates;
+
     private const DEFAULT_PAGE_SIZE = 25;
 
     public function __construct(

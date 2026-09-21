@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Logging\LogContext;
 use Core\Shared\Events\EventBus;
 use Core\Shared\Events\InProcessEventBus;
 use Core\Tenant\Application\StoreContextService;
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
         // global scope `BelongsToStore` y el middleware vean la misma instancia.
         $this->app->singleton(StoreContextService::class);
         $this->app->singleton(EventBus::class, InProcessEventBus::class);
+
+        // LogContext: singleton por request — middleware, processors y
+        // servicios comparten la misma instancia de correlación
+        // (RF-OBS-130 — Fase 13).
+        $this->app->singleton(LogContext::class);
     }
 
     /**

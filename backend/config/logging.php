@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -65,6 +66,31 @@ return [
             'path' => storage_path(path: 'logs/laravel.log'),
             'level' => env(key: 'LOG_LEVEL', default: 'debug'),
             'replace_placeholders' => true,
+        ],
+
+        // Canal JSON estructurado (RF-OBS-130 — Fase 13). Diseñado para
+        // ingesta por Loki / Promtail sin parseo de regex. Cada línea
+        // es un JSON con: timestamp, level, channel, message, context,
+        // extra (incluye request_id, trace_id, span_id).
+        //
+        // Path separado del canal `single` para evitar que un parseador
+        // de logs legacy rompa con líneas JSON.
+        'json' => [
+            'driver' => 'monolog',
+            'level' => env(key: 'LOG_LEVEL', default: 'debug'),
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => storage_path(path: 'logs/laravel.json.log'),
+            ],
+            'formatter' => JsonFormatter::class,
+            'formatter_with' => [
+                'batchMode' => JsonFormatter::BATCH_MODE_JSON,
+                'appendNewline' => true,
+            ],
+            'processors' => [
+                PsrLogMessageProcessor::class,
+                App\Logging\ContextProcessor::class,
+            ],
         ],
 
         'daily' => [
