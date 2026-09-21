@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\CorrelationIdMiddleware;
 use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetSessionDomainFromHost;
@@ -28,6 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // CorrelationId va al INICIO del stack global para que cualquier
+        // middleware o handler que loguee tenga IDs de trazabilidad
+        // disponibles desde el primer momento (RF-OBS-130 — Fase 13).
+        $middleware->prepend(CorrelationIdMiddleware::class);
+
         // CR2: prepended ANTES del session middleware para que el Domain
         // del cookie quede seteado antes de emitir el Set-Cookie.
         // EnsureFrontendRequestsAreStateful agrega StartSession + cookies
