@@ -67,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
         /*
          * Laravel carga automáticamente los archivos ubicados directamente en:
          *
