@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Logging\LogContext;
+use App\Metrics\MetricsService;
+use App\Metrics\MetricsStorageManager;
 use Core\Shared\Events\EventBus;
 use Core\Shared\Events\InProcessEventBus;
 use Core\Tenant\Application\StoreContextService;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -34,6 +37,17 @@ class AppServiceProvider extends ServiceProvider
         // por DI y construye el HealthChecker en runtime. Esto evita
         // tener que registrar el contrato HealthCheck en el container
         // y mantiene el orquestador testeable con doubles anónimos.
+
+        // RF-OBS-132 — Fase 13 PR3: MetricsStorageManager construye el
+        // adapter según config/metrics.php. El registry se memoiza
+        // para no recrear el cliente Redis en cada request.
+        $this->app->singleton(MetricsStorageManager::class, function ($app): MetricsStorageManager {
+            return new MetricsStorageManager(container: $app->make(Container::class));
+        });
+
+        $this->app->singleton(MetricsService::class, function ($app): MetricsService {
+            return new MetricsService(registry: $app->make(MetricsStorageManager::class)->registry());
+        });
     }
 
     /**
