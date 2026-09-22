@@ -6,6 +6,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CorrelationIdMiddleware;
 use App\Http\Middleware\HttpMetricsMiddleware;
+use App\Http\Middleware\HttpTracingMiddleware;
 use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetSessionDomainFromHost;
@@ -55,6 +56,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // request_id en sus labels si hace falta en el futuro.
         // (RF-OBS-132 — Fase 13 PR3).
         $middleware->prepend(HttpMetricsMiddleware::class);
+
+        // HttpTracing: instrumenta cada request con un span
+        // OpenTelemetry. Prepended al stack global, después de
+        // HttpMetrics, para que las trazas tengan contexto de
+        // correlación de PR1 (CorrelationId emite W3C traceparent
+        // que el span respeta como parent context).
+        // (RF-OBS-133 — Fase 13 PR4).
+        $middleware->prepend(HttpTracingMiddleware::class);
 
         // CR2: prepended ANTES del session middleware para que el Domain
         // del cookie quede seteado antes de emitir el Set-Cookie.
