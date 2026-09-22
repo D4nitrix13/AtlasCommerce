@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Logging\LogContext;
 use App\Metrics\MetricsService;
 use App\Metrics\MetricsStorageManager;
+use App\Tracing\Tracer;
 use Core\Shared\Events\EventBus;
 use Core\Shared\Events\InProcessEventBus;
 use Core\Tenant\Application\StoreContextService;
@@ -47,6 +48,17 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(MetricsService::class, function ($app): MetricsService {
             return new MetricsService(registry: $app->make(MetricsStorageManager::class)->registry());
+        });
+
+        // RF-OBS-133 — Fase 13 PR4: Tracer singleton que envuelve el
+        // SDK de OpenTelemetry. Por defecto usa noop exporter (cero
+        // overhead); setear OTEL_ENABLED=true + OTEL_EXPORTER_OTLP_ENDPOINT
+        // para activar el exporter OTLP en producción.
+        $this->app->singleton(Tracer::class, function ($app): Tracer {
+            return new Tracer(
+                logContext: $app->make(LogContext::class),
+                config: (array) $app->make('config')->get(key: 'tracing', default: []),
+            );
         });
     }
 
