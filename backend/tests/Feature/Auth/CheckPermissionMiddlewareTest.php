@@ -126,7 +126,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
 
         $shipment = Shipment::query()->where(column: 'order_id', operator: '=', value: $this->order->id)->firstOrFail();
 
-        $response = $this->postJson("/api/shipments/{$shipment->id}/ship");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/ship");
         $response->assertOk();
     }
 
@@ -145,7 +145,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
 
         $shipment = Shipment::query()->where(column: 'order_id', operator: '=', value: $this->order->id)->firstOrFail();
 
-        $response = $this->postJson("/api/shipments/{$shipment->id}/ship");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/ship");
         $response->assertOk();
     }
 
@@ -165,7 +165,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
         $shipment = Shipment::query()->where(column: 'order_id', operator: '=', value: $this->order->id)->firstOrFail();
 
         // El permiso `shipping.shipments.deliver` NO está asignado al rol staff.
-        $response = $this->postJson("/api/shipments/{$shipment->id}/deliver");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/deliver");
         $response->assertStatus(403);
         $response->assertJsonPath('message', fn (string $m): bool => str_contains($m, 'shipping.shipments.deliver'));
     }
@@ -185,7 +185,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
 
         $shipment = Shipment::query()->where(column: 'order_id', operator: '=', value: $this->order->id)->firstOrFail();
 
-        $response = $this->postJson("/api/shipments/{$shipment->id}/ship");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/ship");
         $response->assertStatus(403);
     }
 
@@ -201,7 +201,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->postJson("/api/shipments/{$shipment->id}/ship");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/ship");
         $response->assertStatus(403);
         $response->assertJsonPath('message', fn (string $m): bool => str_contains($m, 'desactivada'));
     }
@@ -209,7 +209,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
     #[Test]
     public function unauthenticated_request_returns_401(): void
     {
-        $response = $this->postJson('/api/shipments/1/ship');
+        $response = $this->postJson('/api/v1/shipments/1/ship');
         $response->assertStatus(401);
     }
 
@@ -227,7 +227,7 @@ final class CheckPermissionMiddlewareTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->postJson("/api/shipments/{$shipment->id}/ship");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/ship");
         $response->assertStatus(403);
     }
 

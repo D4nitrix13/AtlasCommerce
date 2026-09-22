@@ -28,7 +28,8 @@ class CategoryUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $categoryId = (int) $this->route('category');
+        $route = $this->route('category');
+        $categoryId = is_object($route) ? $route->id : (int) $route;
 
         return [
             'name' => ['sometimes', 'string', 'min:2', 'max:120'],
