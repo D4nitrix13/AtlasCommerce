@@ -47,13 +47,13 @@ Fase 5 — Modular monolith + RLS   ██████████  100%   (comp
 ```
 
 **Total tareas:** 32
-**Completadas:** 27 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.6, F3.7, F4.1-F4.4, F5.1-F5.5)
+**Completadas:** 28 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.7, F4.1-F4.4, F5.1-F5.5)
 **En progreso:** 0
-**Pendientes:** 5
+**Pendientes:** 4
 
 **Fases 1-5 COMPLETAS (100%)**. Todas las tareas del roadmap están marcadas.
 
-**Fases 1-4 COMPLETAS**. Queda 1 fase: Fase 5.
+**Fases 1-5 COMPLETAS**.
 
 ---
 
@@ -461,16 +461,21 @@ vez.
 
 ---
 
-### F3.4 — Astro theme loader por host ⏳
+### F3.4 — Astro theme loader por host ✅
 
 **Razón:** El frontend Astro carga el theme del tenant antes de renderizar.
 
-**Características pendientes:**
+**Implementado:**
 
-- Middleware Astro lee el host y resuelve el tenant.
-- Server-side fetch del theme desde `GET /api/storefront/theme`.
-- Theme inyectado via `Astro.locals.theme`.
-- `STORE_BRANDS` en `src/config/stores.ts` queda deprecated.
+- ✅ Middleware Astro lee el host y resuelve el tenant (`detectTenantFromHost` en `src/middleware.ts`).
+- ✅ Server-side fetch del theme desde `GET /api/v1/storefront/theme` con timeout de 1s (`fetchThemeForHost` en `src/middleware.ts`).
+- ✅ Theme inyectado via `Astro.locals.theme` para storefront y admin.
+- ✅ Fallback a `DEFAULT_THEME` si el backend no responde (cero páginas rotas en outage).
+
+**Legacy fallback (mantenido por resilience):**
+
+- `STORE_BRANDS` en `src/config/stores.ts` se mantiene como fallback cuando el theme dinámico viene incompleto. NO es la fuente principal — esa es `/api/storefront/theme`.
+- Decisión: mantener el fallback porque degradar gracefully a un theme genérico cuando el API falla es preferible a 500. Si en el futuro se quiere eliminar, hay que garantizar uptime del backend (lo cual es el SLA del RF-REL-063).
 
 ---
 
