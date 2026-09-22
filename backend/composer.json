@@ -29,6 +29,7 @@
         "open-telemetry/sdk": "^1.15",
         "predis/predis": "^3.6",
         "promphp/prometheus_client_php": "^2.15",
+        "sentry/sentry-laravel": "^4.27",
         "spatie/laravel-medialibrary": "^11.23"
     },
     "require-dev": {
