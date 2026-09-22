@@ -244,11 +244,12 @@ class AuthController extends Controller
         // extiende expires_at a (now + SANCTUM_EXPIRATION_MINUTES).
         // El costo es 1 UPDATE por sesión activa por cada ventana de
         // ~24h; reduce re-logins diarios sin sacrificar seguridad.
-        // currentAccessToken() puede ser null (no auth) o un
-        // TransientToken (session auth) — solo NewAccessToken tiene
-        // expires_at. Solo refrescamos tokens persistentes.
+        // currentAccessToken() retorna el MODEL PersonalAccessToken
+        // directamente (NO el wrapper NewAccessToken — eso solo lo
+        // retorna createToken()). Solo refrescamos tokens persistentes
+        // (TransientToken de session auth no tienen DB row).
         $token = $user->currentAccessToken();
-        if ($token instanceof \Laravel\Sanctum\NewAccessToken) {
+        if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
             $expiresAt = $token->expires_at;
             if ($expiresAt instanceof \Illuminate\Support\Carbon && $expiresAt->isBefore(now()->addDay())) {
                 $token->forceFill(attributes: [
