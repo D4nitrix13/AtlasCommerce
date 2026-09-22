@@ -25,7 +25,8 @@ class ProductVariantUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $variantId = (int) $this->route('variant');
+        $route = $this->route('variant');
+        $variantId = is_object($route) ? $route->id : (int) $route;
 
         return [
             'name' => ['sometimes', 'string', 'min:1', 'max:160'],

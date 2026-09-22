@@ -24,7 +24,8 @@ class AttributeUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $attributeId = (int) $this->route('attribute');
+        $attribute = $this->route('attribute');
+        $attributeId = is_object($attribute) ? $attribute->id : (int) $attribute;
 
         return [
             'name' => ['sometimes', 'string', 'min:2', 'max:100'],

@@ -24,7 +24,8 @@ class BrandUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $brandId = (int) $this->route('brand');
+        $route = $this->route('brand');
+        $brandId = is_object($route) ? $route->id : (int) $route;
 
         return [
             'name' => [
