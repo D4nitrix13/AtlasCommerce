@@ -1,0 +1,184 @@
+# Prometheus alert rules — AtlasCommerce
+# Phase 13 PR6 — load via `rule_files:` in prometheus.yml
+#
+# Convenciones:
+#  - `for:` durations son GENEROSOS para evitar false positives en
+#    picos cortos (deploys, cold caches, garbage collection).
+#  - Labels `severity` y `team` enrutan a los receivers correctos
+#    en Alertmanager.
+#  - `summary` es one-line para Slack/PagerDuty; `description` tiene
+#    contexto + qué hacer (link al runbook).
+
+groups:
+
+  # ─────────────────────────────────────────────────────────────
+  # Grupo: HTTP / API
+  # Métricas: atlascommerce_http_requests_total,
+  #           atlascommerce_http_request_duration_seconds
+  # ─────────────────────────────────────────────────────────────
+  - name: atlascommerce.http
+    interval: 30s
+    rules:
+
+      - alert: Http5xxRateHigh
+        expr: |
+          (
+            sum(rate(atlascommerce_http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(atlascommerce_http_requests_total[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "5xx rate above 1% for 5 minutes (instance {{ $labels.instance }})"
+          description: |
+            Más del 1% de requests HTTP están fallando con 5xx sostenido
+            por 5 minutos. Posible deploy con bug, DB caída, o dependencia
+            externa inaccesible.
+            Runbook: docs/operations/observability-runbook.md#41-http5xxratehigh
+
+      - alert: ApiLatencyP95High
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (route, le) (rate(atlascommerce_http_request_duration_seconds_bucket[5m]))
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "p95 latency above 500ms on {{ $labels.route }}"
+          description: |
+            p95 de la route {{ $labels.route }} está arriba de 500ms
+            sostenido por 10 minutos.
+            Runbook: docs/operations/observability-runbook.md#42-apilatencyp95high
+
+      - alert: CheckoutLatencyP99High
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (route, le) (
+              rate(atlascommerce_http_request_duration_seconds_bucket{route=~"/api/v1/(checkout|cart)/.*"}[5m])
+            )
+          ) > 2.0
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+          revenue_impact: high
+        annotations:
+          summary: "p99 checkout latency above 2s — revenue impact"
+          description: |
+            El p99 del flujo de checkout está arriba de 2 segundos
+            sostenido por 5 minutos. CRITICAL — bloquea ventas.
+            Runbook: docs/operations/observability-runbook.md#43-checkoutlatencyp99high
+
+  # ─────────────────────────────────────────────────────────────
+  # Grupo: dependencias / readiness
+  # Métricas: scrape health + atlascommerce_queue_size
+  # ─────────────────────────────────────────────────────────────
+  - name: atlascommerce.dependencies
+    interval: 30s
+    rules:
+
+      - alert: BackendScrapeFailing
+        expr: up{job="atlascommerce-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Prometheus no puede scrapear /metrics del backend"
+          description: |
+            El endpoint /metrics no responde o no es accesible desde
+            Prometheus. Verificar:
+            1. ¿El backend está vivo? (curl /health/live)
+            2. ¿Redis está accesible? (las métricas usan Redis storage)
+            3. ¿Network/firewall entre Prometheus y backend?
+            Runbook: docs/operations/observability-runbook.md#47-redisdown
+
+      - alert: QueueBacklogGrowing
+        expr: atlascommerce_queue_size{queue="default"} > 1000
+        for: 15m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Queue backlog > 1000 jobs por 15 minutos"
+          description: |
+            La cola default tiene > 1000 jobs pendientes por 15 min.
+            Posibles causas:
+            1. Workers no están corriendo → restart queue:work
+            2. Workers lentos → ver traces en Tempo
+            3. Pico legítimo de tráfico → monitorear
+            Runbook: docs/operations/observability-runbook.md#46-queuebackloggrowing
+
+      - alert: QueueBacklogCritical
+        expr: atlascommerce_queue_size{queue="default"} > 5000
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Queue backlog > 5000 jobs — workers no están procesando"
+          description: |
+            La cola default tiene > 5000 jobs pendientes. CRITICAL —
+            los jobs de orders/email/notifications no se están
+            procesando.
+            Runbook: docs/operations/observability-runbook.md#46-queuebackloggrowing
+
+  # ─────────────────────────────────────────────────────────────
+  # Grupo: health checks
+  # Métrica: probe_http_status (scrape directo de /health/ready)
+  # ─────────────────────────────────────────────────────────────
+  - name: atlascommerce.health
+    interval: 30s
+    rules:
+
+      - alert: HealthCheckFailing
+        expr: probe_http_status_code{instance=~".*atlascommerce.*", endpoint="health-ready"} == 503
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "/health/ready devuelve 503 por 2 min"
+          description: |
+            El endpoint /health/ready está devolviendo 503 sostenido
+            por 2 minutos. Algún check crítico (DB o storage) está
+            fallando.
+            Verificar payload: curl http://<instance>/health/ready
+            Runbook: docs/operations/observability-runbook.md#44-databasedown
+
+  # ─────────────────────────────────────────────────────────────
+  # Grupo: Sentry error rate
+  # Métrica: scrape custom de Sentry API (futuro) o estimación
+  # indirecta vía 5xx rate.
+  # ─────────────────────────────────────────────────────────────
+  - name: atlascommerce.errors
+    interval: 60s
+    rules:
+
+      # Proxy de error rate via métricas Prometheus (más confiable
+      # que scrapear Sentry API directamente).
+      - alert: Http5xxRateSustained
+        expr: |
+          (
+            sum(rate(atlascommerce_http_requests_total{status=~"5.."}[15m]))
+            /
+            sum(rate(atlascommerce_http_requests_total[15m]))
+          ) > 0.05
+        for: 15m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "5xx rate above 5% por 15 min — error crítico"
+          description: |
+            El error rate es > 5% sostenido. Esto va a aparecer como
+            un pico en Sentry también.
+            Verificar Sentry: https://<org>.sentry.io/issues/?query=is%3Aunresolved
+            Runbook: docs/operations/observability-runbook.md#41-http5xxratehigh
