@@ -121,13 +121,15 @@ final class RoleControllerTest extends TestCase
         $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/roles');
 
         $response->assertOk();
+        // Cursor pagination response shape (RF-PERF-022): sin
+        // current_page/last_page, tiene next_cursor/prev_cursor/has_more.
         $response->assertJsonStructure(structure: [
             'data' => [
                 '*' => ['id', 'name', 'slug', 'is_active', 'is_protected'],
             ],
-            'meta' => ['current_page', 'per_page', 'total', 'last_page'],
+            'meta' => ['per_page', 'has_more', 'next_cursor', 'prev_cursor'],
         ]);
-        $this->assertGreaterThanOrEqual(2, $response->json(key: 'meta.total'));
+        $this->assertGreaterThanOrEqual(2, count($response->json(key: 'data')));
     }
 
     #[Test]
