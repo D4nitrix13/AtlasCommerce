@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\HealthController;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CorrelationIdMiddleware;
+use App\Http\Middleware\HttpMetricsMiddleware;
 use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetSessionDomainFromHost;
@@ -47,6 +48,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // middleware o handler que loguee tenga IDs de trazabilidad
         // disponibles desde el primer momento (RF-OBS-130 — Fase 13).
         $middleware->prepend(CorrelationIdMiddleware::class);
+
+        // HttpMetrics: instrumenta cada request con Prometheus
+        // (counter + histogram). Prepended al stack global, después
+        // de CorrelationId, para que las métricas puedan incluir el
+        // request_id en sus labels si hace falta en el futuro.
+        // (RF-OBS-132 — Fase 13 PR3).
+        $middleware->prepend(HttpMetricsMiddleware::class);
 
         // CR2: prepended ANTES del session middleware para que el Domain
         // del cookie quede seteado antes de emitir el Set-Cookie.
