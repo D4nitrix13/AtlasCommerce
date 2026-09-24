@@ -50,7 +50,7 @@ el cliente final.
 - architecture/multi-store.md       # Multi-tienda a fondo
 - architecture/flow.md              # Diagramas de flujo
 - architecture/decisions.md         # ADR (decisiones documentadas)
-- architecture/deployment.md        # Despliegue
+- architecture/deployment-overview.md # Despliegue
 ```
 
 ### Stack tecnológico
@@ -75,7 +75,7 @@ el cliente final.
 - backend/stores/stores-module.md    # Multi-tienda
 - backend/stores/store-context.md
 - backend/stores/permissions-by-store.md
-- backend/TASKS.md                  # Roadmap backend
+- development/releases/v2.0.0.md   # Release notes (última versión)
 
 - database/README.md                # DB
 - database/data-model.md            # ER
