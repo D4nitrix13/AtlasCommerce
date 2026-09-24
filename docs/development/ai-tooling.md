@@ -216,5 +216,3 @@ ln -s ~/.agents/skills/<nombre> ~/.claude/skills/<nombre>
 - [scripts/install-git-hooks.sh](../scripts/install-git-hooks.sh "../scripts/install-git-hooks.sh")
 - [.claude/skills/README.md](../.claude/skills/README.md ".claude/skills/README.md")
 - [.atl/skill-registry.md](../.atl/skill-registry.md ".atl/skill-registry.md")
-- [HANDOFF-2026-08-15.md](HANDOFF-2026-08-15.md "HANDOFF-2026-08-15.md")
-  para el contexto histórico de las decisiones.
