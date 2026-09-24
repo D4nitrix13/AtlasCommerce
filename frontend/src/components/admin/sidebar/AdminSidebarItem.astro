@@ -1,6 +1,31 @@
 ---
+/**
+ * AdminSidebarItem — Item individual del AdminSidebar.
+ *
+ * Renderiza un `<a>` con icono + nombre + badge opcional. Estado
+ * `active` se computa en el padre segun `Astro.url.pathname`.
+ *
+ * Ejemplo de uso:
+ * ```astro
+ * <AdminSidebarItem
+ *   name="Dashboard"
+ *   href="/admin/dashboard"
+ *   icon="squares-2x2"
+ *   active={currentPath === '/admin/dashboard'}
+ * />
+ * ```
+ */
 import Icon from '../../ui/Icon.astro';
 
+/**
+ * Props de AdminSidebarItem.
+ *
+ * @prop {string}    name      Label visible del item
+ * @prop {string}    href      Ruta destino (sin locale prefix)
+ * @prop {string}    [icon]    Nombre del icono lucide (opcional)
+ * @prop {boolean}   [active]  Si está en la ruta actual (default false)
+ * @prop {string}    [badge]   Texto del badge opcional (ej: "12" notificaciones)
+ */
 interface Props {
   name: string;
   href: string;

@@ -1,4 +1,23 @@
 ---
+/**
+ * AdminSidebar — Menu lateral completo del panel admin.
+ *
+ * Estructura del menu (8 categorias, 24 items) hardcoded en este frontmatter.
+ * Para EXTENDER el menu (agregar item o categoria), editar el array `menu`
+ * directamente aca. Las rutas siguen el patron `/admin/<modulo>/<sub>`.
+ *
+ * Items destacados:
+ *   - Dashboard: vista principal con metricas del tenant
+ *   - Órdenes: lista con badge "12" hardcoded (TODO: hacer dinamico
+ *     via API en sesion futura)
+ *   - UserMenu al final: muestra el admin autenticado + logout
+ *
+ * Multi-tenant: NO se hace routing por tenant aqui (cada ruta tiene su
+ * propio controller backend que ya respeta `store.domain` middleware).
+ *
+ * **AGENTS.md §16**: este componente vive en `components/admin/sidebar/`
+ * (subfolder permitido dentro de admin/).
+ */
 import AdminSidebarItem from './AdminSidebarItem.astro';
 import AdminUserMenu from '../auth/AdminUserMenu';
 

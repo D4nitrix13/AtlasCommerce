@@ -8,12 +8,33 @@ import type { Refund, RefundStatus, RefundWithRelations } from '../../../types/r
 import type { PaginatedResponse } from '../../../types/api';
 import { REFUND_STATUS_COLORS } from '../../../types/returns';
 
+/**
+ * RefundsAdmin — Panel admin para gestionar reembolsos.
+ *
+ * Lista paginada de refunds del tenant. Flujo de transiciones es el
+ * más simple de los admin panels:
+ *
+ *   pending   → completed | failed
+ *   completed → (terminal)
+ *   failed    → (terminal)
+ *
+ * **Cuidado**: el endpoint backend `POST /api/v1/refunds/{id}/process`
+ * (completed) es IRREVERSIBLE — dispara reversión de stock + impacto
+ * en invoice (ver `RefundController::process()` en backend).
+ * Por eso `useState(pendingId)` deshabilita el botón durante el request.
+ *
+ * **Estados** (AGENTS.md §11): isLoading/error/empty/success/pendingId.
+ * **Multi-tenant**: scoping via `store.domain` middleware en backend.
+ */
 const REFUND_TRANSITIONS: Record<RefundStatus, RefundStatus[]> = {
   pending: ['completed', 'failed'],
   completed: [],
   failed: [],
 };
 
+/**
+ * I18n keys por status.
+ */
 const STATUS_LABEL_KEYS = {
   pending: 'admin.refunds.status.pending',
   completed: 'admin.refunds.status.completed',

@@ -12,6 +12,33 @@ import type {
 import type { PaginatedResponse } from '../../../types/api';
 import { RETURN_REQUEST_STATUS_COLORS } from '../../../types/returns';
 
+/**
+ * ReturnsAdmin — Panel admin para gestionar solicitudes de devolución (RMA).
+ *
+ * Lista paginada de return requests del tenant actual, con acciones de
+ * transición de estado segun `RETURN_TRANSITIONS`:
+ *
+ *   pending   → approved | rejected | cancelled
+ *   approved  → cancelled
+ *   rejected  → (terminal)
+ *   completed → (terminal)
+ *   cancelled → (terminal)
+ *
+ * Las transiciones se disparan via endpoints API backend (no via service
+ * directo): usan `POST /api/v1/returns/{id}/{transition}` con CSRF + auth
+ * via `authedFetch`. Errores (ej: 422 por transición inválida) se
+ * muestran inline con el mensaje del API.
+ *
+ * **Estados del componente** (AGENTS.md §11):
+ *   - isLoading: spinners durante fetch
+ *   - error: banner rojo si fetch falla
+ *   - empty: "No hay solicitudes" si array vacío
+ *   - success: lista con badges de status + botones de transición
+ *   - pendingId: id con transición en curso (botón deshabilitado)
+ *
+ * **Multi-tenant**: el tenant se resuelve por middleware `store.domain`
+ * en el backend. El componente no filtra por tienda (viene en la API).
+ */
 const RETURN_TRANSITIONS: Record<ReturnRequestStatus, ReturnRequestStatus[]> = {
   pending: ['approved', 'rejected', 'cancelled'],
   approved: ['cancelled'],
@@ -20,6 +47,12 @@ const RETURN_TRANSITIONS: Record<ReturnRequestStatus, ReturnRequestStatus[]> = {
   cancelled: [],
 };
 
+/**
+ * Mapa de cada estado a su i18n key (frontend/src/i18n/<locale>/...).
+ *
+ * Usado via `t(STATUS_LABEL_KEYS[status])` para resolver label
+ * traducido en runtime.
+ */
 const STATUS_LABEL_KEYS = {
   pending: 'admin.returns.status.pending',
   approved: 'admin.returns.status.approved',
