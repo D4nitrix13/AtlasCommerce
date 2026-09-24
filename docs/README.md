@@ -28,7 +28,7 @@ el cliente final.
 5. getting-started/backend-setup.md # Configurar Laravel
 6. getting-started/frontend-setup.md # Configurar Astro
 7. getting-started/local-domains.md # Hosts locales multi-tienda
-8. getting-started/caddy.md        # Reverse proxy
+8. operations/caddy.md             # Reverse proxy (dev + prod)
 9. getting-started/seed.md         # Datos iniciales
 ```
 

@@ -81,7 +81,7 @@ brew install caddy
 `Caddyfile` global: `/etc/caddy/Caddyfile`.
 
 Para desarrollo local ver
-[getting-started/caddy.md](../getting-started/caddy.md "getting-started/caddy.md").
+[operations/caddy.md](../operations/caddy.md "operations/caddy.md").
 
 ### Comandos
 
@@ -200,4 +200,4 @@ A definir. Stack candidato:
 - [operations/docker.md](../operations/docker.md "operations/docker.md")
 - [operations/caddy.md](../operations/caddy.md "operations/caddy.md")
 - [operations/deployment.md](../operations/deployment.md "operations/deployment.md")
-- [getting-started/caddy.md](../getting-started/caddy.md "getting-started/caddy.md")
+- [operations/caddy.md](../operations/caddy.md "operations/caddy.md")
