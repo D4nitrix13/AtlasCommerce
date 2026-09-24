@@ -6,35 +6,44 @@ entornos.
 
 ## 1. Levantar los servicios
 
+Multi-instance layout: cada instancia tiene su propio `docker-compose`
+bajo `docker/instances/development/<tenant>/`. Usá el dispatcher
+canónico `scripts/docker-stack.sh` (NO `docker compose` directo) para
+operarla.
+
 ```bash
-cd docker/dev
-docker compose up -d
+# Levantar la instancia dev del store panda-estampados-and-kitsune
+./scripts/docker-stack.sh up dev panda-estampados-and-kitsune
 ```
 
 Esto arranca:
 
-- `PostgreSQL 18` con `PostGIS 3.6` en puerto 5432.
-- Volumen persistente `ecommerce_postgres_data`.
+- `PostgreSQL 18` con `PostGIS 3.6` en puerto 6432 (host) → 5432
+  (container).
+- `Redis 7` en puerto 7379 (host) → 6379 (container).
+- Volumen persistente `panda-estampados-and-kitsune-dev-postgres-data`.
 
 ### Verificar
 
 ```bash
-docker compose ps
-# NAME                  STATUS         PORTS
-# ecommerce-postgres    Up 30 seconds  0.0.0.0:5432->5432/tcp
+./scripts/docker-stack.sh status dev panda-estampados-and-kitsune
+# NAME                                          STATUS         PORTS
+# panda-estampados-and-kitsune-dev-postgres     Up 30 seconds  0.0.0.0:6432->5432/tcp
 ```
 
 Probar conexión:
 
 ```bash
-docker exec -it ecommerce-postgres psql -U postgres -d store -c "SELECT version();"
+./scripts/docker-stack.sh exec dev panda-estampados-and-kitsune postgres \
+  psql -U postgres -d store -c "SELECT version();"
 # PostgreSQL 18.x on x86_64-pc-linux-gnu ...
 ```
 
 ## 2. Verificar la extensión PostGIS
 
 ```bash
-docker exec -it ecommerce-postgres psql -U postgres -d store -c "SELECT PostGIS_Version();"
+./scripts/docker-stack.sh exec dev panda-estampados-and-kitsune postgres \
+  psql -U postgres -d store -c "SELECT PostGIS_Version();"
 ```
 
 Si devuelve la versión, la extensión está instalada.
@@ -93,40 +102,37 @@ php artisan migrate:fresh --seed
 
 ## 6. Acceder a `pgAdmin` (opcional)
 
-Si querés interfaz gráfica para inspeccionar la DB:
-
-```bash
-# Editar docker-compose.dev.yml y descomentar el servicio pgadmin
-docker compose up -d pgadmin
-# Disponible en http://localhost:5050
-# Login: admin@example.com / admin
-```
+Si querés interfaz gráfica para inspeccionar la DB, pgAdmin viene
+incluido por default en el compose de la instancia (puerto 6050 host).
+Solo abrí `http://localhost:6050` después de levantar la instancia.
+Login default: `admin@example.com` / `admin`.
 
 ## Comandos útiles de Docker
 
 ```bash
-# Ver logs en vivo
-docker compose logs -f postgres
+# Ver logs en vivo del postgres
+./scripts/docker-stack.sh logs dev panda-estampados-and-kitsune postgres -f
 
-# Entrar al container
-docker exec -it ecommerce-postgres bash
+# Entrar al container de postgres (bash interactivo)
+./scripts/docker-stack.sh exec dev panda-estampados-and-kitsune postgres bash
 
-# Parar todo
-docker compose down
+# Parar todos los servicios de la instancia (conserva volumenes)
+./scripts/docker-stack.sh down dev panda-estampados-and-kitsune
 
-# Parar y borrar volúmenes (reset total)
-docker compose down -v
+# Reset completo (¡BORRA DATOS!): down + eliminar volumenes
+./scripts/docker-stack.sh down dev panda-estampados-and-kitsune -v
 ```
 
 ## Datos persistentes
 
-El volumen `ecommerce_postgres_data` sobrevive a `docker compose down`
-y `docker compose up`. Solo se borra con `down -v`.
+El volumen `panda-estampados-and-kitsune-dev-postgres-data` sobrevive
+a `docker compose down` y vuelve a usarse en el próximo `up`.
+Solo se borra con `down -v`.
 
 Verificar:
 
 ```bash
-docker volume ls | grep ecommerce
+docker volume ls | grep panda
 ```
 
 ## Próximo paso
