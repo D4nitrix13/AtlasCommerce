@@ -28,6 +28,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * `order_custom_designs`, `invoices`, `shipments`. N:1 con `customers`,
  * `customer_addresses`, `stores`, `sales_channels`, `users`, `currencies`.
  *
+ * **Scopes más usados** (ver método por método):
+ * - `scopePending` / `scopeProcessing` / `scopeCompleted` / `scopeCancelled`
+ *   — filtran por `status` (enum `OrderStatus`).
+ * - `scopeByCustomer(int $customerId)` / `scopeByStore(int $storeId)`
+ *   — atajos para queries filtradas por FK.
+ *
+ * **Soft delete**: el modelo usa `SoftDeletes` trait. Los scopes de status
+ * NO filtran soft-deleted por default — usar `->withTrashed()` si se
+ * necesitan ver cancelados hace tiempo.
+ *
  * @property int $id
  * @property int $customer_id
  * @property int|null $shipping_address_id
@@ -136,31 +146,78 @@ class Order extends Model
         return $this->hasMany(Shipment::class);
     }
 
+    /**
+     * Filtrar orders con status `Pending` (pago aún no confirmado / items
+     * no preparados). Equivalente a `where('status', OrderStatus::Pending->value)`.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
     public function scopePending(Builder $query): Builder
     {
         return $query->where(column: 'status', operator: '=', value: OrderStatus::Pending->value);
     }
 
+    /**
+     * Filtrar orders con status `Processing` (pago confirmado, en preparación
+     * o despacho). Equivalente a `where('status', OrderStatus::Processing->value)`.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
     public function scopeProcessing(Builder $query): Builder
     {
         return $query->where(column: 'status', operator: '=', value: OrderStatus::Processing->value);
     }
 
+    /**
+     * Filtrar orders con status `Completed` (entregado, cerrado). Equivalente
+     * a `where('status', OrderStatus::Completed->value)`.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
     public function scopeCompleted(Builder $query): Builder
     {
         return $query->where(column: 'status', operator: '=', value: OrderStatus::Completed->value);
     }
 
+    /**
+     * Filtrar orders con status `Cancelled` (antes o después del pago).
+     * No confundir con soft-delete: una order cancelada puede seguir
+     * existiendo en la DB (auditoría). Usar `->withTrashed()` solo si
+     * se quieren ver soft-deleted (caso edge).
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
     public function scopeCancelled(Builder $query): Builder
     {
         return $query->where(column: 'status', operator: '=', value: OrderStatus::Cancelled->value);
     }
 
+    /**
+     * Filtrar orders por FK `customer_id`.
+     *
+     * @param  Builder<Order>  $query
+     * @param  int  $customerId  ID del customer (PK en tabla `customers`)
+     * @return Builder<Order>
+     */
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
         return $query->where(column: 'customer_id', operator: '=', value: $customerId);
     }
 
+    /**
+     * Filtrar orders por FK `store_id`.
+     *
+     * Útil en contextos multi-tenant para asegurar scoping. NO es un
+     * substitute del middleware `store.domain` — usar ambos.
+     *
+     * @param  Builder<Order>  $query
+     * @param  int  $storeId  ID del store (PK en tabla `stores`)
+     * @return Builder<Order>
+     */
     public function scopeByStore(Builder $query, int $storeId): Builder
     {
         return $query->where('store_id', $storeId);

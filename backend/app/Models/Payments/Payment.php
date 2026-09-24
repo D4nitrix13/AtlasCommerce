@@ -88,6 +88,18 @@ class Payment extends Model
         return $this->hasMany(InvoicePayment::class);
     }
 
+    /**
+     * N:M con Invoice via tabla pivot `invoice_payments`. Permite que un
+     * payment se aplique a múltiples invoices (ej: payment grande que
+     * cubre 3 invoices).
+     *
+     * Pivot expone:
+     * - `applied_amount_cents` (int) — cuánto se aplicó a ESTA invoice
+     *   (un mismo payment puede tener 3 rows con distintos amounts).
+     * - `applied_at` (datetime) — cuándo se aplicó (auditoría).
+     *
+     * @return BelongsToMany<Invoice, $this>
+     */
     public function invoices(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -96,21 +108,51 @@ class Payment extends Model
         )->withPivot(['applied_amount_cents', 'applied_at']);
     }
 
+    /**
+     * Filtrar payments con status `pending` (string literal, NO enum).
+     * Status como string es fragil a typos — preferir `Payment::firstWhere('status', 'pending')`
+     * o usar constantes de clase si existen.
+     *
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
     public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
 
+    /**
+     * Filtrar payments con status `completed` (transaction ejecutada
+     * exitosamente en el gateway; fondos confirmados).
+     *
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
     public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', 'completed');
     }
 
+    /**
+     * Filtrar payments con status `failed` (gateway rechazó la transacción
+     * o fue cancelada antes de completarse). NO confundir con `cancelled`
+     * (que es decisión del usuario) o `refunded` (que requiere refund).
+     *
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
     public function scopeFailed(Builder $query): Builder
     {
         return $query->where('status', 'failed');
     }
 
+    /**
+     * Filtrar payments por FK `customer_id`.
+     *
+     * @param  Builder<Payment>  $query
+     * @param  int  $customerId  ID del customer
+     * @return Builder<Payment>
+     */
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
         return $query->where('customer_id', $customerId);
