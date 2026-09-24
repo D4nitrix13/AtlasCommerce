@@ -56,7 +56,7 @@ tail -10 /etc/hosts
 ## 3. Configurar Caddy
 
 `Caddy` resuelve los hosts a la app correcta. Ver
-[getting-started/caddy.md](caddy.md "getting-started/caddy.md") para
+[operations/caddy.md](../operations/caddy.md "operations/caddy.md") para
 detalle completo.
 
 Caddyfile mínimo (copiar a `/etc/caddy/Caddyfile`):
