@@ -7,8 +7,8 @@ Comandos y convenciones para el día a día de desarrollo.
 En una sesión de desarrollo típica necesitás 4 servicios:
 
 ```bash
-# Terminal 1 — Postgres + Redis (Docker)
-cd docker/dev && docker compose up
+# Terminal 1 — Postgres + Redis + Nginx (Docker, multi-instance layout)
+./scripts/docker-stack.sh up dev panda-estampados-and-kitsune
 
 # Terminal 2 — Backend Laravel
 cd backend && php artisan serve
@@ -16,9 +16,15 @@ cd backend && php artisan serve
 # Terminal 3 — Frontend Astro
 cd frontend && pnpm run dev
 
-# Terminal 4 — Caddy (solo si necesitás multi-tienda)
+# Terminal 4 — Caddy (opcional, solo si necesitás multi-tienda via hosts locales)
 sudo caddy run --config /etc/caddy/Caddyfile
 ```
+
+> **No usar `docker compose` directo.** El dispatcher canónico es
+> [`scripts/docker-stack.sh`](../../scripts/docker-stack.sh "scripts/docker-stack.sh")
+> por AGENTS.md raíz. Caddy puede correr fuera de Docker (service del
+> sistema) o lo levanta nginx dentro del compose — ver
+> [`operations/caddy.md`](../operations/caddy.md "operations/caddy.md").
 
 O usando el script `composer dev` que combina queue + logs + server:
 
@@ -85,8 +91,16 @@ tail -f /tmp/frontend.log
 
 ### Caddy
 
+Si Caddy corre como service del sistema:
+
 ```bash
 sudo journalctl -u caddy -n 100 -f
+```
+
+Si Caddy corre dentro del compose de la instancia:
+
+```bash
+./scripts/docker-stack.sh logs dev panda-estampados-and-kitsune caddy -f
 ```
 
 ## Tareas comunes
