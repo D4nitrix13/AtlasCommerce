@@ -292,6 +292,17 @@ Route::middleware('auth:sanctum')->group(function (): void {
     */
 
     Route::prefix('admin')->group(function (): void {
+        // Theme admin (gestión del branding del store). El tenant se
+        // resuelve via store.domain middleware (definido en el group
+        // prefix 'admin' arriba) — store resuelto en
+        // $request->attributes->get('store').
+        Route::get('theme', [App\Http\Controllers\Api\Admin\ThemeController::class, 'show'])
+            ->middleware('store.domain')
+            ->name('admin.theme.show');
+        Route::patch('theme', [App\Http\Controllers\Api\Admin\ThemeController::class, 'update'])
+            ->middleware('store.domain')
+            ->name('admin.theme.update');
+
         Route::get('permissions', [RoleController::class, 'listPermissions'])
             ->middleware('permission:auth.permissions.manage')
             ->name('admin.permissions.index');
