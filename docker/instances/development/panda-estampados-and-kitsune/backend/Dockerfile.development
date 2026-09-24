@@ -58,11 +58,17 @@ RUN /bin/mkdir -p /var/log/php && /bin/chown -R www-data:www-data /var/log/php
 RUN /bin/chown -R www-data:www-data /var/www/html
 
 # Composer install con dev dependencies (Pint, PHPStan, IDE Helper).
+# IMPORTANTE: composer install corre como www-data (no root) para que
+# todos los archivos vendor/ queden owned por www-data. Esto permite
+# que `composer require` desde el host (mounted en el mismo path)
+# pueda escribir en vendor/ sin necesitar sudo.
 COPY backend/composer.json backend/composer.lock ./
 # El plugin `d4nitrix13/atlas-commerce-plugin-erp` está como repositorio
 # `path` en composer.json → necesita `packages/atlas-commerce-plugin-erp`
 # en el WORKDIR antes del install.
 COPY backend/packages ./packages
+
+USER www-data
 
 RUN /usr/bin/composer install \
   --no-scripts \
@@ -71,10 +77,28 @@ RUN /usr/bin/composer install \
 
 COPY backend/ .
 
+# Crear storage/trees como ROOT (el COPY de arriba los puso root-owned
+# y www-data no podria crear subdirs). Despues chown a www-data.
+USER root
+RUN /bin/mkdir -p \
+    /var/www/html/storage/logs \
+    /var/www/html/storage/framework/cache/data \
+    /var/www/html/storage/framework/sessions \
+    /var/www/html/storage/framework/testing \
+    /var/www/html/storage/framework/views \
+    /var/www/html/bootstrap/cache
+RUN /bin/chown -R www-data:www-data /var/www/html
+
+# Volver a www-data para composer dump-autoload (que necesita escribir
+# en storage/logs via artisan package:discover, y crear archivos
+# vendor/composer/autoload_* owned por www-data).
+USER www-data
+
 RUN /usr/bin/composer dump-autoload --optimize
 
 EXPOSE 8000
 
+USER root
 COPY docker/instances/development/panda-estampados-and-kitsune/backend/entrypoint.development.sh /usr/local/bin/entrypoint
 RUN /bin/chmod +x /usr/local/bin/entrypoint
 
