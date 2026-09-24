@@ -67,7 +67,7 @@ final class SupportTicketControllerTest extends TestCase
     #[TestAttr]
     public function it_requires_authentication(): void
     {
-        $this->getJson(uri: 'http://panda-estampados.com/api/support/tickets')
+        $this->getJson(uri: 'http://panda-estampados.com/api/v1/support/tickets')
             ->assertStatus(status: 401);
     }
 
@@ -80,7 +80,7 @@ final class SupportTicketControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/support/tickets');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/support/tickets');
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');
@@ -92,7 +92,7 @@ final class SupportTicketControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/support/tickets',
+            uri: 'http://panda-estampados.com/api/v1/support/tickets',
             data: [
                 'subject' => 'No me llegó el pedido',
                 'description' => 'Pedí hace 5 días y nada.',
@@ -113,7 +113,7 @@ final class SupportTicketControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: 'http://panda-estampados.com/api/support/tickets',
+            uri: 'http://panda-estampados.com/api/v1/support/tickets',
             data: ['subject' => 'x'], // muy corto y sin description
         );
 
@@ -132,7 +132,7 @@ final class SupportTicketControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $response = $this->getJson(uri: "http://panda-estampados.com/api/support/tickets/{$ticket->id}");
+        $response = $this->getJson(uri: "http://panda-estampados.com/api/v1/support/tickets/{$ticket->id}");
 
         $response->assertOk();
         $response->assertJsonCount(count: 1, key: 'data.messages');
@@ -150,7 +150,7 @@ final class SupportTicketControllerTest extends TestCase
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson(
-            uri: "http://panda-estampados.com/api/support/tickets/{$ticket->id}/reply",
+            uri: "http://panda-estampados.com/api/v1/support/tickets/{$ticket->id}/reply",
             data: ['message' => 'Alguna novedad?'],
         );
 
@@ -169,11 +169,11 @@ final class SupportTicketControllerTest extends TestCase
 
         Sanctum::actingAs($this->user);
 
-        $this->getJson(uri: "http://panda-estampados.com/api/support/tickets/{$otherTicket->id}")
+        $this->getJson(uri: "http://panda-estampados.com/api/v1/support/tickets/{$otherTicket->id}")
             ->assertStatus(status: 404);
 
         $this->postJson(
-            uri: "http://panda-estampados.com/api/support/tickets/{$otherTicket->id}/reply",
+            uri: "http://panda-estampados.com/api/v1/support/tickets/{$otherTicket->id}/reply",
             data: ['message' => 'hack'],
         )->assertStatus(status: 404);
     }
@@ -184,7 +184,7 @@ final class SupportTicketControllerTest extends TestCase
         $userWithoutCustomer = User::factory()->create();
         Sanctum::actingAs($userWithoutCustomer);
 
-        $this->getJson(uri: 'http://panda-estampados.com/api/support/tickets')
+        $this->getJson(uri: 'http://panda-estampados.com/api/v1/support/tickets')
             ->assertStatus(status: 404);
     }
 }

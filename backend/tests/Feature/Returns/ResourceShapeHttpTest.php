@@ -122,7 +122,7 @@ final class ResourceShapeHttpTest extends TestCase
 
         $shipment = Shipment::query()->where(column: 'order_id', operator: '=', value: $this->order->id)->firstOrFail();
 
-        $response = $this->getJson("/api/shipments/{$shipment->id}");
+        $response = $this->getJson("/api/v1/shipments/{$shipment->id}");
 
         $response->assertOk();
         $response->assertJsonPath('data.id', $shipment->id);
@@ -155,7 +155,7 @@ final class ResourceShapeHttpTest extends TestCase
 
         $shipment = Shipment::query()->where(column: 'order_id', operator: '=', value: $this->order->id)->firstOrFail();
 
-        $response = $this->postJson("/api/shipments/{$shipment->id}/ship");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/ship");
 
         $response->assertOk();
         $response->assertJsonPath('data.status', ShipmentStatus::Shipped->value);
@@ -176,7 +176,7 @@ final class ResourceShapeHttpTest extends TestCase
         app(ShipmentService::class)->markAsShipped(shipment: $shipment);
 
         // pending → cancelled ya no es válido después de ship.
-        $response = $this->postJson("/api/shipments/{$shipment->id}/cancel");
+        $response = $this->postJson("/api/v1/shipments/{$shipment->id}/cancel");
         $response->assertStatus(422);
         $response->assertJsonStructure(['message']);
     }
@@ -344,7 +344,7 @@ final class ResourceShapeHttpTest extends TestCase
             appliedAmountCents: $this->invoice->total_cents,
         );
 
-        $response = $this->getJson('/api/shipments');
+        $response = $this->getJson('/api/v1/shipments');
 
         $response->assertOk();
         $response->assertJsonStructure([
