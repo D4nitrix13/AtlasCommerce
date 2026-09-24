@@ -1,4 +1,24 @@
 ---
+/**
+ * RecentOrdersTable — Tabla de orders recientes en el dashboard admin.
+ *
+ * **MOCK DATA**: el array `orders` está hardcoded con 6 orders de ejemplo
+ * (cliente, ID, producto, status, amount, status color). NO está
+ * conectado al backend todavía — pendiente para sesión futura migrarlo
+ * a `fetch` de `frontend/src/lib/api.ts` con datos reales del tenant.
+ *
+ * **Uso**: Lives en `pages/[locale]/admin/dashboard.astro` como
+ * widget secundario (debajo de metric cards + charts principales).
+ *
+ * **AGENTS.md §16**: este componente vive en `components/admin/dashboard/`.
+ *
+ * **AGENTS.md §11 — UI states**: NO implementa loading/error porque
+ * son datos estáticos hardcoded. Cuando se conecte a la API, agregar:
+ *   - skeleton mientras carga
+ *   - banner error si fetch falla
+ *   - empty state si array está vacío
+ *   - "Ver más" link a `/admin/sales/orders` si hay más de N rows
+ */
 const orders = [
   {
     customer: 'Carlos López',

@@ -8,6 +8,30 @@ import type { Shipment, ShipmentStatus, ShipmentWithRelations } from '../../../t
 import type { PaginatedResponse } from '../../../types/api';
 import { SHIPMENT_STATUS_COLORS } from '../../../types/shipping';
 
+/**
+ * ShipmentsAdmin — Panel admin para gestionar envíos.
+ *
+ * Lista paginada de shipments del tenant con flujo de transiciones:
+ *
+ *   pending    → shipped | cancelled
+ *   shipped    → delivered
+ *   in_transit → delivered
+ *   delivered  → (terminal)
+ *   cancelled  → (terminal)
+ *
+ * Dispara endpoints backend `POST /api/v1/shipments/{id}/<transition>`
+ * con auth via `authedFetch`. Errores 422 (transición inválida) se
+ * renderizan inline con el mensaje del API.
+ *
+ * **Estados** (AGENTS.md §11): isLoading/error/empty/success/pendingId.
+ * **Multi-tenant**: scoping via `store.domain` middleware en backend.
+ *
+ * **Diferencia con patrón "returns/refunds admin"**: este panel tiene
+ * 5 estados (pending, shipped, in_transit, delivered, cancelled) vs 5
+ * de returns, pero solo 3 de refunds. La maquina de transiciones se
+ * mantiene simple: cada estado tiene lista explícita de próximos
+ * permitidos.
+ */
 const SHIPPING_TRANSITIONS: Record<ShipmentStatus, ShipmentStatus[]> = {
   pending: ['shipped', 'cancelled'],
   shipped: ['delivered'],
@@ -16,6 +40,9 @@ const SHIPPING_TRANSITIONS: Record<ShipmentStatus, ShipmentStatus[]> = {
   cancelled: [],
 };
 
+/**
+ * I18n keys por status. Se resuelven via `t(STATUS_LABEL_KEYS[status])`.
+ */
 const STATUS_LABEL_KEYS = {
   pending: 'admin.shipments.status.pending',
   shipped: 'admin.shipments.status.shipped',
