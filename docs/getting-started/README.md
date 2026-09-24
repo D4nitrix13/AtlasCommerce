@@ -28,10 +28,9 @@ cd AtlasCommerce
 cd backend && composer install
 cd ../frontend && pnpm install
 
-# 3. Bases de datos
-cd docker/dev
-docker compose up -d
-cd ../../backend
+# 3. Bases de datos (usar scripts/docker-stack.sh como entrypoint canonico)
+./scripts/docker-stack.sh up dev panda-estampados-and-kitsune
+cd backend
 php artisan migrate --seed
 
 # 4. Iniciar todo
