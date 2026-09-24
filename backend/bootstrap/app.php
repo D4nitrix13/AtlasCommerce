@@ -97,6 +97,19 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // OAuth: errores de OAuth devuelven JSON 400 (no redirect).
+        // Defense-in-depth: el redirect endpoint corta temprano si no
+        // hay session — ese corte debe devolver JSON claro, no redirect
+        // a login (que confundiría al frontend).
+        $exceptions->render(function (\App\Exceptions\SocialAuth\OAuthException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(
+                    data: ['message' => $e->getMessage()],
+                    status: $e->getStatusCode(),
+                );
+            }
+        });
     })
     ->withProviders([
         App\Providers\AppServiceProvider::class,
