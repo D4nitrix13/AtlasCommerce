@@ -1,4 +1,22 @@
 ---
+/**
+ * RevenueOverviewCard — Resumen anual de ingresos del tenant admin.
+ *
+ * Widget del dashboard admin que muestra comparativa de revenue
+ * entre el año actual y el anterior, mes por mes, con overlay de
+ * 2 lineas (current vs previous year).
+ *
+ * **MOCK DATA**: los arrays `currentYear` y `previousYear` están
+ * hardcoded con valores demo. NO conectado al backend todavía —
+ * pendiente para sesión futura migrar a fetch real via
+ * `frontend/src/lib/api.ts` (endpoint esperado: `GET /api/v1/orders/revenue/yearly`).
+ *
+ * **Uso**: Lives en `pages/[locale]/admin/dashboard.astro` (top section)
+ * + `pages/[locale]/admin/reports.astro` (junto con los otros 3 widget cards).
+ *
+ * **AGENTS.md §16**: vive en `components/admin/reports/`.
+ * **AGENTS.md §11**: NO implementa loading/error porque es MOCK data estático.
+ */
 const chartId = `revenue-overview-${Math.random().toString(36).slice(2)}`;
 
 const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];

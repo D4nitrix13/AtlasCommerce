@@ -1,4 +1,17 @@
 ---
+/**
+ * CustomerAnalyticsCard — Segmentación de clientes del tenant admin.
+ *
+ * Widget del dashboard admin con:
+ *   - 4 KPI cards (Total clientes, Nuevos este mes, Tasa retorno, Activos)
+ *   - Pie/donut chart de segments (Frecuentes, Ocasionales, Nuevos, Inactivos)
+ *
+ * **MOCK DATA**: hardcoded. Endpoint backend a definir —
+ * sugerencia: `GET /api/v1/customers/segments?period=month`.
+ *
+ * **Uso**: Dashboard admin + reports page.
+ * **AGENTS.md §11**: MOCK data estático, no requiere loading/error.
+ */
 const chartId = `customer-analytics-${Math.random().toString(36).slice(2)}`;
 
 const stats = [

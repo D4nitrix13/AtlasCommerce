@@ -1,4 +1,17 @@
 ---
+/**
+ * SalesPerformanceCard — Métricas clave de ventas para el tenant admin.
+ *
+ * Widget del dashboard admin con:
+ *   - 4 KPI cards (Total vendido, Ticket promedio, Tasa conv., Devoluciones)
+ *   - 1 chart semanal (Lun-Dom con valores en currency cents format)
+ *
+ * **MOCK DATA**: hardcoded. Pendiente migrar a fetch cuando se defina
+ * endpoint `GET /api/v1/orders/kpis` + `GET /api/v1/orders/weekly`.
+ *
+ * **Uso**: Dashboard admin + reports page.
+ * **AGENTS.md §11**: MOCK data estático, no requiere loading/error.
+ */
 const chartId = `sales-performance-${Math.random().toString(36).slice(2)}`;
 
 const metrics = [
