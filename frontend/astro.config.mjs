@@ -11,7 +11,7 @@ import node from "@astrojs/node";
 // desde componentes Astro/React. SVGO como plugin de Vite solo optimiza
 // los SVGs que se importan via `import` (no los referenciados por URL).
 // Para SVGs en /public/, el script `pnpm run optimize:svgs` (wired al
-// prebuild) cubre todo. Ver /docs/IMAGE_OPTIMIZATION.md para detalles.
+// prebuild) cubre todo. Ver /docs/frontend/image-optimization.md para detalles.
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
