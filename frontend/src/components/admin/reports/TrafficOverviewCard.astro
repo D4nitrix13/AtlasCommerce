@@ -1,4 +1,17 @@
 ---
+/**
+ * TrafficOverviewCard — Distribución de fuentes de tráfico + top pages.
+ *
+ * Widget del dashboard admin con:
+ *   - Pie/donut chart de sources (Directo, Orgánico, Referido, Social)
+ *   - Top 5 pages con views
+ *
+ * **MOCK DATA**: hardcoded. Cuando se conecte a la API, el endpoint
+ * probable es `GET /api/v1/analytics/traffic` (sumarizado por mes).
+ *
+ * **Uso**: Dashboard admin + reports page.
+ * **AGENTS.md §11**: MOCK data estático, no requiere loading/error.
+ */
 const chartId = `traffic-overview-${Math.random().toString(36).slice(2)}`;
 
 const sources = [
