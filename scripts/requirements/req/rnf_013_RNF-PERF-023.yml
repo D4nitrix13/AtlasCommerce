@@ -1,7 +1,7 @@
 # RNF: RNF-PERF-023 - Optimización de imágenes en frontend
 rnf_013:
   title: "Optimización de imágenes en frontend"
-  rationale: "Astro image optimization para assets críticos. WebP/AVIF automático. Documentado en docs/IMAGE_OPTIMIZATION.md."
+  rationale: "Astro image optimization para assets críticos. WebP/AVIF automático. Documentado en docs/frontend/image-optimization.md."
   priority: "M"
   status: "implemented"
   category: "Rendimiento"
@@ -15,4 +15,4 @@ rnf_013:
   dependencias: []
   estabilidad: "PD"
   urgencia: "puede esperar"
-  comentarios: "Implementado con `<Image />` de Astro para assets críticos; WebP/AVIF automático. Documentado en `docs/IMAGE_OPTIMIZATION.md`. Pendiente gap: auditar que TODAS las imágenes de producto pasen por este pipeline; las servidas vía `AssetController` no están optimizadas."
+  comentarios: "Implementado con `<Image />` de Astro para assets críticos; WebP/AVIF automático. Documentado en `docs/frontend/image-optimization.md`. Pendiente gap: auditar que TODAS las imágenes de producto pasen por este pipeline; las servidas vía `AssetController` no están optimizadas."

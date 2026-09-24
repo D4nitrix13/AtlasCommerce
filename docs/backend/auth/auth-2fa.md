@@ -353,3 +353,11 @@ TWO_FACTOR_RECOVERY_CODES_PREFIX=STORE
   - Eventos de seguridad: intentos fallidos,
     activación/desactivación de 2FA, uso de recovery
     codes
+
+## Ver también
+
+- [recovery-methods.md](recovery-methods.md "recovery-methods.md")
+  — Wizard de recuperación de contraseña (Email OTP, Recovery
+  Codes, TOTP). Mismos mecanismos de auth que este doc pero usados
+  en el flujo de **password reset** (pre-login) en vez de 2FA
+  (post-login).
