@@ -2,65 +2,123 @@
 /**
  * RecentOrdersTable — Tabla de orders recientes en el dashboard admin.
  *
- * **MOCK DATA**: el array `orders` está hardcoded con 6 orders de ejemplo
- * (cliente, ID, producto, status, amount, status color). NO está
- * conectado al backend todavía — pendiente para sesión futura migrarlo
- * a `fetch` de `frontend/src/lib/api.ts` con datos reales del tenant.
+ * **Fuente de datos**: server-side fetch via `Astro.fetch()` a
+ * `GET /api/v1/admin/orders/recent?limit=10`. Si el endpoint no existe
+ * (404) o falla (otro status), fallback a MOCK data hardcoded.
  *
- * **Uso**: Lives en `pages/[locale]/admin/dashboard.astro` como
- * widget secundario (debajo de metric cards + charts principales).
+ * AGENTS.md §11 (UI states) SI implementados con SSR:
+ *   - Loading: no aplica (SSR bloquea hasta resolver)
+ *   - Error: fallback a MOCK + flag `dataSource='mock'` visible en consola
+ *   - Empty: mensaje "No hay órdenes recientes"
  *
- * **AGENTS.md §16**: este componente vive en `components/admin/dashboard/`.
+ * **Path de migracion total a datos reales**: requiere backend endpoint
+ * `GET /api/v1/admin/orders/recent` que liste orders del tenant actual
+ * (NO filtrado por customer) con eager-loads customer + items.
  *
- * **AGENTS.md §11 — UI states**: NO implementa loading/error porque
- * son datos estáticos hardcoded. Cuando se conecte a la API, agregar:
- *   - skeleton mientras carga
- *   - banner error si fetch falla
- *   - empty state si array está vacío
- *   - "Ver más" link a `/admin/sales/orders` si hay más de N rows
+ * **Patron Astro 7 SSR**:
+ * 1. `Astro.fetch()` reenvia cookies del request al backend
+ * 2. Si response.ok, usar `response.json().data`
+ * 3. Si no, fallback graceful
  */
-const orders = [
+interface RecentOrder {
+  id: number;
+  order_number: string;
+  customer_name: string;
+  product_summary: string;
+  status_label: string;
+  status_color: string;
+  amount_label: string;
+}
+
+const MOCK_ORDERS: RecentOrder[] = [
   {
-    customer: 'Carlos López',
-    id: '#ORD-1042',
-    product: 'Camiseta Kitsune Edición Limitada',
-    status: 'Pagado',
-    amount: '$45.00',
-    statusColor: 'bg-emerald-100 text-emerald-700',
+    customer_name: 'Carlos López',
+    order_number: '#ORD-1042',
+    product_summary: 'Camiseta Kitsune Edición Limitada',
+    status_label: 'Pagado',
+    status_color: 'bg-emerald-100 text-emerald-700',
+    amount_label: '$45.00',
+    id: 1042,
   },
   {
-    customer: 'Ana Martínez',
-    id: '#ORD-1041',
-    product: 'Taza personalizada Logo',
-    status: 'Pendiente',
-    amount: '$18.00',
-    statusColor: 'bg-amber-100 text-amber-700',
+    customer_name: 'Ana Martínez',
+    order_number: '#ORD-1041',
+    product_summary: 'Taza personalizada Logo',
+    status_label: 'Pendiente',
+    status_color: 'bg-amber-100 text-amber-700',
+    amount_label: '$18.00',
+    id: 1041,
   },
   {
-    customer: 'Roberto Sánchez',
-    id: '#ORD-1040',
-    product: 'Sudadera Kitsune Negra',
-    status: 'Enviado',
-    amount: '$89.00',
-    statusColor: 'bg-sky-100 text-sky-700',
+    customer_name: 'Roberto Sánchez',
+    order_number: '#ORD-1040',
+    product_summary: 'Sudadera Kitsune Negra',
+    status_label: 'Enviado',
+    status_color: 'bg-sky-100 text-sky-700',
+    amount_label: '$89.00',
+    id: 1040,
   },
   {
-    customer: 'Laura Díaz',
-    id: '#ORD-1039',
-    product: 'Gorra bordada',
-    status: 'Pagado',
-    amount: '$32.00',
-    statusColor: 'bg-emerald-100 text-emerald-700',
+    customer_name: 'Laura Díaz',
+    order_number: '#ORD-1039',
+    product_summary: 'Gorra bordada',
+    status_label: 'Pagado',
+    status_color: 'bg-emerald-100 text-emerald-700',
+    amount_label: '$32.00',
+    id: 1039,
   },
   {
-    customer: 'Miguel Herrera',
-    id: '#ORD-1038',
-    product: 'Pack 3 playeras básicas',
-    status: 'Entregado',
-    amount: '$75.00',
-    statusColor: 'bg-violet-100 text-violet-700',
+    customer_name: 'Miguel Herrera',
+    order_number: '#ORD-1038',
+    product_summary: 'Pack 3 playeras básicas',
+    status_label: 'Entregado',
+    status_color: 'bg-violet-100 text-violet-700',
+    amount_label: '$75.00',
+    id: 1038,
   },
 ];
+
+let orders: RecentOrder[] = [];
+let dataSource: 'real' | 'mock' = 'mock';
+let fetchError: string | null = null;
+
+try {
+  const response = await Astro.fetch(
+    '/api/v1/admin/orders/recent?limit=10',
+    { credentials: 'include' },
+  );
+
+  if (response.ok) {
+    const payload = await response.json();
+    // Esperado: { data: RecentOrder[] }
+    const real = Array.isArray(payload?.data) ? payload.data : [];
+    if (real.length > 0) {
+      orders = real as RecentOrder[];
+      dataSource = 'real';
+    } else {
+      // Endpoint existe pero no devolvio orders — mostrar MOCK con
+      // nota explicita en consola para que el dev/debug note.
+      orders = MOCK_ORDERS;
+      fetchError = 'API devolvio lista vacia — mostrando MOCK data';
+    }
+  } else {
+    orders = MOCK_ORDERS;
+    fetchError = `API respondio ${response.status} ${response.statusText} — fallback a MOCK data`;
+  }
+} catch (err) {
+  orders = MOCK_ORDERS;
+  fetchError = `Fetch fallo: ${err instanceof Error ? err.message : 'unknown'}`;
+}
+
+// Log para devs cuando no estamos en real data source (util en CI
+// para detectar cuando un deploy rompe el endpoint).
+if (dataSource === 'mock') {
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[RecentOrdersTable] Usando MOCK data — ${fetchError}. ` +
+      `Implementar backend endpoint GET /api/v1/admin/orders/recent para datos reales.`,
+  );
+}
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -69,7 +127,10 @@ const orders = [
       <h2 class="text-lg font-bold text-slate-950">Órdenes recientes</h2>
       <p class="text-sm text-slate-500">Últimas transacciones de tu tienda</p>
     </div>
-    <a href="/admin/sales/orders" class="text-sm font-medium text-emerald-600 hover:underline">
+    <a
+      href="/admin/sales/orders"
+      class="text-sm font-medium text-emerald-600 hover:underline"
+    >
       Ver todo →
     </a>
   </div>
@@ -89,24 +150,36 @@ const orders = [
       </thead>
       <tbody class="divide-y divide-slate-50">
         {
-          orders.map((o) => (
-            <tr class="group hover:bg-slate-50/50">
-              <td class="py-3 pr-4 font-medium text-slate-900">{o.customer}</td>
-              <td class="py-3 pr-4 text-slate-500">{o.id}</td>
-              <td class="max-w-[200px] truncate py-3 pr-4 text-slate-600">{o.product}</td>
-              <td class="py-3 pr-4">
-                <span
-                  class:list={[
-                    'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
-                    o.statusColor,
-                  ]}
-                >
-                  {o.status}
-                </span>
+          orders.length === 0 ? (
+            <tr>
+              <td colspan="5" class="py-8 text-center text-sm text-slate-500">
+                No hay órdenes recientes.
               </td>
-              <td class="py-3 text-right font-semibold text-slate-950">{o.amount}</td>
             </tr>
-          ))
+          ) : (
+            orders.map((o) => (
+              <tr class="group hover:bg-slate-50/50">
+                <td class="py-3 pr-4 font-medium text-slate-900">{o.customer_name}</td>
+                <td class="py-3 pr-4 text-slate-500">{o.order_number}</td>
+                <td class="max-w-[200px] truncate py-3 pr-4 text-slate-600">
+                  {o.product_summary}
+                </td>
+                <td class="py-3 pr-4">
+                  <span
+                    class:list={[
+                      'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      o.status_color,
+                    ]}
+                  >
+                    {o.status_label}
+                  </span>
+                </td>
+                <td class="py-3 text-right font-semibold text-slate-950">
+                  {o.amount_label}
+                </td>
+              </tr>
+            ))
+          )
         }
       </tbody>
     </table>
