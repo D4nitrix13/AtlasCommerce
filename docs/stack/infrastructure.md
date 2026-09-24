@@ -196,7 +196,7 @@ A definir. Stack candidato:
 
 ## Documentación relacionada
 
-- [architecture/deployment.md](../architecture/deployment.md "architecture/deployment.md")
+- [operations/deployment.md](../operations/deployment.md "operations/deployment.md")
 - [operations/docker.md](../operations/docker.md "operations/docker.md")
 - [operations/caddy.md](../operations/caddy.md "operations/caddy.md")
 - [operations/deployment.md](../operations/deployment.md "operations/deployment.md")

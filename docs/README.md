@@ -50,7 +50,6 @@ el cliente final.
 - architecture/multi-store.md       # Multi-tienda a fondo
 - architecture/flow.md              # Diagramas de flujo
 - architecture/decisions.md         # ADR (decisiones documentadas)
-- architecture/deployment-overview.md # Despliegue
 ```
 
 ### Stack tecnológico
