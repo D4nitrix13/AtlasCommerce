@@ -11,6 +11,7 @@ use App\Http\Resources\Shipping\ShipmentResource;
 use App\Models\Shipping\Shipment;
 use App\Services\Shipping\ShipmentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Controlador API para gestionar envíos.

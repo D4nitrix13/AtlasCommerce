@@ -46,11 +46,10 @@ class SupportTicketController extends Controller
 
         $paginator = SupportTicket::query()
             ->where('customer_id', $customer->id)
-            ->orderByDesc('created_at')
-            ->paginate(perPage: (int) $request->query('per_page', 20));
+            ->orderByDesc('created_at');
 
         return $this->cursorPaginatedResponse(
-            request: $request, query: $query, resourceClass: AdminSupportTicketResource::class,
+            request: $request, query: $paginator, resourceClass: AdminSupportTicketResource::class,
         );
     }
 

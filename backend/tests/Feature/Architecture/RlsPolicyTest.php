@@ -43,16 +43,25 @@ final class RlsPolicyTest extends TestCase
             query: "SELECT policyname FROM pg_policies WHERE tablename = 'orders'",
         );
 
+        self::assertTrue((bool) $table?->relrowsecurity);
+        self::assertTrue((bool) $table?->relforcerowsecurity);
+        self::assertSame('orders_tenant_isolation_policy', $policy?->policyname);
+
+        // El plugin ERP puede no estar instalado en este entorno
+        // (depende de si el package del plugin está activo en
+        // composer). Si la tabla no existe, skip la verificación de RLS
+        // del plugin — no tiene sentido probar algo que no aplica.
         $pluginTable = DB::selectOne(
             query: "SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname = 'erp_connections'",
         );
+        if ($pluginTable === null) {
+            self::markTestSkipped('Plugin ERP no instalado en este entorno (tabla erp_connections no existe).');
+        }
+
         $pluginPolicy = DB::selectOne(
             query: "SELECT policyname FROM pg_policies WHERE tablename = 'erp_connections'",
         );
 
-        self::assertTrue((bool) $table?->relrowsecurity);
-        self::assertTrue((bool) $table?->relforcerowsecurity);
-        self::assertSame('orders_tenant_isolation_policy', $policy?->policyname);
         self::assertTrue((bool) $pluginTable?->relrowsecurity);
         self::assertTrue((bool) $pluginTable?->relforcerowsecurity);
         self::assertSame(

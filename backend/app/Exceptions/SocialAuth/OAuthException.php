@@ -40,4 +40,15 @@ abstract class OAuthException extends RuntimeException
     {
         return [];
     }
+
+    /**
+     * HTTP status code apropiado para este fallo.
+     *
+     * Default 400 (Bad Request). Subclases pueden override si el caso
+     * requiere otro código (ej. 409 para conflictos de email).
+     */
+    public function getStatusCode(): int
+    {
+        return 400;
+    }
 }

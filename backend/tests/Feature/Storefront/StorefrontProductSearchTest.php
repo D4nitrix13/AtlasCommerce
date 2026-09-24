@@ -346,9 +346,11 @@ final class StorefrontProductSearchTest extends TestCase
 
         $page1 = $this->getJson(uri: $this->url(q: 'Camiseta', page: 1, perPage: 3));
         $page1->assertOk();
-        $page1->assertJsonCount(7, 'data');
+        // El search usa paginación offset (a diferencia del listado de
+        // productos que usa cursor — ver RF-PERF-022).
         $page1->assertJsonPath(path: 'meta.per_page', expect: 3);
         $page1->assertJsonPath(path: 'meta.last_page', expect: 3);
+        $page1->assertJsonPath(path: 'meta.total', expect: 7);
         $this->assertCount(3, $page1->json(key: 'data'));
 
         $page3 = $this->getJson(uri: $this->url(q: 'Camiseta', page: 3, perPage: 3));

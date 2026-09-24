@@ -119,7 +119,7 @@ final class TrackingControllerTest extends TestCase
     #[TestAttr]
     public function it_returns_shipment_with_correct_email(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/tracking/SHP-2026-ABC123?email=comprador@example.com');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/tracking/SHP-2026-ABC123?email=comprador@example.com');
 
         $response->assertOk();
         $response->assertJsonPath(path: 'data.tracking_code', expect: 'SHP-2026-ABC123');
@@ -132,7 +132,7 @@ final class TrackingControllerTest extends TestCase
     #[TestAttr]
     public function it_returns_404_for_wrong_email(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/tracking/SHP-2026-ABC123?email=otro@example.com');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/tracking/SHP-2026-ABC123?email=otro@example.com');
 
         $response->assertStatus(status: 404);
         $response->assertJsonPath(path: 'message', expect: 'No encontramos un envío con ese código.');
@@ -141,7 +141,7 @@ final class TrackingControllerTest extends TestCase
     #[TestAttr]
     public function it_returns_404_for_unknown_tracking_code(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/tracking/UNKNOWN-CODE?email=comprador@example.com');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/tracking/UNKNOWN-CODE?email=comprador@example.com');
 
         $response->assertStatus(status: 404);
     }
@@ -174,7 +174,7 @@ final class TrackingControllerTest extends TestCase
         ]);
 
         // Estamos en storeA — el código de storeB NO debe matchear.
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/tracking/SHP-OTHER-XYZ?email=comprador@example.com');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/tracking/SHP-OTHER-XYZ?email=comprador@example.com');
 
         $response->assertStatus(status: 404);
     }
@@ -182,7 +182,7 @@ final class TrackingControllerTest extends TestCase
     #[TestAttr]
     public function it_validates_email_format(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/tracking/SHP-2026-ABC123?email=not-an-email');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/tracking/SHP-2026-ABC123?email=not-an-email');
 
         $response->assertStatus(status: 422);
         $response->assertJsonValidationErrors(errors: ['email']);
@@ -191,7 +191,7 @@ final class TrackingControllerTest extends TestCase
     #[TestAttr]
     public function it_requires_email(): void
     {
-        $response = $this->getJson(uri: 'http://panda-estampados.com/api/tracking/SHP-2026-ABC123');
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/tracking/SHP-2026-ABC123');
 
         $response->assertStatus(status: 422);
         $response->assertJsonValidationErrors(errors: ['email']);

@@ -40,7 +40,7 @@ final class StorefrontAssetTest extends TestCase
         parent::setUp();
 
         // Fake del disk `ftp` para no depender de un FTP real en tests.
-        Storage::fake(name: 'ftp');
+        Storage::fake(disk: 'ftp');
 
         $this->currency = Currency::query()->create(attributes: [
             'code' => 'NIO',
@@ -61,7 +61,7 @@ final class StorefrontAssetTest extends TestCase
 
         StoreDomain::query()->create(attributes: [
             'store_id' => $this->store->id,
-            'host' => 'panda-estampados.test',
+            'domain' => 'panda-estampados.test',
             'is_primary' => true,
             'is_active' => true,
         ]);
@@ -76,13 +76,17 @@ final class StorefrontAssetTest extends TestCase
             contents: $contents,
         );
 
-        $response = $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp');
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp');
 
         $response->assertOk();
-        $response->assertHeader(name: 'Content-Type', value: 'image/webp');
-        $response->assertHeader(name: 'Cache-Control', value: 'public, max-age=31536000, immutable');
+        $response->assertHeader('Content-Type', 'image/webp');
+        // Cache-Control ordering es normalizado por Symfony HeaderBag
+        // (directives reordenadas); verificamos las 3 directives presentes
+        // en lugar de equality estricta.
+        $cacheControl = $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('public', (string) $cacheControl);
+        $this->assertStringContainsString('max-age=31536000', (string) $cacheControl);
+        $this->assertStringContainsString('immutable', (string) $cacheControl);
         $this->assertNotEmpty(actual: $response->headers->get(key: 'ETag'));
         $this->assertSame(expected: $contents, actual: $response->getContent());
     }
@@ -97,9 +101,7 @@ final class StorefrontAssetTest extends TestCase
         );
 
         // Intentar acceder como panda-estampados.
-        $response = $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/v1/storefront/assets/tenants/kitsune/branding/logo.webp');
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/kitsune/branding/logo.webp');
 
         $response->assertForbidden();
     }
@@ -107,9 +109,7 @@ final class StorefrontAssetTest extends TestCase
     #[Test]
     public function it_returns_404_when_file_does_not_exist(): void
     {
-        $response = $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/missing.webp');
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/missing.webp');
 
         $response->assertNotFound();
     }
@@ -117,9 +117,7 @@ final class StorefrontAssetTest extends TestCase
     #[Test]
     public function it_returns_403_on_path_traversal_attempts(): void
     {
-        $response = $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/../../../etc/passwd');
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/../../../etc/passwd');
 
         $response->assertForbidden();
     }
@@ -133,9 +131,7 @@ final class StorefrontAssetTest extends TestCase
             contents: $contents,
         );
 
-        $response = $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/v1/storefront/assets/shared/icons/social/facebook.webp');
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/shared/icons/social/facebook.webp');
 
         $response->assertOk();
         $this->assertSame(expected: $contents, actual: $response->getContent());
@@ -144,21 +140,19 @@ final class StorefrontAssetTest extends TestCase
     #[Test]
     public function it_returns_304_when_if_none_match_matches_etag(): void
     {
-        $contents = 'cached-content';
+        $contents = 'etag-test-content';
         Storage::disk(name: 'ftp')->put(
-            path: 'tenants/panda-estampados/branding/logo.webp',
+            path: 'tenants/panda-estampados/branding/etag-test.webp',
             contents: $contents,
         );
 
         $expectedEtag = '"'.md5(string: $contents).'"';
 
-        $response = $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-            'HTTP_IF_NONE_MATCH' => $expectedEtag,
-        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp');
+        $response = $this->withHeaders(headers: ['If-None-Match' => $expectedEtag])
+            ->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/etag-test.webp');
 
-        $response->assertStatus(code: 304);
-        $this->assertSame(expected: $expectedEtag, actual: $response->headers->get(key: 'ETag'));
+        $response->assertStatus(304);
+        $this->assertSame($expectedEtag, $response->headers->get('ETag'));
     }
 
     #[Test]
@@ -169,9 +163,7 @@ final class StorefrontAssetTest extends TestCase
             contents: 'content',
         );
 
-        $response = $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/v1/storefront/assets//tenants/panda-estampados/brand/logo.webp');
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets//tenants/panda-estampados/brand/logo.webp');
 
         $response->assertOk();
     }
@@ -179,24 +171,24 @@ final class StorefrontAssetTest extends TestCase
     #[Test]
     public function it_caches_assets_in_redis_with_24h_ttl(): void
     {
+        // Path único por test para evitar cache compartida entre tests
+        // (RefreshDatabase no limpia Redis).
         Storage::disk(name: 'ftp')->put(
-            path: 'tenants/panda-estampados/branding/logo.webp',
+            path: 'tenants/panda-estampados/branding/cache-test.webp',
             contents: 'cached-content',
         );
 
-        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: 'tenants/panda-estampados/branding/logo.webp');
+        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: 'tenants/panda-estampados/branding/cache-test.webp');
 
         // Antes del request: cache no existe.
-        $this->assertFalse(condition: \Illuminate\Support\Facades\Cache::store(name: 'redis')->has(key: $cacheKey));
+        $this->assertFalse(\Illuminate\Support\Facades\Cache::store(name: 'redis')->has($cacheKey));
 
         // Hacer el request: dispara cache miss + lectura FTP + escritura en cache.
-        $this->withServerVariables(serverVariables: [
-            'HTTP_HOST' => 'panda-estampados.test',
-        ])->get(uri: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp')
+        $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/cache-test.webp')
             ->assertOk();
 
         // Despues del request: cache existe.
-        $this->assertTrue(condition: \Illuminate\Support\Facades\Cache::store(name: 'redis')->has(key: $cacheKey));
-        $this->assertSame(expected: 'cached-content', actual: \Illuminate\Support\Facades\Cache::store(name: 'redis')->get(key: $cacheKey));
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::store(name: 'redis')->has($cacheKey));
+        $this->assertSame('cached-content', \Illuminate\Support\Facades\Cache::store(name: 'redis')->get($cacheKey));
     }
 }
