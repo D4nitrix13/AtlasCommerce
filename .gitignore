@@ -37,3 +37,12 @@ scripts/requirements/docs/
 openspec/specs/cache/
 
 backend/backend/
+
+# Root-level composer stubs (do NOT use — backend/ has the real setup).
+# These show up as untracked noise from local tooling hooks.
+/composer.json
+/composer.lock
+
+# Root-level vendor/ (local Composer autoload — not the backend's).
+# Absolute path so backend/vendor/ stays unaffected.
+/vendor/
