@@ -303,6 +303,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->middleware('store.domain')
             ->name('admin.theme.update');
 
+        // Recent orders del tenant — alimenta el widget
+        // RecentOrdersTable del dashboard admin. Multi-tenant via
+        // store.domain global scope.
+        Route::get('orders/recent', [App\Http\Controllers\Api\Admin\RecentOrdersController::class, 'index'])
+            ->middleware('store.domain')
+            ->name('admin.orders.recent');
+
         Route::get('permissions', [RoleController::class, 'listPermissions'])
             ->middleware('permission:auth.permissions.manage')
             ->name('admin.permissions.index');
