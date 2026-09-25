@@ -65,11 +65,12 @@ return [
         'enabled' => env('SCRAMBLE_DEV_TOOLS', env('APP_DEBUG', false)),
     ],
 
-    'renderer' => 'elements',
+    'renderer' => 'scalar',
 
     'renderers' => [
         /*
          * Stoplight Elements config options: https://docs.stoplight.io/docs/elements/b074dc47b2826-elements-configuration-options
+         * (No es el renderer activo; se mantiene por si queremos switch.)
          */
         'elements' => [
             'view' => 'scramble::docs',
@@ -83,6 +84,8 @@ return [
         ],
         /*
          * Scalar API reference config options: https://scalar.com/products/api-references/configuration
+         * Renderer activo — UI moderna (mejor UX, OpenAPI 3.1, dark/light, server selection, mejor TryIt).
+         * CDN-based: zero install (carga desde cdn.jsdelivr.net).
          */
         'scalar' => [
             'view' => 'scramble::scalar',
@@ -177,6 +180,5 @@ return [
      *     ],
      * ],
      */
-    // 'security_strategy' => \Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy::class,
     'security_strategy' => null,
 ];
