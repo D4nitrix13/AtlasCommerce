@@ -1,4 +1,22 @@
 ---
+/**
+ * TrafficSourcesCard — Donut chart de sources de trafico en dashboard admin.
+ *
+ * Variante small del `TrafficOverviewCard` (que vive en reports page).
+ * Mismo shape de data (sources[]), distinta presentacion: solo el donut
+ * con label center overlay ("Visitas: 284K"). NO reimplementa — viene
+ * de la misma fuente eventual.
+ *
+ * **MOCK DATA**: hardcoded. Endpoint backend esperado cuando se
+ * migre: mismo `GET /api/v1/admin/metrics/traffic/sources` que el
+ * widget grande (TrafficOverviewCard).
+ *
+ * Diferencias con TrafficOverviewCard:
+ *   - Sin lista de top 5 pages (solo donut + label center)
+ *   - Sin leyenda lateral (la leyenda vive abajo del chart)
+ *
+ * **AGENTS.md §11**: MOCK data estatico.
+ */
 const chartId = `traffic-chart-${Math.random().toString(36).slice(2)}`;
 
 const sources = [

@@ -1,4 +1,26 @@
 ---
+/**
+ * RevenueChart — Chart.js line chart de revenue mensual en el dashboard admin.
+ *
+ * Usa `<canvas>` con `data-labels` + `data-values` (JSON-encoded) como
+ * DOM data attributes. El `<script>` al final del componente hidrata
+ * el chart via Chart.js/auto (lazy import via Vite). Multi-tenant safe:
+ * chartId random por instancia para evitar colisiones si hay multiples
+ * charts en la misma page.
+ *
+ * **MOCK DATA**: `labels` (12 meses) + `values` (revenue por mes) hardcoded.
+ * Migrar a `Astro.fetch('/api/v1/admin/metrics/revenue/monthly')` en sesion
+ * futura. Mismo patron que RevenueOverviewCard (commit actual).
+ *
+ * **AGENTS.md §18** (performance): Chart.js dynamic import = codigo se
+ * carga solo cuando el componente se monta (no en el bundle inicial).
+ *
+ * **Toggle UI** (Ingresos/Ordenes/Ganancia): los 3 botones existen pero
+ * solo "Ingresos" renderiza datos reales. Los otros 2 son placeholder
+ * para switch entre dataset del mismo endpoint o 3 endpoints distintos.
+ *
+ * **AGENTS.md §11**: NO implementa loading/error (MOCK data).
+ */
 const chartId = `revenue-chart-${Math.random().toString(36).slice(2)}`;
 
 const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];

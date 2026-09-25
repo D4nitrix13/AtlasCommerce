@@ -1,6 +1,24 @@
 import { useState, type ReactElement } from 'react';
 import type { Theme } from '../../../lib/theme';
 
+/**
+ * ThemeForm — Editor de theme del tenant admin.
+ *
+ * Form controlado que permite editar el theme activo del store:
+ * identity (short_name, logos), palette (colors), contact (email, phone),
+ * tokens (CSS custom properties adicionales).
+ *
+ * **State machine** (discriminated union):
+ *   - `idle`     → form listo para submit
+ *   - `saving`   → request PATCH en curso (deshabilitar submit)
+ *   - `success`  → guardado OK, mensaje verde + reset a idle tras 2s
+ *   - `error`    → mensaje rojo, mantener form intacto para retry
+ *
+ * **Endpoint**: PATCH /api/v1/admin/theme con body Theme.
+ * **Errors 4xx/5xx** se manejan via `error` state con mensaje del backend.
+ *
+ * @prop {Theme} initialTheme Estado actual del theme (del backend via GET /admin/theme)
+ */
 interface Props {
   initialTheme: Theme;
 }
