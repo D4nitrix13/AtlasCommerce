@@ -1,4 +1,24 @@
 ---
+/**
+ * LowStockTable — Alertas de inventario bajo (widget del dashboard admin).
+ *
+ * Lista los productos con stock <= threshold (default 10). Cada fila
+ * muestra: nombre, SKU, unidades restantes, y badge de estado
+ * (Critico <5 | Bajo <10 | Normal >=10).
+ *
+ * **MOCK DATA**: hardcoded con 4 productos placeholder. Pendiente
+ * refactor: la fuente real es InventoryController del backend y un
+ * endpoint dedicado (no existe hoy). Cuando se implemente:
+ *   - GET /api/v1/admin/inventory/low-stock?threshold=10
+ *   - Eager-loads product + variant (el stock puede ser variant-level)
+ *   - Paginacion si hay mas de N alerts
+ *
+ * **Uso**: Dashboard admin (entre MetricCards principales y
+ * RecentOrdersTable abajo).
+ *
+ * **AGENTS.md §11**: MOCK data estatico, no requiere loading/error.
+ * **AGENTS.md §16**: vive en `components/admin/dashboard/`.
+ */
 const products = [
   {
     name: 'Camiseta Kitsune Edición Limitada',

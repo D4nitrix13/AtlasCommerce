@@ -1,4 +1,27 @@
 ---
+/**
+ * AdminHeader — Sticky top header del shell del panel admin.
+ *
+ * Presente en TODAS las rutas `/admin/*`. Wrapper con comportamiento
+ * acoplado:
+ *   1. Sidebar toggle: `<button data-sidebar-toggle>` con `aria-expanded`
+ *      manejado por JS global (ver `frontend/src/scripts/sidebar.ts`).
+ *   2. Search input: placeholder ("Buscar productos, ordenes..."), sin
+ *      handler — backend search no implementado todavia.
+ *   3. Quick action button "Nueva orden": link directo a
+ *      `/admin/sales/orders/new`.
+ *   4. AdminUserMenu: avatar + nombre + dropdown logout (slot al final).
+ *
+ * **AGENTS.md §17** (a11y): usa `<button>` real con `aria-label` y
+ * `aria-expanded`. aria-controls apunta a `admin-sidebar` (id).
+ *
+ * **Multi-tenant**: sin scope de tenant propio; el user authenticated
+ * aplica en cualquier ruta admin via session Sanctum.
+ *
+ * **AGENTS.md §11** (UI states): solo datos del usuario (auth); no
+ * loading/error explicito (la pagina padre renderiza skeleton si
+ * todavia no cargo user).
+ */
 import Icon from '../../ui/Icon.astro';
 ---
 
