@@ -6,28 +6,62 @@
  *   - Pie/donut chart de sources (Directo, Orgánico, Referido, Social)
  *   - Top 5 pages con views
  *
- * **MOCK DATA**: hardcoded. Cuando se conecte a la API, el endpoint
- * probable es `GET /api/v1/analytics/traffic` (sumarizado por mes).
- *
- * **Uso**: Dashboard admin + reports page.
- * **AGENTS.md §11**: MOCK data estático, no requiere loading/error.
+ * **MOCK DATA con fallback**: fetch a
+ * `GET /api/v1/admin/metrics/traffic/sources`. Fallback a MOCK data
+ * si 404 / falla.
  */
-const chartId = `traffic-overview-${Math.random().toString(36).slice(2)}`;
+interface TrafficSource {
+  label: string;
+  value: number;
+  color: string;
+  visits: string;
+}
+interface TrafficTopPage {
+  path: string;
+  views: number;
+}
 
-const sources = [
+interface TrafficData {
+  sources: TrafficSource[];
+  top_pages: TrafficTopPage[];
+}
+
+const MOCK_SOURCES: TrafficSource[] = [
   { label: 'Directo', value: 35, color: '#059669', visits: '99,400' },
   { label: 'Orgánico', value: 28, color: '#0ea5e9', visits: '79,520' },
   { label: 'Referido', value: 22, color: '#8b5cf6', visits: '62,480' },
   { label: 'Social', value: 15, color: '#f43f5e', visits: '42,600' },
 ];
 
-const topPages = [
+const MOCK_TOP_PAGES: TrafficTopPage[] = [
   { path: '/products/kitsune-edicion-limitada', views: 4280 },
   { path: '/categories/camisetas', views: 3120 },
   { path: '/', views: 2890 },
   { path: '/products/sudadera-negra', views: 2340 },
   { path: '/cart', views: 1870 },
 ];
+
+let sources: TrafficSource[] = MOCK_SOURCES;
+let topPages: TrafficTopPage[] = MOCK_TOP_PAGES;
+let dataSource: 'real' | 'mock' = 'mock';
+
+try {
+  const response = await Astro.fetch('/api/v1/admin/metrics/traffic/sources', {
+    credentials: 'include',
+  });
+  if (response.ok) {
+    const payload = (await response.json()) as { data?: TrafficData };
+    if (payload?.data?.sources && Array.isArray(payload.data.sources) && payload.data.sources.length > 0) {
+      sources = payload.data.sources;
+      topPages = payload.data.top_pages;
+      dataSource = 'real';
+    }
+  }
+} catch {
+  // Fallback silencioso
+}
+
+const chartId = `traffic-overview-${Math.random().toString(36).slice(2)}`;
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

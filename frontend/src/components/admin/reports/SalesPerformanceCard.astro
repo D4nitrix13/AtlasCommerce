@@ -6,23 +6,58 @@
  *   - 4 KPI cards (Total vendido, Ticket promedio, Tasa conv., Devoluciones)
  *   - 1 chart semanal (Lun-Dom con valores en currency cents format)
  *
- * **MOCK DATA**: hardcoded. Pendiente migrar a fetch cuando se defina
- * endpoint `GET /api/v1/orders/kpis` + `GET /api/v1/orders/weekly`.
+ * **MOCK DATA con fallback**: server-side fetch via `Astro.fetch()` a
+ * `GET /api/v1/admin/metrics/sales/performance`. Si 404 / falla,
+ * fallback a MOCK data hardcoded. Mismo patron que RevenueOverviewCard.
  *
  * **Uso**: Dashboard admin + reports page.
- * **AGENTS.md §11**: MOCK data estático, no requiere loading/error.
  */
-const chartId = `sales-performance-${Math.random().toString(36).slice(2)}`;
+interface SalesMetric {
+  label: string;
+  value: string;
+  change: string;
+  trend: 'up' | 'down';
+}
 
-const metrics = [
+interface SalesPerformanceData {
+  metrics: SalesMetric[];
+  days: string[];
+  values: number[];
+}
+
+const MOCK_METRICS: SalesMetric[] = [
   { label: 'Total vendido', value: '$48,295', change: '+12.5%', trend: 'up' },
   { label: 'Ticket promedio', value: '$34.20', change: '+5.3%', trend: 'up' },
   { label: 'Tasa de conversión', value: '3.8%', change: '-0.4%', trend: 'down' },
   { label: 'Devoluciones', value: '2.1%', change: '-0.8%', trend: 'up' },
 ];
 
-const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-const values = [4200, 3800, 5100, 4600, 6200, 7800, 5400];
+const MOCK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const MOCK_VALUES = [4200, 3800, 5100, 4600, 6200, 7800, 5400];
+
+let metrics: SalesMetric[] = MOCK_METRICS;
+let days: string[] = MOCK_DAYS;
+let values: number[] = MOCK_VALUES;
+let dataSource: 'real' | 'mock' = 'mock';
+
+try {
+  const response = await Astro.fetch('/api/v1/admin/metrics/sales/performance', {
+    credentials: 'include',
+  });
+  if (response.ok) {
+    const payload = (await response.json()) as { data?: SalesPerformanceData };
+    if (payload?.data?.metrics && Array.isArray(payload.data.metrics) && payload.data.metrics.length > 0) {
+      metrics = payload.data.metrics;
+      days = payload.data.days;
+      values = payload.data.values;
+      dataSource = 'real';
+    }
+  }
+} catch {
+  // Fallback silencioso a MOCK data
+}
+
+const chartId = `sales-performance-${Math.random().toString(36).slice(2)}`;
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
