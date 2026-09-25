@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Admin\Metrics;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -14,27 +15,22 @@ use Illuminate\Support\Facades\DB;
  * Alimenta SalesPerformanceCard (frontend/src/components/admin/
  * reports/SalesPerformanceCard.astro).
  *
- * **Hibrido**: KPIs son queries reales (SUM/COUNT desde orders).
- * Weekly trend chart es MOCK data — implementar requiere agregacion
- * diaria de orders y series temporales, fuera de scope aqui. El
- * frontend hace fallback a MOCK cuando la respuesta viene vacia.
+ * KPIs (queries reales del periodo "mes actual vs mes anterior"):
+ *   - total_sold: SUM total_cents este mes
+ *   - avg_ticket: AVG total_cents este mes (proximo a ticket promedio)
+ *   - conversion_rate: ratio orders completados / total orders del tenant
+ *   - returns_rate: ratio orders cancelled / total
+ *
+ * Weekly trend chart: SUM(total_cents) GROUP BY day-of-week (Lun-Dom)
+ * sobre los ultimos 7 dias. Query real con EXTRACT(DOW FROM ...) en
+ * PostgreSQL. Si no hay orders en un dia, valor 0.
  *
  * Tenant scoping via middleware store.domain.
  */
 class SalesPerformanceController extends Controller
 {
     /**
-     * Devuelve 4 KPIs derivados de orders + weekly chart data.
-     *
-     * KPIs (queries reales del periodo "mes actual vs mes anterior"):
-     *   - total_sold: SUM total_cents este mes
-     *   - avg_ticket: AVG total_cents este mes (proximo a ticket promedio)
-     *   - orders_count: COUNT este mes
-     *   - returns_rate: COUNT cancelled / COUNT total (porcentaje)
-     *
-     * Weekly chart: shape consistente con frontend mock pero con
-     * placeholder data (mejor implementar serie temporal real en sesion
-     * futura cuando el schema soporte esto).
+     * Devuelve 4 KPIs + 7 valores de tendencia semanal.
      *
      * @return JsonResponse { data: { metrics[], days[], values[] } }
      */
@@ -42,6 +38,7 @@ class SalesPerformanceController extends Controller
     {
         $now = now();
         $monthStart = $now->copy()->startOfMonth();
+        $weekStart = $now->copy()->subDays(value: 6)->startOfDay();
 
         $totals = DB::table('orders')
             ->selectRaw("
@@ -69,7 +66,11 @@ class SalesPerformanceController extends Controller
         }
 
         $returnsRate = $totals->orders_count > 0
-            ? round(value: ($totals->cancelled_count / $totals->orders_count) * 100, decimals: 1)
+            ? round(num: ($totals->cancelled_count / $totals->orders_count) * 100, precision: 1)
+            : 0.0;
+
+        $conversionRate = $totals->orders_count > 0
+            ? round(num: ($totals->completed_count / $totals->orders_count) * 100, precision: 1)
             : 0.0;
 
         $metrics = [
@@ -87,7 +88,7 @@ class SalesPerformanceController extends Controller
             ],
             [
                 'label' => 'Tasa de conversión',
-                'value' => '0%',
+                'value' => $conversionRate.'%',
                 'change' => '+0%',
                 'trend' => 'up',
             ],
@@ -99,14 +100,33 @@ class SalesPerformanceController extends Controller
             ],
         ];
 
-        // Weekly mock data (mantiene shape compatible con frontend).
-        // Series temporales reales requieren agregacion diaria — fuera
-        // de scope. Ver comments en TRAFFIC/customer versions.
+        // Weekly trend: SUM(total_cents) por dia de la semana, ultimos 7 dias.
+        // PostgreSQL: EXTRACT(DOW FROM ...) returns 0=Sun, 1=Mon, ..., 6=Sat.
+        // Mapeamos a indices Lun-Dom (0-6).
+        $weekly = DB::table('orders')
+            ->selectRaw('
+                EXTRACT(DOW FROM ordered_at)::int as dow,
+                COALESCE(SUM(total_cents), 0)::bigint as total
+            ')
+            ->where('ordered_at', '>=', $weekStart)
+            ->groupBy('dow')
+            ->get();
+
+        // Inicializar los 7 dias (Lun-Dom) con 0, luego aplicar resultados.
+        // dow de postgres: 0=Sun, 1=Mon, ..., 6=Sat.
+        // Array Mon-first: [Mon(1), Tue(2), Wed(3), Thu(4), Fri(5), Sat(6), Sun(0)]
+        $values = [0, 0, 0, 0, 0, 0, 0];
+        foreach ($weekly as $row) {
+            $dow = (int) $row->dow;
+            $idx = $dow === 0 ? 6 : $dow - 1; // Sun->6, Mon->0, etc.
+            $values[$idx] = (int) ($row->total / 100); // cents -> currency
+        }
+
         return response()->json(data: [
             'data' => [
                 'metrics' => $metrics,
                 'days' => ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                'values' => [4200, 3800, 5100, 4600, 6200, 7800, 5400],
+                'values' => $values,
             ],
         ]);
     }
