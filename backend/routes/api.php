@@ -310,6 +310,25 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->middleware('store.domain')
             ->name('admin.orders.recent');
 
+        // Metrics endpoints — alimenta widgets del dashboard + reports.
+        // Cada uno: store.domain scope + controller query real (o stub
+        // estructurado si requiere external data).
+        Route::get('metrics/revenue/yearly', App\Http\Controllers\Api\Admin\Metrics\RevenueYearlyController::class)
+            ->middleware('store.domain')
+            ->name('admin.metrics.revenue.yearly');
+        Route::get('metrics/sales/performance', App\Http\Controllers\Api\Admin\Metrics\SalesPerformanceController::class)
+            ->middleware('store.domain')
+            ->name('admin.metrics.sales.performance');
+        Route::get('metrics/traffic/sources', App\Http\Controllers\Api\Admin\Metrics\TrafficSourcesController::class)
+            ->middleware('store.domain')
+            ->name('admin.metrics.traffic.sources');
+        Route::get('metrics/customers/segments', App\Http\Controllers\Api\Admin\Metrics\CustomerSegmentsController::class)
+            ->middleware('store.domain')
+            ->name('admin.metrics.customers.segments');
+        Route::get('inventory/low-stock', App\Http\Controllers\Api\Admin\Metrics\LowStockController::class)
+            ->middleware('store.domain')
+            ->name('admin.inventory.low_stock');
+
         Route::get('permissions', [RoleController::class, 'listPermissions'])
             ->middleware('permission:auth.permissions.manage')
             ->name('admin.permissions.index');
