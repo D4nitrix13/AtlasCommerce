@@ -1,10 +1,9 @@
 ---
 /**
  * RecentOrdersTable — Tabla de orders recientes en el dashboard admin.
- *
- * **Fuente de datos**: server-side fetch via `Astro.fetch()` a
- * `GET /api/v1/admin/orders/recent?limit=10`. Si el endpoint no existe
- * (404) o falla (otro status), fallback a MOCK data hardcoded.
+ * implementado en `Admin/RecentOrdersController.php` (commit 2ab7c45).
+ * Si el endpoint falla (5xx) o responde vacio, fallback a MOCK data
+ * para no romper el dashboard.
  *
  * AGENTS.md §11 (UI states) SI implementados con SSR:
  *   - Loading: no aplica (SSR bloquea hasta resolver)
