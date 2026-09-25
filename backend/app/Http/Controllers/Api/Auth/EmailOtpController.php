@@ -39,6 +39,25 @@ class EmailOtpController extends Controller
 
     private const CODE_LENGTH = 6;
 
+    /**
+     * Solicita un codigo OTP para login passwordless.
+     *
+     * Body esperado: { email }
+     *
+     * Comportamiento security-critical:
+     *   - **Anti-enumeracion**: misma respuesta si el email existe o no
+     *     ('si esta registrado, te enviamos un codigo'). NUNCA confirmar
+     *     existencia via diferenciacion de respuesta.
+     *   - **Rate limit**: 3 requests/minuto por email hasheado. Spam protection.
+     *   - **Codigo plain NUNCA persiste**: solo se guarda hash bcrypt
+     *     en OtpChallenge.code_hash. El email transporta el codigo visible.
+     *   - **TTL**: 10 minutos (TTL_MINUTES constant).
+     *
+     * Status codes:
+     *   - 200: codigo enviado (o no, por anti-enumeracion)
+     *   - 422: validacion fallo (FormRequest validation)
+     *   - 429: rate limit excedido
+     */
     public function request(EmailOtpRequestRequest $request): JsonResponse
     {
         $email = strtolower((string) $request->input('email'));
@@ -82,6 +101,29 @@ class EmailOtpController extends Controller
         ]);
     }
 
+    /**
+     * Verifica el codigo OTP y emite token Sanctum.
+     *
+     * Body esperado: { email, code }
+     *
+     * Logica de validacion (orden estricto):
+     *   1. Rate limit: 5 verifications/min por email hasheado
+     *   2. User existe? (rate-limit hit + 422 si no)
+     *   3. Challenge existe y no consumido? (rate-limit hit + 422)
+     *   4. Challenge usable? (no expirado, attempts < max) — si no, attempts++
+     *      y 422. attempts se incrementa ANTES de validar expires_at para
+     *      que un challenge expirado no da informacion via timing.
+     *   5. Hash::check($code, code_hash) — bcrypt comparison, constant time
+     *   6. Si MAX_ATTEMPTS (5) alcanzado -> consumir challenge + 422
+     *      (invalida el codigo para evitar brute force continuo)
+     *   7. OK -> marcar consumido + clear rate limit + emitir Sanctum token
+     *
+     * Status codes:
+     *   - 200: { token: '...plainTextToken' }
+     *   - 422: codigo invalido o expirado
+     *   - 429: rate limit excedido
+     *   - 403: cuenta desactivada (post-auth)
+     */
     public function verify(EmailOtpVerifyRequest $request): JsonResponse
     {
         $email = strtolower((string) $request->input('email'));
