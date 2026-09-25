@@ -1,4 +1,23 @@
 ---
+/**
+ * AdminLayout — Shell visual completo del panel administrativo.
+ *
+ * Usado en TODAS las paginas /admin/* (dashboard, customers, sales,
+ * shipping, settings, reports, returns — 7+ paginas).
+ *
+ * Composición:
+ *   - <AuthGuard> (envuelve el slot): valida Sanctum auth + redirect a /auth/login
+ *   - <AdminSidebar> (izquierda): menu colapsable con 8 categorias, 24 items
+ *   - <AdminHeader> (top): sticky header con search + user menu + sidebar toggle
+ *   - <slot /> (contenido principal): la pagina especifica renderiza aca
+ *
+ * Multi-tenancy:
+ *   - El tenant se resuelve via middleware backend (store.domain), no aca
+ *   - Favicon per-tenant si esta disponible en $store->favicon_path
+ *
+ * **AGENTS.md §16**: layout/shell — siempre via este componente para
+ * consistencia visual. NO usar <body> directamente en paginas admin.
+ */
 import '../styles/global.css';
 import AdminSidebar from '../components/admin/sidebar/AdminSidebar.astro';
 import AdminHeader from '../components/admin/header/AdminHeader.astro';

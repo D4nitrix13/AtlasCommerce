@@ -1,4 +1,22 @@
 ---
+/**
+ * AuthLayout — Shell visual para TODAS las pantallas de autenticacion.
+ *
+ * Usado en paginas de auth (login, signup, forgot-password,
+ * reset-password, 2fa challenge, 2fa setup, 2fa recovery — 7 paginas).
+ *
+ * Composición:
+ *   - Lado izquierdo: tagline + ilustracion (desktop only)
+ *   - Lado derecho: <slot /> con el form (login form, signup form, etc)
+ *   - En mobile, el layout se apila (ilustracion oculta)
+ *
+ * Multi-tenancy:
+ *   - Tenant via `Astro.props.store` (resuelto por middleware store.domain)
+ *   - Favicon per-tenant desde public/favicon-{slug}.ico
+ *   - Brand color aplica a:focus-visible + submit button
+ *
+ * **AGENTS.md §16**: shell — siempre via este layout para /auth/* y /admin/auth/*.
+ */
 import '../styles/global.css';
 
 interface Props {
