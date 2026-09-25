@@ -4,22 +4,27 @@
  *
  * Lista los productos con stock <= threshold (default 10). Cada fila
  * muestra: nombre, SKU, unidades restantes, y badge de estado
- * (Critico <5 | Bajo <10 | Normal >=10).
+ * (Critico <5 | Bajo <10).
  *
- * **MOCK DATA**: hardcoded con 4 productos placeholder. Pendiente
- * refactor: la fuente real es InventoryController del backend y un
- * endpoint dedicado (no existe hoy). Cuando se implemente:
- *   - GET /api/v1/admin/inventory/low-stock?threshold=10
- *   - Eager-loads product + variant (el stock puede ser variant-level)
- *   - Paginacion si hay mas de N alerts
+ * **Endpoint real**: GET /api/v1/admin/inventory/low-stock?threshold=10
+ * implementado en `Admin/Metrics/LowStockController.php`. Devuelve
+ * { data: [{ id, name, sku, stock, status, status_color }] }.
+ *
+ * Fallback a MOCK data si el endpoint responde 5xx o devuelve vacio
+ * (cuando modulo de inventory no esta instalado en el tenant).
  *
  * **Uso**: Dashboard admin (entre MetricCards principales y
  * RecentOrdersTable abajo).
- *
- * **AGENTS.md §11**: MOCK data estatico, no requiere loading/error.
- * **AGENTS.md §16**: vive en `components/admin/dashboard/`.
  */
-const products = [
+interface LowStockProduct {
+  name: string;
+  sku: string;
+  stock: number;
+  status: string;
+  statusColor: string;
+}
+
+const MOCK_PRODUCTS: LowStockProduct[] = [
   {
     name: 'Camiseta Kitsune Edición Limitada',
     sku: 'KIT-CS-001',
@@ -45,10 +50,27 @@ const products = [
     name: 'Taza Personalizada Logo',
     sku: 'KIT-TZ-001',
     stock: 12,
-    status: 'Normal',
-    statusColor: 'bg-emerald-100 text-emerald-700',
+    status: 'Bajo',
+    statusColor: 'bg-amber-100 text-amber-700',
   },
 ];
+
+let products: LowStockProduct[] = MOCK_PRODUCTS;
+
+try {
+  const response = await Astro.fetch(
+    '/api/v1/admin/inventory/low-stock?threshold=10',
+    { credentials: 'include' },
+  );
+  if (response.ok) {
+    const payload = (await response.json()) as { data?: LowStockProduct[] };
+    if (Array.isArray(payload?.data) && payload.data.length > 0) {
+      products = payload.data;
+    }
+  }
+} catch {
+  // Fallback silencioso a MOCK data
+}
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b28c95e94d467c58d814171450b8a050",
+    "content-hash": "dc4eb4759616179edc7823ba246cc096",
     "packages": [
         {
             "name": "brick/math",
@@ -218,7 +218,7 @@
         },
         {
             "name": "d4nitrix13/atlas-commerce-plugin-erp",
-            "version": "dev-main",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "packages/atlas-commerce-plugin-erp",

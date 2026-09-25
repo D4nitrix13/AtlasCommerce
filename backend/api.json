@@ -2776,9 +2776,251 @@
                 }
             }
         },
+        "/v1/admin/metrics/customers/segments": {
+            "get": {
+                "operationId": "admin.metrics.customers.segments",
+                "summary": "Devuelve stats agregados + segmentation breakdown",
+                "tags": [
+                    "CustomerSegments"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "stats": {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Total clientes"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "const": "up"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Nuevos este mes"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "const": "up"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Tasa de retorno"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "const": "up"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Clientes activos"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "const": "up"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "minItems": 4,
+                                                    "maxItems": 4
+                                                },
+                                                "segments": {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Compradores frecuentes"
+                                                                },
+                                                                "value": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "color": {
+                                                                    "type": "string",
+                                                                    "const": "#059669"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "color"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Ocasionales"
+                                                                },
+                                                                "value": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "color": {
+                                                                    "type": "string",
+                                                                    "const": "#0ea5e9"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "color"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Nuevos"
+                                                                },
+                                                                "value": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "color": {
+                                                                    "type": "string",
+                                                                    "const": "#8b5cf6"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "color"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Inactivos"
+                                                                },
+                                                                "value": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "color": {
+                                                                    "type": "string",
+                                                                    "const": "#94a3b8"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "color"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "minItems": 4,
+                                                    "maxItems": 4
+                                                }
+                                            },
+                                            "required": [
+                                                "stats",
+                                                "segments"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/auth/login/email-otp/request": {
             "post": {
                 "operationId": "auth.login.email-otp.request",
+                "description": "Body esperado: { email }\n\nComportamiento security-critical:\n  - **Anti-enumeracion**: misma respuesta si el email existe o no\n    ('si esta registrado, te enviamos un codigo'). NUNCA confirmar\n    existencia via diferenciacion de respuesta.\n  - **Rate limit**: 3 requests/minuto por email hasheado. Spam protection.\n  - **Codigo plain NUNCA persiste**: solo se guarda hash bcrypt\n    en OtpChallenge.code_hash. El email transporta el codigo visible.\n  - **TTL**: 10 minutos (TTL_MINUTES constant).\n\nStatus codes:\n  - 200: codigo enviado (o no, por anti-enumeracion)\n  - 422: validacion fallo (FormRequest validation)\n  - 429: rate limit excedido",
+                "summary": "Solicita un codigo OTP para login passwordless",
                 "tags": [
                     "EmailOtp"
                 ],
@@ -2845,6 +3087,8 @@
         "/v1/auth/login/email-otp/verify": {
             "post": {
                 "operationId": "auth.login.email-otp.verify",
+                "description": "Body esperado: { email, code }\n\nLogica de validacion (orden estricto):\n  1. Rate limit: 5 verifications/min por email hasheado\n  2. User existe? (rate-limit hit + 422 si no)\n  3. Challenge existe y no consumido? (rate-limit hit + 422)\n  4. Challenge usable? (no expirado, attempts < max) \u2014 si no, attempts++\n     y 422. attempts se incrementa ANTES de validar expires_at para\n     que un challenge expirado no da informacion via timing.\n  5. Hash::check($code, code_hash) \u2014 bcrypt comparison, constant time\n  6. Si MAX_ATTEMPTS (5) alcanzado -> consumir challenge + 422\n     (invalida el codigo para evitar brute force continuo)\n  7. OK -> marcar consumido + clear rate limit + emitir Sanctum token\n\nStatus codes:\n  - 200: { token: '...plainTextToken' }\n  - 422: codigo invalido o expirado\n  - 429: rate limit excedido\n  - 403: cuenta desactivada (post-auth)",
+                "summary": "Verifica el codigo OTP y emite token Sanctum",
                 "tags": [
                     "EmailOtp"
                 ],
@@ -2954,6 +3198,98 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/v1/admin/inventory/low-stock": {
+            "get": {
+                "operationId": "admin.inventory.low_stock",
+                "description": "Importante: usa Schema::hasTable() ANTES de ejecutar query \u2014\nsi la query falla sobre una tabla inexistente Postgres deja la\ntransaccion en estado aborted (SQLSTATE 25P02), rompiendo\nqueries subsecuentes dentro del mismo transaction.",
+                "summary": "Lista de productos con stock total <= threshold (default 10)",
+                "tags": [
+                    "LowStock"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "sku": {
+                                                                "type": "string"
+                                                            },
+                                                            "stock": {
+                                                                "type": "integer"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "Cr\u00edtico",
+                                                                    "Bajo"
+                                                                ]
+                                                            },
+                                                            "status_color": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "bg-rose-100 text-rose-700",
+                                                                    "bg-amber-100 text-amber-700"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "sku",
+                                                            "stock",
+                                                            "status",
+                                                            "status_color"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "minItems": 0,
+                                                    "maxItems": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -6281,6 +6617,79 @@
                 }
             }
         },
+        "/v1/admin/orders/recent": {
+            "get": {
+                "operationId": "admin.orders.recent",
+                "tags": [
+                    "RecentOrders"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "order_number": {
+                                                        "type": "string"
+                                                    },
+                                                    "customer_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "product_summary": {
+                                                        "type": "string"
+                                                    },
+                                                    "status_label": {
+                                                        "type": "string"
+                                                    },
+                                                    "status_color": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "bg-amber-100 text-amber-700",
+                                                            "bg-sky-100 text-sky-700",
+                                                            "bg-emerald-100 text-emerald-700",
+                                                            "bg-violet-100 text-violet-700",
+                                                            "bg-slate-100 text-slate-700"
+                                                        ]
+                                                    },
+                                                    "amount_label": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "order_number",
+                                                    "customer_name",
+                                                    "product_summary",
+                                                    "status_label",
+                                                    "status_color",
+                                                    "amount_label"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/auth/recovery-codes": {
             "get": {
                 "operationId": "auth.recovery-codes.index",
@@ -6381,6 +6790,8 @@
         "/v1/refunds/{refund}/process": {
             "post": {
                 "operationId": "refunds.process",
+                "description": "**Operacion IRREVERSIBLE**: dispara efectos secundarios\ntransaccionales:\n  - Revertir stock de los items del return request asociado\n  - Impacto en invoice (mark invoice line como refunded)\n  - Si payment method tiene webhook \u2192 notificar al gateway\n\nCaptura `InvalidRefundTransitionException` (estado invalido) y\n`RuntimeException` (error del gateway de pago) -> 422 con msg.\n\nStatus codes:\n  - 200: refund procesado, invoice + stock revertidos\n  - 422: transicion invalida (ya completado/failed) o error de pago\n  - 404: refund no existe (route model binding)",
+                "summary": "Procesa un refund pending \u2192 completed",
                 "tags": [
                     "Refund"
                 ],
@@ -6456,6 +6867,8 @@
         "/v1/refunds/{refund}/fail": {
             "post": {
                 "operationId": "refunds.fail",
+                "description": "Diferencia clave con `process()`: NO dispara efectos secundarios\nen inventario/invoice. Solo cambia el estado a `failed` para\nauditor\u00eda. Usado cuando el gateway de pago rechaza (timeout,\ninvalid credentials, fraud detection).\n\nStatus codes:\n  - 200: refund marcado como failed\n  - 422: transicion invalida (ya completado/failed)\n  - 404: refund no existe",
+                "summary": "Marca un refund pending \u2192 failed (sin revertir stock)",
                 "tags": [
                     "Refund"
                 ],
@@ -6693,6 +7106,8 @@
             },
             "post": {
                 "operationId": "refunds.store",
+                "description": "Body esperado:\n  - return_request_id (int, required): return request aprobable\n  - amount_cents (int, min:1): monto a reembolsar en cents\n  - payment_method_id (int, opcional): metodo via el cual procesar\n\nStatus codes:\n  - 201: refund creado\n  - 422: validacion fallo (FormRequest-style inline) o monto invalido",
+                "summary": "Crea un refund en estado `pending` (sin procesar)",
                 "tags": [
                     "Refund"
                 ],
@@ -7649,6 +8064,115 @@
                 }
             }
         },
+        "/v1/admin/metrics/revenue/yearly": {
+            "get": {
+                "operationId": "admin.metrics.revenue.yearly",
+                "description": "Query: SUM(total_cents) por mes, dos a\u00f1os consecutivos (current y previous),\nsolo orders con status in (pending, processing, completed) \u2014 `cancelled`\nse excluye porque no son revenue real.\n\nSi el tenant no tiene orders, devuelve shape vacio (months con 0s).",
+                "summary": "Devuelve revenue mensual del a\u00f1o actual y anterior comparados",
+                "tags": [
+                    "RevenueYearly"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "year": {
+                                                    "type": "integer"
+                                                },
+                                                "previous_year": {
+                                                    "type": "integer"
+                                                },
+                                                "labels": {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Ene"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Feb"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Mar"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Abr"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "May"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Jun"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Jul"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Ago"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Sep"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Oct"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Nov"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Dic"
+                                                        }
+                                                    ],
+                                                    "minItems": 12,
+                                                    "maxItems": 12
+                                                },
+                                                "current_year_values": {
+                                                    "type": "string"
+                                                },
+                                                "previous_year_values": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "year",
+                                                "previous_year",
+                                                "labels",
+                                                "current_year_values",
+                                                "previous_year_values"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/admin/permissions": {
             "get": {
                 "operationId": "admin.permissions.index",
@@ -8010,6 +8534,231 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/v1/admin/metrics/sales/performance": {
+            "get": {
+                "operationId": "admin.metrics.sales.performance",
+                "description": "KPIs (queries reales del periodo \"mes actual vs mes anterior\"):\n  - total_sold: SUM total_cents este mes\n  - avg_ticket: AVG total_cents este mes (proximo a ticket promedio)\n  - orders_count: COUNT este mes\n  - returns_rate: COUNT cancelled / COUNT total (porcentaje)\n\nWeekly chart: shape consistente con frontend mock pero con\nplaceholder data (mejor implementar serie temporal real en sesion\nfutura cuando el schema soporte esto).",
+                "summary": "Devuelve 4 KPIs derivados de orders + weekly chart data",
+                "tags": [
+                    "SalesPerformance"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "metrics": {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Total vendido"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "const": "up"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Ticket promedio"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "const": "up"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Tasa de conversi\u00f3n"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string",
+                                                                    "const": "0%"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "const": "up"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "label": {
+                                                                    "type": "string",
+                                                                    "const": "Devoluciones"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "change": {
+                                                                    "type": "string",
+                                                                    "const": "+0%"
+                                                                },
+                                                                "trend": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "down",
+                                                                        "up"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "label",
+                                                                "value",
+                                                                "change",
+                                                                "trend"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "minItems": 4,
+                                                    "maxItems": 4
+                                                },
+                                                "days": {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Lun"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Mar"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Mi\u00e9"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Jue"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Vie"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "S\u00e1b"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "const": "Dom"
+                                                        }
+                                                    ],
+                                                    "minItems": 7,
+                                                    "maxItems": 7
+                                                },
+                                                "values": {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 4200
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 3800
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 5100
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 4600
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 6200
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 7800
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 5400
+                                                        }
+                                                    ],
+                                                    "minItems": 7,
+                                                    "maxItems": 7
+                                                }
+                                            },
+                                            "required": [
+                                                "metrics",
+                                                "days",
+                                                "values"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -9956,6 +10705,79 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/v1/admin/metrics/traffic/sources": {
+            "get": {
+                "operationId": "admin.metrics.traffic.sources",
+                "description": "El frontend (TrafficOverviewCard, TrafficSourcesCard) detecta\nlista vacia y hace fallback a MOCK data hardcoded.",
+                "summary": "Devuelve shape vacio con la estructura esperada",
+                "tags": [
+                    "TrafficSources"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "sources": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "minItems": 0,
+                                                    "maxItems": 0
+                                                },
+                                                "top_pages": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "minItems": 0,
+                                                    "maxItems": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "sources",
+                                                "top_pages"
+                                            ]
+                                        },
+                                        "_meta": {
+                                            "type": "object",
+                                            "description": "Flag explicito para debugging \u2014 frontend no usa este campo",
+                                            "properties": {
+                                                "stub": {
+                                                    "type": "boolean"
+                                                },
+                                                "reason": {
+                                                    "type": "string",
+                                                    "const": "Traffic tracking not integrated yet. See Plausible/GA4/Matomo PR backlog."
+                                                }
+                                            },
+                                            "required": [
+                                                "stub",
+                                                "reason"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "_meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
