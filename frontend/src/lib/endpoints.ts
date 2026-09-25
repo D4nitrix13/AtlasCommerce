@@ -1,3 +1,22 @@
+/**
+ * Endpoints registry — single source of truth para TODAS las URLs del backend.
+ *
+ * Cubre 4 grupos de rutas:
+ *   - /v1/storefront/* — paginas publicas del cliente (home, product, cart, auth)
+ *   - /v1/auth/* — login, logout, me, register, password reset (customer-scoped)
+ *   - /v1/account/* — customer logueado (orders, addresses, returns, questions)
+ *   - /v1/admin/* — panel administrativo (orders, products, customers, returns, themes, metrics)
+ *
+ * **Por que es central**: si una URL cambia en backend (version bump, refactor),
+ * solo hay que tocar este archivo. Cada componente importa el path desde aca,
+ * nunca usa strings hardcoded en sus fetch calls.
+ *
+ * Ejemplo de uso:
+ * ```ts
+ * import { API_ENDPOINTS } from '../lib/endpoints';
+ * const response = await fetch(API_ENDPOINTS.admin.orders.recent);
+ * ```
+ */
 export const API_ENDPOINTS = {
   auth: {
     login: '/v1/auth/login',

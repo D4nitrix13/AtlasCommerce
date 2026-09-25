@@ -1,12 +1,44 @@
 ---
+/**
+ * MetricCard — Card individual de metric para dashboard + reports.
+ *
+ * Usado en /admin/dashboard (4 cards principales: Ventas, Visitas, etc)
+ * y en /admin/reports (cards secundarios). 8+ instancias en el repo.
+ *
+ * Variantes por `accent`: emerald (default) | sky | amber | rose.
+ * La accent mapea a color Tailwind del icon background (left circle).
+ *
+ * Variantes por `trend`: 'up' (verde, flecha ↗) | 'down' (rose, flecha ↘).
+ *
+ * **AGENTS.md §12** (validar datos): usar `?? 0` o `?? ''` para evitar
+ * renders rotos cuando falta data.
+ *
+ * Ejemplo:
+ * ```astro
+ * <MetricCard
+ *   title="Ventas"
+ *   value="$2,540"
+ *   change="+12%"
+ *   trend="up"
+ *   icon="chart-bar"
+ *   accent="emerald"
+ * />
+ * ```
+ */
 import Icon from '../../ui/Icon.astro';
 
 interface Props {
+  /** Label descriptivo de la metrica (visible en H3) */
   title: string;
+  /** Valor destacado formateado por caller (ej: '$2,540', '18,420') */
   value: string;
+  /** Delta vs periodo anterior (ej: '+12%', '-5%') */
   change: string;
+  /** Direccion del cambio — afecta color y flecha */
   trend?: 'up' | 'down';
+  /** Nombre del icono lucide */
   icon?: string;
+  /** Color de acento del icon background */
   accent?: 'emerald' | 'sky' | 'amber' | 'rose';
 }
 
