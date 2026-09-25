@@ -27,3 +27,4 @@ test-results/
 # Test artifacts
 /playwright-report/
 /playwright/.cache/
+storybook-static/
