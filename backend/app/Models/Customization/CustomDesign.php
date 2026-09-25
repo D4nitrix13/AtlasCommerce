@@ -78,21 +78,47 @@ class CustomDesign extends Model
         return $this->hasMany(OrderCustomDesign::class);
     }
 
+    /**
+     * Filtrar designs con status `draft` (cliente lo está editando, no listo).
+     *
+     * @param  Builder<CustomDesign>  $query
+     * @return Builder<CustomDesign>
+     */
     public function scopeDraft(Builder $query): Builder
     {
         return $query->where('status', 'draft');
     }
 
+    /**
+     * Filtrar designs con status `ready` (cliente lo subió, listo para producción).
+     *
+     * @param  Builder<CustomDesign>  $query
+     * @return Builder<CustomDesign>
+     */
     public function scopeReady(Builder $query): Builder
     {
         return $query->where('status', 'ready');
     }
 
+    /**
+     * Filtrar designs por FK `customer_id`.
+     *
+     * @param  Builder<CustomDesign>  $query
+     * @param  int  $customerId  ID del customer
+     * @return Builder<CustomDesign>
+     */
     public function scopeForCustomer(Builder $query, int $customerId): Builder
     {
         return $query->where('customer_id', $customerId);
     }
 
+    /**
+     * Filtrar designs por FK `product_id`.
+     *
+     * @param  Builder<CustomDesign>  $query
+     * @param  int  $productId  ID del product base
+     * @return Builder<CustomDesign>
+     */
     public function scopeForProduct(Builder $query, int $productId): Builder
     {
         return $query->where('product_id', $productId);
