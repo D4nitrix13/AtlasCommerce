@@ -19,9 +19,10 @@
     ],
     "require": {
         "php": "^8.4",
-        "d4nitrix13/atlas-commerce-plugin-erp": "dev-master",
+        "d4nitrix13/atlas-commerce-plugin-erp": "dev-main",
         "dedoc/scramble": "^0.13.45",
         "laravel/framework": "^13.8",
+        "laravel/passkeys": "^0.2.1",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.0",
         "laravel/tinker": "^3.0",
