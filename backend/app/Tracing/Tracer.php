@@ -100,6 +100,14 @@ final class Tracer
         }
     }
 
+    /**
+     * Getter del provider subyacente (usado por /metrics endpoint).
+     *
+     * **Cuidado**: NO exponer el provider fuera de Tracing\ namespace
+     * — romperia el encapsulamiento. Tests internos OK.
+     *
+     * @return TracerProviderInterface El provider activo (noop/memory/otlp).
+     */
     public function provider(): TracerProviderInterface
     {
         return $this->provider;

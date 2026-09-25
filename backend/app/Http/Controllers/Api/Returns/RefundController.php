@@ -51,6 +51,18 @@ class RefundController extends Controller
         ))->response();
     }
 
+    /**
+     * Crea un refund en estado `pending` (sin procesar).
+     *
+     * Body esperado:
+     *   - return_request_id (int, required): return request aprobable
+     *   - amount_cents (int, min:1): monto a reembolsar en cents
+     *   - payment_method_id (int, opcional): metodo via el cual procesar
+     *
+     * Status codes:
+     *   - 201: refund creado
+     *   - 422: validacion fallo (FormRequest-style inline) o monto invalido
+     */
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make(data: $request->all(), rules: [
@@ -83,6 +95,23 @@ class RefundController extends Controller
         ))->response()->setStatusCode(201);
     }
 
+    /**
+     * Procesa un refund pending → completed.
+     *
+     * **Operacion IRREVERSIBLE**: dispara efectos secundarios
+     * transaccionales:
+     *   - Revertir stock de los items del return request asociado
+     *   - Impacto en invoice (mark invoice line como refunded)
+     *   - Si payment method tiene webhook → notificar al gateway
+     *
+     * Captura `InvalidRefundTransitionException` (estado invalido) y
+     * `RuntimeException` (error del gateway de pago) -> 422 con msg.
+     *
+     * Status codes:
+     *   - 200: refund procesado, invoice + stock revertidos
+     *   - 422: transicion invalida (ya completado/failed) o error de pago
+     *   - 404: refund no existe (route model binding)
+     */
     public function process(Refund $refund): JsonResponse
     {
         try {
@@ -96,6 +125,19 @@ class RefundController extends Controller
         ))->response();
     }
 
+    /**
+     * Marca un refund pending → failed (sin revertir stock).
+     *
+     * Diferencia clave con `process()`: NO dispara efectos secundarios
+     * en inventario/invoice. Solo cambia el estado a `failed` para
+     * auditoría. Usado cuando el gateway de pago rechaza (timeout,
+     * invalid credentials, fraud detection).
+     *
+     * Status codes:
+     *   - 200: refund marcado como failed
+     *   - 422: transicion invalida (ya completado/failed)
+     *   - 404: refund no existe
+     */
     public function fail(Refund $refund): JsonResponse
     {
         try {
