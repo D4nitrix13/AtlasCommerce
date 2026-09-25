@@ -180,5 +180,15 @@ return [
      *     ],
      * ],
      */
-    'security_strategy' => null,
+    // 'security_strategy' => \Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy::class,
+    //
+    // Workaround: el default MiddlewareAuthSecurityStrategy de Scramble
+    // no detecta correctamente `auth:sanctum` (devuelve securitySchemes
+    // count=0). Usamos un replacement custom en
+    // App\Scramble\SanctumBearerAuthSecurityStrategy que sí matchea
+    // el middleware real.
+    //
+    // Si Scramble arregla el upstream, restaurar:
+    //   'security_strategy' => \Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy::class
+    'security_strategy' => \App\Scramble\SanctumBearerAuthSecurityStrategy::class,
 ];
