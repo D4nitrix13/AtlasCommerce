@@ -44,6 +44,20 @@ RUN /usr/local/bin/pecl install redis xdebug \
 # Composer.
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Pre-crear directorios temp con sticky bit (1777) que composer/PHP/curl
+# necesitan para escribir cuando composer require corre desde el container
+# con un UID no-root (e.g. HOST_UID=1000 via docker-compose user: override).
+# Sin esto, scripts artisan fallan con "permission denied" en /tmp.
+# Sticky bit permite que cualquier UID escriba pero solo borre lo propio.
+RUN /bin/mkdir -p \
+    /tmp/composer-cache-1000 \
+    /tmp/composer-tmp-1000 \
+    /tmp/laravel \
+  && /bin/chmod 1777 \
+    /tmp/composer-cache-1000 \
+    /tmp/composer-tmp-1000 \
+    /tmp/laravel
+
 WORKDIR /var/www/html
 
 # Configuración PHP: dev (errores visibles + xdebug) + opcache off.
