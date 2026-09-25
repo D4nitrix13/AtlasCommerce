@@ -6,26 +6,61 @@
  * entre el año actual y el anterior, mes por mes, con overlay de
  * 2 lineas (current vs previous year).
  *
- * **MOCK DATA**: los arrays `currentYear` y `previousYear` están
- * hardcoded con valores demo. NO conectado al backend todavía —
- * pendiente para sesión futura migrar a fetch real via
- * `frontend/src/lib/api.ts` (endpoint esperado: `GET /api/v1/orders/revenue/yearly`).
+ * **MOCK DATA con fallback**: server-side fetch via `Astro.fetch()`
+ * a `GET /api/v1/admin/metrics/revenue/yearly`. Si el endpoint no
+ * existe (404 esperado) o falla, fallback a MOCK data hardcoded.
+ * Mismo patron que `RecentOrdersTable` (commit b529d17).
  *
  * **Uso**: Lives en `pages/[locale]/admin/dashboard.astro` (top section)
  * + `pages/[locale]/admin/reports.astro` (junto con los otros 3 widget cards).
  *
  * **AGENTS.md §16**: vive en `components/admin/reports/`.
- * **AGENTS.md §11**: NO implementa loading/error porque es MOCK data estático.
  */
-const chartId = `revenue-overview-${Math.random().toString(36).slice(2)}`;
+interface RevenueYearData {
+  year: number;
+  previous_year: number;
+  labels: string[];
+  current_year_values: number[];
+  previous_year_values: number[];
+}
 
-const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-const currentYear = [
+const MOCK_CURRENT_YEAR = [
   18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 40000, 45000, 48000,
 ];
-const previousYear = [
+const MOCK_PREVIOUS_YEAR = [
   15000, 18000, 17000, 22000, 25000, 24000, 28000, 30000, 34000, 32000, 36000, 38000,
 ];
+
+const MOCK_MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+let months: string[] = MOCK_MONTHS;
+let currentYear: number[] = MOCK_CURRENT_YEAR;
+let previousYear: number[] = MOCK_PREVIOUS_YEAR;
+let currentYearLabel: number = new Date().getFullYear();
+let previousYearLabel: number = currentYearLabel - 1;
+let dataSource: 'real' | 'mock' = 'mock';
+
+try {
+  const response = await Astro.fetch('/api/v1/admin/metrics/revenue/yearly', {
+    credentials: 'include',
+  });
+  if (response.ok) {
+    const payload = (await response.json()) as { data?: RevenueYearData };
+    if (payload?.data && Array.isArray(payload.data.labels) && payload.data.labels.length > 0) {
+      months = payload.data.labels;
+      currentYear = payload.data.current_year_values;
+      previousYear = payload.data.previous_year_values;
+      currentYearLabel = payload.data.year;
+      previousYearLabel = payload.data.previous_year;
+      dataSource = 'real';
+    }
+  }
+} catch (err) {
+  // Fallback silencioso a MOCK data - console.warn en SSR solo cuando se
+  // necesita visibilidad (mismo pattern que RecentOrdersTable).
+}
+
+const chartId = `revenue-overview-${Math.random().toString(36).slice(2)}`;
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -38,11 +73,11 @@ const previousYear = [
     <div class="flex items-center gap-4 text-sm">
       <div class="flex items-center gap-2">
         <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-        <span class="text-slate-500">2026</span>
+        <span class="text-slate-500">{currentYearLabel}</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="h-2.5 w-2.5 rounded-full bg-slate-300"></span>
-        <span class="text-slate-500">2025</span>
+        <span class="text-slate-500">{previousYearLabel}</span>
       </div>
     </div>
   </div>

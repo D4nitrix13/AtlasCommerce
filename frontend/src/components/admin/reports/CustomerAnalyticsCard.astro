@@ -6,27 +6,61 @@
  *   - 4 KPI cards (Total clientes, Nuevos este mes, Tasa retorno, Activos)
  *   - Pie/donut chart de segments (Frecuentes, Ocasionales, Nuevos, Inactivos)
  *
- * **MOCK DATA**: hardcoded. Endpoint backend a definir —
- * sugerencia: `GET /api/v1/customers/segments?period=month`.
- *
- * **Uso**: Dashboard admin + reports page.
- * **AGENTS.md §11**: MOCK data estático, no requiere loading/error.
+ * **MOCK DATA con fallback**: fetch a
+ * `GET /api/v1/admin/metrics/customers/segments`. Fallback a MOCK data
+ * si 404 / falla.
  */
-const chartId = `customer-analytics-${Math.random().toString(36).slice(2)}`;
+interface CustomerStat {
+  label: string;
+  value: string;
+  change: string;
+  trend: 'up' | 'down';
+}
+interface CustomerSegment {
+  label: string;
+  value: number;
+  color: string;
+}
+interface CustomerData {
+  stats: CustomerStat[];
+  segments: CustomerSegment[];
+}
 
-const stats = [
+const MOCK_STATS: CustomerStat[] = [
   { label: 'Total clientes', value: '2,847', change: '+8.2%', trend: 'up' },
   { label: 'Nuevos este mes', value: '142', change: '+15.3%', trend: 'up' },
   { label: 'Tasa de retorno', value: '34.2%', change: '+2.1%', trend: 'up' },
   { label: 'Clientes activos', value: '1,892', change: '-1.4%', trend: 'down' },
 ];
 
-const segments = [
+const MOCK_SEGMENTS: CustomerSegment[] = [
   { label: 'Compradores frecuentes', value: 34, color: '#059669' },
   { label: 'Ocasionales', value: 28, color: '#0ea5e9' },
   { label: 'Nuevos', value: 22, color: '#8b5cf6' },
   { label: 'Inactivos', value: 16, color: '#94a3b8' },
 ];
+
+let stats: CustomerStat[] = MOCK_STATS;
+let segments: CustomerSegment[] = MOCK_SEGMENTS;
+let dataSource: 'real' | 'mock' = 'mock';
+
+try {
+  const response = await Astro.fetch('/api/v1/admin/metrics/customers/segments', {
+    credentials: 'include',
+  });
+  if (response.ok) {
+    const payload = (await response.json()) as { data?: CustomerData };
+    if (payload?.data?.stats && Array.isArray(payload.data.stats) && payload.data.stats.length > 0) {
+      stats = payload.data.stats;
+      segments = payload.data.segments;
+      dataSource = 'real';
+    }
+  }
+} catch {
+  // Fallback silencioso
+}
+
+const chartId = `customer-analytics-${Math.random().toString(36).slice(2)}`;
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
