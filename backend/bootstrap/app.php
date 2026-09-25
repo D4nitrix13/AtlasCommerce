@@ -12,6 +12,7 @@ use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetSessionDomainFromHost;
 use App\Http\Middleware\StoreMaintenanceMode;
 use App\Http\Middleware\ValidateStatefulCsrf;
+use App\Http\Middleware\ValidateStoreIdHeader;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -85,6 +86,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'store.domain' => ResolveStoreFromDomain::class,
+            'validate.store_id' => ValidateStoreIdHeader::class,
             'store.maintenance' => StoreMaintenanceMode::class,
             'permission' => CheckPermission::class,
             // CR2: alias de la middleware de Sanctum para uso futuro en
