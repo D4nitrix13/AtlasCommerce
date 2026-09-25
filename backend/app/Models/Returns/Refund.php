@@ -71,21 +71,51 @@ class Refund extends Model
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * Filtrar refunds con status `pending` (creado, no procesado aún).
+     *
+     * @param  Builder<Refund>  $query
+     * @return Builder<Refund>
+     */
     public function scopePending(Builder $query): Builder
     {
         return $query->where(column: 'status', operator: '=', value: RefundStatus::Pending->value);
     }
 
+    /**
+     * Filtrar refunds con status `completed` (procesado, stock revertido,
+     * invoice impactado). Ver RefundController::process() para el detalle
+     * operacional IRREVERSIBLE.
+     *
+     * @param  Builder<Refund>  $query
+     * @return Builder<Refund>
+     */
     public function scopeCompleted(Builder $query): Builder
     {
         return $query->where(column: 'status', operator: '=', value: RefundStatus::Completed->value);
     }
 
+    /**
+     * Filtrar refunds con status `failed` (gateway rechazo, sin reversion de stock).
+     *
+     * @param  Builder<Refund>  $query
+     * @return Builder<Refund>
+     */
     public function scopeFailed(Builder $query): Builder
     {
         return $query->where(column: 'status', operator: '=', value: RefundStatus::Failed->value);
     }
 
+    /**
+     * Filtrar refunds por FK `return_request_id`.
+     *
+     * Cardinalidad: 1:N entre return_request y refund (un return
+     * puede tener multiples refunds si reembolso parcial).
+     *
+     * @param  Builder<Refund>  $query
+     * @param  int  $returnRequestId
+     * @return Builder<Refund>
+     */
     public function scopeByReturnRequest(Builder $query, int $returnRequestId): Builder
     {
         return $query->where(column: 'return_request_id', operator: '=', value: $returnRequestId);

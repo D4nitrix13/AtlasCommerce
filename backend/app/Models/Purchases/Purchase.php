@@ -78,21 +78,46 @@ class Purchase extends Model
         return $this->hasMany(PurchaseItem::class);
     }
 
+    /**
+     * Filtrar purchases con status `pending` (orden creada, productos no recibidos).
+     *
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
     public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
 
+    /**
+     * Filtrar purchases con status `received` (mercancia fisica recibida del proveedor).
+     *
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
     public function scopeReceived(Builder $query): Builder
     {
         return $query->where('status', 'received');
     }
 
+    /**
+     * Filtrar purchases con status `cancelled` (orden cancelada antes o despues de recibir).
+     *
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
     public function scopeCancelled(Builder $query): Builder
     {
         return $query->where('status', 'cancelled');
     }
 
+    /**
+     * Filtrar purchases por FK `supplier_id`.
+     *
+     * @param  Builder<Purchase>  $query
+     * @param  int  $supplierId  ID del supplier
+     * @return Builder<Purchase>
+     */
     public function scopeBySupplier(Builder $query, int $supplierId): Builder
     {
         return $query->where('supplier_id', $supplierId);
