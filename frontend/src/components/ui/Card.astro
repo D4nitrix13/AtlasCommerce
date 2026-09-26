@@ -1,0 +1,79 @@
+---
+/**
+ * Card — primitive UI.
+ *
+ * Caja blanca con slots semánticos (header / default / footer). El
+ * padding es opcional (none/sm/md/lg) para que el consumidor controle
+ * la densidad (ej: media card vs form card).
+ *
+ * Uso:
+ *   <Card padding="md">
+ *     <h3 slot="header">Resumen</h3>
+ *     <p>Contenido del card.</p>
+ *     <div slot="footer">
+ *       <Button variant="primary">Confirmar</Button>
+ *     </div>
+ *   </Card>
+ */
+interface Props {
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  bordered?: boolean;
+  shadow?: 'none' | 'sm' | 'md';
+  class?: string;
+}
+
+const {
+  padding = 'md',
+  bordered = true,
+  shadow = 'sm',
+  class: className,
+} = Astro.props;
+
+const PADDING_BODY: Record<NonNullable<Props['padding']>, string> = {
+  none: 'p-0',
+  sm: 'p-3',
+  md: 'p-6',
+  lg: 'p-8',
+};
+
+const PADDING_HEADER: Record<NonNullable<Props['padding']>, string> = {
+  none: 'p-0',
+  sm: 'px-3 pt-3 pb-2',
+  md: 'px-6 pt-6 pb-3',
+  lg: 'px-8 pt-8 pb-4',
+};
+
+const PADDING_FOOTER: Record<NonNullable<Props['padding']>, string> = {
+  none: 'p-0',
+  sm: 'px-3 pb-3 pt-2',
+  md: 'px-6 pb-6 pt-3',
+  lg: 'px-8 pb-8 pt-4',
+};
+
+const SHADOW: Record<NonNullable<Props['shadow']>, string> = {
+  none: '',
+  sm: 'shadow-sm',
+  md: 'shadow-md',
+};
+---
+
+<article
+  class:list={[
+    'rounded-xl bg-white',
+    bordered && 'border border-slate-200',
+    SHADOW[shadow],
+    className,
+  ]}
+>
+  <header class:list={[PADDING_HEADER[padding], 'border-b border-slate-100']}>
+    <slot name="header" />
+  </header>
+
+  <div class={PADDING_BODY[padding]}>
+    <slot />
+  </div>
+
+  <footer class:list={[PADDING_FOOTER[padding], 'border-t border-slate-100 bg-slate-50/50 rounded-b-xl']}>
+    <slot name="footer" />
+  </footer>
+</article>

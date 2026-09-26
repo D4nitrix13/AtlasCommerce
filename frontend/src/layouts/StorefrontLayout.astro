@@ -1,0 +1,81 @@
+---
+/**
+ * StorefrontLayout — shell visual completo del storefront público.
+ *
+ * Compone: <StorefrontHeader> + <slot> + <StorefrontFooter>, y aplica
+ * la paleta del tenant vía CSS variables (`--primary`, `--primary-hover`,
+ * `--secondary`, `--accent`). Estas variables se setean como `style`
+ * inline en `<html>` para que TODO el subtree herede los colores del
+ * brand sin tener que hardcodear hexes por componente.
+ *
+ * Tenant resolution:
+ *   - El middleware setea `Astro.locals.tenant?.tenantSlug`.
+ *   - Si está, resolvemos el brand con `getBrandBySlug(slug)`.
+ *   - Si no, caemos al DEFAULT_BRAND (Kitsune).
+ *
+ * El layout envuelve el contenido con min-h-screen + flex column para
+ * que el footer quede siempre al final de la página aunque el slot
+ * tenga poco contenido (sticky footer pattern).
+ *
+ * Uso:
+ *   ---
+ *   import StorefrontLayout from '../layouts/StorefrontLayout.astro';
+ *   ---
+ *   <StorefrontLayout title="Inicio">
+ *     <h1>Bienvenido</h1>
+ *   </StorefrontLayout>
+ */
+import '../styles/global.css';
+import { getBrandBySlug, type StoreBrand } from '../config/stores';
+import StorefrontHeader from '../components/storefront/layout/StorefrontHeader.astro';
+import StorefrontFooter from '../components/storefront/layout/StorefrontFooter.astro';
+
+interface Props {
+  title?: string;
+  cartCount?: number;
+}
+
+const { title = 'AtlasCommerce', cartCount = 0 } = Astro.props;
+
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const brand: StoreBrand = getBrandBySlug(tenantSlug);
+const locale = Astro.locals.locale ?? 'es';
+
+// Theme root: convierte los accent colors del brand en CSS vars que
+// cualquier componente puede consumir vía `var(--primary)` o
+// `bg-[var(--primary)]`. El default fallback (`#475569`) mantiene
+// legibilidad si no hay brand resuelto.
+const themeRootStyle = `--primary: ${brand.accentColor}; --primary-hover: ${brand.accentHoverColor};`;
+const tenantFavicon = tenantSlug
+  ? `/api/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
+  : '/favicon.svg';
+---
+
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href={tenantFavicon} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+
+  <body
+    class="flex min-h-screen flex-col bg-white font-sans text-slate-900 antialiased"
+    style={themeRootStyle}
+  >
+    <StorefrontHeader brand={brand} locale={locale} cartCount={cartCount} />
+
+    <main id="main-content" class="flex-1">
+      <slot />
+    </main>
+
+    <StorefrontFooter brand={brand} locale={locale} />
+  </body>
+</html>

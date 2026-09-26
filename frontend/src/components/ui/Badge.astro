@@ -1,0 +1,51 @@
+---
+/**
+ * Badge — primitive UI.
+ *
+ * Pills semánticas. La variant principal es `status` (order status pills
+ * definidos en design-refs §6.4): pending / processing / shipped /
+ * delivered / cancelled. También soporta `neutral` para uso genérico.
+ *
+ * Uso:
+ *   <Badge status="processing" label="Preparando" />
+ *   <Badge variant="neutral">Novedades</Badge>
+ */
+type StatusVariant = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+type GenericVariant = 'neutral' | 'primary';
+
+interface Props {
+  status?: StatusVariant;
+  variant?: GenericVariant;
+  label?: string;
+  class?: string;
+}
+
+const { status, variant, label, class: className } = Astro.props;
+
+const STATUS_CLASSES: Record<StatusVariant, string> = {
+  pending: 'bg-amber-100 text-amber-800',
+  processing: 'bg-violet-100 text-violet-800',
+  shipped: 'bg-cyan-100 text-cyan-800',
+  delivered: 'bg-emerald-100 text-emerald-800',
+  cancelled: 'bg-red-100 text-red-800',
+};
+
+const VARIANT_CLASSES: Record<GenericVariant, string> = {
+  neutral: 'bg-slate-100 text-slate-700',
+  primary:
+    'bg-[var(--primary,#ede9fe)] text-[var(--primary,#7c3aed)]',
+};
+
+const isStatus = typeof status === 'string';
+const classes = isStatus ? STATUS_CLASSES[status] : VARIANT_CLASSES[variant ?? 'neutral'];
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+    classes,
+    className,
+  ]}
+>
+  {label ?? <slot />}
+</span>

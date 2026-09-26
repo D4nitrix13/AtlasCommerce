@@ -1,0 +1,66 @@
+---
+/**
+ * Table — primitive UI.
+ *
+ * Wrapper semántico de `<table>` con slots para thead y tbody, y
+ * soporte para header sticky en scroll vertical. El consumidor controla
+ * la densidad (padding) y las columnas.
+ *
+ * Accesibilidad:
+ *  - `<caption>` opcional para describir el contenido (screen readers).
+ *  - El thead envuelve `<tr>` con `<th scope="col">` por convención.
+ *
+ * Uso:
+ *   <Table caption="Pedidos recientes" sticky>
+ *     <tr slot="header">
+ *       <th>ID</th>
+ *       <th>Cliente</th>
+ *       <th>Total</th>
+ *     </tr>
+ *     <tr slot="row">
+ *       <td>001</td>
+ *       <td>María</td>
+ *       <td>$45.00</td>
+ *     </tr>
+ *   </Table>
+ */
+interface Props {
+  caption?: string;
+  sticky?: boolean;
+  striped?: boolean;
+  bordered?: boolean;
+  class?: string;
+}
+
+const {
+  caption,
+  sticky = false,
+  striped = false,
+  bordered = true,
+  class: className,
+} = Astro.props;
+---
+
+<div class:list={['overflow-x-auto rounded-lg', bordered && 'border border-slate-200', className]}>
+  <table class="w-full text-left text-sm">
+    {
+      caption && (
+        <caption class="px-4 py-2 text-left text-xs font-medium text-slate-500">
+          {caption}
+        </caption>
+      )
+    }
+
+    <thead class:list={['bg-slate-50 text-xs uppercase tracking-wide text-slate-500', sticky && 'sticky top-0 z-10']}>
+      <slot name="header" />
+    </thead>
+
+    <tbody class:list={['divide-y divide-slate-100 bg-white', striped && '[&>tr:nth-child(even)]:bg-slate-50/50']}>
+      <slot name="row" />
+    </tbody>
+
+    <tfoot class="bg-slate-50">
+      <slot name="footer" />
+    </tfoot>
+  </table>
+</div>

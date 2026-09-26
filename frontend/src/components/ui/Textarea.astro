@@ -1,0 +1,96 @@
+---
+/**
+ * Textarea — primitive UI.
+ *
+ * Igual que Input pero multilínea. Comparte convenciones de label,
+ * error/hint y accesibilidad (mismos aria attributes).
+ *
+ * Uso:
+ *   <Textarea name="bio" label="Biografía" rows={4} />
+ */
+interface Props {
+  name: string;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  error?: string;
+  hint?: string;
+  rows?: number;
+  maxlength?: number;
+  class?: string;
+}
+
+const {
+  name,
+  id,
+  label,
+  placeholder,
+  value,
+  required = false,
+  disabled = false,
+  readonly = false,
+  error,
+  hint,
+  rows = 4,
+  maxlength,
+  class: className,
+} = Astro.props;
+
+const inputId = id ?? `textarea-${name}`;
+const messageId = `${inputId}-message`;
+const hasError = typeof error === 'string' && error !== '';
+---
+
+<div class={`flex flex-col gap-1.5 ${className ?? ''}`}>
+  {
+    label && (
+      <label for={inputId} class="text-sm font-medium text-slate-700">
+        {label}
+        {required && (
+          <span aria-hidden="true" class="ml-1 text-red-500">
+            *
+          </span>
+        )}
+      </label>
+    )
+  }
+
+  <textarea
+    id={inputId}
+    name={name}
+    placeholder={placeholder}
+    value={value}
+    required={required}
+    disabled={disabled}
+    readonly={readonly}
+    rows={rows}
+    maxlength={maxlength}
+    aria-invalid={hasError}
+    aria-describedby={hasError || hint ? messageId : undefined}
+    class:list={[
+      'block w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 transition resize-y',
+      'placeholder:text-slate-400',
+      'focus:outline-none focus:ring-2 focus:ring-offset-0',
+      hasError
+        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+        : 'border-slate-200 focus:border-slate-400 focus:ring-slate-200',
+      disabled && 'cursor-not-allowed bg-slate-50 opacity-70',
+    ]}
+  ></textarea>
+
+  {
+    hasError ? (
+      <p id={messageId} role="alert" class="text-xs text-red-600">
+        {error}
+      </p>
+    ) : hint ? (
+      <p id={messageId} class="text-xs text-slate-500">
+        {hint}
+      </p>
+    ) : null
+  }
+</div>
