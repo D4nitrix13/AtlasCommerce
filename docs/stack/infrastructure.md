@@ -1,55 +1,82 @@
-# Infraestructura — Docker, Caddy, Kubernetes
+# Infraestructura — Docker, Caddy
 
 ## Visión general
 
 Capas externas al código de la aplicación: `Docker` para entornos de
-desarrollo, `Caddy` como reverse proxy con TLS automático, y
-`Kubernetes` para orquestación en producción.
+desarrollo y producción (multi-instance), y `Caddy` como reverse proxy
+con TLS automático. NO usamos `Kubernetes`: cada store corre en su
+propio host con `docker compose` administrado por
+[`scripts/docker-stack.sh`](../../scripts/docker-stack.sh "scripts/docker-stack.sh").
 
 ## Docker
 
-`Docker` se usa para estandarizar el entorno de desarrollo. Los
-servicios persistentes (`PostgreSQL`, `Redis`) corren en containers
-mientras que el código backend/frontend se monta desde el filesystem.
+`Docker` se usa para estandarizar los entornos. Los servicios
+persistentes (`PostgreSQL`, `Redis`) corren en containers, mientras
+que el código backend/frontend se bind-mounta desde el filesystem
+(en dev) o se copia al image (en prod).
 
 ### Instalación
 
 ```bash
-# Ubuntu / Debian
-sudo apt install docker.io docker-compose-v2
+# Ubuntu / Debian (Docker Engine + Compose plugin v2)
+sudo apt install docker.io docker-compose-plugin
 sudo usermod -aG docker $USER
+# Necesario re-login para que surta efecto la membresía al grupo.
 
-# macOS
-brew install docker docker-compose
+# macOS / Windows
+brew install --cask docker
+# O instalar Docker Desktop desde docker.com.
 ```
 
-### Estructura
+Verificá la instalación con `docker compose version` (debe ser
+`>= 2.x`, integrada como plugin).
 
-```txt
+### Estructura del repo
+
+```text
 docker/
-├── dev/
-│   ├── docker-compose.dev.yml    # Postgres + Redis + tools
-│   └── scripts/                   # Scripts de admin
-└── tools/
-    └── vikunja/                   # Tool alternativo de tasks
+├── COMPOSE.md                         # Convenciones + anatomía del stack
+├── DOCKERFILES.md                     # Guías de authoring de Dockerfiles
+├── versions.env                       # Versiones de imágenes compartidas
+└── instances/
+    ├── development/                   # Stage dev
+    │   ├── panda-estampados-and-kitsune/
+    │   ├── mm-boutique/
+    │   └── morales-store/
+    └── production/                    # Stage prod
+        ├── panda-estampados-and-kitsune/
+        ├── mm-boutique/
+        └── morales-store/
 ```
 
-### Comandos
+Cada instancia tiene su propio `docker-compose.yml` y su
+`environment/.env`. Para detalle de los servicios y volúmenes
+ver [`docs/operations/docker.md`](../operations/docker.md "operations/docker.md").
+
+### Comandos (canónico: vía `scripts/docker-stack.sh`)
+
+> **NO** usar `docker compose` directo. Toda la operatoria va por
+> el dispatcher, que resuelve stage/store y valida combinaciones.
+> Ver AGENTS.md raíz.
 
 ```bash
-cd docker/dev
+# Levantar 1 instancia (stage + store)
+./scripts/docker-stack.sh up development panda-estampados-and-kitsune
+./scripts/docker-stack.sh up production mm-boutique
 
-# Levantar servicios
-docker compose up -d
+# Bajar (preserva volúmenes)
+./scripts/docker-stack.sh down development panda-estampados-and-kitsune
 
-# Ver logs
-docker compose logs -f postgres
+# Reset completo (¡BORRA DATOS! requiere -y)
+./scripts/docker-stack.sh rm-volumes -y development panda-estampados-and-kitsune
 
-# Detener
-docker compose down
+# Inspeccionar
+./scripts/docker-stack.sh ps development panda-estampados-and-kitsune
+./scripts/docker-stack.sh status development panda-estampados-and-kitsune
+./scripts/docker-stack.sh logs development panda-estampados-and-kitsune backend -f
 
-# Reset completo (¡borra datos!)
-docker compose down -v
+# Rebuild sin cache (ej. después de cambiar un Dockerfile)
+./scripts/docker-stack.sh build no-cache development panda-estampados-and-kitsune
 ```
 
 ## Caddy
@@ -78,10 +105,13 @@ brew install caddy
 
 ### Configuración
 
-`Caddyfile` global: `/etc/caddy/Caddyfile`.
+El `Caddyfile` canónico vive dentro de cada instancia, en
+`docker/instances/<stage>/<store>/Caddyfile` (solo producción). En
+dev el routing lo hace el Caddy local (system service) apuntado a
+`127.0.0.1:9000` (backend) y `127.0.0.1:5321` (frontend).
 
-Para desarrollo local ver
-[operations/caddy.md](../operations/caddy.md "operations/caddy.md").
+Para detalle del setup dev ver
+[`operations/caddy.md`](../operations/caddy.md "operations/caddy.md").
 
 ### Comandos
 
@@ -99,50 +129,6 @@ caddy reload --config /etc/caddy/Caddyfile
 journalctl -u caddy -f
 ```
 
-## Kubernetes
-
-Orquestación de producción. Los manifests viven en `infra/k8s/` (a
-desarrollar). El sistema está pensado para desplegarse en:
-
-- **VPS** con `k3s` (Kubernetes ligero).
-- **Cluster gestionado** (EKS, GKE, AKS).
-
-### Componentes planeados
-
-```txt
-ingress (nginx/traefik)
-  ├── frontend (Deployment + Service)
-  └── backend (Deployment + Service)
-
-stateful
-  ├── postgres (StatefulSet + PVC)
-  └── redis (Deployment + PVC)
-
-jobs
-  └── backend-worker (Deployment + Command)
-
-secrets (Secret)
-  ├── db-credentials
-  ├── redis-password
-  └── api-keys
-```
-
-### Comandos básicos
-
-```bash
-# Aplicar manifests
-kubectl apply -f infra/k8s/
-
-# Ver pods
-kubectl get pods -n ecommerce
-
-# Logs
-kubectl logs -f deployment/backend -n ecommerce
-
-# Port-forward para debug
-kubectl port-forward svc/backend 8000:8000 -n ecommerce
-```
-
 ## Cloudflare
 
 `Cloudflare` se usa como:
@@ -154,17 +140,27 @@ kubectl port-forward svc/backend 8000:8000 -n ecommerce
 
 ### Configuración DNS
 
+Registros `A` para apuntar cada dominio a la IP del host donde corre
+la instancia (un VPS por instancia):
+
 ```dns
 Tipo    Nombre                              Valor
-A       panda-estampados.com               <VPS_IP>
-A       www.panda-estampados.com           <VPS_IP>
-A       admin.panda-estampados.com         <VPS_IP>
-A       kitsune.com                         <VPS_IP>
-A       www.kitsune.com                     <VPS_IP>
-A       admin.kitsune.com                   <VPS_IP>
+A       panda-estampados.com                <VPS_IP_PANDA>
+A       www.panda-estampados.com            <VPS_IP_PANDA>
+A       admin.panda-estampados.com          <VPS_IP_PANDA>
+A       kitsune.com                         <VPS_IP_PANDA>
+A       www.kitsune.com                     <VPS_IP_PANDA>
+A       admin.kitsune.com                   <VPS_IP_PANDA>
+A       mm-boutique.com                     <VPS_IP_MM>
+A       www.mm-boutique.com                 <VPS_IP_MM>
+A       admin.mm-boutique.com               <VPS_IP_MM>
+A       morales-store.com                   <VPS_IP_MORALES>
+A       www.morales-store.com               <VPS_IP_MORALES>
+A       admin.morales-store.com             <VPS_IP_MORALES>
 ```
 
-Proxy: a través de `Cloudflare` (nube naranja activada).
+Proxy: a través de `Cloudflare` (nube naranja activada) para WAF +
+CDN; Caddy termina TLS del origen.
 
 ### Configuración recomendada
 
@@ -177,27 +173,28 @@ Proxy: a través de `Cloudflare` (nube naranja activada).
 
 ## Almacenamiento de objetos
 
-Producción debería usar `S3` o compatible. Ver
-[stack/database.md](database.md "stack/database.md") sección Storage.
+Producción debería usar `S3` o compatible para assets grandes. Ver
+[`stack/database.md`](database.md "stack/database.md") sección Storage.
 
 ## Monitoreo y logs
 
-A definir. Stack candidato:
+Stack candidato (a evaluar):
 
 - **Prometheus** + **Grafana** para métricas.
 - **Loki** + **Grafana** para logs centralizados.
 - **Sentry** para tracking de errores.
 
+Para el runbook de detección de incidentes ver
+[`operations/observability-runbook.md`](../operations/observability-runbook.md "observability-runbook.md").
+
 ## Respaldo
 
-- Volúmenes `PersistentVolumeClaim` con `VolumeSnapshot`.
-- Snapshots programados semanalmente.
+- Volúmenes Docker con snapshots programados semanalmente.
 - Retención 30 días mínimo.
+- Detalle operativo en [`operations/backups.md`](../operations/backups.md "operations/backups.md").
 
 ## Documentación relacionada
 
-- [operations/deployment.md](../operations/deployment.md "operations/deployment.md")
-- [operations/docker.md](../operations/docker.md "operations/docker.md")
-- [operations/caddy.md](../operations/caddy.md "operations/caddy.md")
-- [operations/deployment.md](../operations/deployment.md "operations/deployment.md")
-- [operations/caddy.md](../operations/caddy.md "operations/caddy.md")
+- [`operations/deployment.md`](../operations/deployment.md "operations/deployment.md")
+- [`operations/docker.md`](../operations/docker.md "operations/docker.md")
+- [`operations/caddy.md`](../operations/caddy.md "operations/caddy.md")

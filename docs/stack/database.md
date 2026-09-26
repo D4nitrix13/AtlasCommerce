@@ -2,18 +2,26 @@
 
 ## Visión general
 
-Una sola instancia de `PostgreSQL` con extensión `PostGIS` almacena
-todos los datos de ambas tiendas. `Redis` maneja cache, sesiones y
-colas. Los archivos (imágenes, assets) viven en `FTP` o `S3`.
+Cada instancia (`<stage>` × `<store>`) tiene **su propio** stack
+interno: `PostgreSQL` con extensión `PostGIS`, `Redis` para cache
+y sesiones, y `FTP` para uploads. Los stores NO comparten base de
+datos; viven aislados bajo `docker/instances/<stage>/<store>/`.
+
+`S3` (o compatible) es el destino recomendado para assets de
+producción.
 
 ## Versiones
 
-| Componente      | Versión  |
-| --------------- | -------- |
-| `PostgreSQL`    | 18.x     |
-| `PostGIS`       | 3.6+     |
-| `Redis`         | 7.x      |
-| `Docker` `postgis/postgis` tag | `18-3.6` |
+| Componente                        | Versión            |
+| --------------------------------- | ------------------ |
+| `PostgreSQL`                      | 18.x               |
+| `PostGIS`                         | 3.6+               |
+| `Redis`                           | 7.x                |
+| Docker image `postgis/postgis`    | `18-3.6`           |
+| Docker image `redis`              | `7-alpine`         |
+| Docker image `fauria/vsftpd`      | (latest)           |
+
+Defaults en [`docker/versions.env`](../../docker/versions.env "docker/versions.env").
 
 ## PostgreSQL + PostGIS
 
@@ -21,58 +29,61 @@ colas. Los archivos (imágenes, assets) viven en `FTP` o `S3`.
 
 Necesario para queries geoespaciales (zonas de envío, ubicación de
 almacenes, direcciones de envío). Extiende `PostgreSQL` con tipos
-geométricos.
+geométricos e índices espaciales.
 
-### Instalación con Docker (recomendado)
+### Arranque con Docker (recomendado)
 
 ```bash
-cd docker/dev
-docker compose up -d
+# Levantar el stack de una instancia (dev)
+./scripts/docker-stack.sh up development panda-estampados-and-kitsune
+
+# Equivale a (NO usar directo, pero a modo ilustrativo):
+# cd docker/instances/development/panda-estampados-and-kitsune
+# docker compose up -d postgres
 ```
 
-El `docker-compose.dev.yml` define el servicio `postgres` con:
+El compose de la instancia define el servicio `postgres`:
 
 ```yaml
 services:
   postgres:
     image: postgis/postgis:18-3.6
-    container_name: ecommerce-postgres
+    container_name: panda-estampados-and-kitsune-dev-postgres
     restart: unless-stopped
-    env_file: [.env]
-    ports: ["${POSTGRES_PORT:-5432}:5432"]
-    command:
-      - postgres
-      - -c
-      - shared_preload_libraries=pg_stat_statements
-      - -c
-      - pg_stat_statements.track=all
+    env_file:
+      - environment/.env
+      - ../../../versions.env
+    ports:
+      - "${POSTGRES_PORT:-6432}:5432"
     volumes:
-      - ecommerce_postgres_data:/var/lib/postgresql
+      - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./conf/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - atlas_commerce_panda_estampados_and_kitsune_dev_postgres_data:/var/lib/postgresql
       - ../../database/postgresql/init:/docker-entrypoint-initdb.d:ro
 ```
 
-### Instalación manual (no recomendado)
-
-```bash
-# Ubuntu
-sudo apt install postgresql-18 postgresql-18-postgis-3
-
-# Crear DB
-sudo -u postgres createuser -P ecommerce
-sudo -u postgres createdb -O ecommerce ecommerce
-sudo -u postgres psql -d ecommerce -c "CREATE EXTENSION postgis;"
-```
+> **Nota:** el `container_name` incluye el slug del store para que
+> las 3 instancias dev puedan coexistir si alguien las levanta
+> simultáneamente (los volúmenes y containers no chocan entre stores).
+> Los puertos host están shifted (`+1000`) para no pisar un Postgres
+> local.
 
 ### Conexión desde el backend
 
+Variables de entorno del backend (Laravel), leídas desde el `.env`
+de la instancia:
+
 ```env
 DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
+DB_HOST=postgres
 DB_PORT=5432
-DB_DATABASE=store
-DB_USERNAME=postgres
-DB_PASSWORD=secret
+DB_DATABASE=<store_slug>           # ej: panda_estampados_and_kitsune
+DB_USERNAME=<store_slug>           # guiones → guiones bajos para PG
+DB_PASSWORD=<secret>
 ```
+
+`DB_HOST=postgres` usa el nombre del servicio en la red interna
+de docker, no `127.0.0.1`.
 
 ## Redis
 
@@ -83,45 +94,42 @@ DB_PASSWORD=secret
 - Colas (`QUEUE_CONNECTION=redis`).
 - Rate limiting de Laravel.
 
-### Instalación con Docker
+### Arranque con Docker
 
 ```bash
-docker compose -f docker/dev/docker-compose.dev.yml up -d redis
+# Dev
+./scripts/docker-stack.sh up development panda-estampados-and-kitsune
+# Redis queda en container `panda-estampados-and-kitsune-dev-redis`.
 ```
 
-### Instalación manual
-
-```bash
-sudo apt install redis-server
-sudo systemctl enable redis-server
-```
-
-### Conexión
+### Conexión desde el backend
 
 ```env
-REDIS_HOST=127.0.0.1
+REDIS_HOST=redis
 REDIS_PORT=6379
 REDIS_PASSWORD=null
 ```
+
+En dev sin password. En prod se setea `requirepass` en
+`conf/redis/redis.conf` y se inyecta vía `REDIS_PASSWORD`.
 
 ## Almacenamiento de archivos
 
 Assets del sistema (logos de tienda, imágenes de productos, uploads
 de clientes) viven en disco. Dos backends soportados:
 
-### FTP (legacy)
+### FTP (dev e histórico)
 
-```bash
-# Servidor FTP local para dev
-sudo apt install vsftpd
-sudo systemctl enable vsftpd
-```
+El stack dev incluye un container `vsftpd` (imagen `fauria/vsftpd`)
+para subir/descargar assets vía FTP. En dev el backend usa
+`Storage::disk('ftp')` para escribir productos vía `tenants:bootstrap`.
 
 ```env
 FILESYSTEM_DISK=ftp
-FTP_HOST=127.0.0.1
-FTP_USERNAME=ecommerce
-FTP_PASSWORD=secret
+FTP_HOST=ftp
+FTP_USERNAME=<store>-ftp
+FTP_PASSWORD=<secret>
+FTP_ROOT=/
 ```
 
 ### S3 (recomendado para producción)
@@ -133,36 +141,44 @@ FILESYSTEM_DISK=s3
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=ecommerce-assets
+AWS_BUCKET=atlas-commerce-assets
 AWS_ENDPOINT=https://...
 ```
 
 ## Modelo de datos
 
-- 75 tablas en `PostgreSQL`.
+- ~75 tablas en `PostgreSQL` por instancia.
 - Diagrama ER en `database/diagrams/ecommerce-er.mmd`.
-- Documentación: [database/data-model.md](../database/data-model.md "database/data-model.md").
+- Documentación: [`database/data-model.md`](../database/data-model.md "database/data-model.md").
 
 ### Convenciones
 
 - **Money en centavos** (`unsignedBigInteger`).
-- **Multi-tenancy** vía `store_id` + `BelongsToStore` trait.
-- **Soft deletes** en entidades de negocio (`users`, `products`, etc.).
+- **Multi-tenancy por instancia** — cada `<store>` de dev vive en
+  una BD separada (no comparten schema). En prod, multi-tenant
+  *dentro* de una instancia se modela con `store_id` +
+  `BelongsToStore` trait (ver `panda-estampados-and-kitsune`).
+- **Soft deletes** en entidades de negocio (`users`, `products`,
+  etc.).
 - **Índices** en todas las FKs y columnas de búsqueda frecuente.
 - **Snake_case** en tablas y columnas.
 
 ## Respaldo
 
-- **PostgreSQL**: dumps programados vía `docker/dev/scripts/backup.sh`.
-- **Redis**: persistencia opcional (`--appendonly yes`).
+- **PostgreSQL**: dumps programados vía
+  [`scripts/docker-stack.sh db-backup`](../../scripts/docker-stack.sh "scripts/docker-stack.sh").
+  Output: `db-backups/<stage>-<store>-<YYYY-MM-DD-HHMM>.sql.gz`.
+- **Redis**: persistencia opcional (`--appendonly yes`) en
+  `conf/redis/redis.conf`.
 - **Storage**: snapshots de disco + lifecycle en S3.
 
-Ver [operations/backups.md](../operations/backups.md "operations/backups.md").
+Ver [`operations/backups.md`](../operations/backups.md "operations/backups.md")
+para el detalle operativo (cron, retention, restore).
 
 ## Documentación relacionada
 
-- [architecture/overview.md](../architecture/overview.md "architecture/overview.md")
-- [database/data-model.md](../database/data-model.md "database/data-model.md")
-- [getting-started/databases.md](../getting-started/databases.md "getting-started/databases.md")
-- [operations/docker.md](../operations/docker.md "operations/docker.md")
-- [operations/backups.md](../operations/backups.md "operations/backups.md")
+- [`architecture/overview.md`](../architecture/overview.md "architecture/overview.md")
+- [`database/data-model.md`](../database/data-model.md "database/data-model.md")
+- [`getting-started/databases.md`](../getting-started/databases.md "getting-started/databases.md")
+- [`operations/docker.md`](../operations/docker.md "operations/docker.md")
+- [`operations/backups.md`](../operations/backups.md "operations/backups.md")
