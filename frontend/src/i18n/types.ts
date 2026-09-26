@@ -460,6 +460,23 @@ export type TranslationKey =
   | 'admin.customers.confirmReactivate'
   | 'admin.customers.close'
 
+  // ─── storefront: layout (header/footer) ──────────────────────────────
+  | 'storefront.header.nav.home'
+  | 'storefront.header.nav.products'
+  | 'storefront.header.nav.search'
+  | 'storefront.header.nav.account'
+  | 'storefront.header.nav.cart'
+  | 'storefront.header.cartBadge'
+  | 'storefront.header.openMenu'
+  | 'storefront.header.closeMenu'
+  | 'storefront.header.brandTagline'
+  | 'storefront.footer.about'
+  | 'storefront.footer.terms'
+  | 'storefront.footer.privacy'
+  | 'storefront.footer.help'
+  | 'storefront.footer.contact'
+  | 'storefront.footer.copyright'
+
   // ─── storefront: search ─────────────────────────────────────────────
   | 'storefront.search.title'
   | 'storefront.search.subtitle'

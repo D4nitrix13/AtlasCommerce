@@ -468,6 +468,23 @@ const en: Translations = {
   'storefront.cart.total': 'Total',
   'storefront.cart.checkout': 'Checkout',
 
+  // ─── storefront: layout (header/footer) ───────────────────────────
+  'storefront.header.nav.home': 'Home',
+  'storefront.header.nav.products': 'Products',
+  'storefront.header.nav.search': 'Search',
+  'storefront.header.nav.account': 'My account',
+  'storefront.header.nav.cart': 'Cart',
+  'storefront.header.cartBadge': '{count} in cart',
+  'storefront.header.openMenu': 'Open menu',
+  'storefront.header.closeMenu': 'Close menu',
+  'storefront.header.brandTagline': 'Your store, your way',
+  'storefront.footer.about': 'About',
+  'storefront.footer.terms': 'Terms',
+  'storefront.footer.privacy': 'Privacy',
+  'storefront.footer.help': 'Help',
+  'storefront.footer.contact': 'Contact',
+  'storefront.footer.copyright': '© {year} {brand}. All rights reserved.',
+
   // ─── account: addresses ────────────────────────────────────────
   'account.addresses.title': 'My addresses',
   'account.addresses.subtitle': 'Manage your shipping and billing addresses.',

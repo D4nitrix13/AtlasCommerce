@@ -1,0 +1,143 @@
+---
+/**
+ * Modal — primitive UI.
+ *
+ * Dialog modal construido sobre `<dialog>` nativo (HTMLDialogElement).
+ * Esto evita reinventar el focus trap y el manejo de ESC: el browser
+ * se encarga automáticamente cuando se usa `showModal()`.
+ *
+ * El consumidor controla visibilidad (`open`) y provee el contenido
+ * por slot. El header tiene un slot `title` semántico.
+ *
+ * Accesibilidad (AGENTS §17):
+ *  - role="dialog" + aria-modal="true" los pone el `<dialog>` nativo.
+ *  - El botón de cerrar tiene aria-label.
+ *  - El título se enlaza con aria-labelledby.
+ *
+ * Limitaciones:
+ *  - Como Astro es server-rendered, este componente sólo renderiza el
+ *    markup. El padre debe controlar showModal()/close() con un script
+ *    o un wrapper React. Este primitive provee el `<dialog>` listo.
+ *
+ * Uso:
+ *   <Modal id="confirm-delete" title="¿Eliminar producto?">
+ *     <p>Esta acción no se puede deshacer.</p>
+ *     <div slot="footer">
+ *       <Button variant="secondary">Cancelar</Button>
+ *       <Button variant="danger">Eliminar</Button>
+ *     </div>
+ *   </Modal>
+ */
+interface Props {
+  id: string;
+  title?: string;
+  open?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  dismissible?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  title,
+  open = false,
+  size = 'md',
+  dismissible = true,
+  class: className,
+} = Astro.props;
+
+const SIZE_CLASSES: Record<NonNullable<Props['size']>, string> = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-2xl',
+};
+
+const titleId = `${id}-title`;
+---
+
+<dialog
+  id={id}
+  aria-labelledby={title ? titleId : undefined}
+  class:list={[
+    'w-full rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-900/50',
+    SIZE_CLASSES[size],
+    className,
+  ]}
+>
+  <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-4">
+    {title && (
+      <h2 id={titleId} class="text-lg font-semibold text-slate-900">
+        {title}
+      </h2>
+    )}
+    {
+      dismissible && (
+        <button
+          type="button"
+          aria-label="Cerrar"
+          data-close-modal={id}
+          class="shrink-0 rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
+      )
+    }
+  </div>
+
+  <div class="px-6 py-4">
+    <slot />
+  </div>
+
+  <div class="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/50 px-6 py-3 rounded-b-2xl">
+    <slot name="footer" />
+  </div>
+</dialog>
+
+{
+  open && (
+    <script is:inline define:vars={{ modalId: id }}>
+      // Auto-open cuando el consumidor marca `open` en SSR. En general
+      // esto NO debería ocurrir porque los modales se abren tras una
+      // acción del usuario; el padre debe manejar open/close via JS.
+      document.getElementById(modalId)?.showModal();
+    </script>
+  )
+}
+
+<script>
+  // Listener global para botones con `data-close-modal={id}`. Cierra
+  // el dialog referenciado. Vive en este archivo porque es el único
+  // componente que emite ese atributo.
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const trigger = target.closest<HTMLElement>('[data-close-modal]');
+    if (!trigger) return;
+    const modalId = trigger.dataset.closeModal;
+    if (!modalId) return;
+    const dialog = document.getElementById(modalId);
+    if (dialog instanceof HTMLDialogElement && dialog.open) {
+      dialog.close();
+    }
+  });
+
+  // Click en el backdrop cierra el modal (cuando dismissible). El
+  // `<dialog>` nativo reporta el target como el propio dialog cuando
+  // se hace click fuera del contenido.
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLDialogElement)) return;
+    const dismissible = target.querySelector('[data-close-modal]') !== null;
+    if (!dismissible) return;
+    const rect = target.getBoundingClientRect();
+    const isInside =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+    if (!isInside) {
+      target.close();
+    }
+  });
+</script>

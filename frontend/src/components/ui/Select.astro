@@ -1,0 +1,108 @@
+---
+/**
+ * Select — primitive UI.
+ *
+ * Wrapper accesible del `<select>` nativo. Las opciones se pasan por
+ * prop `options` (label/value) o por slot default para casos custom
+ * (optgroups, opciones dinámicas). Comparte convenciones de label,
+ * error/hint y accesibilidad con Input/Textarea.
+ *
+ * Uso:
+ *   <Select
+ *     name="country"
+ *     label="País"
+ *     options={[{value: 'NI', label: 'Nicaragua'}, {value: 'CR', label: 'Costa Rica'}]}
+ *   />
+ */
+interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
+interface Props {
+  name: string;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  options: SelectOption[];
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  hint?: string;
+  class?: string;
+}
+
+const {
+  name,
+  id,
+  label,
+  placeholder,
+  options,
+  value,
+  required = false,
+  disabled = false,
+  error,
+  hint,
+  class: className,
+} = Astro.props;
+
+const selectId = id ?? `select-${name}`;
+const messageId = `${selectId}-message`;
+const hasError = typeof error === 'string' && error !== '';
+---
+
+<div class={`flex flex-col gap-1.5 ${className ?? ''}`}>
+  {
+    label && (
+      <label for={selectId} class="text-sm font-medium text-slate-700">
+        {label}
+        {required && (
+          <span aria-hidden="true" class="ml-1 text-red-500">
+            *
+          </span>
+        )}
+      </label>
+    )
+  }
+
+  <select
+    id={selectId}
+    name={name}
+    required={required}
+    disabled={disabled}
+    aria-invalid={hasError}
+    aria-describedby={hasError || hint ? messageId : undefined}
+    class:list={[
+      'block w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 transition',
+      'focus:outline-none focus:ring-2 focus:ring-offset-0',
+      hasError
+        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+        : 'border-slate-200 focus:border-slate-400 focus:ring-slate-200',
+      disabled && 'cursor-not-allowed bg-slate-50 opacity-70',
+    ]}
+  >
+    {placeholder && <option value="">{placeholder}</option>}
+    {
+      options.map((opt) => (
+        <option value={opt.value} disabled={opt.disabled} selected={opt.value === value}>
+          {opt.label}
+        </option>
+      ))
+    }
+    <slot />
+  </select>
+
+  {
+    hasError ? (
+      <p id={messageId} role="alert" class="text-xs text-red-600">
+        {error}
+      </p>
+    ) : hint ? (
+      <p id={messageId} class="text-xs text-slate-500">
+        {hint}
+      </p>
+    ) : null
+  }
+</div>

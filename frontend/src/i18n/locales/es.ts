@@ -469,6 +469,23 @@ const es: Translations = {
   'storefront.cart.total': 'Total',
   'storefront.cart.checkout': 'Ir a checkout',
 
+  // ─── storefront: layout (header/footer) ───────────────────────────
+  'storefront.header.nav.home': 'Inicio',
+  'storefront.header.nav.products': 'Productos',
+  'storefront.header.nav.search': 'Buscar',
+  'storefront.header.nav.account': 'Mi cuenta',
+  'storefront.header.nav.cart': 'Carrito',
+  'storefront.header.cartBadge': '{count} en el carrito',
+  'storefront.header.openMenu': 'Abrir menú',
+  'storefront.header.closeMenu': 'Cerrar menú',
+  'storefront.header.brandTagline': 'Tu tienda, a tu manera',
+  'storefront.footer.about': 'Acerca de',
+  'storefront.footer.terms': 'Términos',
+  'storefront.footer.privacy': 'Privacidad',
+  'storefront.footer.help': 'Ayuda',
+  'storefront.footer.contact': 'Contacto',
+  'storefront.footer.copyright': '© {year} {brand}. Todos los derechos reservados.',
+
   // ─── account: addresses ────────────────────────────────────────
   'account.addresses.title': 'Mis direcciones',
   'account.addresses.subtitle': 'Gestioná tus direcciones de envío y facturación.',

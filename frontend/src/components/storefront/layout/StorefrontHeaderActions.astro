@@ -1,0 +1,60 @@
+---
+/**
+ * StorefrontHeaderActions — acciones de la derecha del header.
+ *
+ * Compone: badge de carrito + link "Mi cuenta" + locale switcher.
+ *
+ * El locale switcher es React (idioma dinámico con localStorage); lo
+ * hidratamos con `client:load` para que esté listo al primer paint.
+ * El badge del carrito es server-rendered con `cartCount` como prop.
+ */
+import LanguageSwitcher from '../../ui/LanguageSwitcher';
+import { getServerDictionary } from '../../../i18n/server';
+
+interface Props {
+  cartHref: string;
+  accountHref: string;
+  cartCount: number;
+}
+
+const { cartHref, accountHref, cartCount } = Astro.props;
+const t = getServerDictionary(Astro.locals.locale);
+
+const hasItemsInCart = cartCount > 0;
+const cartLabel = hasItemsInCart
+  ? t['storefront.header.cartBadge'].replace('{count}', String(cartCount))
+  : t['storefront.header.nav.cart'];
+---
+
+<div class="flex items-center gap-1.5">
+  <a
+    href={accountHref}
+    class="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)]"
+  >
+    <span aria-hidden="true" class="text-base">👤</span>
+    <span class="hidden sm:inline">{t['storefront.header.nav.account']}</span>
+  </a>
+
+  <a
+    href={cartHref}
+    aria-label={cartLabel}
+    class="relative inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)]"
+  >
+    <span aria-hidden="true" class="text-base">🛒</span>
+    <span class="hidden sm:inline">{t['storefront.header.nav.cart']}</span>
+    {
+      hasItemsInCart && (
+        <span
+          aria-hidden="true"
+          class="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[var(--primary,#475569)] px-1 text-[10px] font-semibold text-white"
+        >
+          {cartCount > 99 ? '99+' : cartCount}
+        </span>
+      )
+    }
+  </a>
+
+  <div class="ml-1 border-l border-slate-200 pl-2">
+    <LanguageSwitcher client:load variant="inline" theme="light" />
+  </div>
+</div>

@@ -1,0 +1,51 @@
+---
+/**
+ * Dropdown — primitive UI.
+ *
+ * Menú accesible construido con `<details>`/`<summary>` para que sea
+ * puro HTML (sin JS por defecto). El trigger es el `<summary>` y el
+ * panel son `<li role="menuitem">` dentro de `<ul role="menu">`.
+ *
+ * Como Astro es server-rendered, el cierre automático por click-outside
+ * no es nativo. Para comportamientos más avanzados (cerrar al click
+ * fuera), el consumidor puede envolver con un wrapper React. Este
+ * primitive cubre el caso "menú estático / settings list".
+ *
+ * Accesibilidad:
+ *  - `<summary>` con aria-expanded dinámico (details.open).
+ *  - Lista con role="menu" e items con role="menuitem".
+ *
+ * Uso:
+ *   <Dropdown label="Cuenta">
+ *     <li role="menuitem"><a href="/account">Mi cuenta</a></li>
+ *     <li role="menuitem"><a href="/orders">Mis pedidos</a></li>
+ *   </Dropdown>
+ */
+interface Props {
+  label: string;
+  align?: 'left' | 'right';
+  class?: string;
+}
+
+const { label, align = 'right', class: className } = Astro.props;
+const alignClass = align === 'right' ? 'right-0' : 'left-0';
+---
+
+<details class:list={['relative', className]}>
+  <summary
+    class="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] [&::-webkit-details-marker]:hidden"
+  >
+    {label}
+    <span aria-hidden="true" class="text-xs">▾</span>
+  </summary>
+
+  <ul
+    role="menu"
+    class:list={[
+      'absolute z-20 mt-1 min-w-[10rem] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg',
+      alignClass,
+    ]}
+  >
+    <slot />
+  </ul>
+</details>

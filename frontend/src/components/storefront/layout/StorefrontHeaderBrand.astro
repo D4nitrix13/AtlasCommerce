@@ -1,0 +1,40 @@
+---
+/**
+ * StorefrontHeaderBrand — bloque de marca (logo + nombre) del header.
+ *
+ * Es el sub-componente "más a la izquierda" del header: muestra el
+ * logo del tenant y el nombre corto. El link envuelve todo para que
+ * el área clickeable sea generosa (mobile-friendly).
+ *
+ * El logo se sirve desde `/api/storefront/assets/tenants/{slug}/branding/`
+ * siguiendo la convención del resto del repo.
+ */
+import type { StoreBrand } from '../../../config/stores';
+
+interface Props {
+  brand: StoreBrand;
+  homeHref: string;
+}
+
+const { brand, homeHref } = Astro.props;
+---
+
+<a
+  href={homeHref}
+  class="flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+>
+  <span
+    class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200"
+    style={`background-color: ${brand.accentColor}1a;`}
+  >
+    <img
+      src={brand.logoPath}
+      alt={brand.shortName}
+      class="h-7 w-7 object-contain"
+      loading="eager"
+    />
+  </span>
+  <span class="flex flex-col leading-tight">
+    <span class="text-base font-bold tracking-tight text-slate-900">{brand.shortName}</span>
+  </span>
+</a>
