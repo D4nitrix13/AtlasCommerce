@@ -328,6 +328,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('inventory/low-stock', App\Http\Controllers\Api\Admin\Metrics\LowStockController::class)
             ->middleware('store.domain')
             ->name('admin.inventory.low_stock');
+        Route::get('metrics/products/top', App\Http\Controllers\Api\Admin\Metrics\TopProductsController::class)
+            ->middleware('store.domain')
+            ->name('admin.metrics.products.top');
 
         Route::get('permissions', [RoleController::class, 'listPermissions'])
             ->middleware('permission:auth.permissions.manage')
