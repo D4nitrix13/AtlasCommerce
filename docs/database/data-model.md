@@ -1,23 +1,34 @@
-# Modelo de Datos Multi-Tienda
+# Modelo de Datos Multi-Store
 
 ## Visión general
 
-El modelo de datos soporta una plataforma ecommerce multi-tienda
-donde dos marcas (`Panda Estampados` y `Kitsune`) comparten
-backend, base de datos e inventario, pero presentan catálogos,
-pedidos y reportes separados.
+El modelo de datos soporta una plataforma ecommerce multi-store
+desplegada como **3 instancias independientes** (ver
+[architecture/overview.md](../architecture/overview.md
+"architecture/overview.md")). Cada instancia tiene su propia
+base de datos `PostgreSQL`. Dentro de la instancia
+`panda-estampados-and-kitsune` conviven dos marcas (`Panda
+Estampados` y `Kitsune Store`) que comparten backend, BD e
+inventario pero presentan catálogos, pedidos y reportes
+separados vía `store_id`. Las instancias `mm-boutique` y
+`morales-store` son single-brand — el `store_id` se mantiene
+en esquema pero apunta siempre a la misma marca.
 
 ## Principios del modelo
 
-1. **Shared database** — Una sola instancia `PostgreSQL` para
-   ambas tiendas.
-2. `store_id` como filtro — Las tablas transaccionales incluyen
-   `store_id` para aislamiento por tienda.
-3. **Productos globales** — Los productos son entidades globales.
-   Se publican selectivamente en tiendas vía `product_stores`.
-4. **Inventario global** — El stock es compartido entre tiendas.
-5. **Roles por tienda** — Cada usuario puede tener un rol
-   distinto por tienda mediante `user_stores.role_id`.
+1. **BD por instancia** — Cada stack Docker tiene su propia
+   instancia `PostgreSQL` (`docker/instances/<stage>/<store>/
+   conf/postgres/`). Las instancias no comparten BD.
+2. `store_id` como filtro dentro de la instancia — Las tablas
+   transaccionales incluyen `store_id` para aislamiento por
+   marca cuando la instancia atiende varias.
+3. **Productos globales dentro de la instancia** — Los
+   productos son entidades globales dentro de la BD. Se
+   publican selectivamente en marcas vía `product_stores`.
+4. **Inventario global dentro de la instancia** — El stock es
+   compartido entre marcas de la misma instancia.
+5. **Roles por marca** — Cada usuario puede tener un rol
+   distinto por marca mediante `user_stores.role_id`.
 
 ## Entidades multi-tienda
 
@@ -171,10 +182,13 @@ payments            → pagos por tienda
 store_settings      → configuración por tienda
 ```
 
-## Entidades globales (sin `store_id`)
+## Entidades globales (sin `store_id` dentro de la instancia)
 
 Estas tablas NO incluyen `store_id` porque son compartidas
-entre tiendas:
+entre marcas dentro de la misma instancia Docker. **No se
+comparten entre instancias** — cada stack tiene su propia
+copia de estas tablas con datos independientes para su(s)
+marca(s):
 
 ```txt
 users               → usuarios globales

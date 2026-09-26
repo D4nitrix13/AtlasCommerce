@@ -1,16 +1,28 @@
-# Flujo Multi-Tienda — Arquitectura Final
+# Flujo Multi-Store — Arquitectura por Instancia
 
-> Última actualización: 2027-08-01
-> Stack: Docker / Kubernetes / Caddy / Laravel 13 / Astro 7 /
+> Última actualización: 2026-09-26
+> Stack: Docker / Caddy / Laravel 13 / Astro 7 /
 > PostgreSQL 18 / Redis
+
+Este documento describe el flujo de requests en AtlasCommerce
+considerando la arquitectura multi-instancia desplegada. Cada
+instancia `docker/instances/<stage>/<store>/` es una unidad
+aislada con su propia BD, Redis, backend y frontend. Multi-store
+opera dentro de una misma instancia cuando el dueño comparte
+operación entre marcas (caso Panda Estampados + Kitsune). Multi-
+instancia aísla tiendas de dueños distintos en servidores
+separados.
 
 ---
 
 ## 1. Topología de despliegue
 
-Una sola instancia de cada servicio atienda ambas tiendas. El routing por
-dominio se resuelve en el edge (Caddy) y se enriquece en el backend vía
-middleware.
+Una sola instancia Docker atienda los dominios de su tenant.
+El routing por dominio se resuelve en el edge (Caddy) y se
+enriquece en el backend vía middleware. Las instancias `mm-
+boutique` y `morales-store` exponen dominios únicos; la
+instancia `panda-estampados-and-kitsune` sirve dos marcas
+(Panda Estampados y Kitsune Store) bajo una sola API.
 
 ```mermaid
 flowchart TB
@@ -31,19 +43,19 @@ flowchart TB
         Caddy["Caddy<br/>TLS termination<br/>VirtualHost routing"]:::proxy
     end
 
-    subgraph K8s["Kubernetes Cluster"]
+    subgraph DockerStack["Docker Compose Stack — una sola instancia"]
         subgraph FE["Frontend — Astro SSR"]
-            Astro["astro:4321<br/>1 pod · N réplicas<br/>lee Host → config tienda"]:::fe
+            Astro["astro:4321<br/>lee Host → config tienda"]:::fe
         end
         subgraph BE["Backend — Laravel 13 + PHP 8.3"]
-            PHP["php-fpm:9000<br/>1 sola app<br/>atiende Panda + Kitsune<br/>Resuelve tienda por middleware"]:::be
+            App["app:8000<br/>backend único<br/>atiende las marcas del tenant<br/>Resuelve tienda por middleware"]:::be
             MW["ResolveStoreFromDomain<br/>middleware"]:::be
             SC["StoreContextService<br/>singleton por request"]:::be
         end
     end
 
     subgraph DataLayer["Data Layer"]
-        PG[("PostgreSQL 18 + PostGIS<br/>schema multi-tenant<br/>store_id en cada tabla<br/>BelongsToStore global scope")]:::data
+        PG[("PostgreSQL 18 + PostGIS<br/>schema multi-store<br/>store_id en cada tabla<br/>BelongsToStore global scope")]:::data
         RD[("Redis 7<br/>cache + sessions + queues<br/>namespace panda: · kitsune:")]:::data
         FTP[("FTP / S3<br/>assets · uploads<br/>namespace panda/ · kitsune/")]:::data
     end
@@ -51,17 +63,17 @@ flowchart TB
     User -->|HTTPS| CF
     CF -->|HTTPS<br/>cached o proxied| Caddy
 
-    Caddy -->|"panda-estampados-and-kitsune.com<br/>www.panda-estampados-and-kitsune.com<br/>kitsune.com<br/>www.kitsune.com"| Astro
-    Caddy -->|"admin.panda-estampados-and-kitsune.com<br/>admin.kitsune.com"| PHP
-    Caddy -->|"api.panda-estampados-and-kitsune.com<br/>api.kitsune.com"| PHP
+    Caddy -->|"panda-estampados.com<br/>www.panda-estampados.com<br/>kitsune.com<br/>www.kitsune.com"| Astro
+    Caddy -->|"admin.panda-estampados.com<br/>admin.kitsune.com"| App
+    Caddy -->|"api.panda-estampados.com<br/>api.kitsune.com"| App
 
-    Astro -->|"fetch /api/*<br/>cookie + X-Forwarded-Host"| PHP
+    Astro -->|"fetch /api/*<br/>cookie + X-Forwarded-Host"| App
 
-    PHP --> MW
+    App --> MW
     MW --> SC
     SC --> PG
     SC --> RD
-    PHP -->|"upload/download assets"| FTP
+    App -->|"upload/download assets"| FTP
 
     Astro -.->|"static assets"| FTP
 
@@ -73,11 +85,22 @@ flowchart TB
     SC -.->|"setStore(id)"| Stores
 ```
 
+Las instancias `mm-boutique` y `morales-store` siguen el mismo
+patrón pero con dominios únicos:
+
+- `mm-boutique.com`, `www.mm-boutique.com`, `admin.mm-boutique.com`.
+- `morales-store.com`, `www.morales-store.com`,
+  `admin.morales-store.com`.
+
+Cada instancia es una unidad aislada: BD propia, Redis propio,
+FTP propio. Ver [operations/deployment.md](../operations/deployment.md
+"operations/deployment.md") para el detalle de despliegue.
+
 ---
 
 ## 2. Flujo de request — Storefront
 
-Cómo se resuelve una visita a `panda-estampados-and-kitsune.com/productos`:
+Cómo se resuelve una visita a `panda-estampados.com/productos`:
 
 ```mermaid
 sequenceDiagram
@@ -92,17 +115,17 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Cache as Redis
 
-    U->>CF: GET https://panda-estampados-and-kitsune.com/productos
-    CF->>Caddy: HTTPS request (Host: panda-estampados-and-kitsune.com)
+    U->>CF: GET https://panda-estampados.com/productos
+    CF->>Caddy: HTTPS request (Host: panda-estampados.com)
     Caddy->>FE: reverse_proxy a frontend:4321
 
     FE->>FE: Astro lee request.headers.host<br/>Resuelve tenant='panda'
     FE->>FE: Aplica theme + i18n + branding de Panda
 
-    FE->>BE: GET /api/storefront/products<br/>Header: X-Forwarded-Host: panda-estampados-and-kitsune.com<br/>Cookie: session (si existe)
+    FE->>BE: GET /api/storefront/products<br/>Header: X-Forwarded-Host: panda-estampados.com<br/>Cookie: session (si existe)
 
     BE->>MW: handle(request)
-    MW->>DB: SELECT s.* FROM stores s<br/>JOIN store_domains d<br/>WHERE d.domain='panda-estampados-and-kitsune.com'<br/>AND s.is_active=true
+    MW->>DB: SELECT s.* FROM stores s<br/>JOIN store_domains d<br/>WHERE d.domain='panda-estampados.com'<br/>AND s.is_active=true
     DB-->>MW: store_id=1, is_active=true
     MW->>SC: setStore($store) (singleton por request)
     MW-->>BE: next($request) con store en contexto
@@ -119,16 +142,22 @@ sequenceDiagram
     CF-->>U: página con productos
 ```
 
-**Punto clave:** la línea `WHERE store_id=1` **no la escribió ningún
-developer**. La inyecta el global scope del trait `BelongsToStore`. Si
-olvidás el trait, Laravel no filtra y rompes el aislamiento. Por eso
-el `MultiTenantHttpIsolationTest` es crítico.
+**Punto clave:** la línea `WHERE store_id=1` **no la escribió
+ningún developer**. La inyecta el global scope del trait
+`BelongsToStore`. Si olvidás el trait, Laravel no filtra y
+rompes el aislamiento. Por eso el `MultiTenantHttpIsolationTest`
+es crítico.
+
+Para instancias single-store (MM Boutique, Morales Store) el
+mismo flujo aplica pero la BD solo conoce un `store_id`. El
+middleware `ResolveStoreFromDomain` valida que el dominio
+entrante pertenezca al tenant activo.
 
 ---
 
 ## 3. Flujo de request — Admin
 
-Cómo se resuelve un login en `admin.panda-estampados-and-kitsune.com`:
+Cómo se resuelve un login en `admin.panda-estampados.com`:
 
 ```mermaid
 sequenceDiagram
@@ -141,16 +170,16 @@ sequenceDiagram
     participant Auth as Sanctum
     participant DB as PostgreSQL
 
-    Admin->>CF: GET https://admin.panda-estampados-and-kitsune.com/login
-    CF->>Caddy: HTTPS (Host: admin.panda-estampados-and-kitsune.com)
-    Caddy->>BE: reverse_proxy a backend:8000
+    Admin->>CF: GET https://admin.panda-estampados.com/login
+    CF->>Caddy: HTTPS (Host: admin.panda-estampados.com)
+    Caddy->>BE: reverse_proxy a app:8000
 
     BE->>MW: handle(request)
-    MW->>DB: SELECT store FROM store_domains<br/>WHERE domain='admin.panda-estampados-and-kitsune.com'
+    MW->>DB: SELECT store FROM store_domains<br/>WHERE domain='admin.panda-estampados.com'
     DB-->>MW: store_id=1 (Panda)
     MW->>BE: store resuelto en contexto
 
-    Admin->>BE: POST /api/auth/login<br/>{ email, password }
+    Admin->>BE: POST /api/v1/auth/login<br/>{ email, password }
     BE->>Auth: AuthController@login
     Auth->>DB: SELECT user WHERE email=?
     DB-->>Auth: user con store_id=1
@@ -158,88 +187,101 @@ sequenceDiagram
     Auth->>DB: INSERT personal_access_tokens<br/>(Sanctum, scoped a store_id)
     Auth-->>Admin: 200 + cookie Secure + Bearer token
 
-    Admin->>BE: GET /api/admin/dashboard<br/>Cookie: panda_session
+    Admin->>BE: GET /api/v1/admin/dashboard<br/>Cookie: panda_session
     BE->>MW: handle — store_id=1 confirmado
     BE->>DB: queries filtradas por store_id=1
     DB-->>BE: data de Panda
     BE-->>Admin: dashboard
 ```
 
-**Diferencia con storefront:** el admin fija el `store_id` **dos
-veces**: una por el dominio (`ResolveStoreFromDomain`) y otra por el
-usuario logueado (campo `users.store_id`). Si no coinciden, **se
-rechaza el request**. Esto evita que un operador de Kitsune entre a
-`admin.panda-estampados-and-kitsune.com`.
+**Diferencia con storefront:** el admin fija el `store_id`
+**dos veces**: una por el dominio (`ResolveStoreFromDomain`)
+y otra por el usuario logueado (campo `users.store_id`). Si
+no coinciden, **se rechaza el request**. Esto evita que un
+operador de Kitsune entre a `admin.panda-estampados.com`.
 
 ---
 
-## 4. Conexiones con servicios
-
-| Servicio       | Quién lo usa       | Protocolo    | Datos que pasan                              |
-| -------------- | ------------------ | ------------ | -------------------------------------------- |
-| **Cloudflare** | Caddy              | HTTPS        | Request/response. Headers, cookies, body.    |
-| **Caddy**      | Frontend / Backend | HTTP interno | Host header, X-Forwarded-Proto, X-Real-IP.   |
-| **Frontend**   | Backend            | HTTP/HTTPS   | Fetch API. Cookies Sanctum. Header `Host`.   |
-| **Backend**    | PostgreSQL         | TCP 5432     | Credenciales `.env`. Queries parametrizadas. |
-| **Backend**    | Redis              | TCP 6379     | `REDIS_PASSWORD`. Sesiones, cache, queues.   |
-| **Backend**    | FTP / S3           | FTP/S3       | Credenciales en `.env`. Assets binarios.     |
-| **Frontend**   | FTP / S3           | HTTPS        | Solo assets públicos vía CDN.                |
-
-### Conexiones K8s internas
+## 4. Conexiones entre servicios (Docker Compose)
 
 ```mermaid
 flowchart LR
-    subgraph Pods["Kubernetes Pods"]
-        Astro["astro pod<br/>:4321"]
-        PHP["laravel pod<br/>:8000"]
-        Worker["worker pod<br/>php artisan queue:work"]
+    subgraph Stack["Docker Stack — una instancia"]
+        Astro["frontend<br/>:4321"]
+        App["app<br/>:8000"]
+        Worker["worker<br/>php artisan queue:work"]
     end
-    subgraph Stateful["StatefulSet"]
+    subgraph Volumes["Named Volumes"]
         PG[("postgres<br/>:5432")]
         RD[("redis<br/>:6379")]
         FTP_S[("ftp / s3<br/>:21 / :443")]
     end
 
-    Astro <-->|"HTTP /api/*"| PHP
-    PHP -->|"5432 TCP"| PG
-    PHP -->|"6379 TCP"| RD
+    Astro <-->|"HTTP /api/*"| App
+    App -->|"5432 TCP"| PG
+    App -->|"6379 TCP"| RD
     Worker -->|"5432 TCP"| PG
     Worker -->|"6379 TCP"| RD
     Worker -->|"21 / 443"| FTP_S
-    PHP -->|"21 / 443"| FTP_S
+    App -->|"21 / 443"| FTP_S
 ```
 
-> Los **Secrets** (DB password, Redis password, FTP creds) viven en
-> K8s Secrets montados como variables de entorno en cada pod. Nunca en
-> código ni en ConfigMaps.
+> Los **Secrets** (DB password, Redis password, FTP creds)
+> viven en `docker/instances/<stage>/<store>/environment/.env`
+> montados como variables de entorno en cada container. Nunca
+> en código ni en archivos versionados.
+
+En **dev** la capa HTTP está separada: existe un sidecar
+`nginx` (`:8000`) entre Caddy y el FPM (`backend:9000`). En
+**producción** la imagen `app` ya trae `php-fpm` + nginx
+unificados en un solo puerto `:8000`. Ver
+[operations/deployment.md](../operations/deployment.md
+"operations/deployment.md") para la diferencia concreta.
 
 ---
 
 ## 5. Decisiones clave del diseño
 
-| Decisión                                   | Por qué                                                                                                                 |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| **1 backend, 1 frontend, N tiendas**       | El 95% del código es idéntico. Multi-instance es duplicar operaciones, no valor.                                                |
-| **Subdominio admin por tienda**            | Cookies aisladas, deploy independiente, branding distinto, seguridad reforzada.                                         |
-| **PostgreSQL compartido con `store_id`**   | Una sola fuente de verdad. El global scope del trait aísla los datos.                                                   |
-| **Redis compartido con namespaces**        | `panda:cart:123` y `kitsune:cart:123` conviven sin colisión. Invalidación cross-tenant no es problema porque no existe. |
-| **FTP único con prefijos**                 | Los assets son archivos. El servidor no sabe de tiendas. Los nombres de archivo lleva la tienda.                          |
-| **Middleware resuelve tienda por host**    | Single source of truth para el store activo en cada request.                                                            |
-| **Wildcard TLS `*.panda-estampados-and-kitsune.com`** | Un cert cubre storefront + admin. Renovación automática con Caddy + Cloudflare.                                         |
+| Decisión                                                  | Por qué                                                                                                                |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **1 backend, 1 frontend, N tiendas**                      | El 95% del código es idéntico. Multi-instance es duplicar operaciones, no valor.                                       |
+| **Subdominio admin por tienda**                           | Cookies aisladas, deploy independiente, branding distinto, seguridad reforzada.                                        |
+| **PostgreSQL compartido con `store_id` (dentro de stack)**| Una sola fuente de verdad por instancia. El global scope del trait aísla los datos.                                    |
+| **Redis compartido con namespaces**                       | `panda:cart:123` y `kitsune:cart:123` conviven sin colisión. Invalidación cross-tenant no es problema porque no existe. |
+| **FTP único con prefijos**                                | Los assets son archivos. El servidor no sabe de tiendas. Los nombres de archivo lleva la tienda.                       |
+| **Middleware resuelve tienda por host**                   | Single source of truth para el store activo en cada request.                                                           |
+| **Wildcard TLS `*.panda-estampados.com`** + `*.kitsune.com` | Un cert cubre storefront + admin por marca. Renovación automática con Caddy + Cloudflare.                            |
 
 ---
 
 ## 6. Lo que falta para llegar a producción
 
-1. **Caddyfile** con los virtualhosts para cada dominio real.
-2. **Seeder `store_domains`** cargando `panda-estampados-and-kitsune.com`,
-   `admin.panda-estampados-and-kitsune.com`, `kitsune.com`,
-   `admin.kitsune.com`, `www.*`, etc.
-3. **Campo `users.store_id`** con FK a `stores.id`.
-4. **Middleware/Policy** que valida que
+1. ✅ **Caddyfile** con los virtualhosts para cada dominio real —
+   `docker/instances/production/<store>/Caddyfile`.
+2. ✅ **Seeder `store_domains`** cargando `panda-estampados.com`,
+   `admin.panda-estampados.com`, `kitsune.com`, `admin.kitsune.com`,
+   `mm-boutique.com`, `admin.mm-boutique.com`, `morales-store.com`,
+   `admin.morales-store.com`, `www.*`, etc. — vía
+   `tenants:bootstrap seeds/<store>.json`.
+3. ✅ **Campo `users.store_id`** con FK a `stores.id`.
+4. 🔄 **Middleware/Policy** que valida que
    `users.store_id === store_context.store_id` antes de cualquier
-   acción admin.
-5. **Astro middleware** que lee el `Host` del request y expone el tenant al SSR.
-6. **HPA en K8s** para escalar `astro` y `laravel` independientemente.
-7. **Backups automatizados** de Postgres y Redis (cron + S3).
-8. **Monitoreo** con Prometheus + Grafana (métricas de latencia por tienda).
+   acción admin. Verificar cobertura en `policies/` por store.
+5. ✅ **Astro middleware** que lee el `Host` del request y expone
+   el tenant al SSR — `src/middleware.ts` con
+   `detectTenantFromHost`.
+6. ⏳ **Backups automatizados** de Postgres y Redis (cron + S3).
+   Ver [operations/backups.md](../operations/backups.md
+   "operations/backups.md").
+7. ⏳ **Monitoreo** con Prometheus + Grafana (métricas de
+   latencia por tienda). Stack aún no configurado.
+
+## Decisiones arquitectónicas vinculadas
+
+- [architecture/overview.md](overview.md "architecture/overview.md")
+  — Diagrama del sistema actual.
+- [architecture/multi-store.md](multi-store.md
+  "architecture/multi-store.md") — Multi-store design dentro de
+  una instancia.
+- [architecture/decisions.md](decisions.md "architecture/decisions.md")
+  — ADRs.

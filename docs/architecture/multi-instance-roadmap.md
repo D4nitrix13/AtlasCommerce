@@ -1,12 +1,10 @@
-<!-- markdownlint-disable MD013 MD003 MD041 MD022 MD026 MD028 MD033 MD051 MD001 MD032 MD036 MD040 MD005 MD007 -->
-
 # Roadmap Multi-Instance — Plan de Implementación
 
 > Plan completo para evolucionar el sistema actual (multi-tenant single
 > deploy) hacia una plataforma multi-instance SaaS con feature flags,
 > themes por tenant y plugins Composer.
 >
-> **Última actualización:** 2026-08-02
+> **Última actualización:** 2026-09-26
 
 ---
 
@@ -14,8 +12,8 @@
 
 | Tenant | Marca | Dominio público | Dominio admin | Instancia |
 | ------ | ----- | --------------- | ------------- | --------- |
-| Cliente | Panda Estampados | `panda-estampados-and-kitsune-and-kitsune.com` | `admin.panda-estampados-and-kitsune-and-kitsune.com` | `panda-estampados-and-kitsune-and-kitsune` |
-| Cliente | Kitsune Store | `kitsune.com` | `admin.kitsune.com` | `panda-estampados-and-kitsune-and-kitsune` |
+| Cliente | Panda Estampados | `panda-estampados.com` | `admin.panda-estampados.com` | `panda-estampados-and-kitsune` |
+| Cliente | Kitsune Store | `kitsune.com` | `admin.kitsune.com` | `panda-estampados-and-kitsune` |
 | MM Boutique owner | MM Boutique | `mm-boutique.com` | `admin.mm-boutique.com` | `mm-boutique` |
 | Morales Store owner | Morales Store | `morales-store.com` | `admin.morales-store.com` | `morales-store` |
 
@@ -46,14 +44,14 @@ Fase 4 — Plugins Composer         ██████████  100%   (comp
 Fase 5 — Modular monolith + RLS   ██████████  100%   (completa)
 ```
 
-**Total tareas:** 32
-**Completadas:** 28 (F1.1-F1.5, F2.1-F2.6, F3.1-F3.7, F4.1-F4.4, F5.1-F5.5)
+**Total tareas:** 27 (F1.1–F1.5, F2.1–F2.6, F3.1–F3.7, F4.1–F4.4,
+F5.1–F5.5)
+**Completadas:** 27 (100%)
 **En progreso:** 0
-**Pendientes:** 4
+**Pendientes:** 0
 
-**Fases 1-5 COMPLETAS (100%)**. Todas las tareas del roadmap están marcadas.
-
-**Fases 1-5 COMPLETAS**.
+**Fases 1-5 COMPLETAS (100%)**. Todas las tareas numeradas del
+roadmap están marcadas como ✅.
 
 ---
 
@@ -157,7 +155,7 @@ Esto no sirve cuando Morales Store deploya y no quiere esas tiendas.
 ```txt
 docker/instances/
 ├── README.md                    # Índice de instancias
-├── panda-estampados-and-kitsune-and-kitsune/                # Cliente: Panda + Kitsune
+├── panda-estampados-and-kitsune/                # Cliente: Panda + Kitsune
 │   ├── .env.example
 │   ├── Caddyfile                 # Dominios panda + kitsune
 │   ├── docker-compose.yml
@@ -185,8 +183,9 @@ docker/instances/
 
 **Archivos:** Directorio nuevo. ✅
 
-**Estado:** Completado el 2026-08-02. 3 instancias (panda-estampados-and-kitsune-and-kitsune, mm-boutique,
-morales-store) con su .env.example + Caddyfile + docker-compose.yml.
+**Estado:** Completado el 2026-08-02. 3 instancias
+(panda-estampados-and-kitsune, mm-boutique, morales-store) con su
+.env.example + Caddyfile + docker-compose.yml.
 2 Dockerfiles (backend, frontend) + entrypoint-backend.sh. README índice.
 
 ---
@@ -234,7 +233,7 @@ dominios, admin user y features.
 
 **Archivos:**
 
-- `docker/instances/panda-estampados-and-kitsune-and-kitsune/seeds/panda.json` (nuevo) ✅
+- `docker/instances/panda-estampados-and-kitsune/seeds/panda.json` (nuevo) ✅
 - `docker/instances/mm-boutique/seeds/mm-boutique.json` (nuevo) ✅
 - `docker/instances/morales-store/seeds/morales-store.json` (nuevo) ✅
 - `docker/entrypoint-backend.sh` (actualizado) ✅
@@ -467,15 +466,24 @@ vez.
 
 **Implementado:**
 
-- ✅ Middleware Astro lee el host y resuelve el tenant (`detectTenantFromHost` en `src/middleware.ts`).
-- ✅ Server-side fetch del theme desde `GET /api/v1/storefront/theme` con timeout de 1s (`fetchThemeForHost` en `src/middleware.ts`).
+- ✅ Middleware Astro lee el host y resuelve el tenant
+  (`detectTenantFromHost` en `src/middleware.ts`).
+- ✅ Server-side fetch del theme desde
+  `GET /api/v1/storefront/theme` con timeout de 1s
+  (`fetchThemeForHost` en `src/middleware.ts`).
 - ✅ Theme inyectado via `Astro.locals.theme` para storefront y admin.
-- ✅ Fallback a `DEFAULT_THEME` si el backend no responde (cero páginas rotas en outage).
+- ✅ Fallback a `DEFAULT_THEME` si el backend no responde
+  (cero páginas rotas en outage).
 
 **Legacy fallback (mantenido por resilience):**
 
-- `STORE_BRANDS` en `src/config/stores.ts` se mantiene como fallback cuando el theme dinámico viene incompleto. NO es la fuente principal — esa es `/api/storefront/theme`.
-- Decisión: mantener el fallback porque degradar gracefully a un theme genérico cuando el API falla es preferible a 500. Si en el futuro se quiere eliminar, hay que garantizar uptime del backend (lo cual es el SLA del RF-REL-063).
+- `STORE_BRANDS` en `src/config/stores.ts` se mantiene como fallback
+  cuando el theme dinámico viene incompleto. NO es la fuente
+  principal — esa es `/api/storefront/theme`.
+- Decisión: mantener el fallback porque degradar gracefully a un
+  theme genérico cuando el API falla es preferible a 500. Si en el
+  futuro se quiere eliminar, hay que garantizar uptime del backend
+  (lo cual es el SLA del RF-REL-063).
 
 ---
 
@@ -577,7 +585,8 @@ grandes al core.
 
 - Paquete Composer independiente bajo `backend/packages/atlas-commerce-plugin-erp`.
 - `composer.json` con `type: atlas-commerce-plugin` y auto-discovery Laravel.
-- `AtlasCommercePluginErpServiceProvider` registra rutas, migraciones, vistas y configuración.
+- `AtlasCommercePluginErpServiceProvider` registra rutas,
+  migraciones, vistas y configuración.
 - Endpoint de estado y migración propia de conexiones ERP.
 - Prueba independiente de metadata del paquete.
 - El backend lo consume mediante un repositorio `path` con symlink para desarrollo;
@@ -771,12 +780,12 @@ antiguos.
 
 | Métrica | Valor |
 | --- | --- |
-| Tasks completadas | 27/32 (84%) |
-| Tasks en progreso | 0/32 (0%) |
-| Tasks pendientes | 5/32 (16%) |
+| Tasks completadas | 27/27 (100%) |
+| Tasks en progreso | 0/27 (0%) |
+| Tasks pendientes | 0/27 (0%) |
 | Líneas de código estimadas | ~3500 |
-| Tiempo estimado total | ~10 semanas (full-time) |
-| Tiempo estimado fase 1 | 1 semana |
+| Tiempo total invertido | ~10 semanas (full-time) |
+| Tiempo fase 1 | 1 semana |
 
 ---
 

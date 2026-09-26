@@ -97,38 +97,75 @@ Uso:
 ## Frontend — Astro
 
 - `PUBLIC_API_URL` — URL base de la API `Laravel`
-  (con `/api`, ej. `http://localhost:9000/api`)
+  (relativa `/api`, ej. `/api` en dev). En local con un
+  stack corriendo fuera de Caddy puede forzarse absoluto
+  (ej. `http://localhost:9000/api`).
 
 ### Notas
 
 - `PUBLIC_API_URL` **debe** incluir el sufijo `/api`.
 - Los endpoints en `src/lib/endpoints.ts` **no**
   incluyen `/api`.
-- En producción:
-  `PUBLIC_API_URL=https://api.panda-estampados.com/api`
+- En producción se usa la forma relativa `/api` para que
+  Caddy rutee por `Host` header a la instancia correcta.
+  Ver [multi-store.md](../architecture/multi-store.md
+  "docs/architecture/multi-store.md").
 
 ## Docker
 
 - `POSTGRES_PORT` — Puerto local de `PostgreSQL`
-  (archivo: `docker/dev/.env`)
+  (archivo: `docker/instances/development/<tenant>/environment/.env`)
 - `POSTGRES_USER` — Usuario de `PostgreSQL`
-  (archivo: `docker/dev/.env`)
+  (archivo: `docker/instances/development/<tenant>/environment/.env`)
 - `POSTGRES_PASSWORD` — Contraseña de `PostgreSQL`
-  (archivo: `docker/dev/.env`)
+  (archivo: `docker/instances/development/<tenant>/environment/.env`)
 - `POSTGRES_DB` — Nombre de la base de datos
-  (archivo: `docker/dev/.env`)
+  (archivo: `docker/instances/development/<tenant>/environment/.env`)
+
+`<tenant>` es uno de `panda-estampados-and-kitsune`,
+`mm-boutique` o `morales-store`. Cada instancia tiene su
+propio `.env` aislado.
 
 ## Dominios locales (desarrollo)
 
-Para desarrollo local con múltiples dominios,
-agregar en `/etc/hosts`:
+Para desarrollo local con múltiples dominios, agregar en
+`/etc/hosts`. Sigue la convención de
+[getting-started/local-domains.md](../getting-started/local-domains.md
+"docs/getting-started/local-domains.md") usando `.com` como
+TLD local. Las instancias pueden correr en paralelo porque
+cada una expone puertos distintos en el host.
+
+### Instancia `panda-estampados-and-kitsune` (multi-brand)
 
 ```txt
-127.0.0.1  panda-estampados.test
-127.0.0.1  kitsune.test
-127.0.0.1  admin.panda-estampados.test
-127.0.0.1  api.panda-estampados.test
+127.0.0.1   panda-estampados.com
+127.0.0.1   www.panda-estampados.com
+127.0.0.1   admin.panda-estampados.com
+127.0.0.1   kitsune.com
+127.0.0.1   www.kitsune.com
+127.0.0.1   admin.kitsune.com
 ```
+
+### Instancia `mm-boutique`
+
+```txt
+127.0.0.1   mm-boutique.com
+127.0.0.1   www.mm-boutique.com
+127.0.0.1   admin.mm-boutique.com
+```
+
+### Instancia `morales-store`
+
+```txt
+127.0.0.1   morales-store.com
+127.0.0.1   www.morales-store.com
+127.0.0.1   admin.morales-store.com
+```
+
+> Solo una instancia puede correr a la vez (puertos del
+> host compartidos: `5432`, `6379`, `9000`, `4321` mapeados
+> con shift +1000). Para correr varias en paralelo, override
+> `*_PORT` en el `.env` correspondiente.
 
 ## Producción
 
@@ -136,7 +173,11 @@ agregar en `/etc/hosts`:
 - `APP_DEBUG` — `false`
 - `DB_HOST` — `postgres` (`Docker`)
 - `REDIS_HOST` — `redis` (`Docker`)
-- `PUBLIC_API_URL` —
-  `https://api.panda-estampados.com/api`
-- `SANCTUM_STATEFUL_DOMAINS` —
-  `panda-estampados.com,kitsune.com,admin.panda-estampados.com`
+- `PUBLIC_API_URL` — Relativo (`/api`), no absoluto. Caddy
+  expone API bajo cada `admin.<dominio>/*` según el
+  `Caddyfile` por instancia.
+- `SANCTUM_STATEFUL_DOMAINS` (ejemplo instancia
+  `panda-estampados-and-kitsune`):
+  `panda-estampados.com,kitsune.com,admin.panda-estampados.com,
+  www.panda-estampados.com,www.kitsune.com`. Las otras
+  instancias usan sus propios dominios equivalentes.
