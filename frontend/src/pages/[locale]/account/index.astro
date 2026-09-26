@@ -1,0 +1,152 @@
+---
+/**
+ * Dashboard del cliente (RF-CUST-040 / Baymard §6.1 / F1.3).
+ *
+ * Estructura:
+ *   1. WelcomeBanner      → saludo localizado por store.
+ *   2. QuickActionsGrid   → 8 atajos a las tareas más comunes.
+ *   3. RecentOrdersList   → últimos 5 pedidos con status pill.
+ *
+ * Filosófica Baymard §2.6:
+ *   - Returning users son task-oriented → no hay hero, no recommendations.
+ *   - Asumir que olvidaron la nav → atajos obvios cada vez.
+ *
+ * Mock data:
+ *   - `CURRENT_USER` y `RECENT_ORDERS_MOCK` viven en `data/account-mock.ts`.
+ *   - Cuando `/api/storefront/me` y `/api/storefront/orders` existan,
+ *     reemplazar el bloque `import * as mock` por fetch + hydration.
+ *
+ * Multi-tenant:
+ *   - `CURRENT_USER.storeSlug` (mock) define saludo + variant del banner.
+ *   - `Astro.locals.tenant.tenantSlug` (real) se usa como fallback si
+ *     el mock queda vacío.
+ */
+import AccountLayout from '../../../layouts/AccountLayout.astro';
+import DashboardWelcomeBanner from '../../../components/account/dashboard/DashboardWelcomeBanner.astro';
+import QuickActionsGrid from '../../../components/account/dashboard/QuickActionsGrid.astro';
+import RecentOrdersList from '../../../components/account/dashboard/RecentOrdersList.astro';
+import { getServerDictionary, getServerLocale } from '../../../i18n/server';
+import {
+  CURRENT_USER,
+  RECENT_ORDERS_MOCK,
+  getRecentOrders,
+  type OrderStatus,
+} from '../../../data/account-mock';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+// Store resolution: prioridad al mock del user, fallback al tenant
+// resuelto por middleware. Si tampoco, null → variant neutral.
+const effectiveStoreSlug =
+  CURRENT_USER.storeSlug ??
+  Astro.locals.tenant?.tenantSlug ??
+  null;
+
+const isKitsune = effectiveStoreSlug === 'kitsune';
+const greetingTemplate = isKitsune
+  ? t['account.dashboard.greeting.kitsune']
+  : t['account.dashboard.greeting.panda'];
+const greeting = greetingTemplate.replace('{name}', CURRENT_USER.firstName);
+
+const bannerVariant: 'kitsune' | 'panda' | 'neutral' = isKitsune
+  ? 'kitsune'
+  : effectiveStoreSlug === 'panda-estampados'
+    ? 'panda'
+    : 'neutral';
+
+// Locale-prefixed hrefs para los atajos.
+const localePrefix = `/${locale}`;
+const orderIdLabel = (id: string): string =>
+  t['account.dashboard.recentOrders.orderId'].replace('{id}', id);
+const itemsCountLabel = (count: number): string =>
+  t['account.dashboard.recentOrders.itemsCount'].replace('{count}', String(count));
+const statusLabel = (status: OrderStatus): string => {
+  const key = `account.orderStatus.${status}` as const;
+  return t[key];
+};
+
+const quickActions = [
+  {
+    label: t['account.dashboard.action.orders.label'],
+    description: t['account.dashboard.action.orders.description'],
+    href: `${localePrefix}/account/orders`,
+    iconName: 'shopping-cart',
+  },
+  {
+    label: t['account.dashboard.action.wishlist.label'],
+    description: t['account.dashboard.action.wishlist.description'],
+    href: `${localePrefix}/account/wishlist`,
+    iconName: 'gift',
+  },
+  {
+    label: t['account.dashboard.action.profile.label'],
+    description: t['account.dashboard.action.profile.description'],
+    href: `${localePrefix}/account/profile`,
+    iconName: 'user',
+  },
+  {
+    label: t['account.dashboard.action.addresses.label'],
+    description: t['account.dashboard.action.addresses.description'],
+    href: `${localePrefix}/account/addresses`,
+    iconName: 'building-office',
+  },
+  {
+    label: t['account.dashboard.action.security.label'],
+    description: t['account.dashboard.action.security.description'],
+    href: `${localePrefix}/account/security`,
+    iconName: 'shield-check',
+  },
+  {
+    label: t['account.dashboard.action.support.label'],
+    description: t['account.dashboard.action.support.description'],
+    href: `${localePrefix}/account/tickets`,
+    iconName: 'chat-bubble-left-right',
+  },
+  {
+    label: t['account.dashboard.action.notifications.label'],
+    description: t['account.dashboard.action.notifications.description'],
+    href: `${localePrefix}/account/notifications`,
+    iconName: 'bell',
+  },
+  {
+    label: t['account.dashboard.action.privacy.label'],
+    description: t['account.dashboard.action.privacy.description'],
+    href: `${localePrefix}/account/privacy`,
+    iconName: 'cog-6-tooth',
+  },
+];
+
+const recentOrders = getRecentOrders(5);
+---
+
+<AccountLayout title={t['account.layout.title']}>
+  <DashboardWelcomeBanner
+    userName={CURRENT_USER.firstName}
+    greeting={greeting}
+    subtitle={t['account.dashboard.subtitle']}
+    variant={bannerVariant}
+  />
+
+  <QuickActionsGrid
+    heading={t['account.dashboard.quickActions.heading']}
+    items={quickActions}
+  />
+
+  <RecentOrdersList
+    orders={recentOrders}
+    heading={t['account.dashboard.recentOrders.heading']}
+    viewAllLabel={t['account.dashboard.recentOrders.viewAll']}
+    viewAllHref={`${localePrefix}/account/orders`}
+    orderIdLabel={orderIdLabel}
+    itemsCountLabel={itemsCountLabel}
+    viewDetailLabel={t['account.dashboard.recentOrders.viewDetail']}
+    statusLabel={statusLabel}
+    emptyTitle={t['account.dashboard.recentOrders.empty']}
+    emptyHint={t['account.dashboard.recentOrders.emptyHint']}
+    loading={false}
+    error={false}
+    loadingLabel={t['account.dashboard.recentOrders.loading']}
+    errorLabel={t['account.dashboard.recentOrders.error']}
+  />
+</AccountLayout>

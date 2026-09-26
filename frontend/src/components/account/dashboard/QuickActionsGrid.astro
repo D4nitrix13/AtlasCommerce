@@ -1,0 +1,60 @@
+---
+/**
+ * QuickActionsGrid — Composición responsive de QuickActionCards.
+ *
+ * Saca la composición del `index.astro` para que la página no supere
+ * las 400 líneas (AGENTS §1). El grid es:
+ *
+ *   mobile:  1 col
+ *   sm:      2 cols
+ *   lg:      3 cols
+ *
+ * Esto matchea el patrón del design-refs §6.1 (icon-based dashboard
+ * grid). El page pasa el array de items ya resueltos a href (con
+ * locale prefix) + labels/descripciones localizadas.
+ */
+import QuickActionCard from './QuickActionCard.astro';
+
+export interface QuickActionItem {
+  label: string;
+  description: string;
+  href: string;
+  iconName: string;
+  badge?: number | string;
+}
+
+interface Props {
+  heading: string;
+  items: QuickActionItem[];
+}
+
+const { heading, items } = Astro.props;
+const hasItems = items.length > 0;
+---
+
+<section
+  aria-labelledby="quick-actions-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm"
+>
+  <h2 id="quick-actions-heading" class="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+
+  {
+    hasItems ? (
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+        {items.map((item) => (
+          <QuickActionCard
+            label={item.label}
+            description={item.description}
+            href={item.href}
+            iconName={item.iconName}
+            badge={item.badge}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="py-6 text-center text-sm text-slate-500">—</p>
+    )
+  }
+</section>
