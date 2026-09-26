@@ -12,7 +12,13 @@ operadores.
 
 ## Variables de entorno
 
-Definidas en `backend/.env.example`:
+Definidas en
+`docker/instances/<stage>/<store>/environment/.env`
+(donde `<stage>` es `development` o `production` y `<store>`
+es `panda-estampados-and-kitsune`, `mm-boutique` o
+`morales-store`). Cada instancia tiene su propio `.env`
+aislado; las credenciales OAuth **no se comparten** entre
+instancias.
 
 ```env
 GOOGLE_CLIENT_ID=

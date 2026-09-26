@@ -1,14 +1,23 @@
-# Arquitectura Multi-Tienda
+# Arquitectura Multi-Store
+
+> Este documento describe el modelo multi-store que aplica a
+> la instancia `panda-estampados-and-kitsune` (donde el mismo
+> dueño opera Panda Estampados y Kitsune Store). Las instancias
+> `mm-boutique` y `morales-store` son single-brand — para esas,
+> multi-store colapsa a una sola marca y los mecanismos de
+> `store_id` quedan activos pero sin discriminacion practica.
+> Ver [overview.md](overview.md "architecture/overview.md")
+> para la vision multi-instancia.
 
 ## Problema que resuelve
 
 Panda Estampados y Kitsune son dos marcas
 comerciales con identidad, público y catálogo
 distintos, pero comparten operaciones, inventario
-y administración. El sistema debe presentar dos
-tiendas independientes para el cliente final
-mientras mantiene una plataforma unificada para
-el dueño.
+y administración dentro de la misma instancia Docker.
+El sistema debe presentar dos tiendas independientes
+para el cliente final mientras mantiene una plataforma
+unificada para el dueño.
 
 ## Definiciones
 
@@ -34,7 +43,24 @@ el dueño.
 - **SalesChannel** — Canal de venta: Web,
   WhatsApp, Instagram, Admin, tienda física.
 
-## Las dos tiendas
+## Instancias y marcas
+
+AtlasCommerce se despliega como tres stacks Docker
+independientes. Solo uno aplica multi-store en la práctica:
+
+| Instancia                          | Marcas                                  | Multi-store |
+| ---------------------------------- | --------------------------------------- | ----------- |
+| `panda-estampados-and-kitsune`     | Panda Estampados + Kitsune Store        | Sí          |
+| `mm-boutique`                      | MM Boutique                             | No (1)      |
+| `morales-store`                    | Morales Store                           | No (1)      |
+
+(1) Las instancias single-brand conservan el modelo
+`store_id` en BD (por consistencia con el resto del modelo de
+datos) pero todos los registros apuntan al mismo `store_id`.
+El middleware `ResolveStoreFromDomain` resuelve siempre al
+mismo store.
+
+## Las dos tiendas de la instancia multi-store
 
 ### Panda Estampados
 
