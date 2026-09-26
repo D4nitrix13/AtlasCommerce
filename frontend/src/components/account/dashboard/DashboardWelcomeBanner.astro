@@ -1,0 +1,51 @@
+---
+/**
+ * DashboardWelcomeBanner — Banner top del dashboard del cliente.
+ *
+ * Según el store del usuario:
+ *   - Kitsune (B2C otaku) → "おかえりなさい, {name}" + copy breve.
+ *   - Panda Estampados (B2B) → "Bienvenido de vuelta, {name}" + copy.
+ *   - Cualquier otro store → fallback neutro "Hola, {name}".
+ *
+ * El saludo correcto se elige en el page (`index.astro`) pasando
+ * `greeting` ya resuelta al i18n — el banner NO lee el storeSlug.
+ *
+ * Variantes de estilo:
+ *   - `kitsune`: gradient violeta (color-mix sobre --primary).
+ *   - `panda`: gradient esmeralda (idem).
+ *   - `neutral`: slate (fallback para stores no detectados).
+ */
+interface Props {
+  userName: string;
+  greeting: string;
+  subtitle: string;
+  variant: 'kitsune' | 'panda' | 'neutral';
+}
+
+const { userName, greeting, subtitle, variant } = Astro.props;
+
+const VARIANT_CLASSES: Record<Props['variant'], string> = {
+  kitsune:
+    'bg-[color-mix(in_srgb,var(--primary,#7c3aed)_8%,white)] border-[color-mix(in_srgb,var(--primary,#7c3aed)_20%,white)]',
+  panda:
+    'bg-[color-mix(in_srgb,var(--primary,#059669)_8%,white)] border-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]',
+  neutral: 'bg-slate-50 border-slate-200',
+};
+---
+
+<section
+  aria-labelledby="dashboard-welcome-heading"
+  class:list={[
+    'rounded-2xl border p-6 sm:p-8',
+    VARIANT_CLASSES[variant],
+  ]}
+>
+  <h1
+    id="dashboard-welcome-heading"
+    class="text-2xl font-bold text-slate-900 sm:text-3xl"
+  >
+    {greeting}
+  </h1>
+  <p class="mt-2 text-sm text-slate-600 sm:text-base">{subtitle}</p>
+  <p class="sr-only">{`Usuario: ${userName}`}</p>
+</section>
