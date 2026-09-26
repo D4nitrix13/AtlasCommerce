@@ -20,7 +20,7 @@ autenticado en el request.
 ### 1. Login
 
 ```http
-POST /api/auth/login
+POST /api/v1/auth/login
 Content-Type: application/json
 
 {
@@ -48,7 +48,7 @@ peticiones subsecuentes.
 ### 2. Petición autenticada
 
 ```http
-GET /api/products
+GET /api/v1/products
 Authorization: Bearer abc123def456...
 Accept: application/json
 ```
@@ -56,7 +56,7 @@ Accept: application/json
 ### 3. Logout
 
 ```http
-POST /api/auth/logout
+POST /api/v1/auth/logout
 Authorization: Bearer abc123def456...
 ```
 
@@ -65,7 +65,7 @@ Elimina el token actual de `personal_access_tokens`.
 ### 4. Usuario autenticado
 
 ```http
-GET /api/auth/me
+GET /api/v1/auth/me
 Authorization: Bearer abc123def456...
 ```
 
@@ -73,16 +73,21 @@ Retorna los datos del usuario asociado al token.
 
 ## Rutas de autenticación
 
-| Método | URI                  | Descripción                 | Autenticación  |
-| ------ | -------------------- | --------------------------- | -------------- |
-| POST   | `/api/auth/login`    | Iniciar sesión              | No requiere    |
-| POST   | `/api/auth/register` | Registrar usuario           | No requiere    |
-| POST   | `/api/auth/logout`   | Cerrar sesión               | Requiere token |
-| GET    | `/api/auth/me`       | Obtener usuario autenticado | Requiere token |
+| Método | URI                       | Descripción                 | Autenticación  |
+| ------ | ------------------------- | --------------------------- | -------------- |
+| POST   | `/api/v1/auth/login`      | Iniciar sesión              | No requiere    |
+| POST   | `/api/v1/auth/register`   | Registrar usuario           | No requiere    |
+| POST   | `/api/v1/auth/logout`     | Cerrar sesión               | Requiere token |
+| GET    | `/api/v1/auth/me`         | Obtener usuario autenticado | Requiere token |
 
-**Nota:** Estas rutas deben existir en
-`routes/api.php` pero actualmente no están definidas
-como grupos separados. Verificar en el código fuente.
+**Nota:** Las rutas anteriores viven en
+`backend/routes/api.php` bajo el grupo con middleware
+`store.domain`. El prefijo `/api/v1/` lo aplica
+`backend/bootstrap/app.php` (RNF-MAIN-054, ver
+`docs/api/versioning.md`). El endpoint `auth/register`
+no está implementado todavía en
+`backend/routes/api.php` — la creación de clientes se
+realiza vía admin (`POST /api/v1/admin/customers`).
 
 ## Rutas protegidas
 
@@ -139,16 +144,30 @@ const response = await fetch(`${API_BASE_URL}/products`, {
 
 ## Relación con 2FA
 
-El 2FA **no está integrado aún** en el flujo de login.
-Actualmente:
+El 2FA **sí está integrado** en el flujo de login y en
+los mecanismos de recuperación. El estado actual:
 
-1. El usuario se autentica con email + password.
-2. Se emite un token `Sanctum`.
-3. El 2FA se activa y verifica después, una vez que el
-   usuario ya tiene token.
+1. El usuario envía credenciales a
+   `POST /api/v1/auth/login`.
+2. Si el usuario tiene 2FA activo, la respuesta es
+   `{ "status": "2fa_required", "challenge_token": "..." }`
+   y NO se emite token `Sanctum` todavía.
+3. El cliente envía el código TOTP a
+   `POST /api/v1/auth/2fa/verify-totp-login` con el
+   `challenge_token`; el backend emite el token `Sanctum`.
+4. Si el usuario no tiene 2FA, se devuelve el token
+   directamente.
 
-**Pendiente:** Integrar verificación 2FA entre la
-autenticación por contraseña y la emisión del token.
+Adicionalmente:
+
+- **Email OTP passwordless** vía `EmailOtpController`
+  (`POST /api/v1/auth/login/email-otp/request` y
+  `/verify`).
+- **WebAuthn / passkeys** vía `laravel/passkeys`
+  (commit `d4621fb`). Las rutas del paquete se
+  registran con middleware `web`, no bajo `/api/v1/`:
+  por ejemplo `GET /passkeys/login/options`,
+  `POST /passkeys/login`, `POST /user/passkeys`.
 
 Ver [backend/auth/auth-2fa.md](../auth/auth-2fa.md
 "Autenticación de Dos Factores") para detalles del
@@ -163,7 +182,10 @@ En `config/sanctum.php`:
 - `stateful` — Dominios que usan autenticación stateful
   (SPA cookies).
 
-En `.env`:
+En `.env` por instancia, ruta
+`docker/instances/<stage>/<store>/environment/.env`
+(ejemplo:
+`docker/instances/development/panda-estampados-and-kitsune/environment/.env`):
 
 ```env
 SANCTUM_STATEFUL_DOMAINS=localhost:5321,localhost:8080,panda-estampados.com
