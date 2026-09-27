@@ -1,4 +1,22 @@
 ---
+/**
+ * Dashboard admin principal (F5.1 i18n refactor).
+ *
+ * Compone las MetricCards principales + el RevenueChart + las cards de
+ * TrafficSources / MonthlyGoals / RecentOrders / RecentActivity. Antes
+ * de F5.1 todas las labels visibles estaban hardcoded en español; ahora
+ * cada componente Astro consulta `getServerDictionary(locale)` para
+ * resolver sus strings, manteniendo ES/EN sincronizados via las keys
+ * `admin.dashboard.*` + `admin.metrics.*` en `i18n/types.ts`.
+ *
+ * La unica prop que la MetricCard recibe de la pagina es
+ * `vsPreviousLabel` (string interpolado a "vs mes anterior" / "vs
+ * previous month") porque es la unica string que NO vive en el
+ * componente.
+ *
+ * **AGENTS.md §1** (400 lineas max para pagina): sigue debajo del
+ * limite — composicion pura, sin logica.
+ */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import MetricCard from '../../../../components/admin/dashboard/MetricCard.astro';
 import RevenueChart from '../../../../components/admin/dashboard/RevenueChart.astro';
@@ -6,38 +24,57 @@ import TrafficSourcesCard from '../../../../components/admin/dashboard/TrafficSo
 import MonthlyGoalsCard from '../../../../components/admin/dashboard/MonthlyGoalsCard.astro';
 import RecentOrdersTable from '../../../../components/admin/dashboard/RecentOrdersTable.astro';
 import RecentActivityCard from '../../../../components/admin/dashboard/RecentActivityCard.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
 ---
 
-<AdminLayout title="Dashboard | Admin">
+<AdminLayout title={t['admin.dashboard.layout.title']}>
   <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-tight text-slate-950">Dashboard</h1>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.dashboard.title']}
+    </h1>
 
-    <p class="mt-1 text-sm text-slate-500">
-      Bienvenido de nuevo. Esto es lo que está pasando en tu ecommerce hoy.
-    </p>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.dashboard.subtitle']}</p>
   </div>
 
   <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     <MetricCard
-      title="Ingresos totales"
+      title={t['admin.metrics.metricTitles.totalRevenue']}
       value="$48,295"
       change="+12.5%"
       icon="banknotes"
       accent="emerald"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
     />
 
-    <MetricCard title="Usuarios activos" value="2,847" change="+8.2%" icon="users" accent="sky" />
+    <MetricCard
+      title={t['admin.metrics.metricTitles.activeUsers']}
+      value="2,847"
+      change="+8.2%"
+      icon="users"
+      accent="sky"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
+    />
 
     <MetricCard
-      title="Órdenes totales"
+      title={t['admin.metrics.metricTitles.totalOrders']}
       value="1,432"
       change="-3.1%"
       trend="down"
       icon="shopping-cart"
       accent="rose"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
     />
 
-    <MetricCard title="Visitas" value="284K" change="+24.7%" icon="eye" accent="amber" />
+    <MetricCard
+      title={t['admin.metrics.metricTitles.visits']}
+      value="284K"
+      change="+24.7%"
+      icon="eye"
+      accent="amber"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
+    />
   </section>
 
   <section class="mt-5 grid gap-5 xl:grid-cols-3">

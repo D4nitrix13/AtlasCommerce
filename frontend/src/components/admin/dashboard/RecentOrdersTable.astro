@@ -18,7 +18,15 @@
  * 1. `Astro.fetch()` reenvia cookies del request al backend
  * 2. Si response.ok, usar `response.json().data`
  * 3. Si no, fallback graceful
+ *
+ * **i18n**: los headers de la tabla y el empty state vienen del
+ * diccionario. Los status_label y customer_name vienen del backend
+ * (no se traducen aca).
  */
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+
 interface RecentOrder {
   id: number;
   order_number: string;
@@ -123,14 +131,16 @@ if (dataSource === 'mock') {
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
   <div class="mb-4 flex items-center justify-between">
     <div>
-      <h2 class="text-lg font-bold text-slate-950">Órdenes recientes</h2>
-      <p class="text-sm text-slate-500">Últimas transacciones de tu tienda</p>
+      <h2 class="text-lg font-bold text-slate-950">
+        {t['admin.dashboard.recentOrders.heading']}
+      </h2>
+      <p class="text-sm text-slate-500">{t['admin.dashboard.recentOrders.subtitle']}</p>
     </div>
     <a
       href="/admin/sales/orders"
       class="text-sm font-medium text-emerald-600 hover:underline"
     >
-      Ver todo →
+      {t['admin.dashboard.recentOrders.viewAll']}
     </a>
   </div>
 
@@ -140,11 +150,11 @@ if (dataSource === 'mock') {
         <tr
           class="border-b border-slate-100 text-xs font-medium uppercase tracking-wider text-slate-500"
         >
-          <th class="pb-3 pr-4">Cliente</th>
-          <th class="pb-3 pr-4">Orden</th>
-          <th class="pb-3 pr-4">Producto</th>
-          <th class="pb-3 pr-4">Estado</th>
-          <th class="pb-3 text-right">Monto</th>
+          <th class="pb-3 pr-4">{t['admin.dashboard.recentOrders.col.customer']}</th>
+          <th class="pb-3 pr-4">{t['admin.dashboard.recentOrders.col.order']}</th>
+          <th class="pb-3 pr-4">{t['admin.dashboard.recentOrders.col.product']}</th>
+          <th class="pb-3 pr-4">{t['admin.dashboard.recentOrders.col.status']}</th>
+          <th class="pb-3 text-right">{t['admin.dashboard.recentOrders.col.amount']}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-50">
@@ -152,7 +162,7 @@ if (dataSource === 'mock') {
           orders.length === 0 ? (
             <tr>
               <td colspan="5" class="py-8 text-center text-sm text-slate-500">
-                No hay órdenes recientes.
+                {t['admin.dashboard.recentOrders.empty']}
               </td>
             </tr>
           ) : (

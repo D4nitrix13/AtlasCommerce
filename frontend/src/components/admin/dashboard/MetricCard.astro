@@ -40,9 +40,19 @@ interface Props {
   icon?: string;
   /** Color de acento del icon background */
   accent?: 'emerald' | 'sky' | 'amber' | 'rose';
+  /** Texto localizado que sigue al delta (ej: "vs mes anterior"). */
+  vsPreviousLabel: string;
 }
 
-const { title, value, change, trend = 'up', icon = 'chart-bar', accent = 'emerald' } = Astro.props;
+const {
+  title,
+  value,
+  change,
+  trend = 'up',
+  icon = 'chart-bar',
+  accent = 'emerald',
+  vsPreviousLabel,
+} = Astro.props;
 
 const accentClasses = {
   emerald: 'bg-emerald-50 text-emerald-600',
@@ -72,7 +82,7 @@ const accentClasses = {
       {change}
     </span>
 
-    <span class="text-slate-400">vs mes anterior</span>
+    <span class="text-slate-400">{vsPreviousLabel}</span>
   </div>
 
   <div class="mt-5 h-10">

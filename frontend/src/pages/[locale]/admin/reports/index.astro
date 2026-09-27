@@ -1,4 +1,22 @@
 ---
+/**
+ * Reports admin principal (F5.2 i18n refactor).
+ *
+ * Compone las MetricCards de KPIs + el RevenueOverviewCard + las cards
+ * de SalesPerformance / TopProducts / TrafficOverview / CustomerAnalytics
+ * + la LowStockTable. Antes de F5.2 todas las labels visibles estaban
+ * hardcoded en español; ahora cada componente Astro consulta
+ * `getServerDictionary(locale)` para resolver sus strings, manteniendo
+ * ES/EN sincronizados via las keys `admin.reports.*` + `admin.metrics.*`
+ * en `i18n/types.ts`.
+ *
+ * Al igual que en dashboard/index.astro, MetricCard recibe solo
+ * `vsPreviousLabel` como prop (las demas labels viven en el componente
+ * o son titles reusables bajo `admin.metrics.metricTitles.*`).
+ *
+ * **AGENTS.md §1** (400 lineas max para pagina): sigue debajo del
+ * limite — composicion pura, sin logica.
+ */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import MetricCard from '../../../../components/admin/dashboard/MetricCard.astro';
 import RevenueOverviewCard from '../../../../components/admin/reports/RevenueOverviewCard.astro';
@@ -7,43 +25,52 @@ import TopProductsCard from '../../../../components/admin/reports/TopProductsCar
 import CustomerAnalyticsCard from '../../../../components/admin/reports/CustomerAnalyticsCard.astro';
 import TrafficOverviewCard from '../../../../components/admin/reports/TrafficOverviewCard.astro';
 import LowStockTable from '../../../../components/admin/dashboard/LowStockTable.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
 ---
 
-<AdminLayout title="Reportes | Admin">
+<AdminLayout title={t['admin.reports.layout.title']}>
   <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-tight text-slate-950">Reportes</h1>
-    <p class="mt-1 text-sm text-slate-500">Vista detallada del rendimiento de tu ecommerce.</p>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.reports.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.reports.subtitle']}</p>
   </div>
 
   <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     <MetricCard
-      title="Ingresos totales"
+      title={t['admin.metrics.metricTitles.totalRevenue']}
       value="$48,295"
       change="+12.5%"
       icon="banknotes"
       accent="emerald"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
     />
     <MetricCard
-      title="Órdenes totales"
+      title={t['admin.metrics.metricTitles.totalOrders']}
       value="1,432"
       change="+8.2%"
       icon="shopping-cart"
       accent="sky"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
     />
     <MetricCard
-      title="Ticket promedio"
+      title={t['admin.metrics.metricTitles.avgTicket']}
       value="$34.20"
       change="+5.3%"
       icon="banknotes"
       accent="amber"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
     />
     <MetricCard
-      title="Tasa de conversión"
+      title={t['admin.metrics.metricTitles.conversionRate']}
       value="3.8%"
       change="-0.4%"
       trend="down"
       icon="chart-bar"
       accent="rose"
+      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
     />
   </section>
 
