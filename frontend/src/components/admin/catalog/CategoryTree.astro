@@ -1,0 +1,193 @@
+---
+/**
+ * CategoryTree — Vista jerárquica de categorías con expansión.
+ *
+ * Render recursivo: cada nodo tiene children colapsables (default:
+ * primer nivel expandido). Acciones inline por nodo (add child,
+ * edit, delete). El drag & drop real se delega a JS en la página
+ * padre (no implementado en este mock — TODO F5.4 cuando exista
+ * endpoint `PATCH /api/v1/admin/catalog/categories/{id}/move`).
+ *
+ * El componente recibe las categorías planas y construye el árbol
+ * internamente. Mantiene el patrón "tree desde flat list" para
+ * alinearse con cómo el backend probablemente serializa (id + parent_id).
+ *
+ * AGENTS.md §1: ~140 líneas. La recursión vive en un helper slot.
+ */
+import type { CategoryMock } from '../../../data/catalog-mock';
+import { getServerDictionary } from '../../../i18n/server';
+import { adminUrl } from '../../../lib/path-helpers';
+import { getServerLocale } from '../../../i18n/server';
+
+interface Props {
+  categories: readonly CategoryMock[];
+}
+
+const { categories } = Astro.props;
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+
+/** Construye el árbol desde la lista plana. */
+interface CategoryNode extends CategoryMock {
+  children: CategoryNode[];
+}
+
+const childrenByParent = new Map<number | null, CategoryMock[]>();
+for (const category of categories) {
+  const list = childrenByParent.get(category.parentId) ?? [];
+  list.push(category);
+  childrenByParent.set(category.parentId, list);
+}
+
+function buildNode(category: CategoryMock): CategoryNode {
+  const children = (childrenByParent.get(category.id) ?? [])
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(buildNode);
+  return { ...category, children };
+}
+
+const roots: CategoryNode[] = (childrenByParent.get(null) ?? [])
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map(buildNode);
+
+const hasCategories = roots.length > 0;
+---
+
+{
+  hasCategories ? (
+    <ul class="space-y-1" role="tree" aria-label={t['admin.catalog.categories.title']}>
+      {roots.map((node) => (
+        <li role="treeitem" aria-expanded="true" class="rounded-md">
+          <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50">
+            <div class="flex min-w-0 items-center gap-2">
+              {node.children.length > 0 ? (
+                <button
+                  type="button"
+                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                  aria-label={t['admin.catalog.categories.actions.collapse']}
+                  data-toggle-tree
+                  data-target={`tree-children-${node.id}`}
+                >
+                  <span aria-hidden="true" class="text-xs">▾</span>
+                </button>
+              ) : (
+                <span class="inline-block h-6 w-6 shrink-0" aria-hidden="true" />
+              )}
+              <a
+                href={adminUrl(locale, `/catalog/categories/${node.id}`)}
+                class="min-w-0 truncate text-sm font-medium text-slate-900 hover:text-violet-700 hover:underline"
+              >
+                {node.name}
+              </a>
+              <span class="shrink-0 text-xs text-slate-500">
+                · {t['admin.catalog.categories.productsCount'].replace('{count}', String(node.productsCount))}
+              </span>
+              {node.children.length > 0 && (
+                <span class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                  {t['admin.catalog.categories.childrenCount'].replace('{count}', String(node.children.length))}
+                </span>
+              )}
+            </div>
+            <div class="flex shrink-0 items-center gap-1">
+              <a
+                href={`${adminUrl(locale, `/catalog/categories/${node.id}`)}?edit=1`}
+                class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                aria-label={`${t['admin.catalog.categories.actions.edit']}: ${node.name}`}
+                title={t['admin.catalog.categories.actions.edit']}
+              >
+                <span aria-hidden="true" class="text-xs">✎</span>
+              </a>
+              <button
+                type="button"
+                class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                aria-label={`${t['admin.catalog.categories.actions.addChild']}: ${node.name}`}
+                title={t['admin.catalog.categories.actions.addChild']}
+              >
+                <span aria-hidden="true" class="text-xs">+</span>
+              </button>
+              <button
+                type="button"
+                class="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                aria-label={`${t['admin.catalog.categories.actions.delete']}: ${node.name}`}
+                title={t['admin.catalog.categories.actions.delete']}
+              >
+                <span aria-hidden="true" class="text-xs">🗑</span>
+              </button>
+            </div>
+          </div>
+
+          {node.children.length > 0 && (
+            <ul
+              id={`tree-children-${node.id}`}
+              role="group"
+              class="mt-1 space-y-1 border-l border-slate-200 pl-4"
+            >
+              {node.children.map((child) => (
+                <li role="treeitem" aria-expanded="false" class="rounded-md">
+                  <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50">
+                    <div class="flex min-w-0 items-center gap-2">
+                      <span class="inline-block h-6 w-6 shrink-0" aria-hidden="true" />
+                      <a
+                        href={adminUrl(locale, `/catalog/categories/${child.id}`)}
+                        class="min-w-0 truncate text-sm font-medium text-slate-900 hover:text-violet-700 hover:underline"
+                      >
+                        {child.name}
+                      </a>
+                      <span class="shrink-0 text-xs text-slate-500">
+                        · {t['admin.catalog.categories.productsCount'].replace('{count}', String(child.productsCount))}
+                      </span>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                      <a
+                        href={`${adminUrl(locale, `/catalog/categories/${child.id}`)}?edit=1`}
+                        class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                        aria-label={`${t['admin.catalog.categories.actions.edit']}: ${child.name}`}
+                        title={t['admin.catalog.categories.actions.edit']}
+                      >
+                        <span aria-hidden="true" class="text-xs">✎</span>
+                      </a>
+                      <button
+                        type="button"
+                        class="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                        aria-label={`${t['admin.catalog.categories.actions.delete']}: ${child.name}`}
+                        title={t['admin.catalog.categories.actions.delete']}
+                      >
+                        <span aria-hidden="true" class="text-xs">🗑</span>
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm font-medium text-slate-700">
+        {t['admin.catalog.categories.empty']}
+      </p>
+      <p class="mt-1 text-xs text-slate-500">
+        {t['admin.catalog.categories.emptyHint']}
+      </p>
+    </div>
+  )
+}
+
+<script>
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const button = target.closest('[data-toggle-tree]');
+    if (!(button instanceof HTMLElement)) return;
+    const targetId = button.dataset.target;
+    if (!targetId) return;
+    const subtree = document.getElementById(targetId);
+    if (!subtree) return;
+    const item = button.closest('[role="treeitem"]');
+    const expanded = item?.getAttribute('aria-expanded') === 'true';
+    item?.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    subtree.classList.toggle('hidden');
+  });
+</script>

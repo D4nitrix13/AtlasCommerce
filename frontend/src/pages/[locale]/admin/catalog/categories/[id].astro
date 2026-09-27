@@ -1,0 +1,137 @@
+---
+/**
+ * /admin/catalog/categories/[id] — Detalle/edit categoría (F5.3).
+ *
+ * Resuelve la categoría por id (mock). Si no existe → notFound.
+ * Renderiza un form con: nombre, slug, descripción, parent (selector
+ * de categorías excluyendo a sí misma para evitar ciclos).
+ *
+ * El submit handler real (PUT /api/v1/admin/catalog/categories/{id})
+ * se hace en F5.4 cuando el endpoint exista. Por ahora el form es
+ * declarativo y los inputs son "controlled" pero sin persistencia.
+ *
+ * AGENTS.md §1: ~120 líneas.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import Input from '../../../../components/ui/Input.astro';
+import Textarea from '../../../../components/ui/Textarea.astro';
+import Select from '../../../../components/ui/Select.astro';
+import Button from '../../../../components/ui/Button.astro';
+import {
+  getCategoryById,
+  CATEGORIES_MOCK,
+  type CategoryMock,
+} from '../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../i18n/server';
+import { adminUrl } from '../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+
+const idParam = Astro.params.id;
+const categoryId = idParam !== undefined ? Number.parseInt(idParam, 10) : NaN;
+const category = Number.isFinite(categoryId)
+  ? getCategoryById(categoryId)
+  : undefined;
+
+// Selector de padre excluye a sí misma y descendientes para evitar
+// ciclos en el árbol. Sin descendientes calculados por depth en este
+// mock (todos están en nivel 1 o 2 del root), así que filtramos solo
+// por id !== self.
+const parentOptions = [
+  {
+    value: '',
+    label: t['admin.catalog.categories.form.parentNone'],
+  },
+  ...CATEGORIES_MOCK.filter((c: CategoryMock) => c.id !== categoryId).map((c: CategoryMock) => ({
+    value: String(c.id),
+    label: c.name,
+  })),
+];
+---
+
+<AdminLayout title={t['admin.catalog.categories.detail.title']}>
+  {
+    category === undefined ? (
+      <div class="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+        <h1 class="text-xl font-semibold text-slate-900">
+          {t['admin.catalog.categories.detail.notFound']}
+        </h1>
+        <p class="mt-2 text-sm text-slate-500">
+          {t['admin.catalog.common.error']}
+        </p>
+        <a
+          href={adminUrl(locale, '/catalog/categories')}
+          class="mt-4 inline-block text-sm font-medium text-violet-700 hover:underline"
+        >
+          ← {t['admin.catalog.categories.detail.back']}
+        </a>
+      </div>
+    ) : (
+      <>
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="mb-1 flex items-center gap-2 text-xs text-slate-500">
+              <a
+                href={adminUrl(locale, '/catalog/categories')}
+                class="hover:text-violet-700 hover:underline"
+              >
+                {t['admin.catalog.categories.title']}
+              </a>
+              <span aria-hidden="true">/</span>
+              <span>{category.name}</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+              {category.name}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+              {t['admin.catalog.categories.productsCount'].replace(
+                '{count}',
+                String(category.productsCount),
+              )}
+            </p>
+          </div>
+        </div>
+
+        <form
+          method="post"
+          class="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <Input
+            name="name"
+            label={t['admin.catalog.categories.form.name']}
+            value={category.name}
+            required
+          />
+          <Input
+            name="slug"
+            label={t['admin.catalog.categories.form.slug']}
+            value={category.slug}
+            hint="auto-generado si se deja vacío"
+          />
+          <Textarea
+            name="description"
+            label={t['admin.catalog.categories.form.description']}
+            value={category.description}
+            rows={3}
+          />
+          <Select
+            name="parentId"
+            label={t['admin.catalog.categories.form.parent']}
+            options={parentOptions}
+            value={category.parentId !== null ? String(category.parentId) : ''}
+          />
+          <div class="flex items-center justify-end gap-2 border-t border-slate-200 pt-4">
+            <Button variant="ghost" type="button">
+              {t['admin.catalog.common.cancel']}
+            </Button>
+            <Button variant="primary" type="submit">
+              {t['admin.catalog.common.save']}
+            </Button>
+          </div>
+        </form>
+      </>
+    )
+  }
+</AdminLayout>

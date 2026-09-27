@@ -1,0 +1,127 @@
+---
+/**
+ * MediaUploader — Uploader múltiple de imágenes con drag & drop.
+ *
+ * Patrón Baymard §7.2: área de drop visible + botón alternativo
+ * "Subir". Cada imagen previsualizada tiene botón "Principal" (radio)
+ * y "Eliminar".
+ *
+ * La lógica de drag-drop, upload real (XHR/multipart) y storage URL
+ * se delega a JS cuando exista el endpoint
+ * `POST /api/v1/admin/catalog/products/{id}/media`. En este mock
+ * solo se renderiza la UI + estado (preview con data URI).
+ *
+ * AGENTS.md §1: ~110 líneas.
+ */
+import Button from '../../ui/Button.astro';
+import { getServerDictionary } from '../../../i18n/server';
+
+interface Props {
+  /** Imágenes iniciales (URLs ya subidas). */
+  initialImages?: readonly string[];
+  /** Máximo de imágenes permitidas (default: 8). */
+  maxImages?: number;
+}
+
+const { initialImages = [], maxImages = 8 } = Astro.props;
+const t = getServerDictionary(Astro.locals.locale);
+
+const hasImages = initialImages.length > 0;
+const canAddMore = initialImages.length < maxImages;
+---
+
+<section
+  aria-labelledby="media-title"
+  class="space-y-4"
+  data-media-uploader
+  data-max-images={maxImages}
+>
+  <h2 id="media-title" class="text-sm font-semibold text-slate-900">
+    {t['admin.catalog.media.title']}
+  </h2>
+
+  {
+    canAddMore && (
+      <div
+        role="button"
+        tabindex="0"
+        aria-label={t['admin.catalog.media.upload']}
+        data-dropzone
+        class="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition hover:border-violet-400 hover:bg-violet-50/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+      >
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+          ↑
+        </span>
+        <p class="text-sm font-medium text-slate-700">
+          {t['admin.catalog.media.dragHint']}
+        </p>
+        <p class="text-xs text-slate-500">{t['admin.catalog.media.or']}</p>
+        <Button variant="secondary" size="sm" type="button">
+          {t['admin.catalog.media.upload']}
+        </Button>
+        <p class="text-xs text-slate-400">{t['admin.catalog.media.help']}</p>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          class="hidden"
+          data-file-input
+        />
+      </div>
+    )
+  }
+
+  {
+    hasImages && (
+      <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {initialImages.map((imageUrl, index) => (
+          <li class="group relative overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <img
+              src={imageUrl}
+              alt={t['admin.catalog.media.alt']}
+              class="aspect-square w-full object-cover"
+              loading="lazy"
+            />
+            <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/60 to-transparent p-2 text-xs text-white">
+              <label class="flex items-center gap-1">
+                <input
+                  type="radio"
+                  name="primary-image"
+                  value={index}
+                  checked={index === 0}
+                  class="h-3.5 w-3.5 border-white/50 bg-white/20 text-violet-600 focus:ring-violet-500"
+                />
+                <span>{t['admin.catalog.media.primary']}</span>
+              </label>
+              <button
+                type="button"
+                class="rounded p-1 text-white hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label={t['admin.catalog.media.remove']}
+              >
+                ✕
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    !hasImages && !canAddMore && (
+      <p class="text-sm text-slate-500">{t['admin.catalog.media.empty']}</p>
+    )
+  }
+</section>
+
+<script>
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const dropzone = target.closest('[data-dropzone]');
+    if (dropzone instanceof HTMLElement) {
+      const input = dropzone.querySelector('[data-file-input]');
+      if (input instanceof HTMLInputElement) input.click();
+    }
+  });
+</script>
