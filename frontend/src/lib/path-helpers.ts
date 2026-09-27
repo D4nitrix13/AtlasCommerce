@@ -107,6 +107,26 @@ export function withLocale(barePath: string, locale: Locale): string {
 }
 
 /**
+ * Construye un path absoluto admin con el locale prefijado.
+ *
+ * El sidebar admin, los redirects post-auth y los links internos usan
+ * URLs del estilo `/{locale}/admin/...`. Esta helper centraliza la
+ * construcción para que agregar/renombrar secciones admin no requiera
+ * recordar el prefijo de locale (RF-AUTH-008 §4).
+ *
+ *   adminUrl("es", "/dashboard")           → "/es/admin/dashboard"
+ *   adminUrl("en", "/sales/orders")        → "/en/admin/sales/orders"
+ *   adminUrl("es", "/admin/dashboard")     → "/es/admin/dashboard" (idempotente)
+ */
+export function adminUrl(locale: Locale, barePath: string): string {
+  const normalized = barePath.startsWith('/') ? barePath : `/${barePath}`;
+  const withoutAdmin = normalized.startsWith('/admin/') || normalized === '/admin'
+    ? normalized
+    : `/admin${normalized === '/' ? '' : normalized}`;
+  return `/${locale}${withoutAdmin}`;
+}
+
+/**
  * Determina si un barePath (locale ya removido) es una ruta admin/auth
  * pública. AuthGuard usa esto para no redirigir al login a usuarios
  * no autenticados que están siguiendo un email link o viendo 2FA.

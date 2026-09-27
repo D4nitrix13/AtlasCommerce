@@ -2,92 +2,47 @@
 /**
  * AdminSidebar — Menu lateral completo del panel admin.
  *
- * Estructura del menu (8 categorias, 24 items) hardcoded en este frontmatter.
- * Para EXTENDER el menu (agregar item o categoria), editar el array `menu`
- * directamente aca. Las rutas siguen el patron `/admin/<modulo>/<sub>`.
+ * La estructura del menu (8 categorías, 24 items) vive en
+ * `src/config/menu.ts` como single source of truth. Este componente
+ * la consume vía `getAdminMenu(locale)` que resuelve los hrefs al
+ * prefijo dinámico `/{locale}/admin/...` (RF-AUTH-008 §4).
+ *
+ * Para EXTENDER el menu (agregar item o categoría), editar el array
+ * `RAW_MENU` en `src/config/menu.ts` — NUNCA duplicar acá.
  *
  * Items destacados:
- *   - Dashboard: vista principal con metricas del tenant
- *   - Órdenes: lista con badge "12" hardcoded (TODO: hacer dinamico
- *     via API en sesion futura)
- *   - UserMenu al final: muestra el admin autenticado + logout
+ *   - Dashboard: vista principal con métricas del tenant
+ *   - Órdenes: badge dinámico cargado en cliente vía
+ *     `/api/v1/admin/orders/recent?limit=50` contando items con
+ *     `status='pending'`. Si el fetch falla o devuelve 0, el badge
+ *     se omite (no se muestra `0`).
  *
- * Multi-tenant: NO se hace routing por tenant aqui (cada ruta tiene su
- * propio controller backend que ya respeta `store.domain` middleware).
+ * Multi-tenant:
+ *   - El tenant se resuelve via middleware backend (`store.domain`),
+ *     no acá. Cada ruta tiene su propio controller que respeta el
+ *     tenant.
+ *   - Los hrefs llevan prefijo de locale: sin esto, sites no-default-
+ *     locale (`/en/admin/dashboard`) navegan al login del default
+ *     locale (`/admin/dashboard`) → bug multi-tenant F6.1.
  *
  * **AGENTS.md §16**: este componente vive en `components/admin/sidebar/`
  * (subfolder permitido dentro de admin/).
  */
 import AdminSidebarItem from './AdminSidebarItem.astro';
 import AdminUserMenu from '../auth/AdminUserMenu';
+import { getAdminMenu } from '../../config/menu';
+import Icon from '../../ui/Icon.astro';
 
+const locale = Astro.locals.locale ?? 'es';
+const menu = getAdminMenu(locale);
 const currentPath = Astro.url.pathname;
 
-const menu = [
-  {
-    label: 'Resumen',
-    items: [
-      { name: 'Dashboard', href: '/admin/dashboard', icon: 'squares-2x2' },
-      { name: 'Reportes', href: '/admin/reports', icon: 'chart-bar' },
-    ],
-  },
-  {
-    label: 'Comercio',
-    items: [
-      { name: 'Órdenes', href: '/admin/sales/orders', icon: 'shopping-cart', badge: '12' },
-      { name: 'Productos', href: '/admin/catalog/products', icon: 'cube' },
-      { name: 'Clientes', href: '/admin/customers', icon: 'users' },
-      { name: 'Facturas', href: '/admin/sales/invoices', icon: 'document-text' },
-    ],
-  },
-  {
-    label: 'Catálogo',
-    items: [
-      { name: 'Categorías', href: '/admin/catalog/categories', icon: 'folder' },
-      { name: 'Marcas', href: '/admin/catalog/brands', icon: 'tag' },
-      { name: 'Variantes', href: '/admin/catalog/variants', icon: 'square-3-stack-3d' },
-    ],
-  },
-  {
-    label: 'Inventario',
-    items: [
-      { name: 'Stock', href: '/admin/inventory/stock', icon: 'archive-box' },
-      { name: 'Movimientos', href: '/admin/inventory/movements', icon: 'arrow-path' },
-      { name: 'Depósitos', href: '/admin/inventory/warehouses', icon: 'building-office' },
-    ],
-  },
-  {
-    label: 'Compras',
-    items: [
-      { name: 'Proveedores', href: '/admin/purchases/suppliers', icon: 'truck' },
-      { name: 'Compras', href: '/admin/purchases/orders', icon: 'clipboard-document-list' },
-    ],
-  },
-  {
-    label: 'Marketing',
-    items: [
-      { name: 'Cupones', href: '/admin/marketing/coupons', icon: 'ticket' },
-      { name: 'Promociones', href: '/admin/marketing/promotions', icon: 'gift' },
-    ],
-  },
-  {
-    label: 'Soporte',
-    items: [
-      { name: 'Tickets', href: '/admin/support/tickets', icon: 'chat-bubble-left-right' },
-      { name: 'Reseñas', href: '/admin/support/reviews', icon: 'star' },
-      { name: 'Preguntas', href: '/admin/support/questions', icon: 'question-mark-circle' },
-    ],
-  },
-  {
-    label: 'Sistema',
-    items: [
-      { name: 'Usuarios', href: '/admin/users', icon: 'user' },
-      { name: 'Roles', href: '/admin/roles', icon: 'shield-check' },
-      { name: 'Auditoría', href: '/admin/system/audits', icon: 'magnifying-glass' },
-      { name: 'Configuración', href: '/admin/settings', icon: 'cog-6-tooth' },
-    ],
-  },
-];
+// `import.meta.env.PUBLIC_API_URL` solo es visible en SSR. Para que el
+// script client-side pueda construir la URL absoluta del endpoint admin
+// de orders, lo pasamos vía `define:vars` (Astro serializa las vars en
+// el HTML inline). Fallback a `''` para Same-Origin (cuando el proxy
+// inverso del tenant expone `/api` directamente).
+const publicApiUrl = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
 ---
 
 <style is:global>
@@ -150,6 +105,14 @@ const menu = [
       padding-left: 260px !important;
     }
   }
+
+  /* ── Pending orders badge: hidden hasta que el JS inyecte el valor ── */
+  [data-badge='orders-pending'] {
+    display: none;
+  }
+  [data-badge='orders-pending'][data-loaded='true'] {
+    display: inline-flex;
+  }
 </style>
 
 <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"></div>
@@ -181,12 +144,51 @@ const menu = [
           </p>
 
           <div class="space-y-1">
-            {section.items.map((item) => (
-              <AdminSidebarItem
-                {...item}
-                active={currentPath === item.href || currentPath.startsWith(item.href + '/')}
-              />
-            ))}
+            {section.items.map((item) => {
+              const href = item.href;
+              const isActive = currentPath === href || currentPath.startsWith(href + '/');
+              const activeClass = isActive
+                ? 'bg-emerald-500/10 text-emerald-400'
+                : 'text-slate-400 hover:bg-white/5 hover:text-white';
+              const iconColorClass = isActive ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300';
+
+              // Items con badge dinámico (orders-pending, etc.) se
+              // renderizan inline para poder inyectar el `<span
+              // data-badge>` que el script client-side va a llenar.
+              // El resto usa el componente `AdminSidebarItem` normal.
+              if (item.badge !== undefined) {
+                return (
+                  <a
+                    href={href}
+                    title={item.name}
+                    aria-current={isActive ? 'page' : undefined}
+                    class:list={[
+                      'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition',
+                      activeClass,
+                    ]}
+                  >
+                    <Icon
+                      name={item.icon}
+                      class:list={['h-5 w-5 shrink-0 transition', iconColorClass]}
+                    />
+                    <span class="sidebar-label flex-1">{item.name}</span>
+                    <span
+                      data-badge={item.badge}
+                      class="sidebar-label rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-400"
+                    />
+                  </a>
+                );
+              }
+
+              return (
+                <AdminSidebarItem
+                  name={item.name}
+                  href={href}
+                  icon={item.icon}
+                  active={isActive}
+                />
+              );
+            })}
           </div>
         </div>
       ))
@@ -198,7 +200,28 @@ const menu = [
   </div>
 </aside>
 
+{/*
+  Bridge script: expone `window.__ATLAS_ADMIN_API_BASE__` con la URL
+  base del backend al script TS de abajo (que Astro compila como
+  módulo separado). Se necesita porque `define:vars` solo funciona
+  en scripts `is:inline`, y el resto del sidebar usa TypeScript con
+  helpers de tipo.
+*/}
+<script is:inline define:vars={{ publicApiUrl }}>
+  window.__ATLAS_ADMIN_API_BASE__ = publicApiUrl;
+</script>
+
 <script>
+  /**
+   * Sidebar behavior — collapse persistence + dynamic badge fetching.
+   *
+   * El badge de órdenes pendientes se carga client-side porque el
+   * `AdminSidebar` se monta en TODAS las páginas admin (vía
+   * `AdminLayout`), así que hacer SSR-fetch del contador en cada
+   * navegación sumaría N requests a un widget secundario. El fetch
+   * client-side se dispara una vez por mount y cachea el resultado
+   * en memoria hasta el próximo full reload.
+   */
   (function () {
     const STORAGE_KEY = 'admin-sidebar-collapsed';
     const sidebar = document.getElementById('admin-sidebar') as HTMLElement | null;
@@ -208,8 +231,6 @@ const menu = [
 
     if (!sidebar || !overlay || !mainContent) return;
 
-    // Narrow TS: capturamos referencias no-null para usar dentro de callbacks
-    // donde el type narrowing no se propaga.
     const sidebarEl: HTMLElement = sidebar;
     const overlayEl: HTMLElement = overlay;
     const mainContentEl: HTMLElement = mainContent;
@@ -306,5 +327,57 @@ const menu = [
     if (isDesktop()) {
       applyDesktopState();
     }
+
+    /**
+     * Carga el badge de órdenes pendientes.
+     *
+     * Endpoint: `GET /api/v1/admin/orders/recent?limit=50`
+     *   - Devuelve hasta 50 orders recientes del tenant.
+     *   - Contamos items con `status === 'pending'` (status string del
+     *     backend, NO `payment_status` — orders 'pending' significa que
+     *     requieren atención del admin).
+     *   - El `RecentOrdersController` ya tiene scope multi-tenant via
+     *     `store.domain` middleware; el browser envía credenciales con
+     *     `credentials: 'include'` para que Sanctum reconozca la sesión.
+     *
+     * Si el endpoint falla (5xx, 401 sin sesión, network), ocultamos el
+     * badge silenciosamente para no mostrar `0` falso. Log a consola
+     * para que devs/debug noten el problema.
+     */
+    async function loadOrdersPendingBadge(): Promise<void> {
+      const badgeEls = document.querySelectorAll<HTMLElement>('[data-badge="orders-pending"]');
+      if (badgeEls.length === 0) return;
+
+      // Bridge global seteado por el script is:inline de arriba.
+      const apiBase = (window as unknown as { __ATLAS_ADMIN_API_BASE__?: string }).__ATLAS_ADMIN_API_BASE__ ?? '';
+
+      try {
+        const response = await fetch(`${apiBase}/api/v1/admin/orders/recent?limit=50`, {
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const payload = (await response.json()) as { data?: Array<{ status?: string }> };
+        const orders = Array.isArray(payload.data) ? payload.data : [];
+        const pendingCount = orders.filter((order) => order.status === 'pending').length;
+
+        if (pendingCount <= 0) return;
+
+        const display = pendingCount > 99 ? '99+' : String(pendingCount);
+        badgeEls.forEach((el) => {
+          el.textContent = display;
+          el.setAttribute('data-loaded', 'true');
+          el.setAttribute('title', `${pendingCount} órdenes pendientes`);
+          el.setAttribute('aria-label', `${pendingCount} órdenes pendientes`);
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[AdminSidebar] No se pudo cargar badge de órdenes pendientes:', err);
+      }
+    }
+
+    loadOrdersPendingBadge();
   })();
 </script>
