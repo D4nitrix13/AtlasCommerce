@@ -1,0 +1,139 @@
+---
+/**
+ * OrderShippingForm — Form SSR-only para asignar carrier + tracking.
+ *
+ * El form hace POST al endpoint backend cuando esté disponible:
+ *   `POST /api/v1/admin/orders/{id}/shipment`
+ *   body: { carrier, trackingNumber }
+ *
+ * Mientras el endpoint no exista, el form se renderiza con `action="#"`
+ * y un `onsubmit` que muestra el estado "saved" como feedback visual
+ * (no rompe la página; la integración real reemplaza esta lógica).
+ *
+ * AGENTS.md §17: cada `<input>` con `<label for>` asociado.
+ * AGENTS.md §11: el botón maneja estado "saving" via atributo data.
+ */
+interface Props {
+  orderId: string;
+  heading: string;
+  helper: string;
+  labelCarrier: string;
+  labelTrackingNumber: string;
+  buttonSave: string;
+  buttonSaved: string;
+  currentCarrier?: string;
+  currentTrackingNumber?: string;
+}
+
+const {
+  orderId,
+  heading,
+  helper,
+  labelCarrier,
+  labelTrackingNumber,
+  buttonSave,
+  buttonSaved,
+  currentCarrier,
+  currentTrackingNumber,
+} = Astro.props;
+
+const CARRIER_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: '—' },
+  { value: 'FedEx', label: 'FedEx' },
+  { value: 'DHL', label: 'DHL' },
+  { value: 'UPS', label: 'UPS' },
+  { value: 'Correos Nicaragua', label: 'Correos Nicaragua' },
+  { value: 'Other', label: 'Otro' },
+];
+---
+
+<section
+  aria-labelledby="shipping-form-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2 id="shipping-form-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+  <p class="mt-1 text-xs text-slate-500">{helper}</p>
+
+  <form
+    method="post"
+    action={`/api/v1/admin/orders/${orderId}/shipment`}
+    class="mt-4 flex flex-col gap-3"
+    data-shipping-form
+  >
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-medium text-slate-700">{labelCarrier}</span>
+        <select
+          name="carrier"
+          required
+          class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        >
+          {
+            CARRIER_OPTIONS.map((opt) => (
+              <option value={opt.value} selected={opt.value === (currentCarrier ?? '')}>
+                {opt.label}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-medium text-slate-700">{labelTrackingNumber}</span>
+        <input
+          type="text"
+          name="trackingNumber"
+          required
+          value={currentTrackingNumber ?? ''}
+          placeholder="NI1234567890"
+          class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        />
+      </label>
+    </div>
+
+    <div class="flex items-center justify-between gap-3">
+      <button
+        type="submit"
+        class="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+      >
+        {buttonSave}
+      </button>
+      <p
+        class="hidden text-xs font-medium text-emerald-600"
+        role="status"
+        data-shipping-status
+      >
+        ✓ {buttonSaved}
+      </p>
+    </div>
+  </form>
+</section>
+
+<script>
+  /**
+   * Feedback inline mientras no hay endpoint real.
+   *
+   * Cuando llegue `POST /api/v1/admin/orders/{id}/shipment`, el handler
+   * se reemplaza por una llamada fetch + redirect o un alert de error
+   * si el backend rechaza. El bloque actual solo evita que el form
+   * "muera" silenciosamente al submit.
+   */
+  document.querySelectorAll<HTMLFormElement>('[data-shipping-form]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const status = form.querySelector<HTMLElement>('[data-shipping-status]');
+      const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (!submit) return;
+      submit.disabled = true;
+      submit.textContent = (form.dataset.savingLabel ?? '...') as string;
+      window.setTimeout(() => {
+        if (status) status.classList.remove('hidden');
+        submit.disabled = false;
+        const idleLabel = submit.dataset.idleLabel;
+        if (idleLabel !== undefined) submit.textContent = idleLabel;
+      }, 800);
+    });
+  });
+</script>

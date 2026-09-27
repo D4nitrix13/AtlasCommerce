@@ -1,0 +1,95 @@
+---
+/**
+ * BulkOrderActions — Toolbar flotante con acciones bulk sobre la lista
+ * de orders (F5.4).
+ *
+ * Patrón Shopify Admin / Stripe (design-refs §7.2): cuando hay ≥1 row
+ * seleccionada, aparece un sticky bottom-bar con el count + acciones
+ * disponibles. Las acciones son stubs (no POST real) — cuando exista
+ * el endpoint `POST /api/v1/admin/orders/bulk`, este componente se
+ * conecta vía fetch y maneja errores/feedback.
+ *
+ * AGENTS.md §17: la barra es un `<div role="region">` con label
+ * accesible para SR.
+ */
+interface Props {
+  selectedCount: number;
+  labelSelectedCount: string;
+  labelMarkShipped: string;
+  labelMarkProcessing: string;
+  labelExportCsv: string;
+  labelGenerateInvoice: string;
+}
+
+const {
+  selectedCount,
+  labelSelectedCount,
+  labelMarkShipped,
+  labelMarkProcessing,
+  labelExportCsv,
+  labelGenerateInvoice,
+} = Astro.props;
+
+const isVisible = selectedCount > 0;
+---
+
+<div
+  role="region"
+  aria-label="Bulk actions"
+  class:list={[
+    'fixed inset-x-0 bottom-4 z-30 mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg transition-all',
+    isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0',
+  ]}
+>
+  <p class="text-sm font-semibold text-slate-900">
+    {labelSelectedCount.replace('{count}', String(selectedCount))}
+  </p>
+  <div class="flex flex-wrap items-center gap-2">
+    <button
+      type="button"
+      data-bulk-action="markProcessing"
+      class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+    >
+      {labelMarkProcessing}
+    </button>
+    <button
+      type="button"
+      data-bulk-action="markShipped"
+      class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+    >
+      {labelMarkShipped}
+    </button>
+    <button
+      type="button"
+      data-bulk-action="exportCsv"
+      class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+    >
+      {labelExportCsv}
+    </button>
+    <button
+      type="button"
+      data-bulk-action="generateInvoice"
+      class="inline-flex h-9 items-center rounded-lg bg-slate-900 px-3 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+    >
+      {labelGenerateInvoice}
+    </button>
+  </div>
+</div>
+
+<script>
+  /**
+   * Stub local de bulk actions.
+   *
+   * Cuando llegue `POST /api/v1/admin/orders/bulk` con shape
+   * `{ action: 'markShipped' | 'markProcessing' | ..., ids: string[] }`,
+   * este handler se reemplaza por fetch + reload. Hoy solo loguea a
+   * consola para devs/debug.
+   */
+  document.querySelectorAll<HTMLButtonElement>('[data-bulk-action]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.bulkAction ?? '';
+      // eslint-disable-next-line no-console
+      console.info('[BulkOrderActions] action requested (stub):', action);
+    });
+  });
+</script>

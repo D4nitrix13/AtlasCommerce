@@ -1,0 +1,158 @@
+---
+/**
+ * InvoicePreview — Vista previa imprimible de una factura admin (F5.4).
+ *
+ * Template A4 con tipografía serif-friendly y reglas de paginación.
+ * Soporta `@media print` para que el botón Imprimir del page funcione
+ * sin styles extra. NO se carga el CSS de Tailwind dentro del iframe
+ * para mantener peso bajo; en su lugar, usamos estilos inline
+ * minimalistas.
+ *
+ * Estructura visual:
+ *   - Header: "FACTURA" + número + status pill + fechas (issued/due)
+ *   - De / Para: dos columnas con datos de la tienda y del cliente
+ *   - Items table: descripción + cantidad + unit price + subtotal
+ *   - Totals: subtotal / tax / total alineados a la derecha
+ *   - Notes: bloque italic al pie si existen
+ *
+ * El iframe se renderiza via `<iframe>` con `srcdoc` que contiene el
+ * HTML completo + estilos. Esto evita contaminar el shell admin con
+ * estilos de la plantilla printable.
+ */
+import { formatCentsAsDecimal, formatDate } from '../../../lib/formatters';
+import type { AdminInvoiceMock } from '../../../data/sales-mock';
+
+interface Props {
+  invoice: AdminInvoiceMock;
+  storeName: string;
+  storeAddress: string;
+  statusLabel: string;
+  labelHeading: string;
+  labelFrom: string;
+  labelTo: string;
+  labelNumber: string;
+  labelIssuedAt: string;
+  labelDueAt: string;
+  labelItemsHeading: string;
+  labelDescription: string;
+  labelQuantity: string;
+  labelUnitPrice: string;
+  labelSubtotal: string;
+  labelTotalsSubtotal: string;
+  labelTotalsTax: string;
+  labelTotalsTotal: string;
+  labelNotes: string;
+}
+
+const {
+  invoice,
+  storeName,
+  storeAddress,
+  statusLabel,
+  labelHeading,
+  labelFrom,
+  labelTo,
+  labelNumber,
+  labelIssuedAt,
+  labelDueAt,
+  labelItemsHeading,
+  labelDescription,
+  labelQuantity,
+  labelUnitPrice,
+  labelSubtotal,
+  labelTotalsSubtotal,
+  labelTotalsTax,
+  labelTotalsTotal,
+  labelNotes,
+} = Astro.props;
+
+const currencyCode = 'USD';
+
+const escapeAttr = (raw: string): string =>
+  raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// Construimos las filas del items table como string antes del template
+// principal para evitar problemas de parser con template literals anidados.
+const itemRows = invoice.items
+  .map((item) => {
+    const subtotal = formatCentsAsDecimal(item.unitPriceCents * item.quantity, currencyCode);
+    const unitPrice = formatCentsAsDecimal(item.unitPriceCents, currencyCode);
+    return `<tr><td>${escapeAttr(item.description)}</td>` +
+      `<td class="num">${item.quantity}</td>` +
+      `<td class="num">${unitPrice}</td>` +
+      `<td class="num">${subtotal}</td></tr>`;
+  })
+  .join('');
+
+const notesBlock = invoice.notes
+  ? `<div class="notes"><strong>${labelNotes}:</strong> ${escapeAttr(invoice.notes)}</div>`
+  : '';
+
+const docHtml = '<!doctype html><html lang="es"><head><meta charset="utf-8" />' +
+  `<title>${labelNumber} ${invoice.number}</title>` +
+  '<style>' +
+  '* { box-sizing: border-box; }' +
+  'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #1f2937; margin: 0; padding: 32px; background: white; font-size: 12px; line-height: 1.45; }' +
+  'h1 { margin: 0; font-size: 24px; letter-spacing: 0.02em; }' +
+  'h2 { margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; font-weight: 600; }' +
+  '.header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1f2937; padding-bottom: 16px; margin-bottom: 24px; }' +
+  '.header .meta { text-align: right; }' +
+  '.header .meta p { margin: 2px 0; }' +
+  '.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }' +
+  `.pill-${invoice.status} { background: ${
+    invoice.status === 'paid' ? '#d1fae5; color: #065f46' :
+    invoice.status === 'sent' ? '#dbeafe; color: #1e40af' :
+    invoice.status === 'overdue' ? '#fee2e2; color: #991b1b' :
+    invoice.status === 'cancelled' ? '#f1f5f9; color: #475569' :
+    '#f1f5f9; color: #475569'
+  }; }` +
+  '.row { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 28px; }' +
+  '.row .party p { margin: 2px 0; }' +
+  '.row .party .name { font-weight: 600; font-size: 13px; }' +
+  'table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }' +
+  'th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }' +
+  'th { background: #f8fafc; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-size: 10px; }' +
+  'td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }' +
+  '.totals { display: flex; justify-content: flex-end; }' +
+  '.totals table { width: 280px; margin: 0; }' +
+  '.totals td { border: none; padding: 4px 8px; }' +
+  '.totals tr.grand td { font-weight: 700; font-size: 14px; border-top: 2px solid #1f2937; padding-top: 8px; }' +
+  '.notes { margin-top: 36px; padding: 12px 14px; background: #f8fafc; border-left: 3px solid #cbd5e1; font-style: italic; color: #475569; }' +
+  '@media print { body { padding: 0; } .no-print { display: none !important; } }' +
+  '</style></head><body>' +
+  '<div class="header"><div>' +
+  `<h1>${labelHeading}</h1>` +
+  `<p style="margin: 4px 0; color: #64748b;">${labelNumber}: <strong>${invoice.number}</strong></p>` +
+  '</div><div class="meta">' +
+  `<span class="pill pill-${invoice.status}">${statusLabel}</span>` +
+  `<p style="margin-top: 8px;">${labelIssuedAt}: <strong>${formatDate(invoice.issuedAt)}</strong></p>` +
+  `<p>${labelDueAt}: <strong>${formatDate(invoice.dueAt)}</strong></p>` +
+  '</div></div>' +
+  '<div class="row"><div class="party">' +
+  `<h2>${labelFrom}</h2>` +
+  `<p class="name">${storeName}</p>` +
+  `<p>${storeAddress}</p>` +
+  '</div><div class="party">' +
+  `<h2>${labelTo}</h2>` +
+  `<p class="name">${escapeAttr(invoice.customer.name)}</p>` +
+  `<p>${escapeAttr(invoice.customer.email)}</p>` +
+  `<p>${escapeAttr(invoice.customer.phone)}</p>` +
+  '</div></div>' +
+  `<h2>${labelItemsHeading}</h2>` +
+  `<table><thead><tr><th>${labelDescription}</th><th class="num">${labelQuantity}</th><th class="num">${labelUnitPrice}</th><th class="num">${labelSubtotal}</th></tr></thead><tbody>${itemRows}</tbody></table>` +
+  '<div class="totals"><table><tbody>' +
+  `<tr><td>${labelTotalsSubtotal}</td><td class="num">${formatCentsAsDecimal(invoice.subtotalCents, currencyCode)}</td></tr>` +
+  `<tr><td>${labelTotalsTax}</td><td class="num">${formatCentsAsDecimal(invoice.taxCents, currencyCode)}</td></tr>` +
+  `<tr class="grand"><td>${labelTotalsTotal}</td><td class="num">${formatCentsAsDecimal(invoice.totalCents, currencyCode)}</td></tr>` +
+  '</tbody></table></div>' +
+  notesBlock +
+  '</body></html>';
+
+const iframeSrcdoc = docHtml.replace(/"/g, '&quot;');
+---
+
+<iframe
+  title={`${labelHeading} ${invoice.number}`}
+  srcdoc={iframeSrcdoc}
+  class="h-[640px] w-full rounded-xl border border-slate-200 bg-white shadow-sm"
+></iframe>

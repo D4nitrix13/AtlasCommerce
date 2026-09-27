@@ -1,0 +1,205 @@
+---
+/**
+ * `/[locale]/admin/sales` — Hub de ventas (F5.4).
+ *
+ * Página de aterrizaje para el módulo de ventas. Renderiza 4 KPI
+ * cards (orders hoy / pending / shipped hoy / ingresos mes) más una
+ * vista resumida de orders recientes + facturas recientes. El header
+ * usa el `AdminLayout` (que aplica AuthGuard + sidebar).
+ *
+ * Multi-tenant: el tenant se resuelve via middleware backend; los
+ * KPIs son del tenant activo, NO del total global.
+ *
+ * **AGENTS.md §1** (400 lineas max para pagina): composición pura.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import MetricCard from '../../../../components/admin/dashboard/MetricCard.astro';
+import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
+import { adminUrl } from '../../../../lib/path-helpers';
+import {
+  getAllOrdersMock,
+  getAllInvoicesMock,
+} from '../../../../data/sales-mock';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+const today = new Date().toISOString().slice(0, 10);
+
+const ALL_ORDERS = getAllOrdersMock();
+const ALL_INVOICES = getAllInvoicesMock();
+
+const ordersToday = ALL_ORDERS.filter((order) => order.date === today).length;
+const pending = ALL_ORDERS.filter(
+  (order) => order.status === 'pending' || order.status === 'processing',
+).length;
+const shippedToday = ALL_ORDERS.filter(
+  (order) => order.status === 'shipped' && order.date === today,
+).length;
+
+const currentMonth = today.slice(0, 7);
+const monthRevenueCents = ALL_ORDERS.filter(
+  (order) =>
+    order.date.startsWith(currentMonth) &&
+    (order.status === 'shipped' || order.status === 'delivered'),
+).reduce((sum, order) => sum + order.totalCents, 0);
+
+const monthRevenueLabel = `$${(monthRevenueCents / 100).toLocaleString('es-NI', {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+})}`;
+
+const recentOrders = [...ALL_ORDERS]
+  .sort((a, b) => b.date.localeCompare(a.date))
+  .slice(0, 5);
+const recentInvoices = [...ALL_INVOICES]
+  .sort((a, b) => b.issuedAt.localeCompare(a.issuedAt))
+  .slice(0, 5);
+
+const ordersListHref = adminUrl(locale, '/sales/orders');
+const invoicesListHref = adminUrl(locale, '/sales/invoices');
+---
+
+<AdminLayout title={t['admin.sales.layout.title']}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.sales.hub.heading']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.sales.hub.subtitle']}</p>
+  </div>
+
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <MetricCard
+      title={t['admin.sales.hub.card.ordersToday']}
+      value={String(ordersToday)}
+      change=""
+      icon="shopping-bag"
+      accent="emerald"
+      vsPreviousLabel={t['admin.sales.hub.card.ordersTodayHint']}
+    />
+    <MetricCard
+      title={t['admin.sales.hub.card.pending']}
+      value={String(pending)}
+      change=""
+      icon="alert-circle"
+      accent="amber"
+      vsPreviousLabel={t['admin.sales.hub.card.pendingHint']}
+    />
+    <MetricCard
+      title={t['admin.sales.hub.card.shippedToday']}
+      value={String(shippedToday)}
+      change=""
+      icon="truck"
+      accent="sky"
+      vsPreviousLabel={t['admin.sales.hub.card.shippedTodayHint']}
+    />
+    <MetricCard
+      title={t['admin.sales.hub.card.monthRevenue']}
+      value={monthRevenueLabel}
+      change=""
+      icon="banknotes"
+      accent="emerald"
+      vsPreviousLabel={t['admin.sales.hub.card.monthRevenueHint']}
+    />
+  </section>
+
+  <section class="mt-5 grid gap-5 xl:grid-cols-2">
+    <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <header class="mb-4 flex items-center justify-between">
+        <h2 class="text-base font-semibold text-slate-900 sm:text-lg">
+          {t['admin.sales.hub.card.recentOrdersHeading']}
+        </h2>
+        <a
+          href={ordersListHref}
+          class="text-sm font-medium text-emerald-600 hover:underline"
+        >
+          {t['admin.sales.hub.card.viewAllOrders']} ↗
+        </a>
+      </header>
+      <ul class="divide-y divide-slate-100">
+        {
+          recentOrders.map((order) => (
+            <li class="flex items-center justify-between py-2 text-sm">
+              <div class="flex flex-col">
+                <span class="font-mono text-xs font-medium text-slate-900">
+                  {order.number}
+                </span>
+                <span class="text-xs text-slate-500">{order.customer.name}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-semibold tabular-nums text-slate-900">
+                  ${(order.totalCents / 100).toFixed(2)}
+                </span>
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                    order.status === 'pending'
+                      ? 'bg-amber-100 text-amber-800'
+                      : order.status === 'processing'
+                        ? 'bg-violet-100 text-violet-800'
+                        : order.status === 'shipped'
+                          ? 'bg-cyan-100 text-cyan-800'
+                          : order.status === 'delivered'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-red-100 text-red-800',
+                  ]}
+                >
+                  {t[`admin.sales.orderStatus.${order.status}`]}
+                </span>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+
+    <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <header class="mb-4 flex items-center justify-between">
+        <h2 class="text-base font-semibold text-slate-900 sm:text-lg">
+          {t['admin.sales.hub.card.recentInvoicesHeading']}
+        </h2>
+        <a
+          href={invoicesListHref}
+          class="text-sm font-medium text-emerald-600 hover:underline"
+        >
+          {t['admin.sales.hub.card.viewAllInvoices']} ↗
+        </a>
+      </header>
+      <ul class="divide-y divide-slate-100">
+        {
+          recentInvoices.map((invoice) => (
+            <li class="flex items-center justify-between py-2 text-sm">
+              <div class="flex flex-col">
+                <span class="font-mono text-xs font-medium text-slate-900">
+                  {invoice.number}
+                </span>
+                <span class="text-xs text-slate-500">{invoice.customer.name}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-semibold tabular-nums text-slate-900">
+                  ${(invoice.totalCents / 100).toFixed(2)}
+                </span>
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                    invoice.status === 'paid'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : invoice.status === 'overdue'
+                        ? 'bg-red-100 text-red-800'
+                        : invoice.status === 'sent'
+                          ? 'bg-sky-100 text-sky-800'
+                          : invoice.status === 'cancelled'
+                            ? 'bg-slate-100 text-slate-700'
+                            : 'bg-amber-100 text-amber-800',
+                  ]}
+                >
+                  {t[`admin.sales.invoices.status.${invoice.status}`]}
+                </span>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+  </section>
+</AdminLayout>

@@ -1,0 +1,131 @@
+---
+/**
+ * OrderShippingCard — Card de dirección + tracking para el detail admin.
+ *
+ * Variante admin que muestra la dirección de envío + el estado del
+ * tracking (courier + número + link) o el empty state si no hay envío
+ * asignado. Este componente NO incluye el form para asignar envío —
+ * ese vive en `OrderShippingForm.astro` y se renderiza por separado
+ * dentro del tab "Envío".
+ *
+ * Se usa en el tab "Envío" del detail page (F5.4) y potencialmente en
+ * el hub de shipments (cuando se implemente en F5.6+).
+ */
+import type { AdminOrderShippingMock } from '../../../data/sales-mock';
+
+interface Props {
+  address: AdminOrderShippingMock;
+  trackingNumber?: string;
+  trackingCarrier?: string;
+  trackingUrl?: string;
+  heading: string;
+  labelRecipient: string;
+  labelPhone: string;
+  labelAddress: string;
+  labelCountry: string;
+  labelReference: string;
+  trackingHeading: string;
+  labelCarrier: string;
+  labelTrackingNumber: string;
+  labelOpenCarrier: string;
+  trackingNotAssigned: string;
+}
+
+const {
+  address,
+  trackingNumber,
+  trackingCarrier,
+  trackingUrl,
+  heading,
+  labelRecipient,
+  labelPhone,
+  labelAddress,
+  labelCountry,
+  labelReference,
+  trackingHeading,
+  labelCarrier,
+  labelTrackingNumber,
+  labelOpenCarrier,
+  trackingNotAssigned,
+} = Astro.props;
+
+const hasTracking = Boolean(trackingNumber);
+---
+
+<section
+  aria-labelledby="order-shipping-card-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2 id="order-shipping-card-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+
+  <dl class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+    <div class="flex flex-col gap-0.5">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelRecipient}</dt>
+      <dd class="text-slate-900">{address.recipient}</dd>
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelPhone}</dt>
+      <dd class="text-slate-900">{address.phone}</dd>
+    </div>
+    <div class="flex flex-col gap-0.5 sm:col-span-2">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelAddress}</dt>
+      <dd class="text-slate-900">
+        {address.detailedAddress}, {address.municipality}, {address.department}
+      </dd>
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelCountry}</dt>
+      <dd class="text-slate-900">{address.country}</dd>
+    </div>
+    {
+      address.reference && (
+        <div class="flex flex-col gap-0.5">
+          <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelReference}</dt>
+          <dd class="text-slate-900">{address.reference}</dd>
+        </div>
+      )
+    }
+  </dl>
+</section>
+
+<section
+  aria-labelledby="order-tracking-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2 id="order-tracking-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+    {trackingHeading}
+  </h2>
+
+  {
+    hasTracking ? (
+      <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div class="flex flex-col gap-1">
+          <p class="text-sm text-slate-900">
+            <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelCarrier}:</span>{' '}
+            <strong>{trackingCarrier ?? '—'}</strong>
+          </p>
+          <p class="font-mono text-sm text-slate-900">
+            <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelTrackingNumber}:</span>{' '}
+            {trackingNumber}
+          </p>
+        </div>
+        {trackingUrl && (
+          <a
+            href={trackingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+          >
+            {labelOpenCarrier} ↗
+          </a>
+        )}
+      </div>
+    ) : (
+      <p class="mt-4 rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+        {trackingNotAssigned}
+      </p>
+    )
+  }
+</section>
