@@ -1,0 +1,142 @@
+---
+/**
+ * OrderTimeline — Timeline visual de status para órdenes admin (F5.4).
+ *
+ * Variante admin del `account/orders/OrderTimeline.astro`. Mismos
+ * hitos reducidos (received → processing → shipped → delivered) que
+ * el flujo operativo, más el actor (system | admin) por entry para
+ * trazabilidad. El `cancelled` se renderiza como un dot final con
+ * label distinto (rojo) en lugar de un quinto hito intermedio.
+ *
+ * Los hitos se renderizan en orden cronológico ASCENDENTE (received
+ * primero, delivered último). Cada entry muestra:
+ *   - timestamp localizado (formatDateTime)
+ *   - actor (system/admin) con icono sutil
+ *   - note (opcional) en pill gris
+ *
+ * AGENTS.md §17: `<ol>` semántica con `<time datetime>` para SR.
+ *
+ * Slots: ninguno. La información viene 100% por props para mantener
+ * este componente reutilizable en detail pages de returns/refunds
+ * cuando se necesite.
+ */
+import { formatDateTime } from '../../../lib/formatters';
+import type { AdminOrderTimelineEntry } from '../../../data/sales-mock';
+
+interface Props {
+  timeline: readonly AdminOrderTimelineEntry[];
+  heading: string;
+  labelReceived: string;
+  labelProcessing: string;
+  labelShipped: string;
+  labelDelivered: string;
+  labelCancelled: string;
+  actorSystem: string;
+  actorAdmin: string;
+}
+
+const {
+  timeline,
+  heading,
+  labelReceived,
+  labelProcessing,
+  labelShipped,
+  labelDelivered,
+  labelCancelled,
+  actorSystem,
+  actorAdmin,
+} = Astro.props;
+
+const KEY_LABELS = {
+  received: labelReceived,
+  processing: labelProcessing,
+  shipped: labelShipped,
+  delivered: labelDelivered,
+  cancelled: labelCancelled,
+} as const;
+
+const ACTOR_LABELS = {
+  system: actorSystem,
+  admin: actorAdmin,
+} as const;
+
+const KEY_DOT: Record<AdminOrderTimelineEntry['key'], string> = {
+  received: 'bg-sky-500 text-white',
+  processing: 'bg-violet-500 text-white',
+  shipped: 'bg-cyan-500 text-white',
+  delivered: 'bg-emerald-500 text-white',
+  cancelled: 'bg-red-500 text-white',
+};
+
+// Ordenar cronológicamente: recibido primero, entregado último.
+const sorted = [...timeline].sort(
+  (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+);
+
+const hasAnyEntry = sorted.length > 0;
+---
+
+<section
+  aria-labelledby="order-timeline-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2 id="order-timeline-heading" class="mb-5 text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+
+  {
+    hasAnyEntry ? (
+      <ol class="relative flex flex-col gap-5">
+        {sorted.map((entry, idx) => {
+          const isLast = idx === sorted.length - 1;
+          return (
+            <li class="relative flex gap-4">
+              <div class="flex flex-col items-center">
+                <div
+                  class:list={[
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold shadow-sm',
+                    KEY_DOT[entry.key],
+                  ]}
+                  aria-hidden="true"
+                >
+                  {entry.key === 'delivered'
+                    ? '✓'
+                    : entry.key === 'cancelled'
+                      ? '✕'
+                      : entry.key === 'shipped'
+                        ? '📦'
+                        : entry.key === 'processing'
+                          ? '⚙'
+                          : '⤓'}
+                </div>
+                {!isLast && (
+                  <span aria-hidden="true" class="mt-1 h-full w-0.5 min-h-[24px] flex-1 bg-slate-200" />
+                )}
+              </div>
+              <div class="flex min-w-0 flex-1 flex-col gap-1 pb-1">
+                <div class="flex flex-wrap items-baseline gap-2">
+                  <p class="text-sm font-semibold text-slate-900">
+                    {KEY_LABELS[entry.key]}
+                  </p>
+                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
+                    {ACTOR_LABELS[entry.actor as keyof typeof ACTOR_LABELS] ?? entry.actor}
+                  </span>
+                </div>
+                <p class="text-xs font-medium text-slate-500">
+                  <time datetime={entry.timestamp}>{formatDateTime(entry.timestamp)}</time>
+                </p>
+                {entry.note && (
+                  <p class="mt-1 rounded-md bg-slate-50 px-2 py-1 text-xs italic text-slate-600">
+                    {entry.note}
+                  </p>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    ) : (
+      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-500">—</p>
+    )
+  }
+</section>

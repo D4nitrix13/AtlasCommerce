@@ -1,0 +1,106 @@
+---
+/**
+ * OrderPaymentSummary — Resumen de pago de una order admin (F5.4).
+ *
+ * Variante admin del componente `account/orders/OrderPaymentSummary.astro`
+ * — incluye la línea de tax (que el summary de cliente omite porque
+ * normalmente el cliente ve "total" sin desglose). Muestra método +
+ * brand/last4 cuando aplica (tarjeta).
+ *
+ * Total = subtotal + shipping + tax (suma coherente con backend).
+ */
+import type { AdminOrderPaymentMock } from '../../../data/sales-mock';
+import { formatCentsAsDecimal } from '../../../lib/formatters';
+
+interface Props {
+  payment: AdminOrderPaymentMock;
+  subtotalCents: number;
+  shippingCents: number;
+  taxCents: number;
+  totalCents: number;
+  currencyCode: string;
+  heading: string;
+  labelMethod: string;
+  methodCard: string;
+  methodTransfer: string;
+  methodCod: string;
+  methodNet30: string;
+  labelSubtotal: string;
+  labelShipping: string;
+  shippingFree: string;
+  labelTax: string;
+  labelTotal: string;
+}
+
+const {
+  payment,
+  subtotalCents,
+  shippingCents,
+  taxCents,
+  totalCents,
+  currencyCode,
+  heading,
+  labelMethod,
+  methodCard,
+  methodTransfer,
+  methodCod,
+  methodNet30,
+  labelSubtotal,
+  labelShipping,
+  shippingFree,
+  labelTax,
+  labelTotal,
+} = Astro.props;
+
+const METHOD_LABELS: Record<AdminOrderPaymentMock['method'], string> = {
+  card: methodCard,
+  transfer: methodTransfer,
+  cash_on_delivery: methodCod,
+  net30: methodNet30,
+};
+---
+
+<section
+  aria-labelledby="order-payment-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2 id="order-payment-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+
+  <dl class="mt-4 flex flex-col gap-2 text-sm">
+    <div class="flex items-center justify-between gap-3">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelMethod}</dt>
+      <dd class="font-medium text-slate-900">
+        {METHOD_LABELS[payment.method]}
+        {
+          payment.brand && payment.last4 && (
+            <span class="ml-2 text-xs font-normal text-slate-500">
+              {payment.brand} ···· {payment.last4}
+            </span>
+          )
+        }
+      </dd>
+    </div>
+    <div class="flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelSubtotal}</dt>
+      <dd class="tabular-nums text-slate-700">{formatCentsAsDecimal(subtotalCents, currencyCode)}</dd>
+    </div>
+    <div class="flex items-center justify-between gap-3">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelShipping}</dt>
+      <dd class="tabular-nums text-slate-700">
+        {shippingCents === 0 ? shippingFree : formatCentsAsDecimal(shippingCents, currencyCode)}
+      </dd>
+    </div>
+    <div class="flex items-center justify-between gap-3">
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelTax}</dt>
+      <dd class="tabular-nums text-slate-700">{formatCentsAsDecimal(taxCents, currencyCode)}</dd>
+    </div>
+    <div class="mt-2 flex items-center justify-between gap-3 border-t border-slate-200 pt-3">
+      <dt class="text-sm font-semibold text-slate-900">{labelTotal}</dt>
+      <dd class="text-base font-bold tabular-nums text-slate-900">
+        {formatCentsAsDecimal(totalCents, currencyCode)}
+      </dd>
+    </div>
+  </dl>
+</section>

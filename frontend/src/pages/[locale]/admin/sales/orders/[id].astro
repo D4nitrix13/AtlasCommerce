@@ -1,0 +1,332 @@
+---
+/**
+ * `/[locale]/admin/sales/orders/[id]` — Detalle de order admin (F5.4).
+ *
+ * Layout: tabs horizontales accesibles (`role="tablist"`). El switch
+ * entre tabs se hace con un script inline minúsculo (sin React island).
+ *
+ * Tabs (orden visual):
+ *   1. Resumen — datos de la orden + customer card
+ *   2. Productos — lines table con SKU
+ *   3. Envío — dirección + tracking + form para asignar envío
+ *   4. Pago — método + desglose de totales
+ *   5. Timeline — status pills con timestamps + actor
+ *   6. Reembolsos — empty state (futuro)
+ *
+ * **AGENTS.md §1** (400 lineas max para pagina): composición pura.
+ */
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import Badge from '../../../../../components/ui/Badge.astro';
+import OrderTimeline from '../../../../../components/admin/sales/OrderTimeline.astro';
+import OrderCustomerCard from '../../../../../components/admin/sales/OrderCustomerCard.astro';
+import OrderItemsTable from '../../../../../components/admin/sales/OrderItemsTable.astro';
+import OrderShippingCard from '../../../../../components/admin/sales/OrderShippingCard.astro';
+import OrderShippingForm from '../../../../../components/admin/sales/OrderShippingForm.astro';
+import OrderPaymentSummary from '../../../../../components/admin/sales/OrderPaymentSummary.astro';
+import { getServerDictionary, getServerLocale } from '../../../../../i18n/server';
+import { adminUrl } from '../../../../../lib/path-helpers';
+import { findOrderByIdMock, type AdminOrderStatus } from '../../../../../data/sales-mock';
+import { formatCentsAsDecimal, formatDate } from '../../../../../lib/formatters';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+const orderId = Astro.params.id;
+const order = typeof orderId === 'string' ? findOrderByIdMock(orderId) : null;
+
+const ordersListHref = adminUrl(locale, '/sales/orders');
+const customerProfileHref = order
+  ? adminUrl(locale, `/customers/${order.customer.id}`)
+  : adminUrl(locale, '/customers');
+
+const statusLabel = (status: AdminOrderStatus): string => t[`admin.sales.orderStatus.${status}`];
+---
+
+<AdminLayout title={t['admin.sales.layout.title']}>
+  {
+    !order && (
+      <section class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl" aria-hidden="true">🔍</div>
+        <p class="text-base font-semibold text-slate-900 sm:text-lg">{t['admin.sales.orders.detail.notFound.title']}</p>
+        <p class="max-w-md text-sm text-slate-500">{t['admin.sales.orders.detail.notFound.hint']}</p>
+        <a
+          href={ordersListHref}
+          class="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+        >
+          {t['admin.sales.orders.detail.notFound.back']}
+        </a>
+      </section>
+    )
+  }
+
+  {
+    order && (
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <a
+            href={ordersListHref}
+            class="inline-flex w-fit items-center gap-1 text-sm font-medium text-slate-700 transition hover:underline focus-visible:outline-none focus-visible:underline"
+          >
+            {t['admin.sales.orders.detail.backToList']}
+          </a>
+          <div class="flex flex-wrap items-center gap-2">
+            {order.status !== 'cancelled' && order.status !== 'delivered' && (
+              <>
+                <button type="button" class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+                  {t['admin.sales.orders.detail.actions.markProcessing']}
+                </button>
+                <button type="button" class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+                  {t['admin.sales.orders.detail.actions.markShipped']}
+                </button>
+                <button type="button" class="inline-flex h-9 items-center rounded-lg bg-slate-900 px-3 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+                  {t['admin.sales.orders.detail.actions.generateInvoice']}
+                </button>
+                <button type="button" class="inline-flex h-9 items-center rounded-lg border border-red-200 bg-white px-3 text-xs font-medium text-red-700 transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2">
+                  {t['admin.sales.orders.detail.actions.cancelOrder']}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {order.status === 'cancelled' && (
+          <div role="status" class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            <span aria-hidden="true" class="text-base">⚠</span>
+            <p>{t['admin.sales.orders.detail.cancelled.banner']}</p>
+          </div>
+        )}
+        {order.status === 'delivered' && (
+          <div role="status" class="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+            <span aria-hidden="true" class="text-base">✓</span>
+            <p>{t['admin.sales.orders.detail.delivered.banner']}</p>
+          </div>
+        )}
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-1">
+              <h1 class="font-mono text-xl font-bold text-slate-900 sm:text-2xl">#ORD-{order.id}</h1>
+              <p class="text-sm text-slate-500">
+                {t['admin.sales.orders.detail.summary.placedOn']}{' '}
+                <time datetime={order.date}>{formatDate(order.date)}</time>
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <Badge status={order.status} label={statusLabel(order.status)} />
+              <span class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-base font-bold tabular-nums text-white">
+                {formatCentsAsDecimal(order.totalCents, 'USD')}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <div data-tab-root class="flex flex-col gap-4">
+          <div role="tablist" aria-orientation="horizontal" class="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+            <button type="button" role="tab" id="tab-summary" aria-controls="panel-summary" aria-selected="true" data-tab-trigger="summary" class="flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition aria-selected:bg-slate-900 aria-selected:text-white">
+              {t['admin.sales.orders.detail.tab.summary']}
+            </button>
+            <button type="button" role="tab" id="tab-items" aria-controls="panel-items" aria-selected="false" data-tab-trigger="items" class="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition aria-selected:bg-slate-900 aria-selected:text-white hover:bg-slate-100">
+              {t['admin.sales.orders.detail.tab.items']}
+            </button>
+            <button type="button" role="tab" id="tab-shipping" aria-controls="panel-shipping" aria-selected="false" data-tab-trigger="shipping" class="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition aria-selected:bg-slate-900 aria-selected:text-white hover:bg-slate-100">
+              {t['admin.sales.orders.detail.tab.shipping']}
+            </button>
+            <button type="button" role="tab" id="tab-payment" aria-controls="panel-payment" aria-selected="false" data-tab-trigger="payment" class="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition aria-selected:bg-slate-900 aria-selected:text-white hover:bg-slate-100">
+              {t['admin.sales.orders.detail.tab.payment']}
+            </button>
+            <button type="button" role="tab" id="tab-timeline" aria-controls="panel-timeline" aria-selected="false" data-tab-trigger="timeline" class="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition aria-selected:bg-slate-900 aria-selected:text-white hover:bg-slate-100">
+              {t['admin.sales.orders.detail.tab.timeline']}
+            </button>
+            <button type="button" role="tab" id="tab-refunds" aria-controls="panel-refunds" aria-selected="false" data-tab-trigger="refunds" class="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition aria-selected:bg-slate-900 aria-selected:text-white hover:bg-slate-100">
+              {t['admin.sales.orders.detail.tab.refunds']}
+            </button>
+          </div>
+
+          <section role="tabpanel" id="panel-summary" aria-labelledby="tab-summary" data-tab-panel="summary" class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <OrderCustomerCard
+              customer={order.customer}
+              customerProfileHref={customerProfileHref}
+              heading={t['admin.sales.orders.detail.customer.heading']}
+              labelPhone={t['admin.sales.orders.detail.customer.phone']}
+              labelType={t['admin.sales.orders.detail.customer.type']}
+              labelOrdersCount={t['admin.sales.orders.detail.customer.ordersCount']}
+              labelLifetimeValue={t['admin.sales.orders.detail.customer.lifetimeValue']}
+              labelViewProfile={t['admin.sales.orders.detail.customer.viewProfile']}
+              typeRetail={t['admin.customers.type.retail']}
+              typeWholesale={t['admin.customers.type.wholesale']}
+              typeVip={t['admin.customers.type.vip']}
+            />
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <h2 class="text-base font-semibold text-slate-900 sm:text-lg">{t['admin.sales.orders.detail.summary.heading']}</h2>
+              <dl class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                <div class="flex flex-col gap-0.5">
+                  <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.orders.detail.summary.orderNumber']}</dt>
+                  <dd class="font-mono text-slate-900">{order.number}</dd>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                  <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.orders.detail.summary.placedOn']}</dt>
+                  <dd class="text-slate-900"><time datetime={order.date}>{formatDate(order.date)}</time></dd>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                  <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.orders.detail.summary.status']}</dt>
+                  <dd><Badge status={order.status} label={statusLabel(order.status)} /></dd>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                  <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.orders.detail.summary.total']}</dt>
+                  <dd class="font-semibold text-slate-900 tabular-nums">{formatCentsAsDecimal(order.totalCents, 'USD')}</dd>
+                </div>
+              </dl>
+              {order.notes && (
+                <p class="mt-4 rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs italic text-slate-600">{order.notes}</p>
+              )}
+            </section>
+          </section>
+
+          <section role="tabpanel" id="panel-items" aria-labelledby="tab-items" data-tab-panel="items" hidden>
+            <OrderItemsTable
+              items={order.items}
+              currencyCode="USD"
+              heading={t['admin.sales.orders.detail.items.heading']}
+              columnProduct={t['admin.sales.orders.detail.items.column.product']}
+              columnSku={t['admin.sales.orders.detail.items.column.sku']}
+              columnQuantity={t['admin.sales.orders.detail.items.column.quantity']}
+              columnUnitPrice={t['admin.sales.orders.detail.items.column.unitPrice']}
+              columnSubtotal={t['admin.sales.orders.detail.items.column.subtotal']}
+              emptyLabel={t['admin.sales.orders.detail.items.heading']}
+            />
+          </section>
+
+          <section role="tabpanel" id="panel-shipping" aria-labelledby="tab-shipping" data-tab-panel="shipping" hidden class="flex flex-col gap-4">
+            <OrderShippingCard
+              address={order.shippingAddress}
+              trackingNumber={order.trackingNumber}
+              trackingCarrier={order.trackingCarrier}
+              trackingUrl={order.trackingUrl}
+              heading={t['admin.sales.orders.detail.shipping.heading']}
+              labelRecipient={t['admin.sales.orders.detail.shipping.recipient']}
+              labelPhone={t['admin.sales.orders.detail.shipping.phone']}
+              labelAddress={t['admin.sales.orders.detail.shipping.address']}
+              labelCountry={t['admin.sales.orders.detail.shipping.country']}
+              labelReference={t['admin.sales.orders.detail.shipping.reference']}
+              trackingHeading={t['admin.sales.orders.detail.shipping.tracking.heading']}
+              labelCarrier={t['admin.sales.orders.detail.shipping.tracking.carrier']}
+              labelTrackingNumber={t['admin.sales.orders.detail.shipping.tracking.number']}
+              labelOpenCarrier={t['admin.sales.orders.detail.shipping.tracking.openLabel']}
+              trackingNotAssigned={t['admin.sales.orders.detail.shipping.tracking.notAssigned']}
+            />
+            <OrderShippingForm
+              orderId={order.id}
+              heading={t['admin.sales.orders.detail.shipping.form.heading']}
+              helper={t['admin.sales.orders.detail.shipping.form.helper']}
+              labelCarrier={t['admin.sales.orders.detail.shipping.form.carrier']}
+              labelTrackingNumber={t['admin.sales.orders.detail.shipping.form.trackingNumber']}
+              buttonSave={t['admin.sales.orders.detail.shipping.form.save']}
+              buttonSaved={t['admin.sales.orders.detail.shipping.form.saved']}
+              currentCarrier={order.trackingCarrier}
+              currentTrackingNumber={order.trackingNumber}
+            />
+          </section>
+
+          <section role="tabpanel" id="panel-payment" aria-labelledby="tab-payment" data-tab-panel="payment" hidden>
+            <OrderPaymentSummary
+              payment={order.payment}
+              subtotalCents={order.subtotalCents}
+              shippingCents={order.shippingCents}
+              taxCents={order.taxCents}
+              totalCents={order.totalCents}
+              currencyCode="USD"
+              heading={t['admin.sales.orders.detail.payment.heading']}
+              labelMethod={t['admin.sales.orders.detail.payment.method']}
+              methodCard={t['admin.sales.orders.detail.payment.methodCard']}
+              methodTransfer={t['admin.sales.orders.detail.payment.methodTransfer']}
+              methodCod={t['admin.sales.orders.detail.payment.methodCod']}
+              methodNet30={t['admin.sales.orders.detail.payment.methodNet30']}
+              labelSubtotal={t['admin.sales.orders.detail.payment.subtotal']}
+              labelShipping={t['admin.sales.orders.detail.payment.shipping']}
+              shippingFree={t['admin.sales.orders.detail.payment.shippingFree']}
+              labelTax={t['admin.sales.orders.detail.payment.tax']}
+              labelTotal={t['admin.sales.orders.detail.payment.total']}
+            />
+          </section>
+
+          <section role="tabpanel" id="panel-timeline" aria-labelledby="tab-timeline" data-tab-panel="timeline" hidden>
+            <OrderTimeline
+              timeline={order.timeline}
+              heading={t['admin.sales.orders.detail.timeline.heading']}
+              labelReceived={t['admin.sales.orders.detail.timeline.received']}
+              labelProcessing={t['admin.sales.orders.detail.timeline.processing']}
+              labelShipped={t['admin.sales.orders.detail.timeline.shipped']}
+              labelDelivered={t['admin.sales.orders.detail.timeline.delivered']}
+              labelCancelled={t['admin.sales.orders.detail.timeline.cancelled']}
+              actorSystem={t['admin.sales.orders.detail.timeline.actorSystem']}
+              actorAdmin={t['admin.sales.orders.detail.timeline.actorAdmin']}
+            />
+          </section>
+
+          <section role="tabpanel" id="panel-refunds" aria-labelledby="tab-refunds" data-tab-panel="refunds" hidden>
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <h2 class="text-base font-semibold text-slate-900 sm:text-lg">{t['admin.sales.orders.detail.refunds.heading']}</h2>
+              <p class="mt-3 rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm text-slate-500">{t['admin.sales.orders.detail.refunds.empty']}</p>
+              <p class="mt-2 text-xs text-slate-500">{t['admin.sales.orders.detail.refunds.hint']}</p>
+            </section>
+          </section>
+        </div>
+      </div>
+    )
+  }
+</AdminLayout>
+
+<script>
+  /**
+   * Tab switching minimal (sin React island).
+   *
+   * Mantiene `aria-selected` sincronizado, oculta paneles via `hidden`,
+   * y soporta ArrowLeft/ArrowRight para mover el foco entre tabs.
+   */
+  function initTabs(): void {
+    const triggers = document.querySelectorAll<HTMLButtonElement>('[data-tab-trigger]');
+    const panels = document.querySelectorAll<HTMLElement>('[data-tab-panel]');
+    if (triggers.length === 0) return;
+
+    function activate(tabKey: string): void {
+      triggers.forEach((trigger) => {
+        const isActive = trigger.dataset.tabTrigger === tabKey;
+        trigger.setAttribute('aria-selected', String(isActive));
+        trigger.tabIndex = isActive ? 0 : -1;
+        trigger.classList.toggle('aria-selected:bg-slate-900', isActive);
+        trigger.classList.toggle('aria-selected:text-white', isActive);
+        trigger.classList.toggle('text-slate-600', !isActive);
+        trigger.classList.toggle('hover:bg-slate-100', !isActive);
+      });
+      panels.forEach((panel) => {
+        const isActive = panel.dataset.tabPanel === tabKey;
+        if (isActive) {
+          panel.removeAttribute('hidden');
+        } else {
+          panel.setAttribute('hidden', '');
+        }
+      });
+    }
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const key = trigger.dataset.tabTrigger;
+        if (typeof key === 'string') activate(key);
+      });
+      trigger.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+        event.preventDefault();
+        const list = Array.from(triggers);
+        const idx = list.indexOf(trigger);
+        const nextIdx = event.key === 'ArrowRight' ? (idx + 1) % list.length : (idx - 1 + list.length) % list.length;
+        const next = list[nextIdx];
+        if (next && next.dataset.tabTrigger) {
+          activate(next.dataset.tabTrigger);
+          next.focus();
+        }
+      });
+    });
+  }
+
+  initTabs();
+</script>
