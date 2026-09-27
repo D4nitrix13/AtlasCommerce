@@ -1,0 +1,37 @@
+---
+/**
+ * Cupones — admin (F5.5).
+ *
+ * Grid de `CouponCard.astro` (estilo gift-card). 8 cards en el mock.
+ *
+ * **AGENTS.md §1**: ~60 líneas — header + grid.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import CouponCard from '../../../../components/admin/marketing/CouponCard.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+import { coupons } from '../../../../data/marketing-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+---
+
+<AdminLayout title={`${t['admin.marketing.coupons.title']} | Admin`}>
+  <div class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+        {t['admin.marketing.coupons.title']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.marketing.coupons.subtitle']}</p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+    >
+      <span aria-hidden="true">+</span>
+      <span>{t['admin.marketing.coupons.create']}</span>
+    </button>
+  </div>
+
+  <section class="grid gap-4 md:grid-cols-2">
+    {coupons.map((coupon) => <CouponCard coupon={coupon} />)}
+  </section>
+</AdminLayout>

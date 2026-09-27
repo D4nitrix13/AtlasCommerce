@@ -1,0 +1,111 @@
+---
+/**
+ * Depósitos (warehouses) — admin (F5.5).
+ *
+ * Listado en grid de cards (no tabla): cada depósito es una unidad
+ * física con dirección + manager + capacidad + # items. Cada card
+ * linkea al detalle dinámico `/admin/inventory/warehouses/[id]`.
+ *
+ * Patrón Shopify Admin: cards con occupancy progress bar al final.
+ *
+ * **AGENTS.md §1**: ~80 líneas — header + grid de cards.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import Icon from '../../../../ui/Icon.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+import { warehouses } from '../../../../data/inventory-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const formatCapacity = (n: number): string => {
+  return new Intl.NumberFormat('es-NI').format(n);
+};
+---
+
+<AdminLayout title={`${t['admin.inventory.warehouses.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.inventory.warehouses.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.inventory.warehouses.subtitle']}</p>
+  </div>
+
+  <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    {
+      warehouses.map((wh) => {
+        const occupancyPercent = Math.min(100, Math.round((wh.itemsCount / wh.capacity) * 100));
+        return (
+          <a
+            href={`/admin/inventory/warehouses/${wh.id}`}
+            class="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h2 class="truncate text-base font-bold text-slate-950 group-hover:text-slate-700">
+                  {wh.name}
+                </h2>
+                <p class="mt-0.5 text-xs text-slate-500">
+                  {wh.city}, {wh.country}
+                </p>
+              </div>
+              <span
+                class:list={[
+                  'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                  wh.isActive
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-slate-100 text-slate-500',
+                ]}
+              >
+                {wh.isActive
+                  ? t['admin.inventory.warehouses.card.statusActive']
+                  : t['admin.inventory.warehouses.card.statusInactive']}
+              </span>
+            </div>
+
+            <dl class="mt-4 space-y-2 text-xs">
+              <div>
+                <dt class="font-medium uppercase tracking-wide text-slate-400">
+                  {t['admin.inventory.warehouses.card.address']}
+                </dt>
+                <dd class="mt-0.5 text-slate-700">{wh.address}</dd>
+              </div>
+              <div>
+                <dt class="font-medium uppercase tracking-wide text-slate-400">
+                  {t['admin.inventory.warehouses.card.manager']}
+                </dt>
+                <dd class="mt-0.5 text-slate-700">{wh.managerName}</dd>
+              </div>
+            </dl>
+
+            <div class="mt-4 flex items-baseline justify-between text-xs">
+              <span class="text-slate-500">{t['admin.inventory.warehouses.card.occupancy']}</span>
+              <span class="font-semibold text-slate-900">{occupancyPercent}%</span>
+            </div>
+            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
+              <div
+                class:list={[
+                  'h-full rounded-full transition-all',
+                  occupancyPercent >= 90
+                    ? 'bg-rose-500'
+                    : occupancyPercent >= 70
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500',
+                ]}
+                style={`width:${occupancyPercent}%`}
+              />
+            </div>
+            <div class="mt-1 flex items-baseline justify-between text-xs text-slate-500">
+              <span>{formatCapacity(wh.itemsCount)} {t['admin.inventory.warehouses.card.itemsCount']}</span>
+              <span>/ {formatCapacity(wh.capacity)}</span>
+            </div>
+
+            <div class="mt-3 flex items-center gap-1 text-xs font-medium text-slate-500 opacity-0 transition group-hover:opacity-100">
+              <Icon name="chevron-right" class="h-3.5 w-3.5" />
+              <span>Ver detalle</span>
+            </div>
+          </a>
+        );
+      })
+    }
+  </section>
+</AdminLayout>

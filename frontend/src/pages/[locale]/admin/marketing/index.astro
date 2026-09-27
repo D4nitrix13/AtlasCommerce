@@ -1,0 +1,116 @@
+---
+/**
+ * Hub de Marketing (F5.5).
+ *
+ * 4 cards de overview (cupones activos, promos vigentes, conversión,
+ * canjes último mes) + acceso directo a secciones.
+ *
+ * **AGENTS.md §1**: ~110 líneas — header + 4 cards + 2 quick links.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import Icon from '../../../../ui/Icon.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+interface HubCard {
+  href: string;
+  title: string;
+  hint: string;
+  icon: string;
+  accent: 'violet' | 'emerald' | 'sky' | 'amber';
+}
+
+const cards: HubCard[] = [
+  {
+    href: '/admin/marketing/coupons',
+    title: t['admin.marketing.hub.activeCoupons'],
+    hint: t['admin.marketing.hub.activeCouponsHint'],
+    icon: 'ticket',
+    accent: 'violet',
+  },
+  {
+    href: '/admin/marketing/promotions',
+    title: t['admin.marketing.hub.activePromotions'],
+    hint: t['admin.marketing.hub.activePromotionsHint'],
+    icon: 'gift',
+    accent: 'emerald',
+  },
+  {
+    href: '/admin/marketing/coupons',
+    title: t['admin.marketing.hub.conversionRate'],
+    hint: t['admin.marketing.hub.conversionRateHint'],
+    icon: 'chart-bar',
+    accent: 'sky',
+  },
+  {
+    href: '/admin/marketing/coupons',
+    title: t['admin.marketing.hub.redemptionsMonth'],
+    hint: t['admin.marketing.hub.redemptionsMonthHint'],
+    icon: 'arrow-path',
+    accent: 'amber',
+  },
+];
+
+const accentClass: Record<HubCard['accent'], string> = {
+  violet: 'bg-violet-50 text-violet-600',
+  emerald: 'bg-emerald-50 text-emerald-600',
+  sky: 'bg-sky-50 text-sky-600',
+  amber: 'bg-amber-50 text-amber-600',
+};
+---
+
+<AdminLayout title={`${t['admin.marketing.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.marketing.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.marketing.subtitle']}</p>
+  </div>
+
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    {
+      cards.map((card) => (
+        <a
+          href={card.href}
+          class="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow"
+        >
+          <div class:list={['mb-4 grid h-10 w-10 place-items-center rounded-xl', accentClass[card.accent]]}>
+            <Icon name={card.icon} class="h-5 w-5" />
+          </div>
+          <h2 class="text-base font-bold text-slate-950 group-hover:text-slate-700">
+            {card.title}
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">{card.hint}</p>
+        </a>
+      ))
+    }
+  </section>
+
+  <section class="mt-6 grid gap-4 lg:grid-cols-2">
+    <a
+      href="/admin/marketing/coupons"
+      class="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300"
+    >
+      <div>
+        <h3 class="text-base font-bold text-slate-950">
+          {t['admin.marketing.coupons.title']}
+        </h3>
+        <p class="mt-1 text-xs text-slate-500">8 cupones · 4 activos</p>
+      </div>
+      <Icon name="chevron-right" class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700" />
+    </a>
+    <a
+      href="/admin/marketing/promotions"
+      class="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300"
+    >
+      <div>
+        <h3 class="text-base font-bold text-slate-950">
+          {t['admin.marketing.promotions.title']}
+        </h3>
+        <p class="mt-1 text-xs text-slate-500">5 promociones · 3 vigentes</p>
+      </div>
+      <Icon name="chevron-right" class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700" />
+    </a>
+  </section>
+</AdminLayout>

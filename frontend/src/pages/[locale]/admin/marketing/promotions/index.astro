@@ -1,0 +1,121 @@
+---
+/**
+ * Promociones — admin (F5.5).
+ *
+ * Combina el `PromoRuleBuilder.astro` (wizard de creación) con un
+ * listado de promos existentes. Como en Shopify Admin, el builder
+ * va arriba y la lista de promos vigentes abajo.
+ *
+ * **AGENTS.md §1**: ~140 líneas — header + builder + lista de cards.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import PromoRuleBuilder from '../../../../components/admin/marketing/PromoRuleBuilder.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+import { promotions, type PromotionKind, type CouponStatus } from '../../../../data/marketing-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const KIND_LABEL_KEY: Record<PromotionKind, string> = {
+  bogo: 'admin.marketing.promotions.kind.bogo',
+  percent_off: 'admin.marketing.promotions.kind.percent',
+  free_shipping: 'admin.marketing.promotions.kind.freeShipping',
+};
+
+const STATUS_LABEL_KEY: Record<CouponStatus, string> = {
+  active: 'admin.marketing.coupons.status.active',
+  scheduled: 'admin.marketing.coupons.status.scheduled',
+  expired: 'admin.marketing.coupons.status.expired',
+  exhausted: 'admin.marketing.coupons.status.exhausted',
+};
+
+const KIND_BADGE: Record<PromotionKind, string> = {
+  bogo: 'bg-violet-100 text-violet-700',
+  percent_off: 'bg-sky-100 text-sky-700',
+  free_shipping: 'bg-emerald-100 text-emerald-700',
+};
+
+const STATUS_BADGE: Record<CouponStatus, string> = {
+  active: 'bg-emerald-100 text-emerald-700',
+  scheduled: 'bg-sky-100 text-sky-700',
+  expired: 'bg-slate-100 text-slate-500',
+  exhausted: 'bg-rose-100 text-rose-700',
+};
+
+const formatDate = (iso: string): string => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-NI', { day: '2-digit', month: 'short' });
+};
+
+const describeRule = (promo: typeof promotions[number]): string => {
+  if (promo.kind === 'bogo' && promo.config.buyQuantity && promo.config.getQuantity) {
+    return `${promo.config.buyQuantity}x${promo.config.buyQuantity + promo.config.getQuantity} · ${promo.config.appliesTo ?? ''}`;
+  }
+  if (promo.kind === 'percent_off') {
+    return `${promo.config.percentOff}% off · ${promo.config.appliesTo ?? ''}`;
+  }
+  return `Envío gratis desde $${promo.config.minSubtotal ?? 0}`;
+};
+---
+
+<AdminLayout title={`${t['admin.marketing.promotions.title']} | Admin`}>
+  <div class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+        {t['admin.marketing.promotions.title']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.marketing.promotions.subtitle']}</p>
+    </div>
+  </div>
+
+  <section class="mb-8">
+    <PromoRuleBuilder />
+  </section>
+
+  <section>
+    <h2 class="mb-4 text-lg font-bold text-slate-950">Promociones vigentes y pasadas</h2>
+    <div class="grid gap-3">
+      {
+        promotions.map((promo) => (
+          <article class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                    KIND_BADGE[promo.kind],
+                  ]}
+                >
+                  {t[KIND_LABEL_KEY[promo.kind]]}
+                </span>
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                    STATUS_BADGE[promo.status],
+                  ]}
+                >
+                  {t[STATUS_LABEL_KEY[promo.status]]}
+                </span>
+                <span class="text-xs text-slate-400">P{String(promo.priority).padStart(2, '0')}</span>
+              </div>
+              <h3 class="mt-2 text-base font-bold text-slate-950">{promo.name}</h3>
+              <p class="mt-0.5 text-sm text-slate-600">{describeRule(promo)}</p>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs text-slate-500">
+              <div>
+                <p class="font-medium text-slate-400">Vigencia</p>
+                <p class="mt-0.5 text-slate-700">
+                  {formatDate(promo.startAt)} → {formatDate(promo.endAt)}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="font-medium text-slate-400">Usos</p>
+                <p class="mt-0.5 font-semibold text-slate-900">{promo.usageCount}</p>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</AdminLayout>
