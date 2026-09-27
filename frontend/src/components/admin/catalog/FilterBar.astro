@@ -1,0 +1,137 @@
+---
+/**
+ * FilterBar — Filtros laterales para listas admin (sidebar).
+ *
+ * Patrón Baymard §7.2: filtros apilados verticalmente en columna
+ * izquierda, sticky al hacer scroll. Cada filtro es controlado
+ * (el padre mantiene el estado y lo aplica server-side o client-side).
+ *
+ * El componente es presentacional puro: solo emite los filtros como
+ * data-attrs para que el padre los consuma. Cuando se implemente el
+ * filtrado real client-side, el padre lee `data-filters` y los
+ * aplica a la lista.
+ *
+ * AGENTS.md §1: ~120 líneas.
+ */
+import Input from '../../ui/Input.astro';
+import Select from '../../ui/Select.astro';
+import Button from '../../ui/Button.astro';
+import {
+  type ProductStatus,
+  BRANDS_MOCK,
+  CATEGORIES_MOCK,
+} from '../../../data/catalog-mock';
+import { getServerDictionary } from '../../../i18n/server';
+
+interface Props {
+  /** Categorías raíz para filtrar. */
+  rootCategoryIds?: readonly number[];
+  showStatusFilter?: boolean;
+  showPriceRange?: boolean;
+}
+
+const {
+  rootCategoryIds,
+  showStatusFilter = true,
+  showPriceRange = true,
+} = Astro.props;
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
+  { value: 'active', label: t['admin.catalog.products.status.active'] },
+  { value: 'draft', label: t['admin.catalog.products.status.draft'] },
+  { value: 'archived', label: t['admin.catalog.products.status.archived'] },
+];
+
+const categoryOptions = CATEGORIES_MOCK.filter(
+  (c) => !rootCategoryIds || rootCategoryIds.includes(c.id),
+).map((c) => ({ value: String(c.id), label: c.name }));
+
+const brandOptions = BRANDS_MOCK.map((b) => ({
+  value: String(b.id),
+  label: b.name,
+}));
+---
+
+<aside
+  aria-label={t['admin.catalog.filters.title']}
+  class="space-y-5 rounded-lg border border-slate-200 bg-white p-4"
+  data-filter-bar
+>
+  <div>
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+      {t['admin.catalog.filters.title']}
+    </h3>
+    <Input
+      name="filter-search"
+      type="search"
+      placeholder={t['admin.catalog.filters.search']}
+    />
+  </div>
+
+  {showStatusFilter && (
+    <div>
+      <Select
+        name="filter-status"
+        label={t['admin.catalog.filters.status']}
+        placeholder={t['admin.catalog.common.allStatuses']}
+        options={STATUS_OPTIONS}
+      />
+    </div>
+  )}
+
+  {categoryOptions.length > 0 && (
+    <div>
+      <Select
+        name="filter-category"
+        label={t['admin.catalog.filters.category']}
+        placeholder={t['admin.catalog.filters.allCategories']}
+        options={categoryOptions}
+      />
+    </div>
+  )}
+
+  {brandOptions.length > 0 && (
+    <div>
+      <Select
+        name="filter-brand"
+        label={t['admin.catalog.filters.brand']}
+        placeholder={t['admin.catalog.filters.allBrands']}
+        options={brandOptions}
+      />
+    </div>
+  )}
+
+  {showPriceRange && (
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">
+        {t['admin.catalog.filters.priceRange']}
+      </label>
+      <div class="flex items-center gap-2">
+        <Input
+          name="filter-min-price"
+          type="number"
+          placeholder={t['admin.catalog.filters.minPrice']}
+          inputmode="decimal"
+        />
+        <span aria-hidden="true" class="text-slate-400">—</span>
+        <Input
+          name="filter-max-price"
+          type="number"
+          placeholder={t['admin.catalog.filters.maxPrice']}
+          inputmode="decimal"
+        />
+      </div>
+    </div>
+  )}
+
+  <div class="flex flex-col gap-2 border-t border-slate-100 pt-4">
+    <Button variant="primary" size="sm" fullWidth type="button" data-filter-apply>
+      {t['admin.catalog.filters.apply']}
+    </Button>
+    <Button variant="ghost" size="sm" fullWidth type="button" data-filter-clear>
+      {t['admin.catalog.filters.clear']}
+    </Button>
+  </div>
+</aside>

@@ -1,0 +1,250 @@
+---
+/**
+ * ProductTable — Tabla densa para listado de productos admin.
+ *
+ * Patrón Baymard §7.2 / Shopify Admin:
+ *  - Selección múltiple con checkboxes (el padre maneja estado).
+ *  - Status pill semántico (Badge variant neutral/primary).
+ *  - Stock badge con color por nivel (in/low/out).
+ *  - Acciones inline por fila (view / edit / duplicate / delete).
+ *  - Empty state explícito (AGENTS §11).
+ *
+ * El componente es "controlled" — recibe `selectedIds` y emite
+ * cambios vía callback. La BulkActionsBar padre reacciona al cambio.
+ *
+ * AGENTS.md §1: el componente es ~140 líneas. Si crece más,
+ * dividir en `ProductTableRow.astro` + tabla base.
+ */
+import Badge from '../../ui/Badge.astro';
+import {
+  type ProductMock,
+  type ProductStatus,
+  getStockLevel,
+  getCategoryById,
+  getBrandById,
+} from '../../../data/catalog-mock';
+import { getServerDictionary } from '../../../i18n/server';
+import { adminUrl } from '../../../lib/path-helpers';
+import { getServerLocale } from '../../../i18n/server';
+
+interface Props {
+  products: readonly ProductMock[];
+  selectedIds: readonly number[];
+}
+
+const { products, selectedIds } = Astro.props;
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+
+const STATUS_BADGE_VARIANT: Record<ProductStatus, 'neutral' | 'primary'> = {
+  active: 'primary',
+  draft: 'neutral',
+  archived: 'neutral',
+};
+
+const STOCK_PILL: Record<
+  ReturnType<typeof getStockLevel>,
+  { labelKey: keyof typeof t; className: string }
+> = {
+  in_stock: {
+    labelKey: 'admin.catalog.products.stock.inStock',
+    className: 'bg-emerald-100 text-emerald-700',
+  },
+  low_stock: {
+    labelKey: 'admin.catalog.products.stock.lowStock',
+    className: 'bg-amber-100 text-amber-800',
+  },
+  out_of_stock: {
+    labelKey: 'admin.catalog.products.stock.outOfStock',
+    className: 'bg-red-100 text-red-700',
+  },
+};
+
+const STATUS_LABEL: Record<ProductStatus, string> = {
+  active: t['admin.catalog.products.status.active'],
+  draft: t['admin.catalog.products.status.draft'],
+  archived: t['admin.catalog.products.status.archived'],
+};
+
+const hasProducts = products.length > 0;
+
+function formatPrice(cents: number): string {
+  return new Intl.NumberFormat(locale === 'es' ? 'es-NI' : 'en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(cents / 100);
+}
+
+function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-NI' : 'en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(iso));
+}
+---
+
+{
+  hasProducts ? (
+    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <tr>
+            <th scope="col" class="w-10 px-4 py-3">
+              <span class="sr-only">{t['admin.catalog.common.actions']}</span>
+            </th>
+            <th scope="col" class="px-2 py-3 font-medium">
+              {t['admin.catalog.products.column.image']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-medium">
+              {t['admin.catalog.products.column.name']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-medium">
+              {t['admin.catalog.products.column.sku']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-medium">
+              {t['admin.catalog.products.column.category']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-medium">
+              {t['admin.catalog.products.column.brand']}
+            </th>
+            <th scope="col" class="px-3 py-3 text-right font-medium">
+              {t['admin.catalog.products.column.stock']}
+            </th>
+            <th scope="col" class="px-3 py-3 text-right font-medium">
+              {t['admin.catalog.products.column.price']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-medium">
+              {t['admin.catalog.products.column.status']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-medium">
+              {t['admin.catalog.products.column.updatedAt']}
+            </th>
+            <th scope="col" class="px-4 py-3 text-right font-medium">
+              {t['admin.catalog.products.column.actions']}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {products.map((product) => {
+            const category = getCategoryById(product.categoryId);
+            const brand = getBrandById(product.brandId);
+            const stockLevel = getStockLevel(product.stock);
+            const stockInfo = STOCK_PILL[stockLevel];
+            const isSelected = selectedIds.includes(product.id);
+            const detailHref = adminUrl(locale, `/catalog/products/${product.id}`);
+            return (
+              <tr class:list={['group hover:bg-slate-50/50', isSelected && 'bg-violet-50/50']}>
+                <td class="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    name="selected-product"
+                    value={product.id}
+                    checked={isSelected}
+                    aria-label={product.name}
+                    class="h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                    data-product-checkbox={product.id}
+                  />
+                </td>
+                <td class="px-2 py-3">
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    class="h-12 w-12 rounded-md border border-slate-200 object-cover"
+                    loading="lazy"
+                    width="48"
+                    height="48"
+                  />
+                </td>
+                <td class="max-w-[260px] px-3 py-3">
+                  <a
+                    href={detailHref}
+                    class="font-medium text-slate-900 hover:text-violet-700 hover:underline"
+                  >
+                    {product.name}
+                  </a>
+                </td>
+                <td class="px-3 py-3 font-mono text-xs text-slate-600">
+                  {product.sku}
+                </td>
+                <td class="px-3 py-3 text-slate-700">
+                  {category?.name ?? '—'}
+                </td>
+                <td class="px-3 py-3 text-slate-700">
+                  {brand?.name ?? '—'}
+                </td>
+                <td class="px-3 py-3 text-right">
+                  <span
+                    class:list={[
+                      'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      stockInfo.className,
+                    ]}
+                  >
+                    {product.stock} · {t[stockInfo.labelKey]}
+                  </span>
+                </td>
+                <td class="px-3 py-3 text-right font-semibold text-slate-900">
+                  {formatPrice(product.priceCents)}
+                </td>
+                <td class="px-3 py-3">
+                  <Badge variant={STATUS_BADGE_VARIANT[product.status]}>
+                    {STATUS_LABEL[product.status]}
+                  </Badge>
+                </td>
+                <td class="px-3 py-3 text-xs text-slate-500">
+                  {formatDate(product.updatedAt)}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-end gap-1">
+                    <a
+                      href={detailHref}
+                      class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      aria-label={`${t['admin.catalog.products.actions.view']}: ${product.name}`}
+                      title={t['admin.catalog.products.actions.view']}
+                    >
+                      <span aria-hidden="true" class="text-xs">👁</span>
+                    </a>
+                    <a
+                      href={`${detailHref}?edit=1`}
+                      class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      aria-label={`${t['admin.catalog.products.actions.edit']}: ${product.name}`}
+                      title={t['admin.catalog.products.actions.edit']}
+                    >
+                      <span aria-hidden="true" class="text-xs">✎</span>
+                    </a>
+                    <button
+                      type="button"
+                      class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      aria-label={`${t['admin.catalog.products.actions.duplicate']}: ${product.name}`}
+                      title={t['admin.catalog.products.actions.duplicate']}
+                    >
+                      <span aria-hidden="true" class="text-xs">⎘</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      aria-label={`${t['admin.catalog.products.actions.delete']}: ${product.name}`}
+                      title={t['admin.catalog.products.actions.delete']}
+                    >
+                      <span aria-hidden="true" class="text-xs">🗑</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm font-medium text-slate-700">
+        {t['admin.catalog.products.empty']}
+      </p>
+      <p class="mt-1 text-xs text-slate-500">
+        {t['admin.catalog.products.emptyHint']}
+      </p>
+    </div>
+  )
+}

@@ -1,0 +1,121 @@
+---
+/**
+ * /admin/catalog/products — Lista de productos admin (F5.3).
+ *
+ * Tabla densa con:
+ *  - Filtros laterales (FilterBar)
+ *  - Top bar con búsqueda, export CSV y botón "Nuevo producto"
+ *  - Bulk actions bar (aparece cuando hay selección)
+ *  - ProductTable denso con checkboxes + acciones inline
+ *
+ * Patrón Baymard §7.2 / Shopify Admin. El estado de selección se
+ * mantiene en el DOM via `data-product-checkbox` y se escucha via JS
+ * inline. Cuando exista el endpoint bulk, el padre lee los IDs y hace
+ * POST a `/api/v1/admin/catalog/products/bulk`.
+ *
+ * AGENTS.md §1: ~150 líneas. Composición pura — toda la lógica de
+ * tabla y filtros vive en sub-componentes.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import ProductTable from '../../../../components/admin/catalog/ProductTable.astro';
+import BulkActionsBar from '../../../../components/admin/catalog/BulkActionsBar.astro';
+import FilterBar from '../../../../components/admin/catalog/FilterBar.astro';
+import { PRODUCTS_MOCK } from '../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../i18n/server';
+import { adminUrl } from '../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+
+// TODO: replace with GET /api/v1/admin/catalog/products cuando el
+// endpoint exista. Por ahora el padre (server) usa PRODUCTS_MOCK.
+const products = PRODUCTS_MOCK;
+---
+
+<AdminLayout title={t['admin.catalog.products.title']}>
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+        {t['admin.catalog.products.title']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">
+        {t['admin.catalog.products.subtitle']}
+      </p>
+    </div>
+    <a
+      href={adminUrl(locale, '/catalog/products/create')}
+      class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+    >
+      <span aria-hidden="true">+</span>
+      {t['admin.catalog.products.addProduct']}
+    </a>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
+    <FilterBar />
+
+    <div class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3">
+        <label class="flex flex-1 items-center gap-2">
+          <span class="sr-only">{t['admin.catalog.common.search']}</span>
+          <input
+            type="search"
+            name="search"
+            placeholder={t['admin.catalog.products.searchPlaceholder']}
+            class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-200"
+          />
+        </label>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        >
+          <span aria-hidden="true">↓</span>
+          {t['admin.catalog.products.exportCsv']}
+        </button>
+      </div>
+
+      <BulkActionsBar count={0} entityType="product" />
+
+      <ProductTable products={products} selectedIds={[]} />
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  /**
+   * Bridge client-side entre checkboxes de ProductTable y
+   * BulkActionsBar. Sin backend real (todas las acciones quedan
+   * en estado de "clicked" — el wiring se completa cuando exista
+   * el endpoint bulk).
+   */
+  const checkboxes = document.querySelectorAll<HTMLInputElement>(
+    '[data-product-checkbox]',
+  );
+  const bar = document.querySelector<HTMLElement>('[data-bulk-bar]');
+  const counters = bar?.querySelectorAll<HTMLElement>('[data-bulk-bar]');
+
+  function updateBar() {
+    if (!bar) return;
+    const selected = document.querySelectorAll<HTMLInputElement>(
+      '[data-product-checkbox]:checked',
+    );
+    const count = selected.length;
+    bar.dataset.count = String(count);
+  }
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', updateBar);
+  });
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest('[data-bulk-clear]')) {
+      document
+        .querySelectorAll<HTMLInputElement>('[data-product-checkbox]:checked')
+        .forEach((cb) => (cb.checked = false));
+      updateBar();
+    }
+  });
+</script>

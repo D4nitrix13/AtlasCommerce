@@ -1,0 +1,143 @@
+---
+/**
+ * /admin/catalog/brands/[id] — Detalle/edit marca (F5.3).
+ *
+ * Resuelve la marca por id (mock). Renderiza form con: nombre,
+ * slug, descripción, website, logo. El submit real se hace en F5.4
+ * cuando exista `PUT /api/v1/admin/catalog/brands/{id}`.
+ *
+ * AGENTS.md §1: ~100 líneas.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import Input from '../../../../components/ui/Input.astro';
+import Textarea from '../../../../components/ui/Textarea.astro';
+import Button from '../../../../components/ui/Button.astro';
+import { getBrandById } from '../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../i18n/server';
+import { adminUrl } from '../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+const locale = getServerLocale(Astro.locals.locale);
+
+const idParam = Astro.params.id;
+const brandId = idParam !== undefined ? Number.parseInt(idParam, 10) : NaN;
+const brand = Number.isFinite(brandId) ? getBrandById(brandId) : undefined;
+---
+
+<AdminLayout title={t['admin.catalog.brands.detail.title']}>
+  {
+    brand === undefined ? (
+      <div class="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+        <h1 class="text-xl font-semibold text-slate-900">
+          {t['admin.catalog.brands.detail.notFound']}
+        </h1>
+        <p class="mt-2 text-sm text-slate-500">
+          {t['admin.catalog.common.error']}
+        </p>
+        <a
+          href={adminUrl(locale, '/catalog/brands')}
+          class="mt-4 inline-block text-sm font-medium text-violet-700 hover:underline"
+        >
+          ← {t['admin.catalog.brands.detail.back']}
+        </a>
+      </div>
+    ) : (
+      <>
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="mb-1 flex items-center gap-2 text-xs text-slate-500">
+              <a
+                href={adminUrl(locale, '/catalog/brands')}
+                class="hover:text-violet-700 hover:underline"
+              >
+                {t['admin.catalog.brands.title']}
+              </a>
+              <span aria-hidden="true">/</span>
+              <span>{brand.name}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <img
+                src={brand.logoUrl}
+                alt={t['admin.catalog.brands.logoAlt'].replace('{name}', brand.name)}
+                class="h-12 w-12 rounded-lg border border-slate-200 object-cover"
+                loading="lazy"
+                width="48"
+                height="48"
+              />
+              <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+                {brand.name}
+              </h1>
+            </div>
+            <p class="mt-2 text-sm text-slate-500">
+              {t['admin.catalog.brands.productsCount'].replace(
+                '{count}',
+                String(brand.productsCount),
+              )}
+            </p>
+          </div>
+        </div>
+
+        <form
+          method="post"
+          class="grid gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2"
+        >
+          <Input
+            name="name"
+            label={t['admin.catalog.brands.form.name']}
+            value={brand.name}
+            required
+          />
+          <Input
+            name="slug"
+            label={t['admin.catalog.brands.form.slug']}
+            value={brand.slug}
+            hint="auto-generado si se deja vacío"
+          />
+          <div class="sm:col-span-2">
+            <Textarea
+              name="description"
+              label={t['admin.catalog.brands.form.description']}
+              value={brand.description}
+              rows={3}
+            />
+          </div>
+          <Input
+            name="website"
+            type="url"
+            label={t['admin.catalog.brands.form.website']}
+            value={brand.website ?? ''}
+            placeholder="https://"
+          />
+          <div class="sm:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
+              {t['admin.catalog.brands.form.logo']}
+            </label>
+            <div class="flex items-center gap-3">
+              <img
+                src={brand.logoUrl}
+                alt=""
+                class="h-16 w-16 rounded-lg border border-slate-200 object-cover"
+                width="64"
+                height="64"
+              />
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                class="block w-full text-sm text-slate-500 file:mr-3 file:rounded-md file:border-0 file:bg-violet-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-violet-700 hover:file:bg-violet-100"
+              />
+            </div>
+          </div>
+          <div class="sm:col-span-2 flex items-center justify-end gap-2 border-t border-slate-200 pt-4">
+            <Button variant="ghost" type="button">
+              {t['admin.catalog.common.cancel']}
+            </Button>
+            <Button variant="primary" type="submit">
+              {t['admin.catalog.common.save']}
+            </Button>
+          </div>
+        </form>
+      </>
+    )
+  }
+</AdminLayout>
