@@ -1,0 +1,170 @@
+---
+/**
+ * AdjustStockModal — Modal de ajuste manual de stock (Shopify Admin pattern).
+ *
+ * Se abre desde el `StockTable.astro` mediante data-attributes
+ * (`data-open-adjust`). El listener global (en StockTable) dispara
+ * `dialog.showModal()` y popula los campos del modal con metadata
+ * de la entry clickeada.
+ *
+ * El modal está construido sobre el primitive `<Modal>` semántico
+ * (`<dialog>` nativo HTMLDialogElement — focus trap y ESC los maneja
+ * el browser).
+ *
+ * Campos del formulario:
+ *   - Tipo de ajuste: increment / decrement / set (radios estilizados)
+ *   - Cantidad (number input)
+ *   - Motivo (text input — requerido para auditoría)
+ *   - Nota interna (textarea — opcional)
+ *   - Preview en vivo del stock final
+ *
+ * **i18n**: labels localizadas via `getServerDictionary(locale)`. Los
+ * placeholders NO se traducen (son ejemplos concretos en ES).
+ *
+ * **AGENTS.md §1**: ~140 líneas — formulario denso pero acotado.
+ *
+ * **Out-of-scope**: este modal es UI-only — el submit es un stub.
+ * Cuando se conecte a `/api/v1/admin/inventory/adjust`, el handler
+ * vive en un `<script>` adicional con fetch + POST.
+ */
+import Modal from '../../ui/Modal.astro';
+import Button from '../../ui/Button.astro';
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+---
+
+<Modal id="adjust-stock-modal" title={t['admin.inventory.adjust.title']} size="lg">
+  <form id="adjust-stock-form" class="space-y-4" novalidate>
+    <input type="hidden" name="stock-entry-id" value="" />
+
+    <div class="rounded-xl bg-slate-50 p-3">
+      <div class="flex items-baseline justify-between gap-3">
+        <div class="min-w-0">
+          <p class="truncate text-sm font-semibold text-slate-900" data-modal-field="product"></p>
+          <p class="truncate text-xs text-slate-500" data-modal-field="variant"></p>
+        </div>
+        <span class="shrink-0 text-xs text-slate-500" data-modal-field="warehouse"></span>
+      </div>
+      <div class="mt-2 flex items-center gap-2 text-xs text-slate-600">
+        <span>Stock actual:</span>
+        <span class="font-mono font-semibold text-slate-900" data-modal-field="current">0</span>
+      </div>
+    </div>
+
+    <fieldset class="space-y-2">
+      <legend class="text-sm font-medium text-slate-700">
+        {t['admin.inventory.adjust.type']}
+      </legend>
+      <div class="grid grid-cols-3 gap-2">
+        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 transition has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+          <input type="radio" name="adjust-type" value="increase" class="text-emerald-600 focus:ring-emerald-500" checked />
+          <span class="text-sm text-slate-700">+ {t['admin.inventory.adjust.type.increase']}</span>
+        </label>
+        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 transition has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50">
+          <input type="radio" name="adjust-type" value="decrease" class="text-rose-600 focus:ring-rose-500" />
+          <span class="text-sm text-slate-700">− {t['admin.inventory.adjust.type.decrease']}</span>
+        </label>
+        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50">
+          <input type="radio" name="adjust-type" value="set" class="text-sky-600 focus:ring-sky-500" />
+          <span class="text-sm text-slate-700">= {t['admin.inventory.adjust.type.set']}</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div>
+      <label for="adjust-quantity" class="text-sm font-medium text-slate-700">
+        {t['admin.inventory.adjust.quantity']}
+      </label>
+      <input
+        id="adjust-quantity"
+        name="quantity"
+        type="number"
+        min="0"
+        required
+        class="mt-1.5 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        placeholder="0"
+      />
+    </div>
+
+    <div>
+      <label for="adjust-reason" class="text-sm font-medium text-slate-700">
+        {t['admin.inventory.adjust.reason']}
+        <span aria-hidden="true" class="ml-1 text-red-500">*</span>
+      </label>
+      <input
+        id="adjust-reason"
+        name="reason"
+        type="text"
+        required
+        class="mt-1.5 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        placeholder={t['admin.inventory.adjust.reasonPlaceholder']}
+      />
+    </div>
+
+    <div>
+      <label for="adjust-note" class="text-sm font-medium text-slate-700">
+        {t['admin.inventory.adjust.note']}
+      </label>
+      <textarea
+        id="adjust-note"
+        name="note"
+        rows="2"
+        class="mt-1.5 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        placeholder={t['admin.inventory.adjust.notePlaceholder']}
+      ></textarea>
+    </div>
+
+    <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+      <span class="font-medium text-slate-700">{t['admin.inventory.adjust.preview']}:</span>
+      <span class="ml-2 font-mono text-sm font-semibold text-slate-900" data-modal-preview="final">—</span>
+    </div>
+  </form>
+
+  <Fragment slot="footer">
+    <Button variant="secondary" type="button" data-close-modal="adjust-stock-modal">
+      {t['admin.inventory.adjust.cancel']}
+    </Button>
+    <button
+      type="submit"
+      form="adjust-stock-form"
+      class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--primary,#475569)] px-4 text-sm font-medium text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+    >
+      {t['admin.inventory.adjust.submit']}
+    </button>
+  </Fragment>
+</Modal>
+
+<script>
+  /**
+   * Preview en vivo del stock final en función del tipo + cantidad.
+   *
+   *   increase → current + qty
+   *   decrease → max(current - qty, 0)
+   *   set      → qty
+   *
+   * No hace submit real (stub). El connect con el endpoint
+   * `/api/v1/admin/inventory/adjust` se hace en sesión futura.
+   */
+  const form = document.getElementById('adjust-stock-form');
+  if (form instanceof HTMLFormElement) {
+    const previewEl = form.querySelector<HTMLElement>('[data-modal-preview="final"]');
+    const currentField = form.querySelector<HTMLElement>('[data-modal-field="current"]');
+    const updatePreview = (): void => {
+      if (!previewEl || !currentField) return;
+      const current = Number(currentField.textContent ?? '0');
+      const typeEl = form.querySelector<HTMLInputElement>('input[name="adjust-type"]:checked');
+      const qtyEl = form.querySelector<HTMLInputElement>('input[name="quantity"]');
+      const type = typeEl?.value ?? 'increase';
+      const qty = Math.max(0, Number(qtyEl?.value ?? '0'));
+      let final = current;
+      if (type === 'increase') final = current + qty;
+      else if (type === 'decrease') final = Math.max(0, current - qty);
+      else if (type === 'set') final = qty;
+      previewEl.textContent = String(final);
+    };
+
+    form.addEventListener('input', updatePreview);
+    form.addEventListener('change', updatePreview);
+  }
+</script>

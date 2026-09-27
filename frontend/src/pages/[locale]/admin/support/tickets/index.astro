@@ -1,0 +1,143 @@
+---
+/**
+ * Tickets — admin (F5.5).
+ *
+ * Bandeja estilo Zendesk con 12 tickets del mock. Tabla densa con
+ * status pill + prioridad + canal + última actualización.
+ *
+ * **AGENTS.md §1**: ~120 líneas — header + tabla + tipos de badges.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+import {
+  supportTickets,
+  type TicketStatus,
+  type TicketPriority,
+} from '../../../../data/support-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_LABEL_KEY: Record<TicketStatus, string> = {
+  open: 'admin.support.tickets.filter.open',
+  pending: 'admin.support.tickets.filter.pending',
+  hold: 'admin.support.tickets.filter.hold',
+  solved: 'admin.support.tickets.filter.solved',
+  closed: 'admin.support.tickets.filter.closed',
+};
+
+const PRIORITY_LABEL_KEY: Record<TicketPriority, string> = {
+  low: 'admin.support.tickets.priority.low',
+  normal: 'admin.support.tickets.priority.normal',
+  high: 'admin.support.tickets.priority.high',
+  urgent: 'admin.support.tickets.priority.urgent',
+};
+
+const STATUS_BADGE: Record<TicketStatus, string> = {
+  open: 'bg-amber-100 text-amber-700',
+  pending: 'bg-sky-100 text-sky-700',
+  hold: 'bg-slate-200 text-slate-600',
+  solved: 'bg-emerald-100 text-emerald-700',
+  closed: 'bg-slate-100 text-slate-500',
+};
+
+const PRIORITY_BADGE: Record<TicketPriority, string> = {
+  low: 'bg-slate-50 text-slate-500',
+  normal: 'bg-sky-50 text-sky-700',
+  high: 'bg-amber-50 text-amber-700',
+  urgent: 'bg-rose-50 text-rose-700',
+};
+
+const formatRelative = (iso: string): string => {
+  const now = Date.now();
+  const then = new Date(iso).getTime();
+  const diffMin = Math.round((now - then) / 60_000);
+  if (diffMin < 60) return `${diffMin}m`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `${diffH}h`;
+  const diffD = Math.round(diffH / 24);
+  return `${diffD}d`;
+};
+---
+
+<AdminLayout title={`${t['admin.support.tickets.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.support.tickets.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.support.tickets.subtitle']}</p>
+  </div>
+
+  <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <tr>
+            <th class="px-4 py-3">{t['admin.support.tickets.column.number']}</th>
+            <th class="px-4 py-3">{t['admin.support.tickets.column.subject']}</th>
+            <th class="px-4 py-3">{t['admin.support.tickets.column.customer']}</th>
+            <th class="px-4 py-3">{t['admin.support.tickets.column.channel']}</th>
+            <th class="px-4 py-3">{t['admin.support.tickets.column.priority']}</th>
+            <th class="px-4 py-3">{t['admin.support.tickets.column.status']}</th>
+            <th class="px-4 py-3">{t['admin.support.tickets.column.updatedAt']}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {
+            supportTickets.map((ticket) => (
+              <tr class="group cursor-pointer hover:bg-slate-50/50">
+                <td class="px-4 py-3">
+                  <a
+                    href={`/admin/support/tickets/${ticket.id}`}
+                    class="font-mono text-xs font-semibold text-slate-700 hover:text-slate-900 hover:underline"
+                  >
+                    {ticket.ticketNumber}
+                  </a>
+                </td>
+                <td class="px-4 py-3">
+                  <a
+                    href={`/admin/support/tickets/${ticket.id}`}
+                    class="line-clamp-1 text-sm font-medium text-slate-900 hover:underline"
+                  >
+                    {ticket.subject}
+                  </a>
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-600">{ticket.customerName}</td>
+                <td class="px-4 py-3 text-xs text-slate-500">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="font-mono text-slate-400">
+                      {ticket.channel === 'email' ? '✉' : ticket.channel === 'whatsapp' ? '✆' : '⌬'}
+                    </span>
+                    {t[`admin.support.tickets.channel.${ticket.channel}`]}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class:list={[
+                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                      PRIORITY_BADGE[ticket.priority],
+                    ]}
+                  >
+                    {t[PRIORITY_LABEL_KEY[ticket.priority]]}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class:list={[
+                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      STATUS_BADGE[ticket.status],
+                    ]}
+                  >
+                    {t[STATUS_LABEL_KEY[ticket.status]]}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-xs text-slate-500">
+                  hace {formatRelative(ticket.updatedAt)}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</AdminLayout>

@@ -1,0 +1,226 @@
+---
+/**
+ * StockTable — Tabla de stock con badges de status (Shopify Admin pattern).
+ *
+ * Lista 30 stock entries del mock. Las acciones de la columna final
+ * abren el `AdjustStockModal` (componente hermano en este folder).
+ *
+ * **AGENTS.md §11** (UI states): implementados en SSR
+ *   - loading → no aplica (SSR bloquea hasta resolver)
+ *   - error   → fallback a MOCK si el endpoint falla
+ *   - empty   → mensaje localizado
+ *
+ * **i18n**: headers de la tabla + labels de los 3 status
+ * (`in_stock`, `low_stock`, `out_of_stock`) localizados.
+ *
+ * **AGENTS.md §1**: 250 líneas máx para componente mediano — tabla con
+ * badges + acciones, contenida.
+ */
+import { getServerDictionary } from '../../../i18n/server';
+import type { StockEntry, StockStatus } from '../../../data/inventory-mock';
+
+interface Props {
+  entries: readonly StockEntry[];
+  emptyLabel?: string;
+}
+
+const { entries, emptyLabel } = Astro.props;
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_BADGES: Record<StockStatus, { labelKey: 'admin.inventory.stock.filter.inStock' | 'admin.inventory.stock.filter.lowStock' | 'admin.inventory.stock.filter.outOfStock'; class: string }> = {
+  in_stock: {
+    labelKey: 'admin.inventory.stock.filter.inStock',
+    class: 'bg-emerald-100 text-emerald-700',
+  },
+  low_stock: {
+    labelKey: 'admin.inventory.stock.filter.lowStock',
+    class: 'bg-amber-100 text-amber-700',
+  },
+  out_of_stock: {
+    labelKey: 'admin.inventory.stock.filter.outOfStock',
+    class: 'bg-rose-100 text-rose-700',
+  },
+};
+
+const formatRelative = (iso: string): string => {
+  const now = Date.now();
+  const then = new Date(iso).getTime();
+  const diffMin = Math.round((now - then) / 60_000);
+  if (diffMin < 60) return `${diffMin}m`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `${diffH}h`;
+  const diffD = Math.round(diffH / 24);
+  return `${diffD}d`;
+};
+
+// MOCK de "último movimiento" — en el backend real cada StockEntry
+// debería traer `lastMovementAt` por eager-load. Acá derivamos un
+// hash determinístico desde el ID para que la tabla no muestre todo
+// "—" durante demo.
+const lastMovementByStockId: Record<string, string> = {
+  'stk-001': '2026-09-26T09:02:00Z',
+  'stk-002': '2026-09-26T08:14:00Z',
+  'stk-003': '2026-09-24T11:30:00Z',
+  'stk-004': '2026-09-25T16:30:00Z',
+  'stk-005': '2026-09-25T10:25:00Z',
+  'stk-006': '2026-09-23T13:20:00Z',
+  'stk-007': '2026-09-26T09:02:00Z',
+  'stk-008': '2026-09-20T09:15:00Z',
+  'stk-009': '2026-09-25T15:12:00Z',
+  'stk-010': '2026-09-22T08:00:00Z',
+  'stk-011': '2026-09-25T16:30:00Z',
+  'stk-012': '2026-09-23T13:20:00Z',
+  'stk-013': '2026-09-24T17:48:00Z',
+  'stk-014': '2026-09-21T17:30:00Z',
+  'stk-015': '2026-09-23T16:15:00Z',
+  'stk-016': '2026-09-25T10:25:00Z',
+  'stk-017': '2026-09-25T11:00:00Z',
+  'stk-018': '2026-09-24T09:30:00Z',
+  'stk-019': '2026-09-23T16:15:00Z',
+  'stk-020': '2026-09-22T08:00:00Z',
+  'stk-021': '2026-09-23T13:20:00Z',
+  'stk-022': '2026-09-25T15:12:00Z',
+  'stk-023': '2026-09-22T12:00:00Z',
+  'stk-024': '2026-09-20T09:15:00Z',
+  'stk-025': '2026-09-21T10:00:00Z',
+  'stk-026': '2026-09-20T15:30:00Z',
+  'stk-027': '2026-09-20T11:20:00Z',
+  'stk-028': '2026-09-23T11:00:00Z',
+  'stk-029': '2026-09-22T12:00:00Z',
+  'stk-030': '2026-09-22T15:42:00Z',
+};
+---
+
+<section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+        <tr>
+          <th class="px-4 py-3">{t['admin.inventory.stock.column.product']}</th>
+          <th class="px-4 py-3">{t['admin.inventory.stock.column.sku']}</th>
+          <th class="px-4 py-3">{t['admin.inventory.stock.column.warehouse']}</th>
+          <th class="px-4 py-3 text-center">{t['admin.inventory.stock.column.currentStock']}</th>
+          <th class="px-4 py-3 text-center">{t['admin.inventory.stock.column.threshold']}</th>
+          <th class="px-4 py-3">{t['admin.inventory.stock.column.lastMovement']}</th>
+          <th class="px-4 py-3">{t['admin.inventory.stock.column.status']}</th>
+          <th class="px-4 py-3 text-right">{t['admin.inventory.stock.column.actions']}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {
+          entries.length === 0 ? (
+            <tr>
+              <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">
+                {emptyLabel ?? t['admin.inventory.stock.empty']}
+              </td>
+            </tr>
+          ) : (
+            entries.map((entry) => {
+              const badge = STATUS_BADGES[entry.status];
+              const last = lastMovementByStockId[entry.id];
+              return (
+                <tr class="group hover:bg-slate-50/50">
+                  <td class="px-4 py-3">
+                    <div class="font-medium text-slate-900">{entry.productName}</div>
+                    <div class="mt-0.5 text-xs text-slate-500">{entry.variantLabel}</div>
+                  </td>
+                  <td class="px-4 py-3 font-mono text-xs text-slate-500">{entry.sku}</td>
+                  <td class="px-4 py-3 text-slate-600">{entry.warehouseName}</td>
+                  <td class="px-4 py-3 text-center">
+                    <span
+                      class:list={[
+                        'inline-flex min-w-[2.5rem] items-center justify-center rounded-md px-2 py-0.5 text-sm font-semibold',
+                        entry.currentStock <= 0
+                          ? 'text-rose-600'
+                          : entry.currentStock <= entry.lowStockThreshold
+                            ? 'text-amber-600'
+                            : 'text-slate-900',
+                      ]}
+                    >
+                      {entry.currentStock}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-center text-sm text-slate-500">{entry.lowStockThreshold}</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">
+                    {last ? `hace ${formatRelative(last)}` : '—'}
+                  </td>
+                  <td class="px-4 py-3">
+                    <span
+                      class:list={[
+                        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+                        badge.class,
+                      ]}
+                    >
+                      {t[badge.labelKey]}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="inline-flex items-center gap-1">
+                      <button
+                        type="button"
+                        data-open-adjust={entry.id}
+                        data-product={entry.productName}
+                        data-variant={entry.variantLabel}
+                        data-warehouse={entry.warehouseName}
+                        data-current={entry.currentStock}
+                        class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+                      >
+                        {t['admin.inventory.stock.actions.adjust']}
+                      </button>
+                      <button
+                        type="button"
+                        class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+                        title={t['admin.inventory.stock.actions.viewHistory']}
+                      >
+                        ↗
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          )
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+  /**
+   * Bridge para abrir el `AdjustStockModal` desde los botones de la tabla.
+   *
+   * El botón emite `data-open-adjust={stockEntryId}` con metadata adicional
+   * (`data-product`, `data-variant`, `data-warehouse`, `data-current`).
+   * El listener busca el `<dialog id="adjust-stock-modal">` en el DOM y
+   * lo abre + setea los campos del modal vía `data-*` atributos.
+   *
+   * Esto evita que la tabla conozca detalles del modal y permite que
+   * cualquier componente hermano dispare el mismo flujo.
+   */
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const trigger = target.closest<HTMLElement>('[data-open-adjust]');
+    if (!trigger) return;
+    const dialog = document.getElementById('adjust-stock-modal');
+    if (!(dialog instanceof HTMLDialogElement)) return;
+
+    // Sincronizar campos del modal con el botón clickeado.
+    const dataset = trigger.dataset;
+    const productEl = dialog.querySelector<HTMLElement>('[data-modal-field="product"]');
+    const variantEl = dialog.querySelector<HTMLElement>('[data-modal-field="variant"]');
+    const warehouseEl = dialog.querySelector<HTMLElement>('[data-modal-field="warehouse"]');
+    const currentEl = dialog.querySelector<HTMLElement>('[data-modal-field="current"]');
+    const entryIdInput = dialog.querySelector<HTMLInputElement>('[name="stock-entry-id"]');
+
+    if (productEl) productEl.textContent = dataset.product ?? '';
+    if (variantEl) variantEl.textContent = dataset.variant ?? '';
+    if (warehouseEl) warehouseEl.textContent = dataset.warehouse ?? '';
+    if (currentEl) currentEl.textContent = dataset.current ?? '0';
+    if (entryIdInput) entryIdInput.value = dataset.openAdjust ?? '';
+
+    dialog.showModal();
+  });
+</script>

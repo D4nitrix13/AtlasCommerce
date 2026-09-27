@@ -1,0 +1,90 @@
+---
+/**
+ * TicketThread — Thread de conversación (Zendesk pattern).
+ *
+ * Renderiza la lista de `messages[]` de un ticket alternando entre
+ * bubbles de cliente (izquierda, fondo slate) y admin (derecha,
+ * fondo emerald). Cada bubble tiene autor, timestamp y body.
+ *
+ * Diferencias con el `TicketThread` típico de Discord/Slack:
+ *   - Mensajes del cliente a la **izquierda** (no a la derecha)
+ *   - Avatar con iniciales en vez de foto (placeholder visual)
+ *   - Timestamps compactos (no relativos — absolute ISO format)
+ *
+ * Esto matchea la convención Zendesk Admin.
+ *
+ * **AGENTS.md §1**: ~80 líneas — composición, sin lógica de negocio.
+ *
+ * **i18n**: labels de rol (customer/support) localizadas.
+ */
+import { getServerDictionary } from '../../../i18n/server';
+import type { SupportTicket } from '../../../data/support-mock';
+
+interface Props {
+  ticket: SupportTicket;
+}
+
+const { ticket } = Astro.props;
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const formatTimestamp = (iso: string): string => {
+  const d = new Date(iso);
+  return d.toLocaleString('es-NI', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const initialsOf = (name: string): string => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return (parts[0] ?? '?').slice(0, 2).toUpperCase();
+  return `${(parts[0] ?? '').charAt(0)}${(parts[1] ?? '').charAt(0)}`.toUpperCase();
+};
+---
+
+<section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+  <ol class="divide-y divide-slate-100">
+    {
+      ticket.messages.map((m) => {
+        const isAdmin = m.authorRole === 'admin';
+        return (
+          <li class:list={['flex gap-3 p-4', isAdmin ? 'flex-row-reverse' : '']}>
+            <div
+              class:list={[
+                'grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-bold',
+                isAdmin ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-700',
+              ]}
+              aria-hidden="true"
+            >
+              {initialsOf(m.authorName)}
+            </div>
+
+            <div class:list={['flex max-w-[80%] flex-col gap-1', isAdmin ? 'items-end' : '']}>
+              <div class:list={['flex items-center gap-2 text-xs text-slate-500', isAdmin ? 'flex-row-reverse' : '']}>
+                <span class="font-semibold text-slate-700">{m.authorName}</span>
+                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] uppercase tracking-wider text-slate-600">
+                  {isAdmin ? t['admin.support.tickets.detail.thread.support'] : t['admin.support.tickets.detail.thread.customer']}
+                </span>
+                <time datetime={m.createdAt} class="text-slate-400">
+                  {formatTimestamp(m.createdAt)}
+                </time>
+              </div>
+              <p
+                class:list={[
+                  'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                  isAdmin ? 'rounded-tr-sm bg-emerald-50 text-slate-900' : 'rounded-tl-sm bg-slate-100 text-slate-900',
+                ]}
+              >
+                {m.body}
+              </p>
+            </div>
+          </li>
+        );
+      })
+    }
+  </ol>
+</section>

@@ -1,0 +1,38 @@
+---
+/**
+ * Reseñas — admin (F5.5).
+ *
+ * Moderación de 20 reseñas del mock. Cada review se renderiza con
+ * `ReviewModerationCard.astro`. Layout responsive: 2 columnas en
+ * desktop, 1 en mobile.
+ *
+ * **AGENTS.md §1**: ~50 líneas — header + grid de cards.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import ReviewModerationCard from '../../../../components/admin/support/ReviewModerationCard.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+import { productReviews } from '../../../../data/support-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+// Por defecto mostramos las pending para que el admin tenga trabajo
+// al entrar a la página. En sesión futura esto sería un filtro real.
+const reviewsToShow = productReviews.filter((r) => r.status === 'pending');
+---
+
+<AdminLayout title={`${t['admin.support.reviews.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.support.reviews.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.support.reviews.subtitle']}</p>
+  </div>
+
+  <p class="mb-4 text-xs text-slate-500">
+    Mostrando {reviewsToShow.length} reseñas pendientes (de {productReviews.length} totales)
+  </p>
+
+  <section class="grid gap-4 xl:grid-cols-2">
+    {reviewsToShow.map((review) => <ReviewModerationCard review={review} />)}
+  </section>
+</AdminLayout>

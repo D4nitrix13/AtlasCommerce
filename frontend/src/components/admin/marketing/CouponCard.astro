@@ -1,0 +1,160 @@
+---
+/**
+ * CouponCard — Card estilo "gift card" para cupones (Shopify Admin pattern).
+ *
+ * Cada card tiene:
+ *   - Código destacado arriba (monoespaciado, con botón "Copiar")
+ *   - Descuento en grande (% OFF / $X OFF / envío gratis)
+ *   - Subtotal mínimo (si aplica) y vigencia
+ *   - Status pill (active/scheduled/expired/exhausted)
+ *
+ * El estilo "gift card" usa un gradiente slate→sky de fondo que le da
+ * peso visual sin distraer del resto del listado. Los bordes
+ * perforados a la izquierda/derecha son decoración CSS (círculos
+ * `before`/`after`) que evocan cupones físicos cortados con tijera.
+ *
+ * **AGENTS.md §1**: ~120 líneas — card densa con composición, no lógica.
+ *
+ * **i18n**: todo localizado via `getServerDictionary(locale)`. El copy
+ * del cupón en sí (`description`) viene del backend.
+ */
+import { getServerDictionary } from '../../../i18n/server';
+import type { Coupon, CouponStatus } from '../../../data/marketing-mock';
+
+interface Props {
+  coupon: Coupon;
+}
+
+const { coupon } = Astro.props;
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_LABEL_KEY: Record<CouponStatus, 'admin.marketing.coupons.status.active' | 'admin.marketing.coupons.status.scheduled' | 'admin.marketing.coupons.status.expired' | 'admin.marketing.coupons.status.exhausted'> = {
+  active: 'admin.marketing.coupons.status.active',
+  scheduled: 'admin.marketing.coupons.status.scheduled',
+  expired: 'admin.marketing.coupons.status.expired',
+  exhausted: 'admin.marketing.coupons.status.exhausted',
+};
+
+const STATUS_BADGE: Record<CouponStatus, string> = {
+  active: 'bg-emerald-100 text-emerald-700',
+  scheduled: 'bg-sky-100 text-sky-700',
+  expired: 'bg-slate-100 text-slate-500',
+  exhausted: 'bg-rose-100 text-rose-700',
+};
+
+const formatDate = (iso: string): string => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-NI', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+---
+
+<article class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+  <div class="relative flex">
+    <div class="relative w-2/5 shrink-0 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-700 p-5 text-white">
+      <span aria-hidden="true" class="absolute -bottom-3 -left-3 h-6 w-6 rounded-full bg-white"></span>
+      <span aria-hidden="true" class="absolute -right-3 -bottom-3 h-6 w-6 rounded-full bg-white"></span>
+
+      <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200">Cupón</p>
+      <p class="mt-2 break-all font-mono text-lg font-bold tracking-wider" data-coupon-code={coupon.id}>
+        {coupon.code}
+      </p>
+
+      <div class="mt-4 flex items-end gap-2">
+        <span class="text-3xl font-bold leading-none">
+          {coupon.discountType === 'free_shipping' ? '✦' : `${coupon.discountValue}${coupon.discountType === 'percentage' ? '%' : '$'}`}
+        </span>
+        <span class="pb-1 text-xs uppercase tracking-wide text-sky-200">
+          {coupon.discountType === 'percentage'
+            ? 'OFF'
+            : coupon.discountType === 'fixed_amount'
+              ? 'OFF'
+              : 'ENVÍO'}
+        </span>
+      </div>
+
+      <button
+        type="button"
+        data-copy-coupon={coupon.code}
+        class="mt-4 inline-flex items-center gap-1.5 rounded-md border border-white/30 bg-white/10 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+      >
+        <span aria-hidden="true">⧉</span>
+        <span>{t['admin.marketing.coupons.card.copy']}</span>
+      </button>
+    </div>
+
+    <div class="flex flex-1 flex-col gap-2 p-5">
+      <p class="text-sm font-medium text-slate-700">{coupon.description}</p>
+
+      <div class="mt-auto space-y-1.5 text-xs text-slate-500">
+        {
+          coupon.minSubtotal !== null && (
+            <p>
+              <span class="font-medium text-slate-600">
+                {t['admin.marketing.coupons.card.minSubtotal'].replace('{amount}', `$${coupon.minSubtotal}`)}
+              </span>
+            </p>
+          )
+        }
+        <p>
+          {formatDate(coupon.validFrom)} → {formatDate(coupon.validUntil)}
+        </p>
+        <p>
+          <span class="font-medium text-slate-700">{coupon.usageCount}</span>
+          {coupon.usageLimit !== null ? ` / ${coupon.usageLimit}` : ''} usos
+        </p>
+      </div>
+
+      <div class="mt-2 flex items-center justify-between">
+        <span
+          class:list={[
+            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+            STATUS_BADGE[coupon.status],
+          ]}
+        >
+          {t[STATUS_LABEL_KEY[coupon.status]]}
+        </span>
+        <a
+          href={`/admin/marketing/coupons/${coupon.id}`}
+          class="text-xs font-medium text-slate-500 transition hover:text-slate-900"
+        >
+          {t['admin.marketing.coupons.detail.edit']} →
+        </a>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+  /**
+   * Copiar el código del cupón al clipboard.
+   *
+   * El botón emite `data-copy-coupon={code}`. El listener lee el valor
+   * y dispara `navigator.clipboard.writeText`. Feedback efímero
+   * (cambia el label del botón a "Copiado" durante 1.5s).
+   */
+  document.addEventListener('click', async (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const trigger = target.closest<HTMLElement>('[data-copy-coupon]');
+    if (!trigger) return;
+    const code = trigger.dataset.copyCoupon;
+    if (!code) return;
+
+    try {
+      await navigator.clipboard.writeText(code);
+      const label = trigger.querySelector<HTMLElement>('span:last-child');
+      const originalLabel = label?.textContent ?? '';
+      if (label) {
+        label.textContent =
+          trigger.getAttribute('data-copy-feedback') ?? 'Copiado';
+      }
+      window.setTimeout(() => {
+        if (label) label.textContent = originalLabel;
+      }, 1500);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[CouponCard] No se pudo copiar al clipboard:', err);
+    }
+  });
+</script>
