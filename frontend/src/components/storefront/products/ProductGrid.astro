@@ -1,0 +1,109 @@
+---
+/**
+ * ProductGrid — grid responsive de ProductCards con estados UI completos.
+ *
+ * AGENTS §11 obligatorio: loading · empty · error · success · disabled.
+ * Aunque los datos vienen de mock, mantenemos las branches para que el
+ * consumer (página) pueda pasar `status` y reflejar fetch real sin
+ * cambiar el componente.
+ *
+ * Layout responsive (Baymard §5.2 storefront público):
+ *   mobile: 2 columnas
+ *   sm:     3 columnas
+ *   lg:     4 columnas
+ *   xl:     4 columnas (mismo, cards más grandes)
+ *
+ * Si se pasa `activeCategory`, se filtran los productos en el cliente.
+ * Esto evita un roundtrip al backend en esta fase (mock) y permite
+ * que la UI funcione desde la URL `/products?category=figures`.
+ */
+import ProductCard, { type ProductCardLabels } from './ProductCard.astro';
+import type { Product } from '../../../types/catalog';
+
+export type ProductGridStatus = 'success' | 'loading' | 'empty' | 'error';
+
+interface Props {
+  products: readonly Product[];
+  locale: string;
+  cardLabels: ProductCardLabels;
+  status?: ProductGridStatus;
+  /** Slug de categoría para filtrar (opcional). */
+  activeCategory?: string | null;
+  /** Keys de traducción para loading/error/empty/count. */
+  loadingLabel: string;
+  errorLabel: string;
+  emptyLabel: string;
+  emptyHint: string;
+}
+
+const {
+  products,
+  locale,
+  cardLabels,
+  status = 'success',
+  activeCategory = null,
+  loadingLabel,
+  errorLabel,
+  emptyLabel,
+  emptyHint,
+} = Astro.props;
+
+const filteredProducts =
+  activeCategory === null
+    ? products
+    : products.filter((product) => product.category === activeCategory);
+
+const showSkeleton = status === 'loading';
+const showError = status === 'error';
+const showEmpty = status === 'empty' || (status === 'success' && filteredProducts.length === 0);
+const showProducts = status === 'success' && filteredProducts.length > 0;
+---
+
+<section aria-label={cardLabels.viewDetail} class="w-full">
+  {
+    showSkeleton && (
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map(() => (
+          <div class="animate-pulse overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div class="aspect-square bg-slate-100" />
+            <div class="space-y-2 p-4">
+              <div class="h-4 w-3/4 rounded bg-slate-100" />
+              <div class="h-3 w-full rounded bg-slate-100" />
+              <div class="h-3 w-1/2 rounded bg-slate-100" />
+            </div>
+          </div>
+        ))}
+        <p class="sr-only">{loadingLabel}</p>
+      </div>
+    )
+  }
+
+  {
+    showError && (
+      <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+        <p class="text-sm font-medium text-red-700">{errorLabel}</p>
+      </div>
+    )
+  }
+
+  {
+    showEmpty && (
+      <div class="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+        <p class="text-base font-semibold text-slate-700">{emptyLabel}</p>
+        <p class="max-w-md text-sm text-slate-500">{emptyHint}</p>
+      </div>
+    )
+  }
+
+  {
+    showProducts && (
+      <ul class="grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-4">
+        {filteredProducts.map((product) => (
+          <li class="list-none">
+            <ProductCard product={product} locale={locale} labels={cardLabels} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</section>

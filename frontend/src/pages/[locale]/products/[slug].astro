@@ -1,0 +1,160 @@
+---
+/**
+ * Detalle de producto (`/[locale]/products/[slug]`).
+ *
+ * Stub mínimo (F4 expande este page). Por ahora muestra:
+ *   - Imagen principal
+ *   - Título (h1)
+ *   - Precio + compare-at si hay descuento
+ *   - Stock indicator
+ *   - Descripción
+ *   - Botón "Añadir al carrito" (preparado con TODO, sin handler)
+ *
+ * El detalle completo (galería, variantes, recomendaciones,
+ * wishlist "My Collection", etc.) viene en F4.
+ *
+ * Si el slug no matchea, devuelve 404 explícito (`Astro.response`)
+ * para no confundir con un error de render.
+ */
+import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
+import Button from '../../../components/ui/Button.astro';
+import Badge from '../../../components/ui/Badge.astro';
+import { getServerDictionary } from '../../../i18n/server';
+import { findProductBySlug, CATEGORIES } from '../../../data/products';
+import { formatCurrency } from '../../../lib/formatters';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+
+// TODO F1.4: cart store.
+const cartCount = 0;
+
+const { slug } = Astro.params;
+const product = slug !== undefined ? findProductBySlug(slug) : null;
+
+if (product === null) {
+  Astro.response.status = 404;
+}
+
+const cardLabels = {
+  newBadge: t['storefront.productCard.badge.new'],
+  saleBadge: t['storefront.productCard.badge.sale'],
+  lowStockBadge: t['storefront.productCard.badge.lowStock'],
+  addToCart: t['storefront.productCard.addToCart'],
+  outOfStock: t['storefront.productCard.outOfStock'],
+  viewDetail: t['storefront.productCard.viewDetail'],
+};
+
+const category =
+  product !== null
+    ? CATEGORIES.find((entry) => entry.slug === product.category) ?? null
+    : null;
+
+const currencyCode = product?.currency ?? 'USD';
+const priceFormatted = product !== null ? formatCurrency(product.priceCents, currencyCode) : '';
+const compareAtFormatted =
+  product !== null && product.compareAtPriceCents !== undefined
+    ? formatCurrency(product.compareAtPriceCents, currencyCode)
+    : null;
+
+const catalogHref = `/${locale}/products`;
+const isOutOfStock = product !== null && product.stock <= 0;
+const isLowStock = product !== null && product.stock > 0 && product.stock <= 5;
+---
+
+<StorefrontLayout title={product?.name ?? t['storefront.productDetail.notFound']} cartCount={cartCount}>
+  <main class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+    <nav aria-label="breadcrumb" class="mb-6 text-sm">
+      <a
+        href={catalogHref}
+        class="inline-flex items-center gap-1 text-slate-600 transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
+      >
+        <span aria-hidden="true">←</span>
+        {t['storefront.productDetail.breadcrumb']}
+      </a>
+    </nav>
+
+    {
+      product === null ? (
+        <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+          <h1 class="text-2xl font-bold text-slate-900">
+            {t['storefront.productDetail.notFound']}
+          </h1>
+          <p class="max-w-md text-sm text-slate-500">
+            {t['storefront.productDetail.notFoundHint']}
+          </p>
+          <a
+            href={catalogHref}
+            class="mt-2 inline-flex h-10 items-center rounded-lg bg-[var(--primary,#475569)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)]"
+          >
+            {t['storefront.productDetail.breadcrumb']}
+          </a>
+        </section>
+      ) : (
+        <article class="grid gap-8 lg:grid-cols-2">
+          <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              class="aspect-square w-full object-cover"
+              decoding="async"
+              loading="eager"
+            />
+          </div>
+
+          <div class="flex flex-col gap-5">
+            {category && (
+              <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                {t['storefront.productDetail.category']}: <span class="text-slate-700">{category.name}</span>
+              </p>
+            )}
+
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              {product.name}
+            </h1>
+
+            <div class="flex items-end gap-3">
+              <span class="text-3xl font-bold tabular-nums text-slate-900">
+                {priceFormatted}
+              </span>
+              {compareAtFormatted !== null && (
+                <span class="text-base text-slate-400 line-through tabular-nums">
+                  {compareAtFormatted}
+                </span>
+              )}
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              {isOutOfStock ? (
+                <Badge status="cancelled" label={t['storefront.productDetail.outOfStock']} />
+              ) : isLowStock ? (
+                <Badge status="shipped" label={t['storefront.productCard.badge.lowStock']} />
+              ) : (
+                <Badge status="delivered" label={t['storefront.productDetail.inStock']} />
+              )}
+            </div>
+
+            <p class="text-base leading-relaxed text-slate-700">
+              {product.description}
+            </p>
+
+            <div class="mt-2 flex flex-col gap-2">
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={isOutOfStock}
+                fullWidth={true}
+                ariaLabel={t['storefront.productDetail.addToCart']}
+              >
+                {isOutOfStock ? t['storefront.productDetail.outOfStock'] : t['storefront.productDetail.addToCart']}
+              </Button>
+              <p class="text-xs text-slate-500">
+                {t['storefront.productDetail.addToCartHint']}
+              </p>
+            </div>
+          </div>
+        </article>
+      )
+    }
+  </main>
+</StorefrontLayout>

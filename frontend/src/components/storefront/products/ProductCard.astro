@@ -1,0 +1,147 @@
+---
+/**
+ * ProductCard — tarjeta de producto para grids del storefront.
+ *
+ * Patrón B2C kitsune (design-refs §3.1): badges contextuales
+ * ("Novedades", "Oferta", "Últimas unidades") + hover state sutil.
+ * Envuelto en `<article>` semántico y con heading jerárquico para
+ * lectores de pantalla (AGENTS §17).
+ *
+ * Por ahora el card es **presentacional puro** — sin handlers de
+ * add-to-cart. El botón "Añadir" es un `<a>` que apunta al detalle
+ * del producto, donde está el flow completo (ver §11 F4). Esto evita
+ * acoplar el card a un cart store que aún no existe (out-of-scope).
+ *
+ * Props tipadas con `interface Props`. i18n via `t[key]` que llega
+ * como prop (no `getServerDictionary` adentro) para que el componente
+ * sea reutilizable client-side si después se hidrata.
+ */
+import Badge from '../../ui/Badge.astro';
+import { formatCurrency } from '../../../lib/formatters';
+import type { Product, ProductBadge } from '../../../types/catalog';
+
+export interface ProductCardLabels {
+  newBadge: string;
+  saleBadge: string;
+  lowStockBadge: string;
+  addToCart: string;
+  outOfStock: string;
+  viewDetail: string;
+}
+
+interface Props {
+  product: Product;
+  locale: string;
+  labels: ProductCardLabels;
+  /** Mostrar botón "Añadir" como link (true) o deshabilitado (false). */
+  showAddToCart?: boolean;
+}
+
+const { product, locale, labels, showAddToCart = true } = Astro.props;
+
+const detailHref = `/${locale}/products/${product.slug}`;
+const currencyCode = product.currency ?? 'USD';
+const priceFormatted = formatCurrency(product.priceCents, currencyCode);
+const compareAtFormatted =
+  product.compareAtPriceCents !== undefined
+    ? formatCurrency(product.compareAtPriceCents, currencyCode)
+    : null;
+const isOutOfStock = product.stock <= 0;
+
+// Mapeo badge → props del primitive Badge. "new" usa variant primary
+// (que pinta con --primary del tenant) para que sea tenant-aware.
+// "sale" y "low_stock" usan los status pills semánticos de
+// design-refs §6.4.
+const BADGE_STYLES: Record<ProductBadge, {
+  variant: 'primary';
+  status: 'pending' | 'processing' | 'shipped';
+  label: keyof ProductCardLabels;
+}> = {
+  new: { variant: 'primary', status: 'pending', label: 'newBadge' },
+  sale: { variant: 'primary', status: 'processing', label: 'saleBadge' },
+  low_stock: { variant: 'primary', status: 'shipped', label: 'lowStockBadge' },
+};
+
+const ariaLabelForBadge = (badge: ProductBadge): string => labels[BADGE_STYLES[badge].label];
+---
+
+<article
+  class="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-within:ring-2 focus-within:ring-[var(--primary,#475569)] focus-within:ring-offset-2"
+>
+  <a
+    href={detailHref}
+    class="relative block aspect-square overflow-hidden bg-slate-50"
+    aria-label={`${labels.viewDetail}: ${product.name}`}
+  >
+    <img
+      src={product.imageUrl}
+      alt={product.name}
+      loading="lazy"
+      decoding="async"
+      class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+    />
+    {
+      product.badges && product.badges.length > 0 && (
+        <div class="absolute left-2 top-2 flex flex-col gap-1">
+          {product.badges.map((badge) => {
+            const style = BADGE_STYLES[badge];
+            const isNew = badge === 'new';
+            return (
+              <span aria-label={ariaLabelForBadge(badge)}>
+                <Badge
+                  variant={isNew ? style.variant : undefined}
+                  status={isNew ? undefined : style.status}
+                >
+                  {labels[style.label]}
+                </Badge>
+              </span>
+            );
+          })}
+        </div>
+      )
+    }
+    {
+      isOutOfStock && (
+        <div class="absolute right-2 top-2">
+          <Badge variant="neutral">{labels.outOfStock}</Badge>
+        </div>
+      )
+    }
+  </a>
+
+  <div class="flex flex-1 flex-col gap-2 p-4">
+    <h3 class="line-clamp-2 text-sm font-semibold text-slate-900">
+      <a
+        href={detailHref}
+        class="transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
+      >
+        {product.name}
+      </a>
+    </h3>
+
+    <p class="line-clamp-2 text-xs text-slate-500">{product.description}</p>
+
+    <div class="mt-auto flex items-end justify-between gap-2 pt-2">
+      <div class="flex flex-col">
+        <span class:list={["text-base font-bold text-slate-900", isOutOfStock && "opacity-60"]}>
+          {priceFormatted}
+        </span>
+        {
+          compareAtFormatted !== null && !isOutOfStock && (
+            <span class="text-xs text-slate-400 line-through">{compareAtFormatted}</span>
+          )
+        }
+      </div>
+      {
+        showAddToCart && !isOutOfStock && (
+          <a
+            href={detailHref}
+            class="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          >
+            {labels.addToCart}
+          </a>
+        )
+      }
+    </div>
+  </div>
+</article>

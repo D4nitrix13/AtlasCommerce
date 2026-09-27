@@ -1,0 +1,110 @@
+---
+/**
+ * Lista pública de productos (`/[locale]/products`).
+ *
+ * Composición: StorefrontLayout + heading + filtro de categorías
+ * (link-based) + ProductGrid.
+ *
+ * Filtros: el slug de categoría se lee de `?category=` (query string).
+ * La paginación real via URL params queda pendiente para F4 — esta
+ * página muestra todos los productos del mock en una sola página.
+ *
+ * El filtro está implementado como links SSR (no JS), así funciona
+ * sin hidratar React islands y mantiene la página por debajo del
+ * límite de 400 líneas.
+ */
+import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
+import ProductGrid from '../../../components/storefront/products/ProductGrid.astro';
+import { getServerDictionary } from '../../../i18n/server';
+import {
+  PRODUCTS,
+  CATEGORIES,
+  getCategoriesInUse,
+  findProductsByCategory,
+} from '../../../data/products';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+
+// TODO F1.4: cart store.
+const cartCount = 0;
+
+const activeCategory = Astro.url.searchParams.get('category');
+const categoriesInUse = getCategoriesInUse();
+const products =
+  activeCategory !== null && activeCategory !== ''
+    ? findProductsByCategory(activeCategory)
+    : PRODUCTS;
+
+const cardLabels = {
+  newBadge: t['storefront.productCard.badge.new'],
+  saleBadge: t['storefront.productCard.badge.sale'],
+  lowStockBadge: t['storefront.productCard.badge.lowStock'],
+  addToCart: t['storefront.productCard.addToCart'],
+  outOfStock: t['storefront.productCard.outOfStock'],
+  viewDetail: t['storefront.productCard.viewDetail'],
+};
+
+// Cantidad para mostrar en el heading ("12 productos", "3 productos", etc.)
+const countLabel = t['storefront.productGrid.count'].replace('{count}', String(products.length));
+---
+
+<StorefrontLayout
+  title={`${t['storefront.productGrid.heading']} · ${countLabel}`}
+  cartCount={cartCount}
+>
+  <main class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        {t['storefront.productGrid.heading']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">{countLabel}</p>
+    </header>
+
+    <nav aria-label={t['storefront.productGrid.filter.all']} class="mb-8">
+      <ul class="flex flex-wrap gap-2 p-0">
+        <li class="list-none">
+          <a
+            href={`/${locale}/products`}
+            class:list={[
+              'inline-flex h-9 items-center rounded-full border px-4 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+              activeCategory === null
+                ? 'border-[var(--primary,#475569)] bg-[var(--primary,#475569)] text-white'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+            ]}
+          >
+            {t['storefront.productGrid.filter.all']}
+          </a>
+        </li>
+        {
+          categoriesInUse.map((category) => (
+            <li class="list-none">
+              <a
+                href={`/${locale}/products?category=${category.slug}`}
+                class:list={[
+                  'inline-flex h-9 items-center rounded-full border px-4 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                  activeCategory === category.slug
+                    ? 'border-[var(--primary,#475569)] bg-[var(--primary,#475569)] text-white'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+                ]}
+              >
+                {category.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <ProductGrid
+      products={products}
+      locale={locale}
+      cardLabels={cardLabels}
+      status="success"
+      loadingLabel={t['storefront.productGrid.loading']}
+      errorLabel={t['storefront.productGrid.error']}
+      emptyLabel={t['storefront.productGrid.empty']}
+      emptyHint={t['storefront.productGrid.emptyHint']}
+    />
+  </main>
+</StorefrontLayout>

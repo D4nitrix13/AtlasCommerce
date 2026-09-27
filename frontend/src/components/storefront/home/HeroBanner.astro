@@ -1,0 +1,90 @@
+---
+/**
+ * HeroBanner — hero del storefront público (home).
+ *
+ * Patrón ACEPTABLE para home (contraste con design-refs §8.1 donde el
+ * hero gigante es anti-patrón para DASHBOARD, no para home). El hero
+ * de home debe vender, comunicar propuesta de valor y dar CTA principal.
+ *
+ * Tenant-aware: usa `--primary` del theme root seteado por
+ * `StorefrontLayout.astro`. Esto permite que cada tienda (Kitsune
+ * violeta, Panda esmeralda, etc.) tenga su propio hero sin tocar el
+ * componente.
+ *
+ * Layout: eyebrow + h1 + subtítulo + CTAs primario/secundario.
+ * Eyebrow + accent chip en el h1 refuerzan identidad kitsune
+ * (design-refs §3.2 "1-2 acentos sutiles", no saturar).
+ */
+export interface HeroCta {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  subtitle: string;
+  primaryCta: HeroCta;
+  secondaryCta?: HeroCta;
+}
+
+const { eyebrow, title, subtitle, primaryCta, secondaryCta } = Astro.props;
+---
+
+<section
+  aria-label="Hero"
+  class="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100"
+>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-20 blur-3xl"
+    style="background: var(--primary, #475569);"
+  >
+  </div>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full opacity-10 blur-3xl"
+    style="background: var(--primary, #475569);"
+  >
+  </div>
+
+  <div class="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
+    {
+      eyebrow && (
+        <p class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 backdrop-blur">
+          <span
+            aria-hidden="true"
+            class="inline-block h-1.5 w-1.5 rounded-full"
+            style="background: var(--primary, #475569);"
+          />
+          {eyebrow}
+        </p>
+      )
+    }
+
+    <h1 class="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+      {title}
+    </h1>
+
+    <p class="max-w-2xl text-base text-slate-600 sm:text-lg">{subtitle}</p>
+
+    <div class="mt-2 flex flex-wrap items-center gap-3">
+      <a
+        href={primaryCta.href}
+        class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+      >
+        {primaryCta.label}
+      </a>
+      {
+        secondaryCta && (
+          <a
+            href={secondaryCta.href}
+            class="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          >
+            {secondaryCta.href === '#' ? secondaryCta.label : secondaryCta.label}
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>

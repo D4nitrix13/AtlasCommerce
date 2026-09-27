@@ -2,37 +2,140 @@
 /**
  * Página pública del carrito de compras.
  *
- * Wrapper Astro que monta el React island `CouponInput`. La lógica
- * completa del carrito (items, totales, checkout) vive en componentes
- * específicos que se irán agregando en PRs subsiguientes. Este PR
- * introduce la entrada de cupón como bloque independiente.
+ * Reemplaza el stub anterior (que sólo mostraba `<CouponInput>`) con
+ * la composición real:
+ *   - Layout storefront con header/footer.
+ *   - Si hay items: lista de CartItem + CartSummary + botón checkout.
+ *   - Si está vacío: empty state + CTA "Explorar productos".
  *
- * i18n: el título se renderiza server-side vía `getServerDictionary`
- * para evitar mismatch con el primer render del React island.
+ * TODO F1.4: cart store — hoy la página NO lee del store todavía
+ * (no existe). Como placeholder para que la UI se vea completa y los
+ * componentes se rendericen, mostramos 2 items demo del mock + el
+ * summary. Cuando el cart store global exista, este array se reemplaza
+ * por `cart.items` y los handlers de CartItem se hidratan.
  */
-import Layout from '../../layouts/Layout.astro';
-import CouponInput from '../../components/storefront/cart/CouponInput';
+import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
+import CartItem from '../../components/storefront/cart/CartItem.astro';
+import CartSummary from '../../components/storefront/cart/CartSummary.astro';
 import { getServerDictionary } from '../../i18n/server';
+import { PRODUCTS, findProductBySlug } from '../../data/products';
 
-const t = getServerDictionary(Astro.locals.locale);
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+
+const checkoutHref = `/${locale}/checkout`;
+
+// TODO F1.4: cart store — leer de un store Zustand o endpoint backend.
+// Por ahora demo: 2 items para que la composición se renderice visible.
+const demoItems = [
+  {
+    productSlug: PRODUCTS[0].slug,
+    quantity: 2,
+  },
+  {
+    productSlug: PRODUCTS[2].slug,
+    quantity: 1,
+  },
+];
+
+const cartItems = demoItems
+  .map((entry) => {
+    const product = findProductBySlug(entry.productSlug);
+    if (product === null) {
+      return null;
+    }
+    return {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      priceCents: product.priceCents,
+      currency: product.currency ?? 'USD',
+      quantity: entry.quantity,
+    };
+  })
+  .filter((item): item is NonNullable<typeof item> => item !== null);
+
+const isEmpty = cartItems.length === 0;
+
+const subtotalCents = cartItems.reduce(
+  (total, item) => total + item.priceCents * item.quantity,
+  0,
+);
+const currencyCode = cartItems[0]?.currency ?? 'USD';
+// Envío gratis sobre $50, sino $4 fijo (placeholder UX).
+const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
+const shippingCents =
+  subtotalCents === 0
+    ? null
+    : subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS
+      ? 0
+      : 400;
+
+const cartItemLabels = {
+  remove: t['storefront.cart.removeItem'],
+  decrement: t['storefront.cart.decrement'],
+  increment: t['storefront.cart.increment'],
+  qty: t['storefront.cart.qty'],
+};
+
+const cartSummaryLabels = {
+  subtotal: t['storefront.cart.subtotal'],
+  discount: t['storefront.cart.discount'],
+  shipping: t['storefront.cart.shipping'],
+  shippingFree: t['storefront.cart.shippingFree'],
+  total: t['storefront.cart.total'],
+  checkout: t['storefront.cart.checkout'],
+};
 ---
 
-<Layout title={t['storefront.cart.title']}>
-  <main class="mx-auto max-w-3xl px-4 py-8">
-    <h1 class="mb-6 text-2xl font-bold text-neutral-900">
-      {t['storefront.cart.title']}
-    </h1>
+<StorefrontLayout title={t['storefront.cart.title']}>
+  <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        {t['storefront.cart.title']}
+      </h1>
+      {
+        !isEmpty && (
+          <p class="mt-1 text-sm text-slate-500">
+            {t['storefront.cart.itemsCount'].replace('{count}', String(cartItems.length))}
+          </p>
+        )
+      }
+    </header>
 
-    <div class="flex flex-col gap-6">
-      <p class="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-6 text-center text-sm text-neutral-600">
-        {t['storefront.cart.empty']}
-        <br />
-        <span class="mt-1 inline-block text-xs text-neutral-500">
-          {t['storefront.cart.emptyHint']}
-        </span>
-      </p>
+    {
+      isEmpty ? (
+        <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+          <p class="text-2xl font-bold text-slate-900">{t['storefront.cart.empty']}</p>
+          <p class="max-w-md text-sm text-slate-500">{t['storefront.cart.emptyHint']}</p>
+          <a
+            href={`/${locale}/products`}
+            class="mt-2 inline-flex h-11 items-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          >
+            {t['storefront.cart.browseProducts']}
+          </a>
+        </section>
+      ) : (
+        <div class="grid gap-8 lg:grid-cols-[1fr_360px]">
+          <ul class="flex list-none flex-col gap-4 p-0">
+            {cartItems.map((item) => (
+              <li class="list-none">
+                <CartItem item={item} locale={locale} labels={cartItemLabels} />
+              </li>
+            ))}
+          </ul>
 
-      <CouponInput client:only="react" />
-    </div>
+          <CartSummary
+            subtotalCents={subtotalCents}
+            currencyCode={currencyCode}
+            shippingCents={shippingCents}
+            checkoutHref={checkoutHref}
+            labels={cartSummaryLabels}
+            isEmpty={false}
+          />
+        </div>
+      )
+    }
   </main>
-</Layout>
+</StorefrontLayout>

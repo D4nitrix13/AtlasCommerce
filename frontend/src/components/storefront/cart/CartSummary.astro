@@ -1,0 +1,109 @@
+---
+/**
+ * CartSummary — bloque de totales + checkout en el carrito.
+ *
+ * Layout: subtotal · descuento (opcional) · envío (opcional) · total.
+ * El "Total" se resalta con tipografía más grande y el botón de
+ * checkout usa `--primary` del tenant para mantener la coherencia con
+ * el resto del storefront.
+ *
+ * Single source of truth para el cálculo del total: este componente
+ * NO recalcula. Recibe los valores pre-computados (esperaríamos que
+ * vengan del cart store o, en el futuro, del backend).
+ *
+ * El botón "Checkout" es un link (no un handler) porque no hay lógica
+ * de checkout implementada todavía — sólo navega a `/[locale]/checkout`
+ * que es la página que otra tarea construye.
+ */
+import { formatCurrency } from '../../../lib/formatters';
+
+export interface CartSummaryLabels {
+  subtotal: string;
+  discount: string;
+  shipping: string;
+  shippingFree: string;
+  total: string;
+  checkout: string;
+}
+
+interface Props {
+  subtotalCents: number;
+  currencyCode?: string;
+  discountCents?: number;
+  shippingCents?: number | null;
+  checkoutHref: string;
+  labels: CartSummaryLabels;
+  /** Mostrar el botón deshabilitado cuando subtotal es 0 (carrito vacío). */
+  isEmpty?: boolean;
+}
+
+const {
+  subtotalCents,
+  currencyCode = 'USD',
+  discountCents = 0,
+  shippingCents = null,
+  checkoutHref,
+  labels,
+  isEmpty = false,
+} = Astro.props;
+
+const subtotalFormatted = formatCurrency(subtotalCents, currencyCode);
+const discountFormatted =
+  discountCents > 0 ? formatCurrency(discountCents, currencyCode) : null;
+const shippingFormatted =
+  shippingCents === null ? null : shippingCents === 0 ? labels.shippingFree : formatCurrency(shippingCents, currencyCode);
+const totalCents = Math.max(0, subtotalCents - discountCents + (shippingCents ?? 0));
+const totalFormatted = formatCurrency(totalCents, currencyCode);
+
+const showShipping = shippingCents !== null;
+---
+
+<aside
+  class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+  aria-label={labels.total}
+>
+  <h2 class="text-base font-semibold text-slate-900">{labels.total}</h2>
+
+  <dl class="flex flex-col gap-2 text-sm">
+    <div class="flex items-center justify-between">
+      <dt class="text-slate-600">{labels.subtotal}</dt>
+      <dd class="tabular-nums text-slate-900">{subtotalFormatted}</dd>
+    </div>
+
+    {
+      discountFormatted !== null && (
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-600">{labels.discount}</dt>
+          <dd class="tabular-nums text-emerald-600">−{discountFormatted}</dd>
+        </div>
+      )
+    }
+
+    {
+      showShipping && (
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-600">{labels.shipping}</dt>
+          <dd class="tabular-nums text-slate-900">{shippingFormatted}</dd>
+        </div>
+      )
+    }
+
+    <div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-3">
+      <dt class="text-base font-semibold text-slate-900">{labels.total}</dt>
+      <dd class="text-lg font-bold tabular-nums text-slate-900">{totalFormatted}</dd>
+    </div>
+  </dl>
+
+  <a
+    href={checkoutHref}
+    aria-disabled={isEmpty}
+    class:list={[
+      'mt-2 inline-flex h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold text-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+      isEmpty
+        ? 'cursor-not-allowed bg-slate-300'
+        : 'bg-[var(--primary,#475569)] hover:bg-[var(--primary-hover,#334155)] focus-visible:ring-[var(--primary,#475569)]',
+    ]}
+  >
+    {labels.checkout}
+  </a>
+</aside>
