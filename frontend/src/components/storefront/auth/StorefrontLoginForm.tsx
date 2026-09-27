@@ -100,7 +100,7 @@ export default function StorefrontLoginForm({
             handleSocialLogin('google');
           }}
           data-auth-link="social-google"
-          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
         >
           <GoogleIcon />
           <span>{t('auth.login.shell.google')}</span>
@@ -111,7 +111,7 @@ export default function StorefrontLoginForm({
             handleSocialLogin('facebook');
           }}
           data-auth-link="social-facebook"
-          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
         >
           <FacebookIcon />
           <span>{t('auth.login.shell.facebook')}</span>
@@ -147,7 +147,7 @@ export default function StorefrontLoginForm({
             onChange={(event) => {
               setEmail(event.target.value);
             }}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
           />
         </div>
 
@@ -159,7 +159,7 @@ export default function StorefrontLoginForm({
             <a
               href={forgotHref}
               data-auth-link="forgot"
-              className="text-xs font-semibold text-[#2D9D8E] hover:text-[#1E6F62]"
+              className="text-xs font-semibold text-[var(--brand-accent,#2D9D8E)] hover:text-[var(--brand-accent-hover,#258777)]"
             >
               {t('auth.login.shell.forgotLink')}
             </a>
@@ -176,7 +176,7 @@ export default function StorefrontLoginForm({
               onChange={(event) => {
                 setPassword(event.target.value);
               }}
-              className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+              className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
             />
             <button
               type="button"
@@ -206,7 +206,7 @@ export default function StorefrontLoginForm({
             onChange={(event) => {
               setRememberMe(event.target.checked);
             }}
-            className="w-4 h-4 rounded border-slate-300 text-[#2D9D8E] focus:ring-[#2D9D8E]"
+            className="w-4 h-4 rounded border-slate-300 text-[var(--brand-accent,#2D9D8E)] focus:ring-[var(--brand-accent,#2D9D8E)]"
           />
           <span className="text-sm text-slate-600">{t('auth.login.shell.rememberMe')}</span>
         </label>
@@ -214,7 +214,7 @@ export default function StorefrontLoginForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+          className="w-full bg-[var(--brand-accent,#2D9D8E)] hover:bg-[var(--brand-accent-hover,#258777)] disabled:bg-[var(--brand-accent-hover,#258777)] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
         >
           {isSubmitting ? t('auth.login.shell.submitLoading') : t('auth.login.shell.submit')}
         </button>
@@ -224,7 +224,7 @@ export default function StorefrontLoginForm({
         <button
           type="button"
           data-passkey-login-trigger
-          className="w-full bg-white border border-slate-300 hover:border-[#2D9D8E] hover:bg-slate-50 text-slate-700 font-medium py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/15 inline-flex items-center justify-center gap-2"
+          className="w-full bg-white border border-slate-300 hover:border-[var(--brand-accent,#2D9D8E)] hover:bg-slate-50 text-slate-700 font-medium py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)] inline-flex items-center justify-center gap-2"
         >
           <span className="text-base" aria-hidden="true">🔑</span>
           <span>{t('auth.login.shell.passkeyButton') ?? 'Iniciar sesión con passkey'}</span>

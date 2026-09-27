@@ -119,7 +119,7 @@ export default function RegisterForm({
             handleSocialLogin('google');
           }}
           data-auth-link="social-google"
-          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
         >
           <GoogleIcon />
           <span>{t('auth.signup.shell.google')}</span>
@@ -130,7 +130,7 @@ export default function RegisterForm({
             handleSocialLogin('facebook');
           }}
           data-auth-link="social-facebook"
-          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
         >
           <FacebookIcon />
           <span>{t('auth.signup.shell.facebook')}</span>
@@ -161,7 +161,7 @@ export default function RegisterForm({
             onChange={(event) => {
               setFirstName(event.target.value);
             }}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
           />
         </div>
         <div>
@@ -179,7 +179,7 @@ export default function RegisterForm({
             onChange={(event) => {
               setLastName(event.target.value);
             }}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
           />
         </div>
       </div>
@@ -199,7 +199,7 @@ export default function RegisterForm({
           onChange={(event) => {
             setEmail(event.target.value);
           }}
-          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
         />
       </div>
 
@@ -220,7 +220,7 @@ export default function RegisterForm({
             onChange={(event) => {
               setPassword(event.target.value);
             }}
-            className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+            className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
           />
           <button
             type="button"
@@ -246,14 +246,14 @@ export default function RegisterForm({
             <div
               key={index}
               className={`h-1 flex-1 rounded ${
-                index < filledBars ? 'bg-[#2D9D8E]' : 'bg-slate-200'
+                index < filledBars ? 'bg-[var(--brand-accent,#2D9D8E)]' : 'bg-slate-200'
               }`}
             />
           ))}
         </div>
         <p className="text-xs text-slate-500 mt-1.5">
           {t('auth.signup.shell.strengthLabel')}{' '}
-          <span className="font-semibold text-[#1E6F62]">
+          <span className="font-semibold text-[var(--brand-accent,#2D9D8E)]">
             {t(
               strength === 'weak'
                 ? 'auth.signup.shell.strengthWeak'
@@ -273,15 +273,15 @@ export default function RegisterForm({
           onChange={(event) => {
             setAcceptTerms(event.target.checked);
           }}
-          className="w-4 h-4 mt-0.5 rounded border-slate-300 text-[#2D9D8E] focus:ring-[#2D9D8E]"
+          className="w-4 h-4 mt-0.5 rounded border-slate-300 text-[var(--brand-accent,#2D9D8E)] focus:ring-[var(--brand-accent,#2D9D8E)]"
         />
         <span className="text-sm text-slate-600">
           <span>Acepto los </span>
-          <a href="#" className="text-[#2D9D8E] hover:underline">
+          <a href="#" className="text-[var(--brand-accent,#2D9D8E)] hover:underline">
             {t('auth.signup.shell.termsLink')}
           </a>
           <span> y la </span>
-          <a href="#" className="text-[#2D9D8E] hover:underline">
+          <a href="#" className="text-[var(--brand-accent,#2D9D8E)] hover:underline">
             {t('auth.signup.shell.privacyLink')}
           </a>
           <span>.</span>
@@ -291,7 +291,7 @@ export default function RegisterForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+        className="w-full bg-[var(--brand-accent,#2D9D8E)] hover:bg-[var(--brand-accent-hover,#258777)] disabled:bg-[var(--brand-accent-hover,#258777)] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
       >
         {isSubmitting ? t('auth.signup.shell.submitLoading') : t('auth.signup.shell.submit')}
       </button>

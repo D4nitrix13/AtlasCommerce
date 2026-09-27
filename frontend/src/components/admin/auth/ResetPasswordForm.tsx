@@ -15,14 +15,15 @@ import type { LoginResponse, ValidationErrors } from '../../../types/auth';
  *   { email, code, password, password_confirmation, device_name }
  *
  * El `code` se lee de la URL (`?code=...`) — cuando el usuario llega al
- * link del email ya tiene el código prellenado. Si no está, se muestra
+ * link del email ya tiene el código prellenado. Si no está, está
  * como input pequeño para que lo pegue manualmente.
  *
- * Visual: usa la MISMA paleta auth universal que `LoginForm` y
- * `ForgotPasswordForm` (ver `lib/auth-accent.ts`). Los acentos se
- * aplican vía clases Tailwind arbitrarias (`#2D9D8E` family) — no
- * mediante `brand.accentColor`, que difiere por tienda y rompe la
- * consistencia visual entre páginas de auth.
+ * Visual: los acentos (`focus:border`, `focus:ring`, submit button,
+ * success border) consumen `var(--brand-accent, #2D9D8E)` y
+ * `var(--brand-accent-hover, #258777)`, publicados como CSS custom
+ * properties por el `AuthShell` que envuelve la pantalla. El fallback
+ * hex mantiene render correcto si el componente se monta fuera del
+ * shell (por ejemplo en tests).
  *
  * Compone sub-componentes extraídos (sdd PR 2 · Tasks 2.12-2.15):
  *   - PasswordInput — input + toggle show/hide
@@ -205,10 +206,10 @@ export default function ResetPasswordForm({
             hideLabel={t('auth.passwordReset.password.hide')}
             required
             minLength={PASSWORD_MIN_LENGTH}
-            className={passwordsMatch ? 'border-[#2D9D8E]' : 'border-slate-200'}
+            className={passwordsMatch ? 'border-[var(--brand-accent,#2D9D8E)]' : 'border-slate-200'}
           />
           {passwordsMatch && (
-            <p className="mt-1.5 flex items-center gap-1 text-xs text-[#2D9D8E]">
+            <p className="mt-1.5 flex items-center gap-1 text-xs text-[var(--brand-accent,#2D9D8E)]">
               <Check size={14} strokeWidth={2.5} />
               {t('auth.passwordReset.passwordsMatch')}
             </p>
@@ -277,7 +278,7 @@ function CodeInput({
         onChange={(event) => {
           onChange(event.target.value.replace(/\D/g, '').slice(0, CODE_LENGTH));
         }}
-        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-center font-mono text-base tracking-[0.5em] text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-center font-mono text-base tracking-[0.5em] text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
       />
       <p className="text-xs text-slate-400 mt-1.5">{helpText}</p>
     </div>
@@ -302,7 +303,7 @@ function SubmitButton({
     <button
       type="submit"
       disabled={isSubmitting || hasSuccess}
-      className="w-full bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25 flex items-center justify-center gap-2"
+      className="w-full bg-[var(--brand-accent,#2D9D8E)] hover:bg-[var(--brand-accent-hover,#258777)] disabled:bg-[var(--brand-accent-hover,#258777)] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)] flex items-center justify-center gap-2"
     >
       {isSubmitting ? (
         <>
