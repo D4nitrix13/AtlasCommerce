@@ -7,17 +7,17 @@
  *
  * **AGENTS.md §1**: ~120 líneas — header + tabla + tipos de badges.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { getServerDictionary } from '../../../../i18n/server';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
 import {
   supportTickets,
   type TicketStatus,
   type TicketPriority,
-} from '../../../../data/support-mock';
+} from '../../../../../data/support-mock';
 
 const t = getServerDictionary(Astro.locals.locale);
 
-const STATUS_LABEL_KEY: Record<TicketStatus, string> = {
+const STATUS_LABEL_KEY: Record<TicketStatus, 'admin.support.tickets.filter.open' | 'admin.support.tickets.filter.pending' | 'admin.support.tickets.filter.hold' | 'admin.support.tickets.filter.solved' | 'admin.support.tickets.filter.closed'> = {
   open: 'admin.support.tickets.filter.open',
   pending: 'admin.support.tickets.filter.pending',
   hold: 'admin.support.tickets.filter.hold',
@@ -25,7 +25,7 @@ const STATUS_LABEL_KEY: Record<TicketStatus, string> = {
   closed: 'admin.support.tickets.filter.closed',
 };
 
-const PRIORITY_LABEL_KEY: Record<TicketPriority, string> = {
+const PRIORITY_LABEL_KEY: Record<TicketPriority, 'admin.support.tickets.priority.low' | 'admin.support.tickets.priority.normal' | 'admin.support.tickets.priority.high' | 'admin.support.tickets.priority.urgent'> = {
   low: 'admin.support.tickets.priority.low',
   normal: 'admin.support.tickets.priority.normal',
   high: 'admin.support.tickets.priority.high',
