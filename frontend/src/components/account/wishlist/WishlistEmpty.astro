@@ -1,0 +1,39 @@
+---
+/**
+ * WishlistEmpty — Empty state ilustrado de "My Collection" (F2.3).
+ *
+ * Sigue el anti-patrón §8.1 corregido: empty state ilustrado + CTA,
+ * nunca "0 items" pelado. El CTA apunta a la página de productos
+ * pública. El ícono decorativo usa emoji (kawaii-themed) para
+ * reforzar la identidad kitsune sin abusar del tono (§8.2).
+ */
+interface Props {
+  title: string;
+  hint: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+const { title, hint, ctaLabel, ctaHref } = Astro.props;
+---
+
+<div
+  class="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center"
+>
+  <div
+    class="flex h-16 w-16 items-center justify-center rounded-full bg-white text-3xl shadow-sm"
+    aria-hidden="true"
+  >
+    ✨
+  </div>
+  <div class="flex flex-col gap-1">
+    <p class="text-base font-semibold text-slate-900 sm:text-lg">{title}</p>
+    <p class="max-w-md text-sm text-slate-500">{hint}</p>
+  </div>
+  <a
+    href={ctaHref}
+    class="mt-2 inline-flex items-center gap-1 rounded-lg bg-[var(--primary,#7c3aed)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+  >
+    {ctaLabel}
+  </a>
+</div>

@@ -1,0 +1,72 @@
+---
+/**
+ * WishlistGrid — Grid responsive de WishlistItems (F2.3).
+ *
+ * Layout:
+ *   mobile:  1 col
+ *   sm:      2 cols
+ *   lg:      3 cols
+ *   xl:      4 cols
+ *
+ * Refleja el patrón de ProductGrid (mismo breakpoint set) para
+ * coherencia visual con el storefront público.
+ *
+ * El badge de count + heading se renderiza fuera del grid (en el
+ * page) — el grid SOLO se ocupa del layout de las cards.
+ */
+import WishlistItem from './WishlistItem.astro';
+import type { WishlistItemMock } from '../../../data/wishlist-mock';
+
+export interface WishlistItemLabels {
+  addedDaysAgo: string;
+  addedYesterday: string;
+  addedToday: string;
+  personalNoteLabel: string;
+  outOfStockLabel: string;
+  onlyLeftLabel: string;
+  moveToBagLabel: string;
+  removeLabel: string;
+  notifyLabel: string;
+}
+
+interface Props {
+  items: readonly WishlistItemMock[];
+  locale: string;
+  labels: WishlistItemLabels;
+}
+
+const { items, locale, labels } = Astro.props;
+---
+
+<ul class="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+  {
+    items.map((item) => {
+      const productHref = `/${locale}/products/${item.productSlug}`;
+      const notifyEnabled = item.notifyWhenBack === true;
+      return (
+        <li class="list-none">
+          <WishlistItem
+            productHref={productHref}
+            productName={item.productName}
+            imageUrl={item.imageUrl}
+            priceCents={item.priceCents}
+            currencyCode={item.currency}
+            addedDaysAgo={item.addedDaysAgo}
+            personalNote={item.personalNote}
+            stock={item.stock}
+            notifyEnabled={notifyEnabled}
+            addedDaysAgoLabel={labels.addedDaysAgo}
+            addedYesterdayLabel={labels.addedYesterday}
+            addedTodayLabel={labels.addedToday}
+            personalNoteLabel={labels.personalNoteLabel}
+            outOfStockLabel={labels.outOfStockLabel}
+            onlyLeftLabel={labels.onlyLeftLabel}
+            moveToBagLabel={labels.moveToBagLabel}
+            removeLabel={labels.removeLabel}
+            notifyLabel={labels.notifyLabel}
+          />
+        </li>
+      );
+    })
+  }
+</ul>

@@ -1,0 +1,76 @@
+---
+/**
+ * OrderShippingCard — Tarjeta de dirección de envío (F2.2).
+ *
+ * Sigue el patrón de `AddressesManager` (libreta del cliente):
+ *  - Title + label y dato por fila.
+ *  - Tipografía jerarquizada (label small/muted, dato readable).
+ *  - Sin acciones de edición (la dirección de un pedido es histórica).
+ */
+import type { OrderShippingAddressMock } from '../../../data/orders-mock';
+
+interface Props {
+  address: OrderShippingAddressMock;
+  /** Localized strings. */
+  heading: string;
+  labelRecipient: string;
+  labelPhone: string;
+  labelAddress: string;
+  labelCountry: string;
+  labelReference: string;
+}
+
+const { address, heading, labelRecipient, labelPhone, labelAddress, labelCountry, labelReference } =
+  Astro.props;
+
+function buildAddressLine(): string {
+  const parts = [address.detailedAddress, address.municipality, address.department].filter(
+    (part) => part !== null && part !== undefined && part !== ''
+  );
+  return parts.join(', ');
+}
+---
+
+<section
+  aria-labelledby="order-shipping-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2 id="order-shipping-heading" class="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+  <dl class="flex flex-col gap-3 text-sm">
+    <div class="flex flex-col gap-0.5">
+      <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{labelRecipient}</dt>
+      <dd class="font-medium text-slate-900">{address.recipient}</dd>
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{labelPhone}</dt>
+      <dd class="font-medium text-slate-900">
+        <a
+          href={`tel:${address.phone.replace(/\s+/g, '')}`}
+          class="transition hover:text-[var(--primary,#7c3aed)] focus-visible:underline"
+        >
+          {address.phone}
+        </a>
+      </dd>
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{labelAddress}</dt>
+      <dd class="text-slate-700">{buildAddressLine()}</dd>
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{labelCountry}</dt>
+      <dd class="text-slate-700">{address.country}</dd>
+    </div>
+    {
+      address.reference !== undefined && address.reference !== null && address.reference !== '' && (
+        <div class="flex flex-col gap-0.5">
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">
+            {labelReference}
+          </dt>
+          <dd class="text-slate-700">{address.reference}</dd>
+        </div>
+      )
+    }
+  </dl>
+</section>

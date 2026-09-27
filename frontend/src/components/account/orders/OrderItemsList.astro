@@ -1,0 +1,79 @@
+---
+/**
+ * OrderItemsList — Lista de items dentro de un pedido (F2.2).
+ *
+ * Layout B2C estándar (Baymard §5.1): imagen cuadrada + nombre +
+ * qty + precio unitario + subtotal de la fila. Sigue el patrón de
+ * `storefront/cart/CartItem.astro` (mismo dominio: "vista de ítem
+ * comprado"), pero más denso y con qty fija (no editable).
+ */
+import { formatCurrency } from '../../../lib/formatters';
+import type { OrderItemMock } from '../../../data/orders-mock';
+
+interface Props {
+  items: readonly OrderItemMock[];
+  currencyCode: string;
+  locale: string;
+  /** Localized strings. */
+  heading: string;
+  quantityLabel: string;
+}
+
+const { items, currencyCode, locale, heading, quantityLabel } = Astro.props;
+---
+
+<section
+  aria-labelledby="order-items-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2 id="order-items-heading" class="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+  <ul class="flex flex-col gap-3">
+    {
+      items.map((item) => {
+        const detailHref = `/${locale}/products/${item.productSlug}`;
+        const unitPriceFormatted = formatCurrency(item.unitPriceCents, currencyCode);
+        const lineTotalFormatted = formatCurrency(
+          item.unitPriceCents * item.quantity,
+          currencyCode
+        );
+        return (
+          <li class="flex items-center gap-3 rounded-lg border border-slate-100 p-3 sm:gap-4 sm:p-4">
+            <a
+              href={detailHref}
+              class="relative block h-20 w-20 shrink-0 overflow-hidden rounded-md bg-slate-50"
+              aria-label={item.productName}
+            >
+              <img
+                src={item.imageUrl}
+                alt={item.productName}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+            </a>
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+              <h3 class="line-clamp-2 text-sm font-semibold text-slate-900">
+                <a
+                  href={detailHref}
+                  class="transition hover:text-[var(--primary,#7c3aed)] focus-visible:underline"
+                >
+                  {item.productName}
+                </a>
+              </h3>
+              <p class="text-xs text-slate-500">{unitPriceFormatted}</p>
+              <p class="text-xs font-medium text-slate-500">
+                <span class="sr-only">{quantityLabel}:</span>
+                <span aria-hidden="true">× {item.quantity}</span>
+              </p>
+            </div>
+            <span class="shrink-0 text-sm font-bold tabular-nums text-slate-900 sm:text-base">
+              {lineTotalFormatted}
+            </span>
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>

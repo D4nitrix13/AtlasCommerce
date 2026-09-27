@@ -1,0 +1,80 @@
+---
+/**
+ * `/[locale]/account/wishlist` — "My Collection" del cliente (F2.3).
+ *
+ * Sigue el patrón Mejuri/Mr Porter descrito en design-refs §6.2
+ * (Wishlist como Colección curada, NO lista plana). Cada item es
+ * un WishlistItem con contexto personal (cuándo + nota), como
+ * pide el spec.
+ *
+ * Decisión clave: el nombre "My Collection" se mantiene aunque
+ * el i18n fallback sería "Wishlist" / "Favoritos". Es un choice
+ * de product: el nombre marca el tono (colección curada) y se
+ * documenta en el design-refs §3.2.
+ *
+ * Sin handlers: agregar/quitar/move-to-bag son `<a>` + `<button>`
+ * placeholder. El wishlist React island se construye en F5
+ * (out-of-scope F2.3). Por ahora la vista es 100% presentacional.
+ */
+import AccountLayout from '../../../../layouts/AccountLayout.astro';
+import WishlistGrid from '../../../../components/account/wishlist/WishlistGrid.astro';
+import WishlistEmpty from '../../../../components/account/wishlist/WishlistEmpty.astro';
+import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
+import { getAllWishlistItems } from '../../../../data/wishlist-mock';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+const items = getAllWishlistItems();
+const hasItems = items.length > 0;
+const localePrefix = `/${locale}`;
+---
+
+<AccountLayout title={t['account.wishlist.heading']}>
+  <section aria-labelledby="wishlist-heading" class={hasItems ? '' : ''}>
+    <header class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 id="wishlist-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
+          {t['account.wishlist.heading']}
+        </h1>
+        <p class="mt-1 max-w-2xl text-sm text-slate-500">
+          {t['account.wishlist.subtitle']}
+        </p>
+      </div>
+      {
+        hasItems && (
+          <p class="text-xs font-medium text-slate-500">
+            {t['account.wishlist.count'].replace('{count}', String(items.length))}
+          </p>
+        )
+      }
+    </header>
+
+    {
+      hasItems ? (
+        <WishlistGrid
+          items={items}
+          locale={locale}
+          labels={{
+            addedDaysAgo: t['account.wishlist.item.addedDaysAgo'],
+            addedYesterday: t['account.wishlist.item.addedYesterday'],
+            addedToday: t['account.wishlist.item.addedToday'],
+            personalNoteLabel: t['account.wishlist.item.personalNoteLabel'],
+            outOfStockLabel: t['account.wishlist.item.outOfStock'],
+            onlyLeftLabel: t['account.wishlist.item.onlyLeft'],
+            moveToBagLabel: t['account.wishlist.item.moveToBag'],
+            removeLabel: t['account.wishlist.item.remove'],
+            notifyLabel: t['account.wishlist.item.notifyWhenBack'],
+          }}
+        />
+      ) : (
+        <WishlistEmpty
+          title={t['account.wishlist.empty.title']}
+          hint={t['account.wishlist.empty.hint']}
+          ctaLabel={t['account.wishlist.empty.cta']}
+          ctaHref={`${localePrefix}/products`}
+        />
+      )
+    }
+  </section>
+</AccountLayout>
