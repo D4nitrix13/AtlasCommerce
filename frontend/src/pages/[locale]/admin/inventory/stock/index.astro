@@ -11,11 +11,11 @@
  *
  * **AGENTS.md §1**: ~80 líneas — header + tabla + modal.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import StockTable from '../../../../components/admin/inventory/StockTable.astro';
-import AdjustStockModal from '../../../../components/admin/inventory/AdjustStockModal.astro';
-import { getServerDictionary } from '../../../../i18n/server';
-import { stockEntries } from '../../../../data/inventory-mock';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import StockTable from '../../../../../components/admin/inventory/StockTable.astro';
+import AdjustStockModal from '../../../../../components/admin/inventory/AdjustStockModal.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { stockEntries } from '../../../../../data/inventory-mock';
 
 const t = getServerDictionary(Astro.locals.locale);
 ---

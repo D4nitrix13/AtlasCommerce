@@ -8,20 +8,20 @@
  *
  * **AGENTS.md §1**: ~140 líneas — header + builder + lista de cards.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import PromoRuleBuilder from '../../../../components/admin/marketing/PromoRuleBuilder.astro';
-import { getServerDictionary } from '../../../../i18n/server';
-import { promotions, type PromotionKind, type CouponStatus } from '../../../../data/marketing-mock';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import PromoRuleBuilder from '../../../../../components/admin/marketing/PromoRuleBuilder.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { promotions, type PromotionKind, type CouponStatus } from '../../../../../data/marketing-mock';
 
 const t = getServerDictionary(Astro.locals.locale);
 
-const KIND_LABEL_KEY: Record<PromotionKind, string> = {
+const KIND_LABEL_KEY: Record<PromotionKind, 'admin.marketing.promotions.kind.bogo' | 'admin.marketing.promotions.kind.percent' | 'admin.marketing.promotions.kind.freeShipping'> = {
   bogo: 'admin.marketing.promotions.kind.bogo',
   percent_off: 'admin.marketing.promotions.kind.percent',
   free_shipping: 'admin.marketing.promotions.kind.freeShipping',
 };
 
-const STATUS_LABEL_KEY: Record<CouponStatus, string> = {
+const STATUS_LABEL_KEY: Record<CouponStatus, 'admin.marketing.coupons.status.active' | 'admin.marketing.coupons.status.scheduled' | 'admin.marketing.coupons.status.expired' | 'admin.marketing.coupons.status.exhausted'> = {
   active: 'admin.marketing.coupons.status.active',
   scheduled: 'admin.marketing.coupons.status.scheduled',
   expired: 'admin.marketing.coupons.status.expired',

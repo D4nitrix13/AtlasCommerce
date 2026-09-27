@@ -12,13 +12,13 @@
  *
  * **AGENTS.md §1**: ~100 líneas — header + tabla + tipos de badges.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { getServerDictionary } from '../../../../i18n/server';
-import { inventoryMovements, type MovementType } from '../../../../data/inventory-mock';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { inventoryMovements, type MovementType } from '../../../../../data/inventory-mock';
 
 const t = getServerDictionary(Astro.locals.locale);
 
-const TYPE_LABEL_KEY: Record<MovementType, string> = {
+const TYPE_LABEL_KEY: Record<MovementType, 'admin.inventory.movements.type.entry' | 'admin.inventory.movements.type.exit' | 'admin.inventory.movements.type.adjustment' | 'admin.inventory.movements.type.transfer'> = {
   entry: 'admin.inventory.movements.type.entry',
   exit: 'admin.inventory.movements.type.exit',
   adjustment: 'admin.inventory.movements.type.adjustment',
