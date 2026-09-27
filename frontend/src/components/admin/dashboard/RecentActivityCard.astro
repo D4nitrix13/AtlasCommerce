@@ -1,5 +1,26 @@
 ---
+/**
+ * RecentActivityCard — Lista de eventos recientes en el dashboard admin.
+ *
+ * MOCK data con 5 items fijos. Migrar a fetch a
+ * `/api/v1/admin/metrics/activity/recent` en sesion futura.
+ *
+ * **i18n**: heading + subtitle + viewAll localizados. Los textos
+ * individuales de cada actividad (`activities[].text`) NO se traducen
+ * porque son contenido dinamico del backend (eventos especificos del
+ * tenant: "Nueva orden #ORD-1042 recibida", etc).
+ *
+ * Decision consciente: NO traducimos las `activities[].text` MOCK. La
+ * razon es que cuando se conecte al endpoint real, estos textos ya
+ * vendran traducidos desde el backend (o seran templates tipo
+ * "Nueva orden #{id} recibida" con `{id}` interpolado). Traducirlos
+ * aca seria duplicar trabajo y asumir conocimiento que el backend
+ * debe poseer.
+ */
 import Icon from '../../ui/Icon.astro';
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
 
 const activities = [
   {
@@ -38,10 +59,14 @@ const activities = [
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
   <div class="mb-4 flex items-center justify-between">
     <div>
-      <h2 class="text-lg font-bold text-slate-950">Actividad reciente</h2>
-      <p class="text-sm text-slate-500">Últimos eventos de tu tienda</p>
+      <h2 class="text-lg font-bold text-slate-950">
+        {t['admin.dashboard.recentActivity.heading']}
+      </h2>
+      <p class="text-sm text-slate-500">{t['admin.dashboard.recentActivity.subtitle']}</p>
     </div>
-    <a href="#" class="text-sm font-medium text-emerald-600 hover:underline"> Ver todo → </a>
+    <a href="#" class="text-sm font-medium text-emerald-600 hover:underline">
+      {t['admin.dashboard.recentActivity.viewAll']}
+    </a>
   </div>
 
   <div class="space-y-4">

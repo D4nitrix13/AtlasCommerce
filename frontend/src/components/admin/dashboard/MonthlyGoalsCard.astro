@@ -1,26 +1,48 @@
 ---
+/**
+ * MonthlyGoalsCard — Card de seguimiento de objetivos del mes.
+ *
+ * MOCK data: los valores numericos son fijos para esta iteracion; el
+ * endpoint real (`/api/v1/admin/metrics/goals/monthly`) llega en una
+ * sesion futura, mismo patron que RevenueOverviewCard.
+ *
+ * **i18n**: las 3 metric labels y el template "Meta: {target}" se
+ * traducen via el diccionario del locale.
+ */
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+
 const goals = [
   {
-    label: 'Ingresos mensuales',
+    label: t['admin.dashboard.monthlyGoals.metric.monthlyRevenue'],
     current: '$48,295',
     target: '$55,000',
     percent: 88,
     color: 'bg-emerald-500',
   },
   {
-    label: 'Nuevos clientes',
+    label: t['admin.dashboard.monthlyGoals.metric.newCustomers'],
     current: '847',
     target: '1,000',
     percent: 85,
     color: 'bg-emerald-500',
   },
-  { label: 'Tasa de conversión', current: '3.8', target: '5', percent: 76, color: 'bg-sky-500' },
+  {
+    label: t['admin.dashboard.monthlyGoals.metric.conversionRate'],
+    current: '3.8',
+    target: '5',
+    percent: 76,
+    color: 'bg-sky-500',
+  },
 ];
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-  <h2 class="mb-1 text-lg font-bold text-slate-950">Metas mensuales</h2>
-  <p class="mb-5 text-sm text-slate-500">Seguimiento de objetivos</p>
+  <h2 class="mb-1 text-lg font-bold text-slate-950">
+    {t['admin.dashboard.monthlyGoals.heading']}
+  </h2>
+  <p class="mb-5 text-sm text-slate-500">{t['admin.dashboard.monthlyGoals.subtitle']}</p>
 
   <div class="space-y-5">
     {
@@ -40,7 +62,7 @@ const goals = [
 
           <div class="mt-1 flex justify-between text-xs text-slate-400">
             <span>{g.current}</span>
-            <span>Meta: {g.target}</span>
+            <span>{t['admin.dashboard.monthlyGoals.targetLabel'].replace('{target}', g.target)}</span>
           </div>
         </div>
       ))

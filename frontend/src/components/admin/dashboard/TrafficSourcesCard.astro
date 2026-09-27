@@ -16,27 +16,39 @@
  *   - Sin leyenda lateral (la leyenda vive abajo del chart)
  *
  * **AGENTS.md §11**: MOCK data estatico.
+ *
+ * **i18n**: las 4 leyendas se traducen via keys `admin.dashboard.trafficSources.legend.*`
+ * y se serializan al script del cliente via `data-*` para que el doughnut
+ * reciba los labels ya localizados (Chart.js los muestra en tooltips).
  */
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+
 const chartId = `traffic-chart-${Math.random().toString(36).slice(2)}`;
 
 const sources = [
-  { label: 'Directo', value: 35, color: '#059669' },
-  { label: 'Orgánico', value: 28, color: '#0ea5e9' },
-  { label: 'Referido', value: 22, color: '#6366f1' },
-  { label: 'Social', value: 15, color: '#f43f5e' },
-];
+  { value: 35, color: '#059669', legendKey: 'admin.dashboard.trafficSources.legend.direct' as const },
+  { value: 28, color: '#0ea5e9', legendKey: 'admin.dashboard.trafficSources.legend.organic' as const },
+  { value: 22, color: '#6366f1', legendKey: 'admin.dashboard.trafficSources.legend.referral' as const },
+  { value: 15, color: '#f43f5e', legendKey: 'admin.dashboard.trafficSources.legend.social' as const },
+].map((s) => ({ ...s, label: t[s.legendKey] }));
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-  <h2 class="mb-1 text-lg font-bold text-slate-950">Fuentes de tráfico</h2>
-  <p class="mb-6 text-sm text-slate-500">De dónde vienen tus visitas</p>
+  <h2 class="mb-1 text-lg font-bold text-slate-950">
+    {t['admin.dashboard.trafficSources.heading']}
+  </h2>
+  <p class="mb-6 text-sm text-slate-500">{t['admin.dashboard.trafficSources.subtitle']}</p>
 
   <div class="flex items-center gap-6">
     <div class="relative h-44 w-44 shrink-0">
       <canvas id={chartId} data-sources={JSON.stringify(sources)}></canvas>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         <span class="text-2xl font-bold text-slate-950">284K</span>
-        <span class="text-xs text-slate-500">Visitas</span>
+        <span class="text-xs text-slate-500">
+          {t['admin.dashboard.trafficSources.centerLabel.visits']}
+        </span>
       </div>
     </div>
 

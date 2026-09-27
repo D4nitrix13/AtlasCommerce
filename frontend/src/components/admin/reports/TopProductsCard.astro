@@ -1,4 +1,19 @@
 ---
+/**
+ * TopProductsCard — Top 5 productos más vendidos del tenant admin.
+ *
+ * MOCK data con 5 productos fijos. Migrar a fetch a
+ * `/api/v1/admin/metrics/products/top?limit=5` en sesion futura.
+ *
+ * **i18n**: heading + subtitle + viewAll + el sufijo de unidades
+ * (`{sold} uds` / `{sold} units`) se traducen via diccionario.
+ * Los nombres de productos (`p.name`) y revenues (`p.revenue`)
+ * vienen del backend (no se traducen aca).
+ */
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+
 const products = [
   {
     rank: 1,
@@ -25,11 +40,11 @@ const rankColors = [
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
   <div class="mb-4 flex items-center justify-between">
     <div>
-      <h2 class="text-lg font-bold text-slate-950">Productos más vendidos</h2>
-      <p class="text-sm text-slate-500">Top 5 por unidades vendidas</p>
+      <h2 class="text-lg font-bold text-slate-950">{t['admin.reports.topProducts.heading']}</h2>
+      <p class="text-sm text-slate-500">{t['admin.reports.topProducts.subtitle']}</p>
     </div>
     <a href="/admin/catalog/products" class="text-sm font-medium text-emerald-600 hover:underline">
-      Ver todo →
+      {t['admin.reports.topProducts.viewAll']}
     </a>
   </div>
 
@@ -56,7 +71,9 @@ const rankColors = [
               <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
                 <div class="h-full rounded-full bg-emerald-500" style={`width:${p.percent}%`} />
               </div>
-              <span class="shrink-0 text-xs text-slate-400">{p.sold} uds</span>
+              <span class="shrink-0 text-xs text-slate-400">
+                {t['admin.reports.topProducts.units'].replace('{sold}', String(p.sold))}
+              </span>
             </div>
           </div>
         </div>
