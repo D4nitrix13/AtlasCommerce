@@ -1,5 +1,7 @@
 ---
 import { getServerDictionary } from '../../i18n/server';
+import { DEFAULT_BRAND, getBrandBySlug } from '../../config/stores';
+import { themeToBrand } from '../../lib/theme';
 
 /**
  * Layout compartido para todas las pantallas de auth (forgot password,
@@ -7,6 +9,13 @@ import { getServerDictionary } from '../../i18n/server';
  *
  * Estructura: 2 columnas en desktop (ilustración + form). En mobile
  * se apila vertical (form primero, ilustración oculta).
+ *
+ * Multi-tenant: el shell deriva el `StoreBrand` desde `Astro.locals`
+ * (tenant + theme) y publica su accent color como CSS custom properties
+ * (`--brand-accent`, `--brand-accent-hover`, `--brand-accent-ring`) en
+ * el root. Los formularios auth hijos (React islands + Astro markup)
+ * consumen las vars vía `var(--brand-accent, #2D9D8E)` — el fallback
+ * hex mantiene render correcto si el shell no envuelve al form.
  *
  * Props:
  *   - illustration: ruta a la imagen SVG (relativa a /public).
@@ -55,9 +64,29 @@ const {
 
 const t = getServerDictionary(Astro.locals.locale);
 const isReversed = side === 'right';
+
+// Deriva el StoreBrand desde el contexto del middleware (tenant + theme).
+// Misma fuente de verdad que las páginas auth usan para `brand={brand}`,
+// centralizada acá para que las vars CSS reflejen la paleta correcta sin
+// que cada caller tenga que recordar pasarla.
+const fallbackBrand =
+  getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
+const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
+
+// CSS custom properties consumidas por los formularios hijos. Se publican
+// en el root para que el cascade las herede a los React islands montados
+// vía client:load. El `--brand-accent-ring` pre-muele el alpha 25% en
+// `color-mix` para que las clases focus:ring-* no necesiten la variante
+// opacity modifier (Tailwind 4 + var() no siempre la resuelve limpio).
+const cssVars = [
+  `--brand-accent: ${brand.accentColor};`,
+  `--brand-accent-hover: ${brand.accentHoverColor};`,
+  `--brand-accent-ring: color-mix(in srgb, ${brand.accentColor} 25%, transparent);`,
+  `--brand-accent-ring-strong: color-mix(in srgb, ${brand.accentColor} 40%, transparent);`,
+].join(' ');
 ---
 
-<div class={`min-h-screen grid lg:grid-cols-[45%_55%] ${background}`}>
+<div class={`min-h-screen grid lg:grid-cols-[45%_55%] ${background}`} style={cssVars}>
   {
     showIllustration && (
       <aside
@@ -119,10 +148,10 @@ const isReversed = side === 'right';
               <a
                 href={signupHref}
                 data-auth-link="signup"
-                class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
+                class="whitespace-nowrap text-sm text-slate-500 hover:text-[var(--brand-accent-hover,#258777)] transition"
               >
                 <slot name="topRightLink">
-                  ¿No tienes cuenta? <span class="font-semibold text-[#2D9D8E]">Regístrate</span>
+                  ¿No tienes cuenta? <span class="font-semibold text-[var(--brand-accent,#2D9D8E)]">Regístrate</span>
                 </slot>
               </a>
             )
@@ -132,10 +161,10 @@ const isReversed = side === 'right';
               <a
                 href={loginHref}
                 data-auth-link="login"
-                class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
+                class="whitespace-nowrap text-sm text-slate-500 hover:text-[var(--brand-accent-hover,#258777)] transition"
               >
                 <slot name="topRightLink">
-                  ¿Ya tienes cuenta? <span class="font-semibold text-[#2D9D8E]">Inicia sesión</span>
+                  ¿Ya tienes cuenta? <span class="font-semibold text-[var(--brand-accent,#2D9D8E)]">Inicia sesión</span>
                 </slot>
               </a>
             )
@@ -145,10 +174,10 @@ const isReversed = side === 'right';
               <a
                 href={backHref}
                 data-auth-link="back"
-                class="whitespace-nowrap text-sm text-slate-500 hover:text-[#2D9D8E] transition"
+                class="whitespace-nowrap text-sm text-slate-500 hover:text-[var(--brand-accent-hover,#258777)] transition"
               >
                 <slot name="topRightLink">
-                  <span class="font-semibold text-[#2D9D8E]">← Volver a iniciar sesión</span>
+                  <span class="font-semibold text-[var(--brand-accent,#2D9D8E)]">← Volver a iniciar sesión</span>
                 </slot>
               </a>
             )
@@ -166,9 +195,9 @@ const isReversed = side === 'right';
       <slot name="terms">
         <p class="text-center text-xs text-slate-400 mt-8">
           {t['auth.shell.termsPrefix']}{' '}
-          <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.termsLink']}</a>
+          <a href="#" class="underline hover:text-[var(--brand-accent-hover,#258777)]">{t['auth.shell.termsLink']}</a>
           {' '}{t['auth.shell.termsAnd'] ?? 'y'}{' '}
-          <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.privacyLink']}</a>.
+          <a href="#" class="underline hover:text-[var(--brand-accent-hover,#258777)]">{t['auth.shell.privacyLink']}</a>.
         </p>
       </slot>
     </div>

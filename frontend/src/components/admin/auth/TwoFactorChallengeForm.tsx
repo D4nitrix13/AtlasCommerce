@@ -244,7 +244,7 @@ function CodeField({
           const digits = event.target.value.replace(/\D/g, '');
           onChange(digits.slice(0, codeLength));
         }}
-        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 text-center tracking-[0.5em] font-mono text-lg transition focus:bg-white focus:border-[#2D9D8E] focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 text-center tracking-[0.5em] font-mono text-lg transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
       />
       <p className="mt-2 text-xs text-slate-500">{help}</p>
     </div>
@@ -256,7 +256,7 @@ function SubmitButton({ disabled, label }: { disabled: boolean; label: string })
     <button
       type="submit"
       disabled={disabled}
-      className="w-full bg-[#2D9D8E] hover:bg-[#258777] disabled:bg-[#258777] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+      className="w-full bg-[var(--brand-accent,#2D9D8E)] hover:bg-[var(--brand-accent-hover,#258777)] disabled:bg-[var(--brand-accent-hover,#258777)] disabled:opacity-70 text-white font-semibold py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
     >
       {label}
     </button>
@@ -268,7 +268,7 @@ function RecoveryLink({ href, children }: { href: string; children: string }): R
     <a
       href={href}
       data-auth-link="recovery-back"
-      className="block text-center text-sm font-semibold text-[#2D9D8E] hover:text-[#1E6F62]"
+      className="block text-center text-sm font-semibold text-[var(--brand-accent,#2D9D8E)] hover:text-[var(--brand-accent-hover,#258777)]"
     >
       {children}
     </a>
