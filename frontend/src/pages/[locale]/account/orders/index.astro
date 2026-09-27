@@ -1,0 +1,213 @@
+---
+/**
+ * `/[locale]/account/orders` — Lista de pedidos del cliente (F2.1).
+ *
+ * Basado en Baymard §5.1 / 62-orders-overview (ref Crate & Barrel,
+ * Sephora): tabla densa con status pills semánticas + quick filter
+ * pills por estado + paginación.
+ *
+ * Filtros:
+ *  - Quick filter pills arriba de la tabla, uno por `OrderStatus`
+ *    + "Todos".
+ *  - Estado activo se mantiene en la URL (`?status=shipped`) para
+ *    que el back/forward del navegador funcione sin React island
+ *    (AGENTS §18: priorizar componentes estáticos).
+ *  - SSR lee `Astro.url.searchParams.get('status')` en cada
+ *    request — sin hydration JS.
+ *
+ * Paginación:
+ *  - Page size fijo (8) por simplicidad de mock; cuando exista el
+ *    endpoint real, este valor sale del total/header `X-Total`.
+ *  - Paginación SSR via `?page=N` (mismo approach).
+ *
+ * Multi-tenant: el sidebar hereda tokens del tenant vía
+ * AccountLayout; aquí no se aplica variante porque la tabla es
+ * invariante.
+ */
+import AccountLayout from '../../../../layouts/AccountLayout.astro';
+import OrdersTable from '../../../../components/account/orders/OrdersTable.astro';
+import StatusFilterPills from '../../../../components/account/orders/StatusFilterPills.astro';
+import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
+import { getAllOrders } from '../../../../data/orders-mock';
+import type { OrderStatus } from '../../../../data/account-mock';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+const ALL_ORDERS = getAllOrders();
+const PAGE_SIZE = 8;
+
+// Status query param: "all" | un status válido.
+const ALL_STATUSES = ['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'] as const;
+type FilterSlug = (typeof ALL_STATUSES)[number];
+
+function parseStatus(value: string | null): FilterSlug {
+  if (value === null) return 'all';
+  return (ALL_STATUSES as readonly string[]).includes(value) ? (value as FilterSlug) : 'all';
+}
+
+const currentStatus = parseStatus(Astro.url.searchParams.get('status'));
+
+const currentPageRaw = Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10);
+const currentPage = Number.isFinite(currentPageRaw) && currentPageRaw > 0 ? currentPageRaw : 1;
+
+// Filter first, then paginate.
+const filteredOrders =
+  currentStatus === 'all'
+    ? ALL_ORDERS
+    : ALL_ORDERS.filter((order) => order.status === currentStatus);
+
+const totalFiltered = filteredOrders.length;
+const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+const clampedPage = Math.min(currentPage, totalPages);
+const startIdx = (clampedPage - 1) * PAGE_SIZE;
+const paginatedOrders = filteredOrders.slice(startIdx, startIdx + PAGE_SIZE);
+
+const showEmpty = totalFiltered === 0;
+
+// Status counts (across all orders, no filter applied → counts are stable).
+function countByStatus(status: OrderStatus): number {
+  return ALL_ORDERS.filter((order) => order.status === status).length;
+}
+
+const FILTER_SLUGS: readonly OrderStatus[] = [
+  'pending',
+  'processing',
+  'shipped',
+  'delivered',
+  'cancelled',
+];
+
+const localePrefix = `/${locale}`;
+const orderIdTemplate = t['account.dashboard.recentOrders.orderId'];
+
+function filterHref(slug: FilterSlug): string {
+  const params = new URLSearchParams();
+  if (slug !== 'all') params.set('status', slug);
+  params.set('page', '1');
+  const qs = params.toString();
+  return qs.length > 0 ? `${localePrefix}/account/orders?${qs}` : `${localePrefix}/account/orders`;
+}
+
+const filters: { slug: FilterSlug; label: string; href: string; count: number }[] = [
+  {
+    slug: 'all',
+    label: t['account.orders.list.filter.all'],
+    href: filterHref('all'),
+    count: ALL_ORDERS.length,
+  },
+  ...FILTER_SLUGS.map((status) => ({
+    slug: status as FilterSlug,
+    label: t[`account.orders.list.filter.${status}` as const],
+    href: filterHref(status as FilterSlug),
+    count: countByStatus(status),
+  })),
+];
+
+const navLabel = t['account.orders.list.heading'];
+
+// Helpers used inside JSX → expose as plain functions (Astro server-side
+// resolution, no client).
+const statusLabel = (status: OrderStatus): string => t[`account.orderStatus.${status}` as const];
+
+const itemsCountLabel = (count: number): string =>
+  t['account.dashboard.recentOrders.itemsCount'].replace('{count}', String(count));
+
+const orderIdLabel = (id: string): string => orderIdTemplate.replace('{id}', id);
+
+function detailHrefFor(orderId: string): string {
+  return `${localePrefix}/account/orders/${orderId}`;
+}
+
+function pageHref(page: number): string {
+  const params = new URLSearchParams();
+  if (currentStatus !== 'all') params.set('status', currentStatus);
+  if (page > 1) params.set('page', String(page));
+  const qs = params.toString();
+  return qs.length > 0 ? `${localePrefix}/account/orders?${qs}` : `${localePrefix}/account/orders`;
+}
+
+const showPagination = totalPages > 1;
+---
+
+<AccountLayout title={t['account.orders.list.heading']}>
+  <section
+    aria-labelledby="orders-heading"
+    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+  >
+    <header class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 id="orders-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
+          {t['account.orders.list.heading']}
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">{t['account.orders.list.subtitle']}</p>
+      </div>
+      <p class="text-xs font-medium text-slate-500">
+        {t['account.orders.list.countOf'].replace('{count}', String(totalFiltered))}
+      </p>
+    </header>
+
+    <div class="mb-4">
+      <StatusFilterPills currentStatus={currentStatus} filters={filters} navLabel={navLabel} />
+    </div>
+
+    <OrdersTable
+      orders={paginatedOrders}
+      currencyCode="USD"
+      statusLabel={statusLabel}
+      orderIdLabel={orderIdLabel}
+      itemsCountLabel={itemsCountLabel}
+      detailHrefFor={detailHrefFor}
+      viewDetailLabel={t['account.orders.list.viewDetail']}
+      columnOrderNumber={t['account.orders.list.column.orderNumber']}
+      columnDate={t['account.orders.list.column.date']}
+      columnStatus={t['account.orders.list.column.status']}
+      columnItems={t['account.orders.list.column.items']}
+      columnTotal={t['account.orders.list.column.total']}
+      columnActions={t['account.orders.list.column.actions']}
+      showEmpty={showEmpty}
+      emptyTitle={t['account.orders.list.empty.title']}
+      emptyHint={t['account.orders.list.empty.hint']}
+      emptyCtaLabel={t['account.orders.list.empty.cta']}
+      emptyCtaHref={`${localePrefix}/products`}
+    />
+
+    {
+      showPagination && !showEmpty && (
+        <nav
+          aria-label={t['account.orders.list.pagination.page']}
+          class="mt-4 flex items-center justify-between gap-2"
+        >
+          <a
+            href={pageHref(Math.max(1, clampedPage - 1))}
+            aria-disabled={clampedPage === 1 ? 'true' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+              'hover:border-slate-300',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
+              clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+            ]}
+          >
+            ← {t['account.orders.list.pagination.previous']}
+          </a>
+          <p class="text-xs font-medium text-slate-600">
+            {t['account.orders.list.pagination.page']} {clampedPage}{' '}
+            {t['account.orders.list.pagination.of']} {totalPages}
+          </p>
+          <a
+            href={pageHref(Math.min(totalPages, clampedPage + 1))}
+            aria-disabled={clampedPage === totalPages ? 'true' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+              'hover:border-slate-300',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
+              clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+            ]}
+          >
+            {t['account.orders.list.pagination.next']} →
+          </a>
+        </nav>
+      )
+    }
+  </section>
+</AccountLayout>

@@ -1,0 +1,39 @@
+---
+/**
+ * OrderRowActions — celda de acciones para una fila de OrdersTable.
+ *
+ * Sigue la decisión del dashboard (`dashboard/index.astro`): el
+ * "View detail" es un link real al detail page (no un botón que
+ * delega a un handler). Mantenerlo como `<a>` permite pre-fetching
+ * por el navegador y no requiere hidratar nada (AGENTS §18).
+ *
+ * Accesibilidad:
+ *  - `<a>` con texto visible + aria-label que agrega el contexto
+ *    "Pedido #XXX" para que SR no se pierda si solo queda el ícono.
+ */
+interface Props {
+  orderId: string;
+  detailHref: string;
+  viewDetailLabel: string;
+  orderIdTemplate: string;
+}
+
+const { orderId, detailHref, viewDetailLabel, orderIdTemplate } = Astro.props;
+
+const orderLabel = orderIdTemplate.replace('{id}', orderId);
+---
+
+<div class="flex items-center justify-end gap-2">
+  <a
+    href={detailHref}
+    aria-label={`${viewDetailLabel} — ${orderLabel}`}
+    class:list={[
+      'inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors',
+      'hover:border-[var(--primary,#7c3aed)] hover:bg-[color-mix(in_srgb,var(--primary,#7c3aed)_6%,white)] hover:text-[var(--primary,#7c3aed)]',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
+    ]}
+  >
+    <span>{viewDetailLabel}</span>
+    <span aria-hidden="true" class="text-xs">→</span>
+  </a>
+</div>

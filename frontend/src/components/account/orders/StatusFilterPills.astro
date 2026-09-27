@@ -1,0 +1,66 @@
+---
+/**
+ * StatusFilterPills — Quick filter pills (Baymard §5.1, ref Crate & Barrel).
+ *
+ * Filtros inline para OrdersTable. Mantiene la cuenta por status para
+ * que el cliente vea cuántos pedidos hay en cada estado sin expandir.
+ *
+ * Como sigue la skill `data-search-param`, los links son GET con
+ * `?status={slug}` — la página detecta el param en SSR y filtra.
+ * Mantener el filtro como URL state (no React island) preserva la
+ * regla AGENTS §18 sobre componentes estáticos sin hydration extra.
+ *
+ * Accesibilidad:
+ *  - `<nav>` semántica con label localizado.
+ *  - Cada pill es `<a>` real (no `<button>` que requiere JS).
+ *  - El pill activo lleva `aria-current="page"` para lectores.
+ *  - Los conteos van en `<span aria-hidden="true">` para que el SR
+ *    lea solo el label (ej. "Enviados") en vez de "Enviados tres".
+ */
+interface StatusFilter {
+  slug: 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  label: string;
+  href: string;
+  count: number;
+}
+
+interface Props {
+  currentStatus: StatusFilter['slug'];
+  filters: StatusFilter[];
+  navLabel: string;
+}
+
+const { currentStatus, filters, navLabel } = Astro.props;
+---
+
+<nav aria-label={navLabel} class="flex flex-wrap items-center gap-2">
+  {
+    filters.map((filter) => {
+      const isActive = filter.slug === currentStatus;
+      return (
+        <a
+          href={filter.href}
+          aria-current={isActive ? 'page' : undefined}
+          class:list={[
+            'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
+            isActive
+              ? 'border-transparent bg-[var(--primary,#7c3aed)] text-white shadow-sm'
+              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+          ]}
+        >
+          <span>{filter.label}</span>
+          <span
+            aria-hidden="true"
+            class:list={[
+              'inline-flex min-w-[1.5rem] justify-center rounded-full px-1.5 text-xs font-semibold',
+              isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600',
+            ]}
+          >
+            {filter.count}
+          </span>
+        </a>
+      );
+    })
+  }
+</nav>
