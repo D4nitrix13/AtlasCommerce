@@ -4,6 +4,11 @@
  * Mantienen paridad con el backend:
  *   - `formatMoney()` consume la shape `{ cents, formatted, currency_code }`
  *     que devuelve `MoneyFormatter::payload()` en Laravel.
+ *   - `formatCurrency()` es el helper que prefiere la UI pública: recibe
+ *     un monto en cents y un currency code opcional, y devuelve la
+ *     versión localizada (ej. "$25.00", "¥2500", "C$15.50"). Es la
+ *     versión "lista para mostrar" — la que consumen ProductCard,
+ *     CartSummary, etc.
  *
  * Centralizar formateo aquí evita reinventar `Intl.NumberFormat` en cada
  * componente y mantiene consistencia visual (decimales, símbolo, locale).
@@ -59,6 +64,56 @@ export function formatCentsAsDecimal(cents: number, currencyCode: string | null 
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(cents / 10 ** decimals);
+}
+
+/**
+ * Formatea un monto en cents como moneda localizada con símbolo.
+ *
+ * Es el helper principal para ProductCard, CartSummary y cualquier
+ * superficie pública que muestre precios al cliente. Usa
+ * `Intl.NumberFormat` con `style: 'currency'` para respetar convenciones
+ * por país (símbolo antes/después, separadores, decimales).
+ *
+ * Usa el locale del runtime (`navigator.language` en cliente, fallback
+ * `es-NI` en SSR) para que el símbolo y los separadores se vean nativos
+ * al usuario.
+ *
+ * Si el `currencyCode` es desconocido por el runtime, cae a
+ * `formatCentsAsDecimal` para evitar que la UI muestre literal
+ * `[currency]` o un símbolo roto.
+ *
+ * @example
+ *   formatCurrency(2500)                       // "$25.00"
+ *   formatCurrency(2500, 'USD')                // "$25.00"
+ *   formatCurrency(250000, 'JPY')              // "¥2,500"
+ *   formatCurrency(1500, 'NIO')                // "C$15.00"
+ */
+export function formatCurrency(cents: number, currencyCode: string | null = null): string {
+  const code = currencyCode ?? DEFAULT_CURRENCY;
+
+  try {
+    return new Intl.NumberFormat(resolveRuntimeLocale(), {
+      style: 'currency',
+      currency: code,
+    }).format(cents / (code === 'JPY' ? 1 : 100));
+  } catch {
+    // Currency code desconocido por ICU: cae al decimal sin símbolo.
+    return formatCentsAsDecimal(cents, code);
+  }
+}
+
+/**
+ * Resuelve el locale del runtime (cliente) o cae al default para SSR.
+ *
+ * En SSR siempre devuelve `DEFAULT_LOCALE` para mantener consistencia
+ * entre server-render y client-hydrate (sin mismatch). En cliente usa
+ * `navigator.language` para que el formateo se sienta nativo.
+ */
+function resolveRuntimeLocale(): string {
+  if (typeof navigator === 'undefined') {
+    return DEFAULT_LOCALE;
+  }
+  return navigator.language ?? DEFAULT_LOCALE;
 }
 
 /**

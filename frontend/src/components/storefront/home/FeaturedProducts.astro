@@ -1,0 +1,68 @@
+---
+/**
+ * FeaturedProducts — sección "Destacados" de la home.
+ *
+ * Es un wrapper ligero sobre `ProductGrid` (la composición es siempre
+ * section + heading + grid + "Ver todos"). Mantener el componente
+ * separado evita repetir el patrón en la home y la página de categoría.
+ *
+ * El heading + "Ver todos" sigue la jerarquía de h2 para que la home
+ * mantenga el orden semántico correcto (h1 = hero, h2 = secciones).
+ */
+import ProductGrid from '../products/ProductGrid.astro';
+import type { Product } from '../../../types/catalog';
+import type { ProductCardLabels } from '../products/ProductCard.astro';
+
+interface Props {
+  products: readonly Product[];
+  locale: string;
+  heading: string;
+  viewAllLabel: string;
+  viewAllHref: string;
+  cardLabels: ProductCardLabels;
+  loadingLabel: string;
+  emptyLabel: string;
+  emptyHint: string;
+}
+
+const {
+  products,
+  locale,
+  heading,
+  viewAllLabel,
+  viewAllHref,
+  cardLabels,
+  loadingLabel,
+  emptyLabel,
+  emptyHint,
+} = Astro.props;
+---
+
+<section
+  aria-label={heading}
+  class="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 sm:pb-16 lg:pb-20"
+>
+  <header class="mb-8 flex items-end justify-between gap-4">
+    <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+      {heading}
+    </h2>
+    <a
+      href={viewAllHref}
+      class="inline-flex items-center gap-1 text-sm font-medium text-[var(--primary,#475569)] transition hover:underline focus:outline-none focus-visible:underline"
+    >
+      {viewAllLabel}
+      <span aria-hidden="true">→</span>
+    </a>
+  </header>
+
+  <ProductGrid
+    products={products}
+    locale={locale}
+    cardLabels={cardLabels}
+    status="success"
+    loadingLabel={loadingLabel}
+    errorLabel=""
+    emptyLabel={emptyLabel}
+    emptyHint={emptyHint}
+  />
+</section>

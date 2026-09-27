@@ -1,0 +1,76 @@
+---
+/**
+ * Home pública del storefront (`/[locale]/`).
+ *
+ * Composición: StorefrontLayout + HeroBanner + FeaturedCategories +
+ * FeaturedProducts. Los datos vienen del mock `data/products.ts`
+ * hasta que el endpoint `/api/storefront/products` exista.
+ *
+ * Esta página es el entry point del storefront público. Reemplaza el
+ * stub `frontend/src/pages/index.astro` (que era el welcome default
+ * de Astro) con la composición real del storefront.
+ */
+import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
+import HeroBanner from '../../components/storefront/home/HeroBanner.astro';
+import FeaturedCategories from '../../components/storefront/home/FeaturedCategories.astro';
+import FeaturedProducts from '../../components/storefront/home/FeaturedProducts.astro';
+import { getServerDictionary } from '../../i18n/server';
+import { CATEGORIES, getFeaturedProducts } from '../../data/products';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+
+// TODO F1.4: cart store — hoy el badge del header muestra 0 (placeholder
+// en StorefrontLayout.astro). Cuando se hidrate el cart store global,
+// leer el count desde ahí.
+const cartCount = 0;
+
+const productsHref = `/${locale}/products`;
+const searchHref = `/${locale}/search`;
+
+const featured = getFeaturedProducts(4);
+
+const cardLabels = {
+  newBadge: t['storefront.productCard.badge.new'],
+  saleBadge: t['storefront.productCard.badge.sale'],
+  lowStockBadge: t['storefront.productCard.badge.lowStock'],
+  addToCart: t['storefront.productCard.addToCart'],
+  outOfStock: t['storefront.productCard.outOfStock'],
+  viewDetail: t['storefront.productCard.viewDetail'],
+};
+---
+
+<StorefrontLayout title={t['storefront.search.title']} cartCount={cartCount}>
+  <HeroBanner
+    eyebrow={t['storefront.home.hero.eyebrow']}
+    title={t['storefront.home.hero.title']}
+    subtitle={t['storefront.home.hero.subtitle']}
+    primaryCta={{
+      label: t['storefront.home.hero.ctaPrimary'],
+      href: productsHref,
+    }}
+    secondaryCta={{
+      label: t['storefront.home.hero.ctaSecondary'],
+      href: searchHref,
+    }}
+  />
+
+  <FeaturedCategories
+    categories={CATEGORIES}
+    heading={t['storefront.home.featuredCategories.heading']}
+    viewAllLabel={t['storefront.home.featuredCategories.viewAll']}
+    viewAllHref={productsHref}
+  />
+
+  <FeaturedProducts
+    products={featured}
+    locale={locale}
+    heading={t['storefront.home.featuredProducts.heading']}
+    viewAllLabel={t['storefront.home.featuredProducts.viewAll']}
+    viewAllHref={productsHref}
+    cardLabels={cardLabels}
+    loadingLabel={t['storefront.productGrid.loading']}
+    emptyLabel={t['storefront.productGrid.empty']}
+    emptyHint={t['storefront.productGrid.emptyHint']}
+  />
+</StorefrontLayout>
