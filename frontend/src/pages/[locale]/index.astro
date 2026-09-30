@@ -2,33 +2,46 @@
 /**
  * Home pública del storefront (`/[locale]/`).
  *
- * Composición: StorefrontLayout + HeroBanner + FeaturedCategories +
- * FeaturedProducts. Los datos vienen del mock `data/products.ts`
- * hasta que el endpoint `/api/storefront/products` exista.
+ * F3.1 — Tenant detection.
  *
- * Esta página es el entry point del storefront público. Reemplaza el
- * stub `frontend/src/pages/index.astro` (que era el welcome default
- * de Astro) con la composición real del storefront.
+ * Resuelve el tenant desde `Astro.locals.tenant?.tenantSlug` y renderiza
+ * una composición distinta según el caso:
+ *
+ *   - `panda-estampados` → `TenantHero` (copy B2B estampados) +
+ *     categorías top B2B + CTAs a RFQ y bulk-order.
+ *   - cualquier otro     → `HeroBanner` (F1.4 B2C Kitsune) +
+ *     categorías B2C de F1.4.
+ *
+ * Esto mantiene el comportamiento F1.4 intacto para Kitsune y agrega la
+ * rama B2B sin duplicar layouts. Si en el futuro hay más tenants, esta
+ * lógica escala con un switch/if-else sobre `tenantSlug`.
+ *
+ * Mock data:
+ *   - Categorías y productos viven en `data/products.ts` (B2C) y
+ *     `data/b2b-mock.ts` (B2B). Cuando los endpoints existan, ambos
+ *     se reemplazan por fetch + hidratación.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import HeroBanner from '../../components/storefront/home/HeroBanner.astro';
 import FeaturedCategories from '../../components/storefront/home/FeaturedCategories.astro';
 import FeaturedProducts from '../../components/storefront/home/FeaturedProducts.astro';
+import TenantHero from '../../components/storefront/b2b/TenantHero.astro';
 import { getServerDictionary } from '../../i18n/server';
 import { CATEGORIES, getFeaturedProducts } from '../../data/products';
+import { B2B_CATEGORIES } from '../../data/b2b-mock';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
-// TODO F1.4: cart store — hoy el badge del header muestra 0 (placeholder
-// en StorefrontLayout.astro). Cuando se hidrate el cart store global,
-// leer el count desde ahí.
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const isPandaB2B = tenantSlug === 'panda-estampados';
+
 const cartCount = 0;
 
 const productsHref = `/${locale}/products`;
 const searchHref = `/${locale}/search`;
-
-const featured = getFeaturedProducts(4);
+const rfqHref = `/${locale}/rfq`;
+const bulkOrderHref = `/${locale}/bulk-order`;
 
 const cardLabels = {
   newBadge: t['storefront.productCard.badge.new'],
@@ -41,36 +54,71 @@ const cardLabels = {
 ---
 
 <StorefrontLayout title={t['storefront.search.title']} cartCount={cartCount}>
-  <HeroBanner
-    eyebrow={t['storefront.home.hero.eyebrow']}
-    title={t['storefront.home.hero.title']}
-    subtitle={t['storefront.home.hero.subtitle']}
-    primaryCta={{
-      label: t['storefront.home.hero.ctaPrimary'],
-      href: productsHref,
-    }}
-    secondaryCta={{
-      label: t['storefront.home.hero.ctaSecondary'],
-      href: searchHref,
-    }}
-  />
+  {
+    isPandaB2B ? (
+      <>
+        <TenantHero
+          eyebrow={t['storefront.b2b.home.hero.eyebrow']}
+          title={t['storefront.b2b.home.hero.title']}
+          subtitle={t['storefront.b2b.home.hero.subtitle']}
+          primaryCta={{
+            label: t['storefront.b2b.home.hero.ctaPrimary'],
+            href: bulkOrderHref,
+          }}
+          secondaryCta={{
+            label: t['storefront.b2b.home.hero.ctaSecondary'],
+            href: rfqHref,
+          }}
+          bullets={[
+            { icon: '📦', text: t['storefront.b2b.home.bullet.bulk'] },
+            { icon: '📝', text: t['storefront.b2b.home.bullet.rfq'] },
+            { icon: '🏢', text: t['storefront.b2b.home.bullet.multiBranch'] },
+            { icon: '💳', text: t['storefront.b2b.home.bullet.net30'] },
+          ]}
+        />
 
-  <FeaturedCategories
-    categories={CATEGORIES}
-    heading={t['storefront.home.featuredCategories.heading']}
-    viewAllLabel={t['storefront.home.featuredCategories.viewAll']}
-    viewAllHref={productsHref}
-  />
+        <FeaturedCategories
+          categories={B2B_CATEGORIES}
+          heading={t['storefront.b2b.home.featuredCategories.heading']}
+          viewAllLabel={t['storefront.b2b.home.featuredCategories.viewAll']}
+          viewAllHref={productsHref}
+        />
+      </>
+    ) : (
+      <>
+        <HeroBanner
+          eyebrow={t['storefront.home.hero.eyebrow']}
+          title={t['storefront.home.hero.title']}
+          subtitle={t['storefront.home.hero.subtitle']}
+          primaryCta={{
+            label: t['storefront.home.hero.ctaPrimary'],
+            href: productsHref,
+          }}
+          secondaryCta={{
+            label: t['storefront.home.hero.ctaSecondary'],
+            href: searchHref,
+          }}
+        />
 
-  <FeaturedProducts
-    products={featured}
-    locale={locale}
-    heading={t['storefront.home.featuredProducts.heading']}
-    viewAllLabel={t['storefront.home.featuredProducts.viewAll']}
-    viewAllHref={productsHref}
-    cardLabels={cardLabels}
-    loadingLabel={t['storefront.productGrid.loading']}
-    emptyLabel={t['storefront.productGrid.empty']}
-    emptyHint={t['storefront.productGrid.emptyHint']}
-  />
+        <FeaturedCategories
+          categories={CATEGORIES}
+          heading={t['storefront.home.featuredCategories.heading']}
+          viewAllLabel={t['storefront.home.featuredCategories.viewAll']}
+          viewAllHref={productsHref}
+        />
+
+        <FeaturedProducts
+          products={getFeaturedProducts(4)}
+          locale={locale}
+          heading={t['storefront.home.featuredProducts.heading']}
+          viewAllLabel={t['storefront.home.featuredProducts.viewAll']}
+          viewAllHref={productsHref}
+          cardLabels={cardLabels}
+          loadingLabel={t['storefront.productGrid.loading']}
+          emptyLabel={t['storefront.productGrid.empty']}
+          emptyHint={t['storefront.productGrid.emptyHint']}
+        />
+      </>
+    )
+  }
 </StorefrontLayout>

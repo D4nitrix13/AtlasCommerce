@@ -1,0 +1,102 @@
+---
+/**
+ * VolumePricingTable — Tabla de pricing tiers por volumen (B2B).
+ *
+ * Patrón B2B (design-refs §7.2 + §8.3):
+ *   - Pricing visible (anti-pattern: "contact us" oculto).
+ *   - Tabla con columnas: rango de cantidad | descuento | ejemplo.
+ *   - El tier activo se resalta si la página conoce la cantidad
+ *     actual (no obligatorio — puede omitirse).
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - `<table>` semántica con `<thead>` + `<tbody>`.
+ *   - `<th scope="col">` para que SR asocie headers con celdas.
+ *   - Estado activo via `aria-current` opcional.
+ *
+ * Diferencia con PricingTable admin: este es de SOLO LECTURA y está
+ * en el storefront público. No tiene acciones inline.
+ */
+import { PRICING_TIERS } from '../../../data/b2b-mock';
+
+interface Props {
+  heading: string;
+  rangeHeader: string;
+  discountHeader: string;
+  exampleHeader: string;
+  /** Cantidad actual del usuario (resalta su tier). Opcional. */
+  activeQuantity?: number;
+  /** Precio base de ejemplo para la columna "Ejemplo". Opcional. */
+  basePriceCents?: number;
+  currency?: string;
+  /** Localized template: "{tierLabel}: {price}". */
+  exampleTemplate: string;
+}
+
+const {
+  heading,
+  rangeHeader,
+  discountHeader,
+  exampleHeader,
+  activeQuantity,
+  basePriceCents = 0,
+  currency = 'USD',
+  exampleTemplate,
+} = Astro.props;
+
+const hasActiveQuantity =
+  activeQuantity !== undefined && activeQuantity > 0 && basePriceCents > 0;
+
+const rows = PRICING_TIERS.map((tier) => {
+  const isActive =
+    hasActiveQuantity &&
+    activeQuantity !== undefined &&
+    activeQuantity >= tier.minQuantity &&
+    (tier.maxQuantity === null || activeQuantity <= tier.maxQuantity);
+  const examplePrice = basePriceCents * (1 - tier.discountPercent);
+  const exampleFormatted = `$${(examplePrice / 100).toFixed(2)} ${currency}`;
+  const rangeLabel =
+    tier.maxQuantity === null
+      ? `${tier.minQuantity}+`
+      : `${tier.minQuantity}-${tier.maxQuantity}`;
+  const discountLabel = tier.discountPercent === 0 ? '—' : `-${Math.round(tier.discountPercent * 100)}%`;
+  const exampleCell = hasActiveQuantity
+    ? exampleTemplate
+        .replace('{tierLabel}', tier.label)
+        .replace('{price}', exampleFormatted)
+    : tier.label;
+  return { isActive, rangeLabel, discountLabel, exampleCell };
+});
+---
+
+<section aria-labelledby="volume-pricing-heading" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+  <h2 id="volume-pricing-heading" class="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
+    {heading}
+  </h2>
+
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[480px] text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+          <th scope="col" class="py-2 pr-4 font-medium">{rangeHeader}</th>
+          <th scope="col" class="py-2 pr-4 font-medium">{discountHeader}</th>
+          <th scope="col" class="py-2 font-medium">{exampleHeader}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {rows.map((row) => (
+          <tr
+            class:list={[
+              'transition',
+              row.isActive ? 'bg-[color-mix(in_srgb,var(--primary,#059669)_8%,white)]' : 'hover:bg-slate-50',
+            ]}
+            aria-current={row.isActive ? 'true' : undefined}
+          >
+            <td class="py-3 pr-4 font-medium text-slate-900">{row.rangeLabel}</td>
+            <td class="py-3 pr-4 text-slate-700">{row.discountLabel}</td>
+            <td class="py-3 text-slate-700">{row.exampleCell}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>

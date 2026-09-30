@@ -1,0 +1,76 @@
+---
+/**
+ * AddressTypePicker — Picker de tipo de dirección multi-sucursal (B2B).
+ *
+ * Patrón B2B (design-refs §3.4 + §7.2):
+ *   "Multi-sucursal: sede / almacén / oficina / eventos (4 tipos)"
+ *
+ * DIFERENCIA con el picker `shipping | billing | other` del flujo B2C:
+ *   - 4 tipos EXACTOS (no free-form "otro").
+ *   - Renderizado como pills/segmented control, no dropdown.
+ *   - Cada tipo tiene ícono distintivo (no depende solo del label).
+ *
+ * Renderiza como `<fieldset>` con `<legend>` accesible y `<input
+ * type="radio">` nativos (no buttons falsos) — mejor soporte SR.
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - `<fieldset>` + `<legend>` para agrupar radios.
+ *   - `aria-describedby` apunta al helper text.
+ */
+import { B2B_ADDRESS_TYPES } from '../../../data/b2b-mock';
+import type { AddressTypeB2b } from '../../../data/b2b-mock';
+
+interface Props {
+  /** Nombre del input (ej. `b2bAddressType`). */
+  name: string;
+  /** Label del fieldset. */
+  legend: string;
+  /** Helper text debajo del fieldset. */
+  helper: string;
+  /** Tipo actualmente seleccionado. */
+  selected: AddressTypeB2b;
+  /** Locale activo para resolver labels (e.g. "es"). */
+  locale: 'es' | 'en';
+  /** Traducciones por tipo. */
+  typeLabels: Readonly<Record<AddressTypeB2b, string>>;
+}
+
+const { name, legend, helper, selected, locale: _locale, typeLabels } = Astro.props;
+
+const helperId = `${name}-helper`;
+---
+
+<fieldset class="space-y-2">
+  <legend class="text-sm font-medium text-slate-800">{legend}</legend>
+  <div role="radiogroup" class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    {
+      B2B_ADDRESS_TYPES.map((type) => {
+        const isSelected = type.value === selected;
+        const id = `${name}-${type.value}`;
+        return (
+          <label
+            for={id}
+            class:list={[
+              'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-sm transition',
+              isSelected
+                ? 'border-[var(--primary,#059669)] bg-[color-mix(in_srgb,var(--primary,#059669)_8%,white)] text-slate-900'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+            ]}
+          >
+            <input
+              id={id}
+              type="radio"
+              name={name}
+              value={type.value}
+              checked={isSelected}
+              class="sr-only"
+              data-testid={`b2b-address-type-${type.value}`}
+            />
+            <span class="font-semibold">{typeLabels[type.value]}</span>
+          </label>
+        );
+      })
+    }
+  </div>
+  <p id={helperId} class="text-xs text-slate-500">{helper}</p>
+</fieldset>

@@ -1,0 +1,108 @@
+---
+/**
+ * BusinessInfoForm — Form de información fiscal/empresa B2B (RF-CUST-041 B2B).
+ *
+ * Patrón B2B (design-refs §3.4):
+ *   - Razón social (nombre empresa) — obligatorio para facturación.
+ *   - ID fiscal / NIT — para emisión de facturas.
+ *   - Diferencia con B2C: en B2B la empresa es el "cliente", no la persona.
+ *
+ * Campos:
+ *   - Razón social (razonSocial).
+ *   - Nombre comercial (opcional).
+ *   - NIT / ID fiscal.
+ *   - Tipo de contribuyente (dropdown, opcional — para algunos países).
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - Cada input con `<label for>`.
+ *   - `<input type="text">` semántico (NO type="number" para NIT —
+ *     puede tener guiones/letras según país).
+ */
+interface Props {
+  razonSocialLabel: string;
+  razonSocialPlaceholder: string;
+  nombreComercialLabel: string;
+  nombreComercialPlaceholder: string;
+  nitLabel: string;
+  nitPlaceholder: string;
+  nitHelper: string;
+  tipoContribuyenteLabel: string;
+  tipoContribuyenteGranLabel: string;
+  tipoContribuyenteMedianoLabel: string;
+  tipoContribuyentePequenoLabel: string;
+}
+
+const {
+  razonSocialLabel,
+  razonSocialPlaceholder,
+  nombreComercialLabel,
+  nombreComercialPlaceholder,
+  nitLabel,
+  nitPlaceholder,
+  nitHelper,
+  tipoContribuyenteLabel,
+  tipoContribuyenteGranLabel,
+  tipoContribuyenteMedianoLabel,
+  tipoContribuyentePequenoLabel,
+} = Astro.props;
+
+const nitHelperId = 'nit-helper';
+---
+
+<fieldset class="space-y-4">
+  <legend class="sr-only">Información fiscal de la empresa</legend>
+
+  <label class="block">
+    <span class="text-sm font-medium text-slate-800">{razonSocialLabel}</span>
+    <input
+      type="text"
+      name="razonSocial"
+      required
+      autocomplete="organization"
+      placeholder={razonSocialPlaceholder}
+      class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+      data-testid="business-razon-social"
+    />
+  </label>
+
+  <label class="block">
+    <span class="text-sm font-medium text-slate-800">{nombreComercialLabel}</span>
+    <input
+      type="text"
+      name="nombreComercial"
+      autocomplete="organization"
+      placeholder={nombreComercialPlaceholder}
+      class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+      data-testid="business-nombre-comercial"
+    />
+  </label>
+
+  <label class="block">
+    <span class="text-sm font-medium text-slate-800">{nitLabel}</span>
+    <input
+      type="text"
+      name="nit"
+      required
+      autocomplete="off"
+      placeholder={nitPlaceholder}
+      aria-describedby={nitHelperId}
+      class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+      data-testid="business-nit"
+    />
+    <span id={nitHelperId} class="mt-1 text-xs text-slate-500">{nitHelper}</span>
+  </label>
+
+  <label class="block">
+    <span class="text-sm font-medium text-slate-800">{tipoContribuyenteLabel}</span>
+    <select
+      name="tipoContribuyente"
+      class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+      data-testid="business-tipo-contribuyente"
+    >
+      <option value="">{tipoContribuyenteLabel}…</option>
+      <option value="grande">{tipoContribuyenteGranLabel}</option>
+      <option value="mediano">{tipoContribuyenteMedianoLabel}</option>
+      <option value="pequeno">{tipoContribuyentePequenoLabel}</option>
+    </select>
+  </label>
+</fieldset>

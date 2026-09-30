@@ -1,0 +1,92 @@
+---
+/**
+ * RFQStepper — Stepper horizontal persistente para el flujo RFQ.
+ *
+ * Patrón B2B (design-refs §7.3):
+ *   "Stepper horizontal persistente en top de la página de la
+ *    cotización, con tabs por sección."
+ *
+ * DIFERENCIA con un wizard genérico:
+ *   - El stepper es SOLO informativo (los steps reales están abajo
+ *     como secciones del form). No maneja estado interno — la página
+ *     pasa `currentStep` y el componente solo renderiza.
+ *   - Esto permite que el usuario scrollee entre steps sin perder
+ *     el contexto de progreso.
+ *
+ * Estados visuales (AGENTS §11):
+ *   - current  → borde + texto del brand (`--primary`).
+ *   - done     → fondo brand sólido + check visible.
+ *   - upcoming → gris, sin énfasis.
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - `<ol>` semántica (orden importa).
+ *   - Estado actual via `aria-current="step"`.
+ *   - Step label asociado al número via `<span>` visible + texto.
+ *
+ * Los labels llegan ya localizados como props — el componente NO
+ * consulta i18n. Esto evita acoplamiento y permite reusar el stepper
+ * en otros flujos B2B sin tocar este archivo.
+ */
+interface Props {
+  currentStep: 1 | 2 | 3 | 4;
+  labels: readonly string[];
+}
+
+const { currentStep, labels } = Astro.props;
+
+const steps: readonly { number: 1 | 2 | 3 | 4 }[] = [
+  { number: 1 },
+  { number: 2 },
+  { number: 3 },
+  { number: 4 },
+];
+---
+
+<nav aria-label="Pasos de cotización" class="mx-auto w-full max-w-4xl px-4 pt-8 sm:px-6">
+  <ol class="flex w-full items-center justify-between gap-1 sm:gap-3">
+    {
+      steps.map((step, index) => {
+        const isDone = step.number < currentStep;
+        const isCurrent = step.number === currentStep;
+        const isLast = index === steps.length - 1;
+        const label = labels[index] ?? '';
+        return (
+          <li class="flex flex-1 items-center">
+            <div class="flex flex-col items-center gap-1.5">
+              <span
+                aria-current={isCurrent ? 'step' : undefined}
+                class:list={[
+                  'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-semibold transition',
+                  isDone && 'border-[var(--primary,#059669)] bg-[var(--primary,#059669)] text-white',
+                  isCurrent && 'border-[var(--primary,#059669)] bg-white text-[var(--primary,#059669)]',
+                  !isDone && !isCurrent && 'border-slate-300 bg-white text-slate-400',
+                ]}
+              >
+                {isDone ? '✓' : step.number}
+              </span>
+              <span
+                class:list={[
+                  'hidden text-xs font-medium sm:block',
+                  isCurrent ? 'text-[var(--primary,#059669)]' : 'text-slate-500',
+                ]}
+              >
+                {label}
+              </span>
+            </div>
+            {!isLast && (
+              <div
+                aria-hidden="true"
+                class:list={[
+                  'mx-1 h-0.5 flex-1 rounded transition',
+                  step.number < currentStep
+                    ? 'bg-[var(--primary,#059669)]'
+                    : 'bg-slate-200',
+                ]}
+              />
+            )}
+          </li>
+        );
+      })
+    }
+  </ol>
+</nav>
