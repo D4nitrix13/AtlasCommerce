@@ -1,0 +1,63 @@
+---
+/**
+ * CheckoutTermsCheckbox — checkbox de aceptación de términos.
+ *
+ * Patrón Baymard §5.2 (legal consent): el "I agree" debe estar
+ * cerca del CTA de "Place order", no escondido en un footer link.
+ *
+ * Sin handlers: por ahora es un `<input type="checkbox">` real
+ * (no un `<div>` clickeable) que el form del padre recoge vía
+ * `name="terms"`. El padre decide si bloquear el submit si está
+ * unchecked. Soporta estado de error inline.
+ */
+export interface CheckoutTermsLabels {
+  label: string;
+  privacyLink: string;
+  errorRequired: string;
+}
+
+interface Props {
+  /** URL del documento de términos + privacidad. */
+  termsHref: string;
+  /** Marcar como checked por default. */
+  defaultChecked?: boolean;
+  /** Mensaje de error inline (cuando el form bloquea submit). */
+  error?: string;
+  labels: CheckoutTermsLabels;
+}
+
+const { termsHref, defaultChecked = false, error = '', labels } = Astro.props;
+const hasError = error !== '';
+const checkboxId = 'checkout-terms';
+---
+
+<label class="flex items-start gap-3 text-sm text-slate-700">
+  <input
+    id={checkboxId}
+    name="terms"
+    type="checkbox"
+    checked={defaultChecked}
+    required
+    aria-invalid={hasError}
+    aria-describedby={hasError ? `${checkboxId}-error` : undefined}
+    class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-[var(--primary,#475569)] transition focus:outline-none focus:ring-2 focus:ring-[var(--primary,#475569)] focus:ring-offset-2"
+  />
+  <span class="leading-snug">
+    {labels.label}
+    {' '}
+    <a
+      href={termsHref}
+      class="font-medium text-[var(--primary,#475569)] underline-offset-2 hover:underline focus:outline-none focus-visible:underline"
+    >
+      {labels.privacyLink}
+    </a>
+  </span>
+</label>
+
+{
+  hasError && (
+    <p id={`${checkboxId}-error`} role="alert" class="mt-1 text-xs text-red-600">
+      {error}
+    </p>
+  )
+}

@@ -1,0 +1,170 @@
+---
+/**
+ * CheckoutContactStep — Step 1 del checkout.
+ *
+ * Baymard §5.2:
+ *  - Email es el ÚNICO campo obligatorio para contact (guest path).
+ *  - Member signin opcional vía link (Baymard: NO social login
+ *    prominent — email + password first).
+ *  - Marketing opt-in checkbox separado (GDPR compliance).
+ *  - Express checkout (Apple Pay / Google Pay) arriba como
+ *    accelerator pattern (Baymard llama a esto "friction bypass").
+ */
+import Input from '../../ui/Input.astro';
+import Button from '../../ui/Button.astro';
+
+export interface CheckoutContactLabels {
+  heading: string;
+  subtitle: string;
+  emailLabel: string;
+  emailPlaceholder: string;
+  subscribeLabel: string;
+  guestOption: string;
+  memberLogin: string;
+  memberHint: string;
+  continueAsGuest: string;
+  continueToShipping: string;
+  errorEmailEmpty: string;
+  errorEmailInvalid: string;
+  expressHeading: string;
+  expressSubtitle: string;
+  applePay: string;
+  googlePay: string;
+}
+
+interface Props {
+  labels: CheckoutContactLabels;
+  /** Estado actual del email (para repoblar tras error). */
+  email?: string;
+  /** Email pre-llenado si el usuario está logueado. */
+  prefillEmail?: string;
+  /** Errores inline. */
+  errors?: { email?: string };
+  /** Mostrar express checkout (Apple Pay / Google Pay placeholders). */
+  showExpress?: boolean;
+  /** Mostrar "ya tenés cuenta? iniciá sesión" — depende de si está logueado. */
+  showMemberLogin?: boolean;
+  /** Locale-prefixed href al step de shipping. */
+  shippingHref: string;
+  /** Locale-prefixed href al login. */
+  loginHref: string;
+}
+
+const {
+  labels,
+  email = '',
+  prefillEmail = '',
+  errors = {},
+  showExpress = true,
+  showMemberLogin = true,
+  shippingHref,
+  loginHref,
+} = Astro.props;
+
+const resolvedEmail = email !== '' ? email : prefillEmail;
+const emailError = errors.email ?? '';
+---
+
+<form
+  method="get"
+  action={shippingHref}
+  class="flex flex-col gap-6"
+  aria-label={labels.heading}
+  data-checkout-step="contact"
+>
+  {
+    showExpress && (
+      <section class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <header class="flex flex-col gap-1">
+          <h2 class="text-base font-semibold text-slate-900">
+            {labels.expressHeading}
+          </h2>
+          <p class="text-sm text-slate-500">{labels.expressSubtitle}</p>
+        </header>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            disabled
+            aria-label={labels.applePay}
+            class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+              <path d="M17.05 12.04c-.03-2.97 2.43-4.4 2.54-4.47-1.39-2.03-3.55-2.31-4.31-2.34-1.83-.18-3.58 1.08-4.51 1.08-.93 0-2.36-1.05-3.88-1.02-1.99.03-3.83 1.16-4.85 2.94-2.07 3.59-.53 8.9 1.49 11.81.99 1.43 2.16 3.03 3.7 2.97 1.49-.06 2.05-.96 3.85-.96 1.8 0 2.31.96 3.88.93 1.6-.03 2.62-1.45 3.6-2.89 1.13-1.66 1.6-3.27 1.63-3.36-.04-.02-3.12-1.2-3.14-4.69zm-2.95-8.6c.82-1 1.38-2.39 1.23-3.77-1.19.05-2.63.79-3.49 1.79-.77.89-1.44 2.31-1.26 3.66 1.32.1 2.69-.67 3.52-1.68z"/>
+            </svg>
+            <span>{labels.applePay}</span>
+          </button>
+          <button
+            type="button"
+            disabled
+            aria-label={labels.googlePay}
+            class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span class="font-bold tracking-tight">
+              <span class="text-blue-500">G</span>
+              <span class="text-red-500">o</span>
+              <span class="text-amber-500">o</span>
+              <span class="text-blue-500">g</span>
+              <span class="text-emerald-500">l</span>
+              <span class="text-red-500">e</span>
+            </span>
+            <span>Pay</span>
+          </button>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <header class="flex flex-col gap-1">
+      <h2 class="text-base font-semibold text-slate-900">{labels.heading}</h2>
+      <p class="text-sm text-slate-500">{labels.subtitle}</p>
+    </header>
+
+    <Input
+      name="email"
+      type="email"
+      label={labels.emailLabel}
+      placeholder={labels.emailPlaceholder}
+      value={resolvedEmail}
+      required={true}
+      autocomplete="email"
+      error={emailError === labels.errorEmailEmpty || emailError === labels.errorEmailInvalid ? emailError : emailError}
+      inputmode="email"
+    />
+
+    <label class="flex items-start gap-2 text-sm text-slate-700">
+      <input
+        name="subscribe"
+        type="checkbox"
+        class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-[var(--primary,#475569)] transition focus:outline-none focus:ring-2 focus:ring-[var(--primary,#475569)] focus:ring-offset-2"
+      />
+      <span class="leading-snug">{labels.subscribeLabel}</span>
+    </label>
+
+    {
+      showMemberLogin && (
+        <div class="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          <a
+            href={loginHref}
+            class="font-semibold text-[var(--primary,#475569)] underline-offset-2 hover:underline focus:outline-none focus-visible:underline"
+          >
+            {labels.memberLogin}
+          </a>
+          <span class="ml-1 text-slate-500">{labels.memberHint}</span>
+        </div>
+      )
+    }
+
+    <div class="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+      <Button
+        variant="primary"
+        size="lg"
+        type="submit"
+        fullWidth={true}
+        class="sm:w-auto"
+      >
+        {labels.continueToShipping}
+      </Button>
+    </div>
+  </section>
+</form>

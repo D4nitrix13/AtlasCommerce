@@ -1,0 +1,76 @@
+---
+/**
+ * ProductRelated — productos relacionados (recomendados por categoría).
+ *
+ * Baymard research/product-page (gold standard):
+ *  - 3-6 productos en grid responsive.
+ *  - Reusa ProductCard para coherencia visual con /products y home.
+ *  - Heading claro "También te puede interesar".
+ */
+import ProductCard from './ProductCard.astro';
+import type { RelatedProduct } from '../../../data/product-detail-mock';
+
+export interface ProductRelatedLabels {
+  heading: string;
+  empty: string;
+  newBadge: string;
+  saleBadge: string;
+  lowStockBadge: string;
+  addToCart: string;
+  outOfStock: string;
+  viewDetail: string;
+}
+
+interface Props {
+  labels: ProductRelatedLabels;
+  products: readonly RelatedProduct[];
+  locale: string;
+}
+
+const { labels, products, locale } = Astro.props;
+
+const hasProducts = products.length > 0;
+
+// ProductCard espera un `Product` con campos requeridos. RelatedProduct
+// es un subset compatible — sólo necesitamos castear.
+const cardProducts = products.map((entry) => ({
+  id: entry.id,
+  slug: entry.slug,
+  name: entry.name,
+  description: '',
+  priceCents: entry.priceCents,
+  compareAtPriceCents: entry.compareAtPriceCents,
+  imageUrl: entry.imageUrl,
+  category: '',
+  stock: 1,
+  badges: entry.badges,
+  currency: entry.currency,
+}));
+
+const cardLabels = {
+  newBadge: labels.newBadge,
+  saleBadge: labels.saleBadge,
+  lowStockBadge: labels.lowStockBadge,
+  addToCart: labels.addToCart,
+  outOfStock: labels.outOfStock,
+  viewDetail: labels.viewDetail,
+};
+---
+
+<section aria-labelledby="related-heading" class="flex flex-col gap-4">
+  <h2 id="related-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
+    {labels.heading}
+  </h2>
+
+  {
+    hasProducts ? (
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {cardProducts.map((product) => (
+          <ProductCard product={product} locale={locale} labels={cardLabels} />
+        ))}
+      </div>
+    ) : (
+      <p class="text-sm italic text-slate-500">{labels.empty}</p>
+    )
+  }
+</section>
