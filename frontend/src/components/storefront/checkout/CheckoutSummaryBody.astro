@@ -1,0 +1,101 @@
+---
+/**
+ * CheckoutSummaryBody — desglose de items + totales, sin chrome.
+ *
+ * Helper interno compartido entre el bloque mobile (expandible) y
+ * el sidebar desktop (sticky) de CheckoutSummary.astro. Existe como
+ * archivo separado porque Astro no soporta renderizar sub-markup
+ * desde funciones dentro del mismo .astro.
+ */
+import type { CheckoutSummaryItem, CheckoutSummaryLabels } from './CheckoutSummary.astro';
+
+interface Props {
+  items: readonly CheckoutSummaryItem[];
+  currencyCode: string;
+  subtotalFormatted: string;
+  discountFormatted: string | null;
+  shippingDisplay: string;
+  taxFormatted: string | null;
+  labels: Pick<
+    CheckoutSummaryLabels,
+    'subtotal' | 'discount' | 'shipping' | 'tax'
+  >;
+}
+
+const {
+  items,
+  currencyCode,
+  subtotalFormatted,
+  discountFormatted,
+  shippingDisplay,
+  taxFormatted,
+  labels,
+} = Astro.props;
+---
+
+<div class="flex flex-col gap-4">
+  {/* Items con miniatura */}
+  <ul class="flex list-none flex-col gap-2 p-0" role="list">
+    {
+      items.map((item) => {
+        const lineTotal = item.priceCents * item.quantity;
+        const lineFormatted = new Intl.NumberFormat('es-NI', {
+          style: 'currency',
+          currency: currencyCode,
+        }).format(lineTotal);
+        return (
+          <li class="flex items-center gap-3">
+            <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-slate-50">
+              <img
+                src={item.imageUrl}
+                alt={item.name}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+              <span class="absolute -right-1 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-slate-700 px-1 text-[10px] font-semibold text-white">
+                {item.quantity}
+              </span>
+            </div>
+            <div class="flex flex-1 flex-col">
+              <span class="line-clamp-1 text-xs font-medium text-slate-700">
+                {item.name}
+              </span>
+              <span class="text-[11px] text-slate-500">
+                {lineFormatted}
+              </span>
+            </div>
+          </li>
+        );
+      })
+    }
+  </ul>
+
+  {/* Desglose de totales */}
+  <dl class="flex flex-col gap-2 text-sm">
+    <div class="flex items-center justify-between">
+      <dt class="text-slate-600">{labels.subtotal}</dt>
+      <dd class="tabular-nums text-slate-900">{subtotalFormatted}</dd>
+    </div>
+    {
+      discountFormatted !== null && (
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-600">{labels.discount}</dt>
+          <dd class="tabular-nums text-emerald-600">−{discountFormatted}</dd>
+        </div>
+      )
+    }
+    <div class="flex items-center justify-between">
+      <dt class="text-slate-600">{labels.shipping}</dt>
+      <dd class="tabular-nums text-slate-900">{shippingDisplay}</dd>
+    </div>
+    {
+      taxFormatted !== null && (
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-600">{labels.tax}</dt>
+          <dd class="tabular-nums text-slate-900">{taxFormatted}</dd>
+        </div>
+      )
+    }
+  </dl>
+</div>

@@ -1,42 +1,179 @@
 ---
 /**
- * Detalle de producto (`/[locale]/products/[slug]`).
+ * Detalle de producto completo (`/[locale]/products/[slug]`) — F4.2.
  *
- * Stub mínimo (F4 expande este page). Por ahora muestra:
- *   - Imagen principal
- *   - Título (h1)
- *   - Precio + compare-at si hay descuento
- *   - Stock indicator
- *   - Descripción
- *   - Botón "Añadir al carrito" (preparado con TODO, sin handler)
+ * Composición Baymard research/product-page (gold standard):
+ *  - Gallery (zoom on hover + thumbnails) a la izquierda.
+ *  - Info (price, stock, variants, qty, add to cart, wishlist) a la derecha.
+ *  - Tabs debajo (description / specs / shipping).
+ *  - Reviews section.
+ *  - Related products (3) al pie.
+ *  - Share buttons (placeholders sociales).
  *
- * El detalle completo (galería, variantes, recomendaciones,
- * wishlist "My Collection", etc.) viene en F4.
+ * Variantes modeladas via query param `?attr_color=X&attr_size=Y` y
+ * `?qty=N` (progressive enhancement — la página funciona sin JS).
  *
- * Si el slug no matchea, devuelve 404 explícito (`Astro.response`)
- * para no confundir con un error de render.
+ * Si el slug no matchea, devuelve 404 explícito.
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
-import Button from '../../../components/ui/Button.astro';
-import Badge from '../../../components/ui/Badge.astro';
+import ProductGallery from '../../../components/storefront/products/ProductGallery.astro';
+import ProductInfo from '../../../components/storefront/products/ProductInfo.astro';
+import ProductVariants from '../../../components/storefront/products/ProductVariants.astro';
+import ProductDescription from '../../../components/storefront/products/ProductDescription.astro';
+import ProductReviews from '../../../components/storefront/products/ProductReviews.astro';
+import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
 import { getServerDictionary } from '../../../i18n/server';
 import { findProductBySlug, CATEGORIES } from '../../../data/products';
-import { formatCurrency } from '../../../lib/formatters';
+import { SABER_ALTER_DETAIL, RELATED_PRODUCTS, findVariantByAttributes } from '../../../data/product-detail-mock';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
-// TODO F1.4: cart store.
+// TODO F4.2: cart store — actualmente demo (placeholder cartCount = 0).
 const cartCount = 0;
 
 const { slug } = Astro.params;
+
+// Por ahora todos los productos apuntan al detail mock "Saber Alter".
+// Cuando el endpoint real exista, el mapper backend → ProductDetailData
+// se hace acá.
 const product = slug !== undefined ? findProductBySlug(slug) : null;
 
 if (product === null) {
   Astro.response.status = 404;
 }
 
-const cardLabels = {
+// Variantes + reviews + related del mock. Mapeo basado en el slug:
+// si el slug matchea el producto "saber-alter-figma" del PRODUCTS[0],
+// usamos SABER_ALTER_DETAIL; si no, caemos a un subset mínimo derivado
+// del producto base.
+const detail =
+  product?.slug === SABER_ALTER_DETAIL.slug
+    ? SABER_ALTER_DETAIL
+    : product !== null
+      ? {
+          ...SABER_ALTER_DETAIL,
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          description: product.description,
+          priceCents: product.priceCents,
+          compareAtPriceCents: product.compareAtPriceCents,
+          currency: product.currency ?? 'USD',
+          category: product.category,
+          stock: product.stock,
+          badges: product.badges ?? [],
+        }
+      : null;
+
+// URL parsing para query params (image / tab / qty / attrs).
+const url = new URL(Astro.request.url);
+const selectedImageIndex = Number(url.searchParams.get('image') ?? '0');
+const activeTab = (url.searchParams.get('tab') ?? 'description') as
+  | 'description'
+  | 'specs'
+  | 'shipping';
+const quantityParam = Number(url.searchParams.get('qty') ?? '1');
+const selectedAttrs: Record<string, string> = {};
+for (const [key, value] of url.searchParams.entries()) {
+  if (key.startsWith('attr_')) {
+    selectedAttrs[key.slice(5)] = value;
+  }
+}
+
+// Variant matching
+const matchedVariant = detail !== null
+  ? findVariantByAttributes(detail.variants, selectedAttrs)
+  : null;
+
+// Effective price/stock considerando variant.
+const effectivePriceCents =
+  matchedVariant?.priceCents ?? detail?.priceCents ?? 0;
+const effectiveCompareAtPriceCents =
+  matchedVariant?.compareAtPriceCents ?? detail?.compareAtPriceCents;
+const effectiveStock = matchedVariant?.stock ?? detail?.stock ?? 0;
+
+// Hrefs base para query state propagation.
+const productDetailBase = `/${locale}/products/${product?.slug ?? ''}`;
+const loginHref = `/${locale}/account/login?redirect=${encodeURIComponent(productDetailBase)}`;
+
+// Category label
+const category =
+  product !== null
+    ? CATEGORIES.find((entry) => entry.slug === product.category) ?? null
+    : null;
+
+// ─── Labels ──────────────────────────────────────────────────────────
+const galleryLabels = {
+  zoomHint: t['storefront.productDetail.gallery.zoomHint'],
+  previousImage: t['storefront.productDetail.gallery.previousImage'],
+  nextImage: t['storefront.productDetail.gallery.nextImage'],
+  thumbAlt: t['storefront.productDetail.gallery.thumbAlt'],
+};
+
+const variantsLabels = {
+  colorLabel: t['storefront.productDetail.variants.colorLabel'],
+  sizeLabel: t['storefront.productDetail.variants.sizeLabel'],
+  colorSwatchAlt: t['storefront.productDetail.variants.colorSwatchAlt'],
+  selectSizeFirst: t['storefront.productDetail.variants.selectSizeFirst'],
+  outOfStockVariant: t['storefront.productDetail.variants.outOfStockVariant'],
+};
+
+const infoLabels = {
+  inStock: t['storefront.productDetail.inStock'],
+  outOfStock: t['storefront.productDetail.outOfStock'],
+  onlyLeft: t['storefront.productDetail.onlyLeft'],
+  addToCart: t['storefront.productDetail.addToCart'],
+  addingToCart: t['storefront.productDetail.addingToCart'],
+  addToCartHint: t['storefront.productDetail.addToCartHint'],
+  category: t['storefront.productDetail.category'],
+  badgeNew: t['storefront.productCard.badge.new'],
+  badgeSale: t['storefront.productCard.badge.sale'],
+  badgeLowStock: t['storefront.productCard.badge.lowStock'],
+  quantityLabel: t['storefront.productDetail.quantity.label'],
+  quantityDecrement: t['storefront.productDetail.quantity.decrement'],
+  quantityIncrement: t['storefront.productDetail.quantity.increment'],
+  wishlistAdd: t['storefront.productDetail.wishlist.add'],
+  wishlistAdded: t['storefront.productDetail.wishlist.added'],
+  wishlistRemove: t['storefront.productDetail.wishlist.remove'],
+};
+
+const descriptionLabels = {
+  description: t['storefront.productDetail.tabs.description'],
+  specs: t['storefront.productDetail.tabs.specs'],
+  shipping: t['storefront.productDetail.tabs.shipping'],
+  descriptionEmpty: t['storefront.productDetail.description.empty'],
+  specsHeading: t['storefront.productDetail.specs.heading'],
+  specsSku: t['storefront.productDetail.specs.sku'],
+  specsCategory: t['storefront.productDetail.specs.category'],
+  specsStock: t['storefront.productDetail.specs.stock'],
+  specsWeight: t['storefront.productDetail.specs.weight'],
+  specsDimensions: t['storefront.productDetail.specs.dimensions'],
+  specsMaterial: t['storefront.productDetail.specs.material'],
+  shippingHeading: t['storefront.productDetail.shippingReturns.heading'],
+  shippingReturnsShipping: t['storefront.productDetail.shippingReturns.shipping'],
+  shippingReturnsShippingBody: t['storefront.productDetail.shippingReturns.shippingBody'],
+  shippingReturnsReturns: t['storefront.productDetail.shippingReturns.returns'],
+  shippingReturnsReturnsBody: t['storefront.productDetail.shippingReturns.returnsBody'],
+  shippingReturnsWarranty: t['storefront.productDetail.shippingReturns.warranty'],
+  shippingReturnsWarrantyBody: t['storefront.productDetail.shippingReturns.warrantyBody'],
+};
+
+const reviewsLabels = {
+  heading: t['storefront.productDetail.reviews.heading'],
+  average: t['storefront.productDetail.reviews.average'],
+  outOf: t['storefront.productDetail.reviews.outOf'],
+  count: t['storefront.productDetail.reviews.count'],
+  write: t['storefront.productDetail.reviews.write'],
+  viewAll: t['storefront.productDetail.reviews.viewAll'],
+  empty: t['storefront.productDetail.reviews.empty'],
+  verified: t['storefront.productDetail.reviews.verified'],
+  starAlt: t['storefront.productDetail.reviews.starAlt'],
+};
+
+const relatedLabels = {
+  heading: t['storefront.productDetail.related.heading'],
+  empty: t['storefront.productDetail.related.empty'],
   newBadge: t['storefront.productCard.badge.new'],
   saleBadge: t['storefront.productCard.badge.sale'],
   lowStockBadge: t['storefront.productCard.badge.lowStock'],
@@ -45,21 +182,7 @@ const cardLabels = {
   viewDetail: t['storefront.productCard.viewDetail'],
 };
 
-const category =
-  product !== null
-    ? CATEGORIES.find((entry) => entry.slug === product.category) ?? null
-    : null;
-
-const currencyCode = product?.currency ?? 'USD';
-const priceFormatted = product !== null ? formatCurrency(product.priceCents, currencyCode) : '';
-const compareAtFormatted =
-  product !== null && product.compareAtPriceCents !== undefined
-    ? formatCurrency(product.compareAtPriceCents, currencyCode)
-    : null;
-
 const catalogHref = `/${locale}/products`;
-const isOutOfStock = product !== null && product.stock <= 0;
-const isLowStock = product !== null && product.stock > 0 && product.stock <= 5;
 ---
 
 <StorefrontLayout title={product?.name ?? t['storefront.productDetail.notFound']} cartCount={cartCount}>
@@ -75,7 +198,7 @@ const isLowStock = product !== null && product.stock > 0 && product.stock <= 5;
     </nav>
 
     {
-      product === null ? (
+      product === null && (
         <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
           <h1 class="text-2xl font-bold text-slate-900">
             {t['storefront.productDetail.notFound']}
@@ -90,69 +213,124 @@ const isLowStock = product !== null && product.stock > 0 && product.stock <= 5;
             {t['storefront.productDetail.breadcrumb']}
           </a>
         </section>
-      ) : (
-        <article class="grid gap-8 lg:grid-cols-2">
-          <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              class="aspect-square w-full object-cover"
-              decoding="async"
-              loading="eager"
+      )
+    }
+
+    {
+      product !== null && detail !== null && (
+        <article class="flex flex-col gap-10">
+          {/* Top section: gallery + info */}
+          <section class="grid gap-8 lg:grid-cols-2">
+            <ProductGallery
+              images={detail.images}
+              productName={product.name}
+              selectedIndex={selectedImageIndex}
+              labels={galleryLabels}
             />
-          </div>
 
-          <div class="flex flex-col gap-5">
-            {category && (
-              <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                {t['storefront.productDetail.category']}: <span class="text-slate-700">{category.name}</span>
-              </p>
-            )}
+            <div class="flex flex-col gap-5">
+              <ProductInfo
+                labels={infoLabels}
+                name={product.name}
+                priceCents={effectivePriceCents}
+                compareAtPriceCents={effectiveCompareAtPriceCents}
+                currencyCode={detail.currency}
+                stock={effectiveStock}
+                badges={detail.badges}
+                categoryLabel={category?.name ?? undefined}
+                hrefBase={productDetailBase}
+                isInWishlist={false}
+                loginHref={loginHref}
+                quantity={quantityParam}
+              />
 
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              {product.name}
-            </h1>
+              <ProductVariants
+                attributeGroups={detail.variantAttributes}
+                variants={detail.variants}
+                selected={selectedAttrs}
+                hrefBase={productDetailBase}
+                currencyCode={detail.currency}
+                labels={variantsLabels}
+              />
 
-            <div class="flex items-end gap-3">
-              <span class="text-3xl font-bold tabular-nums text-slate-900">
-                {priceFormatted}
-              </span>
-              {compareAtFormatted !== null && (
-                <span class="text-base text-slate-400 line-through tabular-nums">
-                  {compareAtFormatted}
+              {/* Share row (placeholders sociales) */}
+              <div class="flex flex-col gap-2 border-t border-slate-100 pt-4">
+                <span class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  {t['storefront.productDetail.share.heading']}
                 </span>
-              )}
+                <div class="flex items-center gap-2">
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productDetailBase)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t['storefront.productDetail.share.facebook']}
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                      <path d="M22 12.073C22 6.51 17.523 2 12 2S2 6.51 2 12.073c0 5.022 3.657 9.184 8.438 9.879v-6.987h-2.54V12.07h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.888h-2.33v6.987C18.343 21.258 22 17.096 22 12.073z" />
+                    </svg>
+                  </a>
+                  <a
+                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(productDetailBase)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t['storefront.productDetail.share.twitter']}
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  </a>
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(productDetailBase)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t['storefront.productDetail.share.whatsapp']}
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                  </a>
+                  <button
+                    type="button"
+                    disabled
+                    aria-label={t['storefront.productDetail.share.copy']}
+                    class="inline-flex h-9 items-center gap-1 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-3.5 w-3.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                    </svg>
+                    {t['storefront.productDetail.share.copy']}
+                  </button>
+                </div>
+              </div>
             </div>
+          </section>
 
-            <div class="flex flex-wrap items-center gap-2">
-              {isOutOfStock ? (
-                <Badge status="cancelled" label={t['storefront.productDetail.outOfStock']} />
-              ) : isLowStock ? (
-                <Badge status="shipped" label={t['storefront.productCard.badge.lowStock']} />
-              ) : (
-                <Badge status="delivered" label={t['storefront.productDetail.inStock']} />
-              )}
-            </div>
+          {/* Tabs section */}
+          <ProductDescription
+            labels={descriptionLabels}
+            activeTab={activeTab}
+            hrefBase={productDetailBase}
+            description={product.description}
+            specs={detail.specs}
+          />
 
-            <p class="text-base leading-relaxed text-slate-700">
-              {product.description}
-            </p>
+          {/* Reviews section */}
+          <ProductReviews
+            labels={reviewsLabels}
+            reviews={detail.reviews}
+            viewAllHref={`${productDetailBase}?tab=reviews`}
+            writeHref={`${productDetailBase}?tab=write`}
+          />
 
-            <div class="mt-2 flex flex-col gap-2">
-              <Button
-                variant="primary"
-                size="lg"
-                disabled={isOutOfStock}
-                fullWidth={true}
-                ariaLabel={t['storefront.productDetail.addToCart']}
-              >
-                {isOutOfStock ? t['storefront.productDetail.outOfStock'] : t['storefront.productDetail.addToCart']}
-              </Button>
-              <p class="text-xs text-slate-500">
-                {t['storefront.productDetail.addToCartHint']}
-              </p>
-            </div>
-          </div>
+          {/* Related products */}
+          <ProductRelated
+            labels={relatedLabels}
+            products={RELATED_PRODUCTS}
+            locale={locale}
+          />
         </article>
       )
     }

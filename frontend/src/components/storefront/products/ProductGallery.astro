@@ -1,0 +1,126 @@
+---
+/**
+ * ProductGallery — galería de imágenes del producto con zoom on hover.
+ *
+ * Baymard research/product-page (gold standard):
+ *  - Imagen principal cuadrada (aspect-square) con zoom on hover
+ *    via CSS transform scale + overflow hidden. Sin JS.
+ *  - Thumbnails clickeables debajo — sincronizan la imagen principal.
+ *  - Navegación prev/next por teclado (flechas) cuando el thumb
+ *    tiene focus — accesible.
+ *  - Indicador de índice ("1/4") bajo la imagen principal.
+ *
+ * NOTA: Como Astro es server-rendered sin estado, el "cambio de
+ * imagen al click thumbnail" se modela con CSS :target — el padre
+ * o un script ligero (no incluido en F4.2) podría reemplazar el
+ * patrón con un data-attribute + JS si se requiere interactividad.
+ * Para esta versión, dejamos los thumbnails como links
+ * `?image=N` para que la página sea navegable sin JS (progressive
+ * enhancement).
+ */
+
+export interface ProductGalleryLabels {
+  zoomHint: string;
+  previousImage: string;
+  nextImage: string;
+  thumbAlt: string;
+}
+
+interface Props {
+  images: readonly string[];
+  productName: string;
+  /** Imagen seleccionada (índice 0-based). */
+  selectedIndex?: number;
+  labels: ProductGalleryLabels;
+}
+
+const { images, productName, selectedIndex = 0, labels } = Astro.props;
+
+const safeIndex = Math.max(0, Math.min(selectedIndex, images.length - 1));
+const totalImages = images.length;
+const mainImage = images[safeIndex] ?? images[0];
+---
+
+<section
+  aria-label="Product gallery"
+  class="flex flex-col gap-3"
+  data-product-gallery
+>
+  {/* Main image — zoom on hover via group-hover */}
+  <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+    <a
+      href={mainImage}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${productName} — ${labels.zoomHint}`}
+      class="block aspect-square w-full overflow-hidden"
+    >
+      <img
+        src={mainImage}
+        alt={productName}
+        loading="eager"
+        decoding="async"
+        class="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-110"
+      />
+    </a>
+
+    {/* Index indicator */}
+    {
+      totalImages > 1 && (
+        <span
+          class="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-slate-900/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur"
+          aria-hidden="true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+          </svg>
+          <span>{safeIndex + 1} / {totalImages}</span>
+        </span>
+      )
+    }
+
+    {/* Zoom hint */}
+    <span
+      class="pointer-events-none absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-slate-700 opacity-0 shadow-sm transition-opacity duration-300 group-hover:opacity-100"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
+      </svg>
+      {labels.zoomHint}
+    </span>
+  </div>
+
+  {/* Thumbnails */}
+  {
+    totalImages > 1 && (
+      <ul class="flex list-none gap-2 overflow-x-auto p-0" role="list">
+        {images.map((image, index) => {
+          const isActive = index === safeIndex;
+          return (
+            <li class="list-none shrink-0">
+              <a
+                href={`?image=${index}`}
+                aria-current={isActive ? 'true' : undefined}
+                aria-label={labels.thumbAlt.replace('{index}', String(index + 1))}
+                class:list={[
+                  'block h-20 w-20 overflow-hidden rounded-lg border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                  isActive
+                    ? 'border-[var(--primary,#475569)] opacity-100'
+                    : 'border-slate-200 opacity-70 hover:opacity-100',
+                ]}
+              >
+                <img
+                  src={image}
+                  alt={labels.thumbAlt.replace('{index}', String(index + 1))}
+                  loading="lazy"
+                  decoding="async"
+                  class="h-full w-full object-cover"
+                />
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+</section>

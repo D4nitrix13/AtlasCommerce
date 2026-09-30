@@ -1,0 +1,201 @@
+---
+/**
+ * ProductInfo — bloque de info del producto: name, price, stock, badges,
+ * Add to cart button, WishlistButton.
+ *
+ * Layout B2C standard (Baymard research/product-page):
+ *  - Categoría (eyebrow).
+ *  - Name (h1).
+ *  - Price + compare-at (si discount) + discount %.
+ *  - Stock badge (out / low / in stock).
+ *  - Badges marketing (Nuevo/Oferta/etc.) arriba del title.
+ *  - Add to cart button (primary) + Wishlist button (secondary icon).
+ *  - Hint de "el carrito se habilita en próxima fase" placeholder.
+ */
+import Badge from '../../ui/Badge.astro';
+import Button from '../../ui/Button.astro';
+import WishlistButton from './WishlistButton.astro';
+import ProductQuantitySelector from './ProductQuantitySelector.astro';
+import { formatCurrency } from '../../../lib/formatters';
+import type { ProductBadge } from '../../../types/catalog';
+
+export interface ProductInfoLabels {
+  inStock: string;
+  outOfStock: string;
+  onlyLeft: string;
+  addToCart: string;
+  addingToCart: string;
+  addToCartHint: string;
+  category: string;
+  badgeNew: string;
+  badgeSale: string;
+  badgeLowStock: string;
+  quantityLabel: string;
+  quantityDecrement: string;
+  quantityIncrement: string;
+  wishlistAdd: string;
+  wishlistAdded: string;
+  wishlistRemove: string;
+}
+
+interface Props {
+  labels: ProductInfoLabels;
+  name: string;
+  priceCents: number;
+  compareAtPriceCents?: number;
+  currencyCode: string;
+  stock: number;
+  badges: readonly ProductBadge[];
+  categoryLabel?: string;
+  /** Locale-prefixed href al detail (referencia para back link). */
+  hrefBase: string;
+  /** Estado actual del wishlist (placeholder). */
+  isInWishlist?: boolean;
+  /** Locale-prefixed href al login. */
+  loginHref?: string;
+  /** Cantidad actual seleccionada. */
+  quantity?: number;
+  /** Mostrar estado loading del Add to Cart (placeholder). */
+  isAddingToCart?: boolean;
+}
+
+const {
+  labels,
+  name,
+  priceCents,
+  compareAtPriceCents,
+  currencyCode,
+  stock,
+  badges,
+  categoryLabel,
+  hrefBase,
+  isInWishlist = false,
+  loginHref,
+  quantity = 1,
+  isAddingToCart = false,
+} = Astro.props;
+
+const isOutOfStock = stock <= 0;
+const isLowStock = !isOutOfStock && stock <= 5;
+const discountPercent =
+  compareAtPriceCents !== undefined && compareAtPriceCents > priceCents
+    ? Math.round(((compareAtPriceCents - priceCents) / compareAtPriceCents) * 100)
+    : null;
+
+const priceFormatted = formatCurrency(priceCents, currencyCode);
+const compareAtFormatted =
+  compareAtPriceCents !== undefined ? formatCurrency(compareAtPriceCents, currencyCode) : null;
+
+const wishlistLabels = {
+  add: labels.wishlistAdd,
+  added: labels.wishlistAdded,
+  remove: labels.wishlistRemove,
+};
+
+const qtyLabels = {
+  label: labels.quantityLabel,
+  decrement: labels.quantityDecrement,
+  increment: labels.quantityIncrement,
+};
+---
+
+<header class="flex flex-col gap-4">
+  {/* Category eyebrow */}
+  {
+    categoryLabel !== undefined && (
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+        {labels.category}: <span class="text-slate-700">{categoryLabel}</span>
+      </p>
+    )
+  }
+
+  {/* Title */}
+  <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{name}</h1>
+
+  {/* Badges marketing */}
+  {
+    badges.length > 0 && (
+      <div class="flex flex-wrap gap-2">
+        {badges.map((badge) => {
+          if (badge === 'new') {
+            return (
+              <Badge variant="primary" label={labels.badgeNew} />
+            );
+          }
+          if (badge === 'sale') {
+            return (
+              <Badge status="processing" label={labels.badgeSale} />
+            );
+          }
+          if (badge === 'low_stock') {
+            return (
+              <Badge status="shipped" label={labels.badgeLowStock} />
+            );
+          }
+          return null;
+        })}
+      </div>
+    )
+  }
+
+  {/* Price block */}
+  <div class="flex items-end gap-3">
+    <span class="text-3xl font-bold tabular-nums text-slate-900">{priceFormatted}</span>
+    {
+      compareAtFormatted !== null && (
+        <span class="text-base text-slate-400 tabular-nums line-through">{compareAtFormatted}</span>
+      )
+    }
+    {
+      discountPercent !== null && (
+        <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
+          −{discountPercent}%
+        </span>
+      )
+    }
+  </div>
+
+  {/* Stock badge */}
+  <div class="flex flex-wrap items-center gap-2">
+    {
+      isOutOfStock ? (
+        <Badge status="cancelled" label={labels.outOfStock} />
+      ) : isLowStock ? (
+        <Badge status="shipped" label={labels.onlyLeft.replace('{count}', String(stock))} />
+      ) : (
+        <Badge status="delivered" label={labels.inStock} />
+      )
+    }
+  </div>
+
+  {/* Qty + Add to cart + Wishlist */}
+  <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
+    <ProductQuantitySelector
+      labels={qtyLabels}
+      quantity={quantity}
+      min={1}
+      max={Math.max(1, stock)}
+      hrefBase={hrefBase}
+    />
+
+    <div class="flex flex-1 flex-col gap-2">
+      <div class="flex items-center gap-2">
+        <Button
+          variant="primary"
+          size="lg"
+          disabled={isOutOfStock}
+          loading={isAddingToCart}
+          fullWidth={true}
+        >
+          {isOutOfStock ? labels.outOfStock : isAddingToCart ? labels.addingToCart : labels.addToCart}
+        </Button>
+        <WishlistButton
+          labels={wishlistLabels}
+          isInWishlist={isInWishlist}
+          loginHref={loginHref}
+        />
+      </div>
+      <p class="text-xs text-slate-500">{labels.addToCartHint}</p>
+    </div>
+  </div>
+</header>
