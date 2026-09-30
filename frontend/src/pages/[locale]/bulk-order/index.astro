@@ -1,0 +1,87 @@
+---
+/**
+ * /bulk-order — Volumen B2B (F3.3).
+ *
+ * Listing + calculadora interactiva de pricing tiers por volumen.
+ *
+ * Estructura:
+ *   1. Heading + intro.
+ *   2. BulkPricingCalculator (React island) — producto + qty + descuento.
+ *   3. VolumePricingTable — referencia visible de los 4 tiers.
+ *   4. CTA a RFQ para pedidos custom que no entran en bulk estándar.
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - `<section>` con headings jerárquicos.
+ *   - La tabla tiene `<caption>` interno vía `<h2>` con id.
+ */
+import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
+import BulkPricingCalculator from '../../../components/storefront/b2b/BulkPricingCalculator.tsx';
+import VolumePricingTable from '../../../components/storefront/b2b/VolumePricingTable.astro';
+import { getServerDictionary } from '../../../i18n/server';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+
+const rfqHref = `/${locale}/rfq`;
+---
+
+<StorefrontLayout title={t['storefront.bulk_order.title']} cartCount={0}>
+  <main class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+    <header class="mb-8 max-w-3xl">
+      <p class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800">
+        <span aria-hidden="true">📦</span>
+        {t['storefront.bulk_order.eyebrow']}
+      </p>
+      <h1 class="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
+        {t['storefront.bulk_order.heading']}
+      </h1>
+      <p class="mt-2 text-sm text-slate-600 sm:text-base">
+        {t['storefront.bulk_order.subtitle']}
+      </p>
+    </header>
+
+    <div class="grid gap-6 lg:grid-cols-5">
+      <div class="lg:col-span-3">
+        <BulkPricingCalculator
+          client:visible
+          productSelectLabel={t['storefront.bulk_order.calculator.productLabel']}
+          quantityLabel={t['storefront.bulk_order.calculator.quantityLabel']}
+          discountLabel={t['storefront.bulk_order.calculator.discountLabel']}
+          subtotalLabel={t['storefront.bulk_order.calculator.subtotalLabel']}
+          unitPriceLabel={t['storefront.bulk_order.calculator.unitPriceLabel']}
+          addButtonLabel={t['storefront.bulk_order.calculator.addButton']}
+          addingLabel={t['storefront.bulk_order.calculator.adding']}
+          successLabel={t['storefront.bulk_order.calculator.success']}
+          errorMinQuantity={(min: number) =>
+            t['storefront.bulk_order.calculator.errorMinQuantity'].replace('{min}', String(min))}
+          errorInvalidNumber={t['storefront.bulk_order.calculator.errorInvalid']}
+        />
+      </div>
+
+      <div class="lg:col-span-2">
+        <VolumePricingTable
+          heading={t['storefront.bulk_order.table.heading']}
+          rangeHeader={t['storefront.bulk_order.table.range']}
+          discountHeader={t['storefront.bulk_order.table.discount']}
+          exampleHeader={t['storefront.bulk_order.table.example']}
+          exampleTemplate={t['storefront.bulk_order.table.exampleTemplate']}
+        />
+      </div>
+    </div>
+
+    <aside class="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+      <h2 class="text-base font-semibold text-slate-900">
+        {t['storefront.bulk_order.customOrder.heading']}
+      </h2>
+      <p class="mt-2 text-sm text-slate-600">
+        {t['storefront.bulk_order.customOrder.body']}
+      </p>
+      <a
+        href={rfqHref}
+        class="mt-4 inline-flex h-10 items-center justify-center rounded-lg border border-[var(--primary,#059669)] bg-white px-5 text-sm font-semibold text-[var(--primary,#059669)] hover:bg-emerald-50"
+      >
+        {t['storefront.bulk_order.customOrder.cta']}
+      </a>
+    </aside>
+  </main>
+</StorefrontLayout>

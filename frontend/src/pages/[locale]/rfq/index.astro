@@ -1,0 +1,255 @@
+---
+/**
+ * /rfq — Request For Quote (flujo B2B Panda Estampados, F3.2).
+ *
+ * Patrón B2B (design-refs §7.3):
+ *   "Stepper horizontal persistente en top de la página de la
+ *    cotización, con tabs por sección."
+ *
+ * Adaptación al diseño:
+ *   - El stepper muestra 4 secciones canónicas (Diseño / Precios /
+ *     Plazos / Términos), pero el form real se renderiza en 3
+ *     secciones accordion-style: producto + cantidad + descripción
+ *     (Diseño); contacto + empresa + fiscal (Precios/Términos);
+ *     archivos adjuntos (mock upload) + envío.
+ *   - Confirmación de envío: número de ticket + "te respondemos en 24h".
+ *
+ * Mock submit:
+ *   - El handler `onsubmit` no hace POST real — genera un ticket ID
+ *     con `Date.now()` + redirect a `/rfq/confirmation?ticket=...`.
+ *   - Cuando el endpoint `/api/storefront/rfq` exista, reemplazar
+ *     por `fetch` + manejo de errores.
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - Stepper con `<nav aria-label>`.
+ *   - Form con `<fieldset>` por sección + `<legend>`.
+ *   - Labels asociados via `for`.
+ *
+ * Estados (AGENTS §11):
+ *   - Submitting: button disabled + label cambia.
+ *   - Errors: alert inline con `role="alert"`.
+ */
+import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
+import RFQStepper from '../../../components/storefront/b2b/RFQStepper.astro';
+import { getServerDictionary } from '../../../i18n/server';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+
+const bulkOrderHref = `/${locale}/bulk-order`;
+const accountHref = `/${locale}/account`;
+
+const stepperLabels = [
+  t['storefront.rfq.stepper.design'],
+  t['storefront.rfq.stepper.pricing'],
+  t['storefront.rfq.stepper.deadline'],
+  t['storefront.rfq.stepper.terms'],
+];
+---
+
+<StorefrontLayout title={t['storefront.rfq.title']} cartCount={0}>
+  <RFQStepper currentStep={1} labels={stepperLabels} />
+
+  <main class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+    <header class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">
+        {t['storefront.rfq.heading']}
+      </h1>
+      <p class="mt-2 text-sm text-slate-600 sm:text-base">
+        {t['storefront.rfq.subtitle']}
+      </p>
+    </header>
+
+    <form
+      id="rfq-form"
+      class="space-y-6"
+      data-testid="rfq-form"
+    >
+      <!-- Paso 1: producto + cantidad + deadline + descripción diseño -->
+      <fieldset class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <legend class="px-2 text-sm font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
+          {t['storefront.rfq.section.product']}
+        </legend>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.product']}</span>
+            <input
+              type="text"
+              name="product"
+              required
+              placeholder={t['storefront.rfq.field.productPlaceholder']}
+              class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+              data-testid="rfq-product"
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.quantity']}</span>
+            <input
+              type="number"
+              name="quantity"
+              min="1"
+              required
+              placeholder="100"
+              class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+              data-testid="rfq-quantity"
+            />
+          </label>
+        </div>
+
+        <label class="block">
+          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.deadline']}</span>
+          <input
+            type="date"
+            name="deadline"
+            required
+            class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+            data-testid="rfq-deadline"
+          />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.description']}</span>
+          <textarea
+            name="description"
+            rows="4"
+            required
+            placeholder={t['storefront.rfq.field.descriptionPlaceholder']}
+            class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+            data-testid="rfq-description"
+          ></textarea>
+        </label>
+      </fieldset>
+
+      <!-- Paso 2: contacto + empresa + dirección fiscal -->
+      <fieldset class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <legend class="px-2 text-sm font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
+          {t['storefront.rfq.section.contact']}
+        </legend>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.contactName']}</span>
+            <input
+              type="text"
+              name="contactName"
+              required
+              autocomplete="name"
+              class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+              data-testid="rfq-contact-name"
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.contactEmail']}</span>
+            <input
+              type="email"
+              name="contactEmail"
+              required
+              autocomplete="email"
+              class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+              data-testid="rfq-contact-email"
+            />
+          </label>
+        </div>
+
+        <label class="block">
+          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.company']}</span>
+          <input
+            type="text"
+            name="company"
+            required
+            autocomplete="organization"
+            class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+            data-testid="rfq-company"
+          />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.fiscalAddress']}</span>
+          <textarea
+            name="fiscalAddress"
+            rows="3"
+            required
+            class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--primary,#059669)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary,#059669)_20%,white)]"
+            data-testid="rfq-fiscal-address"
+          ></textarea>
+        </label>
+      </fieldset>
+
+      <!-- Paso 3: archivos adjuntos + envío -->
+      <fieldset class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <legend class="px-2 text-sm font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
+          {t['storefront.rfq.section.files']}
+        </legend>
+
+        <label class="block">
+          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.files']}</span>
+          <input
+            type="file"
+            name="attachments"
+            multiple
+            accept=".pdf,.png,.jpg,.jpeg,.ai,.svg"
+            class="mt-1 block w-full text-sm text-slate-700 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-slate-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-100"
+            data-testid="rfq-files"
+          />
+          <span class="mt-1 text-xs text-slate-500">{t['storefront.rfq.field.filesHelper']}</span>
+        </label>
+      </fieldset>
+
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-xs text-slate-500">{t['storefront.rfq.responseTime']}</p>
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <a
+            href={bulkOrderHref}
+            class="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            {t['storefront.rfq.cancel']}
+          </a>
+          <button
+            type="submit"
+            class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#059669)] px-6 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary-hover,#047857)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#059669)] focus-visible:ring-offset-2"
+            data-testid="rfq-submit"
+          >
+            {t['storefront.rfq.submit']}
+          </button>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <aside class="mx-auto w-full max-w-3xl px-4 pb-10 sm:px-6">
+    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
+      <p>
+        <a class="font-medium text-[var(--primary,#059669)] hover:underline" href={accountHref}>
+          {t['storefront.rfq.alreadyCustomer']}
+        </a>
+      </p>
+    </div>
+  </aside>
+</StorefrontLayout>
+
+<script>
+  /**
+   * RFQ form submit handler — mock submission.
+   *
+   * Genera un ticket ID determinístico a partir del timestamp y navega
+   * a la página de confirmación. Cuando el endpoint backend exista
+   * (`POST /api/storefront/rfq`), reemplazar este handler por un fetch
+   * real con manejo de errores.
+   */
+  const form = document.getElementById('rfq-form') as HTMLFormElement | null;
+  if (form !== null) {
+    form.addEventListener('submit', (event: Event) => {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const ticketNumber = `RFQ-${Date.now().toString(36).toUpperCase()}`;
+      const params = new URLSearchParams({ ticket: ticketNumber });
+      window.location.href = `${window.location.pathname.replace(/\/$/, '')}/confirmation?${params.toString()}`;
+    });
+  }
+</script>
