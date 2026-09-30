@@ -15,18 +15,24 @@
  *   - `softBorder` → bordes asociados a `softBg`.
  *
  * Los componentes auth consumen estos valores vía:
- *   - clases Tailwind arbitrarias (`bg-[#2D9D8E]`, `focus:border-[#2D9D8E]`)
+ *   - clases Tailwind arbitrarias (`bg-[var(--brand-accent,#2D9D8E)]`,
+ *     `focus:border-[var(--brand-accent,#2D9D8E)]`)
  *   - estilos inline (`style={{ backgroundColor: AUTH_ACCENT.softBg }}`)
+ *
+ * Los valores se exponen como `var(--brand-accent-*, fallback)` para
+ * que un tenant pueda override la paleta desde su theme (ver
+ * `AuthShell.astro`). El fallback hex mantiene el render correcto si
+ * el shell no inyecta las vars (modo standalone).
  *
  * Cualquier cambio futuro de paleta (rebrand) se hace desde acá y se
  * propaga a todos los flujos de auth.
  */
 export const AUTH_ACCENT = {
-  primary: '#2D9D8E',
-  hover: '#258777',
-  dark: '#1E6F62',
-  softBg: '#E6F7F4',
-  softBorder: '#C2EBE4',
+  primary: 'var(--brand-accent, #2D9D8E)',
+  hover: 'var(--brand-accent-hover, #258777)',
+  dark: 'var(--brand-accent-dark, #1E6F62)',
+  softBg: 'var(--brand-accent-bg, #E6F7F4)',
+  softBorder: 'var(--brand-accent-border, #C2EBE4)',
 } as const;
 
 export type AuthAccent = (typeof AUTH_ACCENT)[keyof typeof AUTH_ACCENT];

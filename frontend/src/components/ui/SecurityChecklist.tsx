@@ -53,11 +53,11 @@ function ChecklistRow({ met, label }: { met: boolean; label: string }): ReactEle
   return (
     <li className="flex items-center gap-2">
       {met ? (
-        <Check size={14} strokeWidth={2.5} className="text-[#2D9D8E]" aria-hidden="true" />
+        <Check size={14} strokeWidth={2.5} className="text-[var(--brand-accent,#2D9D8E)]" aria-hidden="true" />
       ) : (
         <Circle size={14} strokeWidth={2} className="text-slate-400" aria-hidden="true" />
       )}
-      <span className={met ? 'text-[#2D9D8E]' : 'text-slate-400'}>{label}</span>
+      <span className={met ? 'text-[var(--brand-accent,#2D9D8E)]' : 'text-slate-400'}>{label}</span>
     </li>
   );
 }

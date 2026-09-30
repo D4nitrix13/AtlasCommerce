@@ -223,7 +223,7 @@ export default function AddressesManager(): ReactElement {
         <button
           type="button"
           onClick={openCreate}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          className="rounded-md bg-[var(--brand-bg-emphasis,#171717)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-bg-emphasis-hover,#262626)]"
           data-testid="addresses-add"
         >
           {t('account.addresses.add')}
@@ -456,7 +456,7 @@ export default function AddressesManager(): ReactElement {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:bg-neutral-400"
+                className="rounded-md bg-[var(--brand-bg-emphasis,#171717)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-bg-emphasis-hover,#262626)] disabled:bg-[var(--brand-bg-emphasis-disabled,#a3a3a3)]"
                 data-testid="address-save"
               >
                 {saving

@@ -20,6 +20,8 @@ export type LanguageSwitcherTheme = {
   text: string;
   /** Color del item seleccionado (locale activo). */
   activeText: string;
+  /** Fondo del item seleccionado (variant `inline`). Default: `--brand-accent-bg`. */
+  activeBg: string;
   /** Borde sutil del dropdown. */
   border: string;
   /** Color del summary en estado cerrado (header del form). */
@@ -32,13 +34,15 @@ const DARK_THEME: LanguageSwitcherTheme = {
   surface: '#0F172A',
   text: '#FFFFFF',
   activeText: '#DC2626',
+  activeBg: 'var(--brand-accent-bg, #E6F7F4)',
   border: 'rgba(255, 255, 255, 0.10)',
 };
 
 const LIGHT_THEME: LanguageSwitcherTheme = {
   surface: '#FFFFFF',
   text: '#0F172A',
-  activeText: '#2D9D8E',
+  activeText: 'var(--brand-accent, #2D9D8E)',
+  activeBg: 'var(--brand-accent-bg, #E6F7F4)',
   border: '#E5E7EB',
   summaryColor: '#475569',
   summaryHoverColor: '#0F172A',
@@ -85,10 +89,10 @@ export default function LanguageSwitcher({
               handleSelect(candidate);
             }}
             aria-pressed={candidate === locale}
-            className="rounded px-2 py-1 transition focus:outline-none focus:ring-2 focus:ring-[#2D9D8E]/30"
+            className="rounded px-2 py-1 transition focus:outline-none focus:ring-2 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
             style={{
               color: candidate === locale ? resolvedTheme.activeText : resolvedTheme.text,
-              backgroundColor: candidate === locale ? '#E6F7F4' : 'transparent',
+              backgroundColor: candidate === locale ? resolvedTheme.activeBg : 'transparent',
               fontWeight: candidate === locale ? 600 : 400,
             }}
           >
