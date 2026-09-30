@@ -24,7 +24,7 @@ const changeAppliedAt =
   resetEmail !== ''
     ? t['auth.passwordReset.success.changeAppliedAt'].replace('{email}', resetEmail)
     : '';
-const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium underline text-[#2D9D8E] hover:text-[#1E6F62]">${brand.supportEmail}</a>`;
+const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium underline text-[var(--brand-accent,#2D9D8E)] hover:text-[var(--brand-accent-hover,#258777)]">${brand.supportEmail}</a>`;
 ---
 
 <AuthLayout title={`${t['auth.passwordReset.success.title']} · ${brand.name}`}>
@@ -44,7 +44,7 @@ const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium u
         que login, forgot-password y reset-password). */
     }
     <div class="mb-6 flex justify-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#2D9D8E]">
+      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--brand-accent,#2D9D8E)]">
         <svg
           class="h-9 w-9 text-white"
           fill="none"
@@ -73,7 +73,7 @@ const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium u
             borderColor: AUTH_ACCENT.softBorder,
           }}
         >
-          <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2D9D8E]">
+          <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent,#2D9D8E)]">
             <svg
               class="h-5 w-5 text-white"
               fill="none"
@@ -129,7 +129,7 @@ const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium u
 
     <a
       href={loginHref}
-      class="mb-6 flex w-full items-center justify-center rounded-lg bg-[#2D9D8E] hover:bg-[#258777] px-4 py-3 text-sm font-semibold text-white transition focus:outline-none focus:ring-4 focus:ring-[#2D9D8E]/25"
+      class="mb-6 flex w-full items-center justify-center rounded-lg bg-[var(--brand-accent,#2D9D8E)] hover:bg-[var(--brand-accent-hover,#258777)] px-4 py-3 text-sm font-semibold text-white transition focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
     >
       {t['auth.passwordReset.success.goToLogin']}
     </a>

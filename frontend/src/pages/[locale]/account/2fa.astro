@@ -64,9 +64,9 @@ const redirectTo =
 
     <p class="text-center text-xs text-slate-400 mt-8" slot="terms">
       {t['auth.shell.termsPrefix']}{' '}
-      <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.termsLink']}</a>
+      <a href="#" class="underline hover:text-[var(--brand-accent,#2D9D8E)]">{t['auth.shell.termsLink']}</a>
       {' '}{t['auth.shell.termsAnd'] ?? 'y'}{' '}
-      <a href="#" class="underline hover:text-[#2D9D8E]">{t['auth.shell.privacyLink']}</a>.
+      <a href="#" class="underline hover:text-[var(--brand-accent,#2D9D8E)]">{t['auth.shell.privacyLink']}</a>.
     </p>
   </AuthShell>
 </AuthLayout>

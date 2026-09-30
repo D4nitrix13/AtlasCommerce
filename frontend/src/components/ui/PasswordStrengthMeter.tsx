@@ -13,8 +13,8 @@ type PasswordStrengthMeterProps = {
    */
   label?: string;
   /**
-   * Color de las barras rellenas. Default: `#2D9D8E` (AUTH_ACCENT.primary).
-   * Acepta cualquier CSS color válido.
+   * Color de las barras rellenas. Default: `var(--brand-accent, #2D9D8E)`.
+   * Acepta cualquier CSS color válido (string suelto o `var(--x)`).
    */
   fillColor?: string;
   /**
@@ -42,7 +42,7 @@ type PasswordStrengthMeterProps = {
 export function PasswordStrengthMeter({
   score,
   label,
-  fillColor = '#2D9D8E',
+  fillColor = 'var(--brand-accent, #2D9D8E)',
   emptyColor = '#E5E5E5',
   labelPrefix = '',
 }: PasswordStrengthMeterProps): ReactElement {
@@ -67,7 +67,7 @@ export function PasswordStrengthMeter({
       {showLabel && (
         <p className="mt-1.5 text-xs text-slate-400">
           {labelPrefix !== '' ? `${labelPrefix} ` : ''}
-          <span className="font-semibold text-[#2D9D8E]">{label}</span>
+          <span className="font-semibold text-[var(--brand-accent,#2D9D8E)]">{label}</span>
         </p>
       )}
     </div>
