@@ -71,7 +71,7 @@
     "globals": "^17.12.0",
     "jsdom": "^30.1.0",
     "prettier": "^3.3.3",
-    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-astro": "^1.1.0",
     "storybook": "^10.6.0",
     "svgo": "^4.1.0",
     "typescript": "^6.0.3",
