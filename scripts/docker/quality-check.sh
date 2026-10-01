@@ -223,7 +223,7 @@ scan_entrypoint() {
     # Skip comments inline
     [[ "$trimmed" == \#* ]] && continue
     local first
-    first="$(/usr/bin/printf '%s' "$trimmed" | /usr/bin/grep -oE '^[A-Za-z_][A-Za-z0-9_./-]*' || true)"
+    first="$(/usr/bin/printf '%s' "$trimmed" | /usr/bin/grep -oE '^[A-Za-z_][A-Za-z0-9_./=]*' || true)"
     [[ -z "$first" ]] && continue
     # Absolute path? OK.
     [[ "$first" =~ ^/ ]] && continue
