@@ -27,17 +27,20 @@ y `admin.panda-estampados.com` en `/etc/hosts`).
 `tests/e2e/accessibility.spec.ts`:
 
 ### Storefront (público)
+
 - `homepage` (`/es`) — landing principal.
 - `login` (`/es/auth/login`) — flujo de autenticación cliente.
 - `producto` (`/es/products/panda-zen`) — PDP, la página más visitada.
 
 ### Admin (interno)
+
 - `login` (`/es/admin/auth/login`).
 - `forgot password` (`/es/admin/auth/forgot-password`).
 
 ## Cómo funciona
 
 Cada test:
+
 1. Navega a la página.
 2. Construye un `AxeBuilder` con tags `wcag2a`, `wcag2aa`, `wcag22aa`.
 3. Ejecuta `analyze()` contra el DOM actual.
