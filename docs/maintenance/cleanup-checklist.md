@@ -25,10 +25,14 @@
 
 ## Procedimiento
 
-1. **Antes de commitear**: `git status --short` y verificar que solo aparecen archivos intencionales.
-2. **Si aparece un archivo de esta lista**: NO lo agregues con `git add -f`. Es un artifact local que debe quedar ignorado.
-3. **Si necesitas agregar algo legítimo** (ej. un `.zip` de release): usar un path explícito, no broad patterns.
-4. **Cleanup manual**: si un archivo local crece (ej. `.astro/dev.log` > 10MB), borrarlo manualmente. No se commitea.
+1. **Antes de commitear**: `git status --short` y verificar que solo
+   aparecen archivos intencionales.
+2. **Si aparece un archivo de esta lista**: NO lo agregues con
+   `git add -f`. Es un artifact local que debe quedar ignorado.
+3. **Si necesitas agregar algo legítimo** (ej. un `.zip` de release):
+   usar un path explícito, no broad patterns.
+4. **Cleanup manual**: si un archivo local crece (ej. `.astro/dev.log`
+   > 10MB), borrarlo manualmente. No se commitea.
 
 ## Auditoría periódica
 
