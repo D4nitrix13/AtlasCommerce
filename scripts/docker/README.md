@@ -85,7 +85,7 @@ docker/
 | `bootstrap.sh` | `cmd_bootstrap` | Idempotente. Ejecuta 8 pasos post-deploy: pg_isready, db:restore, storage:link, key:generate, cache:clear, migrate, tenants:bootstrap, db:seed. |
 | `fresh-instance.sh` | `cmd_fresh` | Fresh start de 1 instancia: down -v + up -d --build + pre-initdb + migrate + seed + tenants:bootstrap. `store=all` NO permitido. |
 | `hosts.sh` | `cmd_hosts` | Imprime el bloque para `/etc/hosts` con las IPs internas. |
-| `caddy.sh` | `cmd_caddy` | Imprime el bloque Caddyfile para los dominios. |
+| `caddy.sh` | `cmd_caddy` | Imprime el bloque Caddyfile (`docker/caddy/Caddyfile`) para los dominios. |
 
 ### DB — `db/` (nuevo)
 
