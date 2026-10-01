@@ -47,7 +47,6 @@ let currentYear: number[] = MOCK_CURRENT_YEAR;
 let previousYear: number[] = MOCK_PREVIOUS_YEAR;
 let currentYearLabel: number = new Date().getFullYear();
 let previousYearLabel: number = currentYearLabel - 1;
-let dataSource: 'real' | 'mock' = 'mock';
 
 try {
   const response = await Astro.fetch('/api/v1/admin/metrics/revenue/yearly', {
@@ -61,12 +60,10 @@ try {
       previousYear = payload.data.previous_year_values;
       currentYearLabel = payload.data.year;
       previousYearLabel = payload.data.previous_year;
-      dataSource = 'real';
     }
   }
-} catch (err) {
-  // Fallback silencioso a MOCK data - console.warn en SSR solo cuando se
-  // necesita visibilidad (mismo pattern que RecentOrdersTable).
+} catch {
+  // Fallback silencioso a MOCK data (mismo approach que RecentOrdersTable).
 }
 
 const chartId = `revenue-overview-${Math.random().toString(36).slice(2)}`;

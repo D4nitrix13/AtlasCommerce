@@ -71,7 +71,6 @@ const MOCK_SEGMENTS: CustomerSegment[] = [
 
 let stats: CustomerStat[] = MOCK_STATS;
 let segments: CustomerSegment[] = MOCK_SEGMENTS;
-let dataSource: 'real' | 'mock' = 'mock';
 
 try {
   const response = await Astro.fetch('/api/v1/admin/metrics/customers/segments', {
@@ -82,7 +81,6 @@ try {
     if (payload?.data?.stats && Array.isArray(payload.data.stats) && payload.data.stats.length > 0) {
       stats = payload.data.stats;
       segments = payload.data.segments;
-      dataSource = 'real';
     }
   }
 } catch {
