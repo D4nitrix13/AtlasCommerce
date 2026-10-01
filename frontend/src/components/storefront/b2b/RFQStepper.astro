@@ -26,6 +26,9 @@
  * Los labels llegan ya localizados como props — el componente NO
  * consulta i18n. Esto evita acoplamiento y permite reusar el stepper
  * en otros flujos B2B sin tocar este archivo.
+ *
+ * Tamaño: arrow del map extraído a `renderStepItem()` para cumplir
+ * AGENTS §1 max-lines-per-function y complexity.
  */
 interface Props {
   currentStep: 1 | 2 | 3 | 4;
@@ -40,53 +43,64 @@ const steps: readonly { number: 1 | 2 | 3 | 4 }[] = [
   { number: 3 },
   { number: 4 },
 ];
+
+function isDone(stepNumber: 1 | 2 | 3 | 4, current: 1 | 2 | 3 | 4): boolean {
+  return stepNumber < current;
+}
+
+function stepClasses(isDone: boolean, isCurrent: boolean): string {
+  if (isDone) return 'border-[var(--primary,#059669)] bg-[var(--primary,#059669)] text-white';
+  if (isCurrent) return 'border-[var(--primary,#059669)] bg-white text-[var(--primary,#059669)]';
+  return 'border-slate-300 bg-white text-slate-400';
+}
+
+function labelClasses(isCurrent: boolean): string {
+  const base = 'hidden text-xs font-medium sm:block';
+  return isCurrent ? `${base} text-[var(--primary,#059669)]` : `${base} text-slate-500`;
+}
+
+function connectorClasses(stepNumber: 1 | 2 | 3 | 4, current: 1 | 2 | 3 | 4): string {
+  return stepNumber < current
+    ? 'mx-1 h-0.5 flex-1 rounded bg-[var(--primary,#059669)] transition'
+    : 'mx-1 h-0.5 flex-1 rounded bg-slate-200 transition';
+}
+
+function renderStepItem(
+  step: { number: 1 | 2 | 3 | 4 },
+  index: number,
+  labels: readonly string[],
+  currentStep: 1 | 2 | 3 | 4,
+  isLast: boolean,
+): unknown {
+  const done = isDone(step.number, currentStep);
+  const current = step.number === currentStep;
+  const label = labels[index] ?? '';
+  return (
+    <li class="flex flex-1 items-center">
+      <div class="flex flex-col items-center gap-1.5">
+        <span
+          aria-current={current ? 'step' : undefined}
+          class:list={[
+            'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-semibold transition',
+            stepClasses(done, current),
+          ]}
+        >
+          {done ? '✓' : step.number}
+        </span>
+        <span class:list={[labelClasses(current)]}>{label}</span>
+      </div>
+      {!isLast && <div aria-hidden="true" class:list={[connectorClasses(step.number, currentStep)]} />}
+    </li>
+  );
+}
 ---
 
 <nav aria-label="Pasos de cotización" class="mx-auto w-full max-w-4xl px-4 pt-8 sm:px-6">
   <ol class="flex w-full items-center justify-between gap-1 sm:gap-3">
     {
-      steps.map((step, index) => {
-        const isDone = step.number < currentStep;
-        const isCurrent = step.number === currentStep;
-        const isLast = index === steps.length - 1;
-        const label = labels[index] ?? '';
-        return (
-          <li class="flex flex-1 items-center">
-            <div class="flex flex-col items-center gap-1.5">
-              <span
-                aria-current={isCurrent ? 'step' : undefined}
-                class:list={[
-                  'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-semibold transition',
-                  isDone && 'border-[var(--primary,#059669)] bg-[var(--primary,#059669)] text-white',
-                  isCurrent && 'border-[var(--primary,#059669)] bg-white text-[var(--primary,#059669)]',
-                  !isDone && !isCurrent && 'border-slate-300 bg-white text-slate-400',
-                ]}
-              >
-                {isDone ? '✓' : step.number}
-              </span>
-              <span
-                class:list={[
-                  'hidden text-xs font-medium sm:block',
-                  isCurrent ? 'text-[var(--primary,#059669)]' : 'text-slate-500',
-                ]}
-              >
-                {label}
-              </span>
-            </div>
-            {!isLast && (
-              <div
-                aria-hidden="true"
-                class:list={[
-                  'mx-1 h-0.5 flex-1 rounded transition',
-                  step.number < currentStep
-                    ? 'bg-[var(--primary,#059669)]'
-                    : 'bg-slate-200',
-                ]}
-              />
-            )}
-          </li>
-        );
-      })
+      steps.map((step, index) =>
+        renderStepItem(step, index, labels, currentStep, index === steps.length - 1),
+      )
     }
   </ol>
 </nav>
