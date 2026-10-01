@@ -273,9 +273,9 @@ artisan/vsftpd local en tu host.
 
 ## Licencia
 
-**Software propietario** — Copyright © 2026 Daniel Benjamin Pérez Morales (D4nitrix13). Todos
-los derechos reservados. NO es código abierto; no se distribuye bajo ninguna
-licencia pública (MIT, BSD, Apache, GPL u otra).
+**Software propietario** — Copyright © 2026 Daniel Benjamin Pérez Morales
+(D4nitrix13). Todos los derechos reservados. NO es código abierto; no se
+distribuye bajo ninguna licencia pública (MIT, BSD, Apache, GPL u otra).
 
 Para licenciamiento comercial, integración con terceros o cualquier uso que
 no esté explícitamente autorizado, contactar al titular. Ver
