@@ -132,7 +132,8 @@ backend/api/
 | `permissions`     | Permisos por módulo           | ← permission_role   |
 | `permission_role` | Pivote roles-permisos         | roles ↔ permissions |
 
-**Campos importantes de `users`:** id, role_id, first_name, last_name, email (unique), password, phone, is_active, registered_at, soft_deletes
+**Campos importantes de `users`:** id, role_id, first_name, last_name,
+email (unique), password, phone, is_active, registered_at, soft_deletes
 
 #### 2. Catálogo (catalog)
 
@@ -147,7 +148,9 @@ backend/api/
 | `attribute_product_values` | Valores de atributo por producto | products ↔ attributes                                |
 | `attribute_variant_values` | Valores de atributo por variante | product_variants ↔ attributes                        |
 
-**Campos importantes de `products`:** id, category_id, brand_id, name, slug (unique), sku (unique), base_price, cost, is_active, published_at, soft_deletes
+**Campos importantes de `products`:** id, category_id, brand_id, name,
+slug (unique), sku (unique), base_price, cost, is_active, published_at,
+soft_deletes
 
 #### 3. Clientes (customers)
 
@@ -290,7 +293,10 @@ Request → Route → Controller → Model → Database
 | `POST`   | `/api/v1/products/{id}/images`   | Agregar imagen         |
 | `GET`    | `/api/v1/products/{id}/variants` | Variantes del producto |
 
-**El mismo patrón aplica para todos los recursos:** users, roles, permissions, brands, categories, customers, orders, invoices, payments, shipments, coupons, promotions, taxes, return_requests, support_tickets, audits, notifications, currencies, exchange_rates, store_settings, etc.
+**El mismo patrón aplica para todos los recursos:** users, roles,
+permissions, brands, categories, customers, orders, invoices, payments,
+shipments, coupons, promotions, taxes, return_requests, support_tickets,
+audits, notifications, currencies, exchange_rates, store_settings, etc.
 
 ### Nested Resources
 
@@ -313,7 +319,8 @@ Todas las rutas API usan `auth:sanctum` para autenticación por token Bearer.
 
 ### Excepciones JSON
 
-En `bootstrap/app.php` se configura que las excepciones se rendericen como JSON automáticamente para requests a `api/*`.
+En `bootstrap/app.php` se configura que las excepciones se rendericen como
+JSON automáticamente para requests a `api/*`.
 
 ---
 
@@ -368,7 +375,8 @@ DB_PASSWORD=
 
 ### Auto-discovery de migraciones
 
-El `AppServiceProvider` usa `glob()` para cargar automáticamente todas las migraciones de subdirectorios:
+El `AppServiceProvider` usa `glob()` para cargar automáticamente todas
+las migraciones de subdirectorios:
 
 ```php
 foreach (glob(database_path('migrations/*'), GLOB_ONLYDIR) as $directory) {
