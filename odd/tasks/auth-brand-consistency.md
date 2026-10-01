@@ -39,6 +39,7 @@ Tres bugs visibles detectados por el usuario al revisar
 bug pre-existente del CI de backend que se hizo evidente al pushear):
 
 ### Slice 1 — Color teal coherente
+
 - **Frontend `src/middleware.ts`**: arreglar la ruta del fetch del theme
   de `/storefront/theme` → `/api/v1/storefront/theme`.
 - **`packages/themes/panda-estampados/src/index.ts`**: sincronizar
@@ -46,9 +47,10 @@ bug pre-existente del CI de backend que se hizo evidente al pushear):
 - **BD dev**: actualizar `store_themes` para `panda-estampados` con
   los hex correctos (vía SQL directo + seed JSON dev).
 - **Seeds**: `docker/instances/development/panda-estampados-and-kitsune/seeds/dev-panda-estampados.json`
-  + `docker/instances/production/panda-estampados-and-kitsune/seeds/panda.json`.
+  y `docker/instances/production/panda-estampados-and-kitsune/seeds/panda.json`.
 
 ### Slice 2 — Logo como asset estático
+
 - Copiar `brand-assets/store/panda-estampados/{logo,favicon}.webp` →
   `frontend/public/images/tenants/panda-estampados/branding/`.
 - Cambiar `pandaTheme.brand.logoPath` y `loginLogoPath` a la nueva
@@ -57,10 +59,12 @@ bug pre-existente del CI de backend que se hizo evidente al pushear):
   para que el path override-apunte al asset estático (no al FTP).
 
 ### Slice 3 — Signup simétrico con login
+
 - `frontend/src/pages/[locale]/account/signup.astro`: `side="right"` →
   `side="left"`.
 
 ### Slice 4 (extra, scope `ci`) — Arreglar workflow backend.yml
+
 - Bug pre-existente: `vendor/bin/pint --dirty --format=github` falla
   porque Pint no soporta el formato `github` (válidos: null, checkstyle,
   junit, compact).
