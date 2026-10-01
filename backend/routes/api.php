@@ -800,6 +800,88 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::delete('products/{product}/images/{image}', [ProductImageController::class, 'destroy'])
             ->middleware('permission:catalog.manage')
             ->name('admin.products.images.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Catalog RESTful (RF-CAT) — namespace /admin/catalog/*
+        |--------------------------------------------------------------------------
+        |
+        | Las rutas de catalog viven bajo /admin/catalog/* para mantener
+        | orden conforme el panel admin crece (sales, marketing, support
+        | vivirán en sus propios namespaces). Los controllers YA EXISTÍAN
+        | en App\Http\Controllers\Api\Admin\* — sólo se registran acá.
+        |
+        | Se mantienen también las rutas legacy /admin/* existentes
+        | (compatibilidad con frontend desplegado + tests pre-existentes
+        | en tests/Feature/Admin/). Las dos namespaces apuntan a los
+        | mismos controllers: el frontend migrado a /admin/catalog/*
+        | consume esta sección.
+        |
+        */
+
+        Route::middleware('permission:catalog.manage')->prefix('catalog')->group(function (): void {
+            // Products + acciones custom (archive, publish, sync stores).
+            Route::apiResource('products', ProductController::class)
+                ->names('admin.catalog.products');
+
+            Route::post('products/{product}/archive', [ProductController::class, 'archive'])
+                ->name('admin.catalog.products.archive');
+
+            Route::post('products/{product}/publish', [ProductController::class, 'publish'])
+                ->name('admin.catalog.products.publish');
+
+            Route::put('products/{product}/stores', [ProductController::class, 'syncStores'])
+                ->name('admin.catalog.products.stores.sync');
+
+            // Categories, Brands, Variants — CRUD estándar.
+            Route::apiResource('categories', CategoryController::class)
+                ->names('admin.catalog.categories');
+
+            Route::apiResource('brands', BrandController::class)
+                ->names('admin.catalog.brands');
+
+            Route::apiResource('variants', ProductVariantController::class)
+                ->names('admin.catalog.variants');
+
+            // ProductAttributeValues — CRUD estándar.
+            Route::apiResource('product-attribute-values', ProductAttributeValueController::class)
+                ->names('admin.catalog.product-attribute-values');
+
+            // ProductImages — el controller requiere Product $product en
+            // route-model-binding, así que NO se puede usar apiResource
+            // plano. Se registran explícitas anidadas bajo products/{product}.
+            Route::get('products/{product}/images', [ProductImageController::class, 'index'])
+                ->name('admin.catalog.product-images.index');
+
+            Route::post('products/{product}/images', [ProductImageController::class, 'store'])
+                ->name('admin.catalog.product-images.store');
+
+            Route::get('products/{product}/images/{image}', [ProductImageController::class, 'show'])
+                ->name('admin.catalog.product-images.show');
+
+            Route::put('products/{product}/images/{image}', [ProductImageController::class, 'update'])
+                ->name('admin.catalog.product-images.update');
+
+            Route::delete('products/{product}/images/{image}', [ProductImageController::class, 'destroy'])
+                ->name('admin.catalog.product-images.destroy');
+
+            // ProductQuestions — CRUD + acción custom `answer` (RF-SUP-162).
+            Route::apiResource('product-questions', ProductQuestionController::class)
+                ->names('admin.catalog.product-questions');
+
+            Route::put('product-questions/{question}/answer', [ProductQuestionController::class, 'answer'])
+                ->name('admin.catalog.product-questions.answer');
+
+            // ProductReviews — CRUD + acciones custom `approve`/`reject` (RF-SUP-161).
+            Route::apiResource('product-reviews', ProductReviewController::class)
+                ->names('admin.catalog.product-reviews');
+
+            Route::post('product-reviews/{review}/approve', [ProductReviewController::class, 'approve'])
+                ->name('admin.catalog.product-reviews.approve');
+
+            Route::post('product-reviews/{review}/reject', [ProductReviewController::class, 'reject'])
+                ->name('admin.catalog.product-reviews.reject');
+        });
     });
 
     /*
