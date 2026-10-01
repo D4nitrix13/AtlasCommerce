@@ -110,12 +110,14 @@ Para dev:
 # Una sola vez cuando se hace setup
 cp brand-assets/frontend/amico/auth/*.svg frontend/public/images/amico/auth/
 
-# O via el script de setup (TBD)
-./scripts/docker-stack.sh setup dev  # lo automatiza
+# Sync automático al FTP de un tenant (lo usa el admin al subir
+# assets vía la API):
+./scripts/docker-stack.sh sync-assets dev panda-estampados-and-kitsune
 ```
 
-Para prod: el build del frontend incluye esos archivos via el script
-de deploy (TBD).
+Para prod: el build del frontend incluye esos archivos vía
+`frontend/Dockerfile.production` (los copia desde `brand-assets/`
+durante el build de la imagen).
 
 **Naming**: los archivos en `frontend/amico/auth/` NO llevan sufijo
 `-amico` porque ya estan dentro del directorio `amico/`. La convencion
