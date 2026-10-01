@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Concerns;
 
-use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 /**
@@ -84,9 +84,8 @@ trait CursorPaginates
      *   }
      * }
      *
-     * @param  Builder  $query  Query builder con orderBy aplicado.
+     * @param  Builder<Model>  $query  Query builder con orderBy aplicado.
      * @param  class-string  $resourceClass  Resource class para los items.
-     * @return \Illuminate\Http\JsonResponse
      */
     protected function cursorPaginatedResponse(
         Request $request,
