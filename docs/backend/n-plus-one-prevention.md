@@ -71,7 +71,9 @@ Busca:
 
 ### Suprimir falsos positivos
 
-Si el script flaguea algo que **NO** es N+1 (ej: `$invoice->paidAmountCents()` que es un método del modelo, no una relación):
+Si el script flaguea algo que **NO** es N+1 (ej:
+`$invoice->paidAmountCents()` que es un método del modelo, no una
+relación):
 
 **Opción 1** (preferida): agregar `@phpstan-ignore-next-line` en la línea:
 
@@ -85,7 +87,7 @@ foreach ($invoices as $invoice) {
 
 **Opción 2**: agregar `path:line` en `.n-plus-one.ignore` (whitelist):
 
-```
+```text
 backend/app/Services/Sales/OrderService.php:91
 ```
 
