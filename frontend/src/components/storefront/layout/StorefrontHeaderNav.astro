@@ -21,10 +21,14 @@ interface NavLink {
 interface Props {
   links: NavLink[];
   openMenuLabel: string;
-  closeMenuLabel: string;
+  // Aceptado por compatibilidad con StorefrontHeader, pero el menu mobile
+  // ya no necesita un label accesible para "cerrar" — el `<details>`
+  // se cierra via click handler sobre el link. Mantener el prop evita
+  // romper el contrato de la API hasta que se limpie la i18n key.
+  closeMenuLabel?: string;
 }
 
-const { links, openMenuLabel, closeMenuLabel } = Astro.props;
+const { links, openMenuLabel, closeMenuLabel: _closeMenuLabel } = Astro.props;
 const t = getServerDictionary(Astro.locals.locale);
 
 const pathname = Astro.url.pathname;
@@ -98,7 +102,7 @@ const isActive = (link: NavLink): boolean => {
   </nav>
 </details>
 
-<script is:inline define:vars={{ closeMenuLabel }}>
+<script is:inline>
   // Cuando el usuario abre el menú mobile y luego toca un link, el
   // `<details>` queda abierto. Cerrarlo para no mostrar UI rota.
   document.querySelectorAll('details.md\\:hidden nav a').forEach((anchor) => {
