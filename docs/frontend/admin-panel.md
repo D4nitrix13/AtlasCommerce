@@ -2,17 +2,22 @@
 
 ## Visión general
 
-El panel administrativo permite gestionar ambas tiendas
-(Panda Estampados y Kitsune) desde una sola interfaz. Está
-construido con `Astro` y `React`, usando el `AdminLayout`
-como estructura base.
+El panel administrativo permite gestionar todas las marcas
+de la instancia (Panda Estampados + Kitsune en
+`panda-estampados-and-kitsune`; single-brand en las otras)
+desde una sola interfaz. Está construido con `Astro` + `React`,
+usando el `AdminLayout` como estructura base.
+
+Las rutas administrativas se montan bajo `[locale]/admin/`
+para soportar i18n es/en (F5.2).
 
 ## Acceso
 
 ```txt
-URL: admin.panda-estampados.com
-Layout: AdminLayout.astro
-Autenticación: Requiere login + token Sanctum
+URL:      admin.panda-estampados.com
+          admin.kitsune.com
+Layout:   AdminLayout.astro
+Auth:     Sanctum Bearer token + cookie de sesión
 ```
 
 ## Estructura del panel
@@ -29,48 +34,27 @@ Autenticación: Requiere login + token Sanctum
 
 ### Sidebar
 
-El sidebar contiene 8 secciones con 22 items:
+`AdminSidebar.astro` + `AdminSidebarItem.astro`. Construye
+los links con `[locale]` dinámico para soportar i18n
+(commit `8d95e5f`). Muestra un badge con la cantidad de
+pedidos pendientes del tenant.
 
-| Sección        | Items                                     |
-| -------------- | ----------------------------------------- |
-| **Resumen**    | Dashboard, Analíticas                     |
-| **Comercio**   | Órdenes, Productos, Clientes, Facturas    |
-| **Catálogo**   | Categorías, Marcas, Variantes             |
-| **Inventario** | Stock, Movimientos, Depósitos             |
-| **Compras**    | Proveedores, Compras                      |
-| **Marketing**  | Cupones, Promociones                      |
-| **Soporte**    | Tickets, Reseñas, Preguntas               |
-| **Sistema**    | Usuarios, Roles, Auditoría, Configuración |
-
-La configuración del menú está en `src/config/menu.ts`.
+Configuración del menú en
+[`frontend/src/config/menu.ts`](../../frontend/src/config/menu.ts
+"frontend/src/config/menu.ts").
 
 ### Header
 
-El header incluye:
+El header (`AdminHeader.astro`) incluye:
 
 - Búsqueda global
 - Acciones rápidas
 - Avatar del usuario
-- Selector de tienda (futuro)
-
-## Selector de tienda (futuro)
-
-El panel admin debe permitir cambiar entre tiendas:
-
-```txt
-┌───────────────────────────────────────────────┐
-│ [Panda Estampados]  notifications  user@email │
-└───────────────────────────────────────────────┘
-```
-
-El selector envía un header `X-Store-Id` en cada petición
-API para filtrar datos por tienda.
-
-**Estado:** No implementado.
-Ver [backend/stores/store-context.md](../backend/stores/store-context.md
-"Store Context").
+- Locale switcher (es/en)
 
 ## Módulos del admin
+
+Las páginas viven bajo `[locale]/admin/{sección}/`.
 
 ### Dashboard
 
@@ -81,99 +65,114 @@ Ver [backend/stores/store-context.md](../backend/stores/store-context.md
 Componentes:
 
 - `MetricCard.astro` — 4 cards: Ingresos, Usuarios,
-  Órdenes, Visitas
-- `RevenueChart.astro` — Gráfica de línea mensual
-- `TrafficSourcesCard.astro` — Donut chart de tráfico
-- `MonthlyGoalsCard.astro` — Progress bars de metas
-- `RecentOrdersTable.astro` — Tabla de órdenes recientes
-- `RecentActivityCard.astro` — Feed de actividad
-- `LowStockTable.astro` — Productos con stock bajo
+  Órdenes, Visitas.
+- `RevenueChart.astro` — Gráfica de línea mensual.
+- `TrafficSourcesCard.astro` — Donut chart de tráfico.
+- `MonthlyGoalsCard.astro` — Progress bars de metas.
+- `RecentOrdersTable.astro` — Tabla de órdenes recientes.
+- `RecentActivityCard.astro` — Feed de actividad.
+- `LowStockTable.astro` — Productos con stock bajo.
 
-### Catálogo
+Migrado a i18n (commit `12e9f7f`): 75 strings es/en.
+
+### Catálogo (F5.3)
 
 ```txt
-/admin/catalog/products     → CRUD de productos
-/admin/catalog/categories   → CRUD de categorías
-/admin/catalog/brands       → CRUD de marcas
-/admin/catalog/variants     → Variantes de productos
+/admin/catalog/products      → ProductList.astro
+/admin/catalog/categories    → CategoryList.astro
+/admin/catalog/brands        → BrandList.astro
+/admin/catalog/variants      → VariantList.astro
 ```
 
 ### Clientes
 
 ```txt
-/admin/customers → Listado de clientes
+/admin/customers → CustomerList.astro
 ```
 
-### Inventario
+### Inventario (F5.5)
 
 ```txt
-/admin/inventory/stock      → Stock por almacén
-/admin/inventory/movements  → Movimientos de inventario
-/admin/inventory/warehouses → Almacenes
+/admin/inventory/stock       → StockList.astro
+/admin/inventory/movements   → MovementList.astro
+/admin/inventory/warehouses  → WarehouseList.astro
 ```
 
 ### Compras
 
 ```txt
-/admin/purchases/purchase-orders → Órdenes de compra
-/admin/purchases/suppliers       → Proveedores
+/admin/purchases/purchase-orders → PurchaseOrderList.astro
+/admin/purchases/suppliers       → SupplierList.astro
 ```
 
-### Ventas
+### Ventas (F5.4)
 
 ```txt
-/admin/sales/orders   → Pedidos de clientes
-/admin/sales/invoices → Facturas
+/admin/sales/orders   → OrderList.astro
+/admin/sales/invoices → InvoiceList.astro
+/admin/sales/hub      → SalesHub.astro
 ```
 
 ### Pagos
 
 ```txt
-/admin/payments/methods      → Métodos de pago
-/admin/payments/installments → Cuotas
+/admin/payments/methods       → PaymentMethodList.astro
+/admin/payments/transactions  → PaymentTransactionList.astro
+/admin/payments/installments  → InstallmentList.astro
 ```
 
 ### Envíos
 
 ```txt
-/admin/shipping/companies → Empresas de envío
-/admin/shipping/zones     → Zonas de envío
+/admin/shipping/companies → ShippingCompanyList.astro
+/admin/shipping/zones     → ShippingZoneList.astro
 ```
 
-### Marketing
+### Marketing (F5.5)
 
 ```txt
-/admin/marketing/coupons    → Cupones
-/admin/marketing/promotions → Promociones
+/admin/marketing/coupons    → CouponList.astro
+/admin/marketing/promotions → PromotionList.astro
 ```
 
 ### Soporte
 
 ```txt
-/admin/support/tickets   → Tickets de soporte
-/admin/support/reviews   → Reseñas de productos
-/admin/support/questions → Preguntas de productos
+/admin/support/tickets   → TicketList.astro
+/admin/support/reviews   → ReviewList.astro
+/admin/support/questions → QuestionList.astro
 ```
 
-### Configuración
+### Configuración (F5.5)
 
 ```txt
-/admin/settings/store      → Configuración de tienda
-/admin/settings/currencies → Monedas
-/admin/settings/taxes      → Impuestos
+/admin/settings/store      → StoreSettings.astro
+/admin/settings/theme      → ThemeForm.tsx (color pickers + tokens)
+Admin/settings/currencies  → CurrencyList.astro
+/admin/settings/taxes      → TaxList.astro
 ```
+
+`ThemeForm` SSR-fetch el theme del store actual vía
+`GET /api/admin/theme` y persiste via
+`PATCH /api/admin/theme`.
 
 ### Sistema
 
 ```txt
-/admin/users → Gestión de usuarios
-/admin/roles → Gestión de roles
+/admin/users → UserList.astro
+/admin/roles → RoleList.astro
 ```
 
-### Reportes
+### Devoluciones
 
 ```txt
-/admin/reports → Dashboard de reportes
+/admin/returns/requests → ReturnRequestList.astro
+```
+
+### Reportes (F5.1)
+
+```txt
+/admin/reports → dashboard/index.astro (Reportes)
 ```
 
 Componentes:
@@ -184,23 +183,36 @@ Componentes:
 - `CustomerAnalyticsCard.astro`
 - `TrafficOverviewCard.astro`
 
+Migrado a i18n (commit `12e9f7f`): 75 strings es/en.
+
 ## Filtros por tienda
 
-Cada módulo del admin debe filtrar datos por la tienda
-seleccionada. El mecanismo es:
+El admin trabaja en el contexto de un solo `store_id`
+activo por request:
 
-1. Usuario selecciona tienda en el selector.
-2. Frontend envía `X-Store-Id` en cada petición API.
-3. Backend filtra datos por `store_id`.
-4. Frontend muestra solo datos de la tienda seleccionada.
+1. El backend resuelve el store por dominio vía
+   `ResolveStoreFromDomain` middleware.
+2. El `user_store` valida que el operador tiene acceso al
+   store resuelto.
+3. Los queries se filtran automáticamente por `store_id`
+   via el global scope `BelongsToStore`.
+
+Cuando la instancia es multi-store (Panda + Kitsune), el
+operador con acceso a ambos stores ve ambos contextos
+según el subdominio del admin (`admin.panda-estampados.com`
+vs `admin.kitsune.com`).
 
 ## Estados de interfaz
 
-Todo componente con datos debe manejar los 5 estados:
+Todo componente con datos debe manejar los 5 estados
+(ver [`frontend/AGENTS.md`](../../frontend/AGENTS.md
+"frontend/AGENTS.md") § 11):
 
 ```astro
 {isLoading && <p>Cargando productos...</p>}
-{hasError && <p class="text-red-500">Error al cargar.</p>}
+{hasError && (
+  <p class="text-red-500">Error al cargar.</p>
+)}
 {!isLoading && products.length === 0 && (
   <p>No hay productos.</p>
 )}
@@ -211,25 +223,28 @@ Todo componente con datos debe manejar los 5 estados:
 
 ## Datos mock
 
-El dashboard actualmente usa datos hardcodeados en
-`src/data/admin-dashboard.ts`. Estos datos deben
-reemplazarse con llamadas a la API:
+`src/data/admin-dashboard.ts` se mantiene solo para
+desarrollo sin API. Las páginas reales hacen SSR-fetch desde
+endpoints admin:
 
 ```txt
-GET /api/orders?store_id={id}
-GET /api/customers?store_id={id}
-GET /api/products?store_id={id}
-GET /api/inventories
+GET    /api/admin/orders/recent
+GET    /api/admin/metrics/revenue/yearly
+GET    /api/admin/metrics/sales/performance
+GET    /api/admin/metrics/traffic/sources
+GET    /api/admin/metrics/customers/segments
+GET    /api/admin/metrics/products/top
+GET    /api/admin/inventory/low-stock
+GET    /api/admin/theme
+PATCH  /api/admin/theme
+GET    /api/admin/customers
+GET    /api/admin/products
 ```
 
 ## Pendiente
 
-- Selector de tienda en header — No implementado
-- Conexión con API real — No implementada
-- Filtros por tienda — No implementados
-- CRUDs funcionales — No implementados
-- Formularios con `react-hook-form` + `Zod` —
-  No implementados
-- Paginación y búsqueda — No implementados
-- Estados loading/error/empty —
-  Parcialmente implementados
+- CRUDs avanzados (crear/editar con formularios) —
+  lectura y listado implementados; formularios de edición
+  parcial.
+- Bulk actions en tablas — Patrón definido, pendiente
+  implementación.

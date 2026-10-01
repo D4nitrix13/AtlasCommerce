@@ -23,6 +23,7 @@
 | Página completa    | 400            |
 | Función            | 40             |
 | Constantes / types | sin límite     |
+| `*.stories.ts`     | sin límite (separar variantes grandes) |
 
 Si supera **300-400 líneas**, dividir. La página es composición, no un monolito.
 
@@ -136,13 +137,58 @@ Si se repite **3+ veces** la misma estructura → extraer componente.
 
 ## 6. Separación UI vs Negocio
 
-### UI genérico → src/components/ui/
+### UI genérico → `src/components/ui/`
 
-Button.astro, Input.astro, Modal.astro, Badge.astro, Card.astro
+13 UI primitives sin lógica de negocio. Cada una tiene su
+`*.stories.ts` en Storybook 10:
 
-### Componentes de negocio → src/components/{domain}/
+```txt
+Alert   Badge   Breadcrumb  Button  Card  Dropdown
+Icon    Input   Modal       Pagination  Select  Table  Textarea
+```
 
-ProductCard.astro, OrderStatusBadge.astro, AdminSidebar.astro
+Más extensiones React para casos interactivos:
+
+```txt
+LanguageSwitcher.tsx       # selector de locale es / en
+PasswordInput.tsx          # input password con toggle visibility
+PasswordStrengthMeter.tsx  # medidor de fortaleza zxcvbn-style
+SecurityChecklist.tsx      # checklist 2FA / recovery codes
+SocialIcons.tsx            # iconos de redes sociales
+```
+
+### Componentes de dominio → `src/components/{domain}/`
+
+```txt
+storefront/                # tienda pública
+├── auth/                  # login/signup compartidos
+├── b2b/                   # RFQ + bulk + multi-sucursal (Panda)
+├── branding/              # logo + cover por tenant
+├── cart/                  # items + summary + empty state
+├── checkout/              # checkout multi-step
+├── footer/
+├── header/
+├── home/                  # HeroBanner
+├── layout/
+├── products/              # ProductCard, ProductGrid, ProductGallery
+└── search/
+
+account/                   # sección clientes
+├── addresses/             # AddressesManager + multi-sucursal
+├── dashboard/             # QuickActionCard, WelcomeBanner, Orders
+├── layout/
+├── orders/                # OrdersTable, OrderTimeline, StatusFilterPills
+└── wishlist/              # WishlistGrid + WishlistItem
+
+admin/                     # panel administrativo
+├── auth/  catalog/  customers/  dashboard/  header/
+├── inventory/  marketing/  reports/  returns/  sales/
+├── settings/  shipments/  sidebar/  stores/  support/
+```
+
+Regla: los componentes de UI en `ui/` **no** deben conocer reglas
+específicas del negocio. Si un componente necesita lógica de
+negocio, vive en `components/{domain}/`.
 
 ---
 
@@ -336,20 +382,49 @@ export function formatDate(date: string) {
 ```txt
 src/
 ├── components/
-│   ├── ui/                  # Genéricos (Button, Input, Modal, Badge, Card...)
-│   ├── public/              # Tienda pública (header, footer, ProductCard...)
-│   ├── ecommerce/           # Carrito, checkout
-│   └── admin/               # Panel admin (sidebar, header, dashboard, modals, cards, tables, charts)
-├── layouts/                 # Layout.astro, AdminLayout.astro, AuthLayout.astro
-├── pages/                   # File-based routing
-├── lib/                     # api.ts, endpoints.ts, formatters.ts, auth.ts, storage.ts
+│   ├── ui/                  # 13 UI primitives (Button, Input, ...)
+│   ├── storefront/          # auth · b2b · branding · cart · checkout
+│   │                        # footer · header · home · layout
+│   │                        # products · search
+│   ├── account/             # addresses · dashboard · layout · orders · wishlist
+│   ├── admin/               # auth · catalog · customers · dashboard · header
+│   │                        # inventory · marketing · reports · returns · sales
+│   │                        # settings · shipments · sidebar · stores · support
+│   └── auth/                # compartido (formularios login/signup)
+├── layouts/                 # Layout.astro, StorefrontLayout.astro, AdminLayout.astro
+├── pages/
+│   ├── index.astro          # redirect a [locale]
+│   └── [locale]/            # rutas con locale (es / en)
+│       ├── index.astro      # home por tenant
+│       ├── products/[slug].astro
+│       ├── cart.astro
+│       ├── checkout.astro
+│       ├── account/         # dashboard, orders, wishlist, addresses, 2fa
+│       ├── admin/           # dashboard, catalog, sales, inventory, ...
+│       ├── rfq/             # Panda B2B (RFQ + confirmation)
+│       ├── bulk-order/      # Panda B2B (precios por volumen)
+│       └── search/
+├── lib/                     # api.ts, endpoints.ts, formatters.ts, auth.ts
 ├── config/                  # menu.ts, site.ts
-├── data/                    # Datos mock (solo temporal)
-├── stores/                  # Estado React (auth, cart, ui)
+├── i18n/                    # es.json / en.json
+├── stores/                  # Estado React (cart, ui)
 ├── types/                   # TypeScript types por dominio
 ├── styles/                  # global.css (solo import de Tailwind)
 └── assets/                  # Imágenes, iconos estáticos
 ```
+
+### Storybook (`.storybook/`)
+
+```txt
+.storybook/
+├── main.ts                  # registra *.stories.@(ts|tsx|js|jsx|astro|mdx)
+└── preview.ts               # Preview global + tema por defecto
+```
+
+Cada componente de `ui/`, `storefront/`, `account/` lleva su
+`*.stories.ts` junto al `.astro` / `.tsx`. Ver
+[`docs/frontend/storybook.md`](../docs/frontend/storybook.md
+"docs/frontend/storybook.md") para el flujo de trabajo.
 
 ---
 
@@ -428,3 +503,32 @@ const total = order.serverCalculatedTotal;
 - [ ] Archivo < 400 líneas
 - [ ] Sin lógica de negocio que deba estar en Laravel
 - [ ] TypeScript en props y tipos
+- [ ] Componente UI nuevo trae su `*.stories.ts` con default + edge cases
+
+## 22. Storybook
+
+Todo componente visual reutilizable debe traer al menos una
+story. Convenciones:
+
+- Archivo `Component.stories.ts` junto a `Component.astro` /
+  `Component.tsx`.
+- Imports desde `@storybook/astro` (no desde `@storybook/react`
+  salvo para componentes 100% React).
+- Variante `Default` obligatoria + `Loading` / `Empty` / `Error`
+  cuando apliquen.
+- Datos mockeados localmente en la story; nunca fetch en red.
+- Para componentes con tenants (colores Panda/Kitsune), exponer
+  una variant por tenant cuando la lógica lo justifique.
+
+Ejecutar Storybook:
+
+```bash
+cd frontend
+pnpm storybook              # http://localhost:6006
+pnpm storybook:build        # build estático
+pnpm storybook:test         # smoke test
+```
+
+Más detalle en
+[`docs/frontend/storybook.md`](../docs/frontend/storybook.md
+"docs/frontend/storybook.md").

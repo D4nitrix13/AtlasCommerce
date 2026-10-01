@@ -4,7 +4,12 @@
 > deploy) hacia una plataforma multi-instance SaaS con feature flags,
 > themes por tenant y plugins Composer.
 >
-> **Última actualización:** 2026-09-26
+> **Última actualización:** 2026-09-30 — Fases 1-5 al 100%. Sesiones
+> recientes cerraron los flujos storefront (Catálogo + Cart + Home),
+> account (orders + tracking + wishlist), admin (catalog/sales/
+> inventory/marketing/support/settings), Panda B2B (RFQ + bulk +
+> multi-sucursal) y checkout multi-step. Storybook 10 + Archify
+> incorporados al workflow de desarrollo.
 
 ---
 

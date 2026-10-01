@@ -3,114 +3,57 @@
 ## Visión general
 
 El storefront es la tienda pública que ven los clientes. Un
-mismo build de `Astro` sirve tanto Panda Estampados como
-Kitsune Store. La tienda actual se resuelve a partir del
-dominio de origen.
+mismo build de `Astro` sirve Panda Estampados, Kitsune Store,
+MM Boutique y Morales Store. La tienda actual se resuelve a
+partir del dominio de origen (`X-Forwarded-Host`) y se
+refuerza en el backend vía el endpoint
+`GET /api/storefront/theme` (ver
+[`architecture/flow.md`](../architecture/flow.md
+"architecture/flow.md") § 2).
 
 ## Resolución de tienda por dominio
 
 ```txt
 panda-estampados.com → Store{id: 1, name: "Panda Estampados"}
 kitsune.com           → Store{id: 2, name: "Kitsune Store"}
+mm-boutique.com       → Store{id: 3, name: "MM Boutique"}
+morales-store.com     → Store{id: 4, name: "Morales Store"}
 ```
 
-El frontend necesita un mecanismo para:
-
-1. Identificar la tienda actual desde el dominio.
-2. Cargar configuración de la tienda (logo, colores, redes
-   sociales).
-3. Filtrar productos y contenido por tienda.
-4. Aplicar estilos/branding por tienda.
+Las dos primeras marcas conviven en la instancia
+`panda-estampados-and-kitsune`. Las otras dos viven en
+instancias single-tenant.
 
 ## Mecanismo de resolución
 
-### Opción 1: Configuración estática
+### Theme loader dinámico (`frontend/src/middleware.ts`)
 
-Un archivo `src/config/stores.ts` mapea dominios a
-configuración de tienda:
+Implementado en commit `cd848b1` y posteriores:
 
-```ts
-// src/config/stores.ts (conceptual)
+- Middleware Astro lee `request.headers.host`.
+- Llama a `GET /api/storefront/theme` con timeout 1s.
+- Inyecta el resultado en `Astro.locals.theme`.
+- Fallback a `DEFAULT_THEME` si el backend no responde
+  (cero páginas rotas en outage).
 
-export const stores = {
-    "panda-estampados.com": {
-        id: 1,
-        name: "Panda Estampados",
-        slug: "panda-estampados",
-        logo: "/images/panda-logo.svg",
-        primaryColor: "#059669",
-        secondaryColor: "#10b981",
-        whatsapp: "+505 8888 1234",
-    },
-    "kitsune.com": {
-        id: 2,
-        name: "Kitsune Store",
-        slug: "kitsune",
-        logo: "/images/kitsune-logo.svg",
-        primaryColor: "#7c3aed",
-        secondaryColor: "#8b5cf6",
-        whatsapp: "+505 8888 5678",
-    },
-} as const;
+### Fallback estático (`frontend/src/config/stores.ts`)
 
-export type StoreId = keyof typeof stores;
-```
-
-### Opción 2: Resolución dinámica (futuro)
-
-Un helper `src/lib/store-context.ts` resuelve la tienda
-desde el dominio:
-
-```ts
-// src/lib/store-context.ts (conceptual)
-
-export function resolveStoreFromDomain(
-    hostname: string
-): StoreConfig {
-    const store = stores[hostname as StoreId];
-
-    if (!store) {
-        throw new Error(
-            `No store configured for domain: ${hostname}`
-        );
-    }
-
-    return store;
-}
-```
-
-En `Astro`, se puede usar en el frontmatter:
-
-```astro
----
-import { resolveStoreFromDomain } from "../lib/store-context";
-
-const store = resolveStoreFromDomain(Astro.url.hostname);
----
-
-<html>
-<head>
-    <title>{store.name}</title>
-    <style define:vars={{ primaryColor: store.primaryColor }}>
-        :root { --primary: var(--primaryColor); }
-    </style>
-</head>
-<body>
-    <img src={store.logo} alt={store.name} />
-    <slot />
-</body>
-</html>
-```
+Se mantiene como fallback cuando el theme dinámico viene
+incompleto. `STORE_BRANDS` reexporta los paquetes npm del
+workspace `packages/themes/` (Panda, Kitsune, MM Boutique,
+Morales Store). NO es la fuente principal.
 
 ## Páginas del storefront
+
+Todas las rutas viven bajo `[locale]/` (es/en).
 
 ### Homepage
 
 ```txt
-/ → index.astro
+/[locale] → index.astro
 ```
 
-- Banner principal
+- Hero banner por tenant
 - Productos destacados (filtrados por tienda)
 - Categorías
 - Promociones activas
@@ -118,145 +61,162 @@ const store = resolveStoreFromDomain(Astro.url.hostname);
 ### Catálogo
 
 ```txt
-/products → products/index.astro
-/products/:slug → products/[slug].astro
+/[locale]/products               → products/index.astro
+/[locale]/products/[slug]        → products/[slug].astro
 ```
 
 - Grilla de productos con filtros
-- Detalle de producto con imágenes, precio, variantes
+- Detalle de producto con galería, precio, variantes
 - Productos visibles en la tienda actual
   (`product_stores.visible = true`)
 
-### Categorías
+### Búsqueda
 
 ```txt
-/categories → categories/index.astro
+/[locale]/search → search/index.astro
 ```
 
-- Listado de categorías
-- Productos por categoría
+- Resultados paginados
+- Filtros por categoría, marca, precio
 
 ### Carrito
 
 ```txt
-/cart → cart.astro
+/[locale]/cart → cart.astro
 ```
 
 - Listado de items
 - Modificar cantidad
 - Eliminar items
 - Resumen con totales
+- CTA a checkout
 
-### Checkout
+### Checkout multi-step (F4)
 
 ```txt
-/checkout → checkout.astro
+/[locale]/checkout → checkout.astro
 ```
 
-- Dirección de envío
-- Método de pago
-- Confirmación de pedido
+- Stepper visual: dirección → envío → pago → revisión.
+- Persistencia en `localStorage` para refresh-safe.
+- Cálculo de totales siempre desde el backend.
 
 ### Pedidos del cliente
 
+Ver [`account/orders/[id].astro`](../frontend/README.md
+"frontend/README.md") — sección `/account`.
+
+### B2B — Panda Estampados
+
 ```txt
-/orders → orders/index.astro
+/[locale]/rfq                  → rfq/index.astro
+/[locale]/rfq/confirmation     → rfq/confirmation.astro
+/[locale]/bulk-order           → bulk-order/index.astro
 ```
 
-- Historial de pedidos
-- Detalle de pedido
-- Estado del envío
+- RFQ — Request For Quote multi-step (`RFQStepper.astro`).
+- Bulk pricing — tabla de precios por volumen
+  (`VolumePricingTable.astro` + `BulkPricingCalculator.tsx`).
+- Multi-sucursal — direcciones por empresa
+  (`AddressesManager.tsx`).
 
 ## Branding por tienda
 
 ### Logo
 
 Cada tienda tiene su propio logo. El storefront carga el
-logo según la tienda actual.
+logo según la tienda actual desde `store_themes`.
 
 ### Colores
 
-Cada tienda define colores primario y secundario. Se
-aplican como variables CSS:
+Los colores primarios se aplican via `store_themes` y se
+exponen como CSS variables. Cada tenant define:
 
 ```css
 :root {
-    --primary: #059669;    /* Panda: esmeralda */
-    --secondary: #10b981;
+  /* Panda: esmeralda */
+  --primary: #059669;
+  --secondary: #10b981;
+  --accent:  #f59e0b;
 }
 
-/* o */
+/* Kitsune: violeta */
 :root {
-    --primary: #7c3aed;    /* Kitsune: violeta */
-    --secondary: #8b5cf6;
+  --primary: #7c3aed;
+  --secondary: #8b5cf6;
+  --accent:  #f472b6;
 }
 ```
 
 ### Redes sociales
 
-Cada tienda tiene sus propias redes sociales (Instagram,
-Facebook, WhatsApp, TikTok). Se muestran en el header y
-footer.
+`store_social_links` por tienda (Instagram, Facebook,
+WhatsApp, TikTok). Se muestran en el header y footer.
 
 ### WhatsApp
 
 Cada tienda tiene su propio número de WhatsApp para
-contacto directo.
+contacto directo. Configurado vía `store_themes.whatsapp`.
 
 ## SEO por tienda
 
-Cada tienda debe tener su propio SEO:
-
-```astro
----
-const store = resolveStoreFromDomain(Astro.url.hostname);
----
-
-<head>
-    <title>{store.name} - Productos personalizados</title>
-    <meta name="description" content={store.description} />
-    <meta property="og:title" content={store.name} />
-    <meta property="og:image" content={store.logo} />
-</head>
-```
+Cada tienda tiene su propio SEO: `<title>`, `description`,
+`og:title`, `og:image`, `og:locale`. Configurado desde
+`store_themes` y `site.ts`.
 
 ## Componentes del storefront
 
 ```txt
 src/components/storefront/
-├── header/
-│   └── PublicHeader.astro       # Header con logo, nav
+├── auth/                  # login/signup compartidos
+├── b2b/                   # RFQ + bulk + multi-sucursal (Panda)
+├── branding/              # logo + cover por tenant
+├── cart/
+│   ├── CartItem.astro
+│   ├── CartSummary.astro
+│   └── CartEmpty.astro
+├── checkout/
+│   ├── CheckoutStepper.astro
+│   ├── AddressStep.astro
+│   ├── ShippingStep.astro
+│   ├── PaymentStep.astro
+│   └── ReviewStep.astro
 ├── footer/
-│   └── PublicFooter.astro       # Footer con redes sociales
+│   └── PublicFooter.astro
+├── header/
+│   └── PublicHeader.astro
+├── home/
+│   └── HeroBanner.astro
+├── layout/
 ├── products/
-│   ├── ProductCard.astro        # Tarjeta de producto
-│   └── ProductGrid.astro        # Grilla de productos
-└── home/                        # (pendiente)
+│   ├── ProductCard.astro
+│   ├── ProductGrid.astro
+│   ├── ProductGallery.astro
+│   ├── ProductInfo.astro
+│   ├── ProductVariants.astro
+│   ├── ProductDescription.astro
+│   ├── ProductRelated.astro
+│   ├── ProductReviews.astro
+│   ├── ProductQuantitySelector.astro
+│   └── WishlistButton.astro
+└── search/
 ```
 
-## Datos mock actuales
+Cada componente nuevo trae su `*.stories.ts` (ver
+[storybook.md](storybook.md "frontend/storybook.md")).
 
-El storefront actualmente usa datos hardcodeados en
-`src/data/admin-dashboard.ts`. Conectado a la API, estos
-datos deben reemplazarse con llamadas a:
+## Endpoints del storefront
 
 ```txt
-GET /api/storefront/products?store_id={id}
-GET /api/storefront/categories?store_id={id}
-GET /api/storefront/promotions?store_id={id}
+GET    /api/storefront/theme              # theme del tenant (sin auth)
+GET    /api/storefront/products           # catálogo público
+GET    /api/storefront/products/{slug}    # detalle producto
+GET    /api/storefront/promotions         # promociones activas
+GET    /api/assets/{path}                 # assets públicos
+GET    /api/tracking/{tracking_code}      # tracking de pedido
+GET    /api/products/{slug}/price?quantity=N  # wholesale pricing
 ```
 
-**Nota:** Los endpoints del storefront aún no están
-implementados. Los controladores en `Api/Storefront/`
-están vacíos (`.gitkeep`).
-
-## Pendiente
-
-- `src/lib/store-context.ts` — No creado
-- `src/config/stores.ts` — No creado
-- Endpoints storefront en backend — No implementados
-- Conexión con API real — No implementada
-- SEO por tienda — No implementado
-- Redes sociales por tienda — No implementado
-- WhatsApp por tienda — No implementado
-- Branding dinámico — No implementado
+Los controladores viven en
+[`backend/app/Http/Controllers/Api/Storefront/`](../../backend/app/Http/Controllers/Api/Storefront/
+"backend/app/Http/Controllers/Api/Storefront/").

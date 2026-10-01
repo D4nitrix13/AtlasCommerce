@@ -3,51 +3,71 @@
 ## Propósito
 
 El módulo `Stores` gestiona la configuración de cada
-tienda (Panda Estampados, Kitsune) y las relaciones
-entre tiendas y otros dominios del sistema.
+tienda (Panda Estampados, Kitsune, MM Boutique, Morales
+Store) y las relaciones entre tiendas y otros dominios
+del sistema. Se compone de las tablas núcleo del modelo
+multi-tenant y de la lógica de resolución de tienda por
+dominio.
 
 ## Estado del módulo
 
 ```txt
-StoreSetting:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
-  - Controlador: creado como base estructural
-  - Lógica CRUD: pendiente
-
 Store:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
+  - Migración: implementada
+  - Modelo: App\Models\Stores\Store
+  - Controller: App\Http\Controllers\Api\Admin\StoreController
 
 StoreDomain:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
+  - Migración: implementada
+  - Modelo: App\Models\Stores\StoreDomain
+  - Resolución: ResolveStoreFromDomain middleware
 
 StoreSocialLink:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
+  - Migración: implementada
+  - Modelo: App\Models\Stores\StoreSocialLink
+  - Controller: StoreSocialLinkController
+
+StoreTheme:
+  - Migración: implementada
+  - Modelo: App\Models\Stores\StoreTheme
+  - Endpoints: storefront/theme + admin/theme
+
+StoreFeature (feature flags):
+  - Migración: implementada (F2.1)
+  - Modelo: App\Models\Stores\StoreFeature
+  - Helper: Store::hasFeature(slug)
+  - Seeds: panda.json, mm-boutique.json, morales-store.json
 
 ProductStore:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
+  - Migración: implementada
+  - Modelo: App\Models\Stores\ProductStore
+  - Uso: product_stores.visible + public_price
 
 UserStore:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
-  - Role_id: contemplado en el modelo ER
+  - Migración: implementada
+  - Modelo: App\Models\Stores\UserStore
+  - Controller: Admin/UserController + UserStoreRequest
+  - Validación cross-store en ValidateStoreIdHeader
 
 CustomerStore:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
+  - Migración: implementada
+  - Modelo: App\Models\Stores\CustomerStore
+
+WholesalePrice (F2.5):
+  - Migración: implementada
+  - Modelo: App\Models\Catalog\WholesalePrice
+  - Service: WholesalePricingService
+  - Endpoint: GET /api/storefront/products/{slug}/price
 
 SalesChannel:
-  - Migración: contemplada en el modelo ER
-  - Modelo: creado como base estructural
+  - Migración: implementada
+  - Modelo: App\Models\Stores\SalesChannel
 ```
 
-La base estructural del módulo está creada. La lógica
-completa de negocio, policies y validaciones debe
-verificarse en el código.
+La lógica completa de negocio, policies y validaciones
+debe verificarse en el código. La mayoría de los
+controllers tiene tests feature en
+`backend/tests/Feature/Stores/` (o el módulo equivalente).
 
 ## Entidades del módulo
 

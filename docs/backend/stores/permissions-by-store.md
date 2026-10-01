@@ -235,22 +235,29 @@ viewer
 
 ```txt
 Tabla user_stores:
-  - Migración: contemplada en el modelo ER
-  - Modelo UserStore: creado como base estructural
-  - Lógica CRUD: pendiente
+  - Migración: implementada
+  - Modelo UserStore: implementado en
+    `App\Models\Stores\UserStore`
+  - Lógica CRUD: implementada vía
+    `App\Http\Controllers\Api\Admin\UserController`
+    + `App\Http\Requests\Admin\UserStoreRequest`
+    + `App\Http\Resources\Stores\UserStoreResource`
 
-Middleware CheckStoreAccess:
-  - Pendiente de implementar
+Middleware ResolveStoreFromDomain:
+  - Implementado en
+    `App\Http\Middleware\ResolveStoreFromDomain`
+  - Registrado en `bootstrap/app.php`
 
-Policies por tienda:
-  - Pendientes de implementar
+Middleware ValidateStoreIdHeader:
+  - Implementado en
+    `App\Http\Middleware\ValidateStoreIdHeader`
 
-Scopes globales por store_id:
-  - Pendientes de implementar
+Scopes globales por store_id (BelongsToStore trait):
+  - Implementado y aplicado en modelos multi-tenant
+  - RLS activado en PostgreSQL (F5.3 del roadmap) como
+    segunda capa de defensa
 ```
 
-La lógica completa de autorización debe verificarse
-en el código. El modelo ER contempla la estructura,
-pero la implementación de policies y middlewares
-debe validarse antes de considerar el sistema
-como funcional.
+El sistema de autorización está operativo. Validar
+cualquier policy nueva contra `policies/` y agregar
+test feature en `tests/Feature/`.

@@ -97,6 +97,10 @@ Ver [`frontend/AGENTS.md`](frontend/AGENTS.md) para las reglas completas
 - **Componentes de UI en `src/components/ui/`**, dominio en `src/components/{domain}/`.
 - **Accesibilidad** — `<button>` para acciones, `<label>` para inputs, `alt`
   en `<img>`.
+- **Storybook** — todo componente UI nuevo debe traer su `*.stories.ts` con
+  la variant default y al menos un caso edge (loading, empty, error, con
+  datos). Ver [`docs/frontend/storybook.md`](docs/frontend/storybook.md
+  "docs/frontend/storybook.md").
 
 ### SQL / Migraciones
 
@@ -209,6 +213,11 @@ pnpm run lint:fix                # eslint --fix
 # Formateo
 pnpm run format                  # prettier --write
 pnpm run format:check            # prettier --check (CI)
+
+# Storybook (UI primitives)
+pnpm run storybook               # dev server en http://localhost:6006
+pnpm run storybook:build         # build estático para CI/Chromatic
+pnpm run storybook:test          # smoke test del build
 
 # Pre-commit completo
 pnpm run typecheck && pnpm run lint && pnpm run format:check

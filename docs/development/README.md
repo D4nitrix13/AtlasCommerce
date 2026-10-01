@@ -43,6 +43,9 @@ composer dev
 | [plugins.md](plugins.md "plugins.md")                 | Plugins Composer + feature flags  |
 | [linting.md](linting.md "linting.md")                 | Pint + PHPStan + ESLint + Prettier |
 | [git-workflow.md](git-workflow.md "git-workflow.md")    | Commits + branches + PRs          |
+| [core-migration.md](core-migration.md "core-migration.md") | Migración a `app/Core/`         |
+| [ai-tooling.md](ai-tooling.md "ai-tooling.md")       | Skills, Engram, CodeGraph         |
+| [sessions-log.md](sessions-log.md "sessions-log.md") | Log de sesiones recientes          |
 
 ## Convenciones
 
@@ -116,10 +119,13 @@ Si Caddy corre dentro del compose de la instancia:
 
 ### Agregar un componente frontend
 
-1. Crear archivo en `src/components/{ui,public,admin,ecommerce}/`.
+1. Crear archivo en `src/components/{ui,storefront,account,admin}/`.
 2. Si es `React`, agregar prop `interface Props`.
 3. Si tiene datos del backend, usar `apiFetch` de `src/lib/api.ts`.
-4. Agregar story o test manual si aplica.
+4. **Crear `Component.stories.ts` con variants default + edge
+   cases**. Ver
+   [`frontend/storybook.md`](../frontend/storybook.md
+   "docs/frontend/storybook.md").
 5. Documentar si es reutilizable.
 
 ### Crear migración
