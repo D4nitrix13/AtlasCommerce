@@ -68,10 +68,10 @@ class RecentOrdersController extends Controller
                 'id' => $order->id,
                 'order_number' => '#ORD-'.$order->id,
                 'customer_name' => trim(
-                    ($order->customer?->first_name ?? '').' '.($order->customer?->last_name ?? '')
+                    ($order->customer?->first_name ?? '').' '.($order->customer?->last_name ?? ''),
                 ) ?: ($order->customer?->user?->name ?? '—'),
                 'product_summary' => $this->buildProductSummary(order: $order),
-                'status_label' => self::STATUS_LABELS[$order->status?->value ?? ''] ?? (string) $order->status,
+                'status_label' => self::STATUS_LABELS[$order->status?->value ?? ''] ?? $order->status?->value,
                 'status_color' => $this->statusColorClass(status: $order->status),
                 'amount_label' => $this->formatAmount(order: $order),
             ])->all(),
