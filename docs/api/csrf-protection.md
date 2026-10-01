@@ -7,14 +7,21 @@
 
 El backend soporta dos modos de autenticación simultáneamente:
 
-1. **Stateless** (mobile apps, server-to-server, integraciones): `Authorization: Bearer <token>`. Sanctum valida el token y la request NO usa sesión.
-2. **Stateful** (frontend SPA via cookies httpOnly): el navegador envía `Cookie: XSRF-TOKEN=...` y la request pasa por `StartSession` + Sanctum session auth.
+1. **Stateless** (mobile apps, server-to-server, integraciones):
+   `Authorization: Bearer <token>`. Sanctum valida el token y la request
+   NO usa sesión.
+2. **Stateful** (frontend SPA via cookies httpOnly): el navegador envía
+   `Cookie: XSRF-TOKEN=...` y la request pasa por `StartSession` +
+   Sanctum session auth.
 
-El modo se determina por el `Host` header contra `SANCTUM_STATEFUL_DOMAINS` (en `.env`). Hosts en esa lista reciben sesión; el resto se trata como stateless.
+El modo se determina por el `Host` header contra `SANCTUM_STATEFUL_DOMAINS`
+(en `.env`). Hosts en esa lista reciben sesión; el resto se trata como
+stateless.
 
 ## Riesgo CSRF
 
 Con auth stateful (cookie httpOnly), un atacante en otro dominio podría:
+
 - Hacer que el navegador del usuario autenticado envíe una request
   POST a una URL stateful de nuestro backend.
 - Si NO validamos CSRF, esa request se procesa como si fuera del
