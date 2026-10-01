@@ -32,7 +32,7 @@ export default function AdminHomeRedirect(): ReactElement {
     const { locale, barePath } = stripLocaleFromPath(window.location.pathname);
     const target = isAuthenticated
       ? withLocale('/admin/dashboard', locale)
-      : `${withLocale('/auth/login', locale)}?redirect=${encodeURIComponent(barePath)}`;
+      : `${withLocale('/account/login', locale)}?redirect=${encodeURIComponent(barePath)}`;
     window.location.replace(target);
   }, [isAuthenticated, isHydrating]);
 
