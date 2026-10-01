@@ -4,9 +4,9 @@
  * Patrón B2B (design-refs §7.3):
  *   "Quick calculator: cantidad + producto = descuento automático"
  *
- * Componente orquestador: delega render a sub-componentes y
- * persistencia al hook `useBulkCart`. Mantiene tamaño bajo
- * (AGENTS §1: función principal <40 líneas, complejidad <10).
+ * Componente orquestador: estado y cálculo en `useBulkPricingState`,
+ * render puro en `BulkPricingCalculatorView`. Esto mantiene main
+ * <30 líneas (AGENTS §1).
  *
  * Decisiones:
  *   - React island (no Astro) porque requiere estado + handlers.
@@ -267,96 +267,296 @@ function TiersList({ tierCountLabel }: TiersListProps): ReactElement {
   );
 }
 
-export default function BulkPricingCalculator({
-  productSelectLabel,
-  quantityLabel,
-  discountLabel,
+interface BulkPricingCalculatorViewProps {
+  productId: number;
+  quantityInput: string;
+  onProductChange: (nextId: number) => void;
+  onQuantityChange: (next: string) => void;
+  labels: {
+    productSelect: string;
+    quantity: string;
+    discount: string;
+    subtotal: string;
+    unitPrice: string;
+    add: string;
+    adding: string;
+    success: string;
+  };
+  tierLabel: string;
+  tierDiscountPercent: number;
+  subtotalText: string;
+  unitPriceText: string;
+  errorMessage: string | null;
+  persisting: boolean;
+  isValidQuantity: boolean;
+  added: boolean;
+  onAddToBulkOrder: () => void;
+  formatPrice: (cents: number, currency: string) => string;
+}
+
+interface PricingSummaryProps {
+  tierLabel: string;
+  tierDiscountPercent: number;
+  subtotalLabel: string;
+  subtotalText: string;
+  errorMessage: string | null;
+}
+
+function PricingSummary({
+  tierLabel,
+  tierDiscountPercent,
   subtotalLabel,
-  unitPriceLabel,
-  addButtonLabel,
+  subtotalText,
+  errorMessage,
+}: PricingSummaryProps): ReactElement {
+  return (
+    <>
+      <TierCard
+        label={tierLabel}
+        discountPercent={tierDiscountPercent}
+        discountLabel={subtotalLabel}
+      />
+      <SubtotalRow label={subtotalLabel} amount={subtotalText} />
+      {errorMessage !== null && (
+        <p role="alert" className="text-sm text-rose-600" data-testid="bulk-error">
+          {errorMessage}
+        </p>
+      )}
+    </>
+  );
+}
+
+interface BulkActionsProps {
+  disabled: boolean;
+  addLabel: string;
+  addingLabel: string;
+  added: boolean;
+  successLabel: string;
+  onAddToBulkOrder: () => void;
+}
+
+function BulkActions({
+  disabled,
+  addLabel,
   addingLabel,
+  added,
   successLabel,
-  errorMinQuantity,
-  errorInvalidNumber,
-}: Props): ReactElement {
-  const { t } = useTranslations();
-  const initialProduct = BULK_PRODUCTS[0];
-  const [productId, setProductId] = useState<number>(initialProduct?.id ?? 0);
+  onAddToBulkOrder,
+}: BulkActionsProps): ReactElement {
+  return (
+    <>
+      <AddButton
+        disabled={disabled}
+        label={addLabel}
+        busyLabel={addingLabel}
+        onClick={onAddToBulkOrder}
+      />
+      {added && <SuccessMessage text={successLabel} />}
+    </>
+  );
+}
+
+function BulkPricingCalculatorView(props: BulkPricingCalculatorViewProps): ReactElement {
+  return (
+    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <ProductSelector
+        productId={props.productId}
+        products={BULK_PRODUCTS}
+        label={props.labels.productSelect}
+        formatPrice={props.formatPrice}
+        onChange={props.onProductChange}
+      />
+      <QuantityField
+        value={props.quantityInput}
+        label={props.labels.quantity}
+        unitPriceLabel={props.labels.unitPrice}
+        unitPriceText={props.unitPriceText}
+        onChange={props.onQuantityChange}
+      />
+      <PricingSummary
+        tierLabel={props.tierLabel}
+        tierDiscountPercent={props.tierDiscountPercent}
+        subtotalLabel={props.labels.discount}
+        subtotalText={props.subtotalText}
+        errorMessage={props.errorMessage}
+      />
+      <BulkActions
+        disabled={!props.isValidQuantity || props.persisting}
+        addLabel={props.labels.add}
+        addingLabel={props.labels.adding}
+        added={props.added}
+        successLabel={props.labels.success}
+        onAddToBulkOrder={props.onAddToBulkOrder}
+      />
+      <TiersList tierCountLabel={`${PRICING_TIERS.length} tiers`} />
+    </div>
+  );
+}
+
+interface UseBulkPricingStateResult {
+  product: BulkProduct | undefined;
+  productId: number;
+  quantityInput: string;
+  onProductChange: (nextId: number) => void;
+  onQuantityChange: (next: string) => void;
+  tierLabel: string;
+  tierDiscountPercent: number;
+  subtotalText: string;
+  unitPriceText: string;
+  errorMessage: string | null;
+  persisting: boolean;
+  added: boolean;
+  isValidQuantity: boolean;
+  addToBulkOrder: () => boolean;
+  formatPrice: (cents: number, currency: string) => string;
+}
+
+function useProductSelection(): {
+  productId: number;
+  quantityInput: string;
+  product: BulkProduct | undefined;
+  onProductChange: (nextId: number) => void;
+  onQuantityChange: (next: string) => void;
+} {
+  const initial = BULK_PRODUCTS[0];
+  const [productId, setProductId] = useState<number>(initial?.id ?? 0);
   const [quantityInput, setQuantityInput] = useState<string>(
-    String(initialProduct?.minQuantity ?? 1),
+    String(initial?.minQuantity ?? 1),
   );
   const product = useMemo(
-    () => BULK_PRODUCTS.find((p) => p.id === productId) ?? initialProduct,
-    [productId, initialProduct],
+    () => BULK_PRODUCTS.find((p) => p.id === productId) ?? initial,
+    [productId, initial],
   );
-  const quantity = useMemo(() => {
-    const parsed = Number.parseInt(quantityInput, 10);
-    return Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
-  }, [quantityInput]);
+  return {
+    productId,
+    quantityInput,
+    product,
+    onProductChange: (next) => {
+      const found = BULK_PRODUCTS.find((p) => p.id === next);
+      setProductId(next);
+      setQuantityInput(String(found?.minQuantity ?? 1));
+    },
+    onQuantityChange: setQuantityInput,
+  };
+}
+
+function usePricing(
+  product: BulkProduct | undefined,
+  quantity: number,
+): {
+  tierLabel: string;
+  tierDiscountPercent: number;
+  subtotalCents: number;
+  unitPriceText: string;
+  subtotalText: string;
+  formatPrice: (cents: number, currency: string) => string;
+} {
   const tier = useMemo(() => resolvePricingTier(quantity), [quantity]);
   const subtotalCents = Math.round(
     (product?.basePriceCents ?? 0) * quantity * (1 - tier.discountPercent),
   );
-  const errorMessage = useMemo<string | null>(() => {
+  const formatPrice = (cents: number, currency: string): string =>
+    `$${(cents / 100).toFixed(2)} ${currency}`;
+  return {
+    tierLabel: tier.label,
+    tierDiscountPercent: tier.discountPercent,
+    subtotalCents,
+    unitPriceText: product === undefined ? '' : formatPrice(product.basePriceCents, product.currency),
+    subtotalText: product === undefined ? '' : formatPrice(subtotalCents, product.currency),
+    formatPrice,
+  };
+}
+
+function useErrorMessage(
+  product: BulkProduct | undefined,
+  quantity: number,
+  errorInvalidNumber: string,
+  errorMinQuantity: (min: number) => string,
+): string | null {
+  return useMemo<string | null>(() => {
     if (product === undefined) return null;
     if (quantity === 0) return errorInvalidNumber;
     if (quantity < product.minQuantity) return errorMinQuantity(product.minQuantity);
     return null;
   }, [product, quantity, errorInvalidNumber, errorMinQuantity]);
+}
+
+function useBulkPricingState({
+  errorInvalidNumber,
+  errorMinQuantity,
+}: Props): UseBulkPricingStateResult {
+  const { product, productId, quantityInput, onProductChange, onQuantityChange } =
+    useProductSelection();
+  const quantity = useMemo(() => {
+    const parsed = Number.parseInt(quantityInput, 10);
+    return Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+  }, [quantityInput]);
+  const pricing = usePricing(product, quantity);
+  const errorMessage = useErrorMessage(
+    product,
+    quantity,
+    errorInvalidNumber,
+    errorMinQuantity,
+  );
   const { persisting, added, isValidQuantity, addToBulkOrder } = useBulkCart(
     product,
     quantity,
   );
-  const formatPrice = (cents: number, currency: string): string =>
-    `$${(cents / 100).toFixed(2)} ${currency}`;
+  return {
+    product,
+    productId,
+    quantityInput,
+    onProductChange,
+    onQuantityChange,
+    tierLabel: pricing.tierLabel,
+    tierDiscountPercent: pricing.tierDiscountPercent,
+    subtotalText: pricing.subtotalText,
+    unitPriceText: pricing.unitPriceText,
+    errorMessage,
+    persisting,
+    added,
+    isValidQuantity,
+    addToBulkOrder,
+    formatPrice: pricing.formatPrice,
+  };
+}
 
-  if (product === undefined) {
+export default function BulkPricingCalculator(props: Props): ReactElement {
+  const { t } = useTranslations();
+  const state = useBulkPricingState(props);
+  if (state.product === undefined) {
     return (
       <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
         {t('common.error')}
       </p>
     );
   }
-
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <ProductSelector
-        productId={productId}
-        products={BULK_PRODUCTS}
-        label={productSelectLabel}
-        formatPrice={formatPrice}
-        onChange={(next) => {
-          const found = BULK_PRODUCTS.find((p) => p.id === next);
-          setProductId(next);
-          setQuantityInput(String(found?.minQuantity ?? 1));
-        }}
-      />
-      <QuantityField
-        value={quantityInput}
-        label={quantityLabel}
-        unitPriceLabel={unitPriceLabel}
-        unitPriceText={formatPrice(product.basePriceCents, product.currency)}
-        onChange={setQuantityInput}
-      />
-      <TierCard
-        label={tier.label}
-        discountPercent={tier.discountPercent}
-        discountLabel={discountLabel}
-      />
-      <SubtotalRow label={subtotalLabel} amount={formatPrice(subtotalCents, product.currency)} />
-      {errorMessage !== null && (
-        <p role="alert" className="text-sm text-rose-600" data-testid="bulk-error">
-          {errorMessage}
-        </p>
-      )}
-      <AddButton
-        disabled={!isValidQuantity || persisting}
-        label={addButtonLabel}
-        busyLabel={addingLabel}
-        onClick={addToBulkOrder}
-      />
-      {added && <SuccessMessage text={successLabel} />}
-      <TiersList tierCountLabel={`${PRICING_TIERS.length} tiers`} />
-    </div>
+    <BulkPricingCalculatorView
+      productId={state.productId}
+      quantityInput={state.quantityInput}
+      onProductChange={state.onProductChange}
+      onQuantityChange={state.onQuantityChange}
+      labels={{
+        productSelect: props.productSelectLabel,
+        quantity: props.quantityLabel,
+        discount: props.discountLabel,
+        subtotal: props.subtotalLabel,
+        unitPrice: props.unitPriceLabel,
+        add: props.addButtonLabel,
+        adding: props.addingLabel,
+        success: props.successLabel,
+      }}
+      tierLabel={state.tierLabel}
+      tierDiscountPercent={state.tierDiscountPercent}
+      subtotalText={state.subtotalText}
+      unitPriceText={state.unitPriceText}
+      errorMessage={state.errorMessage}
+      persisting={state.persisting}
+      isValidQuantity={state.isValidQuantity}
+      added={state.added}
+      onAddToBulkOrder={state.addToBulkOrder}
+      formatPrice={state.formatPrice}
+    />
   );
 }
