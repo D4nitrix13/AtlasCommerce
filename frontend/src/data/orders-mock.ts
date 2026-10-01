@@ -93,7 +93,7 @@ const PLACEHOLDER_IMAGE =
   );
 
 const DEFAULT_SHIPPING: OrderShippingAddressMock = {
-  recipient: 'Daniel Pérez',
+  recipient: 'Daniel Benjamin Pérez Morales',
   phone: '+505 8888 1234',
   country: 'Nicaragua',
   department: 'Managua',

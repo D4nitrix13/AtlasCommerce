@@ -21,8 +21,8 @@ const meta: Meta<typeof DashboardWelcomeBanner> = {
     },
   },
   args: {
-    userName: 'Daniel',
-    greeting: 'Bienvenido de vuelta, Daniel',
+    userName: 'Daniel Benjamin',
+    greeting: 'Bienvenido de vuelta, Daniel Benjamin',
     subtitle: 'Tienes 2 pedidos en preparación y 1 por enviar.',
     variant: 'kitsune',
   },

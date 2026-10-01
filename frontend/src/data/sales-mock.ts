@@ -280,7 +280,7 @@ function buildTimeline(
 }
 
 const DEFAULT_SHIPPING: AdminOrderShippingMock = {
-  recipient: 'Daniel Pérez',
+  recipient: 'Daniel Benjamin Pérez Morales',
   phone: '+505 8888 1234',
   country: 'Nicaragua',
   department: 'Managua',

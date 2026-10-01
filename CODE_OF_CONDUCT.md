@@ -53,7 +53,7 @@ identifique como tal.
 
 **Mantenedor / Aplicación:**
 
-El proyecto es mantenido por Daniel Pérez (`@D4nitrix13`). Toda comunicación
+El proyecto es mantenido por Daniel Benjamin Pérez Morales (`@D4nitrix13`). Toda comunicación
 referente a la aplicación de este código se manejará en privado para
 proteger a quien reporta.
 
