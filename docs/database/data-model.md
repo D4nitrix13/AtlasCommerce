@@ -201,7 +201,8 @@ categories          → categorías
 products            → productos (publicados vía product_stores)
 product_images      → imágenes de productos
 product_variants    → variantes
-product_attributes  → atributos de productos
+attribute_product   → valores de atributos por producto (pivot)
+attribute_variant   → valores de atributos por variante (pivot)
 attributes          → definición de atributos
 warehouses          → almacenes (inventario global)
 inventories         → stock por almacén-producto
@@ -368,3 +369,46 @@ las consultas filtradas:
 ```php
 $table->index('store_id');
 ```
+
+## Nota de regeneración del ER diagram (2026-10-01)
+
+El diagrama visual en
+[`docs/database/diagrams/ecommerce-er.mmd`](diagrams/ecommerce-er.mmd
+"diagrams/ecommerce-er.mmd") se regeneró a partir del contenido
+real de las migraciones Laravel (`Schema::create` y `Schema::table`
+en `backend/database/migrations/**` y en
+`backend/packages/atlas-commerce-plugin-erp/database/migrations/`).
+
+Resumen del cambio:
+
+- **Total de tablas en el esquema real:** 85 (no 26 como se estimaba
+  en el prompt inicial).
+- **Tablas eliminadas del diagrama anterior:** `erp_connections`
+  (dropped por la migración
+  `system/2026_08_10_000001_drop_erp_connections_table.php`).
+- **Tablas añadidas al diagrama:** `sessions`, `social_accounts`,
+  `passkeys` (vía Laravel Passkeys), `rfq_requests` (storefront,
+  B2B), `bulk_cart_items` (carrito B2B).
+- **Columnas añadidas via `Schema::table`:** `stores.tax_rate`,
+  `invoices.shipping_cents`, `invoices.refunded_cents`,
+  `invoices.shipping_zone_id`, `shipping_zones.store_id`,
+  `shipping_zones.base_cost_cents` (reemplaza `base_cost`),
+  `users.preferred_recovery_method` (con CHECK constraint),
+  `customers.anonymized_at`, `customers.deletion_requested_at`,
+  `customers.deletion_token_hash`,
+  `customers.deletion_token_expires_at` (GDPR, Ley 896 Nicaragua),
+  y `two_factor_settings.secret` ensanchado de `varchar(255)` a
+  `text`.
+- **Política RLS PostgreSQL:** la migración
+  `system/2026_08_02_000003_enable_row_level_security.php` aplica
+  row-level security sobre 23 tablas operativas multi-tenant (las
+  marcadas con `store_id NOT NULL` más `wishlists` y
+  `customer_stores`). El diagrama documenta esa capa en el preamble.
+- **Multi-tenencia:** dentro del mismo diagrama se distinguen las
+  tablas con `store_id NOT NULL` (operacionales) y las globales
+  (catálogo, inventario, etc.) vía el preamble.
+
+Esta nota existe para que cualquier lectura cruzada entre este
+documento y el diagrama sea honesta: si el diagrama contradice
+este texto, el diagrama es la fuente de verdad porque se genera
+desde las migraciones reales.
