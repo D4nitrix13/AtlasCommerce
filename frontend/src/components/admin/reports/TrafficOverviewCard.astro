@@ -72,7 +72,6 @@ const MOCK_TOP_PAGES: TrafficTopPage[] = [
 
 let sources: TrafficSource[] = MOCK_SOURCES;
 let topPages: TrafficTopPage[] = MOCK_TOP_PAGES;
-let dataSource: 'real' | 'mock' = 'mock';
 
 try {
   const response = await Astro.fetch('/api/v1/admin/metrics/traffic/sources', {
@@ -83,7 +82,6 @@ try {
     if (payload?.data?.sources && Array.isArray(payload.data.sources) && payload.data.sources.length > 0) {
       sources = payload.data.sources;
       topPages = payload.data.top_pages;
-      dataSource = 'real';
     }
   }
 } catch {
