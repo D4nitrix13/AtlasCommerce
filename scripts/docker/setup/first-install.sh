@@ -129,6 +129,6 @@ cmd_setup() {
 
     log_ok "Setup completo. Próximos pasos:"
     echo "  1. sudo ./scripts/docker-stack.sh hosts >>/etc/hosts"
-    echo "  2. sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl restart caddy"
+    echo "  2. sudo cp docker/caddy/Caddyfile /etc/caddy/Caddyfile && sudo systemctl restart caddy"
     echo "  3. Probar: curl -sI http://panda-estampados.com/api/storefront/theme"
 }
