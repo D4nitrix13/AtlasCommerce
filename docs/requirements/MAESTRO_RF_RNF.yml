@@ -1,7 +1,7 @@
 # MAESTRO_RF_RNF.yml
 # -----------------------------------------------------------------------------
 # Catálogo maestro de requisitos del ECM-PEK v1.0.0 (Panda Estampados + Kitsune).
-# Datos extraídos de scripts/requirements/req/rf_*.yml y rnf_*.yml.
+# Datos extraídos de docs/requirements/req/rf_*.yml y rnf_*.yml.
 # Fuentes investigadas y completadas por la IA (los HUs quedan marcados
 # como [HU-NN — confirmar con el equipo] porque no hay archivos hu_*.yml
 # en el repositorio; las fuentes regulatorias/estándar sí son externas

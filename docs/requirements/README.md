@@ -1,12 +1,17 @@
-# scripts/requirements/
+# docs/requirements/
 
 Fuente de verdad de los requisitos del proyecto Panda Estampados + Kitsune.
 Versionada en git como archivos YAML individuales, sin tooling intermedio.
 
+> **Nota histórica**: este directorio vivió como `scripts/requirements/` antes
+> de oct-2026. El prefijo `scripts/` era incorrecto: el contenido son
+> documentos de requisitos, no scripts ejecutables. Reubicado bajo
+> `docs/requirements/` para reflejar su naturaleza.
+
 ## Estructura
 
 ```text
-scripts/requirements/
+docs/requirements/
 ├── README.md            este archivo
 ├── STAKEHOLDERS.md      tabla de los 3 integrantes del equipo
 └── req/                 requirements funcionales y no funcionales (.yml)
