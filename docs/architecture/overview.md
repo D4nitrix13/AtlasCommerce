@@ -2,13 +2,14 @@
 
 ## Visión general
 
-AtlasCommerce es una plataforma ecommerce multi-store
-desplegada como **3 instancias Docker independientes** que
+AtlasCommerce es una plataforma ecommerce **multi-instancia**
+desplegada como **3 stacks Docker independientes** que
 atienden **4 marcas** totales. Cada instancia es una unidad
 aislada con su propia base de datos `PostgreSQL`, su
 `Redis`, su backend `Laravel`, su frontend `Astro` y su
 reverse proxy `Caddy`. Multi-store opera dentro de una misma
-instancia cuando el dueño comparte operación entre marcas.
+instancia cuando el dueño comparte operación entre marcas
+(caso `panda-estampados-and-kitsune`).
 
 ```txt
                                                   Internet (HTTPS)

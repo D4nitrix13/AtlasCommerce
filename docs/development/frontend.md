@@ -37,6 +37,26 @@ Corre `astro check` que valida:
 - Tipos en frontmatter de `.astro`.
 - Directivas de template.
 
+## Storybook
+
+```bash
+# Dev server
+pnpm run storybook            # http://localhost:6006
+
+# Build estático (CI, Chromatic, Vercel)
+pnpm run storybook:build      # → storybook-static/
+
+# Smoke test del build
+pnpm run storybook:test
+```
+
+Las stories (`*.stories.ts`) viven junto a cada componente.
+Cada componente UI nuevo debe traer su story con variants
+`Default`, `Loading`, `Empty`, `Error` cuando aplique.
+Ver
+[`frontend/storybook.md`](../frontend/storybook.md
+"docs/frontend/storybook.md").
+
 ## Linter y formateo
 
 ```bash

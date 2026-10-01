@@ -169,7 +169,45 @@ pnpm dev
 pnpm build
 pnpm typecheck
 pnpm format
+pnpm storybook          # UI primitives + componentes (puerto 6006)
+pnpm storybook:build    # build estático para Chromatic / CI
 ```
+
+## Storybook (UI primitives y showcase de componentes)
+
+El frontend incluye **Storybook 10** para desarrollar, documentar
+y probar componentes UI en aislamiento. Ver
+[`docs/frontend/storybook.md`](docs/frontend/storybook.md
+"docs/frontend/storybook.md") para el detalle.
+
+```bash
+cd frontend
+pnpm storybook              # dev en http://localhost:6006
+pnpm storybook:build        # build estático en storybook-static/
+pnpm storybook:test         # smoke test del build
+```
+
+Las stories viven junto a cada componente (`*.stories.ts`).
+Actuales: 13 UI primitives + 4 storefront + 4 account + 2
+home — 23 stories en total.
+
+## Diagramas de arquitectura (Archify)
+
+La skill local **Archify** (`.agents/skills/archify/`) genera
+diagramas standalone en HTML a partir de descripciones en lenguaje
+natural o `Mermaid`. El último diagrama de arquitectura del
+proyecto vive en:
+
+```txt
+.archify/architecture-atlascommerce-<YYYYMMDD-HHMMSS>/
+└── atlascommerce-architecture.html
+```
+
+Regenerar con Archify cuando cambien módulos, instancias o
+flujos cross-tenant. Ver
+[`docs/architecture/architecture-diagrams.md`](docs/architecture/architecture-diagrams.md
+"docs/architecture/architecture-diagrams.md") para el flujo de
+trabajo.
 
 ## Puertos del entorno de desarrollo
 
@@ -214,12 +252,19 @@ artisan/vsftpd local en tu host.
 ## Documentación
 
 - [`docs/`](docs/) — Arquitectura, diseño, operaciones
+  - [`docs/architecture/overview.md`](docs/architecture/overview.md)
+    — Arquitectura general
+  - [`docs/architecture/multi-instance-roadmap.md`](docs/architecture/multi-instance-roadmap.md)
+    — Roadmap multi-instancia
+  - [`docs/architecture/architecture-diagrams.md`](docs/architecture/architecture-diagrams.md)
+    — Cómo generar diagramas con Archify
   - [`docs/operations/ports.md`](docs/operations/ports.md) — Mapa de puertos
   - [`docs/operations/docker.md`](docs/operations/docker.md) — Detalle de los
     servicios Docker
   - [`docs/operations/environments.md`](docs/operations/environments.md) — Ambientes
   - [`docs/operations/caddy.md`](docs/operations/caddy.md) — Reverse proxy
   - [`docs/operations/backups.md`](docs/operations/backups.md) — Respaldos
+  - [`docs/frontend/storybook.md`](docs/frontend/storybook.md) — Storybook 10
 - [`backend/DOCUMENTACION.md`](backend/DOCUMENTACION.md) — Documentación técnica
   del backend
 - [`backend/docs/`](backend/docs/) — Docs internos del backend
