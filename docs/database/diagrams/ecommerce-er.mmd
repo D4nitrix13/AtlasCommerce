@@ -1,1161 +1,1380 @@
 erDiagram
-    %% E-commerce multi-tenant ER diagram.
-    %%
-    %% Naming convention: snake_case (English) to match Laravel migrations.
-    %% Money columns: suffix `_cents` (bigInteger) — never use `decimal`
-    %% for money. Currency is captured per-transaction via `currency_id`
-    %% FK + `exchange_rate_snapshot` decimal(18,8).
-    %%
-    %% Multi-tenancy: operational tables carry `store_id NOT NULL`.
-    %% The `BelongsToStore` global scope filters automatically per request.
-    %% Catalog (products, categories, brands) is global; per-store
-    %% visibility is controlled via `product_stores` pivot.
-    %%
-    %% Auth: users, roles, permissions, password_reset_tokens, two_factor_settings,
-    %% otp_challenges (TOTP + email_otp + recovery_code), recovery_codes.
-    %% Login attempts + security events siguen deferred a futuro.
-    %%
-    %% Customization: minimal in MVP — only `custom_designs` (file upload
-    %% per order item) + `order_custom_designs` bridge. The full design
-    %% editor (design_layers, print_areas, product_mockups, etc.) is
-    %% deferred to v2.
-    %%
-    %% Shipping: lightweight tracking via columns on `shipments`
-    %% (`tracking_url`, `last_event_status`, `last_event_at`) — no
-    %% separate `shipment_trackings` table.
-    %%
-    %% Payments: `payments` is the only ledger; `invoices` has NO
-    %% denormalized `paid_amount` / `pending_balance`. Both are computed
-    %% via `Invoice::paidAmountCents() = SUM(invoice_payments.applied_amount_cents)`.
-    %% No `payment_installments` in MVP — deferred to v2.
+    %% =====================================================================
+    %% AtlasCommerce — ER diagram (regenerated 2026-10-01)
+    %% 
+    %% Source of truth: `Schema::create` calls in
+    %%   backend/database/migrations/**/*.php
+    %%   backend/packages/atlas-commerce-plugin-erp/database/migrations/*.php
+    %% 
+    %% Stats (verified via grep over all `Schema::create('name', ...)` and
+    %% `Schema::create(table: 'name', ...)` migrations):
+    %%   * 85 live tables (post-drop)
+    %%   * 1 dropped table (erp_connections — removed 2026-08-10)
+    %%   * ~10 ALTER additions (tax_rate on stores, shipping_cents /
+    %%     refunded_cents / shipping_zone_id on invoices, store_id /
+    %%     base_cost_cents on shipping_zones, GDPR fields on customers,
+    %%     preferred_recovery_method on users, two_factor_settings.secret
+    %%     widened to text).
+    %% 
+    %% Multi-tenancy: `store_id` is present on operational tables; the
+    %%   `BelongsToStore` global scope filters per request and PostgreSQL
+    %%   RLS policies (see `2026_08_02_000003_enable_row_level_security.php`)
+    %%   enforce isolation at the DB level.
+    %% 
+    %% Money: all monetary amounts end in `_cents` (bigInteger). The only
+    %%   exceptions are `exchange_rate_snapshot` (decimal(18,8)) and
+    %%   coupon/promotion value/percentage (decimal(12,2)).
+    %% 
+    %% Naming convention: snake_case (English) to match Laravel tables.
+    %% Mermaid renders entity names in uppercase visually.
+    %% 
+    %% Diff vs. previous diagram:
+    %%   + sessions, social_account, passkeys, rfq_requests, bulk_cart_items
+    %%     (new tables not present in the old 73-entity diagram)
+    %%   + ALTER columns noted above
+    %%   − erp_connections (dropped; was a legacy plugin table, never used)
+    %% =====================================================================
 
-    CURRENCY {
-        int id PK
-        string code "ISO 4217 (3 chars)"
+    %% ============== 1. INFRASTRUCTURE ==============
+
+    cache {
+        string key PK
+        mediumText value
+        bigInteger expiration "indexed"
+    }
+
+    cache_locks {
+        string key PK
+        string owner
+        bigInteger expiration "indexed"
+    }
+
+    jobs {
+        bigint id PK
+        string queue "indexed"
+        longText payload
+        unsignedSmallInt attempts
+        unsignedInteger reserved_at "nullable"
+        unsignedInteger created_at
+    }
+
+    job_batches {
+        string id PK
         string name
-        string symbol
-        tinyint decimal_places "0..6, drives money arithmetic"
-        boolean is_primary
-        boolean is_active
-        datetime created_at
-        datetime updated_at
+        int total_jobs
+        int pending_jobs
+        int failed_jobs
+        longText failed_job_ids
+        mediumText options "nullable"
+        int cancelled_at "nullable"
+        int created_at
+        int finished_at "nullable"
     }
 
-    EXCHANGE_RATE {
-        int id PK
-        int from_currency_id FK
-        int to_currency_id FK
-        decimal value "decimal(18,8)"
-        date rate_date
-        datetime created_at
-        datetime updated_at
+    failed_jobs {
+        bigint id PK
+        string uuid UK
+        string connection
+        string queue
+        longText payload
+        longText exception
+        timestamp failed_at "useCurrent"
     }
 
-    STORE {
-        int id PK
-        int currency_id FK
+    media {
+        bigint id PK
+        morphs model
+        uuid uuid "nullable, unique"
+        string collection_name
         string name
-        string slug UK
-        string logo_path
-        string favicon_path
-        string cover_image_path
-        string og_image_path
-        string email
-        string phone
-        string whatsapp
-        text address
-        text description
-        string primary_color "hex"
-        string secondary_color "hex"
-        boolean maintenance_mode
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+        string file_name
+        string mime_type "nullable"
+        string disk
+        string conversions_disk "nullable"
+        bigInteger size
+        json manipulations
+        json custom_properties
+        json generated_conversions
+        json responsive_images
+        unsignedInteger order_column "nullable, indexed"
+        timestamp created_at "nullable"
+        timestamp updated_at "nullable"
     }
 
-    STORE_DOMAIN {
-        int id PK
-        int store_id FK
-        string domain UK
-        string type
-        string base_path
-        boolean redirect_to_primary
-        boolean is_primary
-        boolean is_active
-        datetime verified_at
-        datetime created_at
-        datetime updated_at
+    personal_access_tokens {
+        bigint id PK
+        morphs tokenable
+        text name
+        string token "64, unique"
+        text abilities "nullable"
+        timestamp last_used_at "nullable"
+        timestamp expires_at "nullable, indexed"
+        timestamp updated_at
     }
 
-    STORE_SOCIAL_LINK {
-        int id PK
-        int store_id FK
-        string platform
-        string url
-        string display_name
-        string icon_url
-        int position
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-    }
-
-    STORE_SETTING {
-        int id PK
-        int store_id FK
-        string setting_group
-        string setting_key
-        text setting_value
-        string value_type
-        string description
-        boolean is_public
-        datetime created_at
-        datetime updated_at
-    }
-
-    STORE_FEATURE {
-        int id PK
-        int store_id FK
-        string slug "e.g. 'wholesale_pricing', 'bulk_import'"
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-    }
-
-    STORE_THEME {
-        int id PK
-        int store_id FK,UK "1:1 with stores"
-        string short_name
-        string logo_path
-        string login_logo_path
-        string favicon_path
-        string accent_color "hex"
-        string accent_hover_color "hex"
-        string primary_color "hex"
-        string support_email
-        string phone
-        string whatsapp
-        json tokens "fonts, spacing, etc."
-        datetime created_at
-        datetime updated_at
-    }
-
-    SALES_CHANNEL {
-        int id PK
-        int store_id FK
+    passkeys {
+        bigint id PK
+        bigint user_id FK
         string name
-        string type "online, physical, marketplace"
-        boolean is_active
-        datetime created_at
-        datetime updated_at
+        string credential_id UK
+        json credential
+        timestamp last_used_at "nullable"
+        timestamp updated_at
     }
 
-    ROLE {
-        int id PK
-        string name UK
-        string slug UK
-        string description
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    sessions {
+        string id PK
+        bigint user_id FK "nullable, indexed"
+        string ip_address "45 chars, nullable"
+        text user_agent "nullable"
+        longText payload
+        int last_activity "indexed"
     }
 
-    PERMISSION {
-        int id PK
-        string name UK
-        string slug UK
-        string module
-        string description
-        datetime created_at
-        datetime updated_at
-    }
+    %% ============== 2. AUTH ==============
 
-    ROLE_PERMISSION {
-        int id PK
-        int role_id FK
-        int permission_id FK
-        datetime created_at
-        datetime updated_at
-    }
-
-    PASSWORD_RESET_TOKEN {
-        int id PK
-        int user_id FK "nullable, preserves history on user delete"
-        string email
-        string token_hash "bcrypt, never plain text"
-        timestamp expires_at
-        timestamp used_at "nullable, indexed for usage queries"
-        string request_ip "nullable, IP que solicitó el reset"
-        text user_agent "nullable, navegador del solicitante"
-        datetime created_at
-        datetime updated_at
-    }
-
-    TWO_FACTOR_SETTING {
-        int id PK
-        int user_id FK,UK "1:1 — cada user tiene a lo sumo una config 2FA"
-        string secret "TOTP secret encryptado con Laravel Crypt (AES-256+HMAC). Nunca se persiste en texto plano."
-        timestamp enabled_at "null = 2FA deshabilitado. Index para queries de users con 2FA activa."
-        timestamp last_used_at "null hasta primer uso. Para rate limiting y audit."
-        timestamp recovery_codes_generated_at "null = no hay codes generados."
-        datetime created_at
-        datetime updated_at
-    }
-
-    OTP_CHALLENGE {
-        int id PK
-        int user_id FK "cascadeOnDelete"
-        string type "totp | email_otp | recovery_code"
-        string code_hash "bcrypt del challenge (TOTP code / email code / recovery code). Nunca plain text."
-        json context "metadata opcional (action, device_name, etc.)"
-        timestamp expires_at "TTL. Index para limpieza de challenges expirados."
-        timestamp consumed_at "null = no consumido todavía"
-        int attempts "rate limit counter. Max 5 antes de invalidar."
-        datetime created_at
-        datetime updated_at
-    }
-
-    RECOVERY_CODE {
-        int id PK
-        int user_id FK "cascadeOnDelete"
-        string code_hash "bcrypt del código alfanumérico de 10 chars (sin 0/O/1/I/L)"
-        timestamp used_at "null = code disponible. Index para queries de codes disponibles."
-        datetime created_at
-        datetime updated_at
-    }
-
-    USER {
-        int id PK
-        int role_id FK "nullable, global role from ROLES"
-        string first_name
-        string last_name
-        string email UK
-        timestamp email_verified_at
+    users {
+        bigint id PK
+        bigint role_id FK "nullable"
+        string first_name "80"
+        string last_name "80"
+        string email "150, unique"
+        timestamp email_verified_at "nullable"
         string password
-        string phone
-        boolean is_active
-        timestamp last_login_at
-        string last_login_ip
-        int failed_login_attempts
-        timestamp locked_until
-        timestamp password_changed_at
-        string preferred_recovery_method "email | 2fa | recovery_codes. Default email. Define qué método usa el user."
-        datetime registered_at
-        string remember_token
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+        string phone "30, nullable"
+        boolean is_active "default true"
+        timestamp registered_at "useCurrent"
+        timestamp password_changed_at "nullable, indexed"
+        timestamp last_login_at "nullable, indexed"
+        string last_login_ip "45, nullable"
+        unsignedInteger failed_login_attempts "default 0"
+        timestamp locked_until "nullable, indexed"
+        string preferred_recovery_method "20, default email, indexed. CHECK: email|2fa|recovery_codes"
+        string remember_token "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    USER_STORE {
-        int id PK
-        int user_id FK
-        int store_id FK
-        int role_id FK "role per-store, not global"
-        boolean is_active
-        datetime assigned_at
-        datetime created_at
-        datetime updated_at
+    roles {
+        bigint id PK
+        string name "80, unique"
+        string slug "100, unique"
+        text description "nullable"
+        boolean is_active "default true, indexed"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    CUSTOMER {
-        int id PK
-        int user_id FK "nullable: guest checkout allowed"
-        string customer_type "retail, wholesale, vip"
-        string identity_document
-        string first_name
-        string last_name
-        string email
-        string phone
-        boolean is_active
-        datetime registered_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    permissions {
+        bigint id PK
+        string name "100"
+        string slug "120, unique"
+        string module "80, indexed"
+        text description "nullable"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    CUSTOMER_STORE {
-        int id PK
-        int customer_id FK
-        int store_id FK
-        string customer_type
-        boolean is_active
-        datetime registered_at
-        datetime created_at
-        datetime updated_at
+    permission_role {
+        bigint id PK
+        bigint role_id FK
+        bigint permission_id FK
+        timestamp created_at
+        timestamp updated_at
     }
 
-    CUSTOMER_ADDRESS {
-        int id PK
-        int customer_id FK
-        string address_type "shipping, billing"
-        string country "default 'Nicaragua'"
-        string department
-        string municipality
+    password_reset_tokens {
+        bigint id PK
+        bigint user_id FK "nullable"
+        string email "indexed"
+        string token_hash
+        timestamp expires_at "indexed"
+        timestamp used_at "nullable, indexed"
+        string request_ip "45, nullable"
+        text user_agent "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    two_factor_settings {
+        bigint id PK
+        bigint user_id FK "unique (1:1)"
+        text secret "was string(255); widened to text 2026-08-13"
+        timestamp enabled_at "nullable, indexed"
+        timestamp last_used_at "nullable"
+        timestamp recovery_codes_generated_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    otp_challenges {
+        bigint id PK
+        bigint user_id FK
+        string type "30: totp|email_otp|recovery_code"
+        string code_hash "255"
+        json context "nullable"
+        timestamp expires_at "indexed"
+        timestamp consumed_at "nullable"
+        unsignedInteger attempts "default 0"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    recovery_codes {
+        bigint id PK
+        bigint user_id FK
+        string code_hash "255"
+        timestamp used_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    social_accounts {
+        bigint id PK
+        bigint user_id FK
+        string provider "16: google|facebook"
+        string provider_user_id "128"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ============== 3. STORES ==============
+
+    stores {
+        bigint id PK
+        bigint currency_id FK "nullable"
+        string name "160"
+        string slug "160, unique"
+        string logo_path "nullable"
+        string favicon_path "nullable"
+        string cover_image_path "nullable"
+        string og_image_path "nullable"
+        string email "150, nullable"
+        string phone "30, nullable"
+        string whatsapp "30, nullable"
+        text address "nullable"
+        text description "nullable"
+        string primary_color "20, nullable"
+        string secondary_color "20, nullable"
+        decimal tax_rate "5,2, default 0. added 2026-07-29"
+        boolean maintenance_mode "default false, indexed"
+        boolean is_active "default true, indexed"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    store_domains {
+        bigint id PK
+        bigint store_id FK
+        string domain "255"
+        string type "20, default domain"
+        string base_path "255, default /"
+        boolean redirect_to_primary "default false"
+        boolean is_primary "default false"
+        boolean is_active "default true"
+        timestamp verified_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    store_social_links {
+        bigint id PK
+        bigint store_id FK
+        string platform "50"
+        string url "255"
+        string display_name "100, nullable"
+        string icon_url "nullable"
+        unsignedInteger sort_order "default 0"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    store_settings {
+        bigint id PK
+        bigint store_id FK
+        string setting_group "80, default general"
+        string setting_key "120"
+        text setting_value "nullable (EAV)"
+        string value_type "20, default string"
+        string description "255, nullable"
+        boolean is_public "default false"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    store_features {
+        bigint id PK
+        bigint store_id FK
+        string slug "100"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    store_themes {
+        bigint id PK
+        bigint store_id FK "unique (1:1)"
+        string short_name "100, nullable"
+        string logo_path "500, nullable"
+        string login_logo_path "500, nullable"
+        string favicon_path "500, nullable"
+        string accent_color "9, nullable hex"
+        string accent_hover_color "9, nullable hex"
+        string primary_color "9, nullable hex"
+        string support_email "255, nullable"
+        string phone "30, nullable"
+        string whatsapp "30, nullable"
+        json tokens "nullable: fonts, spacing"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    sales_channels {
+        bigint id PK
+        bigint store_id FK
+        string name "100"
+        string type "50: web|pos|phone|social|marketplace"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ============== 4. CUSTOMERS ==============
+
+    customers {
+        bigint id PK
+        bigint user_id FK "nullable"
+        string customer_type "50, default retail"
+        string identity_document "80, nullable, unique"
+        string first_name "80"
+        string last_name "80"
+        string email "150, unique"
+        string phone "30, nullable"
+        timestamp registered_at "useCurrent"
+        boolean is_active "default true"
+        timestamp anonymized_at "GDPR, added 2026-09-14"
+        timestamp deletion_requested_at "GDPR, added 2026-09-14"
+        string deletion_token_hash "64, GDPR, added 2026-09-14"
+        timestamp deletion_token_expires_at "GDPR, added 2026-09-14"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    customer_addresses {
+        bigint id PK
+        bigint customer_id FK
+        string address_type "50, default shipping"
+        string country "80, default Nicaragua"
+        string department "100, nullable"
+        string municipality "100, nullable"
         text detailed_address
-        text reference
-        boolean is_primary
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+        text reference "nullable"
+        boolean is_primary "default false"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    CATEGORY {
-        int id PK
-        int parent_id FK "self-reference for hierarchy"
-        string name
-        string slug UK
-        text description
-        string image_path
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    customer_stores {
+        bigint id PK
+        bigint customer_id FK
+        bigint store_id FK
+        timestamp created_at
+        timestamp updated_at
     }
 
-    BRAND {
-        int id PK
-        string name UK
-        string slug UK
-        text description
-        string logo_url
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    %% ============== 5. CATALOG ==============
+
+    categories {
+        bigint id PK
+        bigint parent_id FK "self-ref, nullable. nullOnDelete → orphans become root"
+        string name "120"
+        string slug "150, unique"
+        text description "nullable"
+        string image_path "nullable"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    PRODUCT {
-        int id PK
-        int category_id FK "primary category"
-        int brand_id FK "nullable"
-        int currency_id FK
-        string name
-        string slug UK
-        longtext description
-        string sku UK
-        bigint base_price_cents
-        bigint cost_cents
-        boolean is_active
-        timestamp published_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    brands {
+        bigint id PK
+        string name "120, unique"
+        string slug "150, unique"
+        text description "nullable"
+        string logo_url "nullable"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    CATEGORY_PRODUCT {
-        int id PK
-        int category_id FK
-        int product_id FK
-        datetime created_at
-        datetime updated_at
+    attributes {
+        bigint id PK
+        string name "100"
+        string slug "120, unique"
+        string type "50, default text: text|number|select"
+        text description "nullable"
+        boolean is_filterable "default false"
+        boolean is_required "default false"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    PRODUCT_STORE {
-        int id PK
-        int product_id FK
-        int store_id FK
-        string slug
-        string public_title
-        bigint public_price_cents
-        text public_description
-        string meta_title
-        text meta_description
-        string og_image_url
-        boolean is_visible
-        boolean is_featured
-        int position
-        timestamp published_at
-        timestamp unpublished_at
-        datetime created_at
-        datetime updated_at
+    products {
+        bigint id PK
+        bigint category_id FK
+        bigint brand_id FK "nullable, nullOnDelete"
+        bigint currency_id FK "nullable"
+        string name "160"
+        string slug "180, unique"
+        longText description "nullable"
+        string sku "120, unique"
+        bigInteger product_base_price_cents "money"
+        bigInteger product_cost_cents "money, default 0"
+        boolean is_active "default true"
+        timestamp published_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    PRODUCT_IMAGE {
-        int id PK
-        int product_id FK
+    product_variants {
+        bigint id PK
+        bigint product_id FK
+        string name "160"
+        string sku "120, unique"
+        bigInteger product_price_cents "money"
+        bigInteger product_cost_cents "money, default 0"
+        string barcode "120, nullable, unique"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    product_images {
+        bigint id PK
+        bigint product_id FK
         string image_url
-        string alt_text
-        boolean is_primary
-        int position
-        datetime created_at
-        datetime updated_at
+        string alt_text "160, nullable"
+        boolean is_primary "default false"
+        unsignedInteger sort_order "default 0"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    PRODUCT_STORE_IMAGE {
-        int id PK
-        int product_store_id FK
+    category_product {
+        bigint id PK
+        bigint category_id FK
+        bigint product_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    attribute_product {
+        bigint id PK
+        bigint product_id FK
+        bigint attribute_id FK
+        string value "255, nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    attribute_variant {
+        bigint id PK
+        bigint product_variant_id FK
+        bigint attribute_id FK
+        string value "255, nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    wholesale_prices {
+        bigint id PK
+        bigint product_id FK
+        bigint store_id FK
+        unsignedInteger min_qty "default 1"
+        bigInteger wholesale_price_cents "money"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ============== 6. PRODUCT ↔ STORE / IMAGES PER STORE ==============
+
+    product_stores {
+        bigint id PK
+        bigint product_id FK
+        bigint store_id FK
+        string slug "nullable, unique per store"
+        string public_title "180, nullable"
+        decimal public_price "12,2, nullable"
+        text public_description "nullable"
+        string meta_title "160, nullable (SEO)"
+        text meta_description "nullable (SEO)"
+        string og_image_url "nullable (SEO)"
+        boolean is_visible "default true, indexed"
+        boolean is_featured "default false, indexed"
+        unsignedInteger sort_order "default 0, indexed"
+        timestamp published_at "nullable, indexed"
+        timestamp unpublished_at "nullable, indexed"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    product_store_images {
+        bigint id PK
+        bigint product_store_id FK
         string image_url
-        string alt_text
-        boolean is_primary
-        int position
-        datetime created_at
-        datetime updated_at
+        string alt_text "255, nullable"
+        boolean is_primary "default false"
+        unsignedInteger sort_order "default 0"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    PRODUCT_VARIANT {
-        int id PK
-        int product_id FK
-        string name
-        string sku UK
-        bigint price_cents
-        bigint cost_cents
-        string barcode UK
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    %% ============== 7. INVENTORY ==============
+
+    warehouses {
+        bigint id PK
+        string name "120"
+        text address "nullable"
+        string phone "30, nullable"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    ATTRIBUTE {
-        int id PK
-        string name
-        string slug UK
-        string type
-        text description
-        boolean is_filterable
-        boolean is_required
-        datetime created_at
-        datetime updated_at
+    inventories {
+        bigint id PK
+        bigint warehouse_id FK
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        unsignedInteger current_stock "default 0"
+        unsignedInteger minimum_stock "default 0"
+        unsignedInteger reserved_stock "default 0"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    PRODUCT_ATTRIBUTE_VALUE {
-        int id PK
-        int product_id FK
-        int attribute_id FK
-        string value
-        datetime created_at
-        datetime updated_at
+    inventory_movements {
+        bigint id PK
+        bigint inventory_id FK
+        bigint user_id FK "nullable"
+        string movement_type "50: entry|exit|transfer|adjustment"
+        unsignedInteger quantity
+        unsignedInteger previous_stock "default 0"
+        unsignedInteger new_stock "default 0"
+        text reason "nullable"
+        timestamp movement_date "useCurrent"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    VARIANT_ATTRIBUTE_VALUE {
-        int id PK
-        int product_variant_id FK
-        int attribute_id FK
-        string value
-        datetime created_at
-        datetime updated_at
+    %% ============== 8. PURCHASES (suppliers) ==============
+
+    suppliers {
+        bigint id PK
+        string name "160"
+        string ruc "80, nullable, unique"
+        string phone "30, nullable"
+        string email "150, nullable, unique"
+        text address "nullable"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    WAREHOUSE {
-        int id PK
-        string name
-        text address
-        string phone
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    purchases {
+        bigint id PK
+        bigint supplier_id FK
+        bigint user_id FK "nullable"
+        bigint currency_id FK
+        string purchase_number "80, unique"
+        bigInteger purchases_subtotal_cents "money, default 0"
+        bigInteger purchases_tax_cents "money, default 0"
+        bigInteger purchases_discount_cents "money, default 0"
+        bigInteger purchases_total_cents "money, default 0"
+        string status "50, default pending"
+        timestamp purchased_at "useCurrent"
+        text notes "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    INVENTORY {
-        int id PK
-        int warehouse_id FK
-        int product_id FK
-        int product_variant_id FK "nullable"
-        int current_stock
-        int minimum_stock
-        int reserved_stock
-        datetime created_at
-        datetime updated_at
+    purchase_items {
+        bigint id PK
+        bigint purchase_id FK
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        unsignedInteger quantity
+        bigInteger purchase_items_unit_cost_cents "money"
+        bigInteger purchase_items_subtotal_cents "money"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    INVENTORY_MOVEMENT {
-        int id PK
-        int inventory_id FK
-        int user_id FK
-        string movement_type "in, out, adjustment, transfer"
-        int quantity
-        int previous_stock
-        int new_stock
-        text reason
-        datetime moved_at
-        datetime created_at
-        datetime updated_at
+    %% ============== 9. CARTS / WISHLISTS / BULK-CART ==============
+
+    carts {
+        bigint id PK
+        bigint customer_id FK
+        bigint store_id FK
+        bigint currency_id FK
+        string status "50, default active"
+        timestamp expires_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    SUPPLIER {
-        int id PK
-        string name
-        string ruc
-        string phone
-        string email
-        text address
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    cart_items {
+        bigint id PK
+        bigint cart_id FK
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        bigint custom_design_id FK "nullable"
+        string cart_line_key "64"
+        unsignedInteger quantity "default 1"
+        bigInteger cart_items_unit_price_cents "money"
+        bigInteger cart_items_subtotal_cents "money"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    PURCHASE {
-        int id PK
-        int supplier_id FK
-        int user_id FK
-        int currency_id FK
-        string purchase_number UK
-        bigint subtotal_cents
-        bigint tax_cents
-        bigint discount_cents
-        bigint total_cents
-        string status "pending, received, cancelled"
-        timestamp purchased_at
-        text notes
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    wishlists {
+        bigint id PK
+        bigint customer_id FK
+        bigint store_id FK "nullable"
+        string name "100, default Default Wishlist"
+        boolean is_default "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    PURCHASE_ITEM {
-        int id PK
-        int purchase_id FK
-        int product_id FK
-        int product_variant_id FK "nullable"
-        int quantity
-        bigint unit_cost_cents
-        bigint subtotal_cents
-        datetime created_at
-        datetime updated_at
+    wishlist_items {
+        bigint id PK
+        bigint wishlist_id FK
+        bigint product_id FK
+        timestamp added_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    CART {
-        int id PK
-        int customer_id FK
-        int store_id FK
-        int currency_id FK
-        string status "active, converted, abandoned"
-        timestamp expires_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    bulk_cart_items {
+        bigint id PK
+        bigint customer_id FK
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        unsignedInteger quantity
+        string notes "500, nullable"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    CART_ITEM {
-        int id PK
-        int cart_id FK
-        int product_id FK
-        int product_variant_id FK "nullable"
-        int custom_design_id FK "nullable"
-        string cart_line_key "unique within cart_id"
-        int quantity
-        bigint unit_price_cents
-        bigint subtotal_cents
-        datetime created_at
-        datetime updated_at
+    %% ============== 10. SALES (orders + invoices + histories) ==============
+
+    orders {
+        bigint id PK
+        bigint customer_id FK
+        bigint shipping_address_id FK "nullable"
+        bigint store_id FK
+        bigint sales_channel_id FK "nullable"
+        bigint user_creator_id FK "nullable"
+        bigint currency_id FK
+        string order_number "80, unique"
+        bigInteger orders_subtotal_cents "money, default 0"
+        bigInteger orders_discount_cents "money, default 0"
+        bigInteger orders_tax_cents "money, default 0"
+        bigInteger orders_shipping_cents "money, default 0"
+        bigInteger orders_total_cents "money, default 0"
+        decimal exchange_rate_snapshot "18,8"
+        bigInteger orders_total_in_base_currency_cents "money, default 0"
+        string status "50, default pending"
+        timestamp ordered_at "useCurrent"
+        text notes "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    WISHLIST {
-        int id PK
-        int customer_id FK
-        int store_id FK
-        string name
-        boolean is_default
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    order_items {
+        bigint id PK
+        bigint order_id FK
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        bigint custom_design_id FK "nullable"
+        unsignedInteger quantity
+        bigInteger order_items_unit_price_cents "money"
+        bigInteger order_items_discount_cents "money, default 0"
+        bigInteger order_items_subtotal_cents "money"
+        string product_name_snapshot "160, nullable"
+        string product_sku_snapshot "120, nullable"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    WISHLIST_ITEM {
-        int id PK
-        int wishlist_id FK
-        int product_id FK
-        timestamp added_at
-        datetime created_at
-        datetime updated_at
+    order_status_histories {
+        bigint id PK
+        bigint order_id FK
+        bigint user_id FK "nullable"
+        string previous_status "50, nullable"
+        string new_status "50"
+        text observation "nullable"
+        timestamp changed_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    CUSTOM_DESIGN {
-        int id PK
-        int customer_id FK "nullable"
-        int user_id FK "nullable"
-        int product_id FK
-        int product_variant_id FK "nullable"
-        string name
-        string status "draft, ready"
-        string preview_url
-        string production_file_url
-        json metadata
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    ORDER {
-        int id PK
-        int customer_id FK
-        int shipping_address_id FK
-        int store_id FK
-        int sales_channel_id FK
-        int user_creator_id FK
-        int currency_id FK
-        string order_number UK
-        bigint subtotal_cents
-        bigint discount_cents
-        bigint tax_cents
-        bigint shipping_cents
-        bigint total_cents
-        decimal exchange_rate_snapshot "decimal(18,8) — frozen at sale"
-        bigint total_in_base_currency_cents
-        string status
-        timestamp ordered_at
-        text notes
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    ORDER_ITEM {
-        int id PK
-        int order_id FK
-        int product_id FK
-        int product_variant_id FK "nullable"
-        int custom_design_id FK "nullable"
-        int quantity
-        bigint unit_price_cents
-        bigint discount_cents
-        bigint subtotal_cents
-        string product_name_snapshot "preserved at order time"
-        string product_sku_snapshot "preserved at order time"
-        datetime created_at
-        datetime updated_at
-    }
-
-    ORDER_STATUS_HISTORY {
-        int id PK
-        int order_id FK
-        int user_id FK "nullable"
-        string previous_status
-        string new_status
-        text observation
-        timestamp changed_at
-        datetime created_at
-        datetime updated_at
-    }
-
-    INVOICE {
-        int id PK
-        int order_id FK "nullable"
-        int customer_id FK
-        int store_id FK
-        int sales_channel_id FK
-        int user_issuer_id FK
-        int currency_id FK
-        string invoice_number UK
-        bigint subtotal_cents
-        bigint discount_cents
-        bigint tax_cents
-        bigint total_cents
-        decimal exchange_rate_snapshot "decimal(18,8) — frozen at issue"
-        string payment_status "pending, partial, paid, refunded"
-        string invoice_status "issued, cancelled"
-        timestamp issued_at
-        timestamp due_at
-        text notes
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    INVOICE_ITEM {
-        int id PK
-        int invoice_id FK
-        int product_id FK
-        int product_variant_id FK "nullable"
-        int quantity
-        bigint unit_price_cents
-        bigint subtotal_cents
-        string product_name_snapshot
-        string product_sku_snapshot
-        datetime created_at
-        datetime updated_at
-    }
-
-    INVOICE_STATUS_HISTORY {
-        int id PK
-        int invoice_id FK
-        int user_id FK "nullable"
-        string previous_status
-        string new_status
-        text observation
-        timestamp changed_at
-        datetime created_at
-        datetime updated_at
-    }
-
-    PAYMENT_METHOD {
-        int id PK
-        string code UK
-        string name
-        string provider "stripe, paypal, cash, etc."
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-    }
-
-    PAYMENT {
-        int id PK
-        int customer_id FK
-        int payment_method_id FK
-        int store_id FK
-        int currency_id FK
-        bigint amount_cents
-        decimal exchange_rate_snapshot
-        string reference
-        string status "pending, completed, failed, refunded"
-        timestamp paid_at
-        text notes
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    INVOICE_PAYMENT {
-        int id PK
-        int invoice_id FK
-        int payment_id FK
-        bigint applied_amount_cents "ledger: SUM per invoice = paid"
-        timestamp applied_at
-        datetime created_at
-        datetime updated_at
-    }
-
-    PAYMENT_TRANSACTION {
-        int id PK
-        int payment_id FK
-        string payment_provider
-        string transaction_code
-        longtext provider_response
-        bigint amount_cents "nullable — partial provider auth"
-        string status
-        timestamp transacted_at
-        datetime created_at
-        datetime updated_at
-    }
-
-    SHIPPING_COMPANY {
-        int id PK
-        string name
-        string phone
-        string email
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    SHIPPING_ZONE {
-        int id PK
-        string name
-        text description
-        decimal base_cost "decimal(12,2) — currency-agnostic fee"
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    SHIPMENT {
-        int id PK
-        int order_id FK
-        int shipping_company_id FK "nullable"
-        int shipping_zone_id FK "nullable"
-        int currency_id FK
-        string tracking_code UK
-        string tracking_url
-        string last_event_status
-        string last_event_location
-        timestamp last_event_at
-        bigint shipping_cost_cents
-        string status
-        timestamp shipped_at
-        timestamp delivered_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    COUPON {
-        int id PK
-        int store_id FK "nullable: global coupons allowed"
-        string code UK
-        string discount_type "percentage, fixed"
-        decimal value
-        decimal minimum_amount
-        date valid_from
-        date valid_to
-        int usage_limit
-        int current_usages
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    COUPON_USAGE {
-        int id PK
-        int coupon_id FK
-        int customer_id FK
-        int order_id FK "nullable: dry-run usage"
-        timestamp used_at
-        datetime created_at
-        datetime updated_at
-    }
-
-    PROMOTION {
-        int id PK
-        int store_id FK "nullable: global promotions allowed"
-        string name
-        text description
-        string discount_type
-        decimal value
-        date valid_from
-        date valid_to
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    PRODUCT_PROMOTION {
-        int id PK
-        int product_id FK
-        int promotion_id FK
-        datetime created_at
-        datetime updated_at
-    }
-
-    TAX {
-        int id PK
-        string name
-        decimal percentage
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    PRODUCT_TAX {
-        int id PK
-        int product_id FK
-        int tax_id FK
-        datetime created_at
-        datetime updated_at
-    }
-
-    WHOLESALE_PRICE {
-        int id PK
-        int product_id FK
-        int store_id FK
-        int min_qty "default 1 — base wholesale price"
-        bigint price_cents
-        datetime created_at
-        datetime updated_at
-    }
-
-    RETURN_REQUEST {
-        int id PK
-        int store_id FK
-        int order_id FK
-        int customer_id FK
-        text reason
-        string status "pending, approved, rejected, completed"
-        timestamp requested_at
-        timestamp resolved_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    RETURN_REQUEST_ITEM {
-        int id PK
-        int return_request_id FK
-        int product_id FK
-        int product_variant_id FK "nullable"
-        int quantity
-        bigint amount_cents
-        datetime created_at
-        datetime updated_at
-    }
-
-    REFUND {
-        int id PK
-        int store_id FK
-        int return_request_id FK
-        int payment_method_id FK "nullable"
-        int currency_id FK
-        bigint amount_cents
-        decimal exchange_rate_snapshot
-        string status
-        timestamp refunded_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
-    }
-
-    ORDER_CUSTOM_DESIGN {
-        int id PK
-        int order_id FK
-        int order_item_id FK
-        int custom_design_id FK "nullable"
+    order_custom_designs {
+        bigint id PK
+        bigint order_id FK
+        bigint order_item_id FK "unique (1:1 per order item)"
+        bigint custom_design_id FK "nullable"
         json design_snapshot
-        string production_file_url
-        string production_status
-        text production_notes
-        int reviewed_by FK "nullable, references users.id"
-        timestamp reviewed_at
-        timestamp approved_at
-        timestamp rejected_at
-        text rejection_reason
-        timestamp production_started_at
-        timestamp production_completed_at
-        datetime created_at
-        datetime updated_at
+        string production_file_url "nullable"
+        string production_status "40, default pending, indexed"
+        text production_notes "nullable"
+        bigint reviewed_by FK "nullable → users"
+        timestamp reviewed_at "nullable, indexed"
+        timestamp approved_at "nullable, indexed"
+        timestamp rejected_at "nullable, indexed"
+        text rejection_reason "nullable"
+        timestamp production_started_at "nullable, indexed"
+        timestamp production_completed_at "nullable, indexed"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    PRODUCT_REVIEW {
-        int id PK
-        int product_id FK
-        int customer_id FK
-        int store_id FK "nullable: global reviews allowed"
-        tinyint rating "1..5"
-        text comment
-        boolean is_approved
-        timestamp reviewed_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+    invoices {
+        bigint id PK
+        bigint order_id FK "nullable"
+        bigint customer_id FK
+        bigint store_id FK
+        bigint sales_channel_id FK "nullable"
+        bigint user_issuer_id FK "nullable"
+        bigint currency_id FK
+        string invoice_number "80, unique"
+        bigInteger invoices_subtotal_cents "money, default 0"
+        bigInteger invoices_discount_cents "money, default 0"
+        bigInteger invoices_tax_cents "money, default 0"
+        bigInteger invoices_shipping_cents "money, default 0, added 2026-07-29"
+        bigInteger invoices_total_cents "money, default 0"
+        decimal exchange_rate_snapshot "18,8"
+        bigInteger invoices_refunded_cents "money, default 0, added 2026-07-31"
+        bigint shipping_zone_id FK "nullable, added 2026-07-31"
+        string payment_status "50, default pending"
+        string invoice_status "50, default issued"
+        timestamp issued_at "useCurrent"
+        timestamp due_at "nullable"
+        text notes "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    PRODUCT_QUESTION {
-        int id PK
-        int product_id FK
-        int customer_id FK
-        int store_id FK "nullable"
+    invoice_items {
+        bigint id PK
+        bigint invoice_id FK
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        unsignedInteger quantity
+        bigInteger invoice_items_unit_price_cents "money"
+        bigInteger invoice_items_subtotal_cents "money"
+        string product_name_snapshot "160, nullable"
+        string product_sku_snapshot "120, nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    invoice_status_histories {
+        bigint id PK
+        bigint invoice_id FK
+        bigint user_id FK "nullable"
+        string previous_status "50, nullable"
+        string new_status "50"
+        text observation "nullable"
+        timestamp changed_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ============== 11. PAYMENTS ==============
+
+    payment_methods {
+        bigint id PK
+        string code "80, unique"
+        string name "160"
+        string provider "80, nullable"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    payments {
+        bigint id PK
+        bigint customer_id FK
+        bigint payment_method_id FK
+        bigint store_id FK
+        bigint currency_id FK
+        bigInteger payments_amount_cents "money"
+        decimal exchange_rate_snapshot "18,8"
+        string reference "160, nullable"
+        string status "50, default pending"
+        timestamp paid_at "nullable"
+        text notes "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    invoice_payments {
+        bigint id PK
+        bigint invoice_id FK
+        bigint payment_id FK
+        bigInteger invoice_payments_applied_amount_cents "money"
+        timestamp applied_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    payment_transactions {
+        bigint id PK
+        bigint payment_id FK
+        string payment_provider "80"
+        string transaction_code "160, nullable"
+        longText provider_response "nullable"
+        bigInteger payment_transactions_amount_cents "money, nullable"
+        string status "50, default pending"
+        timestamp transacted_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ============== 12. SHIPPING ==============
+
+    shipping_companies {
+        bigint id PK
+        string name "160"
+        string phone "30, nullable"
+        string email "150, nullable"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    shipping_zones {
+        bigint id PK
+        bigint store_id FK "nullable, added 2026-08-15. NULL = global"
+        string name "160"
+        text description "nullable"
+        bigInteger shipping_zones_base_cost_cents "money, default 0. replaces decimal base_cost (2026-07-29)"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    shipments {
+        bigint id PK
+        bigint order_id FK
+        bigint shipping_company_id FK "nullable"
+        bigint shipping_zone_id FK "nullable"
+        bigint currency_id FK
+        string tracking_code "160, nullable, unique"
+        string tracking_url "nullable"
+        string last_event_status "80, nullable"
+        string last_event_location "nullable"
+        timestamp last_event_at "nullable"
+        bigInteger shipments_shipping_cost_cents "money, default 0"
+        string status "50, default pending"
+        timestamp shipped_at "nullable"
+        timestamp delivered_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    %% ============== 13. MARKETING ==============
+
+    coupons {
+        bigint id PK
+        bigint store_id FK "nullable. NULL = global coupon"
+        string code "80, unique"
+        string discount_type "50: percentage|fixed|free_shipping"
+        decimal coupons_value "12,2"
+        decimal coupons_minimum_amount "12,2, default 0"
+        date starts_at "nullable"
+        date ends_at "nullable"
+        unsignedInteger usage_limit "nullable"
+        unsignedInteger used_count "default 0"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    promotions {
+        bigint id PK
+        bigint store_id FK "nullable. NULL = global promotion"
+        string name "160"
+        text description "nullable"
+        string discount_type "50"
+        decimal promotions_value "12,2"
+        date starts_at "nullable"
+        date ends_at "nullable"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    coupon_usages {
+        bigint id PK
+        bigint coupon_id FK
+        bigint customer_id FK
+        bigint order_id FK "nullable. partial unique idx (coupon_id, customer_id, order_id WHERE order_id IS NOT NULL)"
+        timestamp used_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    product_promotion {
+        bigint id PK
+        bigint product_id FK
+        bigint promotion_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ============== 14. TAXES ==============
+
+    taxes {
+        bigint id PK
+        string name "100"
+        decimal taxes_percentage "5,2"
+        boolean is_active "default true"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    product_tax {
+        bigint id PK
+        bigint product_id FK
+        bigint tax_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ============== 15. RETURNS / REFUNDS ==============
+
+    return_requests {
+        bigint id PK
+        bigint store_id FK
+        bigint order_id FK
+        bigint customer_id FK
+        text reason
+        string status "50, default pending"
+        timestamp requested_at "useCurrent"
+        timestamp resolved_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    return_request_items {
+        bigint id PK
+        bigint return_request_id FK
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        unsignedInteger quantity
+        bigInteger return_request_items_amount_cents "money"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    refunds {
+        bigint id PK
+        bigint store_id FK
+        bigint return_request_id FK
+        bigint payment_method_id FK "nullable"
+        bigint currency_id FK
+        bigInteger refunds_amount_cents "money"
+        decimal exchange_rate_snapshot "18,8"
+        string status "50, default pending"
+        timestamp refunded_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    %% ============== 16. SUPPORT ==============
+
+    product_reviews {
+        bigint id PK
+        bigint product_id FK
+        bigint customer_id FK
+        bigint store_id FK "nullable"
+        unsignedTinyInteger rating "1-5"
+        text comment "nullable"
+        boolean is_approved "default false"
+        timestamp reviewed_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
+
+    product_questions {
+        bigint id PK
+        bigint product_id FK
+        bigint customer_id FK
+        bigint store_id FK "nullable"
         text question
-        text answer
-        timestamp asked_at
-        timestamp answered_at
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+        text answer "nullable"
+        timestamp asked_at "useCurrent"
+        timestamp answered_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    SUPPORT_TICKET {
-        int id PK
-        int customer_id FK
-        int store_id FK "nullable"
-        string subject
+    support_tickets {
+        bigint id PK
+        bigint customer_id FK
+        bigint store_id FK "nullable"
+        string subject "200"
         text description
-        string status
-        string priority
-        datetime created_at
-        datetime updated_at
-        datetime deleted_at
+        string status "50, default open"
+        string priority "50, default normal"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
     }
 
-    SUPPORT_TICKET_MESSAGE {
-        int id PK
-        int support_ticket_id FK
-        int user_id FK
+    support_ticket_messages {
+        bigint id PK
+        bigint support_ticket_id FK
+        bigint user_id FK "nullable"
         text message
-        timestamp messaged_at
-        datetime created_at
-        datetime updated_at
+        timestamp messaged_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    NOTIFICATION {
-        int id PK
-        int store_id FK "nullable"
-        int user_id FK
-        string title
-        text body
-        string type
-        boolean is_read
-        timestamp read_at
-        datetime created_at
-        datetime updated_at
+    %% ============== 17. SYSTEM (notifications + audits) ==============
+
+    notifications {
+        bigint id PK
+        bigint user_id FK
+        bigint store_id FK "nullable"
+        string title "200"
+        text message
+        string type "50, default info"
+        boolean is_read "default false"
+        timestamp read_at "nullable"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    AUDIT {
-        int id PK
-        int store_id FK "nullable"
-        int user_id FK "nullable"
-        string action "created, updated, deleted"
-        string table_name
-        string record_id
-        text description
-        json old_values
-        json new_values
-        string ip_address
-        text user_agent
-        timestamp registered_at
-        datetime created_at
-        datetime updated_at
+    audits {
+        bigint id PK
+        bigint user_id FK "nullable"
+        bigint store_id FK "nullable"
+        string action "80"
+        string table_name "100"
+        string record_id "50, nullable"
+        text description "nullable"
+        json old_values "nullable"
+        json new_values "nullable"
+        string ip_address "45, nullable"
+        text user_agent "nullable"
+        timestamp registered_at "useCurrent"
+        timestamp created_at
+        timestamp updated_at
     }
 
-    %% ---- Currency / FX ----
-    CURRENCY ||--o{ EXCHANGE_RATE : "from"
-    CURRENCY ||--o{ EXCHANGE_RATE : "to"
+    %% ============== 18. CUSTOMIZATION ==============
 
-    %% ---- Store fan-out ----
-    STORE ||--o{ STORE_DOMAIN : owns
-    STORE ||--o{ STORE_SOCIAL_LINK : has
-    STORE ||--o{ STORE_SETTING : configures
-    STORE ||--o| STORE_THEME : "1:1 branding"
-    STORE ||--o{ STORE_FEATURE : "N:1 enables flags"
-    STORE ||--o{ SALES_CHANNEL : operates
-    STORE ||--o{ USER_STORE : assigns
-    STORE ||--o{ CUSTOMER_STORE : serves
-    STORE ||--o{ PRODUCT_STORE : publishes
-    STORE ||--o{ CART : contains
-    STORE ||--o{ WISHLIST : contains
-    STORE ||--o{ ORDER : receives
-    STORE ||--o{ INVOICE : issues
-    STORE ||--o{ PAYMENT : registers
-    STORE ||--o{ COUPON : offers
-    STORE ||--o{ PROMOTION : runs
-    STORE ||--o{ RETURN_REQUEST : tracks
-    STORE ||--o{ REFUND : records
-    STORE ||--o{ PRODUCT_REVIEW : hosts
-    STORE ||--o{ PRODUCT_QUESTION : hosts
-    STORE ||--o{ SUPPORT_TICKET : handles
-    STORE ||--o{ NOTIFICATION : generates
-    STORE ||--o{ AUDIT : scopes
-    STORE ||--o{ CART : holds
-    STORE ||--o{ WHOLESALE_PRICE : "tier prices"
+    custom_designs {
+        bigint id PK
+        bigint customer_id FK "nullable"
+        bigint user_id FK "nullable"
+        bigint product_id FK
+        bigint product_variant_id FK "nullable"
+        string name "nullable"
+        string status "40, default draft, indexed"
+        string preview_url "nullable"
+        string production_file_url "nullable"
+        json metadata "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft delete"
+    }
 
-    %% ---- Auth ----
-    ROLE ||--o{ USER : global_role
-    ROLE ||--o{ USER_STORE : per_store_role
-    ROLE ||--o{ ROLE_PERMISSION : grants
-    PERMISSION ||--o{ ROLE_PERMISSION : belongs_to
-    USER ||--o{ PASSWORD_RESET_TOKEN : requests_recovery
-    USER ||--o| TWO_FACTOR_SETTING : "1:1 optional (0..1)"
-    USER ||--o{ OTP_CHALLENGE : consumes
-    USER ||--o{ RECOVERY_CODE : "owns. Cascade on user delete."
+    %% ============== 19. SETTINGS (currencies + exchange rates) ==============
 
-    %% ---- User fan-out ----
-    USER ||--o| CUSTOMER : linked_to
-    USER ||--o{ USER_STORE : has_access
-    USER ||--o{ INVENTORY_MOVEMENT : triggers
-    USER ||--o{ PURCHASE : creates
-    USER ||--o{ ORDER : creates
-    USER ||--o{ INVOICE : issues
-    USER ||--o{ ORDER_STATUS_HISTORY : changes
-    USER ||--o{ INVOICE_STATUS_HISTORY : changes
-    USER ||--o{ SUPPORT_TICKET_MESSAGE : writes
-    USER ||--o{ NOTIFICATION : receives
-    USER ||--o{ AUDIT : actor
-    USER ||--o{ CUSTOM_DESIGN : creates
-    USER ||--o{ ORDER_CUSTOM_DESIGN : reviews
+    currencies {
+        bigint id PK
+        string code "3, ISO 4217, unique"
+        string name "80"
+        string symbol "8"
+        unsignedTinyInteger decimal_places "default 2"
+        boolean is_primary "default false, indexed"
+        boolean is_active "default true, indexed"
+        timestamp created_at
+        timestamp updated_at
+    }
 
-    %% ---- Customer fan-out ----
-    CUSTOMER ||--o{ CUSTOMER_STORE : linked
-    CUSTOMER ||--o{ CUSTOMER_ADDRESS : has
-    CUSTOMER ||--o{ CART : owns
-    CUSTOMER ||--o{ WISHLIST : owns
-    CUSTOMER ||--o{ ORDER : places
-    CUSTOMER ||--o{ INVOICE : receives
-    CUSTOMER ||--o{ PAYMENT : makes
-    CUSTOMER ||--o{ COUPON_USAGE : uses
-    CUSTOMER ||--o{ RETURN_REQUEST : requests
-    CUSTOMER ||--o{ PRODUCT_REVIEW : writes
-    CUSTOMER ||--o{ PRODUCT_QUESTION : asks
-    CUSTOMER ||--o{ SUPPORT_TICKET : opens
-    CUSTOMER ||--o{ CUSTOM_DESIGN : authors
+    exchange_rates {
+        bigint id PK
+        bigint from_currency_id FK
+        bigint to_currency_id FK
+        decimal exchange_rates_value "18,8"
+        date rate_date
+        timestamp created_at
+        timestamp updated_at
+    }
 
-    %% ---- Catalog ----
-    CATEGORY ||--o{ CATEGORY : parent_of
-    CATEGORY ||--o{ PRODUCT : primary
-    CATEGORY ||--o{ CATEGORY_PRODUCT : many_to_many
-    PRODUCT ||--o{ CATEGORY_PRODUCT : many_to_many
-    BRAND ||--o{ PRODUCT : manufactures
+    %% ============== 20. STOREFRONT (RFQ — Quote Requests) ==============
 
-    %% ---- Catalog publishing ----
-    PRODUCT ||--o{ PRODUCT_STORE : appears_in
-    PRODUCT ||--o{ PRODUCT_IMAGE : has
-    PRODUCT_STORE ||--o{ PRODUCT_STORE_IMAGE : has
-    PRODUCT ||--o{ PRODUCT_VARIANT : has
-    PRODUCT ||--o{ PRODUCT_ATTRIBUTE_VALUE : has
-    PRODUCT_VARIANT ||--o{ VARIANT_ATTRIBUTE_VALUE : has
-    PRODUCT ||--o{ CART_ITEM : line_in
-    PRODUCT ||--o{ WISHLIST_ITEM : saved_in
-    PRODUCT ||--o{ ORDER_ITEM : line_in
-    PRODUCT ||--o{ INVOICE_ITEM : line_in
-    PRODUCT ||--o{ PURCHASE_ITEM : line_in
-    PRODUCT ||--o{ RETURN_REQUEST_ITEM : line_in
-    PRODUCT ||--o{ PRODUCT_PROMOTION : promotes
-    PRODUCT ||--o{ PRODUCT_TAX : taxed_by
-    PRODUCT ||--o{ PRODUCT_REVIEW : receives
-    PRODUCT ||--o{ PRODUCT_QUESTION : receives
-    PRODUCT ||--o{ CUSTOM_DESIGN : base_of
-    PRODUCT ||--o{ WHOLESALE_PRICE : "tier prices"
+    rfq_requests {
+        bigint id PK
+        string public_id "30, unique. RFQ-{timestamp36}"
+        bigint store_id FK "nullable, restrictOnDelete"
+        bigint customer_id FK "nullable, nullOnDelete"
+        string contact_name "200"
+        string contact_email "200"
+        string contact_phone "50, nullable"
+        string company_name "200, nullable"
+        string subject "200"
+        text message
+        json items "nullable: array {product_id, variant_id?, quantity, notes?}"
+        string status "30, default pending: pending|quoted|accepted|rejected"
+        bigInteger rfq_requests_estimated_total_cents "money, nullable"
+        string currency_code "3, nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
 
-    PRODUCT_VARIANT ||--o{ CART_ITEM : variant_in
-    PRODUCT_VARIANT ||--o{ ORDER_ITEM : variant_in
-    PRODUCT_VARIANT ||--o{ INVOICE_ITEM : variant_in
-    PRODUCT_VARIANT ||--o{ PURCHASE_ITEM : variant_in
-    PRODUCT_VARIANT ||--o{ RETURN_REQUEST_ITEM : variant_in
-    PRODUCT_VARIANT ||--o{ INVENTORY : stocked_as
-    PRODUCT_VARIANT ||--o{ CUSTOM_DESIGN : variant_of
+    %% ============== 21. USER ↔ STORE pivot ==============
 
-    ATTRIBUTE ||--o{ PRODUCT_ATTRIBUTE_VALUE : defines
-    ATTRIBUTE ||--o{ VARIANT_ATTRIBUTE_VALUE : defines
+    user_stores {
+        bigint id PK
+        bigint user_id FK
+        bigint store_id FK
+        bigint role_id FK "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
 
-    %% ---- Inventory ----
-    WAREHOUSE ||--o{ INVENTORY : stocks
-    INVENTORY ||--o{ INVENTORY_MOVEMENT : logs
+    %% =====================================================================
+    %% RELATIONSHIPS
+    %% =====================================================================
+    %% 
+    %% Cardinality legend:
+    %%   ||--o{  : exactly one to zero-or-many
+    %%   ||--||  : exactly one to exactly one
+    %%   ||--o|  : exactly one to zero-or-one
+    %%   }o--o{  : zero-or-many to zero-or-many (pivots)
+    %% =====================================================================
 
-    %% ---- Purchases ----
-    SUPPLIER ||--o{ PURCHASE : supplies
-    PURCHASE ||--o{ PURCHASE_ITEM : contains
+    %% ----- AUTH -----
+    roles ||--o{ users : "users.role_id → roles.id (nullable)"
+    roles ||--o{ permission_role : ""
+    permissions ||--o{ permission_role : ""
+    users ||--o{ sessions : ""
+    users ||--|| two_factor_settings : "unique 1:1"
+    users ||--o{ otp_challenges : ""
+    users ||--o{ recovery_codes : ""
+    users ||--o{ social_accounts : ""
+    users ||--o{ password_reset_tokens : "nullable"
+    users ||--o{ passkeys : ""
 
-    %% ---- Carts ----
-    CART ||--o{ CART_ITEM : contains
-    CUSTOM_DESIGN ||--o{ CART_ITEM : attached_to
+    %% ----- STORES / TENANCY -----
+    stores ||--o{ store_domains : ""
+    stores ||--o{ store_social_links : ""
+    stores ||--o{ store_settings : ""
+    stores ||--o{ store_features : ""
+    stores ||--|| store_themes : "1:1"
+    stores ||--o{ sales_channels : ""
+    stores ||--o{ customer_stores : ""
+    stores ||--o{ user_stores : ""
+    stores ||--o{ product_stores : ""
+    stores ||--o{ wholesale_prices : ""
+    stores ||--o{ coupons : "nullable (NULL = global)"
+    stores ||--o{ promotions : "nullable"
+    stores ||--o{ shipping_zones : "nullable (NULL = global), added 2026-08-15"
+    stores ||--o{ shipping_companies : "no FK (global)"
+    stores ||--o{ orders : ""
+    stores ||--o{ invoices : ""
+    stores ||--o{ payments : ""
+    stores ||--o{ refunds : ""
+    stores ||--o{ return_requests : ""
+    stores ||--o{ carts : ""
+    stores ||--o{ wishlists : "nullable"
+    stores ||--o{ product_reviews : "nullable"
+    stores ||--o{ product_questions : "nullable"
+    stores ||--o{ support_tickets : "nullable"
+    stores ||--o{ notifications : "nullable"
+    stores ||--o{ audits : "nullable"
+    stores ||--o{ rfq_requests : "nullable"
+    user_stores }o--|| users : ""
+    user_stores }o--|| stores : ""
+    user_stores }o--o| roles : "role per store"
 
-    %% ---- Wishlists ----
-    WISHLIST ||--o{ WISHLIST_ITEM : contains
+    %% ----- CUSTOMERS -----
+    users ||--o{ customers : "customers.user_id (nullable → guest customers)"
+    customers ||--o{ customer_addresses : ""
+    customers ||--o{ customer_stores : ""
+    customers ||--o{ carts : ""
+    customers ||--o{ wishlists : ""
+    customers ||--o{ bulk_cart_items : ""
+    customers ||--o{ orders : ""
+    customers ||--o{ invoices : ""
+    customers ||--o{ payments : ""
+    customers ||--o{ coupon_usages : ""
+    customers ||--o{ product_reviews : ""
+    customers ||--o{ product_questions : ""
+    customers ||--o{ support_tickets : ""
+    customers ||--o{ return_requests : ""
+    customers ||--o{ custom_designs : "nullable"
+    customer_stores }o--|| customers : ""
+    customer_stores }o--|| stores : ""
+    customer_addresses ||--o{ orders : "orders.shipping_address_id (nullable)"
 
-    %% ---- Sales ----
-    CUSTOMER_ADDRESS ||--o{ ORDER : shipped_to
-    SALES_CHANNEL ||--o{ ORDER : sourced_from
-    ORDER ||--o{ ORDER_ITEM : contains
-    ORDER ||--o{ ORDER_STATUS_HISTORY : tracks
-    ORDER ||--o| INVOICE : bills
-    ORDER ||--o| SHIPMENT : ships
-    ORDER ||--o{ COUPON_USAGE : applies
-    ORDER ||--o{ RETURN_REQUEST : subject_of
-    ORDER ||--o{ ORDER_CUSTOM_DESIGN : customizes
-    ORDER_ITEM ||--o| ORDER_CUSTOM_DESIGN : realizes
+    %% ----- CATALOG -----
+    categories ||--o{ categories : "self-ref (parent_id, nullOnDelete → root)"
+    categories ||--o{ category_product : ""
+    products ||--o{ category_product : ""
+    category_product }o--|| categories : ""
+    category_product }o--|| products : ""
+    categories ||--o{ products : "products.category_id"
+    brands ||--o{ products : "products.brand_id (nullable)"
+    currencies ||--o{ products : "products.currency_id (nullable)"
+    products ||--o{ product_variants : ""
+    products ||--o{ product_images : ""
+    products ||--o{ attribute_product : ""
+    attributes ||--o{ attribute_product : ""
+    attribute_product }o--|| products : ""
+    attribute_product }o--|| attributes : ""
+    product_variants ||--o{ attribute_variant : ""
+    attributes ||--o{ attribute_variant : ""
+    attribute_variant }o--|| product_variants : ""
+    attribute_variant }o--|| attributes : ""
+    product_stores }o--|| products : ""
+    product_stores }o--|| stores : ""
+    product_stores ||--o{ product_store_images : ""
+    stores ||--o{ wholesale_prices : ""
+    products ||--o{ wholesale_prices : ""
 
-    INVOICE ||--o{ INVOICE_ITEM : contains
-    INVOICE ||--o{ INVOICE_STATUS_HISTORY : tracks
-    INVOICE ||--o{ INVOICE_PAYMENT : receives
-    INVOICE_PAYMENT ||--o{ PAYMENT : applies_to
+    %% ----- INVENTORY -----
+    warehouses ||--o{ inventories : ""
+    products ||--o{ inventories : ""
+    product_variants ||--o{ inventories : "nullable"
+    inventories ||--o{ inventory_movements : ""
+    users ||--o{ inventory_movements : "nullable (system movements allowed)"
 
-    %% ---- Payments ----
-    PAYMENT_METHOD ||--o{ PAYMENT : used_in
-    PAYMENT_METHOD ||--o{ REFUND : used_in
-    PAYMENT ||--o{ INVOICE_PAYMENT : applied_via
-    PAYMENT ||--o{ PAYMENT_TRANSACTION : logs
+    %% ----- PURCHASES -----
+    suppliers ||--o{ purchases : ""
+    currencies ||--o{ purchases : "purchases.currency_id"
+    users ||--o{ purchases : "purchases.user_id (nullable)"
+    purchases ||--o{ purchase_items : ""
+    products ||--o{ purchase_items : ""
+    product_variants ||--o{ purchase_items : "nullable"
 
-    %% ---- Shipping ----
-    SHIPPING_COMPANY ||--o{ SHIPMENT : delivers
-    SHIPPING_ZONE ||--o{ SHIPMENT : covers
+    %% ----- CARTS / WISHLISTS -----
+    carts ||--o{ cart_items : ""
+    cart_items }o--|| products : ""
+    cart_items }o--o| product_variants : "nullable"
+    cart_items }o--o| custom_designs : "nullable"
+    wishlists ||--o{ wishlist_items : ""
+    wishlist_items }o--|| wishlists : ""
+    wishlist_items }o--|| products : ""
+    bulk_cart_items }o--|| customers : ""
+    bulk_cart_items }o--|| products : ""
+    bulk_cart_items }o--o| product_variants : "nullable"
 
-    %% ---- Marketing ----
-    COUPON ||--o{ COUPON_USAGE : records
-    PROMOTION ||--o{ PRODUCT_PROMOTION : applies_to
+    %% ----- SALES -----
+    currencies ||--o{ orders : "orders.currency_id"
+    sales_channels ||--o{ orders : "orders.sales_channel_id (nullable)"
+    users ||--o{ orders : "orders.user_creator_id (nullable)"
+    sales_channels ||--o{ invoices : "nullable"
+    users ||--o{ invoices : "invoices.user_issuer_id (nullable)"
+    shipping_zones ||--o{ invoices : "invoices.shipping_zone_id (nullable, added 2026-07-31)"
+    orders ||--o{ order_items : ""
+    orders ||--o{ order_status_histories : ""
+    orders ||--o{ order_custom_designs : ""
+    orders ||--o| invoices : "invoices.order_id (nullable)"
+    order_items ||--|| order_custom_designs : "unique (1:1)"
+    order_custom_designs }o--o| custom_designs : "nullable"
+    order_custom_designs }o--o| users : "reviewed_by (nullable)"
+    invoices ||--o{ invoice_items : ""
+    invoices ||--o{ invoice_status_histories : ""
+    invoice_items }o--|| products : ""
+    invoice_items }o--o| product_variants : "nullable"
+    order_items }o--|| products : ""
+    order_items }o--o| product_variants : "nullable"
+    order_items }o--o| custom_designs : "nullable"
 
-    %% ---- Returns ----
-    RETURN_REQUEST ||--o{ RETURN_REQUEST_ITEM : contains
-    RETURN_REQUEST ||--o| REFUND : triggers
+    %% ----- PAYMENTS -----
+    payment_methods ||--o{ payments : ""
+    payment_methods ||--o{ refunds : "nullable"
+    payments ||--o{ invoice_payments : ""
+    payments ||--o{ payment_transactions : ""
+    invoices ||--o{ invoice_payments : ""
+    invoice_payments }o--|| invoices : ""
+    invoice_payments }o--|| payments : ""
 
-    %% ---- Support ----
-    SUPPORT_TICKET ||--o{ SUPPORT_TICKET_MESSAGE : contains
+    %% ----- SHIPPING -----
+    shipping_companies ||--o{ shipments : "nullable"
+    shipping_zones ||--o{ shipments : "nullable"
+    currencies ||--o{ shipments : ""
+    orders ||--o{ shipments : ""
 
-    %% ---- Customization ----
-    CUSTOM_DESIGN ||--o{ ORDER_CUSTOM_DESIGN : realized_in
-    CUSTOM_DESIGN ||--o{ ORDER_ITEM : attached_to
+    %% ----- MARKETING -----
+    coupons ||--o{ coupon_usages : ""
+    coupon_usages }o--|| customers : ""
+    coupon_usages }o--o| orders : "nullable. partial unique idx"
+    promotions ||--o{ product_promotion : ""
+    products ||--o{ product_promotion : ""
+    product_promotion }o--|| products : ""
+    product_promotion }o--|| promotions : ""
+
+    %% ----- TAXES -----
+    products ||--o{ product_tax : ""
+    taxes ||--o{ product_tax : ""
+    product_tax }o--|| products : ""
+    product_tax }o--|| taxes : ""
+
+    %% ----- RETURNS -----
+    return_requests ||--o{ return_request_items : ""
+    return_request_items }o--|| products : ""
+    return_request_items }o--o| product_variants : "nullable"
+    return_requests ||--o{ refunds : ""
+    refunds }o--|| return_requests : ""
+
+    %% ----- SUPPORT -----
+    product_reviews }o--|| products : ""
+    product_reviews }o--|| customers : ""
+    product_questions }o--|| products : ""
+    product_questions }o--|| customers : ""
+    support_tickets ||--o{ support_ticket_messages : ""
+    support_tickets }o--|| customers : ""
+    support_ticket_messages }o--o| users : "nullable (system messages)"
+
+    %% ----- SETTINGS -----
+    currencies ||--o{ exchange_rates : "from + to"
+    exchange_rates }o--|| currencies : "from"
+    currencies ||--o{ exchange_rates : "to"
