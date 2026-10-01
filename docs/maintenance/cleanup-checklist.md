@@ -15,8 +15,8 @@
 
 | Path / Patrón | Por qué se ignora |
 | --- | --- |
-| `.venv/`, `venv/`, `__pycache__/`, `*.py[cod]`, `*$py.class` | Doorstop tooling bajo `scripts/requirements/` (legacy, ver T3). |
-| `scripts/requirements/docs/` | Output HTML de `doorstop publish all`, regenerado. |
+| `.venv/`, `venv/`, `__pycache__/`, `*.py[cod]`, `*$py.class` | Doorstop tooling bajo `docs/requirements/` (legacy). |
+| `docs/requirements/docs/` | Output HTML de `doorstop publish all`, regenerado. |
 | `.atl/`, `**/.atl/` | Cache del skill-registry (regenerado por sesión). |
 | `openspec/specs/cache/` | SDD tooling. |
 | `.playwright-cli/`, `.codegraph/` | AI tooling artifacts. |
@@ -46,4 +46,4 @@ Ver también:
 
 - `docs/maintenance/cleanup-checklist.md` (este archivo)
 - `scripts/README.md` para limpieza de scripts legacy
-- `scripts/requirements/README.md` para tooling de requirements (T3 va a reubicar esto)
+- `docs/requirements/README.md` para tooling de requirements
