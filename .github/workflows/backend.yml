@@ -41,7 +41,7 @@ jobs:
 
       - name: Pint (lint dirty)
         working-directory: backend
-        run: vendor/bin/pint --dirty --format=github
+        run: vendor/bin/pint --dirty --test
 
       - name: PHPStan static analysis
         working-directory: backend
