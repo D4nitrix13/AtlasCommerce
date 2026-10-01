@@ -22,10 +22,7 @@ import OrderTable from '../../../../../components/admin/sales/OrderTable.astro';
 import BulkOrderActions from '../../../../../components/admin/sales/BulkOrderActions.astro';
 import { getServerDictionary, getServerLocale } from '../../../../../i18n/server';
 import { adminUrl } from '../../../../../lib/path-helpers';
-import {
-  getAllOrdersMock,
-  type AdminOrderStatus,
-} from '../../../../../data/sales-mock';
+import { getAllOrdersMock } from '../../../../../data/sales-mock';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
