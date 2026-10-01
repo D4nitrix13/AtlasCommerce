@@ -1,3 +1,20 @@
 ---
-return Astro.redirect('/admin/dashboard');
+/**
+ * `/[locale]/admin/` — punto de entrada del panel admin.
+ *
+ * Reglas:
+ *   - Si el usuario está autenticado → redirige a `/admin/dashboard`.
+ *   - Si NO está autenticado → redirige a `/auth/login?redirect=...`.
+ *
+ * La decisión se delega a `AdminHomeRedirect` (client-side) porque el
+ * estado de autenticación vive en `localStorage` (vía `stores/auth`),
+ * no accesible desde el SSR de Astro. El componente es `client:only`
+ * para evitar hydration mismatch y flashing del dashboard antes del
+ * redirect al login.
+ *
+ * Locale awareness: el redirect preserva el `locale` actual para que
+ * el language switcher del login mantenga el idioma elegido.
+ */
+import AdminHomeRedirect from '../../../components/admin/AdminHomeRedirect';
 ---
+<AdminHomeRedirect client:only="react" />
