@@ -91,9 +91,13 @@ Opciones del command:
 
 ## Por que NO estan en `backend/public/` ni `frontend/public/`
 
-- **Binarios en git de la app** = antipatron (rompe clone, infla .git, no se puede ignorar selectivamente).
-- **Doble storage** (git + FTP) solo en este directorio. Es el unico lugar donde es aceptable porque es la source of truth.
-- **Frontend sirve categoria B** (amico SVGs) desde su propio `frontend/public/images/amico/` despues de copiar (ver seccion "Frontend workflow").
+- **Binarios en git de la app** = antipatron (rompe clone, infla .git, no
+  se puede ignorar selectivamente).
+- **Doble storage** (git + FTP) solo en este directorio. Es el unico
+  lugar donde es aceptable porque es la source of truth.
+- **Frontend sirve categoria B** (amico SVGs) desde su propio
+  `frontend/public/images/amico/` despues de copiar (ver seccion
+  "Frontend workflow").
 
 ---
 
