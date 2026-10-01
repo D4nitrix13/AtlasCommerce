@@ -4,12 +4,11 @@ import AuthShell from '../../../components/auth/AuthShell.astro';
 import StorefrontLoginForm from '../../../components/storefront/auth/StorefrontLoginForm';
 import LanguageSwitcher from '../../../components/ui/LanguageSwitcher';
 import OAuthFlashToast from '../../../components/auth/OAuthFlashToast';
-import { getServerDictionary, getServerLocale } from '../../../i18n/server';
+import { getServerDictionary } from '../../../i18n/server';
 import { getBrandBySlug, DEFAULT_BRAND } from '../../../config/stores';
 import { themeToBrand } from '../../../lib/theme';
 
 const t = getServerDictionary(Astro.locals.locale);
-const locale = getServerLocale(Astro.locals.locale);
 
 const fallbackBrand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
 const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
