@@ -1,0 +1,64 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install pnpm dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+  quality:
+    name: Lint + Typecheck + Storybook build
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install pnpm dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        working-directory: frontend
+        run: pnpm exec eslint "src/**/*.{ts,tsx,astro}"
+
+      - name: Prettier check
+        working-directory: frontend
+        run: pnpm exec prettier --check "src/**/*.{ts,tsx,astro,css,md}"
+
+      - name: TypeScript typecheck
+        working-directory: frontend
+        run: pnpm exec astro check
+
+      - name: Storybook build
+        working-directory: frontend
+        run: pnpm storybook:build --quiet
