@@ -73,7 +73,8 @@ http:// {
 ```
 
 > **Multi-tenant routing detallado**: ver
-> [`docs/agent-skills/caddyfile-multi-tenant-routing/SKILL.md`](../agent-skills/caddyfile-multi-tenant-routing/SKILL.md "SKILL.md").
+> [`docs/agent-skills/caddyfile-multi-tenant-routing/SKILL.md`]
+> ([../agent-skills/caddyfile-multi-tenant-routing/SKILL.md]).
 
 ### Caddyfile de producción
 
