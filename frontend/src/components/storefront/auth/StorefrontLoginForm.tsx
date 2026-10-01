@@ -28,16 +28,18 @@ import type { LoginResponse } from '../../../types/auth';
  * y el usuario ve el error en pantalla.
  */
 
-type StorefrontLoginFormProps = {
+interface StorefrontLoginFormProps {
   callbackPath?: string;
   forgotHref?: string;
+  // Reservado para uso futuro. Mantener el prop evita romper el call
+  // site mientras no haya un consumer real.
   locale?: string;
-};
+}
 
 export default function StorefrontLoginForm({
   callbackPath = '/account',
   forgotHref = 'forgot-password',
-  locale = 'es',
+  locale: _locale = 'es',
 }: StorefrontLoginFormProps): ReactElement {
   const { t } = useTranslations();
 

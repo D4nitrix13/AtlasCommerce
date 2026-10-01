@@ -16,10 +16,13 @@ import type { LoginResponse } from '../../../types/auth';
  *   - Submit "Crear mi cuenta"
  */
 
-type RegisterFormProps = {
+interface RegisterFormProps {
   callbackPath?: string;
+  // Reservado para uso futuro (ej. price formatting localizado por moneda
+  // del tenant). Mantener el prop evita romper el call site mientras
+  // no haya un consumer real.
   locale?: string;
-};
+}
 
 type StrengthLevel = 'weak' | 'medium' | 'good';
 
@@ -40,7 +43,7 @@ function strengthLevel(score: number): StrengthLevel {
 
 export default function RegisterForm({
   callbackPath = '/account',
-  locale = 'es',
+  locale: _locale = 'es',
 }: RegisterFormProps): ReactElement {
   const { t } = useTranslations();
 
@@ -265,8 +268,9 @@ export default function RegisterForm({
         </p>
       </div>
 
-      <label className="flex items-start gap-2 cursor-pointer">
+      <label htmlFor="acceptTerms" className="flex items-start gap-2 cursor-pointer">
         <input
+          id="acceptTerms"
           type="checkbox"
           required
           checked={acceptTerms}
@@ -276,15 +280,15 @@ export default function RegisterForm({
           className="w-4 h-4 mt-0.5 rounded border-slate-300 text-[var(--brand-accent,#2D9D8E)] focus:ring-[var(--brand-accent,#2D9D8E)]"
         />
         <span className="text-sm text-slate-600">
-          <span>Acepto los </span>
+          Acepto los{' '}
           <a href="#" className="text-[var(--brand-accent,#2D9D8E)] hover:underline">
             {t('auth.signup.shell.termsLink')}
-          </a>
-          <span> y la </span>
+          </a>{' '}
+          y la{' '}
           <a href="#" className="text-[var(--brand-accent,#2D9D8E)] hover:underline">
             {t('auth.signup.shell.privacyLink')}
           </a>
-          <span>.</span>
+          .
         </span>
       </label>
 
