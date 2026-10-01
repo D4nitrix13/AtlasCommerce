@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\Admin\PromotionProductController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\StoreController;
 use App\Http\Controllers\Api\Admin\StoreSocialLinkController;
-use App\Http\Controllers\Api\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\WholesalePriceController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -42,6 +41,18 @@ use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetContro
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
+use App\Http\Controllers\Api\Account\BulkCartController;
+use App\Http\Controllers\Api\Admin\Inventory\MovementController as AdminInventoryMovementController;
+use App\Http\Controllers\Api\Admin\Inventory\StockController as AdminInventoryStockController;
+use App\Http\Controllers\Api\Admin\Inventory\WarehouseController as AdminInventoryWarehouseController;
+use App\Http\Controllers\Api\Admin\Marketing\CouponAdminController;
+use App\Http\Controllers\Api\Admin\Marketing\PromotionAdminController;
+use App\Http\Controllers\Api\Admin\Marketing\PromotionProductAdminController;
+use App\Http\Controllers\Api\Admin\Support\QuestionAdminController;
+use App\Http\Controllers\Api\Admin\Support\ReviewAdminController;
+use App\Http\Controllers\Api\Admin\Support\TicketAdminController;
+use App\Http\Controllers\Api\Storefront\Checkout\CheckoutController;
+use App\Http\Controllers\Api\Storefront\RfqController;
 use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
 use App\Http\Controllers\Api\Tracking\TrackingController;
@@ -251,6 +262,19 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::post('account/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])
         ->name('account.addresses.primary');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bulk-cart (F3) — items B2B / pedidos grandes
+    |--------------------------------------------------------------------------
+    |
+    | Resource CRUD para los items de bulk-cart del cliente autenticado.
+    | Persiste en la tabla `bulk_cart_items`; alimenta el flujo RFQ.
+    |
+    */
+
+    Route::apiResource('account/bulk-cart', BulkCartController::class)
+        ->names('account.bulk-cart');
 
     /*
     |--------------------------------------------------------------------------
@@ -585,28 +609,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
         /*
         | RF-SUP-160: CRUD admin de tickets de soporte.
-        | Lectura requiere `support.view`, mutaciones `support.manage`.
+        | Reemplazado por `Support\TicketAdminController` (F5.5) que vive
+        | bajo la ruta `/admin/support/tickets` con scope `support.view`
+        | (read) / `support.manage` (mutaciones + reply/close).
+        | Las líneas legacy de `Admin\SupportTicketController` fueron
+        | retiradas para evitar shadowing de rutas.
         */
-
-        Route::get('support/tickets', [AdminSupportTicketController::class, 'index'])
-            ->middleware('permission:support.view')
-            ->name('admin.support.tickets.index');
-
-        Route::get('support/tickets/{ticket}', [AdminSupportTicketController::class, 'show'])
-            ->middleware('permission:support.view')
-            ->name('admin.support.tickets.show');
-
-        Route::put('support/tickets/{ticket}', [AdminSupportTicketController::class, 'update'])
-            ->middleware('permission:support.manage')
-            ->name('admin.support.tickets.update');
-
-        Route::post('support/tickets/{ticket}/reply', [AdminSupportTicketController::class, 'reply'])
-            ->middleware('permission:support.manage')
-            ->name('admin.support.tickets.reply');
-
-        Route::post('support/tickets/{ticket}/close', [AdminSupportTicketController::class, 'close'])
-            ->middleware('permission:support.manage')
-            ->name('admin.support.tickets.close');
 
         /*
         | RF-CAT-026: CRUD admin de productos. Requiere
@@ -882,6 +890,126 @@ Route::middleware('auth:sanctum')->group(function (): void {
             Route::post('product-reviews/{review}/reject', [ProductReviewController::class, 'reject'])
                 ->name('admin.catalog.product-reviews.reject');
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Inventory RESTful (F5.5) — namespace /admin/inventory/*
+        |--------------------------------------------------------------------------
+        |
+        | CRUD de stock, movimientos y almacenes. Aislamiento por tenant via
+        | middleware `store.domain` + filtro por accessibleStoreIds() en cada
+        | controller (los warehouses son globales — ver ADR-005).
+        |
+        */
+
+        Route::middleware('permission:catalog.manage')->prefix('inventory')->group(function (): void {
+            // Stock — sólo lectura + ajuste (PUT /stock/{stock}).
+            Route::get('stock', [AdminInventoryStockController::class, 'index'])
+                ->name('admin.inventory.stock.index');
+            Route::get('stock/{stock}', [AdminInventoryStockController::class, 'show'])
+                ->name('admin.inventory.stock.show');
+            Route::put('stock/{stock}', [AdminInventoryStockController::class, 'update'])
+                ->name('admin.inventory.stock.update');
+
+            // Movements — sólo lectura.
+            Route::get('movements', [AdminInventoryMovementController::class, 'index'])
+                ->name('admin.inventory.movements.index');
+            Route::get('movements/{movement}', [AdminInventoryMovementController::class, 'show'])
+                ->name('admin.inventory.movements.show');
+
+            // Warehouses — Resource CRUD completo.
+            Route::apiResource('warehouses', AdminInventoryWarehouseController::class)
+                ->names('admin.inventory.warehouses');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Marketing RESTful (F5.5) — namespace /admin/marketing/*
+        |--------------------------------------------------------------------------
+        |
+        | CRUD de coupons + promotions + asociación promotion↔product.
+        | Permiso: `marketing.manage`.
+        |
+        */
+
+        Route::middleware('permission:marketing.manage')->prefix('marketing')->group(function (): void {
+            // Coupons — Resource CRUD + action `apply` para test.
+            Route::get('coupons', [CouponAdminController::class, 'index'])
+                ->name('admin.marketing.coupons.index');
+            Route::post('coupons', [CouponAdminController::class, 'store'])
+                ->name('admin.marketing.coupons.store');
+            Route::get('coupons/{coupon}', [CouponAdminController::class, 'show'])
+                ->name('admin.marketing.coupons.show');
+            Route::put('coupons/{coupon}', [CouponAdminController::class, 'update'])
+                ->name('admin.marketing.coupons.update');
+            Route::delete('coupons/{coupon}', [CouponAdminController::class, 'destroy'])
+                ->name('admin.marketing.coupons.destroy');
+            Route::post('coupons/{coupon}/apply', [CouponAdminController::class, 'apply'])
+                ->name('admin.marketing.coupons.apply');
+
+            // Promotions — Resource CRUD.
+            Route::apiResource('promotions', PromotionAdminController::class)
+                ->names('admin.marketing.promotions');
+
+            // Promotion↔Product association — Resource CRUD.
+            Route::apiResource('promotion-products', PromotionProductAdminController::class)
+                ->names('admin.marketing.promotion-products');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Support RESTful (F5.5) — namespace /admin/support/*
+        |--------------------------------------------------------------------------
+        |
+        | CRUD de tickets (RF-SUP-160) + moderación de reseñas (RF-SUP-161)
+        | + moderación de Q&A (RF-SUP-162). Las acciones extra `reply`,
+        | `close`, `approve`, `reject`, `answer` se registran adyacentes al
+        | apiResource para mantener la URL plana.
+        |
+        */
+
+        // Tickets: lectura requiere `support.view`, mutaciones + reply/close
+        // requieren `support.manage`.
+        Route::get('support/tickets', [TicketAdminController::class, 'index'])
+            ->middleware('permission:support.view')
+            ->name('admin.support.tickets.index');
+        Route::post('support/tickets', [TicketAdminController::class, 'store'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.store');
+        Route::get('support/tickets/{ticket}', [TicketAdminController::class, 'show'])
+            ->middleware('permission:support.view')
+            ->name('admin.support.tickets.show');
+        Route::put('support/tickets/{ticket}', [TicketAdminController::class, 'update'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.update');
+        Route::delete('support/tickets/{ticket}', [TicketAdminController::class, 'destroy'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.destroy');
+        Route::post('support/tickets/{ticket}/reply', [TicketAdminController::class, 'reply'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.reply');
+        Route::post('support/tickets/{ticket}/close', [TicketAdminController::class, 'close'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.tickets.close');
+
+        // Reviews (RF-SUP-161): lectura requiere `support.view`, mutaciones
+        // (approve/reject/destroy) requieren `support.manage`. Convive con
+        // la ruta legacy `/admin/reviews/*` (path distinto, no choca).
+        Route::apiResource('support/reviews', ReviewAdminController::class)
+            ->names('admin.support.reviews');
+        Route::post('support/reviews/{review}/approve', [ReviewAdminController::class, 'approve'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.reviews.approve');
+        Route::post('support/reviews/{review}/reject', [ReviewAdminController::class, 'reject'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.reviews.reject');
+
+        // Questions (RF-SUP-162): misma política support.view/manage.
+        Route::apiResource('support/questions', QuestionAdminController::class)
+            ->names('admin.support.questions');
+        Route::post('support/questions/{question}/answer', [QuestionAdminController::class, 'answer'])
+            ->middleware('permission:support.manage')
+            ->name('admin.support.questions.answer');
     });
 
     /*
@@ -1029,6 +1157,27 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::apiResource('return-requests', ReturnRequestController::class);
     Route::apiResource('return-request-items', ReturnRequestItemController::class);
     Route::apiResource('refunds', RefundController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Storefront Checkout (F4) — preview / place / confirm
+    |--------------------------------------------------------------------------
+    |
+    | Endpoints multi-step del checkout tipo Stripe. `preview` calcula
+    | totales sin side effects. `place` crea la orden (e invoice).
+    | `confirm` es el webhook payment stub que acredita el pago.
+    |
+    */
+
+    Route::prefix('storefront/checkout')->group(function (): void {
+        Route::post('preview', [CheckoutController::class, 'preview'])
+            ->name('storefront.checkout.preview');
+        Route::post('place', [CheckoutController::class, 'place'])
+            ->name('storefront.checkout.place');
+        Route::post('confirm/{orderId}', [CheckoutController::class, 'confirm'])
+            ->where('orderId', '[0-9]+')
+            ->name('storefront.checkout.confirm');
+    });
 });
 
 /*
@@ -1058,4 +1207,8 @@ Route::middleware(['store.domain', 'store.maintenance'])->prefix('storefront')->
     // con paths completos tipo tenants/panda-estampados/branding/logo.webp.
     Route::get('/assets/{path}', [StorefrontAssetController::class, 'show'])
         ->where('path', '.*');
+
+    // RFQ (F3): solicitud de cotización pública. No requiere auth.
+    Route::post('/rfq', RfqController::class)
+        ->name('storefront.rfq.store');
 });
