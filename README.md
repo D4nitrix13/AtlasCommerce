@@ -80,7 +80,9 @@ AtlasCommerce/
 ├── scripts/
 │   ├── docker-stack.sh       # Orquestador de las 4 instancias
 │   └── setup-local.sh
-└── Caddyfile                 # Configuración Caddy (prod)
+├── docker/
+│   ├── caddy/                # Caddyfile compartido (reverse proxy prod + dev)
+│   └── instances/            # 6 instancias: 3 prod + 3 dev
 ```
 
 ## Requisitos
@@ -104,7 +106,7 @@ todo.
 sudo ./scripts/docker-stack.sh hosts >> /etc/hosts
 
 # 3. (Opcional) Instalar el Caddyfile del repo:
-sudo cp Caddyfile /etc/caddy/Caddyfile
+sudo cp docker/caddy/Caddyfile /etc/caddy/Caddyfile
 sudo systemctl restart caddy
 
 # 4. Verificar:
