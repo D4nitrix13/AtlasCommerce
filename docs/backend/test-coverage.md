@@ -10,6 +10,7 @@ medirán al correr `composer test:coverage` (backend) y
 `pnpm run test:coverage` (frontend) en CI con Xdebug + v8 habilitados.
 
 **Backend** (esperado a la fecha del PR):
+
 - Domain/Services: ~85% (muchos services tienen tests unitarios).
 - Controllers: ~40% (cubiertos por Feature tests pero los tests
   suelen tocar solo endpoints específicos, no todas las branches).
@@ -18,6 +19,7 @@ medirán al correr `composer test:coverage` (backend) y
 - Models: bajo (testeados indirectamente vía factories + relaciones).
 
 **Frontend** (esperado):
+
 - Components/ui: ~30% (smoke tests básicos).
 - Components/storefront + account + admin: variable según cuántos
   tienen tests Vitest.
@@ -34,6 +36,7 @@ transición.
 ## Roadmap a 70%
 
 ### Backend
+
 1. ✅ Tests de middleware (RF-SEC-017/021/018, RF-STOR-132) — todos
    tienen tests Feature.
 2. ✅ Tests de Services críticos (CheckoutService, CouponService,
@@ -44,6 +47,7 @@ transición.
 5. ⏳ Pendiente: tests unitarios de jobs/commands.
 
 ### Frontend
+
 1. ✅ Tests Vitest de componentes storefront críticos (CouponInput,
    AddressesManager, CustomersAdmin, StoresAdmin).
 2. ⏳ Pendiente: tests de hooks (useCoupon, usePagination, useAuth).
