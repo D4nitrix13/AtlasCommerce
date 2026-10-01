@@ -1,0 +1,45 @@
+name: Infra CI
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'docker/**'
+      - 'scripts/docker/**'
+      - '**/Dockerfile*'
+      - '**/docker-compose*.yml'
+      - '.github/workflows/infra.yml'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'docker/**'
+      - 'scripts/docker/**'
+      - '**/Dockerfile*'
+      - '**/docker-compose*.yml'
+      - '.github/workflows/infra.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: infra-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Docker quality-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup bash + shellcheck
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
+
+      - name: Run Docker quality-check script
+        run: |
+          if [ -f ./scripts/docker/quality-check.sh ]; then
+            chmod +x ./scripts/docker/quality-check.sh
+            ./scripts/docker/quality-check.sh
+          else
+            echo "::notice::scripts/docker/quality-check.sh not found, skipping"
+          fi

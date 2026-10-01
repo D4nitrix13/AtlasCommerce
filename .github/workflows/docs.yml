@@ -1,0 +1,36 @@
+name: Docs CI
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Lint markdown files
+        run: markdownlint "**/*.md" --ignore node_modules --ignore vendor --ignore dist --ignore .astro --ignore 'frontend/storybook-static/**'
