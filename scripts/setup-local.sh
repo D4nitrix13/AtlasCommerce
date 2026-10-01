@@ -8,7 +8,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CADDY_SRC="${ROOT_DIR}/Caddyfile"
+CADDY_SRC="${ROOT_DIR}/docker/caddy/Caddyfile"
 CADDY_DST="/etc/caddy/Caddyfile"
 HOSTS_FILE="/etc/hosts"
 
