@@ -73,8 +73,10 @@ let stats: CustomerStat[] = MOCK_STATS;
 let segments: CustomerSegment[] = MOCK_SEGMENTS;
 
 try {
-  const response = await Astro.fetch('/api/v1/admin/metrics/customers/segments', {
-    credentials: 'include',
+  const response = await fetch(new URL('/api/v1/admin/metrics/customers/segments', Astro.url), {
+    headers: {
+      Cookie: Astro.request.headers.get('Cookie') ?? '',
+    },
   });
   if (response.ok) {
     const payload = (await response.json()) as { data?: CustomerData };

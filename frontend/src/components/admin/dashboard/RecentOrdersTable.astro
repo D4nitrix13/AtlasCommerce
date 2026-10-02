@@ -90,8 +90,10 @@ let dataSource: 'real' | 'mock' = 'mock';
 let fetchError: string | null = null;
 
 try {
-  const response = await Astro.fetch('/api/v1/admin/orders/recent?limit=10', {
-    credentials: 'include',
+  const response = await fetch(new URL('/api/v1/admin/orders/recent?limit=10', Astro.url), {
+    headers: {
+      Cookie: Astro.request.headers.get('Cookie') ?? '',
+    },
   });
 
   if (response.ok) {
