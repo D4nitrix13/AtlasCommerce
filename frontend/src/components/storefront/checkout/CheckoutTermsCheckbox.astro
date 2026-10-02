@@ -43,8 +43,7 @@ const checkboxId = 'checkout-terms';
     class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-[var(--primary,#475569)] transition focus:outline-none focus:ring-2 focus:ring-[var(--primary,#475569)] focus:ring-offset-2"
   />
   <span class="leading-snug">
-    {labels.label}
-    {' '}
+    {labels.label}{' '}
     <a
       href={termsHref}
       class="font-medium text-[var(--primary,#475569)] underline-offset-2 hover:underline focus:outline-none focus-visible:underline"
@@ -54,10 +53,8 @@ const checkboxId = 'checkout-terms';
   </span>
 </label>
 
-{
-  hasError && (
-    <p id={`${checkboxId}-error`} role="alert" class="mt-1 text-xs text-red-600">
-      {error}
-    </p>
-  )
-}
+{hasError && (
+  <p id={`${checkboxId}-error`} role="alert" class="mt-1 text-xs text-red-600">
+    {error}
+  </p>
+)}

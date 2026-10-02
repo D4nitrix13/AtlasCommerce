@@ -38,10 +38,8 @@ const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium u
     loginHref={loginHref}
     side="left"
   >
-    {
-      /* Checkmark grande — usa la paleta auth universal (mismo verde-azulado
-        que login, forgot-password y reset-password). */
-    }
+    {/* Checkmark grande — usa la paleta auth universal (mismo verde-azulado
+        que login, forgot-password y reset-password). */}
     <div class="mb-6 flex justify-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--brand-accent,#2D9D8E)]">
         <svg
@@ -63,36 +61,34 @@ const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium u
     <p class="mb-8 text-center text-slate-500">{successBody}</p>
 
     {/* Confirmation card — fondo suave + borde suave de la paleta auth */}
-    {
-      resetEmail !== '' && (
-        <div
-          class="mb-8 flex items-center gap-3 rounded-lg border p-4"
-          style={{
-            backgroundColor: AUTH_ACCENT.softBg,
-            borderColor: AUTH_ACCENT.softBorder,
-          }}
-        >
-          <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent,#2D9D8E)]">
-            <svg
-              class="h-5 w-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-slate-900">
-              {t['auth.passwordReset.success.changeApplied']}
-            </p>
-            <p class="mt-0.5 text-xs text-slate-600">{changeAppliedAt}</p>
-          </div>
+    {resetEmail !== '' && (
+      <div
+        class="mb-8 flex items-center gap-3 rounded-lg border p-4"
+        style={{
+          backgroundColor: AUTH_ACCENT.softBg,
+          borderColor: AUTH_ACCENT.softBorder,
+        }}
+      >
+        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent,#2D9D8E)]">
+          <svg
+            class="h-5 w-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
         </div>
-      )
-    }
+        <div>
+          <p class="text-sm font-semibold text-slate-900">
+            {t['auth.passwordReset.success.changeApplied']}
+          </p>
+          <p class="mt-0.5 text-xs text-slate-600">{changeAppliedAt}</p>
+        </div>
+      </div>
+    )}
 
     {/* Warning box ("¿No fuiste vos?") */}
     <div
@@ -113,7 +109,8 @@ const supportLink = `<a href="mailto:${brand.supportEmail}" class="font-medium u
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
-          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"></path>
+          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+        ></path>
       </svg>
       <div class="text-sm text-slate-700">
         <strong class="font-semibold">{t['auth.passwordReset.success.didntDoThis']}</strong>{' '}

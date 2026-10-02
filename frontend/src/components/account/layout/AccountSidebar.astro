@@ -66,49 +66,42 @@ function isActive(itemPath: string, current: string): boolean {
 const logoutHref = `${localePrefix}/account/logout`;
 ---
 
-<aside
-  class="hidden w-full shrink-0 lg:w-64"
-  aria-label={navLabel}
->
+<aside class="hidden w-full shrink-0 lg:w-64" aria-label={navLabel}>
   <div class="sticky top-6 flex flex-col gap-6">
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
-        {title}
-      </p>
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">{title}</p>
     </div>
 
     <nav aria-label={navLabel}>
       <ul class="flex flex-col gap-1">
-        {
-          items.map((item: NavItem) => {
-            const active = isActive(item.path, currentPath);
-            return (
-              <li>
-                <a
-                  href={item.path}
-                  aria-current={active ? 'page' : undefined}
+        {items.map((item: NavItem) => {
+          const active = isActive(item.path, currentPath);
+          return (
+            <li>
+              <a
+                href={item.path}
+                aria-current={active ? 'page' : undefined}
+                class:list={[
+                  'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors',
+                  active
+                    ? 'bg-[color-mix(in_srgb,var(--primary,#7c3aed)_10%,white)] font-semibold text-[var(--primary,#7c3aed)]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                ]}
+              >
+                <Icon
+                  name={item.iconName}
                   class:list={[
-                    'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors',
+                    'h-5 w-5 shrink-0',
                     active
-                      ? 'bg-[color-mix(in_srgb,var(--primary,#7c3aed)_10%,white)] font-semibold text-[var(--primary,#7c3aed)]'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                      ? 'text-[var(--primary,#7c3aed)]'
+                      : 'text-slate-400 group-hover:text-slate-600',
                   ]}
-                >
-                  <Icon
-                    name={item.iconName}
-                    class:list={[
-                      'h-5 w-5 shrink-0',
-                      active
-                        ? 'text-[var(--primary,#7c3aed)]'
-                        : 'text-slate-400 group-hover:text-slate-600',
-                    ]}
-                  />
-                  <span>{item.label}</span>
-                </a>
-              </li>
-            );
-          })
-        }
+                />
+                <span>{item.label}</span>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
 

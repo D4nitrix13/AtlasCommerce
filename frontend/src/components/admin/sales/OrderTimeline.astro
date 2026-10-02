@@ -70,7 +70,7 @@ const KEY_DOT: Record<AdminOrderTimelineEntry['key'], string> = {
 
 // Ordenar cronológicamente: recibido primero, entregado último.
 const sorted = [...timeline].sort(
-  (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
 );
 
 const hasAnyEntry = sorted.length > 0;
@@ -84,59 +84,58 @@ const hasAnyEntry = sorted.length > 0;
     {heading}
   </h2>
 
-  {
-    hasAnyEntry ? (
-      <ol class="relative flex flex-col gap-5">
-        {sorted.map((entry, idx) => {
-          const isLast = idx === sorted.length - 1;
-          return (
-            <li class="relative flex gap-4">
-              <div class="flex flex-col items-center">
-                <div
-                  class:list={[
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold shadow-sm',
-                    KEY_DOT[entry.key],
-                  ]}
+  {hasAnyEntry ? (
+    <ol class="relative flex flex-col gap-5">
+      {sorted.map((entry, idx) => {
+        const isLast = idx === sorted.length - 1;
+        return (
+          <li class="relative flex gap-4">
+            <div class="flex flex-col items-center">
+              <div
+                class:list={[
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold shadow-sm',
+                  KEY_DOT[entry.key],
+                ]}
+                aria-hidden="true"
+              >
+                {entry.key === 'delivered'
+                  ? '✓'
+                  : entry.key === 'cancelled'
+                    ? '✕'
+                    : entry.key === 'shipped'
+                      ? '📦'
+                      : entry.key === 'processing'
+                        ? '⚙'
+                        : '⤓'}
+              </div>
+              {!isLast && (
+                <span
                   aria-hidden="true"
-                >
-                  {entry.key === 'delivered'
-                    ? '✓'
-                    : entry.key === 'cancelled'
-                      ? '✕'
-                      : entry.key === 'shipped'
-                        ? '📦'
-                        : entry.key === 'processing'
-                          ? '⚙'
-                          : '⤓'}
-                </div>
-                {!isLast && (
-                  <span aria-hidden="true" class="mt-1 h-full w-0.5 min-h-[24px] flex-1 bg-slate-200" />
-                )}
+                  class="mt-1 h-full w-0.5 min-h-[24px] flex-1 bg-slate-200"
+                />
+              )}
+            </div>
+            <div class="flex min-w-0 flex-1 flex-col gap-1 pb-1">
+              <div class="flex flex-wrap items-baseline gap-2">
+                <p class="text-sm font-semibold text-slate-900">{KEY_LABELS[entry.key]}</p>
+                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
+                  {ACTOR_LABELS[entry.actor as keyof typeof ACTOR_LABELS] ?? entry.actor}
+                </span>
               </div>
-              <div class="flex min-w-0 flex-1 flex-col gap-1 pb-1">
-                <div class="flex flex-wrap items-baseline gap-2">
-                  <p class="text-sm font-semibold text-slate-900">
-                    {KEY_LABELS[entry.key]}
-                  </p>
-                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
-                    {ACTOR_LABELS[entry.actor as keyof typeof ACTOR_LABELS] ?? entry.actor}
-                  </span>
-                </div>
-                <p class="text-xs font-medium text-slate-500">
-                  <time datetime={entry.timestamp}>{formatDateTime(entry.timestamp)}</time>
+              <p class="text-xs font-medium text-slate-500">
+                <time datetime={entry.timestamp}>{formatDateTime(entry.timestamp)}</time>
+              </p>
+              {entry.note && (
+                <p class="mt-1 rounded-md bg-slate-50 px-2 py-1 text-xs italic text-slate-600">
+                  {entry.note}
                 </p>
-                {entry.note && (
-                  <p class="mt-1 rounded-md bg-slate-50 px-2 py-1 text-xs italic text-slate-600">
-                    {entry.note}
-                  </p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-    ) : (
-      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-500">—</p>
-    )
-  }
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  ) : (
+    <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-500">—</p>
+  )}
 </section>

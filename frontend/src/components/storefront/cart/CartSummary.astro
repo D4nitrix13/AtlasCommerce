@@ -48,10 +48,13 @@ const {
 } = Astro.props;
 
 const subtotalFormatted = formatCurrency(subtotalCents, currencyCode);
-const discountFormatted =
-  discountCents > 0 ? formatCurrency(discountCents, currencyCode) : null;
+const discountFormatted = discountCents > 0 ? formatCurrency(discountCents, currencyCode) : null;
 const shippingFormatted =
-  shippingCents === null ? null : shippingCents === 0 ? labels.shippingFree : formatCurrency(shippingCents, currencyCode);
+  shippingCents === null
+    ? null
+    : shippingCents === 0
+      ? labels.shippingFree
+      : formatCurrency(shippingCents, currencyCode);
 const totalCents = Math.max(0, subtotalCents - discountCents + (shippingCents ?? 0));
 const totalFormatted = formatCurrency(totalCents, currencyCode);
 
@@ -70,23 +73,19 @@ const showShipping = shippingCents !== null;
       <dd class="tabular-nums text-slate-900">{subtotalFormatted}</dd>
     </div>
 
-    {
-      discountFormatted !== null && (
-        <div class="flex items-center justify-between">
-          <dt class="text-slate-600">{labels.discount}</dt>
-          <dd class="tabular-nums text-emerald-600">−{discountFormatted}</dd>
-        </div>
-      )
-    }
+    {discountFormatted !== null && (
+      <div class="flex items-center justify-between">
+        <dt class="text-slate-600">{labels.discount}</dt>
+        <dd class="tabular-nums text-emerald-600">−{discountFormatted}</dd>
+      </div>
+    )}
 
-    {
-      showShipping && (
-        <div class="flex items-center justify-between">
-          <dt class="text-slate-600">{labels.shipping}</dt>
-          <dd class="tabular-nums text-slate-900">{shippingFormatted}</dd>
-        </div>
-      )
-    }
+    {showShipping && (
+      <div class="flex items-center justify-between">
+        <dt class="text-slate-600">{labels.shipping}</dt>
+        <dd class="tabular-nums text-slate-900">{shippingFormatted}</dd>
+      </div>
+    )}
 
     <div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-3">
       <dt class="text-base font-semibold text-slate-900">{labels.total}</dt>

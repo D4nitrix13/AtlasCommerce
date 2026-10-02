@@ -48,25 +48,41 @@ const t = getServerDictionary(Astro.locals.locale);
       </div>
       <div class="mt-2 flex items-center gap-2 text-xs text-slate-600">
         <span>Stock actual:</span>
-        <span class="font-mono font-semibold text-slate-900" data-modal-field="current">0</span>
+        <span class="font-mono font-semibold text-slate-900" data-modal-field="current">
+          0
+        </span>
       </div>
     </div>
 
     <fieldset class="space-y-2">
-      <legend class="text-sm font-medium text-slate-700">
-        {t['admin.inventory.adjust.type']}
-      </legend>
+      <legend class="text-sm font-medium text-slate-700">{t['admin.inventory.adjust.type']}</legend>
       <div class="grid grid-cols-3 gap-2">
         <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 transition has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
-          <input type="radio" name="adjust-type" value="increase" class="text-emerald-600 focus:ring-emerald-500" checked />
+          <input
+            type="radio"
+            name="adjust-type"
+            value="increase"
+            class="text-emerald-600 focus:ring-emerald-500"
+            checked
+          />
           <span class="text-sm text-slate-700">+ {t['admin.inventory.adjust.type.increase']}</span>
         </label>
         <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 transition has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50">
-          <input type="radio" name="adjust-type" value="decrease" class="text-rose-600 focus:ring-rose-500" />
+          <input
+            type="radio"
+            name="adjust-type"
+            value="decrease"
+            class="text-rose-600 focus:ring-rose-500"
+          />
           <span class="text-sm text-slate-700">− {t['admin.inventory.adjust.type.decrease']}</span>
         </label>
         <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50">
-          <input type="radio" name="adjust-type" value="set" class="text-sky-600 focus:ring-sky-500" />
+          <input
+            type="radio"
+            name="adjust-type"
+            value="set"
+            class="text-sky-600 focus:ring-sky-500"
+          />
           <span class="text-sm text-slate-700">= {t['admin.inventory.adjust.type.set']}</span>
         </label>
       </div>
@@ -90,7 +106,9 @@ const t = getServerDictionary(Astro.locals.locale);
     <div>
       <label for="adjust-reason" class="text-sm font-medium text-slate-700">
         {t['admin.inventory.adjust.reason']}
-        <span aria-hidden="true" class="ml-1 text-red-500">*</span>
+        <span aria-hidden="true" class="ml-1 text-red-500">
+          *
+        </span>
       </label>
       <input
         id="adjust-reason"
@@ -117,7 +135,9 @@ const t = getServerDictionary(Astro.locals.locale);
 
     <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
       <span class="font-medium text-slate-700">{t['admin.inventory.adjust.preview']}:</span>
-      <span class="ml-2 font-mono text-sm font-semibold text-slate-900" data-modal-preview="final">—</span>
+      <span class="ml-2 font-mono text-sm font-semibold text-slate-900" data-modal-preview="final">
+        —
+      </span>
     </div>
   </form>
 

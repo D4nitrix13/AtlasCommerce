@@ -17,7 +17,14 @@ import {
 
 const t = getServerDictionary(Astro.locals.locale);
 
-const STATUS_LABEL_KEY: Record<TicketStatus, 'admin.support.tickets.filter.open' | 'admin.support.tickets.filter.pending' | 'admin.support.tickets.filter.hold' | 'admin.support.tickets.filter.solved' | 'admin.support.tickets.filter.closed'> = {
+const STATUS_LABEL_KEY: Record<
+  TicketStatus,
+  | 'admin.support.tickets.filter.open'
+  | 'admin.support.tickets.filter.pending'
+  | 'admin.support.tickets.filter.hold'
+  | 'admin.support.tickets.filter.solved'
+  | 'admin.support.tickets.filter.closed'
+> = {
   open: 'admin.support.tickets.filter.open',
   pending: 'admin.support.tickets.filter.pending',
   hold: 'admin.support.tickets.filter.hold',
@@ -25,7 +32,13 @@ const STATUS_LABEL_KEY: Record<TicketStatus, 'admin.support.tickets.filter.open'
   closed: 'admin.support.tickets.filter.closed',
 };
 
-const PRIORITY_LABEL_KEY: Record<TicketPriority, 'admin.support.tickets.priority.low' | 'admin.support.tickets.priority.normal' | 'admin.support.tickets.priority.high' | 'admin.support.tickets.priority.urgent'> = {
+const PRIORITY_LABEL_KEY: Record<
+  TicketPriority,
+  | 'admin.support.tickets.priority.low'
+  | 'admin.support.tickets.priority.normal'
+  | 'admin.support.tickets.priority.high'
+  | 'admin.support.tickets.priority.urgent'
+> = {
   low: 'admin.support.tickets.priority.low',
   normal: 'admin.support.tickets.priority.normal',
   high: 'admin.support.tickets.priority.high',
@@ -82,60 +95,58 @@ const formatRelative = (iso: string): string => {
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          {
-            supportTickets.map((ticket) => (
-              <tr class="group cursor-pointer hover:bg-slate-50/50">
-                <td class="px-4 py-3">
-                  <a
-                    href={`/admin/support/tickets/${ticket.id}`}
-                    class="font-mono text-xs font-semibold text-slate-700 hover:text-slate-900 hover:underline"
-                  >
-                    {ticket.ticketNumber}
-                  </a>
-                </td>
-                <td class="px-4 py-3">
-                  <a
-                    href={`/admin/support/tickets/${ticket.id}`}
-                    class="line-clamp-1 text-sm font-medium text-slate-900 hover:underline"
-                  >
-                    {ticket.subject}
-                  </a>
-                </td>
-                <td class="px-4 py-3 text-sm text-slate-600">{ticket.customerName}</td>
-                <td class="px-4 py-3 text-xs text-slate-500">
-                  <span class="inline-flex items-center gap-1">
-                    <span class="font-mono text-slate-400">
-                      {ticket.channel === 'email' ? '✉' : ticket.channel === 'whatsapp' ? '✆' : '⌬'}
-                    </span>
-                    {t[`admin.support.tickets.channel.${ticket.channel}`]}
+          {supportTickets.map((ticket) => (
+            <tr class="group cursor-pointer hover:bg-slate-50/50">
+              <td class="px-4 py-3">
+                <a
+                  href={`/admin/support/tickets/${ticket.id}`}
+                  class="font-mono text-xs font-semibold text-slate-700 hover:text-slate-900 hover:underline"
+                >
+                  {ticket.ticketNumber}
+                </a>
+              </td>
+              <td class="px-4 py-3">
+                <a
+                  href={`/admin/support/tickets/${ticket.id}`}
+                  class="line-clamp-1 text-sm font-medium text-slate-900 hover:underline"
+                >
+                  {ticket.subject}
+                </a>
+              </td>
+              <td class="px-4 py-3 text-sm text-slate-600">{ticket.customerName}</td>
+              <td class="px-4 py-3 text-xs text-slate-500">
+                <span class="inline-flex items-center gap-1">
+                  <span class="font-mono text-slate-400">
+                    {ticket.channel === 'email' ? '✉' : ticket.channel === 'whatsapp' ? '✆' : '⌬'}
                   </span>
-                </td>
-                <td class="px-4 py-3">
-                  <span
-                    class:list={[
-                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-                      PRIORITY_BADGE[ticket.priority],
-                    ]}
-                  >
-                    {t[PRIORITY_LABEL_KEY[ticket.priority]]}
-                  </span>
-                </td>
-                <td class="px-4 py-3">
-                  <span
-                    class:list={[
-                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                      STATUS_BADGE[ticket.status],
-                    ]}
-                  >
-                    {t[STATUS_LABEL_KEY[ticket.status]]}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-xs text-slate-500">
-                  hace {formatRelative(ticket.updatedAt)}
-                </td>
-              </tr>
-            ))
-          }
+                  {t[`admin.support.tickets.channel.${ticket.channel}`]}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                    PRIORITY_BADGE[ticket.priority],
+                  ]}
+                >
+                  {t[PRIORITY_LABEL_KEY[ticket.priority]]}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    STATUS_BADGE[ticket.status],
+                  ]}
+                >
+                  {t[STATUS_LABEL_KEY[ticket.status]]}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-xs text-slate-500">
+                hace {formatRelative(ticket.updatedAt)}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

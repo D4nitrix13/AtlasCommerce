@@ -556,8 +556,7 @@ const en: Translations = {
   'storefront.rfq.responseTime': 'We respond within 24 business hours.',
   'storefront.rfq.cancel': 'Cancel',
   'storefront.rfq.submit': 'Send quote',
-  'storefront.rfq.alreadyCustomer':
-    'Already a customer? Sign in to track your quotes.',
+  'storefront.rfq.alreadyCustomer': 'Already a customer? Sign in to track your quotes.',
   'storefront.rfq.confirmation.title': 'Quote sent | Panda Estampados',
   'storefront.rfq.confirmation.heading': 'Quote submitted successfully!',
   'storefront.rfq.confirmation.body':
@@ -776,7 +775,8 @@ const en: Translations = {
   'storefront.checkout.trust.net30': 'NET 30 B2B',
   'storefront.checkout.trust.gdpr': 'GDPR compliant',
   'storefront.checkout.success.title': 'Order confirmed!',
-  'storefront.checkout.success.subtitle': 'Thanks for your purchase. We sent you an email with the details.',
+  'storefront.checkout.success.subtitle':
+    'Thanks for your purchase. We sent you an email with the details.',
   'storefront.checkout.success.orderNumber': 'Order number',
   'storefront.checkout.success.confirmationEmail': 'You will receive a confirmation email shortly.',
   'storefront.checkout.success.continueShopping': 'Continue shopping',
@@ -908,7 +908,8 @@ const en: Translations = {
   'admin.customers.actions.view': 'View detail',
   'admin.customers.actions.suspend': 'Suspend',
   'admin.customers.actions.reactivate': 'Reactivate',
-  'admin.customers.confirmSuspend': 'Suspend this customer? They will not be able to purchase until reactivated.',
+  'admin.customers.confirmSuspend':
+    'Suspend this customer? They will not be able to purchase until reactivated.',
   'admin.customers.confirmReactivate': 'Reactivate this customer?',
   'admin.customers.close': 'Close',
 
@@ -946,8 +947,7 @@ const en: Translations = {
   'admin.catalog.common.export': 'Export',
   'admin.catalog.common.upload': 'Upload',
   'admin.catalog.products.title': 'Products',
-  'admin.catalog.products.subtitle':
-    'Manage your inventory: prices, stock, status and visibility.',
+  'admin.catalog.products.subtitle': 'Manage your inventory: prices, stock, status and visibility.',
   'admin.catalog.products.addProduct': 'New product',
   'admin.catalog.products.exportCsv': 'Export CSV',
   'admin.catalog.products.searchPlaceholder': 'Search by name or SKU...',
@@ -1027,8 +1027,7 @@ const en: Translations = {
   'admin.catalog.categories.form.parent': 'Parent category',
   'admin.catalog.categories.form.parentNone': '(No parent — root)',
   'admin.catalog.brands.title': 'Brands',
-  'admin.catalog.brands.subtitle':
-    'Associate your products with brands to improve search and SEO.',
+  'admin.catalog.brands.subtitle': 'Associate your products with brands to improve search and SEO.',
   'admin.catalog.brands.addBrand': 'New brand',
   'admin.catalog.brands.searchPlaceholder': 'Search brands...',
   'admin.catalog.brands.empty': 'No brands registered.',
@@ -1065,8 +1064,7 @@ const en: Translations = {
   'admin.catalog.bulk.actions.deactivate': 'Deactivate',
   'admin.catalog.bulk.actions.delete': 'Delete',
   'admin.catalog.bulk.actions.export': 'Export',
-  'admin.catalog.bulk.confirmDelete':
-    'Delete {count} items? This action cannot be undone.',
+  'admin.catalog.bulk.confirmDelete': 'Delete {count} items? This action cannot be undone.',
   'admin.catalog.filters.title': 'Filters',
   'admin.catalog.filters.search': 'Search',
   'admin.catalog.filters.status': 'Status',
@@ -1081,15 +1079,13 @@ const en: Translations = {
   'admin.catalog.filters.apply': 'Apply',
   'admin.catalog.media.title': 'Images',
   'admin.catalog.media.upload': 'Upload images',
-  'admin.catalog.media.dragHint':
-    'Drag and drop images here, or use the button to select them.',
+  'admin.catalog.media.dragHint': 'Drag and drop images here, or use the button to select them.',
   'admin.catalog.media.or': 'or',
   'admin.catalog.media.primary': 'Primary',
   'admin.catalog.media.alt': 'Alt text',
   'admin.catalog.media.remove': 'Remove image',
   'admin.catalog.media.empty': 'No images uploaded yet.',
-  'admin.catalog.media.help':
-    'Accepted formats: JPG, PNG, WEBP. Max 5MB per image.',
+  'admin.catalog.media.help': 'Accepted formats: JPG, PNG, WEBP. Max 5MB per image.',
   'admin.catalog.pagination.previous': 'Previous',
   'admin.catalog.pagination.next': 'Next',
   'admin.catalog.pagination.page': 'Page',
@@ -1116,8 +1112,7 @@ const en: Translations = {
   'admin.sales.hub.card.openOrdersList': 'Open orders list',
   'admin.sales.hub.card.openInvoicesList': 'Open invoices list',
   'admin.sales.orders.title': 'Orders',
-  'admin.sales.orders.subtitle':
-    'Complete list of tenant orders. Side filters + bulk actions.',
+  'admin.sales.orders.subtitle': 'Complete list of tenant orders. Side filters + bulk actions.',
   'admin.sales.orders.loading': 'Loading orders...',
   'admin.sales.orders.error': 'Could not load orders.',
   'admin.sales.orders.empty': 'No orders yet.',
@@ -1235,8 +1230,7 @@ const en: Translations = {
   'admin.sales.orders.detail.delivered.banner':
     'This order has been delivered. For changes create a refund from Refunds.',
   'admin.sales.invoices.title': 'Invoices',
-  'admin.sales.invoices.subtitle':
-    'Manage issued, overdue and paid invoices. NET 30 + reminders.',
+  'admin.sales.invoices.subtitle': 'Manage issued, overdue and paid invoices. NET 30 + reminders.',
   'admin.sales.invoices.loading': 'Loading invoices...',
   'admin.sales.invoices.error': 'Could not load invoices.',
   'admin.sales.invoices.empty': 'No invoices yet.',
@@ -1315,7 +1309,8 @@ const en: Translations = {
   'account.orders.list.loading': 'Loading your orders...',
   'account.orders.list.error': 'Could not load your orders.',
   'account.orders.list.empty.title': 'You have no orders yet.',
-  'account.orders.list.empty.hint': 'When you place your first order, you will be able to track it from here.',
+  'account.orders.list.empty.hint':
+    'When you place your first order, you will be able to track it from here.',
   'account.orders.list.empty.cta': 'Browse catalog',
   'account.orders.list.filter.all': 'All',
   'account.orders.list.filter.pending': 'Pending',
@@ -1345,13 +1340,17 @@ const en: Translations = {
   'account.orders.detail.summary.status': 'Status',
   'account.orders.detail.timeline.heading': 'Shipping status',
   'account.orders.detail.timeline.received': 'Received at the dojo',
-  'account.orders.detail.timeline.receivedDescription': 'We received your order and started preparing it.',
+  'account.orders.detail.timeline.receivedDescription':
+    'We received your order and started preparing it.',
   'account.orders.detail.timeline.preparing': 'Preparing with care',
-  'account.orders.detail.timeline.preparingDescription': 'We are packing your figures with extra protection.',
+  'account.orders.detail.timeline.preparingDescription':
+    'We are packing your figures with extra protection.',
   'account.orders.detail.timeline.shipped': 'On the way, traveler',
-  'account.orders.detail.timeline.shippedDescription': 'It left our warehouse and is heading to your city.',
+  'account.orders.detail.timeline.shippedDescription':
+    'It left our warehouse and is heading to your city.',
   'account.orders.detail.timeline.outForDelivery': 'Almost at your sanctuary',
-  'account.orders.detail.timeline.outForDeliveryDescription': 'The courier is on the last mile and will arrive at your door soon.',
+  'account.orders.detail.timeline.outForDeliveryDescription':
+    'The courier is on the last mile and will arrive at your door soon.',
   'account.orders.detail.timeline.delivered': 'Delivered',
   'account.orders.detail.timeline.deliveredDescription': 'It arrived! Enjoy your collection.',
   'account.orders.detail.items.heading': 'Items',
@@ -1378,16 +1377,19 @@ const en: Translations = {
   'account.orders.detail.tracking.notShipped': 'No tracking number has been generated yet.',
   'account.orders.detail.reorder': 'Reorder',
   'account.orders.detail.notFound.title': 'We could not find this order.',
-  'account.orders.detail.notFound.hint': 'The link may have expired or the order may belong to another account.',
+  'account.orders.detail.notFound.hint':
+    'The link may have expired or the order may belong to another account.',
   'account.orders.detail.notFound.back': 'Back to my orders',
-  'account.orders.detail.cancelled.banner': 'This order was cancelled. You can place a new order from the catalog whenever you want.',
+  'account.orders.detail.cancelled.banner':
+    'This order was cancelled. You can place a new order from the catalog whenever you want.',
   'account.orders.detail.addedDaysAgo': '{days} days ago',
   'account.orders.detail.addedYesterday': 'yesterday',
   'account.orders.detail.addedToday': 'today',
 
   // ─── account: wishlist "My Collection" (F2.3) ──────────────
   'account.wishlist.heading': 'My Collection',
-  'account.wishlist.subtitle': 'Your curated collection of figures, manga and merch. Keep the context in your head.',
+  'account.wishlist.subtitle':
+    'Your curated collection of figures, manga and merch. Keep the context in your head.',
   'account.wishlist.count': '{count} saved',
   'account.wishlist.loading': 'Loading your collection...',
   'account.wishlist.error': 'Could not load your collection.',
@@ -1403,7 +1405,8 @@ const en: Translations = {
   'account.wishlist.item.notifying': 'We will let you know when it is back.',
   'account.wishlist.item.confirmRemove': 'Remove this piece from your collection?',
   'account.wishlist.empty.title': 'Your collection is empty.',
-  'account.wishlist.empty.hint': 'Here you will see the figures, manga and merch you save for later. Add personal notes and we will notify you when they are back in stock.',
+  'account.wishlist.empty.hint':
+    'Here you will see the figures, manga and merch you save for later. Add personal notes and we will notify you when they are back in stock.',
   'account.wishlist.empty.cta': 'Browse catalog',
 
   'format.empty': '—',
@@ -1421,7 +1424,8 @@ const en: Translations = {
   'admin.inventory.hub.archivedProducts': 'Archived products',
   'admin.inventory.hub.archivedProductsHint': '23 products archived for disuse.',
   'admin.inventory.stock.title': 'Stock by product',
-  'admin.inventory.stock.subtitle': 'Consolidated view of inventory by product, variant and warehouse.',
+  'admin.inventory.stock.subtitle':
+    'Consolidated view of inventory by product, variant and warehouse.',
   'admin.inventory.stock.searchPlaceholder': 'Search by name or SKU...',
   'admin.inventory.stock.filter.allStatuses': 'All statuses',
   'admin.inventory.stock.filter.allWarehouses': 'All warehouses',
@@ -1442,7 +1446,8 @@ const en: Translations = {
   'admin.inventory.stock.actions.viewHistory': 'View history',
   'admin.inventory.stock.actions.export': 'Export CSV',
   'admin.inventory.movements.title': 'Inventory movements',
-  'admin.inventory.movements.subtitle': 'Entries, exits, adjustments and transfers between warehouses.',
+  'admin.inventory.movements.subtitle':
+    'Entries, exits, adjustments and transfers between warehouses.',
   'admin.inventory.movements.column.type': 'Type',
   'admin.inventory.movements.column.product': 'Product',
   'admin.inventory.movements.column.quantity': 'Quantity',
@@ -1498,7 +1503,8 @@ const en: Translations = {
   'admin.marketing.hub.activeCoupons': 'Active coupons',
   'admin.marketing.hub.activeCouponsHint': '4 live + 2 scheduled for end of year.',
   'admin.marketing.hub.activePromotions': 'Active promotions',
-  'admin.marketing.hub.activePromotionsHint': '3 promotions active. 1 BOGO + 1 free shipping + 1 % off.',
+  'admin.marketing.hub.activePromotionsHint':
+    '3 promotions active. 1 BOGO + 1 free shipping + 1 % off.',
   'admin.marketing.hub.conversionRate': 'Conversion rate',
   'admin.marketing.hub.conversionRateHint': '3.8% over 12,400 sessions with coupon applied.',
   'admin.marketing.hub.redemptionsMonth': 'Redemptions this month',
@@ -1539,7 +1545,8 @@ const en: Translations = {
   'admin.marketing.coupons.detail.edit': 'Edit',
   'admin.marketing.coupons.detail.deactivate': 'Deactivate',
   'admin.marketing.promotions.title': 'Promotions',
-  'admin.marketing.promotions.subtitle': 'Automatic rules (BOGO, % off, free shipping) applied to the cart.',
+  'admin.marketing.promotions.subtitle':
+    'Automatic rules (BOGO, % off, free shipping) applied to the cart.',
   'admin.marketing.promotions.create': 'New promotion',
   'admin.marketing.promotions.column.name': 'Name',
   'admin.marketing.promotions.column.kind': 'Type',
@@ -1556,11 +1563,13 @@ const en: Translations = {
   'admin.marketing.promotions.builder.step.rules': '2. Rules',
   'admin.marketing.promotions.builder.step.schedule': '3. Schedule',
   'admin.marketing.promotions.builder.kind.bogo.title': 'BOGO (buy and get)',
-  'admin.marketing.promotions.builder.kind.bogo.description': 'E.g. 2x1, 3x2, 50% off on the second.',
+  'admin.marketing.promotions.builder.kind.bogo.description':
+    'E.g. 2x1, 3x2, 50% off on the second.',
   'admin.marketing.promotions.builder.kind.percent.title': 'Percentage discount',
   'admin.marketing.promotions.builder.kind.percent.description': 'X% off on a category or product.',
   'admin.marketing.promotions.builder.kind.freeShipping.title': 'Free shipping',
-  'admin.marketing.promotions.builder.kind.freeShipping.description': 'Enable free shipping above a minimum subtotal.',
+  'admin.marketing.promotions.builder.kind.freeShipping.description':
+    'Enable free shipping above a minimum subtotal.',
   'admin.marketing.promotions.builder.fields.buyQuantity': 'Buy quantity',
   'admin.marketing.promotions.builder.fields.getQuantity': 'Get quantity',
   'admin.marketing.promotions.builder.fields.percentOff': '% off',
@@ -1639,7 +1648,8 @@ const en: Translations = {
 
   // ─── admin: settings — taxes (F5.5) ──────────────────────────────
   'admin.settings.taxes.title': 'Taxes',
-  'admin.settings.taxes.subtitle': 'Configure tax rates per country and whether prices include tax.',
+  'admin.settings.taxes.subtitle':
+    'Configure tax rates per country and whether prices include tax.',
   'admin.settings.taxes.defaultRate': 'Default rate',
   'admin.settings.taxes.taxIncluded': 'Prices include tax',
   'admin.settings.taxes.taxIncludedHelp': 'Enable if storefront prices already include VAT.',
@@ -1658,7 +1668,8 @@ const en: Translations = {
   'admin.settings.currencies.title': 'Currencies',
   'admin.settings.currencies.subtitle': 'List of accepted currencies and conversion rates.',
   'admin.settings.currencies.base': 'Base currency',
-  'admin.settings.currencies.baseHelp': 'The base currency defines reports and the default conversion.',
+  'admin.settings.currencies.baseHelp':
+    'The base currency defines reports and the default conversion.',
   'admin.settings.currencies.column.code': 'Code',
   'admin.settings.currencies.column.name': 'Name',
   'admin.settings.currencies.column.symbol': 'Symbol',

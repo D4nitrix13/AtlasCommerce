@@ -34,12 +34,12 @@ import type { LoginResponse, ValidationErrors } from '../../../types/auth';
 const PASSWORD_MIN_LENGTH = 12;
 const CODE_LENGTH = 6;
 
-type ResetPasswordFormProps = {
+interface ResetPasswordFormProps {
   email: string;
   codeFromUrl?: string;
   callbackPath?: string;
   locale?: string;
-};
+}
 
 type PasswordStrength = 0 | 1 | 2 | 3 | 4;
 const STRENGTH_LABELS = ['', 'Débil', 'Aceptable', 'Buena', 'Excelente'] as const;

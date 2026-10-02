@@ -54,24 +54,28 @@ const initialsOf = (name: string): string => {
   ]}
   data-review-id={review.id}
 >
-  {
-    review.status === 'flagged' && (
-      <div class="flex items-center gap-2 border-b border-rose-100 bg-rose-50 px-4 py-2 text-xs font-medium text-rose-700">
-        <span aria-hidden="true">⚠</span>
-        <span>{t['admin.support.reviews.card.flagReason']}</span>
-      </div>
-    )
-  }
+  {review.status === 'flagged' && (
+    <div class="flex items-center gap-2 border-b border-rose-100 bg-rose-50 px-4 py-2 text-xs font-medium text-rose-700">
+      <span aria-hidden="true">⚠</span>
+      <span>{t['admin.support.reviews.card.flagReason']}</span>
+    </div>
+  )}
 
   <div class="flex gap-4 p-5">
-    <div class="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-3xl" aria-hidden="true">
+    <div
+      class="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-3xl"
+      aria-hidden="true"
+    >
       {review.productImage}
     </div>
 
     <div class="min-w-0 flex-1">
       <div class="flex items-baseline justify-between gap-3">
         <p class="truncate text-sm font-semibold text-slate-900">{review.productName}</p>
-        <span class="shrink-0 text-amber-500 tracking-tight" aria-label={`${review.rating} de 5 estrellas`}>
+        <span
+          class="shrink-0 text-amber-500 tracking-tight"
+          aria-label={`${review.rating} de 5 estrellas`}
+        >
           {starDisplay}
         </span>
       </div>

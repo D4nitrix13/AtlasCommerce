@@ -35,20 +35,49 @@ const { labels } = Astro.props;
   class="grid grid-cols-5 items-center gap-2 border-t border-slate-100 pt-3"
 >
   {/* SSL — candado */}
-  <span role="listitem" class="inline-flex items-center justify-center gap-1 text-slate-500" aria-label={labels.ssl} title={labels.ssl}>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+  <span
+    role="listitem"
+    class="inline-flex items-center justify-center gap-1 text-slate-500"
+    aria-label={labels.ssl}
+    title={labels.ssl}
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      class="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+      />
     </svg>
     <span class="text-[10px] font-semibold uppercase tracking-wide">SSL</span>
   </span>
 
   {/* Visa — wordmark simple */}
-  <span role="listitem" class="inline-flex items-center justify-center" aria-label={labels.visa} title={labels.visa}>
-    <span class="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold italic tracking-wider text-blue-700">VISA</span>
+  <span
+    role="listitem"
+    class="inline-flex items-center justify-center"
+    aria-label={labels.visa}
+    title={labels.visa}
+  >
+    <span class="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold italic tracking-wider text-blue-700">
+      VISA
+    </span>
   </span>
 
   {/* Mastercard — círculos */}
-  <span role="listitem" class="inline-flex items-center justify-center" aria-label={labels.mastercard} title={labels.mastercard}>
+  <span
+    role="listitem"
+    class="inline-flex items-center justify-center"
+    aria-label={labels.mastercard}
+    title={labels.mastercard}
+  >
     <span class="relative inline-flex h-4 w-7 items-center justify-center">
       <span class="absolute left-0 inline-block h-4 w-4 rounded-full bg-red-500 opacity-90"></span>
       <span class="absolute right-0 inline-block h-4 w-4 rounded-full bg-amber-400 opacity-90 mix-blend-multiply"></span>
@@ -56,14 +85,38 @@ const { labels } = Astro.props;
   </span>
 
   {/* NET 30 */}
-  <span role="listitem" class="inline-flex items-center justify-center" aria-label={labels.net30} title={labels.net30}>
-    <span class="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">NET 30</span>
+  <span
+    role="listitem"
+    class="inline-flex items-center justify-center"
+    aria-label={labels.net30}
+    title={labels.net30}
+  >
+    <span class="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+      NET 30
+    </span>
   </span>
 
   {/* GDPR — escudo */}
-  <span role="listitem" class="inline-flex items-center justify-center gap-1 text-slate-500" aria-label={labels.gdpr} title={labels.gdpr}>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+  <span
+    role="listitem"
+    class="inline-flex items-center justify-center gap-1 text-slate-500"
+    aria-label={labels.gdpr}
+    title={labels.gdpr}
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      class="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+      />
     </svg>
     <span class="text-[10px] font-semibold uppercase tracking-wide">GDPR</span>
   </span>

@@ -2,12 +2,12 @@ const API_URL = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
 
 import { getXsrfToken } from './csrf';
 
-type ApiErrorResponse = {
+interface ApiErrorResponse {
   message?: string;
   errors?: Record<string, string[]> | null;
-};
+}
 
-export type ApiError = {
+export interface ApiError {
   status: number;
   message: string;
   errors: Record<string, string[]> | null;
@@ -21,7 +21,7 @@ export type ApiError = {
    * sigue siendo válido, solo no pudimos validarlo contra el backend).
    */
   isNetworkError: boolean;
-};
+}
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   /**

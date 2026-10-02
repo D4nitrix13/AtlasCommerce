@@ -228,11 +228,14 @@ export default function StorefrontLoginForm({
           data-passkey-login-trigger
           className="w-full bg-white border border-slate-300 hover:border-[var(--brand-accent,#2D9D8E)] hover:bg-slate-50 text-slate-700 font-medium py-2.5 rounded-lg transition focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)] inline-flex items-center justify-center gap-2"
         >
-          <span className="text-base" aria-hidden="true">🔑</span>
+          <span className="text-base" aria-hidden="true">
+            🔑
+          </span>
           <span>{t('auth.login.shell.passkeyButton') ?? 'Iniciar sesión con passkey'}</span>
         </button>
         <p className="mt-2 text-xs text-slate-400">
-          {t('auth.login.shell.passkeyHint') ?? 'WebAuthn · Tu dispositivo biométrico o llave de seguridad'}
+          {t('auth.login.shell.passkeyHint') ??
+            'WebAuthn · Tu dispositivo biométrico o llave de seguridad'}
         </p>
       </div>
     </div>

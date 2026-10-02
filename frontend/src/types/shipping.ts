@@ -19,7 +19,7 @@ export const SHIPMENT_STATUSES = [
 
 export type ShipmentStatus = (typeof SHIPMENT_STATUSES)[number];
 
-export type Shipment = {
+export interface Shipment {
   id: number;
   order_id: number;
   shipping_company_id: number | null;
@@ -32,7 +32,7 @@ export type Shipment = {
   delivered_at: string | null;
   created_at: string;
   updated_at: string;
-};
+}
 
 export type ShipmentWithRelations = Shipment & {
   shipping_company?: {

@@ -66,9 +66,7 @@ const accentClasses = {
   <div class="flex items-start justify-between">
     <div>
       <p class="text-sm font-medium text-slate-500">{title}</p>
-      <h3 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-        {value}
-      </h3>
+      <h3 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">{value}</h3>
     </div>
 
     <div class:list={['grid h-11 w-11 place-items-center rounded-2xl', accentClasses[accent]]}>
@@ -92,13 +90,16 @@ const accentClasses = {
         fill="none"
         stroke="currentColor"
         stroke-width="2"
-        class={accent === 'emerald'
-          ? 'text-emerald-500'
-          : accent === 'sky'
-            ? 'text-sky-500'
-            : accent === 'amber'
-              ? 'text-amber-500'
-              : 'text-rose-500'}></path>
+        class={
+          accent === 'emerald'
+            ? 'text-emerald-500'
+            : accent === 'sky'
+              ? 'text-sky-500'
+              : accent === 'amber'
+                ? 'text-amber-500'
+                : 'text-rose-500'
+        }
+      ></path>
     </svg>
   </div>
 </article>

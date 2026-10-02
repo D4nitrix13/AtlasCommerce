@@ -136,63 +136,58 @@ const publicApiUrl = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
   </div>
 
   <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
-    {
-      menu.map((section) => (
-        <div>
-          <p class="sidebar-label mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
-            {section.label}
-          </p>
+    {menu.map((section) => (
+      <div>
+        <p class="sidebar-label mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+          {section.label}
+        </p>
 
-          <div class="space-y-1">
-            {section.items.map((item) => {
-              const href = item.href;
-              const isActive = currentPath === href || currentPath.startsWith(href + '/');
-              const activeClass = isActive
-                ? 'bg-emerald-500/10 text-emerald-400'
-                : 'text-slate-400 hover:bg-white/5 hover:text-white';
-              const iconColorClass = isActive ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300';
+        <div class="space-y-1">
+          {section.items.map((item) => {
+            const href = item.href;
+            const isActive = currentPath === href || currentPath.startsWith(href + '/');
+            const activeClass = isActive
+              ? 'bg-emerald-500/10 text-emerald-400'
+              : 'text-slate-400 hover:bg-white/5 hover:text-white';
+            const iconColorClass = isActive
+              ? 'text-emerald-400'
+              : 'text-slate-500 group-hover:text-slate-300';
 
-              // Items con badge dinámico (orders-pending, etc.) se
-              // renderizan inline para poder inyectar el `<span
-              // data-badge>` que el script client-side va a llenar.
-              // El resto usa el componente `AdminSidebarItem` normal.
-              if (item.badge !== undefined) {
-                return (
-                  <a
-                    href={href}
-                    title={item.name}
-                    aria-current={isActive ? 'page' : undefined}
-                    class:list={[
-                      'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition',
-                      activeClass,
-                    ]}
-                  >
-                    <Icon
-                      name={item.icon}
-                      class:list={['h-5 w-5 shrink-0 transition', iconColorClass]}
-                    />
-                    <span class="sidebar-label flex-1">{item.name}</span>
-                    <span
-                      data-badge={item.badge}
-                      class="sidebar-label rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-400"
-                    />
-                  </a>
-                );
-              }
-
+            // Items con badge dinámico (orders-pending, etc.) se
+            // renderizan inline para poder inyectar el `<span
+            // data-badge>` que el script client-side va a llenar.
+            // El resto usa el componente `AdminSidebarItem` normal.
+            if (item.badge !== undefined) {
               return (
-                <AdminSidebarItem
-                  name={item.name}
+                <a
                   href={href}
-                  icon={item.icon}
-                  active={isActive}
-                />
+                  title={item.name}
+                  aria-current={isActive ? 'page' : undefined}
+                  class:list={[
+                    'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition',
+                    activeClass,
+                  ]}
+                >
+                  <Icon
+                    name={item.icon}
+                    class:list={['h-5 w-5 shrink-0 transition', iconColorClass]}
+                  />
+                  <span class="sidebar-label flex-1">{item.name}</span>
+                  <span
+                    data-badge={item.badge}
+                    class="sidebar-label rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-400"
+                  />
+                </a>
               );
-            })}
-          </div>
+            }
+
+            return (
+              <AdminSidebarItem name={item.name} href={href} icon={item.icon} active={isActive} />
+            );
+          })}
         </div>
-      ))
-    }
+      </div>
+    ))}
   </nav>
 
   <div class="border-t border-white/10 p-4">
@@ -349,7 +344,8 @@ const publicApiUrl = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
       if (badgeEls.length === 0) return;
 
       // Bridge global seteado por el script is:inline de arriba.
-      const apiBase = (window as unknown as { __ATLAS_ADMIN_API_BASE__?: string }).__ATLAS_ADMIN_API_BASE__ ?? '';
+      const apiBase =
+        (window as unknown as { __ATLAS_ADMIN_API_BASE__?: string }).__ATLAS_ADMIN_API_BASE__ ?? '';
 
       try {
         const response = await fetch(`${apiBase}/api/v1/admin/orders/recent?limit=50`, {
@@ -359,7 +355,7 @@ const publicApiUrl = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
-        const payload = (await response.json()) as { data?: Array<{ status?: string }> };
+        const payload = (await response.json()) as { data?: { status?: string }[] };
         const orders = Array.isArray(payload.data) ? payload.data : [];
         const pendingCount = orders.filter((order) => order.status === 'pending').length;
 
@@ -373,7 +369,6 @@ const publicApiUrl = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
           el.setAttribute('aria-label', `${pendingCount} órdenes pendientes`);
         });
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.warn('[AdminSidebar] No se pudo cargar badge de órdenes pendientes:', err);
       }
     }

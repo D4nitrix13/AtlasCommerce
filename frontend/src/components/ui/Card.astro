@@ -22,12 +22,7 @@ interface Props {
   class?: string;
 }
 
-const {
-  padding = 'md',
-  bordered = true,
-  shadow = 'sm',
-  class: className,
-} = Astro.props;
+const { padding = 'md', bordered = true, shadow = 'sm', class: className } = Astro.props;
 
 const PADDING_BODY: Record<NonNullable<Props['padding']>, string> = {
   none: 'p-0',
@@ -73,7 +68,9 @@ const SHADOW: Record<NonNullable<Props['shadow']>, string> = {
     <slot />
   </div>
 
-  <footer class:list={[PADDING_FOOTER[padding], 'border-t border-slate-100 bg-slate-50/50 rounded-b-xl']}>
+  <footer
+    class:list={[PADDING_FOOTER[padding], 'border-t border-slate-100 bg-slate-50/50 rounded-b-xl']}
+  >
     <slot name="footer" />
   </footer>
 </article>

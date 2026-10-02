@@ -105,7 +105,7 @@ export default function CustomersAdmin(): ReactElement {
     setSelected(null);
     try {
       const response = await apiFetch<{ data: CustomerDetail }>(
-        API_ENDPOINTS.admin.customer(customer.id),
+        API_ENDPOINTS.admin.customer(customer.id)
       );
       setSelected(response.data);
     } catch {
@@ -245,9 +245,7 @@ export default function CustomersAdmin(): ReactElement {
                   className="border-t border-neutral-100"
                   data-testid={`customer-row-${customer.id}`}
                 >
-                  <td className="px-3 py-2 font-medium text-neutral-900">
-                    {customer.full_name}
-                  </td>
+                  <td className="px-3 py-2 font-medium text-neutral-900">{customer.full_name}</td>
                   <td className="px-3 py-2 text-neutral-700">{customer.email}</td>
                   <td className="px-3 py-2 text-neutral-700">
                     {t(`admin.customers.type.${customer.customer_type}`)}
@@ -263,7 +261,7 @@ export default function CustomersAdmin(): ReactElement {
                       {t(
                         customer.is_active
                           ? 'admin.customers.statusActive'
-                          : 'admin.customers.statusInactive',
+                          : 'admin.customers.statusInactive'
                       )}
                     </span>
                   </td>
@@ -317,47 +315,33 @@ export default function CustomersAdmin(): ReactElement {
           data-testid="customer-detail-modal"
         >
           <div className="w-full max-w-md space-y-3 rounded-lg bg-white p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-neutral-900">
-              {selected.full_name}
-            </h2>
+            <h2 className="text-lg font-semibold text-neutral-900">{selected.full_name}</h2>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-neutral-500">
-                  {t('admin.customers.detail.email')}
-                </dt>
+                <dt className="text-neutral-500">{t('admin.customers.detail.email')}</dt>
                 <dd className="text-neutral-900">{selected.email}</dd>
               </div>
               {selected.phone !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-neutral-500">
-                    {t('admin.customers.detail.phone')}
-                  </dt>
+                  <dt className="text-neutral-500">{t('admin.customers.detail.phone')}</dt>
                   <dd className="text-neutral-900">{selected.phone}</dd>
                 </div>
               )}
               {selected.order_count !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-neutral-500">
-                    {t('admin.customers.detail.orders')}
-                  </dt>
+                  <dt className="text-neutral-500">{t('admin.customers.detail.orders')}</dt>
                   <dd className="text-neutral-900">{selected.order_count}</dd>
                 </div>
               )}
               {selected.lifetime_value_cents !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-neutral-500">
-                    {t('admin.customers.detail.lifetimeValue')}
-                  </dt>
-                  <dd className="text-neutral-900">
-                    {selected.lifetime_value_cents / 100}
-                  </dd>
+                  <dt className="text-neutral-500">{t('admin.customers.detail.lifetimeValue')}</dt>
+                  <dd className="text-neutral-900">{selected.lifetime_value_cents / 100}</dd>
                 </div>
               )}
               {selected.registered_at !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-neutral-500">
-                    {t('admin.customers.detail.registeredAt')}
-                  </dt>
+                  <dt className="text-neutral-500">{t('admin.customers.detail.registeredAt')}</dt>
                   <dd className="text-neutral-900">
                     {new Date(selected.registered_at).toLocaleDateString()}
                   </dd>

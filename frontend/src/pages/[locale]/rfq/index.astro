@@ -52,19 +52,11 @@ const stepperLabels = [
 
   <main class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">
-        {t['storefront.rfq.heading']}
-      </h1>
-      <p class="mt-2 text-sm text-slate-600 sm:text-base">
-        {t['storefront.rfq.subtitle']}
-      </p>
+      <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">{t['storefront.rfq.heading']}</h1>
+      <p class="mt-2 text-sm text-slate-600 sm:text-base">{t['storefront.rfq.subtitle']}</p>
     </header>
 
-    <form
-      id="rfq-form"
-      class="space-y-6"
-      data-testid="rfq-form"
-    >
+    <form id="rfq-form" class="space-y-6" data-testid="rfq-form">
       <!-- Paso 1: producto + cantidad + deadline + descripción diseño -->
       <fieldset class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <legend class="px-2 text-sm font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
@@ -73,7 +65,9 @@ const stepperLabels = [
 
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="block">
-            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.product']}</span>
+            <span class="text-sm font-medium text-slate-800">
+              {t['storefront.rfq.field.product']}
+            </span>
             <input
               type="text"
               name="product"
@@ -85,7 +79,9 @@ const stepperLabels = [
           </label>
 
           <label class="block">
-            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.quantity']}</span>
+            <span class="text-sm font-medium text-slate-800">
+              {t['storefront.rfq.field.quantity']}
+            </span>
             <input
               type="number"
               name="quantity"
@@ -99,7 +95,9 @@ const stepperLabels = [
         </div>
 
         <label class="block">
-          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.deadline']}</span>
+          <span class="text-sm font-medium text-slate-800">
+            {t['storefront.rfq.field.deadline']}
+          </span>
           <input
             type="date"
             name="deadline"
@@ -110,7 +108,9 @@ const stepperLabels = [
         </label>
 
         <label class="block">
-          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.description']}</span>
+          <span class="text-sm font-medium text-slate-800">
+            {t['storefront.rfq.field.description']}
+          </span>
           <textarea
             name="description"
             rows="4"
@@ -130,7 +130,9 @@ const stepperLabels = [
 
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="block">
-            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.contactName']}</span>
+            <span class="text-sm font-medium text-slate-800">
+              {t['storefront.rfq.field.contactName']}
+            </span>
             <input
               type="text"
               name="contactName"
@@ -142,7 +144,9 @@ const stepperLabels = [
           </label>
 
           <label class="block">
-            <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.contactEmail']}</span>
+            <span class="text-sm font-medium text-slate-800">
+              {t['storefront.rfq.field.contactEmail']}
+            </span>
             <input
               type="email"
               name="contactEmail"
@@ -155,7 +159,9 @@ const stepperLabels = [
         </div>
 
         <label class="block">
-          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.company']}</span>
+          <span class="text-sm font-medium text-slate-800">
+            {t['storefront.rfq.field.company']}
+          </span>
           <input
             type="text"
             name="company"
@@ -167,7 +173,9 @@ const stepperLabels = [
         </label>
 
         <label class="block">
-          <span class="text-sm font-medium text-slate-800">{t['storefront.rfq.field.fiscalAddress']}</span>
+          <span class="text-sm font-medium text-slate-800">
+            {t['storefront.rfq.field.fiscalAddress']}
+          </span>
           <textarea
             name="fiscalAddress"
             rows="3"

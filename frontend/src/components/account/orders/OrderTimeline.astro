@@ -97,75 +97,71 @@ const hasAnyTimestamp = resolved.some((m) => m.timestamp !== null);
     {heading}
   </h2>
 
-  {
-    hasAnyTimestamp ? (
-      <ol class="relative flex flex-col gap-6">
-        {resolved.map((milestone, idx) => {
-          const isLast = idx === resolved.length - 1;
-          const dotClasses =
-            milestone.state === 'done'
-              ? 'bg-emerald-500 text-white'
-              : milestone.state === 'current'
-                ? 'bg-[var(--primary,#7c3aed)] text-white ring-4 ring-[color-mix(in_srgb,var(--primary,#7c3aed)_20%,white)]'
-                : 'bg-slate-200 text-slate-400';
-          const connectorColor = milestone.state === 'done' ? 'bg-emerald-300' : 'bg-slate-200';
-          return (
-            <li class="relative flex gap-4">
-              <div class="flex flex-col items-center">
-                <div
-                  class:list={[
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base font-semibold shadow-sm',
-                    dotClasses,
-                  ]}
+  {hasAnyTimestamp ? (
+    <ol class="relative flex flex-col gap-6">
+      {resolved.map((milestone, idx) => {
+        const isLast = idx === resolved.length - 1;
+        const dotClasses =
+          milestone.state === 'done'
+            ? 'bg-emerald-500 text-white'
+            : milestone.state === 'current'
+              ? 'bg-[var(--primary,#7c3aed)] text-white ring-4 ring-[color-mix(in_srgb,var(--primary,#7c3aed)_20%,white)]'
+              : 'bg-slate-200 text-slate-400';
+        const connectorColor = milestone.state === 'done' ? 'bg-emerald-300' : 'bg-slate-200';
+        return (
+          <li class="relative flex gap-4">
+            <div class="flex flex-col items-center">
+              <div
+                class:list={[
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base font-semibold shadow-sm',
+                  dotClasses,
+                ]}
+                aria-hidden="true"
+              >
+                {milestone.state === 'done' ? '✓' : milestone.icon}
+              </div>
+              {!isLast && (
+                <span
                   aria-hidden="true"
-                >
-                  {milestone.state === 'done' ? '✓' : milestone.icon}
-                </div>
-                {!isLast && (
-                  <span
-                    aria-hidden="true"
-                    class:list={['mt-1 h-full w-0.5 min-h-[24px] flex-1', connectorColor]}
-                  />
-                )}
-              </div>
-              <div class="flex min-w-0 flex-1 flex-col gap-1 pb-2">
-                <p
-                  class:list={[
-                    'text-sm font-semibold',
-                    milestone.state === 'pending' ? 'text-slate-400' : 'text-slate-900',
-                  ]}
-                >
-                  {milestone.title}
+                  class:list={['mt-1 h-full w-0.5 min-h-[24px] flex-1', connectorColor]}
+                />
+              )}
+            </div>
+            <div class="flex min-w-0 flex-1 flex-col gap-1 pb-2">
+              <p
+                class:list={[
+                  'text-sm font-semibold',
+                  milestone.state === 'pending' ? 'text-slate-400' : 'text-slate-900',
+                ]}
+              >
+                {milestone.title}
+              </p>
+              <p
+                class:list={[
+                  'text-xs',
+                  milestone.state === 'pending' ? 'text-slate-400' : 'text-slate-600',
+                ]}
+              >
+                {milestone.state === 'pending' ? '—' : milestone.description}
+              </p>
+              {milestone.timestamp && (
+                <p class="text-xs font-medium text-slate-500">
+                  <time datetime={milestone.timestamp}>{formatDateTime(milestone.timestamp)}</time>
                 </p>
-                <p
-                  class:list={[
-                    'text-xs',
-                    milestone.state === 'pending' ? 'text-slate-400' : 'text-slate-600',
-                  ]}
-                >
-                  {milestone.state === 'pending' ? '—' : milestone.description}
+              )}
+              {milestone.note && (
+                <p class="mt-1 rounded-md bg-slate-50 px-2 py-1 text-xs italic text-slate-500">
+                  {milestone.note}
                 </p>
-                {milestone.timestamp && (
-                  <p class="text-xs font-medium text-slate-500">
-                    <time datetime={milestone.timestamp}>
-                      {formatDateTime(milestone.timestamp)}
-                    </time>
-                  </p>
-                )}
-                {milestone.note && (
-                  <p class="mt-1 rounded-md bg-slate-50 px-2 py-1 text-xs italic text-slate-500">
-                    {milestone.note}
-                  </p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-    ) : (
-      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-500">
-        — No hay eventos de seguimiento disponibles para este pedido.
-      </p>
-    )
-  }
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  ) : (
+    <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-500">
+      — No hay eventos de seguimiento disponibles para este pedido.
+    </p>
+  )}
 </section>

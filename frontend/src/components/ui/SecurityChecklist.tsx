@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { Check, Circle } from 'lucide-react';
 
-type SecurityChecklistItem = {
+interface SecurityChecklistItem {
   /**
    * Texto del item (ej. "Al menos 12 caracteres").
    * El caller debería pasarlo via i18n.
@@ -11,15 +11,15 @@ type SecurityChecklistItem = {
    * Si el item está cumplido o no. Cumple → check verde, no cumple → círculo gris.
    */
   met: boolean;
-};
+}
 
-type SecurityChecklistProps = {
+interface SecurityChecklistProps {
   /**
    * Título opcional arriba del checklist (ej. "Tu contraseña debe tener:").
    */
   title?: string;
   items: SecurityChecklistItem[];
-};
+}
 
 /**
  * Lista de checks de seguridad para mostrar al usuario qué requisitos
@@ -53,7 +53,12 @@ function ChecklistRow({ met, label }: { met: boolean; label: string }): ReactEle
   return (
     <li className="flex items-center gap-2">
       {met ? (
-        <Check size={14} strokeWidth={2.5} className="text-[var(--brand-accent,#2D9D8E)]" aria-hidden="true" />
+        <Check
+          size={14}
+          strokeWidth={2.5}
+          className="text-[var(--brand-accent,#2D9D8E)]"
+          aria-hidden="true"
+        />
       ) : (
         <Circle size={14} strokeWidth={2} className="text-slate-400" aria-hidden="true" />
       )}

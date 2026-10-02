@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-type PasswordInputProps = {
+interface PasswordInputProps {
   id: string;
   value: string;
   onChange: (value: string) => void;
@@ -20,7 +20,7 @@ type PasswordInputProps = {
   minLength?: number;
   placeholder?: string;
   className?: string;
-};
+}
 
 /**
  * Input de password con toggle show/hide.

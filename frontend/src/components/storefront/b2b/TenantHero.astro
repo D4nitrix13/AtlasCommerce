@@ -47,14 +47,12 @@ const { eyebrow, title, subtitle, primaryCta, secondaryCta, bullets } = Astro.pr
     aria-hidden="true"
     class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-20 blur-3xl"
     style="background: var(--primary, #059669);"
-  >
-  </div>
+  ></div>
   <div
     aria-hidden="true"
     class="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full opacity-10 blur-3xl"
     style="background: var(--secondary, #10b981);"
-  >
-  </div>
+  ></div>
 
   <div class="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
     <p class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800 backdrop-blur">
@@ -75,20 +73,18 @@ const { eyebrow, title, subtitle, primaryCta, secondaryCta, bullets } = Astro.pr
 
     <p class="max-w-2xl text-base text-slate-700 sm:text-lg">{subtitle}</p>
 
-    {
-      bullets.length > 0 && (
-        <ul class="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
-          {bullets.map((bullet) => (
-            <li class="flex items-start gap-2 text-sm text-slate-700 sm:text-base">
-              <span aria-hidden="true" class="mt-0.5 text-base">
-                {bullet.icon}
-              </span>
-              <span>{bullet.text}</span>
-            </li>
-          ))}
-        </ul>
-      )
-    }
+    {bullets.length > 0 && (
+      <ul class="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
+        {bullets.map((bullet) => (
+          <li class="flex items-start gap-2 text-sm text-slate-700 sm:text-base">
+            <span aria-hidden="true" class="mt-0.5 text-base">
+              {bullet.icon}
+            </span>
+            <span>{bullet.text}</span>
+          </li>
+        ))}
+      </ul>
+    )}
 
     <div class="mt-2 flex flex-wrap items-center gap-3">
       <a

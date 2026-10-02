@@ -9,7 +9,7 @@ import { DEFAULT_BRAND, type LoginTheme, type StoreBrand } from '../config/store
  * El middleware de Astro (`src/middleware.ts`) inyecta una instancia
  * de este tipo en `Astro.locals.theme`.
  */
-export type Theme = {
+export interface Theme {
   short_name: string | null;
   logo_path: string | null;
   login_logo_path: string | null;
@@ -22,7 +22,7 @@ export type Theme = {
   whatsapp: string | null;
   login_theme: LoginTheme | null;
   tokens: Record<string, unknown>;
-};
+}
 
 /**
  * Theme por defecto cuando el backend no devuelve uno o falla el fetch.

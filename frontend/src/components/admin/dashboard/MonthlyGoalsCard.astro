@@ -39,33 +39,29 @@ const goals = [
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-  <h2 class="mb-1 text-lg font-bold text-slate-950">
-    {t['admin.dashboard.monthlyGoals.heading']}
-  </h2>
+  <h2 class="mb-1 text-lg font-bold text-slate-950">{t['admin.dashboard.monthlyGoals.heading']}</h2>
   <p class="mb-5 text-sm text-slate-500">{t['admin.dashboard.monthlyGoals.subtitle']}</p>
 
   <div class="space-y-5">
-    {
-      goals.map((g) => (
-        <div>
-          <div class="flex items-center justify-between text-sm">
-            <span class="font-medium text-slate-700">{g.label}</span>
-            <span class="font-semibold text-slate-950">{g.percent}%</span>
-          </div>
-
-          <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div
-              class:list={['h-full rounded-full transition-all', g.color]}
-              style={`width:${g.percent}%`}
-            />
-          </div>
-
-          <div class="mt-1 flex justify-between text-xs text-slate-400">
-            <span>{g.current}</span>
-            <span>{t['admin.dashboard.monthlyGoals.targetLabel'].replace('{target}', g.target)}</span>
-          </div>
+    {goals.map((g) => (
+      <div>
+        <div class="flex items-center justify-between text-sm">
+          <span class="font-medium text-slate-700">{g.label}</span>
+          <span class="font-semibold text-slate-950">{g.percent}%</span>
         </div>
-      ))
-    }
+
+        <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+          <div
+            class:list={['h-full rounded-full transition-all', g.color]}
+            style={`width:${g.percent}%`}
+          />
+        </div>
+
+        <div class="mt-1 flex justify-between text-xs text-slate-400">
+          <span>{g.current}</span>
+          <span>{t['admin.dashboard.monthlyGoals.targetLabel'].replace('{target}', g.target)}</span>
+        </div>
+      </div>
+    ))}
   </div>
 </section>

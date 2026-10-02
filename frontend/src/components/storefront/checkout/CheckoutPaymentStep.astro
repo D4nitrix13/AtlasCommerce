@@ -70,30 +70,26 @@ const methodLabelKey: Record<PaymentMethodOption['id'], keyof CheckoutPaymentLab
     </header>
 
     <div class="flex flex-col gap-2" role="radiogroup" aria-label={labels.heading}>
-      {
-        visibleMethods.map((method, index) => {
-          const isNet30 = method.id === 'net30';
-          return (
-            <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-[var(--primary,#475569)] hover:bg-slate-50 has-[:checked]:border-[var(--primary,#475569)] has-[:checked]:bg-violet-50">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value={method.id}
-                checked={index === 0}
-                class="mt-1 h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
-              />
-              <span class="flex flex-1 flex-col gap-0.5">
-                <span class="text-sm font-semibold text-slate-900">
-                  {labels[methodLabelKey[method.id]]}
-                </span>
-                {isNet30 && (
-                  <span class="text-xs text-amber-700">{labels.net30Hint}</span>
-                )}
+      {visibleMethods.map((method, index) => {
+        const isNet30 = method.id === 'net30';
+        return (
+          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-[var(--primary,#475569)] hover:bg-slate-50 has-[:checked]:border-[var(--primary,#475569)] has-[:checked]:bg-violet-50">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value={method.id}
+              checked={index === 0}
+              class="mt-1 h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
+            />
+            <span class="flex flex-1 flex-col gap-0.5">
+              <span class="text-sm font-semibold text-slate-900">
+                {labels[methodLabelKey[method.id]]}
               </span>
-            </label>
-          );
-        })
-      }
+              {isNet30 && <span class="text-xs text-amber-700">{labels.net30Hint}</span>}
+            </span>
+          </label>
+        );
+      })}
     </div>
 
     {/* Card fields — visible sólo si method = card. Como esto es una

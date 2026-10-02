@@ -22,9 +22,7 @@ const { categories, heading, viewAllLabel, viewAllHref } = Astro.props;
 
 <section aria-label={heading} class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
   <header class="mb-8 flex items-end justify-between gap-4">
-    <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-      {heading}
-    </h2>
+    <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{heading}</h2>
     <a
       href={viewAllHref}
       class="inline-flex items-center gap-1 text-sm font-medium text-[var(--primary,#475569)] transition hover:underline focus:outline-none focus-visible:underline"
@@ -35,27 +33,25 @@ const { categories, heading, viewAllLabel, viewAllHref } = Astro.props;
   </header>
 
   <ul class="grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-4">
-    {
-      categories.map((category) => (
-        <li class="list-none">
-          <a
-            href={category.href}
-            class="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-          >
-            <img
-              src={category.imageUrl}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              class="absolute inset-0 h-full w-full object-cover opacity-90 transition group-hover:scale-105 group-hover:opacity-100"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
-            <span class="relative z-10 p-4 text-base font-bold text-white sm:text-lg">
-              {category.name}
-            </span>
-          </a>
-        </li>
-      ))
-    }
+    {categories.map((category) => (
+      <li class="list-none">
+        <a
+          href={category.href}
+          class="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+        >
+          <img
+            src={category.imageUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            class="absolute inset-0 h-full w-full object-cover opacity-90 transition group-hover:scale-105 group-hover:opacity-100"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
+          <span class="relative z-10 p-4 text-base font-bold text-white sm:text-lg">
+            {category.name}
+          </span>
+        </a>
+      </li>
+    ))}
   </ul>
 </section>

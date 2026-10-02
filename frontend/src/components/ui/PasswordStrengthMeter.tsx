@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-type PasswordStrengthMeterProps = {
+interface PasswordStrengthMeterProps {
   /**
    * Score de 0 a 4 (4 = excelente). Cada entero = 1 barra rellena.
    */
@@ -26,7 +26,7 @@ type PasswordStrengthMeterProps = {
    * El caller debería pasar esto via i18n.
    */
   labelPrefix?: string;
-};
+}
 
 /**
  * Indicador visual de fuerza de contraseña (4 barras).

@@ -13,7 +13,7 @@ import {
  * - `dark` (default) → AdminUserMenu en panel admin (fondo slate).
  * - `light` → pantallas de auth (fondo blanco, brand green activo).
  */
-export type LanguageSwitcherTheme = {
+export interface LanguageSwitcherTheme {
   /** Fondo del dropdown abierto (y hover del summary/items). */
   surface: string;
   /** Color del texto del summary y de los items inactivos. */
@@ -28,7 +28,7 @@ export type LanguageSwitcherTheme = {
   summaryColor?: string;
   /** Color del summary en hover. */
   summaryHoverColor?: string;
-};
+}
 
 const DARK_THEME: LanguageSwitcherTheme = {
   surface: '#0F172A',
@@ -48,11 +48,11 @@ const LIGHT_THEME: LanguageSwitcherTheme = {
   summaryHoverColor: '#0F172A',
 };
 
-type LanguageSwitcherProps = {
+interface LanguageSwitcherProps {
   theme?: 'dark' | 'light' | LanguageSwitcherTheme;
   /** Layout: "dropdown" (default) | "inline" (botones planos ES/EN). */
   variant?: 'dropdown' | 'inline';
-};
+}
 
 const THEME_MAP = {
   dark: DARK_THEME,

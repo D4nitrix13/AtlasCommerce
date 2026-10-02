@@ -49,35 +49,33 @@ const rankColors = [
   </div>
 
   <div class="space-y-4">
-    {
-      products.map((p, i) => (
-        <div class="flex items-center gap-4">
-          <span
-            class:list={[
-              'grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-bold',
-              rankColors[i],
-            ]}
-          >
-            {p.rank}
-          </span>
+    {products.map((p, i) => (
+      <div class="flex items-center gap-4">
+        <span
+          class:list={[
+            'grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-bold',
+            rankColors[i],
+          ]}
+        >
+          {p.rank}
+        </span>
 
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center justify-between">
-              <p class="truncate text-sm font-medium text-slate-900">{p.name}</p>
-              <span class="ml-2 shrink-0 text-sm font-semibold text-slate-950">{p.revenue}</span>
-            </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center justify-between">
+            <p class="truncate text-sm font-medium text-slate-900">{p.name}</p>
+            <span class="ml-2 shrink-0 text-sm font-semibold text-slate-950">{p.revenue}</span>
+          </div>
 
-            <div class="mt-1.5 flex items-center gap-3">
-              <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                <div class="h-full rounded-full bg-emerald-500" style={`width:${p.percent}%`} />
-              </div>
-              <span class="shrink-0 text-xs text-slate-400">
-                {t['admin.reports.topProducts.units'].replace('{sold}', String(p.sold))}
-              </span>
+          <div class="mt-1.5 flex items-center gap-3">
+            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+              <div class="h-full rounded-full bg-emerald-500" style={`width:${p.percent}%`} />
             </div>
+            <span class="shrink-0 text-xs text-slate-400">
+              {t['admin.reports.topProducts.units'].replace('{sold}', String(p.sold))}
+            </span>
           </div>
         </div>
-      ))
-    }
+      </div>
+    ))}
   </div>
 </section>

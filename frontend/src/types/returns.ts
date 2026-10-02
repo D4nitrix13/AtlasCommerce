@@ -20,7 +20,7 @@ export const REFUND_STATUSES = ['pending', 'completed', 'failed'] as const;
 
 export type RefundStatus = (typeof REFUND_STATUSES)[number];
 
-export type ReturnRequestItem = {
+export interface ReturnRequestItem {
   id: number;
   return_request_id: number;
   product_id: number;
@@ -31,9 +31,9 @@ export type ReturnRequestItem = {
     id: number;
     name: string;
   } | null;
-};
+}
 
-export type ReturnRequest = {
+export interface ReturnRequest {
   id: number;
   store_id: number;
   order_id: number;
@@ -44,7 +44,7 @@ export type ReturnRequest = {
   resolved_at: string | null;
   created_at: string;
   updated_at: string;
-};
+}
 
 export type ReturnRequestWithRelations = ReturnRequest & {
   items?: ReturnRequestItem[];
@@ -60,7 +60,7 @@ export type ReturnRequestWithRelations = ReturnRequest & {
   } | null;
 };
 
-export type Refund = {
+export interface Refund {
   id: number;
   return_request_id: number;
   payment_method_id: number | null;
@@ -71,7 +71,7 @@ export type Refund = {
   refunded_at: string | null;
   created_at: string;
   updated_at: string;
-};
+}
 
 export type RefundWithRelations = Refund & {
   return_request?: {

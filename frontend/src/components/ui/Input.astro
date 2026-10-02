@@ -61,18 +61,16 @@ const hasError = typeof error === 'string' && error !== '';
 ---
 
 <div class={`flex flex-col gap-1.5 ${className ?? ''}`}>
-  {
-    label && (
-      <label for={inputId} class="text-sm font-medium text-slate-700">
-        {label}
-        {required && (
-          <span aria-hidden="true" class="ml-1 text-red-500">
-            *
-          </span>
-        )}
-      </label>
-    )
-  }
+  {label && (
+    <label for={inputId} class="text-sm font-medium text-slate-700">
+      {label}
+      {required && (
+        <span aria-hidden="true" class="ml-1 text-red-500">
+          *
+        </span>
+      )}
+    </label>
+  )}
 
   <input
     id={inputId}
@@ -101,15 +99,13 @@ const hasError = typeof error === 'string' && error !== '';
     ]}
   />
 
-  {
-    hasError ? (
-      <p id={messageId} role="alert" class="text-xs text-red-600">
-        {error}
-      </p>
-    ) : hint ? (
-      <p id={messageId} class="text-xs text-slate-500">
-        {hint}
-      </p>
-    ) : null
-  }
+  {hasError ? (
+    <p id={messageId} role="alert" class="text-xs text-red-600">
+      {error}
+    </p>
+  ) : hint ? (
+    <p id={messageId} class="text-xs text-slate-500">
+      {hint}
+    </p>
+  ) : null}
 </div>
