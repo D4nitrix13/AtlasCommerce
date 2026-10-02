@@ -39,9 +39,7 @@ declare module '@storybook/astro' {
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   export type StoryObj<TMeta = Record<string, unknown>> = {
-    args?: TMeta extends { args: infer A }
-      ? Partial<A>
-      : Partial<TMeta>;
+    args?: TMeta extends { args: infer A } ? Partial<A> : Partial<TMeta>;
     argTypes?: Record<string, unknown>;
     parameters?: Record<string, unknown>;
     decorators?: unknown[];
