@@ -61,7 +61,10 @@ const isEmpty = cartItems.length === 0;
 // Paso especial: success page (cuando el form de review se submita,
 // el backend redirige a ?step=success con el número de orden). Hoy
 // no hay backend, pero exponemos el flow visualmente.
-const isSuccessStep = currentStepId === 'success';
+// Comparamos contra `rawStep` (no `currentStepId`) porque `'success'`
+// no está en el union `CheckoutStepId` — es un alias especial resuelto
+// por la página, no un step normal del stepper.
+const isSuccessStep = rawStep === 'success';
 
 // Order number placeholder — en producción vendría del backend.
 const PLACEHOLDER_ORDER_NUMBER = `ORD-${Date.now().toString().slice(-7)}`;
