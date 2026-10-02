@@ -66,11 +66,14 @@ const MOCK_PRODUCTS: LowStockProduct[] = [
 let products: LowStockProduct[] = MOCK_PRODUCTS;
 
 try {
-  const response = await fetch(new URL('/api/v1/admin/inventory/low-stock?threshold=10', Astro.url), {
-    headers: {
-      Cookie: Astro.request.headers.get('Cookie') ?? '',
-    },
-  });
+  const response = await fetch(
+    new URL('/api/v1/admin/inventory/low-stock?threshold=10', Astro.url),
+    {
+      headers: {
+        Cookie: Astro.request.headers.get('Cookie') ?? '',
+      },
+    }
+  );
   if (response.ok) {
     const payload = (await response.json()) as { data?: LowStockProduct[] };
     if (Array.isArray(payload?.data) && payload.data.length > 0) {
