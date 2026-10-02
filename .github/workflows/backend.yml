@@ -71,7 +71,14 @@ jobs:
 
     env:
       APP_ENV: testing
-      APP_KEY: base64:c2VjdXJlX2FwcF9rZXlfZm9yX2dpdGh1Yl9hY3Rpb25zXzMyX2J5dGVz
+      # APP_KEY para cipher AES-256-CBC (32 bytes en base64). Pre-existente
+      # usaba 'secure_app_key_for_github_actions_32_bytes' (41 chars
+      # raw, 42 bytes post-decode) que NO era base64 válido de 32 bytes y
+      # rompía todos los tests que tocaban el Encrypter. Bug
+      # pre-existente — esta key fue generada con
+      # `php -r 'echo "base64:" . base64_encode(random_bytes(32));'`.
+      # NO usar para producción — solo para tests CI.
+      APP_KEY: base64:UOnTRtWA+ThLdXsOB9AE0WWpSgz/ffLfL/A+pEfb8HA=
       DB_CONNECTION: pgsql
       DB_HOST: localhost
       DB_PORT: 5432
