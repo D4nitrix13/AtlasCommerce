@@ -12,6 +12,7 @@ use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -38,6 +39,20 @@ final class MetricsEndpointsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Pin Carbon al 15 de Junio del año en curso para que los tests
+        // de revenue operen sobre una fecha determinista a mitad de
+        // mes. Sin este pin, `now()->startOfMonth()->addDays(5)` cae
+        // en el FUTURO durante la primera semana del mes y el
+        // controller lo excluye de la query (`whereBetween('ordered_at',
+        // [..., now()->endOfDay()])`), haciendo que
+        // `current_year_values[mes_actual]` quede en 0.
+        Carbon::setTestNow(
+            Carbon::now()
+                ->setMonth(6)
+                ->setDay(15)
+                ->setTime(12, 0, 0),
+        );
 
         $role = Role::query()->updateOrCreate(
             attributes: ['slug' => 'admin'],
@@ -70,6 +85,12 @@ final class MetricsEndpointsTest extends TestCase
         $this->adminUser->stores()->attach($this->store->id);
 
         Sanctum::actingAs(user: $this->adminUser, abilities: ['*']);
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow(testNow: null);
+        parent::tearDown();
     }
 
     // -----------------------------------------------------------
