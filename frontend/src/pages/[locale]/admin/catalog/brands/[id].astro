@@ -8,14 +8,14 @@
  *
  * AGENTS.md §1: ~100 líneas.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import Input from '../../../../components/ui/Input.astro';
-import Textarea from '../../../../components/ui/Textarea.astro';
-import Button from '../../../../components/ui/Button.astro';
-import { getBrandById } from '../../../../data/catalog-mock';
-import { getServerDictionary } from '../../../../i18n/server';
-import { adminUrl } from '../../../../lib/path-helpers';
-import { getServerLocale } from '../../../../i18n/server';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import Input from '../../../../../components/ui/Input.astro';
+import Textarea from '../../../../../components/ui/Textarea.astro';
+import Button from '../../../../../components/ui/Button.astro';
+import { getBrandById } from '../../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { adminUrl } from '../../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../../i18n/server';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);

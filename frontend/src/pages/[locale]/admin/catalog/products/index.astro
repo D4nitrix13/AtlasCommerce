@@ -16,14 +16,14 @@
  * AGENTS.md §1: ~150 líneas. Composición pura — toda la lógica de
  * tabla y filtros vive en sub-componentes.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import ProductTable from '../../../../components/admin/catalog/ProductTable.astro';
-import BulkActionsBar from '../../../../components/admin/catalog/BulkActionsBar.astro';
-import FilterBar from '../../../../components/admin/catalog/FilterBar.astro';
-import { PRODUCTS_MOCK } from '../../../../data/catalog-mock';
-import { getServerDictionary } from '../../../../i18n/server';
-import { adminUrl } from '../../../../lib/path-helpers';
-import { getServerLocale } from '../../../../i18n/server';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import ProductTable from '../../../../../components/admin/catalog/ProductTable.astro';
+import BulkActionsBar from '../../../../../components/admin/catalog/BulkActionsBar.astro';
+import FilterBar from '../../../../../components/admin/catalog/FilterBar.astro';
+import { PRODUCTS_MOCK } from '../../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { adminUrl } from '../../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../../i18n/server';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);

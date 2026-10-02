@@ -25,10 +25,10 @@
  * forgot-password usan `AuthLayout` + `AuthShell`).
  */
 import '../../styles/global.css';
-import { getBrandBySlug, type StoreBrand } from '../../config/stores';
-import { themeToBrand } from '../../lib/theme';
-import { getServerDictionary, getServerLocale } from '../../i18n/server';
-import AccountSidebar from '../../components/account/layout/AccountSidebar.astro';
+import { getBrandBySlug, type StoreBrand } from '../config/stores';
+import { themeToBrand } from '../lib/theme';
+import { getServerDictionary, getServerLocale } from '../i18n/server';
+import AccountSidebar from '../components/account/layout/AccountSidebar.astro';
 
 interface Props {
   title?: string;
