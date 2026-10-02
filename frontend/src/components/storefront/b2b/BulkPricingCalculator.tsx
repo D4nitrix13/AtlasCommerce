@@ -21,7 +21,7 @@ import {
   BULK_PRODUCTS,
   PRICING_TIERS,
   resolvePricingTier,
-  type BulkProduct,
+  type BulkOrderProduct,
 } from '../../../data/b2b-mock';
 import { useTranslations } from '../../../i18n';
 
@@ -62,7 +62,7 @@ function writeBulkCart(cart: BulkCartItem[]): void {
   window.localStorage.setItem(BULK_CART_STORAGE_KEY, JSON.stringify(cart));
 }
 
-function useBulkCart(product: BulkProduct | undefined, quantity: number) {
+function useBulkCart(product: BulkOrderProduct | undefined, quantity: number) {
   const [persisting, setPersisting] = useState<boolean>(false);
   const [added, setAdded] = useState<boolean>(false);
   const isValidQuantity = product !== undefined && quantity >= product.minQuantity && quantity > 0;
@@ -99,7 +99,7 @@ function useBulkCart(product: BulkProduct | undefined, quantity: number) {
 
 interface ProductSelectorProps {
   productId: number;
-  products: readonly BulkProduct[];
+  products: readonly BulkOrderProduct[];
   label: string;
   formatPrice: (cents: number, currency: string) => string;
   onChange: (id: number) => void;
@@ -398,7 +398,7 @@ function BulkPricingCalculatorView(props: BulkPricingCalculatorViewProps): React
 }
 
 interface UseBulkPricingStateResult {
-  product: BulkProduct | undefined;
+  product: BulkOrderProduct | undefined;
   productId: number;
   quantityInput: string;
   onProductChange: (nextId: number) => void;
@@ -418,7 +418,7 @@ interface UseBulkPricingStateResult {
 function useProductSelection(): {
   productId: number;
   quantityInput: string;
-  product: BulkProduct | undefined;
+  product: BulkOrderProduct | undefined;
   onProductChange: (nextId: number) => void;
   onQuantityChange: (next: string) => void;
 } {
@@ -443,7 +443,7 @@ function useProductSelection(): {
 }
 
 function usePricing(
-  product: BulkProduct | undefined,
+  product: BulkOrderProduct | undefined,
   quantity: number
 ): {
   tierLabel: string;
@@ -471,7 +471,7 @@ function usePricing(
 }
 
 function useErrorMessage(
-  product: BulkProduct | undefined,
+  product: BulkOrderProduct | undefined,
   quantity: number,
   errorInvalidNumber: string,
   errorMinQuantity: (min: number) => string
