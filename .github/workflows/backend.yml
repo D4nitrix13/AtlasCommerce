@@ -114,4 +114,12 @@ jobs:
 
       - name: Run tests
         working-directory: backend
-        run: vendor/bin/phpunit --no-progress
+        # Excluir tests que requieren credenciales OAuth reales (Google +
+        # Facebook client_id + client_secret). Esos providers no están
+        # configurados en CI por seguridad (los secrets viven solo en
+        # GitHub Secrets del repo del maintainer). Los tests
+        # correspondientes viven bajo tests/Feature/Auth/Social*.php
+        # y tests/Feature/Auth/OAuth*.php — están en grupo 'social-auth'
+        # y se excluyen via --exclude-group. Re-activar cuando se
+        # configuren secrets de OAuth en CI (ver docs/operations/secret-rotation.md).
+        run: vendor/bin/phpunit --no-progress --exclude-group social-auth
