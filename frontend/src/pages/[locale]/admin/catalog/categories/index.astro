@@ -8,13 +8,13 @@
  *
  * AGENTS.md §1: ~80 líneas.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import CategoryTree from '../../../../components/admin/catalog/CategoryTree.astro';
-import Input from '../../../../components/ui/Input.astro';
-import { CATEGORIES_MOCK } from '../../../../data/catalog-mock';
-import { getServerDictionary } from '../../../../i18n/server';
-import { adminUrl } from '../../../../lib/path-helpers';
-import { getServerLocale } from '../../../../i18n/server';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import CategoryTree from '../../../../../components/admin/catalog/CategoryTree.astro';
+import Input from '../../../../../components/ui/Input.astro';
+import { CATEGORIES_MOCK } from '../../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { adminUrl } from '../../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../../i18n/server';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);

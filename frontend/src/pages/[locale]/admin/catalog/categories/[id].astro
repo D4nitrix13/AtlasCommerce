@@ -12,15 +12,15 @@
  *
  * AGENTS.md §1: ~120 líneas.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import Input from '../../../../components/ui/Input.astro';
-import Textarea from '../../../../components/ui/Textarea.astro';
-import Select from '../../../../components/ui/Select.astro';
-import Button from '../../../../components/ui/Button.astro';
-import { getCategoryById, CATEGORIES_MOCK, type CategoryMock } from '../../../../data/catalog-mock';
-import { getServerDictionary } from '../../../../i18n/server';
-import { adminUrl } from '../../../../lib/path-helpers';
-import { getServerLocale } from '../../../../i18n/server';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import Input from '../../../../../components/ui/Input.astro';
+import Textarea from '../../../../../components/ui/Textarea.astro';
+import Select from '../../../../../components/ui/Select.astro';
+import Button from '../../../../../components/ui/Button.astro';
+import { getCategoryById, CATEGORIES_MOCK, type CategoryMock } from '../../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { adminUrl } from '../../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../../i18n/server';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);

@@ -13,13 +13,13 @@
  *
  * AGENTS.md §1: ~120 líneas.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import Badge from '../../../../components/ui/Badge.astro';
-import FilterBar from '../../../../components/admin/catalog/FilterBar.astro';
-import { VARIANTS_MOCK, getProductById, type VariantMock } from '../../../../data/catalog-mock';
-import { getServerDictionary } from '../../../../i18n/server';
-import { adminUrl } from '../../../../lib/path-helpers';
-import { getServerLocale } from '../../../../i18n/server';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import Badge from '../../../../../components/ui/Badge.astro';
+import FilterBar from '../../../../../components/admin/catalog/FilterBar.astro';
+import { VARIANTS_MOCK, getProductById, type VariantMock } from '../../../../../data/catalog-mock';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { adminUrl } from '../../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../../i18n/server';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
