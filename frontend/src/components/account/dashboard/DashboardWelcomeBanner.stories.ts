@@ -64,7 +64,8 @@ export const LongSubtitle: Story = {
   args: {
     userName: 'María',
     greeting: 'Bienvenida de vuelta, María',
-    subtitle: 'Resumen: 5 pedidos entregados · 1 en preparación · 1 ticket abierto · 2 notificaciones sin leer.',
+    subtitle:
+      'Resumen: 5 pedidos entregados · 1 en preparación · 1 ticket abierto · 2 notificaciones sin leer.',
     variant: 'kitsune',
   },
 };

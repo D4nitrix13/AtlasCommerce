@@ -22,12 +22,7 @@ interface Props {
   class?: string;
 }
 
-const {
-  variant = 'info',
-  title,
-  dismissible = false,
-  class: className,
-} = Astro.props;
+const { variant = 'info', title, dismissible = false, class: className } = Astro.props;
 
 const VARIANT_CLASSES: Record<AlertVariant, string> = {
   info: 'border-blue-200 bg-blue-50 text-blue-900',
@@ -53,43 +48,31 @@ const ICON_CLASSES: Record<AlertVariant, string> = {
   ]}
 >
   <span aria-hidden="true" class:list={['mt-0.5 shrink-0', ICON_CLASSES[variant]]}>
-    {
-      variant === 'info' && 'ⓘ'
-    }
-    {
-      variant === 'success' && '✓'
-    }
-    {
-      variant === 'warning' && '⚠'
-    }
-    {
-      variant === 'danger' && '✕'
-    }
+    {variant === 'info' && 'ⓘ'}
+    {variant === 'success' && '✓'}
+    {variant === 'warning' && '⚠'}
+    {variant === 'danger' && '✕'}
   </span>
 
   <div class="flex-1">
-    {
-      title && (
-        <p class="mb-1 font-semibold">
-          {title}
-          <slot name="title" />
-        </p>
-      )
-    }
+    {title && (
+      <p class="mb-1 font-semibold">
+        {title}
+        <slot name="title" />
+      </p>
+    )}
     <div class="text-current/90">
       <slot />
     </div>
   </div>
 
-  {
-    dismissible && (
-      <button
-        type="button"
-        aria-label="Cerrar"
-        class="shrink-0 rounded p-1 transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
-      >
-        <span aria-hidden="true">✕</span>
-      </button>
-    )
-  }
+  {dismissible && (
+    <button
+      type="button"
+      aria-label="Cerrar"
+      class="shrink-0 rounded p-1 transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+    >
+      <span aria-hidden="true">✕</span>
+    </button>
+  )}
 </div>

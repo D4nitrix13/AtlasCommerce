@@ -66,29 +66,28 @@ const accentClass: Record<HubCard['accent'], string> = {
 
 <AdminLayout title={`${t['admin.inventory.title']} | Admin`}>
   <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
-      {t['admin.inventory.title']}
-    </h1>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.inventory.title']}</h1>
     <p class="mt-1 text-sm text-slate-500">{t['admin.inventory.subtitle']}</p>
   </div>
 
   <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    {
-      cards.map((card) => (
-        <a
-          href={card.href}
-          class="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow"
+    {cards.map((card) => (
+      <a
+        href={card.href}
+        class="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow"
+      >
+        <div
+          class:list={[
+            'mb-4 grid h-10 w-10 place-items-center rounded-xl',
+            accentClass[card.accent],
+          ]}
         >
-          <div class:list={['mb-4 grid h-10 w-10 place-items-center rounded-xl', accentClass[card.accent]]}>
-            <Icon name={card.icon} class="h-5 w-5" />
-          </div>
-          <h2 class="text-base font-bold text-slate-950 group-hover:text-slate-700">
-            {card.title}
-          </h2>
-          <p class="mt-1 text-sm text-slate-500">{card.hint}</p>
-        </a>
-      ))
-    }
+          <Icon name={card.icon} class="h-5 w-5" />
+        </div>
+        <h2 class="text-base font-bold text-slate-950 group-hover:text-slate-700">{card.title}</h2>
+        <p class="mt-1 text-sm text-slate-500">{card.hint}</p>
+      </a>
+    ))}
   </section>
 
   <section class="mt-6 grid gap-4 lg:grid-cols-3">
@@ -97,36 +96,39 @@ const accentClass: Record<HubCard['accent'], string> = {
       class="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300"
     >
       <div>
-        <h3 class="text-base font-bold text-slate-950">
-          {t['admin.inventory.stock.title']}
-        </h3>
+        <h3 class="text-base font-bold text-slate-950">{t['admin.inventory.stock.title']}</h3>
         <p class="mt-1 text-xs text-slate-500">30 SKUs · 5 depósitos</p>
       </div>
-      <Icon name="chevron-right" class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700" />
+      <Icon
+        name="chevron-right"
+        class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700"
+      />
     </a>
     <a
       href="/admin/inventory/movements"
       class="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300"
     >
       <div>
-        <h3 class="text-base font-bold text-slate-950">
-          {t['admin.inventory.movements.title']}
-        </h3>
+        <h3 class="text-base font-bold text-slate-950">{t['admin.inventory.movements.title']}</h3>
         <p class="mt-1 text-xs text-slate-500">Últimos 20 movimientos</p>
       </div>
-      <Icon name="chevron-right" class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700" />
+      <Icon
+        name="chevron-right"
+        class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700"
+      />
     </a>
     <a
       href="/admin/inventory/warehouses"
       class="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300"
     >
       <div>
-        <h3 class="text-base font-bold text-slate-950">
-          {t['admin.inventory.warehouses.title']}
-        </h3>
+        <h3 class="text-base font-bold text-slate-950">{t['admin.inventory.warehouses.title']}</h3>
         <p class="mt-1 text-xs text-slate-500">5 depósitos · 4 activos</p>
       </div>
-      <Icon name="chevron-right" class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700" />
+      <Icon
+        name="chevron-right"
+        class="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700"
+      />
     </a>
   </section>
 </AdminLayout>

@@ -116,7 +116,9 @@ const initials = customer.name
       <dd class="font-semibold text-slate-900 tabular-nums">—</dd>
     </div>
     <div class="flex flex-col gap-0.5">
-      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelLifetimeValue}</dt>
+      <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+        {labelLifetimeValue}
+      </dt>
       <dd class="font-semibold text-slate-900 tabular-nums">
         {formatCentsAsDecimal(customer.lifetimeValueCents, 'USD')}
       </dd>

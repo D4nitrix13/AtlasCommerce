@@ -35,9 +35,7 @@ const rfqHref = `/${locale}/rfq`;
       <h1 class="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
         {t['storefront.bulk_order.heading']}
       </h1>
-      <p class="mt-2 text-sm text-slate-600 sm:text-base">
-        {t['storefront.bulk_order.subtitle']}
-      </p>
+      <p class="mt-2 text-sm text-slate-600 sm:text-base">{t['storefront.bulk_order.subtitle']}</p>
     </header>
 
     <div class="grid gap-6 lg:grid-cols-5">
@@ -53,7 +51,8 @@ const rfqHref = `/${locale}/rfq`;
           addingLabel={t['storefront.bulk_order.calculator.adding']}
           successLabel={t['storefront.bulk_order.calculator.success']}
           errorMinQuantity={(min: number) =>
-            t['storefront.bulk_order.calculator.errorMinQuantity'].replace('{min}', String(min))}
+            t['storefront.bulk_order.calculator.errorMinQuantity'].replace('{min}', String(min))
+          }
           errorInvalidNumber={t['storefront.bulk_order.calculator.errorInvalid']}
         />
       </div>
@@ -73,9 +72,7 @@ const rfqHref = `/${locale}/rfq`;
       <h2 class="text-base font-semibold text-slate-900">
         {t['storefront.bulk_order.customOrder.heading']}
       </h2>
-      <p class="mt-2 text-sm text-slate-600">
-        {t['storefront.bulk_order.customOrder.body']}
-      </p>
+      <p class="mt-2 text-sm text-slate-600">{t['storefront.bulk_order.customOrder.body']}</p>
       <a
         href={rfqHref}
         class="mt-4 inline-flex h-10 items-center justify-center rounded-lg border border-[var(--primary,#059669)] bg-white px-5 text-sm font-semibold text-[var(--primary,#059669)] hover:bg-emerald-50"

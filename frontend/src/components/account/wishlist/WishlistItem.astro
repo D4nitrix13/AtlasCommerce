@@ -81,9 +81,7 @@ const addedLabel =
       : addedDaysAgoLabel.replace('{days}', String(addedDaysAgo));
 ---
 
-<article
-  class="group flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
->
+<article class="group flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
   <a
     href={productHref}
     class="relative block aspect-square overflow-hidden rounded-xl bg-slate-50"
@@ -96,13 +94,11 @@ const addedLabel =
       decoding="async"
       class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
     />
-    {
-      isOutOfStock && (
-        <div class="absolute right-2 top-2 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
-          {outOfStockLabel}
-        </div>
-      )
-    }
+    {isOutOfStock && (
+      <div class="absolute right-2 top-2 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
+        {outOfStockLabel}
+      </div>
+    )}
   </a>
 
   <div class="flex flex-col gap-1">
@@ -122,33 +118,26 @@ const addedLabel =
       <span aria-hidden="true">📅</span>
       <span class="ml-1.5">{addedLabel}</span>
     </p>
-    {
-      personalNote !== undefined && personalNote !== '' && (
-        <p class="flex items-start gap-1.5">
-          <span aria-hidden="true" class="mt-0.5 shrink-0">
-            💬
+    {personalNote !== undefined && personalNote !== '' && (
+      <p class="flex items-start gap-1.5">
+        <span aria-hidden="true" class="mt-0.5 shrink-0">
+          💬
+        </span>
+        <span class="flex flex-col gap-0.5">
+          <span class="font-medium uppercase tracking-wider text-slate-400">
+            {personalNoteLabel}
           </span>
-          <span class="flex flex-col gap-0.5">
-            <span class="font-medium uppercase tracking-wider text-slate-400">
-              {personalNoteLabel}
-            </span>
-            <span class="italic text-slate-600">"{personalNote}"</span>
-          </span>
-        </p>
-      )
-    }
+          <span class="italic text-slate-600">"{personalNote}"</span>
+        </span>
+      </p>
+    )}
   </div>
 
-  {
-    isLowStock && (
-      <p
-        class="rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800"
-        role="status"
-      >
-        {onlyLeftLabel.replace('{count}', String(stock))}
-      </p>
-    )
-  }
+  {isLowStock && (
+    <p class="rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800" role="status">
+      {onlyLeftLabel.replace('{count}', String(stock))}
+    </p>
+  )}
 
   <div class="mt-auto flex flex-col gap-2 pt-2">
     <a
@@ -164,20 +153,18 @@ const addedLabel =
       {moveToBagLabel}
     </a>
     <div class="flex items-center justify-between gap-2 text-xs">
-      {
-        isOutOfStock && notifyEnabled ? (
-          <button
-            type="button"
-            disabled
-            aria-label={`${notifyLabel}: ${productName}`}
-            class="inline-flex flex-1 items-center justify-center rounded-md border border-slate-200 bg-white px-2 py-1.5 font-medium text-slate-600 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {notifyLabel}
-          </button>
-        ) : (
-          <span class="flex-1" />
-        )
-      }
+      {isOutOfStock && notifyEnabled ? (
+        <button
+          type="button"
+          disabled
+          aria-label={`${notifyLabel}: ${productName}`}
+          class="inline-flex flex-1 items-center justify-center rounded-md border border-slate-200 bg-white px-2 py-1.5 font-medium text-slate-600 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {notifyLabel}
+        </button>
+      ) : (
+        <span class="flex-1" />
+      )}
       <button
         type="button"
         disabled

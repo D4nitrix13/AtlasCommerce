@@ -27,14 +27,78 @@ interface TaxRate {
 }
 
 const taxRates: readonly TaxRate[] = [
-  { id: 'tx-001', countryCode: 'NI', countryName: 'Nicaragua', region: 'Managua', rate: 15, appliesToShipping: false, updatedAt: '2026-09-15' },
-  { id: 'tx-002', countryCode: 'NI', countryName: 'Nicaragua', region: 'León', rate: 15, appliesToShipping: false, updatedAt: '2026-09-15' },
-  { id: 'tx-003', countryCode: 'NI', countryName: 'Nicaragua', region: 'Granada', rate: 15, appliesToShipping: false, updatedAt: '2026-09-15' },
-  { id: 'tx-004', countryCode: 'NI', countryName: 'Nicaragua', region: 'Estelí', rate: 15, appliesToShipping: false, updatedAt: '2026-09-15' },
-  { id: 'tx-005', countryCode: 'CR', countryName: 'Costa Rica', region: 'San José', rate: 13, appliesToShipping: true, updatedAt: '2026-09-10' },
-  { id: 'tx-006', countryCode: 'HN', countryName: 'Honduras', region: 'Tegucigalpa', rate: 15, appliesToShipping: false, updatedAt: '2026-09-08' },
-  { id: 'tx-007', countryCode: 'GT', countryName: 'Guatemala', region: 'Guatemala', rate: 12, appliesToShipping: true, updatedAt: '2026-09-08' },
-  { id: 'tx-008', countryCode: 'US', countryName: 'Estados Unidos', region: 'Florida', rate: 7, appliesToShipping: false, updatedAt: '2026-08-25' },
+  {
+    id: 'tx-001',
+    countryCode: 'NI',
+    countryName: 'Nicaragua',
+    region: 'Managua',
+    rate: 15,
+    appliesToShipping: false,
+    updatedAt: '2026-09-15',
+  },
+  {
+    id: 'tx-002',
+    countryCode: 'NI',
+    countryName: 'Nicaragua',
+    region: 'León',
+    rate: 15,
+    appliesToShipping: false,
+    updatedAt: '2026-09-15',
+  },
+  {
+    id: 'tx-003',
+    countryCode: 'NI',
+    countryName: 'Nicaragua',
+    region: 'Granada',
+    rate: 15,
+    appliesToShipping: false,
+    updatedAt: '2026-09-15',
+  },
+  {
+    id: 'tx-004',
+    countryCode: 'NI',
+    countryName: 'Nicaragua',
+    region: 'Estelí',
+    rate: 15,
+    appliesToShipping: false,
+    updatedAt: '2026-09-15',
+  },
+  {
+    id: 'tx-005',
+    countryCode: 'CR',
+    countryName: 'Costa Rica',
+    region: 'San José',
+    rate: 13,
+    appliesToShipping: true,
+    updatedAt: '2026-09-10',
+  },
+  {
+    id: 'tx-006',
+    countryCode: 'HN',
+    countryName: 'Honduras',
+    region: 'Tegucigalpa',
+    rate: 15,
+    appliesToShipping: false,
+    updatedAt: '2026-09-08',
+  },
+  {
+    id: 'tx-007',
+    countryCode: 'GT',
+    countryName: 'Guatemala',
+    region: 'Guatemala',
+    rate: 12,
+    appliesToShipping: true,
+    updatedAt: '2026-09-08',
+  },
+  {
+    id: 'tx-008',
+    countryCode: 'US',
+    countryName: 'Estados Unidos',
+    region: 'Florida',
+    rate: 7,
+    appliesToShipping: false,
+    updatedAt: '2026-08-25',
+  },
 ];
 
 const formatDate = (iso: string): string => {
@@ -108,54 +172,54 @@ const formatDate = (iso: string): string => {
             <th class="px-5 py-3">{t['admin.settings.taxes.column.country']}</th>
             <th class="px-5 py-3">{t['admin.settings.taxes.column.region']}</th>
             <th class="px-5 py-3 text-center">{t['admin.settings.taxes.column.rate']}</th>
-            <th class="px-5 py-3 text-center">{t['admin.settings.taxes.column.appliesToShipping']}</th>
+            <th class="px-5 py-3 text-center">
+              {t['admin.settings.taxes.column.appliesToShipping']}
+            </th>
             <th class="px-5 py-3">{t['admin.settings.taxes.column.updatedAt']}</th>
             <th class="px-5 py-3 text-right">{t['admin.settings.taxes.column.actions']}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          {
-            taxRates.map((row) => (
-              <tr class="group hover:bg-slate-50/50">
-                <td class="px-5 py-3">
-                  <div class="flex items-center gap-2">
-                    <span class="font-mono text-xs font-bold text-slate-500">{row.countryCode}</span>
-                    <span class="font-medium text-slate-900">{row.countryName}</span>
-                  </div>
-                </td>
-                <td class="px-5 py-3 text-sm text-slate-600">{row.region}</td>
-                <td class="px-5 py-3 text-center">
-                  <div class="inline-flex items-center gap-1">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.5"
-                      value={row.rate}
-                      class="block w-16 rounded-md border border-slate-200 bg-white px-2 py-1 text-center text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                    />
-                    <span class="text-xs text-slate-500">%</span>
-                  </div>
-                </td>
-                <td class="px-5 py-3 text-center">
+          {taxRates.map((row) => (
+            <tr class="group hover:bg-slate-50/50">
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-slate-500">{row.countryCode}</span>
+                  <span class="font-medium text-slate-900">{row.countryName}</span>
+                </div>
+              </td>
+              <td class="px-5 py-3 text-sm text-slate-600">{row.region}</td>
+              <td class="px-5 py-3 text-center">
+                <div class="inline-flex items-center gap-1">
                   <input
-                    type="checkbox"
-                    checked={row.appliesToShipping}
-                    class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={row.rate}
+                    class="block w-16 rounded-md border border-slate-200 bg-white px-2 py-1 text-center text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
                   />
-                </td>
-                <td class="px-5 py-3 text-xs text-slate-500">{formatDate(row.updatedAt)}</td>
-                <td class="px-5 py-3 text-right">
-                  <button
-                    type="button"
-                    class="rounded-md px-2 py-1 text-xs text-slate-500 transition hover:bg-slate-100 hover:text-rose-600"
-                  >
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            ))
-          }
+                  <span class="text-xs text-slate-500">%</span>
+                </div>
+              </td>
+              <td class="px-5 py-3 text-center">
+                <input
+                  type="checkbox"
+                  checked={row.appliesToShipping}
+                  class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
+              </td>
+              <td class="px-5 py-3 text-xs text-slate-500">{formatDate(row.updatedAt)}</td>
+              <td class="px-5 py-3 text-right">
+                <button
+                  type="button"
+                  class="rounded-md px-2 py-1 text-xs text-slate-500 transition hover:bg-slate-100 hover:text-rose-600"
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

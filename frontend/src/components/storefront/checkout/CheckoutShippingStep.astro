@@ -51,13 +51,7 @@ interface Props {
   continueHref: string;
 }
 
-const {
-  labels,
-  savedAddresses,
-  shippingMethods,
-  backHref,
-  continueHref,
-} = Astro.props;
+const { labels, savedAddresses, shippingMethods, backHref, continueHref } = Astro.props;
 
 const hasSavedAddresses = savedAddresses.length > 0;
 ---
@@ -75,59 +69,55 @@ const hasSavedAddresses = savedAddresses.length > 0;
       <p class="text-sm text-slate-500">{labels.subtitle}</p>
     </header>
 
-    {
-      hasSavedAddresses && (
-        <fieldset class="flex flex-col gap-2 rounded-lg border border-slate-200 p-3">
-          <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            {labels.savedAddresses}
-          </legend>
-          <div class="flex flex-col gap-2">
-            {
-              savedAddresses.map((address, index) => (
-                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 transition hover:border-[var(--primary,#475569)] hover:bg-slate-50 has-[:checked]:border-[var(--primary,#475569)] has-[:checked]:bg-violet-50">
-                  <input
-                    type="radio"
-                    name="savedAddress"
-                    value={address.id}
-                    checked={index === 0}
-                    class="mt-1 h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
-                  />
-                  <span class="flex flex-1 flex-col gap-0.5">
-                    <span class="flex items-center gap-2">
-                      <span class="text-sm font-semibold text-slate-900">{address.label}</span>
-                      {address.isDefault === true && (
-                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-700">
-                          ✓
-                        </span>
-                      )}
-                    </span>
-                    <span class="text-xs text-slate-600">
-                      {address.recipient} · {address.phone}
-                    </span>
-                    <span class="text-xs text-slate-500">
-                      {address.address1}
-                      {address.address2 !== undefined && address.address2 !== '' ? `, ${address.address2}` : ''}
-                      , {address.municipality}, {address.department}
-                    </span>
-                  </span>
-                </label>
-              ))
-            }
-            <label class="flex cursor-pointer items-center gap-3 rounded-md border border-dashed border-slate-300 p-3 transition hover:bg-slate-50">
+    {hasSavedAddresses && (
+      <fieldset class="flex flex-col gap-2 rounded-lg border border-slate-200 p-3">
+        <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {labels.savedAddresses}
+        </legend>
+        <div class="flex flex-col gap-2">
+          {savedAddresses.map((address, index) => (
+            <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 transition hover:border-[var(--primary,#475569)] hover:bg-slate-50 has-[:checked]:border-[var(--primary,#475569)] has-[:checked]:bg-violet-50">
               <input
                 type="radio"
                 name="savedAddress"
-                value="new"
-                class="h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
+                value={address.id}
+                checked={index === 0}
+                class="mt-1 h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
               />
-              <span class="text-sm font-medium text-slate-700">
-                {labels.useNewAddress}
+              <span class="flex flex-1 flex-col gap-0.5">
+                <span class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-slate-900">{address.label}</span>
+                  {address.isDefault === true && (
+                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-700">
+                      ✓
+                    </span>
+                  )}
+                </span>
+                <span class="text-xs text-slate-600">
+                  {address.recipient} · {address.phone}
+                </span>
+                <span class="text-xs text-slate-500">
+                  {address.address1}
+                  {address.address2 !== undefined && address.address2 !== ''
+                    ? `, ${address.address2}`
+                    : ''}
+                  , {address.municipality}, {address.department}
+                </span>
               </span>
             </label>
-          </div>
-        </fieldset>
-      )
-    }
+          ))}
+          <label class="flex cursor-pointer items-center gap-3 rounded-md border border-dashed border-slate-300 p-3 transition hover:bg-slate-50">
+            <input
+              type="radio"
+              name="savedAddress"
+              value="new"
+              class="h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
+            />
+            <span class="text-sm font-medium text-slate-700">{labels.useNewAddress}</span>
+          </label>
+        </div>
+      </fieldset>
+    )}
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <Input name="firstName" label={labels.firstName} required={true} autocomplete="given-name" />
@@ -147,11 +137,38 @@ const hasSavedAddresses = savedAddresses.length > 0;
           { value: 'PA', label: 'Panamá' },
         ]}
       />
-      <Input name="department" label={labels.department} required={true} autocomplete="address-level1" />
-      <Input name="municipality" label={labels.municipality} required={true} autocomplete="address-level2" />
-      <Input name="address1" label={labels.address1} required={true} autocomplete="address-line1" class="sm:col-span-2" />
-      <Input name="address2" label={labels.address2} autocomplete="address-line2" class="sm:col-span-2" />
-      <Input name="reference" label={labels.reference} hint="" autocomplete="off" class="sm:col-span-2" />
+      <Input
+        name="department"
+        label={labels.department}
+        required={true}
+        autocomplete="address-level1"
+      />
+      <Input
+        name="municipality"
+        label={labels.municipality}
+        required={true}
+        autocomplete="address-level2"
+      />
+      <Input
+        name="address1"
+        label={labels.address1}
+        required={true}
+        autocomplete="address-line1"
+        class="sm:col-span-2"
+      />
+      <Input
+        name="address2"
+        label={labels.address2}
+        autocomplete="address-line2"
+        class="sm:col-span-2"
+      />
+      <Input
+        name="reference"
+        label={labels.reference}
+        hint=""
+        autocomplete="off"
+        class="sm:col-span-2"
+      />
     </div>
   </section>
 
@@ -160,48 +177,46 @@ const hasSavedAddresses = savedAddresses.length > 0;
       <h2 class="text-base font-semibold text-slate-900">{labels.methodHeading}</h2>
     </header>
     <div class="flex flex-col gap-2" role="radiogroup" aria-label={labels.methodHeading}>
-      {
-        shippingMethods.map((method, index) => {
-          const labelKey =
-            method.id === 'standard'
-              ? 'methodStandard'
-              : method.id === 'express'
-                ? 'methodExpress'
-                : 'methodPickup';
-          const hintKey =
-            method.id === 'standard'
-              ? 'methodStandardHint'
-              : method.id === 'express'
-                ? 'methodExpressHint'
-                : 'methodPickupHint';
-          return (
-            <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-[var(--primary,#475569)] hover:bg-slate-50 has-[:checked]:border-[var(--primary,#475569)] has-[:checked]:bg-violet-50">
-              <input
-                type="radio"
-                name="shippingMethod"
-                value={method.id}
-                checked={index === 0}
-                class="mt-1 h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
-              />
-              <span class="flex flex-1 flex-col gap-0.5">
-                <span class="flex items-center justify-between gap-2">
-                  <span class="text-sm font-semibold text-slate-900">
-                    {labels[labelKey]}
-                  </span>
-                  <span class="text-sm font-bold tabular-nums text-slate-900">
-                    {method.priceCents === 0
-                      ? labels.methodPickupHint.includes('gratis')
-                        ? 'Gratis'
-                        : '—'
-                      : new Intl.NumberFormat('es-NI', { style: 'currency', currency: 'USD' }).format(method.priceCents / 100)}
-                  </span>
+      {shippingMethods.map((method, index) => {
+        const labelKey =
+          method.id === 'standard'
+            ? 'methodStandard'
+            : method.id === 'express'
+              ? 'methodExpress'
+              : 'methodPickup';
+        const hintKey =
+          method.id === 'standard'
+            ? 'methodStandardHint'
+            : method.id === 'express'
+              ? 'methodExpressHint'
+              : 'methodPickupHint';
+        return (
+          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-[var(--primary,#475569)] hover:bg-slate-50 has-[:checked]:border-[var(--primary,#475569)] has-[:checked]:bg-violet-50">
+            <input
+              type="radio"
+              name="shippingMethod"
+              value={method.id}
+              checked={index === 0}
+              class="mt-1 h-4 w-4 shrink-0 border-slate-300 text-[var(--primary,#475569)] focus:ring-[var(--primary,#475569)]"
+            />
+            <span class="flex flex-1 flex-col gap-0.5">
+              <span class="flex items-center justify-between gap-2">
+                <span class="text-sm font-semibold text-slate-900">{labels[labelKey]}</span>
+                <span class="text-sm font-bold tabular-nums text-slate-900">
+                  {method.priceCents === 0
+                    ? labels.methodPickupHint.includes('gratis')
+                      ? 'Gratis'
+                      : '—'
+                    : new Intl.NumberFormat('es-NI', { style: 'currency', currency: 'USD' }).format(
+                        method.priceCents / 100
+                      )}
                 </span>
-                <span class="text-xs text-slate-500">{labels[hintKey]}</span>
               </span>
-            </label>
-          );
-        })
-      }
+              <span class="text-xs text-slate-500">{labels[hintKey]}</span>
+            </span>
+          </label>
+        );
+      })}
     </div>
   </section>
 

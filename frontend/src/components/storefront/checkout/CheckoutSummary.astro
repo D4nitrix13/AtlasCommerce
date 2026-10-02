@@ -63,8 +63,7 @@ const {
 } = Astro.props;
 
 const subtotalFormatted = formatCurrency(subtotalCents, currencyCode);
-const discountFormatted =
-  discountCents > 0 ? formatCurrency(discountCents, currencyCode) : null;
+const discountFormatted = discountCents > 0 ? formatCurrency(discountCents, currencyCode) : null;
 const taxFormatted = taxCents > 0 ? formatCurrency(taxCents, currencyCode) : null;
 
 const shippingDisplay =
@@ -74,10 +73,7 @@ const shippingDisplay =
       ? labels.shippingFree
       : formatCurrency(shippingCents, currencyCode);
 
-const totalCents = Math.max(
-  0,
-  subtotalCents - discountCents + (shippingCents ?? 0) + taxCents,
-);
+const totalCents = Math.max(0, subtotalCents - discountCents + (shippingCents ?? 0) + taxCents);
 const totalFormatted = formatCurrency(totalCents, currencyCode);
 const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
 const itemCountLabel = labels.itemCount.replace('{count}', String(totalQuantity));
@@ -118,18 +114,14 @@ const bodyProps = {
         <span class="text-xs font-normal text-slate-500">— {itemCountLabel}</span>
       </span>
     </span>
-    <span class="text-base font-bold tabular-nums text-slate-900">
-      {totalFormatted}
-    </span>
+    <span class="text-base font-bold tabular-nums text-slate-900">{totalFormatted}</span>
   </summary>
   <div class="border-t border-slate-200 p-4">
     <CheckoutSummaryBody {...bodyProps} />
     <div class="mt-4 border-t border-slate-200 pt-3">
       <div class="flex items-baseline justify-between">
         <dt class="text-base font-semibold text-slate-900">{labels.total}</dt>
-        <dd class="text-lg font-bold tabular-nums text-slate-900">
-          {totalFormatted}
-        </dd>
+        <dd class="text-lg font-bold tabular-nums text-slate-900">{totalFormatted}</dd>
       </div>
     </div>
   </div>
@@ -147,9 +139,7 @@ const bodyProps = {
   <div class="mt-2 border-t border-slate-200 pt-3">
     <div class="flex items-baseline justify-between">
       <dt class="text-base font-semibold text-slate-900">{labels.total}</dt>
-      <dd class="text-lg font-bold tabular-nums text-slate-900">
-        {totalFormatted}
-      </dd>
+      <dd class="text-lg font-bold tabular-nums text-slate-900">{totalFormatted}</dd>
     </div>
   </div>
 

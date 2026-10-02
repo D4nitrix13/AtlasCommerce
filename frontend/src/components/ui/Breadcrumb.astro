@@ -31,41 +31,34 @@ interface Props {
   class?: string;
 }
 
-const {
-  items,
-  separator = '/',
-  ariaLabel = 'Migas de pan',
-  class: className,
-} = Astro.props;
+const { items, separator = '/', ariaLabel = 'Migas de pan', class: className } = Astro.props;
 ---
 
 <nav aria-label={ariaLabel} class={className}>
   <ol class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
-    {
-      items.map((item, index) => {
-        const isLast = index === items.length - 1;
-        return (
-          <li class="flex items-center gap-1.5">
-            {isLast || !item.href ? (
-              <span aria-current="page" class="font-medium text-slate-900">
-                {item.label}
-              </span>
-            ) : (
-              <a
-                href={item.href}
-                class="rounded transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)]"
-              >
-                {item.label}
-              </a>
-            )}
-            {!isLast && (
-              <span aria-hidden="true" class="text-slate-300">
-                {separator}
-              </span>
-            )}
-          </li>
-        );
-      })
-    }
+    {items.map((item, index) => {
+      const isLast = index === items.length - 1;
+      return (
+        <li class="flex items-center gap-1.5">
+          {isLast || !item.href ? (
+            <span aria-current="page" class="font-medium text-slate-900">
+              {item.label}
+            </span>
+          ) : (
+            <a
+              href={item.href}
+              class="rounded transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)]"
+            >
+              {item.label}
+            </a>
+          )}
+          {!isLast && (
+            <span aria-hidden="true" class="text-slate-300">
+              {separator}
+            </span>
+          )}
+        </li>
+      );
+    })}
   </ol>
 </nav>

@@ -77,10 +77,12 @@ const itemRows = invoice.items
   .map((item) => {
     const subtotal = formatCentsAsDecimal(item.unitPriceCents * item.quantity, currencyCode);
     const unitPrice = formatCentsAsDecimal(item.unitPriceCents, currencyCode);
-    return `<tr><td>${escapeAttr(item.description)}</td>` +
+    return (
+      `<tr><td>${escapeAttr(item.description)}</td>` +
       `<td class="num">${item.quantity}</td>` +
       `<td class="num">${unitPrice}</td>` +
-      `<td class="num">${subtotal}</td></tr>`;
+      `<td class="num">${subtotal}</td></tr>`
+    );
   })
   .join('');
 
@@ -88,7 +90,8 @@ const notesBlock = invoice.notes
   ? `<div class="notes"><strong>${labelNotes}:</strong> ${escapeAttr(invoice.notes)}</div>`
   : '';
 
-const docHtml = '<!doctype html><html lang="es"><head><meta charset="utf-8" />' +
+const docHtml =
+  '<!doctype html><html lang="es"><head><meta charset="utf-8" />' +
   `<title>${labelNumber} ${invoice.number}</title>` +
   '<style>' +
   '* { box-sizing: border-box; }' +
@@ -100,11 +103,15 @@ const docHtml = '<!doctype html><html lang="es"><head><meta charset="utf-8" />' 
   '.header .meta p { margin: 2px 0; }' +
   '.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }' +
   `.pill-${invoice.status} { background: ${
-    invoice.status === 'paid' ? '#d1fae5; color: #065f46' :
-    invoice.status === 'sent' ? '#dbeafe; color: #1e40af' :
-    invoice.status === 'overdue' ? '#fee2e2; color: #991b1b' :
-    invoice.status === 'cancelled' ? '#f1f5f9; color: #475569' :
-    '#f1f5f9; color: #475569'
+    invoice.status === 'paid'
+      ? '#d1fae5; color: #065f46'
+      : invoice.status === 'sent'
+        ? '#dbeafe; color: #1e40af'
+        : invoice.status === 'overdue'
+          ? '#fee2e2; color: #991b1b'
+          : invoice.status === 'cancelled'
+            ? '#f1f5f9; color: #475569'
+            : '#f1f5f9; color: #475569'
   }; }` +
   '.row { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 28px; }' +
   '.row .party p { margin: 2px 0; }' +

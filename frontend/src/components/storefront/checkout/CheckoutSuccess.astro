@@ -45,13 +45,23 @@ const { labels, orderNumber, catalogHref, orderHref, helpHref } = Astro.props;
     class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
     aria-hidden="true"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-8 w-8">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      class="h-8 w-8"
+    >
       <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   </div>
 
   <div class="flex flex-col gap-2">
-    <h1 id="checkout-success-title" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+    <h1
+      id="checkout-success-title"
+      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+    >
       {labels.title}
     </h1>
     <p class="text-sm text-slate-500 sm:text-base">{labels.subtitle}</p>
@@ -69,13 +79,7 @@ const { labels, orderNumber, catalogHref, orderHref, helpHref } = Astro.props;
     <Button variant="primary" size="lg" href={catalogHref} fullWidth={true} class="sm:w-auto">
       {labels.continueShopping}
     </Button>
-    <Button
-      variant="secondary"
-      size="lg"
-      href={orderHref}
-      fullWidth={true}
-      class="sm:w-auto"
-    >
+    <Button variant="secondary" size="lg" href={orderHref} fullWidth={true} class="sm:w-auto">
       {labels.viewOrder}
     </Button>
   </div>

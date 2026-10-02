@@ -62,15 +62,13 @@ function buildAddressLine(): string {
       <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{labelCountry}</dt>
       <dd class="text-slate-700">{address.country}</dd>
     </div>
-    {
-      address.reference !== undefined && address.reference !== null && address.reference !== '' && (
-        <div class="flex flex-col gap-0.5">
-          <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">
-            {labelReference}
-          </dt>
-          <dd class="text-slate-700">{address.reference}</dd>
-        </div>
-      )
-    }
+    {address.reference !== undefined && address.reference !== null && address.reference !== '' && (
+      <div class="flex flex-col gap-0.5">
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">
+          {labelReference}
+        </dt>
+        <dd class="text-slate-700">{address.reference}</dd>
+      </div>
+    )}
   </dl>
 </section>

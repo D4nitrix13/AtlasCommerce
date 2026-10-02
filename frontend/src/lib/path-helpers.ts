@@ -120,9 +120,10 @@ export function withLocale(barePath: string, locale: Locale): string {
  */
 export function adminUrl(locale: Locale, barePath: string): string {
   const normalized = barePath.startsWith('/') ? barePath : `/${barePath}`;
-  const withoutAdmin = normalized.startsWith('/admin/') || normalized === '/admin'
-    ? normalized
-    : `/admin${normalized === '/' ? '' : normalized}`;
+  const withoutAdmin =
+    normalized.startsWith('/admin/') || normalized === '/admin'
+      ? normalized
+      : `/admin${normalized === '/' ? '' : normalized}`;
   return `/${locale}${withoutAdmin}`;
 }
 

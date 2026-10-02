@@ -16,12 +16,7 @@
  * **SOLO para vista**. NO tomar decisiones de negocio con esto.
  */
 
-export type OrderStatus =
-  | 'pending'
-  | 'processing'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled';
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export type UserRole = 'customer' | 'admin';
 

@@ -32,11 +32,11 @@ const alignClass = align === 'right' ? 'right-0' : 'left-0';
 ---
 
 <details class:list={['relative', className]}>
-  <summary
-    class="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] [&::-webkit-details-marker]:hidden"
-  >
+  <summary class="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] [&::-webkit-details-marker]:hidden">
     {label}
-    <span aria-hidden="true" class="text-xs">▾</span>
+    <span aria-hidden="true" class="text-xs">
+      ▾
+    </span>
   </summary>
 
   <ul

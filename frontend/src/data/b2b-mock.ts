@@ -50,7 +50,7 @@ const B2B_PLACEHOLDER_IMAGE =
       </defs>
       <rect width="400" height="400" fill="url(#b2b-g)"/>
       <text x="200" y="210" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" fill="#065f46" font-weight="600">B2B Category</text>
-    </svg>`,
+    </svg>`
   );
 
 export const B2B_CATEGORIES: readonly B2bCategory[] = [

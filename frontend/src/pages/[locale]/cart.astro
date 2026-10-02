@@ -58,19 +58,12 @@ const cartItems = demoItems
 
 const isEmpty = cartItems.length === 0;
 
-const subtotalCents = cartItems.reduce(
-  (total, item) => total + item.priceCents * item.quantity,
-  0,
-);
+const subtotalCents = cartItems.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 const currencyCode = cartItems[0]?.currency ?? 'USD';
 // Envío gratis sobre $50, sino $4 fijo (placeholder UX).
 const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
 const shippingCents =
-  subtotalCents === 0
-    ? null
-    : subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS
-      ? 0
-      : 400;
+  subtotalCents === 0 ? null : subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : 400;
 
 const cartItemLabels = {
   remove: t['storefront.cart.removeItem'],
@@ -95,47 +88,43 @@ const cartSummaryLabels = {
       <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
         {t['storefront.cart.title']}
       </h1>
-      {
-        !isEmpty && (
-          <p class="mt-1 text-sm text-slate-500">
-            {t['storefront.cart.itemsCount'].replace('{count}', String(cartItems.length))}
-          </p>
-        )
-      }
+      {!isEmpty && (
+        <p class="mt-1 text-sm text-slate-500">
+          {t['storefront.cart.itemsCount'].replace('{count}', String(cartItems.length))}
+        </p>
+      )}
     </header>
 
-    {
-      isEmpty ? (
-        <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-          <p class="text-2xl font-bold text-slate-900">{t['storefront.cart.empty']}</p>
-          <p class="max-w-md text-sm text-slate-500">{t['storefront.cart.emptyHint']}</p>
-          <a
-            href={`/${locale}/products`}
-            class="mt-2 inline-flex h-11 items-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-          >
-            {t['storefront.cart.browseProducts']}
-          </a>
-        </section>
-      ) : (
-        <div class="grid gap-8 lg:grid-cols-[1fr_360px]">
-          <ul class="flex list-none flex-col gap-4 p-0">
-            {cartItems.map((item) => (
-              <li class="list-none">
-                <CartItem item={item} locale={locale} labels={cartItemLabels} />
-              </li>
-            ))}
-          </ul>
+    {isEmpty ? (
+      <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+        <p class="text-2xl font-bold text-slate-900">{t['storefront.cart.empty']}</p>
+        <p class="max-w-md text-sm text-slate-500">{t['storefront.cart.emptyHint']}</p>
+        <a
+          href={`/${locale}/products`}
+          class="mt-2 inline-flex h-11 items-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+        >
+          {t['storefront.cart.browseProducts']}
+        </a>
+      </section>
+    ) : (
+      <div class="grid gap-8 lg:grid-cols-[1fr_360px]">
+        <ul class="flex list-none flex-col gap-4 p-0">
+          {cartItems.map((item) => (
+            <li class="list-none">
+              <CartItem item={item} locale={locale} labels={cartItemLabels} />
+            </li>
+          ))}
+        </ul>
 
-          <CartSummary
-            subtotalCents={subtotalCents}
-            currencyCode={currencyCode}
-            shippingCents={shippingCents}
-            checkoutHref={checkoutHref}
-            labels={cartSummaryLabels}
-            isEmpty={false}
-          />
-        </div>
-      )
-    }
+        <CartSummary
+          subtotalCents={subtotalCents}
+          currencyCode={currencyCode}
+          shippingCents={shippingCents}
+          checkoutHref={checkoutHref}
+          labels={cartSummaryLabels}
+          isEmpty={false}
+        />
+      </div>
+    )}
   </main>
 </StorefrontLayout>

@@ -37,44 +37,38 @@ const localePrefix = `/${locale}`;
         <h1 id="wishlist-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
           {t['account.wishlist.heading']}
         </h1>
-        <p class="mt-1 max-w-2xl text-sm text-slate-500">
-          {t['account.wishlist.subtitle']}
-        </p>
+        <p class="mt-1 max-w-2xl text-sm text-slate-500">{t['account.wishlist.subtitle']}</p>
       </div>
-      {
-        hasItems && (
-          <p class="text-xs font-medium text-slate-500">
-            {t['account.wishlist.count'].replace('{count}', String(items.length))}
-          </p>
-        )
-      }
+      {hasItems && (
+        <p class="text-xs font-medium text-slate-500">
+          {t['account.wishlist.count'].replace('{count}', String(items.length))}
+        </p>
+      )}
     </header>
 
-    {
-      hasItems ? (
-        <WishlistGrid
-          items={items}
-          locale={locale}
-          labels={{
-            addedDaysAgo: t['account.wishlist.item.addedDaysAgo'],
-            addedYesterday: t['account.wishlist.item.addedYesterday'],
-            addedToday: t['account.wishlist.item.addedToday'],
-            personalNoteLabel: t['account.wishlist.item.personalNoteLabel'],
-            outOfStockLabel: t['account.wishlist.item.outOfStock'],
-            onlyLeftLabel: t['account.wishlist.item.onlyLeft'],
-            moveToBagLabel: t['account.wishlist.item.moveToBag'],
-            removeLabel: t['account.wishlist.item.remove'],
-            notifyLabel: t['account.wishlist.item.notifyWhenBack'],
-          }}
-        />
-      ) : (
-        <WishlistEmpty
-          title={t['account.wishlist.empty.title']}
-          hint={t['account.wishlist.empty.hint']}
-          ctaLabel={t['account.wishlist.empty.cta']}
-          ctaHref={`${localePrefix}/products`}
-        />
-      )
-    }
+    {hasItems ? (
+      <WishlistGrid
+        items={items}
+        locale={locale}
+        labels={{
+          addedDaysAgo: t['account.wishlist.item.addedDaysAgo'],
+          addedYesterday: t['account.wishlist.item.addedYesterday'],
+          addedToday: t['account.wishlist.item.addedToday'],
+          personalNoteLabel: t['account.wishlist.item.personalNoteLabel'],
+          outOfStockLabel: t['account.wishlist.item.outOfStock'],
+          onlyLeftLabel: t['account.wishlist.item.onlyLeft'],
+          moveToBagLabel: t['account.wishlist.item.moveToBag'],
+          removeLabel: t['account.wishlist.item.remove'],
+          notifyLabel: t['account.wishlist.item.notifyWhenBack'],
+        }}
+      />
+    ) : (
+      <WishlistEmpty
+        title={t['account.wishlist.empty.title']}
+        hint={t['account.wishlist.empty.hint']}
+        ctaLabel={t['account.wishlist.empty.cta']}
+        ctaHref={`${localePrefix}/products`}
+      />
+    )}
   </section>
 </AccountLayout>

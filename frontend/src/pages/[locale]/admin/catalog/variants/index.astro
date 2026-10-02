@@ -16,11 +16,7 @@
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import Badge from '../../../../components/ui/Badge.astro';
 import FilterBar from '../../../../components/admin/catalog/FilterBar.astro';
-import {
-  VARIANTS_MOCK,
-  getProductById,
-  type VariantMock,
-} from '../../../../data/catalog-mock';
+import { VARIANTS_MOCK, getProductById, type VariantMock } from '../../../../data/catalog-mock';
 import { getServerDictionary } from '../../../../i18n/server';
 import { adminUrl } from '../../../../lib/path-helpers';
 import { getServerLocale } from '../../../../i18n/server';
@@ -31,10 +27,7 @@ const locale = getServerLocale(Astro.locals.locale);
 const variants: readonly VariantMock[] = VARIANTS_MOCK;
 const hasVariants = variants.length > 0;
 
-const STOCK_PILL: Record<
-  'in_stock' | 'low_stock' | 'out_of_stock',
-  string
-> = {
+const STOCK_PILL: Record<'in_stock' | 'low_stock' | 'out_of_stock', string> = {
   in_stock: 'bg-emerald-100 text-emerald-700',
   low_stock: 'bg-amber-100 text-amber-800',
   out_of_stock: 'bg-red-100 text-red-700',
@@ -67,9 +60,7 @@ function formatPrice(cents: number): string {
       <h1 class="text-2xl font-bold tracking-tight text-slate-950">
         {t['admin.catalog.variants.title']}
       </h1>
-      <p class="mt-1 text-sm text-slate-500">
-        {t['admin.catalog.variants.subtitle']}
-      </p>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.catalog.variants.subtitle']}</p>
     </div>
     <button
       type="button"
@@ -84,92 +75,74 @@ function formatPrice(cents: number): string {
     <FilterBar showPriceRange={false} />
 
     <div class="space-y-4">
-      {
-        hasVariants ? (
-          <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th class="px-4 py-3 font-medium">
-                    {t['admin.catalog.variants.column.sku']}
-                  </th>
-                  <th class="px-3 py-3 font-medium">
-                    {t['admin.catalog.variants.column.product']}
-                  </th>
-                  <th class="px-3 py-3 font-medium">
-                    {t['admin.catalog.variants.column.color']}
-                  </th>
-                  <th class="px-3 py-3 font-medium">
-                    {t['admin.catalog.variants.column.size']}
-                  </th>
-                  <th class="px-3 py-3 text-right font-medium">
-                    {t['admin.catalog.variants.column.stock']}
-                  </th>
-                  <th class="px-3 py-3 text-right font-medium">
-                    {t['admin.catalog.variants.column.price']}
-                  </th>
-                  <th class="px-4 py-3 font-medium">
-                    {t['admin.catalog.variants.column.status']}
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                {variants.map((variant) => {
-                  const product = getProductById(variant.productId);
-                  const level = stockLevel(variant.stock);
-                  const productHref = product
-                    ? adminUrl(locale, `/catalog/products/${product.id}`)
-                    : '#';
-                  return (
-                    <tr class="hover:bg-slate-50/50">
-                      <td class="px-4 py-3 font-mono text-xs text-slate-600">
-                        {variant.sku}
-                      </td>
-                      <td class="max-w-[280px] truncate px-3 py-3">
-                        <a
-                          href={productHref}
-                          class="font-medium text-slate-900 hover:text-violet-700 hover:underline"
-                        >
-                          {product?.name ?? '—'}
-                        </a>
-                      </td>
-                      <td class="px-3 py-3 text-slate-700">{variant.color}</td>
-                      <td class="px-3 py-3 text-slate-700">{variant.size}</td>
-                      <td class="px-3 py-3 text-right">
-                        <span
-                          class:list={[
-                            'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
-                            STOCK_PILL[level],
-                          ]}
-                        >
-                          {variant.stock} · {STOCK_LABEL[level]}
-                        </span>
-                      </td>
-                      <td class="px-3 py-3 text-right font-semibold text-slate-900">
-                        {formatPrice(variant.priceCents)}
-                      </td>
-                      <td class="px-4 py-3">
-                        <Badge variant={variant.status === 'active' ? 'primary' : 'neutral'}>
-                          {t[`admin.catalog.products.status.${variant.status}`]}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-            <p class="text-sm font-medium text-slate-700">
-              {t['admin.catalog.variants.empty']}
-            </p>
-            <p class="mt-1 text-xs text-slate-500">
-              {t['admin.catalog.variants.emptyHint']}
-            </p>
-          </div>
-        )
-      }
+      {hasVariants ? (
+        <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th class="px-4 py-3 font-medium">{t['admin.catalog.variants.column.sku']}</th>
+                <th class="px-3 py-3 font-medium">{t['admin.catalog.variants.column.product']}</th>
+                <th class="px-3 py-3 font-medium">{t['admin.catalog.variants.column.color']}</th>
+                <th class="px-3 py-3 font-medium">{t['admin.catalog.variants.column.size']}</th>
+                <th class="px-3 py-3 text-right font-medium">
+                  {t['admin.catalog.variants.column.stock']}
+                </th>
+                <th class="px-3 py-3 text-right font-medium">
+                  {t['admin.catalog.variants.column.price']}
+                </th>
+                <th class="px-4 py-3 font-medium">{t['admin.catalog.variants.column.status']}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {variants.map((variant) => {
+                const product = getProductById(variant.productId);
+                const level = stockLevel(variant.stock);
+                const productHref = product
+                  ? adminUrl(locale, `/catalog/products/${product.id}`)
+                  : '#';
+                return (
+                  <tr class="hover:bg-slate-50/50">
+                    <td class="px-4 py-3 font-mono text-xs text-slate-600">{variant.sku}</td>
+                    <td class="max-w-[280px] truncate px-3 py-3">
+                      <a
+                        href={productHref}
+                        class="font-medium text-slate-900 hover:text-violet-700 hover:underline"
+                      >
+                        {product?.name ?? '—'}
+                      </a>
+                    </td>
+                    <td class="px-3 py-3 text-slate-700">{variant.color}</td>
+                    <td class="px-3 py-3 text-slate-700">{variant.size}</td>
+                    <td class="px-3 py-3 text-right">
+                      <span
+                        class:list={[
+                          'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                          STOCK_PILL[level],
+                        ]}
+                      >
+                        {variant.stock} · {STOCK_LABEL[level]}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3 text-right font-semibold text-slate-900">
+                      {formatPrice(variant.priceCents)}
+                    </td>
+                    <td class="px-4 py-3">
+                      <Badge variant={variant.status === 'active' ? 'primary' : 'neutral'}>
+                        {t[`admin.catalog.products.status.${variant.status}`]}
+                      </Badge>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+          <p class="text-sm font-medium text-slate-700">{t['admin.catalog.variants.empty']}</p>
+          <p class="mt-1 text-xs text-slate-500">{t['admin.catalog.variants.emptyHint']}</p>
+        </div>
+      )}
     </div>
   </div>
 </AdminLayout>

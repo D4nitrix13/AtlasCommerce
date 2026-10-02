@@ -40,21 +40,19 @@ const hasItems = items.length > 0;
     {heading}
   </h2>
 
-  {
-    hasItems ? (
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-        {items.map((item) => (
-          <QuickActionCard
-            label={item.label}
-            description={item.description}
-            href={item.href}
-            iconName={item.iconName}
-            badge={item.badge}
-          />
-        ))}
-      </div>
-    ) : (
-      <p class="py-6 text-center text-sm text-slate-500">—</p>
-    )
-  }
+  {hasItems ? (
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+      {items.map((item) => (
+        <QuickActionCard
+          label={item.label}
+          description={item.description}
+          href={item.href}
+          iconName={item.iconName}
+          badge={item.badge}
+        />
+      ))}
+    </div>
+  ) : (
+    <p class="py-6 text-center text-sm text-slate-500">—</p>
+  )}
 </section>

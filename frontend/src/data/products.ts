@@ -35,7 +35,7 @@ const PLACEHOLDER_IMAGE =
       <circle cx="200" cy="160" r="60" fill="#cbd5e1"/>
       <path d="M120 320 Q200 220 280 320 Z" fill="#cbd5e1"/>
       <text x="200" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#64748b">Image placeholder</text>
-    </svg>`,
+    </svg>`
   );
 
 export const CATEGORIES: readonly Category[] = [
@@ -84,8 +84,7 @@ export const PRODUCTS: readonly Product[] = [
     id: 2,
     slug: 'nendoroid-zero-two',
     name: 'Nendoroid Zero Two',
-    description:
-      'Nendoroid de Zero Two (Darling in the Franxx). 10cm, tres expresiones faciales.',
+    description: 'Nendoroid de Zero Two (Darling in the Franxx). 10cm, tres expresiones faciales.',
     priceCents: 7900,
     imageUrl: PLACEHOLDER_IMAGE,
     category: 'figures',

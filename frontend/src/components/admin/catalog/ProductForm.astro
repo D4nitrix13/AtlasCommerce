@@ -42,11 +42,7 @@ interface Props {
   submitLabel?: string;
 }
 
-const {
-  product = null,
-  activeTab = 'basics',
-  submitLabel,
-} = Astro.props;
+const { product = null, activeTab = 'basics', submitLabel } = Astro.props;
 
 const t = getServerDictionary(Astro.locals.locale);
 
@@ -78,7 +74,8 @@ const brandOptions = BRANDS_MOCK.map((b) => ({
 }));
 
 const finalSubmitLabel =
-  submitLabel ?? (isEdit ? t['admin.catalog.common.save'] : t['admin.catalog.products.create.submit']);
+  submitLabel ??
+  (isEdit ? t['admin.catalog.common.save'] : t['admin.catalog.products.create.submit']);
 
 function formatCents(cents: number): string {
   return (cents / 100).toFixed(2);
@@ -96,30 +93,30 @@ function formatCents(cents: number): string {
     aria-label={t['admin.catalog.products.detail.title']}
     class="sticky top-0 z-10 -mx-1 flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-white px-1 py-1"
   >
-    {
-      TABS.map((tab) => {
-        const isActive = tab.id === activeTab;
-        return (
-          <a
-            href={`?tab=${tab.id}${isEdit ? `&id=${product!.id}` : ''}`}
-            aria-current={isActive ? 'page' : undefined}
-            class:list={[
-              'rounded-md px-3 py-1.5 text-xs font-medium transition',
-              isActive
-                ? 'bg-violet-100 text-violet-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-            ]}
-          >
-            {tab.label}
-          </a>
-        );
-      })
-    }
+    {TABS.map((tab) => {
+      const isActive = tab.id === activeTab;
+      return (
+        <a
+          href={`?tab=${tab.id}${isEdit ? `&id=${product!.id}` : ''}`}
+          aria-current={isActive ? 'page' : undefined}
+          class:list={[
+            'rounded-md px-3 py-1.5 text-xs font-medium transition',
+            isActive
+              ? 'bg-violet-100 text-violet-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+          ]}
+        >
+          {tab.label}
+        </a>
+      );
+    })}
   </nav>
 
   {activeTab === 'basics' && (
     <section aria-labelledby="tab-basics" class="grid gap-5 sm:grid-cols-2">
-      <h2 id="tab-basics" class="sr-only">{t['admin.catalog.products.detail.tabs.basics']}</h2>
+      <h2 id="tab-basics" class="sr-only">
+        {t['admin.catalog.products.detail.tabs.basics']}
+      </h2>
       <div class="sm:col-span-2">
         <Input
           name="name"
@@ -168,14 +165,18 @@ function formatCents(cents: number): string {
 
   {activeTab === 'media' && (
     <section aria-labelledby="tab-media">
-      <h2 id="tab-media" class="sr-only">{t['admin.catalog.products.detail.tabs.media']}</h2>
+      <h2 id="tab-media" class="sr-only">
+        {t['admin.catalog.products.detail.tabs.media']}
+      </h2>
       <MediaUploader initialImages={isEdit ? [product!.imageUrl] : []} />
     </section>
   )}
 
   {activeTab === 'pricing' && (
     <section aria-labelledby="tab-pricing" class="grid gap-5 sm:grid-cols-2">
-      <h2 id="tab-pricing" class="sr-only">{t['admin.catalog.products.detail.tabs.pricing']}</h2>
+      <h2 id="tab-pricing" class="sr-only">
+        {t['admin.catalog.products.detail.tabs.pricing']}
+      </h2>
       <Input
         name="priceCents"
         type="number"
@@ -186,7 +187,9 @@ function formatCents(cents: number): string {
         name="compareAtPriceCents"
         type="number"
         label={t['admin.catalog.products.form.compareAtPrice']}
-        value={isEdit && product!.compareAtPriceCents ? formatCents(product!.compareAtPriceCents) : ''}
+        value={
+          isEdit && product!.compareAtPriceCents ? formatCents(product!.compareAtPriceCents) : ''
+        }
         hint={t['admin.catalog.products.form.compareAtPriceHelp']}
       />
       <Input
@@ -212,7 +215,9 @@ function formatCents(cents: number): string {
 
   {activeTab === 'seo' && (
     <section aria-labelledby="tab-seo" class="grid gap-5 sm:grid-cols-2">
-      <h2 id="tab-seo" class="sr-only">{t['admin.catalog.products.detail.tabs.seo']}</h2>
+      <h2 id="tab-seo" class="sr-only">
+        {t['admin.catalog.products.detail.tabs.seo']}
+      </h2>
       <div class="sm:col-span-2">
         <Input
           name="seoTitle"

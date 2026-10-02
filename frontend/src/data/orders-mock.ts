@@ -127,8 +127,7 @@ function buildMilestones(status: OrderStatus, date: string): OrderMilestoneMock[
 
   // `at` es un helper local que produce un ISO 8601 desplazado desde
   // la fecha del pedido. Mantiene el cálculo de offsets legible.
-  const at = (hoursBack: number): string =>
-    new Date(orderTime - hoursBack * HOUR).toISOString();
+  const at = (hoursBack: number): string => new Date(orderTime - hoursBack * HOUR).toISOString();
 
   const milestones: OrderMilestoneMock[] = [
     { key: 'received', timestamp: at(72) },
@@ -153,7 +152,7 @@ function buildMilestones(status: OrderStatus, date: string): OrderMilestoneMock[
 function applyStatusToMilestones(
   milestones: OrderMilestoneMock[],
   status: OrderStatus,
-  at: (hoursBack: number) => string,
+  at: (hoursBack: number) => string
 ): void {
   const [received, preparing, shipped, outForDelivery, delivered] = milestones;
   if (

@@ -101,71 +101,55 @@ const qtyLabels = {
 
 <header class="flex flex-col gap-4">
   {/* Category eyebrow */}
-  {
-    categoryLabel !== undefined && (
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {labels.category}: <span class="text-slate-700">{categoryLabel}</span>
-      </p>
-    )
-  }
+  {categoryLabel !== undefined && (
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+      {labels.category}: <span class="text-slate-700">{categoryLabel}</span>
+    </p>
+  )}
 
   {/* Title */}
   <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{name}</h1>
 
   {/* Badges marketing */}
-  {
-    badges.length > 0 && (
-      <div class="flex flex-wrap gap-2">
-        {badges.map((badge) => {
-          if (badge === 'new') {
-            return (
-              <Badge variant="primary" label={labels.badgeNew} />
-            );
-          }
-          if (badge === 'sale') {
-            return (
-              <Badge status="processing" label={labels.badgeSale} />
-            );
-          }
-          if (badge === 'low_stock') {
-            return (
-              <Badge status="shipped" label={labels.badgeLowStock} />
-            );
-          }
-          return null;
-        })}
-      </div>
-    )
-  }
+  {badges.length > 0 && (
+    <div class="flex flex-wrap gap-2">
+      {badges.map((badge) => {
+        if (badge === 'new') {
+          return <Badge variant="primary" label={labels.badgeNew} />;
+        }
+        if (badge === 'sale') {
+          return <Badge status="processing" label={labels.badgeSale} />;
+        }
+        if (badge === 'low_stock') {
+          return <Badge status="shipped" label={labels.badgeLowStock} />;
+        }
+        return null;
+      })}
+    </div>
+  )}
 
   {/* Price block */}
   <div class="flex items-end gap-3">
     <span class="text-3xl font-bold tabular-nums text-slate-900">{priceFormatted}</span>
-    {
-      compareAtFormatted !== null && (
-        <span class="text-base text-slate-400 tabular-nums line-through">{compareAtFormatted}</span>
-      )
-    }
-    {
-      discountPercent !== null && (
-        <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
-          −{discountPercent}%
-        </span>
-      )
-    }
+    {compareAtFormatted !== null && (
+      <span class="text-base text-slate-400 tabular-nums line-through">{compareAtFormatted}</span>
+    )}
+    {discountPercent !== null && (
+      <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
+        −{discountPercent}%
+      </span>
+    )}
   </div>
 
   {/* Stock badge */}
   <div class="flex flex-wrap items-center gap-2">
-    {
-      isOutOfStock ? (
-        <Badge status="cancelled" label={labels.outOfStock} />
-      ) : isLowStock ? (
-        <Badge status="shipped" label={labels.onlyLeft.replace('{count}', String(stock))} />
-      ) : (
-        <Badge status="delivered" label={labels.inStock} />
-      )
-    }
+    {isOutOfStock ? (
+      <Badge status="cancelled" label={labels.outOfStock} />
+    ) : isLowStock ? (
+      <Badge status="shipped" label={labels.onlyLeft.replace('{count}', String(stock))} />
+    ) : (
+      <Badge status="delivered" label={labels.inStock} />
+    )}
   </div>
 
   {/* Qty + Add to cart + Wishlist */}
@@ -187,13 +171,13 @@ const qtyLabels = {
           loading={isAddingToCart}
           fullWidth={true}
         >
-          {isOutOfStock ? labels.outOfStock : isAddingToCart ? labels.addingToCart : labels.addToCart}
+          {isOutOfStock
+            ? labels.outOfStock
+            : isAddingToCart
+              ? labels.addingToCart
+              : labels.addToCart}
         </Button>
-        <WishlistButton
-          labels={wishlistLabels}
-          isInWishlist={isInWishlist}
-          loginHref={loginHref}
-        />
+        <WishlistButton labels={wishlistLabels} isInWishlist={isInWishlist} loginHref={loginHref} />
       </div>
       <p class="text-xs text-slate-500">{labels.addToCartHint}</p>
     </div>

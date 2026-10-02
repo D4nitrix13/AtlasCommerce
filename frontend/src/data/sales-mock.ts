@@ -232,16 +232,16 @@ function pickItem(catalogIndex: number, quantity: number): AdminOrderItemMock {
   };
 }
 
-function buildTimeline(
-  status: AdminOrderStatus,
-  date: string,
-): AdminOrderTimelineEntry[] {
+function buildTimeline(status: AdminOrderStatus, date: string): AdminOrderTimelineEntry[] {
   const HOUR = 60 * 60 * 1000;
   const orderTime = new Date(`${date}T12:00:00Z`).getTime();
-  const at = (hoursBack: number): string =>
-    new Date(orderTime - hoursBack * HOUR).toISOString();
+  const at = (hoursBack: number): string => new Date(orderTime - hoursBack * HOUR).toISOString();
 
-  const base = (key: AdminOrderTimelineEntry['key'], h: number, actor: string): AdminOrderTimelineEntry => ({
+  const base = (
+    key: AdminOrderTimelineEntry['key'],
+    h: number,
+    actor: string
+  ): AdminOrderTimelineEntry => ({
     key,
     timestamp: at(h),
     actor,
@@ -721,7 +721,9 @@ const INVOICES_DATA: readonly AdminInvoiceMock[] = [
     subtotalCents: 12000,
     taxCents: 0,
     totalCents: 12800,
-    items: [{ description: 'Camiseta Kitsune Edición Limitada × 2', quantity: 2, unitPriceCents: 6000 }],
+    items: [
+      { description: 'Camiseta Kitsune Edición Limitada × 2', quantity: 2, unitPriceCents: 6000 },
+    ],
     notes: 'Pendiente de revisar totales antes de enviar.',
   },
   {

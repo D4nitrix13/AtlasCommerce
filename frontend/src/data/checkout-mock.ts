@@ -182,19 +182,14 @@ export const CHECKOUT_STEPS: readonly CheckoutStepDefinition[] = [
  * Helper: subtotal en cents a partir del carrito actual.
  */
 export function getCheckoutSubtotalCents(): number {
-  return CHECKOUT_CART_ITEMS.reduce(
-    (total, item) => total + item.priceCents * item.quantity,
-    0,
-  );
+  return CHECKOUT_CART_ITEMS.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 }
 
 /**
  * Helper: costo de envío por id (cents). Devuelve `null` si el id
  * no matchea — útil para "no seleccionado".
  */
-export function getShippingMethodPriceCents(
-  id: ShippingMethodOption['id'] | null,
-): number | null {
+export function getShippingMethodPriceCents(id: ShippingMethodOption['id'] | null): number | null {
   if (id === null) return null;
   const method = SHIPPING_METHODS.find((entry) => entry.id === id);
   return method?.priceCents ?? null;

@@ -57,19 +57,13 @@ export const ChevronSeparator: Story = {
 
 export const NoLastLink: Story = {
   args: {
-    items: [
-      { label: 'Tienda', href: '/' },
-      { label: 'Figures' },
-    ],
+    items: [{ label: 'Tienda', href: '/' }, { label: 'Figures' }],
   },
 };
 
 export const CustomAriaLabel: Story = {
   args: {
     ariaLabel: 'Navegación de ruta',
-    items: [
-      { label: 'Inicio', href: '/' },
-      { label: 'Wishlist' },
-    ],
+    items: [{ label: 'Inicio', href: '/' }, { label: 'Wishlist' }],
   },
 };

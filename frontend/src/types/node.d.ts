@@ -59,9 +59,7 @@ declare const __dirname: string;
 
 declare const require: NodeRequire;
 
-interface NodeRequire {
-  (id: string): unknown;
-}
+type NodeRequire = (id: string) => unknown;
 
 declare namespace NodeJS {
   interface ErrnoException extends Error {
