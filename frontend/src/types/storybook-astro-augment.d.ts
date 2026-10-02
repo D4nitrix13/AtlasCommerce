@@ -23,6 +23,9 @@
  * este shim no afecta el dev experience de las stories.
  */
 declare module '@storybook/astro' {
+  // `type` (no `interface`) porque ambos tienen generics con
+  // conditional types que no se pueden expresar como interface.
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   export type Meta<TArgs = Record<string, unknown>> = {
     title?: string;
     component?: unknown;
@@ -34,6 +37,7 @@ declare module '@storybook/astro' {
     [key: string]: unknown;
   };
 
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   export type StoryObj<TMeta = Record<string, unknown>> = {
     args?: TMeta extends { args: infer A }
       ? Partial<A>
