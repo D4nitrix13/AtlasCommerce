@@ -74,8 +74,10 @@ let sources: TrafficSource[] = MOCK_SOURCES;
 let topPages: TrafficTopPage[] = MOCK_TOP_PAGES;
 
 try {
-  const response = await Astro.fetch('/api/v1/admin/metrics/traffic/sources', {
-    credentials: 'include',
+  const response = await fetch(new URL('/api/v1/admin/metrics/traffic/sources', Astro.url), {
+    headers: {
+      Cookie: Astro.request.headers.get('Cookie') ?? '',
+    },
   });
   if (response.ok) {
     const payload = (await response.json()) as { data?: TrafficData };
