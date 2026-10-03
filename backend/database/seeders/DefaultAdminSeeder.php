@@ -37,6 +37,11 @@ final class DefaultAdminSeeder extends Seeder
     /**
      * Default password para todos los admins.
      *
+     * SECURITY: este literal es solo para dev y testing. En producción
+     * usar `BootstrapTenantCommand` con `password_env` apuntando a una
+     * env var (PATRÓN: <TENANT>_ADMIN_PASSWORD) — ver
+     * `docs/operations/default-admin-credentials.md`.
+     *
      * El primer login debe forzar al usuario a cambiarlo (feature a
      * implementar; ver F-Login-Forced-Password-Change del roadmap).
      */
