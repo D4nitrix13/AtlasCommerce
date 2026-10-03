@@ -1,0 +1,116 @@
+@startuml 8.4 - Secuencia: Registro e Inicio de Sesión con 2FA
+
+actor "Cliente externo" as C
+participant "Browser\n(React 19 + Astro 7)" as B
+participant "AuthController\n(API)" as AC
+participant "AuthService" as AS
+participant "EmailService" as ES
+participant "TwoFactorService" as TF
+participant "DB\n(PostgreSQL 18)" as DB
+participant "Servicio\nde Email" as EM
+participant "TOTP Authenticator\n(Google Auth, etc.)" as TA
+
+== REGISTRO ==
+C -> B : Completa formulario de registro\n(correo, contraseña, nombre)
+B -> AC : POST /api/v1/auth/register
+activate AC
+AC -> AS : crearUsuario(datos)
+activate AS
+AS -> DB : SELECT WHERE correo = ?
+DB --> AS : null (no existe)
+AS -> DB : INSERT INTO usuarios
+DB --> AS : usuario(id, correoVerificadoEn=null)
+AS --> AC : usuario
+deactivate AS
+AC -> ES : enviarCorreoVerificacion(usuario)
+activate ES
+ES -> EM : SMTP send email
+ES --> AC : ok
+deactivate ES
+AC --> B : 201 Created\n{mensaje: "Revisa tu correo"}
+deactivate AC
+B --> C : Mostrar "Registro exitoso, revisa tu email"
+
+== VERIFICACIÓN DE CORREO ==
+C -> B : Hace click en enlace del email
+B -> AC : GET /api/v1/auth/verify-email?token=...
+activate AC
+AC -> AS : verificarCorreo(token)
+activate AS
+AS -> DB : SELECT WHERE token = ?
+DB --> AS : usuario
+AS -> DB : UPDATE correoVerificadoEn = NOW()
+DB --> AS : ok
+AS --> AC : usuario verificado
+deactivate AS
+AC --> B : 200 OK
+deactivate AC
+B --> C : Mostrar "Correo verificado, ya puedes iniciar sesión"
+
+== INICIO DE SESIÓN ==
+C -> B : Ingresa correo y contraseña
+B -> AC : POST /api/v1/auth/login
+activate AC
+AC -> AS : autenticar(correo, contraseña)
+activate AS
+AS -> DB : SELECT WHERE correo = ?
+DB --> AS : usuario
+AS -> AS : verificar hash de contraseña
+AS --> AC : usuario autenticado
+deactivate AS
+
+alt ¿2FA activado?
+  AC --> B : 200 OK {requiere_2fa: true, temp_token}
+  B --> C : Mostrar pantalla de código 2FA
+
+  == VERIFICACIÓN 2FA ==
+  alt ¿Método = TOTP?
+    C -> TA : Abrir app Authenticator
+    TA --> C : Mostrar código TOTP (6 dígitos)
+    C -> B : Ingresa código TOTP
+    B -> AC : POST /api/v1/auth/2fa/verify {codigo}
+    activate AC
+    AC -> TF : validarCodigoTOTP(usuario, codigo)
+    activate TF
+    TF -> DB : SELECT credencial_segundo_factor
+    DB --> TF : credencial
+    TF -> TF : comparar código vs TOTP actual
+    TF --> AC : ok
+    deactivate TF
+  else ¿Método = OTP_EMAIL?
+    B -> AC : POST /api/v1/auth/2fa/send-otp
+    AC -> TF : generarOTP(usuario)
+    TF -> DB : INSERT OTP temporal
+    TF -> ES : enviarOTP(usuario)
+    ES -> EM : SMTP send OTP
+    B --> C : Mostrar "Ingresa el código que enviamos a tu correo"
+    C -> B : Ingresa código OTP
+    B -> AC : POST /api/v1/auth/2fa/verify {codigo}
+    AC -> TF : validarCodigoOTP(usuario, codigo)
+    TF -> DB : SELECT OTP
+    TF -> TF : comparar y validar expiración
+    TF --> AC : ok
+  end
+
+  AC -> DB : UPDATE credencial_segundo_factor.verificadoEn
+  AC -> AS : crearSesion(usuario)
+  AS -> DB : INSERT INTO sessions (Sanctum)
+  DB --> AS : session
+  AS --> AC : token
+  AC --> B : 200 OK {token, usuario}
+  deactivate AC
+  B --> C : Mostrar "Sesión iniciada"
+
+else 2FA NO activado
+  AC -> AS : crearSesion(usuario)
+  activate AS
+  AS -> DB : INSERT INTO sessions
+  DB --> AS : token
+  AS --> AC : token
+  deactivate AS
+  AC --> B : 200 OK {token, usuario}
+  deactivate AC
+  B --> C : Mostrar "Sesión iniciada"
+end
+
+@enduml

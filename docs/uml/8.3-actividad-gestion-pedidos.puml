@@ -1,0 +1,90 @@
+@startuml 8.3 - Actividad: Gestión de Pedidos por Operador
+|Operador de tienda|
+start
+
+:Accede al listado de pedidos;
+
+|Sistema AtlasCommerce|
+:Listar pedidos filtrados por tienda y estado;
+
+|Operador de tienda|
+:Selecciona pedido de la cola (PAGADO / CONFIRMADO / EN_PRODUCCION);
+
+|Sistema AtlasCommerce|
+:Cargar detalle del pedido (líneas, pago, cliente, dirección);
+
+|Operador de tienda|
+:Revisa pago, cliente y dirección;
+
+|Sistema AtlasCommerce|
+:Validar estado del pago del pedido;
+
+if (¿Pago confirmado?) then (no)
+  |Operador de tienda|
+  :Pedido en estado PENDIENTE_PAGO;
+  :Notificar al cliente y escalar a revisión;
+  stop
+else (sí)
+endif
+
+if (¿Pedido tiene líneas con productos personalizados?) then (sí)
+  |Operador de tienda|
+  :Confirma que está "En producción";
+  :Ingresa tiempo estimado de producción;
+  |Sistema AtlasCommerce|
+  :Cambiar Pedido a EN_PRODUCCION;
+else (no)
+endif
+
+|Operador de tienda|
+:Prepara el envío del producto;
+
+|Sistema AtlasCommerce|
+:Cambiar Pedido a PREPARADO_ENVIO;
+
+|Operador de tienda|
+:Marca como enviado;
+:Selecciona empresa de envío;
+:Ingresa número de guía;
+
+|Sistema AtlasCommerce|
+:Validar número de guía;
+
+if (¿Guía válida?) then (no)
+  |Operador de tienda|
+  :Corregir guía;
+  stop
+else (sí)
+endif
+
+fork
+  :Cambiar Pedido a ENVIADO;
+fork again
+  :Registrar Envío con número de guía;
+fork again
+  :Descontar stock y registrar MovimientoInventario (tipo SALIDA);
+fork again
+  :Notificar a empresa de envío que rastree el paquete;
+fork again
+  |Sistema de Email|
+  :Enviar email al cliente con número de guía y datos de rastreo;
+end fork
+
+|Empresa de envío|
+:Confirmar entrega al cliente;
+
+|Sistema AtlasCommerce|
+:Cambiar Pedido a ENTREGADO;
+
+|Cliente|
+:Consulta estado del pedido y número de guía;
+
+note right
+  Ver CU-06 — Consultar estado de pedido
+end note
+
+|Operador de tienda|
+:Fin del flujo;
+
+stop
+@enduml

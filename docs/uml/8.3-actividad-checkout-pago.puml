@@ -1,0 +1,110 @@
+@startuml 8.3 - Actividad: Proceso de Checkout y Pago
+|Cliente|
+start
+
+:Selecciona productos desde el storefront;
+:Selecciona variante (talla, color, etc.) y agrega al carrito;
+
+repeat
+  :Modificar carrito (agregar / cambiar cantidad / eliminar ítem);
+  :Ver subtotal y total;
+
+repeat while (¿Continúa modificando carrito?) is (sí) not (no)
+
+:Confirma "Ir a checkout";
+
+|Sistema AtlasCommerce|
+:Cargar carrito activo de la tienda;
+
+if (¿Carrito vacío o todos los items sin stock?) then (sí)
+  |Cliente|
+  :Mostrar mensaje "Carrito vacío o sin stock";
+  stop
+else (no)
+endif
+
+:Validar stock disponible por cada ItemCarrito;
+
+if (¿Hay ítems sin stock suficiente?) then (sí)
+  |Cliente|
+  :Notificar productos sin stock;
+  stop
+else (no)
+endif
+
+|Cliente|
+:Ingresa o selecciona dirección de envío;
+:Selecciona zona de envío (calcula costo);
+
+note right
+  [Opcional]
+  Aplicar cupón de descuento
+end note
+
+:Confirma resumen (subtotal + envío + impuestos - descuentos = total);
+
+|Sistema AtlasCommerce|
+:Crear Pedido en estado PENDIENTE_PAGO;
+:Congelar precio unitario por línea;
+
+|Cliente|
+:Selecciona método de pago;
+
+|Sistema AtlasCommerce|
+:Validar método de pago seleccionado;
+
+if (¿Método de pago válido y habilitado en la tienda?) then (no)
+  |Cliente|
+  :Mostrar error de método;
+  stop
+else (sí)
+endif
+
+:Solicitar pago a pasarela;
+
+|Pasarela de Pago|
+:Procesar solicitud de pago;
+
+if (¿Pasarela responde en ≤ 30 segundos?) then (no)
+  |Sistema AtlasCommerce|
+  :Cancelar intento de pago;
+  |Cliente|
+  :Mostrar "La pasarela no responde. Permite reintentar o cambiar método";
+  stop
+else (sí)
+endif
+
+:Procesar transacción;
+
+if (¿Pago aprobado por la pasarela?) then (no)
+  |Sistema AtlasCommerce|
+  :Registrar TransaccionPago fallida;
+  :Marcar Pago como RECHAZADO;
+  |Cliente|
+  :Mostrar error de pago;
+  :Permite reintentar o cambiar de método de pago;
+  stop
+else (sí)
+endif
+
+|Sistema AtlasCommerce|
+:Actualizar Pago a APROBADO;
+:Actualizar TransaccionPago con datos de pasarela;
+:Cambiar Pedido a PAGADO;
+
+fork
+  :Descontar stock y registrar MovimientoInventario (tipo SALIDA);
+fork again
+  :Generar Factura en PDF;
+fork again
+  :Cambiar Carrito a CONVERTIDO;
+fork again
+  |Sistema de Email|
+  :Enviar email de confirmación de pago al cliente;
+end fork
+
+|Cliente|
+:Recibe confirmación visual y por email;
+
+stop
+@enduml

@@ -1,0 +1,29 @@
+@startuml 8.5 - Diagrama de Estados: Verificación 2FA
+skinparam state {
+  BackgroundColor #FAFAFA
+  BorderColor #333333
+  FontStyle bold
+}
+
+state "SIN_2FA" as S2FA
+state "PENDIENTE_VERIFICACION" as PV
+state "ACTIVO" as ACT
+state "DESHABILITADO" as DES
+
+[*] --> S2FA
+
+S2FA --> PV : usuario.solicitaActivar(metodo)\n/ generarSecreto()\n  guardarCredencialTemporal()
+
+PV --> ACT : usuario.verificaCodigo\n[código = TOTP/OTP válido]\n/ confirmarCredencial()\n  enviarEmailConfirmacion()
+PV --> S2FA : codigo.invalido\n[3 intentos fallidos]\n/ limpiarCredencialTemporal()
+PV --> S2FA : usuario.cancela\n/ limpiarCredencialTemporal()
+PV --> S2FA : timeout\n[≥ 10min sin verificar]\n/ limpiarCredencialTemporal()
+
+ACT --> ACT : usuario.usa2FA\n[código válido en login]\n/ verificarCodigo()
+ACT --> DES : usuario.desactiva\n/ limpiarCredencial()
+ACT --> ACT : codigo.invalido\n[intento de login]\n/ registrarIntentoFallido()
+ACT --> S2FA : cuenta.eliminada\n/ limpiarCredencial()\n  eliminarUsuario()
+
+DES --> S2FA : limpieza.completada\n/ limpiarCredencial()
+
+@enduml

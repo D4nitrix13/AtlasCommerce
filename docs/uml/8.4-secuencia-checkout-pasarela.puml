@@ -1,0 +1,137 @@
+@startuml 8.4 - Secuencia: Checkout Completo con Pasarela de Pago
+
+actor "Cliente externo" as C
+participant "Browser" as B
+participant "CartController" as CC
+participant "OrderService" as OS
+participant "InventoryService" as IS
+participant "PaymentController" as PC
+participant "PaymentService" as PS
+participant "WebhookController" as WC
+participant "EmailService" as ES
+participant "DB" as DB
+participant "Pasarela\nde Pago" as PP
+participant "Servicio\nde Email" as EM
+
+== INICIO DE CHECKOUT ==
+C -> B : Click "Ir a checkout"
+B -> CC : POST /api/v1/checkout
+activate CC
+CC -> OS : crearPedidoDesdeCarrito(carrito)
+activate OS
+
+OS -> IS : validarStockDisponible(items)
+activate IS
+IS -> DB : SELECT stockActual FROM inventarios\nWHERE productoId IN (...) FOR UPDATE
+DB --> IS : stocks
+IS --> OS : {disponible: true, items: [...]}
+deactivate IS
+
+OS -> DB : BEGIN TRANSACTION
+OS -> DB : INSERT INTO pedidos (estado=PENDIENTE_PAGO)
+OS -> DB : INSERT INTO lineas_pedido (cada item)
+DB --> OS : pedido + lineas
+OS -> DB : UPDATE carritos SET estado=CONVERTIDO
+OS -> DB : COMMIT
+OS --> CC : pedido(id, total)
+deactivate OS
+CC --> B : 200 OK {pedidoId, total}
+deactivate CC
+B --> C : Mostrar pantalla de pago
+
+== SOLICITUD DE PAGO ==
+C -> B : Ingresa datos de pago y confirma
+B -> PC : POST /api/v1/payments\n{pedidoId, metodoPagoId, datosPago}
+activate PC
+PC -> PS : iniciarPago(pedido, metodo)
+activate PS
+PS -> DB : INSERT INTO pagos (estado=PENDIENTE)
+DB --> PS : pago
+PS -> DB : INSERT INTO transaccion_pago (referencia=null)
+PS -> PP : POST /charge\n(pedidoId, monto, metodo)
+activate PP
+
+alt ¿Requiere 3D Secure?
+  PP --> PS : {redirect_url: "..."}
+  deactivate PP
+  PS --> PC : 3DS_REQUIRED
+  deactivate PS
+  PC --> B : 200 OK {requires_3ds: true, redirect_url}
+  deactivate PC
+  B --> C : Redirigir a página de 3DS del banco
+  C -> B : Completa 3DS
+  B -> PP : POST confirmación 3DS
+  activate PP
+  PP --> B : 3DS aprobado
+  deactivate PP
+  B -> PC : POST /api/v1/payments/3ds-confirm
+  activate PC
+  PC -> PS : confirmarPago3DS(pedido)
+  activate PS
+  PS -> PP : POST /charge/confirm
+  PP --> PS : {estado: APROBADO, referencia: "..."}
+end
+
+PP --> PS : {estado: APROBADO, referencia: "..."}
+PS -> DB : UPDATE pagos SET estado=APROBADO
+PS -> DB : UPDATE transaccion_pago SET referencia, estadoDevuelto
+PS --> PC : {pago: APROBADO}
+deactivate PS
+PC --> B : 200 OK {pago: APROBADO}
+deactivate PC
+B --> C : Mostrar "Pago procesado, esperando confirmación"
+
+== WEBHOOK ASÍNCRONO DE LA PASARELA (fuente de verdad) ==
+note over PP, WC
+  Este flujo ocurre de forma asíncrona.
+  Puede llegar antes o después que el retorno
+  de la llamada inicial de pago.
+end note
+
+PP -> WC : POST /api/v1/webhooks/pasarela\n(headers, body con evento y firma)
+activate WC
+WC -> WC : verificarFirma(headers, body)
+WC -> PS : procesarWebhook(evento)
+activate PS
+PS -> DB : SELECT pago WHERE pedidoId = ?
+DB --> PS : pago
+PS -> DB : UPDATE pagos SET estado=APROBADO
+PS -> DB : UPDATE pedidos SET estado=PAGADO
+
+par Acciones paralelas tras pago confirmado
+  PS -> IS : descontarStock(pedido)
+  activate IS
+  IS -> DB : INSERT INTO movimientos_inventario (tipo=SALIDA)
+  IS -> DB : UPDATE inventarios SET stockActual
+  deactivate IS
+else
+  PS -> OS : generarFacturaPDF(pedido)
+  activate OS
+  OS -> DB : INSERT INTO facturas
+  deactivate OS
+else
+  PS -> ES : enviarConfirmacionPago(pedido)
+  activate ES
+  ES -> EM : SMTP send email
+  deactivate ES
+end
+
+PS --> WC : 200 OK
+deactivate PS
+WC --> PP : 200 OK
+deactivate WC
+
+== CONFIRMACIÓN VISUAL AL CLIENTE ==
+note over B, C
+  El frontend hace polling o recibe
+  notificación WebSocket del estado del pago.
+end note
+B -> PC : GET /api/v1/payments/{pagoId}/status
+activate PC
+PC -> DB : SELECT pago
+DB --> PC : pago(APROBADO)
+PC --> B : 200 OK {estado: APROBADO}
+deactivate PC
+B --> C : Mostrar "¡Pago exitoso! Tu pedido está confirmado"
+
+@enduml
