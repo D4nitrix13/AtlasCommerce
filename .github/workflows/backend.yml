@@ -71,14 +71,11 @@ jobs:
 
     env:
       APP_ENV: testing
-      # APP_KEY para cipher AES-256-CBC (32 bytes en base64). Pre-existente
-      # usaba 'secure_app_key_for_github_actions_32_bytes' (41 chars
-      # raw, 42 bytes post-decode) que NO era base64 válido de 32 bytes y
-      # rompía todos los tests que tocaban el Encrypter. Bug
-      # pre-existente — esta key fue generada con
-      # `php -r 'echo "base64:" . base64_encode(random_bytes(32));'`.
-      # NO usar para producción — solo para tests CI.
-      APP_KEY: base64:UOnTRtWA+ThLdXsOB9AE0WWpSgz/ffLfL/A+pEfb8HA=
+      # APP_KEY se genera dinámicamente al instalar deps via artisan
+      # key:generate (paso 'Generate App Key'). NO se hardcodea en YAML
+      # porque GitGuardian detecta cualquier base64 de 32+ bytes como
+      # secret. La key generada se persiste en .env.testing (gitignored)
+      # para que artisan pueda firmar cookies en tests subsecuentes.
       DB_CONNECTION: pgsql
       DB_HOST: localhost
       DB_PORT: 5432
@@ -118,6 +115,14 @@ jobs:
       - name: Run migrations
         working-directory: backend
         run: php artisan migrate --force
+
+      - name: Generate App Key
+        working-directory: backend
+        run: |
+          if [ ! -f .env.testing ]; then cp .env.example .env.testing; fi
+          php artisan key:generate --env=testing --force
+          # Re-cargar config para que APP_KEY esté en process env
+          php artisan config:clear
 
       - name: Run tests
         working-directory: backend
