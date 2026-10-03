@@ -304,11 +304,14 @@ final class BootstrapTenantCommandTest extends TestCase
     public function it_throws_in_production_when_password_env_is_missing(): void
     {
         // SECURITY guard: en APP_ENV=production, si el JSON no tiene
-        // password_env configurado Y el env var no existe, no se puede
-        // crear el admin user con un secret hardcodeado. El comando
-        // debe fallar ruidosamente para forzar al operador a configurar
-        // el env var antes del deploy.
+        // password_env configurado Y el env var no existe, el comando
+        // debe fallar ruidosamente (exit code != 0) para forzar al
+        // operador a configurar el env var antes del deploy.
         // Ver docs/operations/default-admin-credentials.md.
+        //
+        // NOTA: usamos assertExitCode + expectsOutput en vez de
+        // expectException porque el handle() del comando captura
+        // Throwable y lo loguea en stderr (no re-lanza).
         //
         // Usar getenv en vez de $this->app->detectEnvironment porque
         // el código de producción lee getenv('APP_ENV') directamente
@@ -334,11 +337,9 @@ final class BootstrapTenantCommandTest extends TestCase
 
             putenv('NEVER_SET_IN_PROD');
 
-            $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessageMatches('/SECURITY.*APP_ENV=production.*admin@prod-fallback.com/s');
-
             $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
-                ->run();
+                ->expectsOutputToContain('Error durante bootstrap: SECURITY')
+                ->assertExitCode(1);
         } finally {
             // Restaurar APP_ENV para no contaminar otros tests.
             if ($previousEnv === false) {
