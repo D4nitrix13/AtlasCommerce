@@ -62,15 +62,13 @@ const cardLabels = {
     {labels.heading}
   </h2>
 
-  {
-    hasProducts ? (
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cardProducts.map((product) => (
-          <ProductCard product={product} locale={locale} labels={cardLabels} />
-        ))}
-      </div>
-    ) : (
-      <p class="text-sm italic text-slate-500">{labels.empty}</p>
-    )
-  }
+  {hasProducts ? (
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {cardProducts.map((product) => (
+        <ProductCard product={product} locale={locale} labels={cardLabels} />
+      ))}
+    </div>
+  ) : (
+    <p class="text-sm italic text-slate-500">{labels.empty}</p>
+  )}
 </section>

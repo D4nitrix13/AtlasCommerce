@@ -16,12 +16,7 @@
  * **SOLO para vista**. NO tomar decisiones de negocio con esto.
  */
 
-export type OrderStatus =
-  | 'pending'
-  | 'processing'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled';
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export type UserRole = 'customer' | 'admin';
 
@@ -51,7 +46,7 @@ export interface RecentOrderMock {
  *   - panda-estampados (o cualquier no-kitsune) → "Bienvenido de vuelta, {name}"
  */
 export const CURRENT_USER: CurrentUserMock = {
-  firstName: 'Daniel',
+  firstName: 'Daniel Benjamin',
   email: 'daniel@example.com',
   locale: 'es',
   storeSlug: 'kitsune',

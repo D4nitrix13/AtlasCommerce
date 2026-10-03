@@ -33,48 +33,44 @@ function formatCents(cents: number): string {
     {t['admin.catalog.products.detail.tabs.variants']}
   </h2>
 
-  {
-    hasVariants ? (
-      <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th class="px-4 py-3 font-medium">SKU</th>
-              <th class="px-4 py-3 font-medium">Color</th>
-              <th class="px-4 py-3 font-medium">Tamaño</th>
-              <th class="px-4 py-3 text-right font-medium">Stock</th>
-              <th class="px-4 py-3 text-right font-medium">Precio</th>
-              <th class="px-4 py-3 font-medium">Estado</th>
+  {hasVariants ? (
+    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <tr>
+            <th class="px-4 py-3 font-medium">SKU</th>
+            <th class="px-4 py-3 font-medium">Color</th>
+            <th class="px-4 py-3 font-medium">Tamaño</th>
+            <th class="px-4 py-3 text-right font-medium">Stock</th>
+            <th class="px-4 py-3 text-right font-medium">Precio</th>
+            <th class="px-4 py-3 font-medium">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {variants.map((variant) => (
+            <tr class="hover:bg-slate-50/50">
+              <td class="px-4 py-3 font-mono text-xs text-slate-600">{variant.sku}</td>
+              <td class="px-4 py-3 text-slate-700">{variant.color}</td>
+              <td class="px-4 py-3 text-slate-700">{variant.size}</td>
+              <td class="px-4 py-3 text-right font-medium text-slate-900">{variant.stock}</td>
+              <td class="px-4 py-3 text-right font-medium text-slate-900">
+                ${formatCents(variant.priceCents)}
+              </td>
+              <td class="px-4 py-3">
+                <Badge variant={variant.status === 'active' ? 'primary' : 'neutral'}>
+                  {t[`admin.catalog.products.status.${variant.status}`]}
+                </Badge>
+              </td>
             </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            {variants.map((variant) => (
-              <tr class="hover:bg-slate-50/50">
-                <td class="px-4 py-3 font-mono text-xs text-slate-600">{variant.sku}</td>
-                <td class="px-4 py-3 text-slate-700">{variant.color}</td>
-                <td class="px-4 py-3 text-slate-700">{variant.size}</td>
-                <td class="px-4 py-3 text-right font-medium text-slate-900">{variant.stock}</td>
-                <td class="px-4 py-3 text-right font-medium text-slate-900">
-                  ${formatCents(variant.priceCents)}
-                </td>
-                <td class="px-4 py-3">
-                  <Badge variant={variant.status === 'active' ? 'primary' : 'neutral'}>
-                    {t[`admin.catalog.products.status.${variant.status}`]}
-                  </Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-        <p class="text-sm font-medium text-slate-700">
-          {t['admin.catalog.variants.emptyHint']}
-        </p>
-      </div>
-    )
-  }
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+      <p class="text-sm font-medium text-slate-700">{t['admin.catalog.variants.emptyHint']}</p>
+    </div>
+  )}
 
   <Button variant="secondary" size="sm" type="button">
     {t['admin.catalog.variants.addVariant']}

@@ -70,7 +70,7 @@ function renderStepItem(
   index: number,
   labels: readonly string[],
   currentStep: 1 | 2 | 3 | 4,
-  isLast: boolean,
+  isLast: boolean
 ): unknown {
   const done = isDone(step.number, currentStep);
   const current = step.number === currentStep;
@@ -89,7 +89,9 @@ function renderStepItem(
         </span>
         <span class:list={[labelClasses(current)]}>{label}</span>
       </div>
-      {!isLast && <div aria-hidden="true" class:list={[connectorClasses(step.number, currentStep)]} />}
+      {!isLast && (
+        <div aria-hidden="true" class:list={[connectorClasses(step.number, currentStep)]} />
+      )}
     </li>
   );
 }
@@ -97,10 +99,8 @@ function renderStepItem(
 
 <nav aria-label="Pasos de cotización" class="mx-auto w-full max-w-4xl px-4 pt-8 sm:px-6">
   <ol class="flex w-full items-center justify-between gap-1 sm:gap-3">
-    {
-      steps.map((step, index) =>
-        renderStepItem(step, index, labels, currentStep, index === steps.length - 1),
-      )
-    }
+    {steps.map((step, index) =>
+      renderStepItem(step, index, labels, currentStep, index === steps.length - 1)
+    )}
   </ol>
 </nav>

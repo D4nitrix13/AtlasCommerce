@@ -37,14 +37,7 @@ interface Props {
   class?: string;
 }
 
-const {
-  id,
-  title,
-  open = false,
-  size = 'md',
-  dismissible = true,
-  class: className,
-} = Astro.props;
+const { id, title, open = false, size = 'md', dismissible = true, class: className } = Astro.props;
 
 const SIZE_CLASSES: Record<NonNullable<Props['size']>, string> = {
   sm: 'max-w-sm',
@@ -71,18 +64,16 @@ const titleId = `${id}-title`;
         {title}
       </h2>
     )}
-    {
-      dismissible && (
-        <button
-          type="button"
-          aria-label="Cerrar"
-          data-close-modal={id}
-          class="shrink-0 rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-        >
-          <span aria-hidden="true">✕</span>
-        </button>
-      )
-    }
+    {dismissible && (
+      <button
+        type="button"
+        aria-label="Cerrar"
+        data-close-modal={id}
+        class="shrink-0 rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+      >
+        <span aria-hidden="true">✕</span>
+      </button>
+    )}
   </div>
 
   <div class="px-6 py-4">
@@ -94,16 +85,12 @@ const titleId = `${id}-title`;
   </div>
 </dialog>
 
-{
-  open && (
-    <script is:inline define:vars={{ modalId: id }}>
-      // Auto-open cuando el consumidor marca `open` en SSR. En general
-      // esto NO debería ocurrir porque los modales se abren tras una
-      // acción del usuario; el padre debe manejar open/close via JS.
-      document.getElementById(modalId)?.showModal();
-    </script>
-  )
-}
+{open && <script is:inline define:vars={{ modalId: id }}>
+  // Auto-open cuando el consumidor marca `open` en SSR. En general
+  // esto NO debería ocurrir porque los modales se abren tras una
+  // acción del usuario; el padre debe manejar open/close via JS.
+  document.getElementById(modalId)?.showModal();
+</script>}
 
 <script>
   // Listener global para botones con `data-close-modal={id}`. Cierra

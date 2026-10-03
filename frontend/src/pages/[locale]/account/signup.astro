@@ -22,14 +22,12 @@ const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
     brandName={brand.name}
     brandLogo={brand.logoPath}
     topRightLink="login"
-    side="right"
+    side="left"
   >
     <LanguageSwitcher slot="topRightExtra" client:load theme="light" />
 
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-slate-900">
-        {t['auth.signup.shell.heading']}
-      </h1>
+      <h1 class="text-3xl font-bold text-slate-900">{t['auth.signup.shell.heading']}</h1>
       <p class="mt-2 text-slate-500">{t['auth.signup.shell.subtitle']}</p>
     </div>
 

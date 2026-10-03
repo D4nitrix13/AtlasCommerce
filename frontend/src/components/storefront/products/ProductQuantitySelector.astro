@@ -28,13 +28,7 @@ interface Props {
   hrefBase: string;
 }
 
-const {
-  labels,
-  quantity,
-  min = 1,
-  max = 99,
-  hrefBase,
-} = Astro.props;
+const { labels, quantity, min = 1, max = 99, hrefBase } = Astro.props;
 
 const safeQty = Math.max(min, Math.min(quantity, max));
 const decrementDisabled = safeQty <= min;
@@ -60,9 +54,7 @@ const url = (newQty: number): string => {
       aria-disabled={decrementDisabled}
       class:list={[
         'flex h-10 w-10 items-center justify-center text-slate-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-        decrementDisabled
-          ? 'cursor-not-allowed opacity-40'
-          : 'hover:bg-slate-100',
+        decrementDisabled ? 'cursor-not-allowed opacity-40' : 'hover:bg-slate-100',
       ]}
     >
       <span aria-hidden="true">−</span>
@@ -80,9 +72,7 @@ const url = (newQty: number): string => {
       aria-disabled={incrementDisabled}
       class:list={[
         'flex h-10 w-10 items-center justify-center text-slate-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-        incrementDisabled
-          ? 'cursor-not-allowed opacity-40'
-          : 'hover:bg-slate-100',
+        incrementDisabled ? 'cursor-not-allowed opacity-40' : 'hover:bg-slate-100',
       ]}
     >
       <span aria-hidden="true">+</span>

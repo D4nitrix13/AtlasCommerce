@@ -90,10 +90,11 @@ let dataSource: 'real' | 'mock' = 'mock';
 let fetchError: string | null = null;
 
 try {
-  const response = await Astro.fetch(
-    '/api/v1/admin/orders/recent?limit=10',
-    { credentials: 'include' },
-  );
+  const response = await fetch(new URL('/api/v1/admin/orders/recent?limit=10', Astro.url), {
+    headers: {
+      Cookie: Astro.request.headers.get('Cookie') ?? '',
+    },
+  });
 
   if (response.ok) {
     const payload = await response.json();
@@ -120,10 +121,9 @@ try {
 // Log para devs cuando no estamos en real data source (util en CI
 // para detectar cuando un deploy rompe el endpoint).
 if (dataSource === 'mock') {
-  // eslint-disable-next-line no-console
   console.warn(
     `[RecentOrdersTable] Usando MOCK data — ${fetchError}. ` +
-      `Implementar backend endpoint GET /api/v1/admin/orders/recent para datos reales.`,
+      `Implementar backend endpoint GET /api/v1/admin/orders/recent para datos reales.`
   );
 }
 ---
@@ -131,15 +131,10 @@ if (dataSource === 'mock') {
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
   <div class="mb-4 flex items-center justify-between">
     <div>
-      <h2 class="text-lg font-bold text-slate-950">
-        {t['admin.dashboard.recentOrders.heading']}
-      </h2>
+      <h2 class="text-lg font-bold text-slate-950">{t['admin.dashboard.recentOrders.heading']}</h2>
       <p class="text-sm text-slate-500">{t['admin.dashboard.recentOrders.subtitle']}</p>
     </div>
-    <a
-      href="/admin/sales/orders"
-      class="text-sm font-medium text-emerald-600 hover:underline"
-    >
+    <a href="/admin/sales/orders" class="text-sm font-medium text-emerald-600 hover:underline">
       {t['admin.dashboard.recentOrders.viewAll']}
     </a>
   </div>
@@ -147,9 +142,7 @@ if (dataSource === 'mock') {
   <div class="overflow-x-auto">
     <table class="w-full text-left text-sm">
       <thead>
-        <tr
-          class="border-b border-slate-100 text-xs font-medium uppercase tracking-wider text-slate-500"
-        >
+        <tr class="border-b border-slate-100 text-xs font-medium uppercase tracking-wider text-slate-500">
           <th class="pb-3 pr-4">{t['admin.dashboard.recentOrders.col.customer']}</th>
           <th class="pb-3 pr-4">{t['admin.dashboard.recentOrders.col.order']}</th>
           <th class="pb-3 pr-4">{t['admin.dashboard.recentOrders.col.product']}</th>
@@ -158,38 +151,32 @@ if (dataSource === 'mock') {
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-50">
-        {
-          orders.length === 0 ? (
-            <tr>
-              <td colspan="5" class="py-8 text-center text-sm text-slate-500">
-                {t['admin.dashboard.recentOrders.empty']}
+        {orders.length === 0 ? (
+          <tr>
+            <td colspan="5" class="py-8 text-center text-sm text-slate-500">
+              {t['admin.dashboard.recentOrders.empty']}
+            </td>
+          </tr>
+        ) : (
+          orders.map((o) => (
+            <tr class="group hover:bg-slate-50/50">
+              <td class="py-3 pr-4 font-medium text-slate-900">{o.customer_name}</td>
+              <td class="py-3 pr-4 text-slate-500">{o.order_number}</td>
+              <td class="max-w-[200px] truncate py-3 pr-4 text-slate-600">{o.product_summary}</td>
+              <td class="py-3 pr-4">
+                <span
+                  class:list={[
+                    'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    o.status_color,
+                  ]}
+                >
+                  {o.status_label}
+                </span>
               </td>
+              <td class="py-3 text-right font-semibold text-slate-950">{o.amount_label}</td>
             </tr>
-          ) : (
-            orders.map((o) => (
-              <tr class="group hover:bg-slate-50/50">
-                <td class="py-3 pr-4 font-medium text-slate-900">{o.customer_name}</td>
-                <td class="py-3 pr-4 text-slate-500">{o.order_number}</td>
-                <td class="max-w-[200px] truncate py-3 pr-4 text-slate-600">
-                  {o.product_summary}
-                </td>
-                <td class="py-3 pr-4">
-                  <span
-                    class:list={[
-                      'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
-                      o.status_color,
-                    ]}
-                  >
-                    {o.status_label}
-                  </span>
-                </td>
-                <td class="py-3 text-right font-semibold text-slate-950">
-                  {o.amount_label}
-                </td>
-              </tr>
-            ))
-          )
-        }
+          ))
+        )}
       </tbody>
     </table>
   </div>

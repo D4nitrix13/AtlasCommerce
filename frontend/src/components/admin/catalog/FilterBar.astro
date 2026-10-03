@@ -16,11 +16,7 @@
 import Input from '../../ui/Input.astro';
 import Select from '../../ui/Select.astro';
 import Button from '../../ui/Button.astro';
-import {
-  type ProductStatus,
-  BRANDS_MOCK,
-  CATEGORIES_MOCK,
-} from '../../../data/catalog-mock';
+import { type ProductStatus, BRANDS_MOCK, CATEGORIES_MOCK } from '../../../data/catalog-mock';
 import { getServerDictionary } from '../../../i18n/server';
 
 interface Props {
@@ -30,11 +26,7 @@ interface Props {
   showPriceRange?: boolean;
 }
 
-const {
-  rootCategoryIds,
-  showStatusFilter = true,
-  showPriceRange = true,
-} = Astro.props;
+const { rootCategoryIds, showStatusFilter = true, showPriceRange = true } = Astro.props;
 
 const t = getServerDictionary(Astro.locals.locale);
 
@@ -45,7 +37,7 @@ const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
 ];
 
 const categoryOptions = CATEGORIES_MOCK.filter(
-  (c) => !rootCategoryIds || rootCategoryIds.includes(c.id),
+  (c) => !rootCategoryIds || rootCategoryIds.includes(c.id)
 ).map((c) => ({ value: String(c.id), label: c.name }));
 
 const brandOptions = BRANDS_MOCK.map((b) => ({
@@ -63,11 +55,7 @@ const brandOptions = BRANDS_MOCK.map((b) => ({
     <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
       {t['admin.catalog.filters.title']}
     </h3>
-    <Input
-      name="filter-search"
-      type="search"
-      placeholder={t['admin.catalog.filters.search']}
-    />
+    <Input name="filter-search" type="search" placeholder={t['admin.catalog.filters.search']} />
   </div>
 
   {showStatusFilter && (
@@ -115,7 +103,9 @@ const brandOptions = BRANDS_MOCK.map((b) => ({
           placeholder={t['admin.catalog.filters.minPrice']}
           inputmode="decimal"
         />
-        <span aria-hidden="true" class="text-slate-400">—</span>
+        <span aria-hidden="true" class="text-slate-400">
+          —
+        </span>
         <Input
           name="filter-max-price"
           type="number"

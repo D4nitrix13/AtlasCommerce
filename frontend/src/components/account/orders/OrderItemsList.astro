@@ -30,50 +30,45 @@ const { items, currencyCode, locale, heading, quantityLabel } = Astro.props;
     {heading}
   </h2>
   <ul class="flex flex-col gap-3">
-    {
-      items.map((item) => {
-        const detailHref = `/${locale}/products/${item.productSlug}`;
-        const unitPriceFormatted = formatCurrency(item.unitPriceCents, currencyCode);
-        const lineTotalFormatted = formatCurrency(
-          item.unitPriceCents * item.quantity,
-          currencyCode
-        );
-        return (
-          <li class="flex items-center gap-3 rounded-lg border border-slate-100 p-3 sm:gap-4 sm:p-4">
-            <a
-              href={detailHref}
-              class="relative block h-20 w-20 shrink-0 overflow-hidden rounded-md bg-slate-50"
-              aria-label={item.productName}
-            >
-              <img
-                src={item.imageUrl}
-                alt={item.productName}
-                loading="lazy"
-                decoding="async"
-                class="h-full w-full object-cover"
-              />
-            </a>
-            <div class="flex min-w-0 flex-1 flex-col gap-1">
-              <h3 class="line-clamp-2 text-sm font-semibold text-slate-900">
-                <a
-                  href={detailHref}
-                  class="transition hover:text-[var(--primary,#7c3aed)] focus-visible:underline"
-                >
-                  {item.productName}
-                </a>
-              </h3>
-              <p class="text-xs text-slate-500">{unitPriceFormatted}</p>
-              <p class="text-xs font-medium text-slate-500">
-                <span class="sr-only">{quantityLabel}:</span>
-                <span aria-hidden="true">× {item.quantity}</span>
-              </p>
-            </div>
-            <span class="shrink-0 text-sm font-bold tabular-nums text-slate-900 sm:text-base">
-              {lineTotalFormatted}
-            </span>
-          </li>
-        );
-      })
-    }
+    {items.map((item) => {
+      const detailHref = `/${locale}/products/${item.productSlug}`;
+      const unitPriceFormatted = formatCurrency(item.unitPriceCents, currencyCode);
+      const lineTotalFormatted = formatCurrency(item.unitPriceCents * item.quantity, currencyCode);
+      return (
+        <li class="flex items-center gap-3 rounded-lg border border-slate-100 p-3 sm:gap-4 sm:p-4">
+          <a
+            href={detailHref}
+            class="relative block h-20 w-20 shrink-0 overflow-hidden rounded-md bg-slate-50"
+            aria-label={item.productName}
+          >
+            <img
+              src={item.imageUrl}
+              alt={item.productName}
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+            />
+          </a>
+          <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <h3 class="line-clamp-2 text-sm font-semibold text-slate-900">
+              <a
+                href={detailHref}
+                class="transition hover:text-[var(--primary,#7c3aed)] focus-visible:underline"
+              >
+                {item.productName}
+              </a>
+            </h3>
+            <p class="text-xs text-slate-500">{unitPriceFormatted}</p>
+            <p class="text-xs font-medium text-slate-500">
+              <span class="sr-only">{quantityLabel}:</span>
+              <span aria-hidden="true">× {item.quantity}</span>
+            </p>
+          </div>
+          <span class="shrink-0 text-sm font-bold tabular-nums text-slate-900 sm:text-base">
+            {lineTotalFormatted}
+          </span>
+        </li>
+      );
+    })}
   </ul>
 </section>

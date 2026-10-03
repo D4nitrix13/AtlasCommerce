@@ -26,22 +26,14 @@ import DashboardWelcomeBanner from '../../../components/account/dashboard/Dashbo
 import QuickActionsGrid from '../../../components/account/dashboard/QuickActionsGrid.astro';
 import RecentOrdersList from '../../../components/account/dashboard/RecentOrdersList.astro';
 import { getServerDictionary, getServerLocale } from '../../../i18n/server';
-import {
-  CURRENT_USER,
-  RECENT_ORDERS_MOCK,
-  getRecentOrders,
-  type OrderStatus,
-} from '../../../data/account-mock';
+import { CURRENT_USER, getRecentOrders, type OrderStatus } from '../../../data/account-mock';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
 
 // Store resolution: prioridad al mock del user, fallback al tenant
 // resuelto por middleware. Si tampoco, null → variant neutral.
-const effectiveStoreSlug =
-  CURRENT_USER.storeSlug ??
-  Astro.locals.tenant?.tenantSlug ??
-  null;
+const effectiveStoreSlug = CURRENT_USER.storeSlug ?? Astro.locals.tenant?.tenantSlug ?? null;
 
 const isKitsune = effectiveStoreSlug === 'kitsune';
 const greetingTemplate = isKitsune
@@ -128,10 +120,7 @@ const recentOrders = getRecentOrders(5);
     variant={bannerVariant}
   />
 
-  <QuickActionsGrid
-    heading={t['account.dashboard.quickActions.heading']}
-    items={quickActions}
-  />
+  <QuickActionsGrid heading={t['account.dashboard.quickActions.heading']} items={quickActions} />
 
   <RecentOrdersList
     orders={recentOrders}

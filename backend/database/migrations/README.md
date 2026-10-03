@@ -1,8 +1,11 @@
 # Migraciones de AtlasCommerce
 
-Este directorio contiene las migraciones de base de datos del store definido en `APP_NAME`.
+Este directorio contiene las migraciones de base de datos del store definido
+en `APP_NAME`.
 
-La estructura separa las migraciones por responsabilidad para evitar archivos demasiado grandes, facilitar el mantenimiento del esquema y permitir ubicar rápidamente cada parte de la base de datos.
+La estructura separa las migraciones por responsabilidad para evitar
+archivos demasiado grandes, facilitar el mantenimiento del esquema y
+permitir ubicar rápidamente cada parte de la base de datos.
 
 Cada carpeta representa un área principal del sistema:
 
@@ -46,9 +49,14 @@ Table: two_factor_settings
 Controller: TwoFactorAuthController
 ```
 
-Los nombres nuevos del proyecto deben mantenerse preferiblemente en inglés. Las tablas antiguas o documentación previa pueden estar en español, pero el código nuevo debe favorecer nombres consistentes con Laravel.
+Los nombres nuevos del proyecto deben mantenerse preferiblemente en inglés.
+Las tablas antiguas o documentación previa pueden estar en español, pero
+el código nuevo debe favorecer nombres consistentes con Laravel.
 
-Si una tabla existente usa un nombre diferente, por ejemplo `usuario` con llave primaria `id_usuario`, las nuevas migraciones deben respetar esa tabla real al crear llaves foráneas. En este proyecto la tabla principal de usuarios es:
+Si una tabla existente usa un nombre diferente, por ejemplo `usuario` con
+llave primaria `id_usuario`, las nuevas migraciones deben respetar esa
+tabla real al crear llaves foráneas. En este proyecto la tabla principal
+de usuarios es:
 
 ```text
 users
@@ -98,13 +106,18 @@ jobs
 personal_access_tokens
 ```
 
-La migración `personal_access_tokens` pertenece a Laravel Sanctum y puede quedarse en la raíz porque es una tabla técnica para tokens API, no una entidad propia del store.
+La migración `personal_access_tokens` pertenece a Laravel Sanctum y puede
+quedarse en la raíz porque es una tabla técnica para tokens API, no una
+entidad propia del store.
 
 ## Carga de migraciones en subcarpetas
 
-Laravel carga automáticamente las migraciones ubicadas directamente en `database/migrations`.
+Laravel carga automáticamente las migraciones ubicadas directamente en
+`database/migrations`.
 
-Como este proyecto organiza migraciones por módulos en subcarpetas, el `AppServiceProvider` debe cargar las carpetas de primer nivel dentro de `database/migrations`.
+Como este proyecto organiza migraciones por módulos en subcarpetas, el
+`AppServiceProvider` debe cargar las carpetas de primer nivel dentro de
+`database/migrations`.
 
 Ejemplo:
 
@@ -187,7 +200,8 @@ failed_jobs
 personal_access_tokens
 ```
 
-La tabla `personal_access_tokens` es utilizada por Laravel Sanctum para autenticación API mediante tokens Bearer.
+La tabla `personal_access_tokens` es utilizada por Laravel Sanctum para
+autenticación API mediante tokens Bearer.
 
 Ejemplo de uso:
 
@@ -199,7 +213,8 @@ No se recomienda duplicar esta tabla ni moverla si ya fue creada y migrada corre
 
 ## Módulo `auth`
 
-Contiene las migraciones relacionadas con autenticación, usuarios, roles, permisos y seguridad de acceso.
+Contiene las migraciones relacionadas con autenticación, usuarios, roles,
+permisos y seguridad de acceso.
 
 Tablas principales:
 
@@ -217,7 +232,9 @@ recovery_codes
 passkey_credentials
 ```
 
-Este módulo permite controlar qué usuarios existen en el sistema, qué rol tiene cada usuario, qué permisos posee cada rol y qué métodos de autenticación adicional tiene cada cuenta.
+Este módulo permite controlar qué usuarios existen en el sistema, qué rol
+tiene cada usuario, qué permisos posee cada rol y qué métodos de
+autenticación adicional tiene cada cuenta.
 
 Ejemplos de roles:
 
@@ -231,7 +248,8 @@ customer
 
 ## Seguridad 2FA gratuita y profesional
 
-El sistema puede implementar autenticación multifactor sin depender de proveedores de pago usando:
+El sistema puede implementar autenticación multifactor sin depender de
+proveedores de pago usando:
 
 ```text
 Email OTP
@@ -240,7 +258,8 @@ Passkeys / WebAuthn
 Recovery Codes
 ```
 
-No se incluyen SMS ni llamadas como métodos principales porque normalmente requieren proveedores externos de pago.
+No se incluyen SMS ni llamadas como métodos principales porque normalmente
+requieren proveedores externos de pago.
 
 La implementación actual usa una migración por tabla:
 
@@ -258,7 +277,8 @@ No se recomienda volver a crear una migración gigante como:
 create_two_factor_auth_tables
 ```
 
-Para este proyecto es más mantenible usar una migración separada por cada tabla 2FA.
+Para este proyecto es más mantenible usar una migración separada por cada
+tabla 2FA.
 
 ## Tabla `two_factor_settings`
 
@@ -494,7 +514,8 @@ created_at
 updated_at
 ```
 
-Las passkeys no guardan contraseñas. Guardan una llave pública asociada a una credencial del dispositivo.
+Las passkeys no guardan contraseñas. Guardan una llave pública asociada a
+una credencial del dispositivo.
 
 Relación principal:
 
@@ -624,7 +645,9 @@ customers
 customer_addresses
 ```
 
-La tabla `customers` representa al comprador dentro del store. La tabla `customer_addresses` permite guardar varias direcciones por cliente, por ejemplo dirección de envío y dirección de facturación.
+La tabla `customers` representa al comprador dentro del store. La tabla
+`customer_addresses` permite guardar varias direcciones por cliente, por
+ejemplo dirección de envío y dirección de facturación.
 
 ## Módulo `catalog`
 
@@ -657,7 +680,9 @@ Variants:
 - White / M
 ```
 
-Las tablas pivote `attribute_product` y `attribute_variant` permiten asignar características como color, talla, material, capacidad, peso u otros atributos.
+Las tablas pivote `attribute_product` y `attribute_variant` permiten
+asignar características como color, talla, material, capacidad, peso u
+otros atributos.
 
 ## Módulo `inventory`
 
@@ -671,7 +696,9 @@ inventories
 inventory_movements
 ```
 
-Este módulo permite conocer el stock actual, stock mínimo y stock reservado de cada producto o variante. También registra entradas, salidas, ajustes, pérdidas y devoluciones mediante movimientos de inventario.
+Este módulo permite conocer el stock actual, stock mínimo y stock reservado
+de cada producto o variante. También registra entradas, salidas, ajustes,
+pérdidas y devoluciones mediante movimientos de inventario.
 
 ## Módulo `purchases`
 
@@ -685,7 +712,9 @@ purchases
 purchase_items
 ```
 
-Sirve para registrar proveedores, compras realizadas y productos comprados. Este módulo alimenta el inventario y permite controlar costos de adquisición.
+Sirve para registrar proveedores, compras realizadas y productos comprados.
+Este módulo alimenta el inventario y permite controlar costos de
+adquisición.
 
 ## Módulo `carts`
 
@@ -700,7 +729,8 @@ wishlists
 wishlist_items
 ```
 
-El carrito representa productos que el cliente desea comprar. La wishlist permite guardar productos favoritos para comprarlos después.
+El carrito representa productos que el cliente desea comprar. La wishlist
+permite guardar productos favoritos para comprarlos después.
 
 ## Módulo `sales`
 
@@ -724,7 +754,10 @@ order   = intención de compra o venta confirmada
 invoice = documento de cobro o comprobante de venta
 ```
 
-Esto permite que un pedido tenga estados como pendiente, confirmado, preparado, enviado o entregado, mientras que la factura puede tener estados de pago como pendiente, pagada parcialmente, pagada, anulada o reembolsada.
+Esto permite que un pedido tenga estados como pendiente, confirmado,
+preparado, enviado o entregado, mientras que la factura puede tener
+estados de pago como pendiente, pagada parcialmente, pagada, anulada o
+reembolsada.
 
 ## Módulo `payments`
 
@@ -755,7 +788,9 @@ Payments:
 2. C$ 1,500 - Bank transfer
 ```
 
-La tabla `invoice_payments` relaciona pagos con facturas. La tabla `payment_installments` permite dividir una factura en cuotas. La tabla `payment_transactions` guarda información técnica de pasarelas de pago.
+La tabla `invoice_payments` relaciona pagos con facturas. La tabla
+`payment_installments` permite dividir una factura en cuotas. La tabla
+`payment_transactions` guarda información técnica de pasarelas de pago.
 
 ## Módulo `shipping`
 
@@ -770,7 +805,8 @@ shipments
 shipment_trackings
 ```
 
-Este módulo permite registrar el envío asociado a un pedido, su costo, estado, código de seguimiento y eventos de rastreo.
+Este módulo permite registrar el envío asociado a un pedido, su costo,
+estado, código de seguimiento y eventos de rastreo.
 
 ## Módulo `marketing`
 
@@ -785,7 +821,8 @@ coupon_usages
 product_promotion
 ```
 
-Permite crear descuentos por código, promociones por producto y registrar qué cliente usó cada cupón.
+Permite crear descuentos por código, promociones por producto y registrar
+qué cliente usó cada cupón.
 
 ## Módulo `taxes`
 
@@ -798,7 +835,8 @@ taxes
 product_tax
 ```
 
-Este módulo permite configurar impuestos como IVA u otros cargos aplicables según el producto.
+Este módulo permite configurar impuestos como IVA u otros cargos
+aplicables según el producto.
 
 ## Módulo `returns`
 
@@ -812,7 +850,8 @@ return_request_items
 refunds
 ```
 
-Permite gestionar solicitudes de devolución, productos devueltos y reembolsos al cliente.
+Permite gestionar solicitudes de devolución, productos devueltos y
+reembolsos al cliente.
 
 ## Módulo `support`
 
@@ -827,7 +866,8 @@ support_tickets
 support_ticket_messages
 ```
 
-Este módulo ayuda a manejar la atención al cliente, preguntas sobre productos y opiniones de compradores.
+Este módulo ayuda a manejar la atención al cliente, preguntas sobre
+productos y opiniones de compradores.
 
 ## Módulo `system`
 
@@ -840,7 +880,9 @@ notifications
 audits
 ```
 
-La tabla `audits` registra acciones importantes realizadas por los usuarios, por ejemplo creación de productos, cambios en facturas, anulación de pagos, cambios de inventario o cambios de configuración 2FA.
+La tabla `audits` registra acciones importantes realizadas por los usuarios,
+por ejemplo creación de productos, cambios en facturas, anulación de pagos,
+cambios de inventario o cambios de configuración 2FA.
 
 Ejemplos de acciones relacionadas con 2FA:
 
@@ -869,7 +911,8 @@ currencies
 exchange_rates
 ```
 
-Permite manejar configuración global como nombre de tienda, logo, correo, teléfono, moneda principal y tasas de cambio.
+Permite manejar configuración global como nombre de tienda, logo, correo,
+teléfono, moneda principal y tasas de cambio.
 
 ## Orden recomendado de migración
 
@@ -914,7 +957,8 @@ Dentro del módulo `auth`, el orden lógico es:
 
 ## Ejecución de migraciones
 
-Si `AppServiceProvider` carga automáticamente las subcarpetas de `database/migrations`, se puede ejecutar:
+Si `AppServiceProvider` carga automáticamente las subcarpetas de
+`database/migrations`, se puede ejecutar:
 
 ```bash
 php artisan migrate
@@ -1039,7 +1083,8 @@ Con Docker:
 docker compose exec app php artisan migrate:fresh
 ```
 
-Si hay tablas parciales creadas por un fallo previo, se pueden eliminar manualmente antes de volver a ejecutar las migraciones.
+Si hay tablas parciales creadas por un fallo previo, se pueden eliminar
+manualmente antes de volver a ejecutar las migraciones.
 
 Ejemplo para limpiar tablas 2FA:
 
@@ -1060,7 +1105,8 @@ DROP TABLE IF EXISTS two_factor_settings CASCADE;
 5. Mantener modelos, entidades y controladores en inglés.
 6. Mantener campos en `snake_case`.
 7. Crear primero las tablas base y después las tablas dependientes.
-8. Usar `foreignId()` para llaves foráneas cuando el tipo coincida con la tabla relacionada.
+8. Usar `foreignId()` para llaves foráneas cuando el tipo coincida con la
+   tabla relacionada.
 9. Si la tabla relacionada usa una PK personalizada, definir explícitamente la referencia.
 10. Usar `timestamps()` en tablas operativas.
 11. Usar `softDeletes()` en tablas donde no conviene borrar registros definitivamente.
@@ -1104,7 +1150,8 @@ passkey_credentials
 personal_access_tokens
 ```
 
-Esta convención sigue un estilo compatible con Laravel y facilita la creación de modelos Eloquent.
+Esta convención sigue un estilo compatible con Laravel y facilita la
+creación de modelos Eloquent.
 
 ## Relación con el frontend
 
@@ -1118,7 +1165,8 @@ Frontend: Astro + TypeScript + Tailwind
 Database: PostgreSQL
 ```
 
-El panel administrativo puede consumir estas tablas mediante endpoints API organizados por módulos:
+El panel administrativo puede consumir estas tablas mediante endpoints API
+organizados por módulos:
 
 ```text
 /api/customers

@@ -103,9 +103,7 @@ const isShippingFree = shippingCents === 0;
           {isShippingFree ? shippingFree : formatCurrency(shippingCents, currencyCode)}
         </dd>
       </div>
-      <div
-        class="mt-2 flex items-center justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900"
-      >
+      <div class="mt-2 flex items-center justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
         <dt>{labelTotal}</dt>
         <dd class="tabular-nums">{formatCurrency(totalCents, currencyCode)}</dd>
       </div>

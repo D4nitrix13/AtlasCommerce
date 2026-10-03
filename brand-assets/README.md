@@ -91,9 +91,13 @@ Opciones del command:
 
 ## Por que NO estan en `backend/public/` ni `frontend/public/`
 
-- **Binarios en git de la app** = antipatron (rompe clone, infla .git, no se puede ignorar selectivamente).
-- **Doble storage** (git + FTP) solo en este directorio. Es el unico lugar donde es aceptable porque es la source of truth.
-- **Frontend sirve categoria B** (amico SVGs) desde su propio `frontend/public/images/amico/` despues de copiar (ver seccion "Frontend workflow").
+- **Binarios en git de la app** = antipatron (rompe clone, infla .git, no
+  se puede ignorar selectivamente).
+- **Doble storage** (git + FTP) solo en este directorio. Es el unico
+  lugar donde es aceptable porque es la source of truth.
+- **Frontend sirve categoria B** (amico SVGs) desde su propio
+  `frontend/public/images/amico/` despues de copiar (ver seccion
+  "Frontend workflow").
 
 ---
 
@@ -110,12 +114,14 @@ Para dev:
 # Una sola vez cuando se hace setup
 cp brand-assets/frontend/amico/auth/*.svg frontend/public/images/amico/auth/
 
-# O via el script de setup (TBD)
-./scripts/docker-stack.sh setup dev  # lo automatiza
+# Sync automático al FTP de un tenant (lo usa el admin al subir
+# assets vía la API):
+./scripts/docker-stack.sh sync-assets dev panda-estampados-and-kitsune
 ```
 
-Para prod: el build del frontend incluye esos archivos via el script
-de deploy (TBD).
+Para prod: el build del frontend incluye esos archivos vía
+`frontend/Dockerfile.production` (los copia desde `brand-assets/`
+durante el build de la imagen).
 
 **Naming**: los archivos en `frontend/amico/auth/` NO llevan sufijo
 `-amico` porque ya estan dentro del directorio `amico/`. La convencion

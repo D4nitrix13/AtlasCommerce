@@ -54,71 +54,69 @@ const cardLabels = {
 ---
 
 <StorefrontLayout title={t['storefront.search.title']} cartCount={cartCount}>
-  {
-    isPandaB2B ? (
-      <>
-        <TenantHero
-          eyebrow={t['storefront.b2b.home.hero.eyebrow']}
-          title={t['storefront.b2b.home.hero.title']}
-          subtitle={t['storefront.b2b.home.hero.subtitle']}
-          primaryCta={{
-            label: t['storefront.b2b.home.hero.ctaPrimary'],
-            href: bulkOrderHref,
-          }}
-          secondaryCta={{
-            label: t['storefront.b2b.home.hero.ctaSecondary'],
-            href: rfqHref,
-          }}
-          bullets={[
-            { icon: '📦', text: t['storefront.b2b.home.bullet.bulk'] },
-            { icon: '📝', text: t['storefront.b2b.home.bullet.rfq'] },
-            { icon: '🏢', text: t['storefront.b2b.home.bullet.multiBranch'] },
-            { icon: '💳', text: t['storefront.b2b.home.bullet.net30'] },
-          ]}
-        />
+  {isPandaB2B ? (
+    <>
+      <TenantHero
+        eyebrow={t['storefront.b2b.home.hero.eyebrow']}
+        title={t['storefront.b2b.home.hero.title']}
+        subtitle={t['storefront.b2b.home.hero.subtitle']}
+        primaryCta={{
+          label: t['storefront.b2b.home.hero.ctaPrimary'],
+          href: bulkOrderHref,
+        }}
+        secondaryCta={{
+          label: t['storefront.b2b.home.hero.ctaSecondary'],
+          href: rfqHref,
+        }}
+        bullets={[
+          { icon: '📦', text: t['storefront.b2b.home.bullet.bulk'] },
+          { icon: '📝', text: t['storefront.b2b.home.bullet.rfq'] },
+          { icon: '🏢', text: t['storefront.b2b.home.bullet.multiBranch'] },
+          { icon: '💳', text: t['storefront.b2b.home.bullet.net30'] },
+        ]}
+      />
 
-        <FeaturedCategories
-          categories={B2B_CATEGORIES}
-          heading={t['storefront.b2b.home.featuredCategories.heading']}
-          viewAllLabel={t['storefront.b2b.home.featuredCategories.viewAll']}
-          viewAllHref={productsHref}
-        />
-      </>
-    ) : (
-      <>
-        <HeroBanner
-          eyebrow={t['storefront.home.hero.eyebrow']}
-          title={t['storefront.home.hero.title']}
-          subtitle={t['storefront.home.hero.subtitle']}
-          primaryCta={{
-            label: t['storefront.home.hero.ctaPrimary'],
-            href: productsHref,
-          }}
-          secondaryCta={{
-            label: t['storefront.home.hero.ctaSecondary'],
-            href: searchHref,
-          }}
-        />
+      <FeaturedCategories
+        categories={B2B_CATEGORIES}
+        heading={t['storefront.b2b.home.featuredCategories.heading']}
+        viewAllLabel={t['storefront.b2b.home.featuredCategories.viewAll']}
+        viewAllHref={productsHref}
+      />
+    </>
+  ) : (
+    <>
+      <HeroBanner
+        eyebrow={t['storefront.home.hero.eyebrow']}
+        title={t['storefront.home.hero.title']}
+        subtitle={t['storefront.home.hero.subtitle']}
+        primaryCta={{
+          label: t['storefront.home.hero.ctaPrimary'],
+          href: productsHref,
+        }}
+        secondaryCta={{
+          label: t['storefront.home.hero.ctaSecondary'],
+          href: searchHref,
+        }}
+      />
 
-        <FeaturedCategories
-          categories={CATEGORIES}
-          heading={t['storefront.home.featuredCategories.heading']}
-          viewAllLabel={t['storefront.home.featuredCategories.viewAll']}
-          viewAllHref={productsHref}
-        />
+      <FeaturedCategories
+        categories={CATEGORIES}
+        heading={t['storefront.home.featuredCategories.heading']}
+        viewAllLabel={t['storefront.home.featuredCategories.viewAll']}
+        viewAllHref={productsHref}
+      />
 
-        <FeaturedProducts
-          products={getFeaturedProducts(4)}
-          locale={locale}
-          heading={t['storefront.home.featuredProducts.heading']}
-          viewAllLabel={t['storefront.home.featuredProducts.viewAll']}
-          viewAllHref={productsHref}
-          cardLabels={cardLabels}
-          loadingLabel={t['storefront.productGrid.loading']}
-          emptyLabel={t['storefront.productGrid.empty']}
-          emptyHint={t['storefront.productGrid.emptyHint']}
-        />
-      </>
-    )
-  }
+      <FeaturedProducts
+        products={getFeaturedProducts(4)}
+        locale={locale}
+        heading={t['storefront.home.featuredProducts.heading']}
+        viewAllLabel={t['storefront.home.featuredProducts.viewAll']}
+        viewAllHref={productsHref}
+        cardLabels={cardLabels}
+        loadingLabel={t['storefront.productGrid.loading']}
+        emptyLabel={t['storefront.productGrid.empty']}
+        emptyHint={t['storefront.productGrid.emptyHint']}
+      />
+    </>
+  )}
 </StorefrontLayout>

@@ -28,10 +28,26 @@ const t = getServerDictionary(Astro.locals.locale);
 const chartId = `traffic-chart-${Math.random().toString(36).slice(2)}`;
 
 const sources = [
-  { value: 35, color: '#059669', legendKey: 'admin.dashboard.trafficSources.legend.direct' as const },
-  { value: 28, color: '#0ea5e9', legendKey: 'admin.dashboard.trafficSources.legend.organic' as const },
-  { value: 22, color: '#6366f1', legendKey: 'admin.dashboard.trafficSources.legend.referral' as const },
-  { value: 15, color: '#f43f5e', legendKey: 'admin.dashboard.trafficSources.legend.social' as const },
+  {
+    value: 35,
+    color: '#059669',
+    legendKey: 'admin.dashboard.trafficSources.legend.direct' as const,
+  },
+  {
+    value: 28,
+    color: '#0ea5e9',
+    legendKey: 'admin.dashboard.trafficSources.legend.organic' as const,
+  },
+  {
+    value: 22,
+    color: '#6366f1',
+    legendKey: 'admin.dashboard.trafficSources.legend.referral' as const,
+  },
+  {
+    value: 15,
+    color: '#f43f5e',
+    legendKey: 'admin.dashboard.trafficSources.legend.social' as const,
+  },
 ].map((s) => ({ ...s, label: t[s.legendKey] }));
 ---
 
@@ -53,17 +69,15 @@ const sources = [
     </div>
 
     <div class="flex-1 space-y-3">
-      {
-        sources.map((s) => (
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`} />
-              <span class="text-sm text-slate-600">{s.label}</span>
-            </div>
-            <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
+      {sources.map((s) => (
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`} />
+            <span class="text-sm text-slate-600">{s.label}</span>
           </div>
-        ))
-      }
+          <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
+        </div>
+      ))}
     </div>
   </div>
 </section>

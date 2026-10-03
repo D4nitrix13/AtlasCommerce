@@ -77,7 +77,7 @@ export default function SearchPage({ locale: _locale }: Props): ReactElement {
  */
 function useSearchHandlers(
   setQuery: (value: string) => void,
-  setPage: (value: number | ((current: number) => number)) => void,
+  setPage: (value: number | ((current: number) => number)) => void
 ): Handlers {
   return {
     onInputChange: (event: ChangeEvent<HTMLInputElement>): void => {
@@ -124,9 +124,7 @@ function SearchBody({
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">
-          {t('storefront.search.title')}
-        </h1>
+        <h1 className="text-3xl font-bold text-slate-900">{t('storefront.search.title')}</h1>
         <p className="mt-2 text-slate-500">{t('storefront.search.subtitle')}</p>
       </header>
 
@@ -218,9 +216,7 @@ function SearchStatusMessages({
         </p>
       )}
 
-      {status === 'loading' && (
-        <SearchLoadingState message={t('storefront.search.loading')} />
-      )}
+      {status === 'loading' && <SearchLoadingState message={t('storefront.search.loading')} />}
 
       {status === 'error' && (
         <SearchErrorState
@@ -252,17 +248,10 @@ interface SuccessSectionProps {
  * Sección de éxito — lista de resultados + paginación.
  * Extraído para mantener `SearchResultsRegion` simple.
  */
-function SearchSuccessSection({
-  response,
-  t,
-  handlers,
-}: SuccessSectionProps): ReactElement {
+function SearchSuccessSection({ response, t, handlers }: SuccessSectionProps): ReactElement {
   return (
     <>
-      <SearchResultsList
-        products={response.data}
-        ariaLabel={t('storefront.search.title')}
-      />
+      <SearchResultsList products={response.data} ariaLabel={t('storefront.search.title')} />
 
       {response.meta.last_page > 1 && (
         <Pagination

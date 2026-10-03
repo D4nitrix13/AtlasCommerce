@@ -61,7 +61,10 @@ const isEmpty = cartItems.length === 0;
 // Paso especial: success page (cuando el form de review se submita,
 // el backend redirige a ?step=success con el número de orden). Hoy
 // no hay backend, pero exponemos el flow visualmente.
-const isSuccessStep = currentStepId === 'success';
+// Comparamos contra `rawStep` (no `currentStepId`) porque `'success'`
+// no está en el union `CheckoutStepId` — es un alias especial resuelto
+// por la página, no un step normal del stepper.
+const isSuccessStep = rawStep === 'success';
 
 // Order number placeholder — en producción vendría del backend.
 const PLACEHOLDER_ORDER_NUMBER = `ORD-${Date.now().toString().slice(-7)}`;
@@ -210,7 +213,7 @@ const shippingCostByStep: Record<string, number | null> = {
   payment: SHIPPING_METHODS[0].priceCents,
   review: SHIPPING_METHODS[0].priceCents,
 };
-const shippingCents = isSuccessStep ? 0 : shippingCostByStep[currentStepId] ?? null;
+const shippingCents = isSuccessStep ? 0 : (shippingCostByStep[currentStepId] ?? null);
 
 // Pre-computar los strings para el review (placeholders).
 const defaultShippingAddress = SAVED_ADDRESSES[0];
@@ -243,113 +246,101 @@ const summaryItems = cartItems.map((item) => ({
       <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
         {t['storefront.checkout.title']}
       </h1>
-      <p class="mt-1 text-sm text-slate-500">
-        {t['storefront.checkout.subtitle']}
-      </p>
+      <p class="mt-1 text-sm text-slate-500">{t['storefront.checkout.subtitle']}</p>
     </header>
 
-    {
-      isEmpty && (
-        <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-          <p class="text-2xl font-bold text-slate-900">
-            {t['storefront.checkout.empty']}
-          </p>
-          <p class="max-w-md text-sm text-slate-500">
-            {t['storefront.checkout.emptyHint']}
-          </p>
-          <a
-            href={catalogHref}
-            class="mt-2 inline-flex h-11 items-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-          >
-            {t['storefront.checkout.browseProducts']}
-          </a>
-        </section>
-      )
-    }
+    {isEmpty && (
+      <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+        <p class="text-2xl font-bold text-slate-900">{t['storefront.checkout.empty']}</p>
+        <p class="max-w-md text-sm text-slate-500">{t['storefront.checkout.emptyHint']}</p>
+        <a
+          href={catalogHref}
+          class="mt-2 inline-flex h-11 items-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+        >
+          {t['storefront.checkout.browseProducts']}
+        </a>
+      </section>
+    )}
 
-    {
-      !isEmpty && isSuccessStep && (
-        <CheckoutSuccess
-          labels={successLabels}
-          orderNumber={PLACEHOLDER_ORDER_NUMBER}
-          catalogHref={catalogHref}
-          orderHref={orderHref}
-          helpHref={helpHref}
+    {!isEmpty && isSuccessStep && (
+      <CheckoutSuccess
+        labels={successLabels}
+        orderNumber={PLACEHOLDER_ORDER_NUMBER}
+        catalogHref={catalogHref}
+        orderHref={orderHref}
+        helpHref={helpHref}
+      />
+    )}
+
+    {!isEmpty && !isSuccessStep && (
+      <>
+        <CheckoutStepper
+          steps={stepperLabels}
+          currentStepId={currentStepId}
+          stepHrefBase={checkoutBaseHref}
         />
-      )
-    }
 
-    {
-      !isEmpty && !isSuccessStep && (
-        <>
-          <CheckoutStepper
-            steps={stepperLabels}
-            currentStepId={currentStepId}
-            stepHrefBase={checkoutBaseHref}
-          />
-
-          <div class="grid gap-8 lg:grid-cols-[1fr_380px]">
-            <div class="order-2 lg:order-1">
-              {currentStepId === 'contact' && (
-                <CheckoutContactStep
-                  labels={contactLabels}
-                  prefillEmail={IS_USER_LOGGED_IN ? 'maria@correo.com' : ''}
-                  showExpress={true}
-                  showMemberLogin={!IS_USER_LOGGED_IN}
-                  shippingHref={shippingHref}
-                  loginHref={loginHref}
-                />
-              )}
-              {currentStepId === 'shipping' && (
-                <CheckoutShippingStep
-                  labels={shippingLabels}
-                  savedAddresses={IS_USER_LOGGED_IN ? SAVED_ADDRESSES : []}
-                  shippingMethods={SHIPPING_METHODS}
-                  backHref={contactHref}
-                  continueHref={paymentHref}
-                />
-              )}
-              {currentStepId === 'payment' && (
-                <CheckoutPaymentStep
-                  labels={paymentLabels}
-                  paymentMethods={PAYMENT_METHODS}
-                  showNet30={false}
-                  backHref={shippingHref}
-                  continueHref={reviewHref}
-                />
-              )}
-              {currentStepId === 'review' && (
-                <CheckoutReviewStep
-                  labels={reviewLabels}
-                  termsLabels={termsLabels}
-                  items={cartItems}
-                  contactEditHref={contactHref}
-                  shippingEditHref={shippingHref}
-                  paymentEditHref={paymentHref}
-                  backHref={paymentHref}
-                  termsHref={termsHref}
-                  contactSummary={contactSummary}
-                  shippingAddressSummary={shippingAddressSummary}
-                  shippingMethodSummary={shippingMethodSummary}
-                  paymentMethodSummary={paymentMethodSummary}
-                />
-              )}
-            </div>
-
-            <div class="order-1 lg:order-2">
-              <CheckoutSummary
-                items={summaryItems}
-                subtotalCents={subtotalCents}
-                currencyCode={currencyCode}
-                shippingCents={shippingCents}
-                labels={summaryLabels}
-              >
-                <CheckoutTrustBadges slot="trust" labels={trustLabels} />
-              </CheckoutSummary>
-            </div>
+        <div class="grid gap-8 lg:grid-cols-[1fr_380px]">
+          <div class="order-2 lg:order-1">
+            {currentStepId === 'contact' && (
+              <CheckoutContactStep
+                labels={contactLabels}
+                prefillEmail={IS_USER_LOGGED_IN ? 'maria@correo.com' : ''}
+                showExpress={true}
+                showMemberLogin={!IS_USER_LOGGED_IN}
+                shippingHref={shippingHref}
+                loginHref={loginHref}
+              />
+            )}
+            {currentStepId === 'shipping' && (
+              <CheckoutShippingStep
+                labels={shippingLabels}
+                savedAddresses={IS_USER_LOGGED_IN ? SAVED_ADDRESSES : []}
+                shippingMethods={SHIPPING_METHODS}
+                backHref={contactHref}
+                continueHref={paymentHref}
+              />
+            )}
+            {currentStepId === 'payment' && (
+              <CheckoutPaymentStep
+                labels={paymentLabels}
+                paymentMethods={PAYMENT_METHODS}
+                showNet30={false}
+                backHref={shippingHref}
+                continueHref={reviewHref}
+              />
+            )}
+            {currentStepId === 'review' && (
+              <CheckoutReviewStep
+                labels={reviewLabels}
+                termsLabels={termsLabels}
+                items={cartItems}
+                contactEditHref={contactHref}
+                shippingEditHref={shippingHref}
+                paymentEditHref={paymentHref}
+                backHref={paymentHref}
+                termsHref={termsHref}
+                contactSummary={contactSummary}
+                shippingAddressSummary={shippingAddressSummary}
+                shippingMethodSummary={shippingMethodSummary}
+                paymentMethodSummary={paymentMethodSummary}
+              />
+            )}
           </div>
-        </>
-      )
-    }
+
+          <div class="order-1 lg:order-2">
+            <CheckoutSummary
+              items={summaryItems}
+              subtotalCents={subtotalCents}
+              currencyCode={currencyCode}
+              shippingCents={shippingCents}
+              labels={summaryLabels}
+            >
+              <CheckoutTrustBadges slot="trust" labels={trustLabels} />
+            </CheckoutSummary>
+          </div>
+        </div>
+      </>
+    )}
   </main>
 </StorefrontLayout>

@@ -14,12 +14,8 @@ import StoresAdmin from '../../../../../components/admin/stores/StoresAdmin';
 
 <AdminLayout title="Stores | Admin">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
-      Tiendas
-    </h1>
-    <p class="mt-1 text-sm text-slate-500">
-      Gestionar tiendas y modo mantenimiento.
-    </p>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">Tiendas</h1>
+    <p class="mt-1 text-sm text-slate-500">Gestionar tiendas y modo mantenimiento.</p>
   </div>
 
   <StoresAdmin locale={Astro.locals.locale} client:only="react" />

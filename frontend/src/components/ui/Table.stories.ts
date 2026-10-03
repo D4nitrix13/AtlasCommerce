@@ -30,10 +30,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    'header:0': '<tr><th class="px-4 py-2 text-left">ID</th><th class="px-4 py-2 text-left">Cliente</th><th class="px-4 py-2 text-right">Total</th><th class="px-4 py-2 text-left">Status</th></tr>',
-    'row:0': '<tr><td class="px-4 py-2 font-medium">#12345</td><td class="px-4 py-2">María G.</td><td class="px-4 py-2 text-right">$45.00</td><td class="px-4 py-2">Entregado</td></tr>',
-    'row:1': '<tr><td class="px-4 py-2 font-medium">#12340</td><td class="px-4 py-2">Carlos R.</td><td class="px-4 py-2 text-right">$120.00</td><td class="px-4 py-2">Enviado</td></tr>',
-    'row:2': '<tr><td class="px-4 py-2 font-medium">#12338</td><td class="px-4 py-2">Ana P.</td><td class="px-4 py-2 text-right">$34.00</td><td class="px-4 py-2">Entregado</td></tr>',
+    'header:0':
+      '<tr><th class="px-4 py-2 text-left">ID</th><th class="px-4 py-2 text-left">Cliente</th><th class="px-4 py-2 text-right">Total</th><th class="px-4 py-2 text-left">Status</th></tr>',
+    'row:0':
+      '<tr><td class="px-4 py-2 font-medium">#12345</td><td class="px-4 py-2">María G.</td><td class="px-4 py-2 text-right">$45.00</td><td class="px-4 py-2">Entregado</td></tr>',
+    'row:1':
+      '<tr><td class="px-4 py-2 font-medium">#12340</td><td class="px-4 py-2">Carlos R.</td><td class="px-4 py-2 text-right">$120.00</td><td class="px-4 py-2">Enviado</td></tr>',
+    'row:2':
+      '<tr><td class="px-4 py-2 font-medium">#12338</td><td class="px-4 py-2">Ana P.</td><td class="px-4 py-2 text-right">$34.00</td><td class="px-4 py-2">Entregado</td></tr>',
   },
   render: () => `
     <div class="overflow-x-auto rounded-lg border border-slate-200">
@@ -84,13 +88,17 @@ export const StickyHeader: Story = {
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 bg-white">
-          ${Array.from({length: 10}).map((_, i) => `
+          ${Array.from({ length: 10 })
+            .map(
+              (_, i) => `
             <tr>
               <td class="px-4 py-2">Producto ${i + 1}</td>
               <td class="px-4 py-2">${10 + i}</td>
               <td class="px-4 py-2">$${(10 + i).toFixed(2)}</td>
             </tr>
-          `).join('')}
+          `
+            )
+            .join('')}
         </tbody>
       </table>
     </div>

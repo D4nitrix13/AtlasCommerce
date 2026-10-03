@@ -23,7 +23,9 @@ const invoiceId = Astro.params.id;
 const invoice = typeof invoiceId === 'string' ? findInvoiceByIdMock(invoiceId) : null;
 
 const invoicesListHref = adminUrl(locale, '/sales/invoices');
-const linkedOrderHref = invoice ? adminUrl(locale, `/sales/orders/${invoice.orderId}`) : invoicesListHref;
+const linkedOrderHref = invoice
+  ? adminUrl(locale, `/sales/orders/${invoice.orderId}`)
+  : invoicesListHref;
 
 const STATUS_BADGE_CLASS: Record<AdminInvoiceStatus, string> = {
   draft: 'bg-slate-100 text-slate-700',
@@ -33,195 +35,247 @@ const STATUS_BADGE_CLASS: Record<AdminInvoiceStatus, string> = {
   cancelled: 'bg-slate-200 text-slate-600',
 };
 
-const statusLabel = (status: AdminInvoiceStatus): string => t[`admin.sales.invoices.status.${status}`];
+const statusLabel = (status: AdminInvoiceStatus): string =>
+  t[`admin.sales.invoices.status.${status}`];
 
 const storeName = 'AtlasCommerce';
 const storeAddress = 'Av. Principal #123, Managua, Nicaragua';
 ---
 
 <AdminLayout title={t['admin.sales.layout.title']}>
-  {
-    !invoice && (
-      <section class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl" aria-hidden="true">🔍</div>
-        <p class="text-base font-semibold text-slate-900 sm:text-lg">{t['admin.sales.invoices.detail.notFound.title']}</p>
-        <p class="max-w-md text-sm text-slate-500">{t['admin.sales.invoices.detail.notFound.hint']}</p>
+  {!invoice && (
+    <section class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+      <div
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl"
+        aria-hidden="true"
+      >
+        🔍
+      </div>
+      <p class="text-base font-semibold text-slate-900 sm:text-lg">
+        {t['admin.sales.invoices.detail.notFound.title']}
+      </p>
+      <p class="max-w-md text-sm text-slate-500">
+        {t['admin.sales.invoices.detail.notFound.hint']}
+      </p>
+      <a
+        href={invoicesListHref}
+        class="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+      >
+        {t['admin.sales.invoices.detail.notFound.back']}
+      </a>
+    </section>
+  )}
+
+  {invoice && (
+    <div class="flex flex-col gap-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <a
           href={invoicesListHref}
-          class="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+          class="inline-flex w-fit items-center gap-1 text-sm font-medium text-slate-700 transition hover:underline focus-visible:outline-none focus-visible:underline"
         >
-          {t['admin.sales.invoices.detail.notFound.back']}
+          {t['admin.sales.invoices.detail.backToList']}
         </a>
-      </section>
-    )
-  }
-
-  {
-    invoice && (
-      <div class="flex flex-col gap-5">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <a
-            href={invoicesListHref}
-            class="inline-flex w-fit items-center gap-1 text-sm font-medium text-slate-700 transition hover:underline focus-visible:outline-none focus-visible:underline"
-          >
-            {t['admin.sales.invoices.detail.backToList']}
-          </a>
-          <div class="flex flex-wrap items-center gap-2">
-            {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
-              <button
-                type="button"
-                data-invoice-action="sendReminder"
-                class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-              >
-                {t['admin.sales.invoices.detail.actions.sendReminder']}
-              </button>
-            )}
-            {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
-              <button
-                type="button"
-                data-invoice-action="markPaid"
-                class="inline-flex h-9 items-center rounded-lg bg-emerald-600 px-3 text-xs font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
-              >
-                {t['admin.sales.invoices.detail.actions.markPaid']}
-              </button>
-            )}
-            {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
-              <button
-                type="button"
-                data-invoice-action="cancel"
-                class="inline-flex h-9 items-center rounded-lg border border-red-200 bg-white px-3 text-xs font-medium text-red-700 transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
-              >
-                {t['admin.sales.invoices.detail.actions.cancel']}
-              </button>
-            )}
-          </div>
-        </div>
-
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-col gap-1">
-              <h1 class="font-mono text-xl font-bold text-slate-900 sm:text-2xl">{invoice.number}</h1>
-              <p class="text-sm text-slate-500">
-                {t['admin.sales.invoices.detail.linkedOrder']}:{' '}
-                <a href={linkedOrderHref} class="font-mono text-slate-700 hover:underline">
-                  #ORD-{invoice.orderId}
-                </a>
-              </p>
-            </div>
-            <span class:list={['inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide', STATUS_BADGE_CLASS[invoice.status]]}>
-              {statusLabel(invoice.status)}
-            </span>
-          </div>
-
-          <dl class="mt-5 grid grid-cols-1 gap-3 border-t border-slate-100 pt-4 text-sm sm:grid-cols-3">
-            <div class="flex flex-col gap-0.5">
-              <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.invoices.detail.issuedAt']}</dt>
-              <dd class="text-slate-900"><time datetime={invoice.issuedAt}>{formatDate(invoice.issuedAt)}</time></dd>
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.invoices.detail.dueAt']}</dt>
-              <dd class="text-slate-900"><time datetime={invoice.dueAt}>{formatDate(invoice.dueAt)}</time></dd>
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.invoices.detail.totals.total']}</dt>
-              <dd class="text-lg font-bold tabular-nums text-slate-900">{formatCentsAsDecimal(invoice.totalCents, 'USD')}</dd>
-            </div>
-          </dl>
-
-          {
-            invoice.notes && (
-              <div class="mt-4 rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs italic text-slate-600">
-                <strong class="not-italic">{t['admin.sales.invoices.detail.notes']}:</strong> {invoice.notes}
-              </div>
-            )
-          }
-        </section>
-
-        <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.4fr]">
-          <section class="flex flex-col gap-4">
-            <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <h2 class="text-base font-semibold text-slate-900 sm:text-lg">{t['admin.sales.invoices.detail.items.heading']}</h2>
-              <div class="mt-4 overflow-x-auto rounded-lg border border-slate-100">
-                <table class="w-full border-collapse text-left text-sm">
-                  <thead class="bg-slate-50 text-xs font-medium uppercase tracking-wide text-slate-500">
-                    <tr>
-                      <th scope="col" class="px-3 py-2 font-semibold">{t['admin.sales.invoices.detail.items.column.description']}</th>
-                      <th scope="col" class="px-3 py-2 text-right font-semibold">{t['admin.sales.invoices.detail.items.column.quantity']}</th>
-                      <th scope="col" class="px-3 py-2 text-right font-semibold">{t['admin.sales.invoices.detail.items.column.unitPrice']}</th>
-                      <th scope="col" class="px-3 py-2 text-right font-semibold">{t['admin.sales.invoices.detail.items.column.subtotal']}</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100">
-                    {invoice.items.map((item) => {
-                      const subtotalCents = item.unitPriceCents * item.quantity;
-                      return (
-                        <tr>
-                          <td class="px-3 py-2 text-slate-900">{item.description}</td>
-                          <td class="px-3 py-2 text-right tabular-nums text-slate-700">{item.quantity}</td>
-                          <td class="px-3 py-2 text-right tabular-nums text-slate-700">{formatCentsAsDecimal(item.unitPriceCents, 'USD')}</td>
-                          <td class="px-3 py-2 text-right font-semibold tabular-nums text-slate-900">{formatCentsAsDecimal(subtotalCents, 'USD')}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <dl class="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 text-sm">
-                <div class="flex items-center justify-between gap-3">
-                  <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.invoices.detail.totals.subtotal']}</dt>
-                  <dd class="tabular-nums text-slate-700">{formatCentsAsDecimal(invoice.subtotalCents, 'USD')}</dd>
-                </div>
-                <div class="flex items-center justify-between gap-3">
-                  <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{t['admin.sales.invoices.detail.totals.tax']}</dt>
-                  <dd class="tabular-nums text-slate-700">{formatCentsAsDecimal(invoice.taxCents, 'USD')}</dd>
-                </div>
-                <div class="mt-2 flex items-center justify-between gap-3 border-t border-slate-200 pt-3">
-                  <dt class="text-sm font-semibold text-slate-900">{t['admin.sales.invoices.detail.totals.total']}</dt>
-                  <dd class="text-base font-bold tabular-nums text-slate-900">{formatCentsAsDecimal(invoice.totalCents, 'USD')}</dd>
-                </div>
-              </dl>
-            </section>
-          </section>
-
-          <section class="flex flex-col gap-3">
-            <header class="flex items-center justify-between">
-              <h2 class="text-base font-semibold text-slate-900 sm:text-lg">{t['admin.sales.invoices.detail.preview.heading']}</h2>
-              <button
-                type="button"
-                data-print-invoice
-                class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-              >
-                {t['admin.sales.invoices.detail.preview.print']} ↗
-              </button>
-            </header>
-            <p class="text-xs text-slate-500">{t['admin.sales.invoices.detail.preview.hint']}</p>
-            <InvoicePreview
-              invoice={invoice}
-              storeName={storeName}
-              storeAddress={storeAddress}
-              statusLabel={statusLabel(invoice.status)}
-              labelHeading={t['admin.sales.invoices.detail.heading']}
-              labelFrom={t['admin.sales.invoices.detail.fromStore']}
-              labelTo={t['admin.sales.invoices.detail.to']}
-              labelNumber={t['admin.sales.invoices.detail.number']}
-              labelIssuedAt={t['admin.sales.invoices.detail.issuedAt']}
-              labelDueAt={t['admin.sales.invoices.detail.dueAt']}
-              labelItemsHeading={t['admin.sales.invoices.detail.items.heading']}
-              labelDescription={t['admin.sales.invoices.detail.items.column.description']}
-              labelQuantity={t['admin.sales.invoices.detail.items.column.quantity']}
-              labelUnitPrice={t['admin.sales.invoices.detail.items.column.unitPrice']}
-              labelSubtotal={t['admin.sales.invoices.detail.items.column.subtotal']}
-              labelTotalsSubtotal={t['admin.sales.invoices.detail.totals.subtotal']}
-              labelTotalsTax={t['admin.sales.invoices.detail.totals.tax']}
-              labelTotalsTotal={t['admin.sales.invoices.detail.totals.total']}
-              labelNotes={t['admin.sales.invoices.detail.notes']}
-            />
-          </section>
+        <div class="flex flex-wrap items-center gap-2">
+          {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
+            <button
+              type="button"
+              data-invoice-action="sendReminder"
+              class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+            >
+              {t['admin.sales.invoices.detail.actions.sendReminder']}
+            </button>
+          )}
+          {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
+            <button
+              type="button"
+              data-invoice-action="markPaid"
+              class="inline-flex h-9 items-center rounded-lg bg-emerald-600 px-3 text-xs font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+            >
+              {t['admin.sales.invoices.detail.actions.markPaid']}
+            </button>
+          )}
+          {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
+            <button
+              type="button"
+              data-invoice-action="cancel"
+              class="inline-flex h-9 items-center rounded-lg border border-red-200 bg-white px-3 text-xs font-medium text-red-700 transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+            >
+              {t['admin.sales.invoices.detail.actions.cancel']}
+            </button>
+          )}
         </div>
       </div>
-    )
-  }
+
+      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col gap-1">
+            <h1 class="font-mono text-xl font-bold text-slate-900 sm:text-2xl">{invoice.number}</h1>
+            <p class="text-sm text-slate-500">
+              {t['admin.sales.invoices.detail.linkedOrder']}:{' '}
+              <a href={linkedOrderHref} class="font-mono text-slate-700 hover:underline">
+                #ORD-{invoice.orderId}
+              </a>
+            </p>
+          </div>
+          <span
+            class:list={[
+              'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
+              STATUS_BADGE_CLASS[invoice.status],
+            ]}
+          >
+            {statusLabel(invoice.status)}
+          </span>
+        </div>
+
+        <dl class="mt-5 grid grid-cols-1 gap-3 border-t border-slate-100 pt-4 text-sm sm:grid-cols-3">
+          <div class="flex flex-col gap-0.5">
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {t['admin.sales.invoices.detail.issuedAt']}
+            </dt>
+            <dd class="text-slate-900">
+              <time datetime={invoice.issuedAt}>{formatDate(invoice.issuedAt)}</time>
+            </dd>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {t['admin.sales.invoices.detail.dueAt']}
+            </dt>
+            <dd class="text-slate-900">
+              <time datetime={invoice.dueAt}>{formatDate(invoice.dueAt)}</time>
+            </dd>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {t['admin.sales.invoices.detail.totals.total']}
+            </dt>
+            <dd class="text-lg font-bold tabular-nums text-slate-900">
+              {formatCentsAsDecimal(invoice.totalCents, 'USD')}
+            </dd>
+          </div>
+        </dl>
+
+        {invoice.notes && (
+          <div class="mt-4 rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs italic text-slate-600">
+            <strong class="not-italic">{t['admin.sales.invoices.detail.notes']}:</strong>{' '}
+            {invoice.notes}
+          </div>
+        )}
+      </section>
+
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.4fr]">
+        <section class="flex flex-col gap-4">
+          <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <h2 class="text-base font-semibold text-slate-900 sm:text-lg">
+              {t['admin.sales.invoices.detail.items.heading']}
+            </h2>
+            <div class="mt-4 overflow-x-auto rounded-lg border border-slate-100">
+              <table class="w-full border-collapse text-left text-sm">
+                <thead class="bg-slate-50 text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th scope="col" class="px-3 py-2 font-semibold">
+                      {t['admin.sales.invoices.detail.items.column.description']}
+                    </th>
+                    <th scope="col" class="px-3 py-2 text-right font-semibold">
+                      {t['admin.sales.invoices.detail.items.column.quantity']}
+                    </th>
+                    <th scope="col" class="px-3 py-2 text-right font-semibold">
+                      {t['admin.sales.invoices.detail.items.column.unitPrice']}
+                    </th>
+                    <th scope="col" class="px-3 py-2 text-right font-semibold">
+                      {t['admin.sales.invoices.detail.items.column.subtotal']}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  {invoice.items.map((item) => {
+                    const subtotalCents = item.unitPriceCents * item.quantity;
+                    return (
+                      <tr>
+                        <td class="px-3 py-2 text-slate-900">{item.description}</td>
+                        <td class="px-3 py-2 text-right tabular-nums text-slate-700">
+                          {item.quantity}
+                        </td>
+                        <td class="px-3 py-2 text-right tabular-nums text-slate-700">
+                          {formatCentsAsDecimal(item.unitPriceCents, 'USD')}
+                        </td>
+                        <td class="px-3 py-2 text-right font-semibold tabular-nums text-slate-900">
+                          {formatCentsAsDecimal(subtotalCents, 'USD')}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <dl class="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 text-sm">
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  {t['admin.sales.invoices.detail.totals.subtotal']}
+                </dt>
+                <dd class="tabular-nums text-slate-700">
+                  {formatCentsAsDecimal(invoice.subtotalCents, 'USD')}
+                </dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  {t['admin.sales.invoices.detail.totals.tax']}
+                </dt>
+                <dd class="tabular-nums text-slate-700">
+                  {formatCentsAsDecimal(invoice.taxCents, 'USD')}
+                </dd>
+              </div>
+              <div class="mt-2 flex items-center justify-between gap-3 border-t border-slate-200 pt-3">
+                <dt class="text-sm font-semibold text-slate-900">
+                  {t['admin.sales.invoices.detail.totals.total']}
+                </dt>
+                <dd class="text-base font-bold tabular-nums text-slate-900">
+                  {formatCentsAsDecimal(invoice.totalCents, 'USD')}
+                </dd>
+              </div>
+            </dl>
+          </section>
+        </section>
+
+        <section class="flex flex-col gap-3">
+          <header class="flex items-center justify-between">
+            <h2 class="text-base font-semibold text-slate-900 sm:text-lg">
+              {t['admin.sales.invoices.detail.preview.heading']}
+            </h2>
+            <button
+              type="button"
+              data-print-invoice
+              class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+            >
+              {t['admin.sales.invoices.detail.preview.print']} ↗
+            </button>
+          </header>
+          <p class="text-xs text-slate-500">{t['admin.sales.invoices.detail.preview.hint']}</p>
+          <InvoicePreview
+            invoice={invoice}
+            storeName={storeName}
+            storeAddress={storeAddress}
+            statusLabel={statusLabel(invoice.status)}
+            labelHeading={t['admin.sales.invoices.detail.heading']}
+            labelFrom={t['admin.sales.invoices.detail.fromStore']}
+            labelTo={t['admin.sales.invoices.detail.to']}
+            labelNumber={t['admin.sales.invoices.detail.number']}
+            labelIssuedAt={t['admin.sales.invoices.detail.issuedAt']}
+            labelDueAt={t['admin.sales.invoices.detail.dueAt']}
+            labelItemsHeading={t['admin.sales.invoices.detail.items.heading']}
+            labelDescription={t['admin.sales.invoices.detail.items.column.description']}
+            labelQuantity={t['admin.sales.invoices.detail.items.column.quantity']}
+            labelUnitPrice={t['admin.sales.invoices.detail.items.column.unitPrice']}
+            labelSubtotal={t['admin.sales.invoices.detail.items.column.subtotal']}
+            labelTotalsSubtotal={t['admin.sales.invoices.detail.totals.subtotal']}
+            labelTotalsTax={t['admin.sales.invoices.detail.totals.tax']}
+            labelTotalsTotal={t['admin.sales.invoices.detail.totals.total']}
+            labelNotes={t['admin.sales.invoices.detail.notes']}
+          />
+        </section>
+      </div>
+    </div>
+  )}
 </AdminLayout>
 
 <script>

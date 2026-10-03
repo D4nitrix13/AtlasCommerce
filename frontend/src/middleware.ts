@@ -86,8 +86,11 @@ const DEFAULT_THEME: Theme = {
  * Resuelve la URL interna del backend para SSR.
  *
  * Server-side fetch desde el middleware de Astro usa `INTERNAL_API_URL`
- * (en Docker network es `http://app:8000/api`). Si no esta seteada,
- * cae a `PUBLIC_API_URL` o a `http://127.0.0.1:8000/api` por default.
+ * (en Docker network es `http://app:8000/api/v1`). Si no esta seteada,
+ * cae a `PUBLIC_API_URL` o a `http://127.0.0.1:8000/api/v1` por default.
+ *
+ * Las rutas publicas del backend viven bajo el prefijo `/api/v1`
+ * (versionado), no bajo `/api` raiz.
  */
 function resolveInternalApiUrl(): string {
   const fromImportMeta = (import.meta.env as Record<string, string | undefined>).INTERNAL_API_URL;
@@ -100,7 +103,7 @@ function resolveInternalApiUrl(): string {
     return fromPublic.replace(/\/$/, '');
   }
 
-  return 'http://127.0.0.1:8000/api';
+  return 'http://127.0.0.1:8000/api/v1';
 }
 
 /**
@@ -383,6 +386,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 // Tipos para `Astro.locals`.
 declare global {
+  // `namespace App` es el contrato de Astro 4+ para extender `Astro.locals`
+  // (ver https://docs.astro.build/en/guides/typescript/#extend-window-and-astroglobals-properties).
+  // La regla `@typescript-eslint/no-namespace` no aplica a este caso porque
+  // el namespace es requerido por el API de Astro, no un módulo interno.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace App {
     interface Locals {
       locale: Locale;

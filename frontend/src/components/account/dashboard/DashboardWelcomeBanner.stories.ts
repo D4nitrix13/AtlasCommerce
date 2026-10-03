@@ -21,8 +21,8 @@ const meta: Meta<typeof DashboardWelcomeBanner> = {
     },
   },
   args: {
-    userName: 'Daniel',
-    greeting: 'Bienvenido de vuelta, Daniel',
+    userName: 'Daniel Benjamin',
+    greeting: 'Bienvenido de vuelta, Daniel Benjamin',
     subtitle: 'Tienes 2 pedidos en preparación y 1 por enviar.',
     variant: 'kitsune',
   },
@@ -64,7 +64,8 @@ export const LongSubtitle: Story = {
   args: {
     userName: 'María',
     greeting: 'Bienvenida de vuelta, María',
-    subtitle: 'Resumen: 5 pedidos entregados · 1 en preparación · 1 ticket abierto · 2 notificaciones sin leer.',
+    subtitle:
+      'Resumen: 5 pedidos entregados · 1 en preparación · 1 ticket abierto · 2 notificaciones sin leer.',
     variant: 'kitsune',
   },
 };

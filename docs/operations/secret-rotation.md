@@ -169,7 +169,7 @@ Cada rotación se registra en
 ```markdown
 | Fecha       | Secret       | Quién  | Notas                                |
 | ----------- | ------------ | ------ | ------------------------------------ |
-| 2026-09-15  | APP_KEY      | Daniel | Rotación inicial, sin incidentes     |
+| 2026-09-15  | APP_KEY      | Daniel Benjamin Pérez Morales | Rotación inicial, sin incidentes     |
 | 2026-12-01  | APP_KEY      | TBD    | Programada                           |
 ```
 

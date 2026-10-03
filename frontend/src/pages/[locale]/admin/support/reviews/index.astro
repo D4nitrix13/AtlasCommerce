@@ -33,6 +33,8 @@ const reviewsToShow = productReviews.filter((r) => r.status === 'pending');
   </p>
 
   <section class="grid gap-4 xl:grid-cols-2">
-    {reviewsToShow.map((review) => <ReviewModerationCard review={review} />)}
+    {reviewsToShow.map((review) => (
+      <ReviewModerationCard review={review} />
+    ))}
   </section>
 </AdminLayout>

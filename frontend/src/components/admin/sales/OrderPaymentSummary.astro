@@ -73,18 +73,18 @@ const METHOD_LABELS: Record<AdminOrderPaymentMock['method'], string> = {
       <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelMethod}</dt>
       <dd class="font-medium text-slate-900">
         {METHOD_LABELS[payment.method]}
-        {
-          payment.brand && payment.last4 && (
-            <span class="ml-2 text-xs font-normal text-slate-500">
-              {payment.brand} ···· {payment.last4}
-            </span>
-          )
-        }
+        {payment.brand && payment.last4 && (
+          <span class="ml-2 text-xs font-normal text-slate-500">
+            {payment.brand} ···· {payment.last4}
+          </span>
+        )}
       </dd>
     </div>
     <div class="flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
       <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelSubtotal}</dt>
-      <dd class="tabular-nums text-slate-700">{formatCentsAsDecimal(subtotalCents, currencyCode)}</dd>
+      <dd class="tabular-nums text-slate-700">
+        {formatCentsAsDecimal(subtotalCents, currencyCode)}
+      </dd>
     </div>
     <div class="flex items-center justify-between gap-3">
       <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{labelShipping}</dt>

@@ -39,7 +39,7 @@ type Story = StoryObj<typeof meta>;
 const placeholderImage =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#f1f5f9"/><circle cx="200" cy="160" r="60" fill="#cbd5e1"/><path d="M120 320 Q200 220 280 320 Z" fill="#cbd5e1"/></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#f1f5f9"/><circle cx="200" cy="160" r="60" fill="#cbd5e1"/><path d="M120 320 Q200 220 280 320 Z" fill="#cbd5e1"/></svg>`
   );
 
 const baseProduct: Product = {
@@ -86,7 +86,12 @@ export const OutOfStock: Story = {
 
 export const AllBadges: Story = {
   args: {
-    product: { ...baseProduct, badges: ['new', 'sale', 'low_stock'], compareAtPriceCents: 16900, stock: 2 },
+    product: {
+      ...baseProduct,
+      badges: ['new', 'sale', 'low_stock'],
+      compareAtPriceCents: 16900,
+      stock: 2,
+    },
   },
 };
 
@@ -95,7 +100,8 @@ export const LongTitle: Story = {
     product: {
       ...baseProduct,
       name: 'Evangelion Unit-01 1/6 — Edición limitada con luz LED y piezas articuladas premium',
-      description: 'Figura escala 1/6 del Eva-01. 30cm, piezas articuladas, base con luz LED opcional. Incluye manual y certificado de autenticidad.',
+      description:
+        'Figura escala 1/6 del Eva-01. 30cm, piezas articuladas, base con luz LED opcional. Incluye manual y certificado de autenticidad.',
     },
   },
 };

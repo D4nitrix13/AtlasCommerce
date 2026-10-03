@@ -48,6 +48,17 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <!--
+          Métricas Prometheus en memoria. El adapter InMemory acumula
+          los counters en el proceso PHP, suficiente para que los tests
+          verifiquen que el registry se popula y que /metrics renderiza
+          el formato correcto. Evita la dependencia de phpredis en
+          entornos donde la extensión no está disponible y desacopla
+          los tests del servicio Redis (CI tiene Redis pero los tests
+          no lo necesitan — el Producer no es parte de la superficie
+          bajo prueba).
+        -->
+        <env name="METRICS_STORAGE" value="inmemory"/>
+        <!--
           Hosts que Sanctum trata como stateful (cookie auth). En tests
           necesitamos el .test para que EnsureFrontendRequestsAreStateful
           agregue StartSession y dispare CSRF validation.

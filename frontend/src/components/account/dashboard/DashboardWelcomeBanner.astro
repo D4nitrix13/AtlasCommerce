@@ -35,15 +35,9 @@ const VARIANT_CLASSES: Record<Props['variant'], string> = {
 
 <section
   aria-labelledby="dashboard-welcome-heading"
-  class:list={[
-    'rounded-2xl border p-6 sm:p-8',
-    VARIANT_CLASSES[variant],
-  ]}
+  class:list={['rounded-2xl border p-6 sm:p-8', VARIANT_CLASSES[variant]]}
 >
-  <h1
-    id="dashboard-welcome-heading"
-    class="text-2xl font-bold text-slate-900 sm:text-3xl"
-  >
+  <h1 id="dashboard-welcome-heading" class="text-2xl font-bold text-slate-900 sm:text-3xl">
     {greeting}
   </h1>
   <p class="mt-2 text-sm text-slate-600 sm:text-base">{subtitle}</p>

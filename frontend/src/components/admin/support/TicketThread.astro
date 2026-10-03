@@ -48,43 +48,50 @@ const initialsOf = (name: string): string => {
 
 <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
   <ol class="divide-y divide-slate-100">
-    {
-      ticket.messages.map((m) => {
-        const isAdmin = m.authorRole === 'admin';
-        return (
-          <li class:list={['flex gap-3 p-4', isAdmin ? 'flex-row-reverse' : '']}>
+    {ticket.messages.map((m) => {
+      const isAdmin = m.authorRole === 'admin';
+      return (
+        <li class:list={['flex gap-3 p-4', isAdmin ? 'flex-row-reverse' : '']}>
+          <div
+            class:list={[
+              'grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-bold',
+              isAdmin ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-700',
+            ]}
+            aria-hidden="true"
+          >
+            {initialsOf(m.authorName)}
+          </div>
+
+          <div class:list={['flex max-w-[80%] flex-col gap-1', isAdmin ? 'items-end' : '']}>
             <div
               class:list={[
-                'grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-bold',
-                isAdmin ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-700',
+                'flex items-center gap-2 text-xs text-slate-500',
+                isAdmin ? 'flex-row-reverse' : '',
               ]}
-              aria-hidden="true"
             >
-              {initialsOf(m.authorName)}
+              <span class="font-semibold text-slate-700">{m.authorName}</span>
+              <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] uppercase tracking-wider text-slate-600">
+                {isAdmin
+                  ? t['admin.support.tickets.detail.thread.support']
+                  : t['admin.support.tickets.detail.thread.customer']}
+              </span>
+              <time datetime={m.createdAt} class="text-slate-400">
+                {formatTimestamp(m.createdAt)}
+              </time>
             </div>
-
-            <div class:list={['flex max-w-[80%] flex-col gap-1', isAdmin ? 'items-end' : '']}>
-              <div class:list={['flex items-center gap-2 text-xs text-slate-500', isAdmin ? 'flex-row-reverse' : '']}>
-                <span class="font-semibold text-slate-700">{m.authorName}</span>
-                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] uppercase tracking-wider text-slate-600">
-                  {isAdmin ? t['admin.support.tickets.detail.thread.support'] : t['admin.support.tickets.detail.thread.customer']}
-                </span>
-                <time datetime={m.createdAt} class="text-slate-400">
-                  {formatTimestamp(m.createdAt)}
-                </time>
-              </div>
-              <p
-                class:list={[
-                  'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-                  isAdmin ? 'rounded-tr-sm bg-emerald-50 text-slate-900' : 'rounded-tl-sm bg-slate-100 text-slate-900',
-                ]}
-              >
-                {m.body}
-              </p>
-            </div>
-          </li>
-        );
-      })
-    }
+            <p
+              class:list={[
+                'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                isAdmin
+                  ? 'rounded-tr-sm bg-emerald-50 text-slate-900'
+                  : 'rounded-tl-sm bg-slate-100 text-slate-900',
+              ]}
+            >
+              {m.body}
+            </p>
+          </div>
+        </li>
+      );
+    })}
   </ol>
 </section>

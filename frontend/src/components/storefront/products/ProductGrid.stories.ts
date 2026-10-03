@@ -52,16 +52,78 @@ type Story = StoryObj<typeof meta>;
 const placeholderImage =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#f1f5f9"/><circle cx="200" cy="160" r="60" fill="#cbd5e1"/><path d="M120 320 Q200 220 280 320 Z" fill="#cbd5e1"/></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#f1f5f9"/><circle cx="200" cy="160" r="60" fill="#cbd5e1"/><path d="M120 320 Q200 220 280 320 Z" fill="#cbd5e1"/></svg>`
   );
 
 const sampleProducts: Product[] = [
-  { id: 1, slug: 'saber-alter-figma', name: 'Saber Alter Figma', description: 'Figma articulada.', priceCents: 14500, imageUrl: placeholderImage, category: 'figures', stock: 8, badges: ['new'], currency: 'USD' },
-  { id: 2, slug: 'nendoroid-zero-two', name: 'Nendoroid Zero Two', description: '10cm, tres expresiones.', priceCents: 7900, imageUrl: placeholderImage, category: 'figures', stock: 3, badges: ['low_stock'], currency: 'USD' },
-  { id: 3, slug: 'chainsaw-man-t1', name: 'Chainsaw Man Tomo 1', description: 'Tankōbon japonés.', priceCents: 1900, imageUrl: placeholderImage, category: 'manga', stock: 24, currency: 'USD' },
-  { id: 4, slug: 'spy-x-family-t1', name: 'Spy x Family Tomo 1', description: 'Edición español.', priceCents: 1499, imageUrl: placeholderImage, category: 'manga', stock: 30, currency: 'USD' },
-  { id: 5, slug: 'jujutsu-kaisen-hoodie', name: 'Hoodie Jujutsu Kaisen', description: 'Sudadera negra logo Gojo.', priceCents: 4900, imageUrl: placeholderImage, category: 'apparel', stock: 12, currency: 'USD' },
-  { id: 6, slug: 'totoro-plush', name: 'Peluche Totoro mediano', description: '30cm, edición oficial.', priceCents: 3500, imageUrl: placeholderImage, category: 'accessories', stock: 18, currency: 'USD' },
+  {
+    id: 1,
+    slug: 'saber-alter-figma',
+    name: 'Saber Alter Figma',
+    description: 'Figma articulada.',
+    priceCents: 14500,
+    imageUrl: placeholderImage,
+    category: 'figures',
+    stock: 8,
+    badges: ['new'],
+    currency: 'USD',
+  },
+  {
+    id: 2,
+    slug: 'nendoroid-zero-two',
+    name: 'Nendoroid Zero Two',
+    description: '10cm, tres expresiones.',
+    priceCents: 7900,
+    imageUrl: placeholderImage,
+    category: 'figures',
+    stock: 3,
+    badges: ['low_stock'],
+    currency: 'USD',
+  },
+  {
+    id: 3,
+    slug: 'chainsaw-man-t1',
+    name: 'Chainsaw Man Tomo 1',
+    description: 'Tankōbon japonés.',
+    priceCents: 1900,
+    imageUrl: placeholderImage,
+    category: 'manga',
+    stock: 24,
+    currency: 'USD',
+  },
+  {
+    id: 4,
+    slug: 'spy-x-family-t1',
+    name: 'Spy x Family Tomo 1',
+    description: 'Edición español.',
+    priceCents: 1499,
+    imageUrl: placeholderImage,
+    category: 'manga',
+    stock: 30,
+    currency: 'USD',
+  },
+  {
+    id: 5,
+    slug: 'jujutsu-kaisen-hoodie',
+    name: 'Hoodie Jujutsu Kaisen',
+    description: 'Sudadera negra logo Gojo.',
+    priceCents: 4900,
+    imageUrl: placeholderImage,
+    category: 'apparel',
+    stock: 12,
+    currency: 'USD',
+  },
+  {
+    id: 6,
+    slug: 'totoro-plush',
+    name: 'Peluche Totoro mediano',
+    description: '30cm, edición oficial.',
+    priceCents: 3500,
+    imageUrl: placeholderImage,
+    category: 'accessories',
+    stock: 18,
+    currency: 'USD',
+  },
 ];
 
 export const Default: Story = {

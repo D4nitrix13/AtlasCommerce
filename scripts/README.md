@@ -55,7 +55,7 @@ docker/
 ├── setup/                       # Setup y helpers de configuración
 │   ├── first-install.sh         # cmd_setup
 │   ├── hosts.sh                 # cmd_hosts (imprime bloque /etc/hosts)
-│   └── caddy.sh                 # cmd_caddy (imprime Caddyfile)
+│   └── caddy.sh                 # cmd_caddy (imprime docker/caddy/Caddyfile)
 └── help/                        # Ayuda
     └── show.sh                  # cmd_help
 ```text

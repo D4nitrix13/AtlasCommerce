@@ -17,7 +17,12 @@
  * Estados (AGENTS §11): loading · empty · error · success · disabled.
  */
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
-import { BULK_PRODUCTS, PRICING_TIERS, resolvePricingTier, type BulkProduct } from '../../../data/b2b-mock';
+import {
+  BULK_PRODUCTS,
+  PRICING_TIERS,
+  resolvePricingTier,
+  type BulkOrderProduct,
+} from '../../../data/b2b-mock';
 import { useTranslations } from '../../../i18n';
 
 interface Props {
@@ -57,11 +62,10 @@ function writeBulkCart(cart: BulkCartItem[]): void {
   window.localStorage.setItem(BULK_CART_STORAGE_KEY, JSON.stringify(cart));
 }
 
-function useBulkCart(product: BulkProduct | undefined, quantity: number) {
+function useBulkCart(product: BulkOrderProduct | undefined, quantity: number) {
   const [persisting, setPersisting] = useState<boolean>(false);
   const [added, setAdded] = useState<boolean>(false);
-  const isValidQuantity =
-    product !== undefined && quantity >= product.minQuantity && quantity > 0;
+  const isValidQuantity = product !== undefined && quantity >= product.minQuantity && quantity > 0;
 
   const addToBulkOrder = (): boolean => {
     if (product === undefined || !isValidQuantity) return false;
@@ -95,7 +99,7 @@ function useBulkCart(product: BulkProduct | undefined, quantity: number) {
 
 interface ProductSelectorProps {
   productId: number;
-  products: readonly BulkProduct[];
+  products: readonly BulkOrderProduct[];
   label: string;
   formatPrice: (cents: number, currency: string) => string;
   onChange: (id: number) => void;
@@ -394,7 +398,7 @@ function BulkPricingCalculatorView(props: BulkPricingCalculatorViewProps): React
 }
 
 interface UseBulkPricingStateResult {
-  product: BulkProduct | undefined;
+  product: BulkOrderProduct | undefined;
   productId: number;
   quantityInput: string;
   onProductChange: (nextId: number) => void;
@@ -414,18 +418,16 @@ interface UseBulkPricingStateResult {
 function useProductSelection(): {
   productId: number;
   quantityInput: string;
-  product: BulkProduct | undefined;
+  product: BulkOrderProduct | undefined;
   onProductChange: (nextId: number) => void;
   onQuantityChange: (next: string) => void;
 } {
   const initial = BULK_PRODUCTS[0];
   const [productId, setProductId] = useState<number>(initial?.id ?? 0);
-  const [quantityInput, setQuantityInput] = useState<string>(
-    String(initial?.minQuantity ?? 1),
-  );
+  const [quantityInput, setQuantityInput] = useState<string>(String(initial?.minQuantity ?? 1));
   const product = useMemo(
     () => BULK_PRODUCTS.find((p) => p.id === productId) ?? initial,
-    [productId, initial],
+    [productId, initial]
   );
   return {
     productId,
@@ -441,8 +443,8 @@ function useProductSelection(): {
 }
 
 function usePricing(
-  product: BulkProduct | undefined,
-  quantity: number,
+  product: BulkOrderProduct | undefined,
+  quantity: number
 ): {
   tierLabel: string;
   tierDiscountPercent: number;
@@ -453,7 +455,7 @@ function usePricing(
 } {
   const tier = useMemo(() => resolvePricingTier(quantity), [quantity]);
   const subtotalCents = Math.round(
-    (product?.basePriceCents ?? 0) * quantity * (1 - tier.discountPercent),
+    (product?.basePriceCents ?? 0) * quantity * (1 - tier.discountPercent)
   );
   const formatPrice = (cents: number, currency: string): string =>
     `$${(cents / 100).toFixed(2)} ${currency}`;
@@ -461,17 +463,18 @@ function usePricing(
     tierLabel: tier.label,
     tierDiscountPercent: tier.discountPercent,
     subtotalCents,
-    unitPriceText: product === undefined ? '' : formatPrice(product.basePriceCents, product.currency),
+    unitPriceText:
+      product === undefined ? '' : formatPrice(product.basePriceCents, product.currency),
     subtotalText: product === undefined ? '' : formatPrice(subtotalCents, product.currency),
     formatPrice,
   };
 }
 
 function useErrorMessage(
-  product: BulkProduct | undefined,
+  product: BulkOrderProduct | undefined,
   quantity: number,
   errorInvalidNumber: string,
-  errorMinQuantity: (min: number) => string,
+  errorMinQuantity: (min: number) => string
 ): string | null {
   return useMemo<string | null>(() => {
     if (product === undefined) return null;
@@ -492,16 +495,8 @@ function useBulkPricingState({
     return Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
   }, [quantityInput]);
   const pricing = usePricing(product, quantity);
-  const errorMessage = useErrorMessage(
-    product,
-    quantity,
-    errorInvalidNumber,
-    errorMinQuantity,
-  );
-  const { persisting, added, isValidQuantity, addToBulkOrder } = useBulkCart(
-    product,
-    quantity,
-  );
+  const errorMessage = useErrorMessage(product, quantity, errorInvalidNumber, errorMinQuantity);
+  const { persisting, added, isValidQuantity, addToBulkOrder } = useBulkCart(product, quantity);
   return {
     product,
     productId,

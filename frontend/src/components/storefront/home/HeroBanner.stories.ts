@@ -21,7 +21,8 @@ const meta: Meta<typeof HeroBanner> = {
   args: {
     eyebrow: 'Nuevo · Edición limitada',
     title: 'Tu colección otaku, curada con cariño',
-    subtitle: 'Figures, manga y apparel de tus franquicias favoritas. Envío gratis en compras mayores a $50.',
+    subtitle:
+      'Figures, manga y apparel de tus franquicias favoritas. Envío gratis en compras mayores a $50.',
     primaryCta: { label: 'Explorar catálogo', href: '/products' },
     secondaryCta: { label: 'Ver novedades', href: '/products?filter=new' },
   },
@@ -52,7 +53,8 @@ export const PandaVariant: Story = {
   args: {
     eyebrow: 'B2B · Estampados personalizados',
     title: 'Vende más con tu marca, sin mínimos',
-    subtitle: 'Cotiza tu pedido al por mayor en menos de 24h. NET 30 disponible para clientes calificados.',
+    subtitle:
+      'Cotiza tu pedido al por mayor en menos de 24h. NET 30 disponible para clientes calificados.',
     primaryCta: { label: 'Solicitar cotización', href: '/bulk-order' },
     secondaryCta: { label: 'Ver catálogo', href: '/products' },
   },
@@ -62,7 +64,8 @@ export const LongTitle: Story = {
   args: {
     eyebrow: 'Edición coleccionista',
     title: 'Evangelion Unit-01 escala 1/6 con luz LED y base articulada premium',
-    subtitle: 'Una pieza de museo para los coleccionistas más exigentes. Stock limitado a 200 unidades worldwide.',
+    subtitle:
+      'Una pieza de museo para los coleccionistas más exigentes. Stock limitado a 200 unidades worldwide.',
     primaryCta: { label: 'Reservar ahora', href: '/products/evangelion-unit-01' },
   },
 };

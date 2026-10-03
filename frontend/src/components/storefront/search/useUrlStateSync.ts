@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 export function useUrlStateSync(
   query: string,
   page: number,
-  onMount: (query: string, page: number) => void,
+  onMount: (query: string, page: number) => void
 ): void {
   // Mount: lee URL → estado.
   useEffect(() => {
@@ -39,9 +39,7 @@ export function useUrlStateSync(
       params.set('page', String(page));
     }
     const search = params.toString();
-    const next = search === ''
-      ? window.location.pathname
-      : `${window.location.pathname}?${search}`;
+    const next = search === '' ? window.location.pathname : `${window.location.pathname}?${search}`;
     window.history.replaceState(null, '', next);
   }, [query, page]);
 }

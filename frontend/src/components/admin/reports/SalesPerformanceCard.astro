@@ -66,19 +66,23 @@ const MOCK_VALUES = [4200, 3800, 5100, 4600, 6200, 7800, 5400];
 let metrics: SalesMetric[] = MOCK_METRICS;
 let days: string[] = MOCK_DAYS;
 let values: number[] = MOCK_VALUES;
-let dataSource: 'real' | 'mock' = 'mock';
 
 try {
-  const response = await Astro.fetch('/api/v1/admin/metrics/sales/performance', {
-    credentials: 'include',
+  const response = await fetch(new URL('/api/v1/admin/metrics/sales/performance', Astro.url), {
+    headers: {
+      Cookie: Astro.request.headers.get('Cookie') ?? '',
+    },
   });
   if (response.ok) {
     const payload = (await response.json()) as { data?: SalesPerformanceData };
-    if (payload?.data?.metrics && Array.isArray(payload.data.metrics) && payload.data.metrics.length > 0) {
+    if (
+      payload?.data?.metrics &&
+      Array.isArray(payload.data.metrics) &&
+      payload.data.metrics.length > 0
+    ) {
       metrics = payload.data.metrics;
       days = payload.data.days;
       values = payload.data.values;
-      dataSource = 'real';
     }
   }
 } catch {
@@ -99,22 +103,20 @@ const chartId = `sales-performance-${Math.random().toString(36).slice(2)}`;
   </div>
 
   <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-    {
-      metrics.map((m) => (
-        <div class="rounded-xl bg-slate-50 p-3">
-          <p class="text-xs font-medium text-slate-500">{m.label}</p>
-          <p class="mt-1 text-lg font-bold text-slate-950">{m.value}</p>
-          <p
-            class:list={[
-              'mt-0.5 text-xs font-medium',
-              m.trend === 'up' ? 'text-emerald-600' : 'text-rose-600',
-            ]}
-          >
-            {m.trend === 'up' ? '↗' : '↘'} {m.change}
-          </p>
-        </div>
-      ))
-    }
+    {metrics.map((m) => (
+      <div class="rounded-xl bg-slate-50 p-3">
+        <p class="text-xs font-medium text-slate-500">{m.label}</p>
+        <p class="mt-1 text-lg font-bold text-slate-950">{m.value}</p>
+        <p
+          class:list={[
+            'mt-0.5 text-xs font-medium',
+            m.trend === 'up' ? 'text-emerald-600' : 'text-rose-600',
+          ]}
+        >
+          {m.trend === 'up' ? '↗' : '↘'} {m.change}
+        </p>
+      </div>
+    ))}
   </div>
 
   <div class="h-[240px]">

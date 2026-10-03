@@ -41,110 +41,98 @@ const { attributeGroups, variants, selected, hrefBase, labels } = Astro.props;
  * Helper: ¿qué variant matchea la selección actual?
  */
 const matchedVariant =
-  variants.find((variant) =>
-    variant.attributes.every((attr) => selected[attr.type] === attr.id),
-  ) ?? null;
+  variants.find((variant) => variant.attributes.every((attr) => selected[attr.type] === attr.id)) ??
+  null;
 
 /**
  * Helper: ¿qué variant IDs están en stock por attribute?
  */
 const variantsByAttribute = (type: string): readonly ProductVariant[] =>
-  variants.filter((variant) =>
-    variant.attributes.some((attr) => attr.type === type),
-  );
+  variants.filter((variant) => variant.attributes.some((attr) => attr.type === type));
 
 const hasColorGroup = attributeGroups.some((group) => group[0]?.type === 'color');
 const hasSizeGroup = attributeGroups.some((group) => group[0]?.type === 'size');
 ---
 
-{
-  attributeGroups.map((group) => {
-    const groupType = group[0]?.type;
-    if (groupType === undefined) return null;
+{attributeGroups.map((group) => {
+  const groupType = group[0]?.type;
+  if (groupType === undefined) return null;
 
-    const isColor = groupType === 'color';
-    const titleKey = isColor ? 'colorLabel' : 'sizeLabel';
-    const selectedInGroup = selected[groupType] ?? '';
+  const isColor = groupType === 'color';
+  const titleKey = isColor ? 'colorLabel' : 'sizeLabel';
+  const selectedInGroup = selected[groupType] ?? '';
 
-    return (
-      <fieldset class="flex flex-col gap-2">
-        <legend class="flex items-baseline justify-between text-sm">
-          <span class="font-medium text-slate-700">{labels[titleKey]}</span>
-          {selectedInGroup && (
-            <span class="text-xs font-medium text-slate-500">
-              {group.find((attr) => attr.id === selectedInGroup)?.label ?? ''}
-            </span>
-          )}
-        </legend>
+  return (
+    <fieldset class="flex flex-col gap-2">
+      <legend class="flex items-baseline justify-between text-sm">
+        <span class="font-medium text-slate-700">{labels[titleKey]}</span>
+        {selectedInGroup && (
+          <span class="text-xs font-medium text-slate-500">
+            {group.find((attr) => attr.id === selectedInGroup)?.label ?? ''}
+          </span>
+        )}
+      </legend>
 
-        <div
-          class:list={[
-            'flex flex-wrap gap-2',
-            isColor ? 'gap-3' : 'gap-2',
-          ]}
-          role="radiogroup"
-          aria-label={labels[titleKey]}
-        >
-          {group.map((attr) => {
-            // ¿Hay alguna variant con este attribute + stock > 0?
-            const matchesAttr = variantsByAttribute(groupType).filter((v) =>
-              v.attributes.some((a) => a.id === attr.id),
-            );
-            const hasStockInAttr = matchesAttr.some((v) => v.stock > 0);
-            const isSelected = selectedInGroup === attr.id;
+      <div
+        class:list={['flex flex-wrap gap-2', isColor ? 'gap-3' : 'gap-2']}
+        role="radiogroup"
+        aria-label={labels[titleKey]}
+      >
+        {group.map((attr) => {
+          // ¿Hay alguna variant con este attribute + stock > 0?
+          const matchesAttr = variantsByAttribute(groupType).filter((v) =>
+            v.attributes.some((a) => a.id === attr.id)
+          );
+          const hasStockInAttr = matchesAttr.some((v) => v.stock > 0);
+          const isSelected = selectedInGroup === attr.id;
 
-            // Construir el nuevo map de selección si se clickea este attr.
-            const nextSelected = { ...selected, [groupType]: attr.id };
-            const nextSearch = new URLSearchParams();
-            Object.entries(nextSelected).forEach(([key, value]) => {
-              nextSearch.set(`attr_${key}`, value);
-            });
-            const href = `${hrefBase}?${nextSearch.toString()}`;
+          // Construir el nuevo map de selección si se clickea este attr.
+          const nextSelected = { ...selected, [groupType]: attr.id };
+          const nextSearch = new URLSearchParams();
+          Object.entries(nextSelected).forEach(([key, value]) => {
+            nextSearch.set(`attr_${key}`, value);
+          });
+          const href = `${hrefBase}?${nextSearch.toString()}`;
 
-            return (
-              <a
-                href={hasStockInAttr ? href : undefined}
-                role="radio"
-                aria-checked={isSelected}
-                aria-disabled={!hasStockInAttr}
-                aria-label={
-                  isColor
-                    ? labels.colorSwatchAlt.replace('{name}', attr.label)
-                    : attr.label
-                }
-                class:list={[
-                  'group relative inline-flex items-center justify-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-                  isColor
-                    ? 'h-9 w-9 rounded-full border-2'
-                    : 'h-10 min-w-[3rem] rounded-lg border-2 px-3 text-sm font-medium',
-                  isSelected
-                    ? 'border-[var(--primary,#475569)]'
-                    : 'border-slate-200 hover:border-slate-400',
-                  !hasStockInAttr && 'cursor-not-allowed opacity-40',
-                ]}
-                title={!hasStockInAttr ? labels.outOfStockVariant : attr.label}
-              >
-                {isColor ? (
-                  <span
-                    class="block h-6 w-6 rounded-full border border-slate-200"
-                    style={`background-color: ${attr.hex ?? '#cbd5e1'};`}
-                  />
-                ) : (
-                  <span class:list={['text-slate-700', isSelected && 'font-semibold text-slate-900']}>
-                    {attr.label}
-                  </span>
-                )}
-              </a>
-            );
-          })}
-        </div>
-      </fieldset>
-    );
-  })
-}
+          return (
+            <a
+              href={hasStockInAttr ? href : undefined}
+              role="radio"
+              aria-checked={isSelected}
+              aria-disabled={!hasStockInAttr}
+              aria-label={
+                isColor ? labels.colorSwatchAlt.replace('{name}', attr.label) : attr.label
+              }
+              class:list={[
+                'group relative inline-flex items-center justify-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                isColor
+                  ? 'h-9 w-9 rounded-full border-2'
+                  : 'h-10 min-w-[3rem] rounded-lg border-2 px-3 text-sm font-medium',
+                isSelected
+                  ? 'border-[var(--primary,#475569)]'
+                  : 'border-slate-200 hover:border-slate-400',
+                !hasStockInAttr && 'cursor-not-allowed opacity-40',
+              ]}
+              title={!hasStockInAttr ? labels.outOfStockVariant : attr.label}
+            >
+              {isColor ? (
+                <span
+                  class="block h-6 w-6 rounded-full border border-slate-200"
+                  style={`background-color: ${attr.hex ?? '#cbd5e1'};`}
+                />
+              ) : (
+                <span class:list={['text-slate-700', isSelected && 'font-semibold text-slate-900']}>
+                  {attr.label}
+                </span>
+              )}
+            </a>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+})}
 
-{
-  !matchedVariant && hasColorGroup && hasSizeGroup && (
-    <p class="text-xs italic text-slate-500">{labels.selectSizeFirst}</p>
-  )
-}
+{!matchedVariant && hasColorGroup && hasSizeGroup && (
+  <p class="text-xs italic text-slate-500">{labels.selectSizeFirst}</p>
+)}

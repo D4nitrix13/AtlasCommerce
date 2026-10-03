@@ -37,6 +37,7 @@ se pierden.
 ```
 
 Buscá:
+
 - `Out of memory` → see § "Memory pressure"
 - `Can't save in background` → fork failures → memoria o fork-related
 
@@ -48,6 +49,7 @@ Buscá:
 ```
 
 Métricas clave:
+
 - `used_memory_human`: tamaño actual
 - `used_memory_peak_human`: pico histórico
 - `maxmemory_human`: límite configurado (si está)

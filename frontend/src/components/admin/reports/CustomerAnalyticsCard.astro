@@ -71,18 +71,22 @@ const MOCK_SEGMENTS: CustomerSegment[] = [
 
 let stats: CustomerStat[] = MOCK_STATS;
 let segments: CustomerSegment[] = MOCK_SEGMENTS;
-let dataSource: 'real' | 'mock' = 'mock';
 
 try {
-  const response = await Astro.fetch('/api/v1/admin/metrics/customers/segments', {
-    credentials: 'include',
+  const response = await fetch(new URL('/api/v1/admin/metrics/customers/segments', Astro.url), {
+    headers: {
+      Cookie: Astro.request.headers.get('Cookie') ?? '',
+    },
   });
   if (response.ok) {
     const payload = (await response.json()) as { data?: CustomerData };
-    if (payload?.data?.stats && Array.isArray(payload.data.stats) && payload.data.stats.length > 0) {
+    if (
+      payload?.data?.stats &&
+      Array.isArray(payload.data.stats) &&
+      payload.data.stats.length > 0
+    ) {
       stats = payload.data.stats;
       segments = payload.data.segments;
-      dataSource = 'real';
     }
   }
 } catch {
@@ -103,22 +107,20 @@ const chartId = `customer-analytics-${Math.random().toString(36).slice(2)}`;
   </div>
 
   <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-    {
-      stats.map((s) => (
-        <div class="rounded-xl bg-slate-50 p-3">
-          <p class="text-xs font-medium text-slate-500">{s.label}</p>
-          <p class="mt-1 text-lg font-bold text-slate-950">{s.value}</p>
-          <p
-            class:list={[
-              'mt-0.5 text-xs font-medium',
-              s.trend === 'up' ? 'text-emerald-600' : 'text-rose-600',
-            ]}
-          >
-            {s.trend === 'up' ? '↗' : '↘'} {s.change}
-          </p>
-        </div>
-      ))
-    }
+    {stats.map((s) => (
+      <div class="rounded-xl bg-slate-50 p-3">
+        <p class="text-xs font-medium text-slate-500">{s.label}</p>
+        <p class="mt-1 text-lg font-bold text-slate-950">{s.value}</p>
+        <p
+          class:list={[
+            'mt-0.5 text-xs font-medium',
+            s.trend === 'up' ? 'text-emerald-600' : 'text-rose-600',
+          ]}
+        >
+          {s.trend === 'up' ? '↗' : '↘'} {s.change}
+        </p>
+      </div>
+    ))}
   </div>
 
   <div class="flex items-center gap-6">
@@ -133,17 +135,15 @@ const chartId = `customer-analytics-${Math.random().toString(36).slice(2)}`;
     </div>
 
     <div class="flex-1 space-y-3">
-      {
-        segments.map((s) => (
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`} />
-              <span class="text-sm text-slate-600">{s.label}</span>
-            </div>
-            <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
+      {segments.map((s) => (
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="h-2.5 w-2.5 rounded-full" style={`background:${s.color}`} />
+            <span class="text-sm text-slate-600">{s.label}</span>
           </div>
-        ))
-      }
+          <span class="text-sm font-semibold text-slate-950">{s.value}%</span>
+        </div>
+      ))}
     </div>
   </div>
 </section>

@@ -32,6 +32,8 @@ const t = getServerDictionary(Astro.locals.locale);
   </div>
 
   <section class="grid gap-4 md:grid-cols-2">
-    {coupons.map((coupon) => <CouponCard coupon={coupon} />)}
+    {coupons.map((coupon) => (
+      <CouponCard coupon={coupon} />
+    ))}
   </section>
 </AdminLayout>

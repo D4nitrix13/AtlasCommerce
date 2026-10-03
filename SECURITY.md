@@ -29,8 +29,8 @@ En su lugar, reportá de forma privada a través de uno de estos canales:
 - **GitHub Security Advisories:** desde la pestaña **Security** del
   repositorio → **Report a vulnerability** (Disclosure privado,
   cifrado en tránsito).
-- **Contacto directo** con el mantenedor: `@D4nitrix13` vía DM en GitHub,
-  solo para triage inicial.
+- **Contacto directo** con el mantenedor: `@D4nitrix13` (Daniel
+  Benjamin Pérez Morales) vía DM en GitHub, solo para triage inicial.
 
 ### Qué incluir en el reporte
 

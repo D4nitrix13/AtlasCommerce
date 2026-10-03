@@ -21,12 +21,14 @@ misma base de código (este repo) pero tienen:
 ```txt
 <instancia>/
 ├── .env.example        # Variables de entorno (template)
-├── Caddyfile            # Reverse proxy con dominios
 ├── docker-compose.yml   # 5 servicios: app, frontend, caddy, db, redis
 ├── seeds/
 │   └── *.json           # Config de tenants para tenants:bootstrap
 └── README.md (este archivo es el de la raíz, no se repite)
 ```
+
+El `Caddyfile` reverse-proxy vive en `docker/caddy/Caddyfile` (uno
+solo para todas las instancias) — NO se duplica por instancia.
 
 ## Deploy de una instancia
 
@@ -61,7 +63,8 @@ El primer arranque ejecuta automáticamente (via entrypoint):
 
 1. Crear la carpeta: `mkdir -p docker/instances/<nombre>/seeds`
 2. Copiar `.env.example` y `docker-compose.yml` de otra instancia.
-3. Copiar el `Caddyfile` y ajustar los dominios.
+3. Si la nueva instancia expone dominios nuevos, agregarlos al
+   `docker/caddy/Caddyfile` raíz (el reverse-proxy es compartido).
 4. Crear `seeds/<nombre>.json` con la config de los tenants.
 5. Editar `.env` con passwords y nombres únicos.
 6. Documentar en este README.
@@ -113,4 +116,4 @@ cliente. El JSON de seed declara ambos tenants:
 }
 ```
 
-Caddyfile lista ambos sets de dominios. La BD es compartida.
+`docker/caddy/Caddyfile` lista ambos sets de dominios. La BD es compartida.

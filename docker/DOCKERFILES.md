@@ -26,7 +26,8 @@ CMD ["node", "./dist/server/entry.mjs"]
 **Por qué importa**: dentro de un container, el `PATH` puede incluir
 directorios donde un atacante con acceso de escritura al FS (por
 ejemplo, vía una vulnerabilidad de la app) podría plantar binarios
-maliciosos. `php`, `node`, `composer`, `pnpm`, `chown`, `apk`, `docker-php-ext-install` — todos deben ir con ruta absoluta.
+maliciosos. `php`, `node`, `composer`, `pnpm`, `chown`, `apk`,
+`docker-php-ext-install` — todos deben ir con ruta absoluta.
 
 Excepciones legítimas (binarios que no existen en `/usr/bin` o
 `/usr/local/bin`): ninguno. Si está en el container, está en un path
@@ -155,7 +156,7 @@ para que no quede en la imagen final.
 Si el contexto de build es grande (ej. todo `frontend/`), creá un
 `.dockerignore` al lado del Dockerfile para excluir:
 
-```
+```text
 node_modules
 .git
 .gitignore

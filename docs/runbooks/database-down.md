@@ -38,6 +38,7 @@ docker exec <postgres-container> df -h /var/lib/postgresql
 ```
 
 Buscá:
+
 - `PANIC:` — crash a nivel Postgres, generalmente corrupción
 - `FATAL: could not write to file` — disk full
 - `FATAL: sorry, too many clients already` — pool exhaustion
@@ -66,6 +67,7 @@ Buscá:
 ```
 
 Si hay muchas conexiones activas:
+
 - `idle in transaction` → código que no hace COMMIT/ROLLBACK → matar y abrir ticket
 - `active` con duration alta → query colgada → matar y abrir ticket
 

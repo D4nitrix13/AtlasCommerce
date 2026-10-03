@@ -172,7 +172,9 @@ frontend/
 
 ### Rendering: Hybrido (SSG + Islands)
 
-Astro renderiza las páginas como **estáticas por defecto** (SSG). Los componentes React se hidratan como **islas** bajo demanda usando el atributo `client:*`.
+Astro renderiza las páginas como **estáticas por defecto** (SSG). Los
+componentes React se hidratan como **islas** bajo demanda usando el
+atributo `client:*`.
 
 ```txt
 Página HTML estática (Astro)
@@ -199,8 +201,10 @@ Las rutas se generan automáticamente desde `src/pages/`:
 
 ### Componentes: Astro vs React
 
-- **Componentes `.astro`**: Renderizado estático en build time. No tienen estado ni interactividad.
-- **Componentes React**: Para interactividad (formularios, carrito, modales). Se importan con `client:*`.
+- **Componentes `.astro`**: Renderizado estático en build time. No
+  tienen estado ni interactividad.
+- **Componentes React**: Para interactividad (formularios, carrito,
+  modales). Se importan con `client:*`.
 
 ---
 
@@ -469,7 +473,9 @@ const { title, accent = "emerald" } = Astro.props;
 
 - Estructura base de Astro 6 con React
 - Layout admin con sidebar, header y responsive
-- Dashboard con 6 componentes (MetricCard, RevenueChart, TrafficSourcesCard, MonthlyGoalsCard, RecentOrdersTable, RecentActivityCard)
+- Dashboard con 6 componentes
+  (MetricCard, RevenueChart, TrafficSourcesCard, MonthlyGoalsCard,
+  RecentOrdersTable, RecentActivityCard)
 - Cliente API genérico (`apiFetch`)
 - Mapa de endpoints de la API
 - Configuración del menú admin

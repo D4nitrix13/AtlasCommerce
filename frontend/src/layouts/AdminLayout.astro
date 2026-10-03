@@ -54,14 +54,17 @@ const tenantFavicon = tenantSlug
     <script is:inline>
       (function () {
         try {
-          var c = localStorage.getItem('admin-sidebar-collapsed') === 'true';
-          var isDesktop = window.innerWidth >= 1024;
+          const c = localStorage.getItem('admin-sidebar-collapsed') === 'true';
+          const isDesktop = window.innerWidth >= 1024;
           if (isDesktop) {
             document.documentElement.classList.add(
               c ? 'sidebar-collapsed-init' : 'sidebar-expanded-init'
             );
           }
-        } catch (e) {}
+        } catch {
+          // localStorage puede no estar disponible (modo privado, etc.).
+          // Fallar silenciosamente: sin clases de init, la sidebar usa defaults.
+        }
       })();
     </script>
   </head>

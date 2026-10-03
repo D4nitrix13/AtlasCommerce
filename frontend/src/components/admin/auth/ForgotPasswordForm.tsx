@@ -10,7 +10,7 @@ import { useTranslations } from '../../../i18n';
  * como query param (deep-linkable, sobrevive a refresh).
  */
 
-type ForgotPasswordFormProps = {
+interface ForgotPasswordFormProps {
   callbackPath?: string;
   locale?: string;
   emailPlaceholder?: string;
@@ -18,7 +18,7 @@ type ForgotPasswordFormProps = {
   helperText?: string;
   submitLabel?: string;
   submittingLabel?: string;
-};
+}
 
 export default function ForgotPasswordForm({
   callbackPath = '/admin/dashboard',

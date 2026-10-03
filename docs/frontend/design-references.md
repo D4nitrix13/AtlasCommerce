@@ -57,7 +57,8 @@ Astro 7 + React 19 + Tailwind CSS 4 + TypeScript 6 + Zod 4 + react-hook-form + C
 - Una sola responsabilidad por archivo
 - Tamaño máx: 150 líneas (simple), 250 (mediano), 400 (página)
 - Estados obligatorios: loading · empty · error · success · disabled
-- Tailwind ordenado por intención (layout → position → size → spacing → borders → bg → text → effects → responsive)
+- Tailwind ordenado por intención (layout → position → size → spacing →
+  borders → bg → text → effects → responsive)
 - i18n obligatorio: `es` y `en`
 
 ### 1.3 Estructura del frontend
@@ -708,25 +709,25 @@ Si necesitás ver dashboards en vivo (Baymard son screenshots, no live):
 
 > Baymard Institute. (2025). *Accounts & Self-Service UX: 5 Common
 > Pitfalls & Best Practices*. Retrieved from
-> https://baymard.com/research-articles/current-state-accounts-selfservice
+> <https://baymard.com/research-articles/current-state-accounts-selfservice>
 
 ### 11.2 Cita sobre el 81% icon-based
 
 > Baymard Institute. (2022). *Accounts & Self-Service UX: Consider
 > Having an "Icon-Based" Dashboard (81% Don't)*. Retrieved from
-> https://baymard.com/research-articles/use-icons-in-the-account-dashboard
+> <https://baymard.com/research-articles/use-icons-in-the-account-dashboard>
 
 ### 11.3 Cita sobre long pages vs short pages
 
 > Baymard Institute. (2025). *Account Dashboard Design Guidelines*.
 > Baymard Premium Research. Retrieved from
-> https://baymard.com/ecommerce-design-examples/58-account-dashboard
+> <https://baymard.com/ecommerce-design-examples/58-account-dashboard>
 
 ### 11.4 Cita sobre returns impact
 
 > Baymard Institute. (2024). *Order Tracking & Returns UX Benchmark*.
 > Retrieved from
-> https://baymard.com/research-articles/2024-benchmark-order-tracking-and-returns
+> <https://baymard.com/research-articles/2024-benchmark-order-tracking-and-returns>
 
 ### 11.5 Frase para defender decisiones de diseño en el tribunal
 

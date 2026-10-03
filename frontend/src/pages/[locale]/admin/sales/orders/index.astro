@@ -22,10 +22,7 @@ import OrderTable from '../../../../../components/admin/sales/OrderTable.astro';
 import BulkOrderActions from '../../../../../components/admin/sales/BulkOrderActions.astro';
 import { getServerDictionary, getServerLocale } from '../../../../../i18n/server';
 import { adminUrl } from '../../../../../lib/path-helpers';
-import {
-  getAllOrdersMock,
-  type AdminOrderStatus,
-} from '../../../../../data/sales-mock';
+import { getAllOrdersMock } from '../../../../../data/sales-mock';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
@@ -54,13 +51,13 @@ const currentTotalMax = currentTotalMaxRaw === '' ? null : Number.parseInt(curre
 const currentPageRaw = Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10);
 const currentPage = Number.isFinite(currentPageRaw) && currentPageRaw > 0 ? currentPageRaw : 1;
 
-let filtered = currentStatus === 'all' ? ALL_ORDERS : ALL_ORDERS.filter((o) => o.status === currentStatus);
+let filtered =
+  currentStatus === 'all' ? ALL_ORDERS : ALL_ORDERS.filter((o) => o.status === currentStatus);
 
 if (currentQuery !== '') {
   const needle = currentQuery.toLowerCase();
   filtered = filtered.filter(
-    (o) =>
-      o.number.toLowerCase().includes(needle) || o.customer.name.toLowerCase().includes(needle),
+    (o) => o.number.toLowerCase().includes(needle) || o.customer.name.toLowerCase().includes(needle)
   );
 }
 
@@ -155,12 +152,24 @@ const BULK_FORM_NAME = 'orders-bulk-form';
             name="status"
             class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
           >
-            <option value="all" selected={currentStatus === 'all'}>{t['admin.sales.orders.filters.all']}</option>
-            <option value="pending" selected={currentStatus === 'pending'}>{t['admin.sales.orderStatus.pending']}</option>
-            <option value="processing" selected={currentStatus === 'processing'}>{t['admin.sales.orderStatus.processing']}</option>
-            <option value="shipped" selected={currentStatus === 'shipped'}>{t['admin.sales.orderStatus.shipped']}</option>
-            <option value="delivered" selected={currentStatus === 'delivered'}>{t['admin.sales.orderStatus.delivered']}</option>
-            <option value="cancelled" selected={currentStatus === 'cancelled'}>{t['admin.sales.orderStatus.cancelled']}</option>
+            <option value="all" selected={currentStatus === 'all'}>
+              {t['admin.sales.orders.filters.all']}
+            </option>
+            <option value="pending" selected={currentStatus === 'pending'}>
+              {t['admin.sales.orderStatus.pending']}
+            </option>
+            <option value="processing" selected={currentStatus === 'processing'}>
+              {t['admin.sales.orderStatus.processing']}
+            </option>
+            <option value="shipped" selected={currentStatus === 'shipped'}>
+              {t['admin.sales.orderStatus.shipped']}
+            </option>
+            <option value="delivered" selected={currentStatus === 'delivered'}>
+              {t['admin.sales.orderStatus.delivered']}
+            </option>
+            <option value="cancelled" selected={currentStatus === 'cancelled'}>
+              {t['admin.sales.orderStatus.cancelled']}
+            </option>
           </select>
         </div>
 
@@ -169,7 +178,9 @@ const BULK_FORM_NAME = 'orders-bulk-form';
             {t['admin.sales.orders.filters.dateRange']}
           </legend>
           <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">{t['admin.sales.orders.filters.dateFrom']}</span>
+            <span class="font-medium text-slate-600">
+              {t['admin.sales.orders.filters.dateFrom']}
+            </span>
             <input
               type="date"
               name="dateFrom"
@@ -193,7 +204,9 @@ const BULK_FORM_NAME = 'orders-bulk-form';
             {t['admin.sales.orders.filters.totalRange']}
           </legend>
           <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">{t['admin.sales.orders.filters.totalMin']} ($)</span>
+            <span class="font-medium text-slate-600">
+              {t['admin.sales.orders.filters.totalMin']} ($)
+            </span>
             <input
               type="number"
               name="totalMin"
@@ -204,7 +217,9 @@ const BULK_FORM_NAME = 'orders-bulk-form';
             />
           </label>
           <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">{t['admin.sales.orders.filters.totalMax']} ($)</span>
+            <span class="font-medium text-slate-600">
+              {t['admin.sales.orders.filters.totalMax']} ($)
+            </span>
             <input
               type="number"
               name="totalMax"
@@ -234,7 +249,12 @@ const BULK_FORM_NAME = 'orders-bulk-form';
     </aside>
 
     <section class="flex flex-col gap-4">
-      <form name={BULK_FORM_NAME} id={BULK_FORM_NAME} method="post" action="/api/v1/admin/orders/bulk">
+      <form
+        name={BULK_FORM_NAME}
+        id={BULK_FORM_NAME}
+        method="post"
+        action="/api/v1/admin/orders/bulk"
+      >
         <input type="hidden" name="csrf_token" value="" />
       </form>
 
@@ -257,43 +277,41 @@ const BULK_FORM_NAME = 'orders-bulk-form';
         bulkFormName={BULK_FORM_NAME}
       />
 
-      {
-        showPagination && !showEmpty && (
-          <nav
-            aria-label={t['admin.sales.orders.pagination.page']}
-            class="mt-2 flex items-center justify-between gap-2"
+      {showPagination && !showEmpty && (
+        <nav
+          aria-label={t['admin.sales.orders.pagination.page']}
+          class="mt-2 flex items-center justify-between gap-2"
+        >
+          <a
+            href={pageHref(Math.max(1, clampedPage - 1))}
+            aria-disabled={clampedPage === 1 ? 'true' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+              'hover:border-slate-300',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
+              clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+            ]}
           >
-            <a
-              href={pageHref(Math.max(1, clampedPage - 1))}
-              aria-disabled={clampedPage === 1 ? 'true' : undefined}
-              class:list={[
-                'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-                'hover:border-slate-300',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
-                clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-              ]}
-            >
-              ← {t['admin.sales.orders.pagination.previous']}
-            </a>
-            <p class="text-xs font-medium text-slate-600">
-              {t['admin.sales.orders.pagination.page']} {clampedPage}{' '}
-              {t['admin.sales.orders.pagination.of']} {totalPages}
-            </p>
-            <a
-              href={pageHref(Math.min(totalPages, clampedPage + 1))}
-              aria-disabled={clampedPage === totalPages ? 'true' : undefined}
-              class:list={[
-                'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-                'hover:border-slate-300',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
-                clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-              ]}
-            >
-              {t['admin.sales.orders.pagination.next']} →
-            </a>
-          </nav>
-        )
-      }
+            ← {t['admin.sales.orders.pagination.previous']}
+          </a>
+          <p class="text-xs font-medium text-slate-600">
+            {t['admin.sales.orders.pagination.page']} {clampedPage}{' '}
+            {t['admin.sales.orders.pagination.of']} {totalPages}
+          </p>
+          <a
+            href={pageHref(Math.min(totalPages, clampedPage + 1))}
+            aria-disabled={clampedPage === totalPages ? 'true' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+              'hover:border-slate-300',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
+              clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+            ]}
+          >
+            {t['admin.sales.orders.pagination.next']} →
+          </a>
+        </nav>
+      )}
     </section>
   </div>
 
@@ -312,7 +330,9 @@ const BULK_FORM_NAME = 'orders-bulk-form';
    * Sincroniza la cantidad de checkboxes marcados con el toolbar
    * `BulkOrderActions`.
    */
-  const toolbar = document.querySelector('[role="region"][aria-label="Bulk actions"]') as HTMLElement | null;
+  const toolbar = document.querySelector(
+    '[role="region"][aria-label="Bulk actions"]'
+  ) as HTMLElement | null;
   const statusEl = toolbar?.querySelector('p.text-sm.font-semibold') as HTMLElement | null;
 
   function recount(): void {

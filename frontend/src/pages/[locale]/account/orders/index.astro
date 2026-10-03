@@ -172,42 +172,40 @@ const showPagination = totalPages > 1;
       emptyCtaHref={`${localePrefix}/products`}
     />
 
-    {
-      showPagination && !showEmpty && (
-        <nav
-          aria-label={t['account.orders.list.pagination.page']}
-          class="mt-4 flex items-center justify-between gap-2"
+    {showPagination && !showEmpty && (
+      <nav
+        aria-label={t['account.orders.list.pagination.page']}
+        class="mt-4 flex items-center justify-between gap-2"
+      >
+        <a
+          href={pageHref(Math.max(1, clampedPage - 1))}
+          aria-disabled={clampedPage === 1 ? 'true' : undefined}
+          class:list={[
+            'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+            'hover:border-slate-300',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
+            clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+          ]}
         >
-          <a
-            href={pageHref(Math.max(1, clampedPage - 1))}
-            aria-disabled={clampedPage === 1 ? 'true' : undefined}
-            class:list={[
-              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-              'hover:border-slate-300',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
-              clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-            ]}
-          >
-            ← {t['account.orders.list.pagination.previous']}
-          </a>
-          <p class="text-xs font-medium text-slate-600">
-            {t['account.orders.list.pagination.page']} {clampedPage}{' '}
-            {t['account.orders.list.pagination.of']} {totalPages}
-          </p>
-          <a
-            href={pageHref(Math.min(totalPages, clampedPage + 1))}
-            aria-disabled={clampedPage === totalPages ? 'true' : undefined}
-            class:list={[
-              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-              'hover:border-slate-300',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
-              clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-            ]}
-          >
-            {t['account.orders.list.pagination.next']} →
-          </a>
-        </nav>
-      )
-    }
+          ← {t['account.orders.list.pagination.previous']}
+        </a>
+        <p class="text-xs font-medium text-slate-600">
+          {t['account.orders.list.pagination.page']} {clampedPage}{' '}
+          {t['account.orders.list.pagination.of']} {totalPages}
+        </p>
+        <a
+          href={pageHref(Math.min(totalPages, clampedPage + 1))}
+          aria-disabled={clampedPage === totalPages ? 'true' : undefined}
+          class:list={[
+            'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+            'hover:border-slate-300',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
+            clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+          ]}
+        >
+          {t['account.orders.list.pagination.next']} →
+        </a>
+      </nav>
+    )}
   </section>
 </AccountLayout>

@@ -40,114 +40,109 @@ const typeLabels: Readonly<Record<AddressTypeB2b, string>> = {
   event: t['account.addresses.b2b.type.event'],
 };
 
-const DEFAULT_SELECTED_TYPE: AddressTypeB2b =
-  (B2B_ADDRESS_TYPES[0]?.value ?? 'headquarters') as AddressTypeB2b;
+const DEFAULT_SELECTED_TYPE: AddressTypeB2b = (B2B_ADDRESS_TYPES[0]?.value ??
+  'headquarters') as AddressTypeB2b;
 ---
 
 <AuthLayout title={t['account.addresses.title']}>
   <main class="mx-auto max-w-4xl px-4 py-8">
-    <h1 class="mb-2 text-2xl font-bold text-neutral-900">
-      {t['account.addresses.title']}
-    </h1>
+    <h1 class="mb-2 text-2xl font-bold text-neutral-900">{t['account.addresses.title']}</h1>
     <p class="mb-6 text-sm text-neutral-600">
-      {isPandaB2B
-        ? t['account.addresses.b2b.subtitle']
-        : t['account.addresses.subtitle']}
+      {isPandaB2B ? t['account.addresses.b2b.subtitle'] : t['account.addresses.subtitle']}
     </p>
 
-    {
-      isPandaB2B && (
-        <section
-          aria-labelledby="b2b-addresses-heading"
-          class="mb-8 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-white p-5 shadow-sm sm:p-6"
-        >
-          <header class="mb-4 flex items-start gap-3">
-            <span
-              aria-hidden="true"
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-lg text-emerald-800"
+    {isPandaB2B && (
+      <section
+        aria-labelledby="b2b-addresses-heading"
+        class="mb-8 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-white p-5 shadow-sm sm:p-6"
+      >
+        <header class="mb-4 flex items-start gap-3">
+          <span
+            aria-hidden="true"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-lg text-emerald-800"
+          >
+            🏢
+          </span>
+          <div>
+            <h2
+              id="b2b-addresses-heading"
+              class="text-base font-semibold text-slate-900 sm:text-lg"
             >
-              🏢
-            </span>
-            <div>
-              <h2 id="b2b-addresses-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
-                {t['account.addresses.b2b.heading']}
-              </h2>
-              <p class="mt-1 text-sm text-slate-600">
-                {t['account.addresses.b2b.description']}
-              </p>
+              {t['account.addresses.b2b.heading']}
+            </h2>
+            <p class="mt-1 text-sm text-slate-600">{t['account.addresses.b2b.description']}</p>
+          </div>
+        </header>
+
+        <form class="space-y-5" data-testid="b2b-address-form">
+          <AddressTypePicker
+            name="b2bAddressType"
+            legend={t['account.addresses.b2b.typeField']}
+            helper={t['account.addresses.b2b.typeHelper']}
+            selected={DEFAULT_SELECTED_TYPE}
+            locale={locale === 'en' ? 'en' : 'es'}
+            typeLabels={typeLabels}
+          />
+
+          <BusinessInfoForm
+            razonSocialLabel={t['account.addresses.b2b.razonSocial']}
+            razonSocialPlaceholder={t['account.addresses.b2b.razonSocialPlaceholder']}
+            nombreComercialLabel={t['account.addresses.b2b.nombreComercial']}
+            nombreComercialPlaceholder={t['account.addresses.b2b.nombreComercialPlaceholder']}
+            nitLabel={t['account.addresses.b2b.nit']}
+            nitPlaceholder={t['account.addresses.b2b.nitPlaceholder']}
+            nitHelper={t['account.addresses.b2b.nitHelper']}
+            tipoContribuyenteLabel={t['account.addresses.b2b.tipoContribuyente']}
+            tipoContribuyenteGranLabel={t['account.addresses.b2b.tipoContribuyenteGrande']}
+            tipoContribuyenteMedianoLabel={t['account.addresses.b2b.tipoContribuyenteMediano']}
+            tipoContribuyentePequenoLabel={t['account.addresses.b2b.tipoContribuyentePequeno']}
+          />
+
+          <fieldset class="space-y-2 border-t border-slate-200 pt-4">
+            <legend class="text-sm font-medium text-slate-800">
+              {t['account.addresses.b2b.defaultFlags']}
+            </legend>
+            <p class="text-xs text-slate-500">{t['account.addresses.b2b.defaultFlagsHelper']}</p>
+            <div class="grid gap-2 sm:grid-cols-2">
+              <label class="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="isDefaultBilling"
+                  class="h-4 w-4 rounded border-slate-300 text-[var(--primary,#059669)] focus:ring-[var(--primary,#059669)]"
+                  data-testid="b2b-default-billing"
+                />
+                <span>{t['account.addresses.b2b.defaultBilling']}</span>
+              </label>
+              <label class="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="isDefaultShipping"
+                  class="h-4 w-4 rounded border-slate-300 text-[var(--primary,#059669)] focus:ring-[var(--primary,#059669)]"
+                  data-testid="b2b-default-shipping"
+                />
+                <span>{t['account.addresses.b2b.defaultShipping']}</span>
+              </label>
             </div>
-          </header>
+          </fieldset>
 
-          <form class="space-y-5" data-testid="b2b-address-form">
-            <AddressTypePicker
-              name="b2bAddressType"
-              legend={t['account.addresses.b2b.typeField']}
-              helper={t['account.addresses.b2b.typeHelper']}
-              selected={DEFAULT_SELECTED_TYPE}
-              locale={locale === 'en' ? 'en' : 'es'}
-              typeLabels={typeLabels}
-            />
-
-            <BusinessInfoForm
-              razonSocialLabel={t['account.addresses.b2b.razonSocial']}
-              razonSocialPlaceholder={t['account.addresses.b2b.razonSocialPlaceholder']}
-              nombreComercialLabel={t['account.addresses.b2b.nombreComercial']}
-              nombreComercialPlaceholder={t['account.addresses.b2b.nombreComercialPlaceholder']}
-              nitLabel={t['account.addresses.b2b.nit']}
-              nitPlaceholder={t['account.addresses.b2b.nitPlaceholder']}
-              nitHelper={t['account.addresses.b2b.nitHelper']}
-              tipoContribuyenteLabel={t['account.addresses.b2b.tipoContribuyente']}
-              tipoContribuyenteGranLabel={t['account.addresses.b2b.tipoContribuyenteGrande']}
-              tipoContribuyenteMedianoLabel={t['account.addresses.b2b.tipoContribuyenteMediano']}
-              tipoContribuyentePequenoLabel={t['account.addresses.b2b.tipoContribuyentePequeno']}
-            />
-
-            <fieldset class="space-y-2 border-t border-slate-200 pt-4">
-              <legend class="text-sm font-medium text-slate-800">
-                {t['account.addresses.b2b.defaultFlags']}
-              </legend>
-              <p class="text-xs text-slate-500">{t['account.addresses.b2b.defaultFlagsHelper']}</p>
-              <div class="grid gap-2 sm:grid-cols-2">
-                <label class="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="isDefaultBilling"
-                    class="h-4 w-4 rounded border-slate-300 text-[var(--primary,#059669)] focus:ring-[var(--primary,#059669)]"
-                    data-testid="b2b-default-billing"
-                  />
-                  <span>{t['account.addresses.b2b.defaultBilling']}</span>
-                </label>
-                <label class="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="isDefaultShipping"
-                    class="h-4 w-4 rounded border-slate-300 text-[var(--primary,#059669)] focus:ring-[var(--primary,#059669)]"
-                    data-testid="b2b-default-shipping"
-                  />
-                  <span>{t['account.addresses.b2b.defaultShipping']}</span>
-                </label>
-              </div>
-            </fieldset>
-
-            <div class="flex flex-col gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-end">
-              <button
-                type="button"
-                class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                {t['common.cancel']}
-              </button>
-              <button
-                type="submit"
-                class="inline-flex h-10 items-center justify-center rounded-md bg-[var(--primary,#059669)] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary-hover,#047857)]"
-                data-testid="b2b-address-save"
-              >
-                {t['account.addresses.b2b.save']}
-              </button>
-            </div>
-          </form>
-        </section>
-      )
-    }
+          <div class="flex flex-col gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-end">
+            <button
+              type="button"
+              class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              {t['common.cancel']}
+            </button>
+            <button
+              type="submit"
+              class="inline-flex h-10 items-center justify-center rounded-md bg-[var(--primary,#059669)] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary-hover,#047857)]"
+              data-testid="b2b-address-save"
+            >
+              {t['account.addresses.b2b.save']}
+            </button>
+          </div>
+        </form>
+      </section>
+    )}
 
     <AddressesManager client:only="react" />
   </main>
