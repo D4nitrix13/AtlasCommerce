@@ -5,7 +5,7 @@
 
 ## Estructura
 
-```
+```text
 backend/lang/
 ├── es/
 │   └── emails.php    ← Traducciones español
@@ -46,7 +46,7 @@ return LocalizedMail::for($user, 'auth.email_otp')
 
 ### Locale resolution
 
-```
+```text
 User->locale (columna explícita en users)
   ↓ si null
 App::getLocale() (runtime override)

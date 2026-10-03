@@ -509,7 +509,8 @@ const es: Translations = {
   'storefront.productDetail.onlyLeft': '¡Solo {count} disponibles!',
   'storefront.productDetail.addToCart': 'Añadir al carrito',
   'storefront.productDetail.addingToCart': 'Añadiendo...',
-  'storefront.productDetail.addToCartHint': 'El carrito se habilitará en la próxima fase (cart store).',
+  'storefront.productDetail.addToCartHint':
+    'El carrito se habilitará en la próxima fase (cart store).',
   'storefront.productDetail.category': 'Categoría',
   'storefront.productDetail.notFound': 'Producto no encontrado.',
   'storefront.productDetail.notFoundHint':
@@ -603,8 +604,7 @@ const es: Translations = {
   'account.addresses.b2b.description':
     'Agregá todas las direcciones de tu empresa. Cada una puede ser la dirección de facturación o de envío por defecto.',
   'account.addresses.b2b.typeField': 'Tipo de dirección',
-  'account.addresses.b2b.typeHelper':
-    'Elegí la función de esta dirección dentro de tu empresa.',
+  'account.addresses.b2b.typeHelper': 'Elegí la función de esta dirección dentro de tu empresa.',
   'account.addresses.b2b.type.headquarters': 'Sede central',
   'account.addresses.b2b.type.warehouse': 'Almacén',
   'account.addresses.b2b.type.office': 'Oficina',
@@ -711,7 +711,8 @@ const es: Translations = {
   'storefront.checkout.contact.subscribeLabel': 'Quiero recibir novedades y ofertas por correo.',
   'storefront.checkout.contact.guestOption': 'Continuar como invitado',
   'storefront.checkout.contact.memberLogin': '¿Ya tenés cuenta? Iniciá sesión',
-  'storefront.checkout.contact.memberHint': 'Iniciar sesión acelera el checkout con direcciones guardadas.',
+  'storefront.checkout.contact.memberHint':
+    'Iniciar sesión acelera el checkout con direcciones guardadas.',
   'storefront.checkout.contact.continueAsGuest': 'Continuar como invitado',
   'storefront.checkout.contact.continueToShipping': 'Continuar a envío',
   'storefront.checkout.contact.error.emailEmpty': 'El correo es obligatorio.',
@@ -778,7 +779,8 @@ const es: Translations = {
   'storefront.checkout.trust.net30': 'NET 30 B2B',
   'storefront.checkout.trust.gdpr': 'Cumplimos GDPR',
   'storefront.checkout.success.title': '¡Pedido confirmado!',
-  'storefront.checkout.success.subtitle': 'Gracias por tu compra. Te enviamos un correo con los detalles.',
+  'storefront.checkout.success.subtitle':
+    'Gracias por tu compra. Te enviamos un correo con los detalles.',
   'storefront.checkout.success.orderNumber': 'Número de pedido',
   'storefront.checkout.success.confirmationEmail': 'Recibirás un correo de confirmación en breve.',
   'storefront.checkout.success.continueShopping': 'Seguir comprando',
@@ -914,6 +916,96 @@ const es: Translations = {
   'admin.customers.confirmReactivate': '¿Reactivar este cliente?',
   'admin.customers.close': 'Cerrar',
 
+  // ─── admin: metrics (F5.1) ────────────────────────────────────────────────
+  'admin.metrics.metricTitles.totalRevenue': 'Ingresos totales',
+  'admin.metrics.metricTitles.activeUsers': 'Usuarios activos',
+  'admin.metrics.metricTitles.totalOrders': 'Pedidos totales',
+  'admin.metrics.metricTitles.visits': 'Visitas',
+  'admin.metrics.metricTitles.avgTicket': 'Ticket promedio',
+  'admin.metrics.metricTitles.conversionRate': 'Tasa de conversión',
+  'admin.metrics.metricCard.changeVsPrevious': 'vs mes anterior',
+
+  // ─── admin: dashboard (F5.1) ────────────────────────────────────────────────
+  'admin.dashboard.layout.title': 'Dashboard · Admin',
+  'admin.dashboard.title': 'Dashboard',
+  'admin.dashboard.subtitle': 'Vista general de las métricas clave de tu tienda.',
+  'admin.dashboard.lowStock.heading': 'Stock bajo',
+  'admin.dashboard.lowStock.subtitle': 'Productos con inventario crítico o bajo.',
+  'admin.dashboard.lowStock.viewAll': 'Ver todo',
+  'admin.dashboard.lowStock.col.product': 'Producto',
+  'admin.dashboard.lowStock.col.sku': 'SKU',
+  'admin.dashboard.lowStock.col.stock': 'Stock',
+  'admin.dashboard.lowStock.col.status': 'Estado',
+  'admin.dashboard.lowStock.status.critical': 'Crítico',
+  'admin.dashboard.lowStock.status.low': 'Bajo',
+  'admin.dashboard.monthlyGoals.heading': 'Metas del mes',
+  'admin.dashboard.monthlyGoals.subtitle': 'Avance hacia los objetivos mensuales.',
+  'admin.dashboard.monthlyGoals.targetLabel': 'Objetivo',
+  'admin.dashboard.monthlyGoals.metric.monthlyRevenue': 'Ingresos del mes',
+  'admin.dashboard.monthlyGoals.metric.newCustomers': 'Clientes nuevos',
+  'admin.dashboard.monthlyGoals.metric.conversionRate': 'Conversión',
+  'admin.dashboard.recentActivity.heading': 'Actividad reciente',
+  'admin.dashboard.recentActivity.subtitle': 'Últimos eventos relevantes del sistema.',
+  'admin.dashboard.recentActivity.viewAll': 'Ver todo',
+  'admin.dashboard.recentOrders.heading': 'Pedidos recientes',
+  'admin.dashboard.recentOrders.subtitle': 'Los últimos pedidos de la tienda.',
+  'admin.dashboard.recentOrders.viewAll': 'Ver todo',
+  'admin.dashboard.recentOrders.empty': 'Aún no hay pedidos.',
+  'admin.dashboard.recentOrders.col.order': 'Pedido',
+  'admin.dashboard.recentOrders.col.product': 'Producto',
+  'admin.dashboard.recentOrders.col.customer': 'Cliente',
+  'admin.dashboard.recentOrders.col.amount': 'Monto',
+  'admin.dashboard.recentOrders.col.status': 'Estado',
+  'admin.dashboard.revenueChart.heading': 'Ingresos vs período anterior',
+  'admin.dashboard.revenueChart.subtitle': 'Comparativa de los últimos 30 días.',
+  'admin.dashboard.revenueChart.toggle.income': 'Ingresos',
+  'admin.dashboard.revenueChart.toggle.orders': 'Pedidos',
+  'admin.dashboard.revenueChart.toggle.profit': 'Ganancia',
+  'admin.dashboard.revenueChart.datasetLabel.income': 'Ingresos',
+  'admin.dashboard.trafficSources.heading': 'Fuentes de tráfico',
+  'admin.dashboard.trafficSources.subtitle': 'De dónde vienen tus visitantes.',
+  'admin.dashboard.trafficSources.centerLabel.visits': 'visitas',
+  'admin.dashboard.trafficSources.legend.direct': 'Directo',
+  'admin.dashboard.trafficSources.legend.organic': 'Orgánico',
+  'admin.dashboard.trafficSources.legend.referral': 'Referidos',
+  'admin.dashboard.trafficSources.legend.social': 'Redes sociales',
+
+  // ─── admin: reports (F5.1) ────────────────────────────────────────────────
+  'admin.reports.layout.title': 'Reportes · Admin',
+  'admin.reports.title': 'Reportes',
+  'admin.reports.subtitle': 'Análisis detallado del rendimiento de la tienda.',
+  'admin.reports.revenueOverview.heading': 'Resumen de ingresos',
+  'admin.reports.revenueOverview.subtitle': 'Evolución de los ingresos en el período seleccionado.',
+  'admin.reports.salesPerformance.heading': 'Rendimiento de ventas',
+  'admin.reports.salesPerformance.subtitle': 'Métricas clave del equipo comercial.',
+  'admin.reports.salesPerformance.metric.totalSold': 'Unidades vendidas',
+  'admin.reports.salesPerformance.metric.avgTicket': 'Ticket promedio',
+  'admin.reports.salesPerformance.metric.conversionRate': 'Tasa de conversión',
+  'admin.reports.salesPerformance.metric.returns': 'Devoluciones',
+  'admin.reports.salesPerformance.datasetLabel.sales': 'Ventas',
+  'admin.reports.customerAnalytics.heading': 'Analítica de clientes',
+  'admin.reports.customerAnalytics.subtitle': 'Segmentación y comportamiento de clientes.',
+  'admin.reports.customerAnalytics.metric.totalCustomers': 'Clientes totales',
+  'admin.reports.customerAnalytics.metric.activeCustomers': 'Clientes activos',
+  'admin.reports.customerAnalytics.metric.newThisMonth': 'Nuevos este mes',
+  'admin.reports.customerAnalytics.metric.returnRate': 'Tasa de retorno',
+  'admin.reports.customerAnalytics.centerLabel.total': 'total',
+  'admin.reports.customerAnalytics.segment.new': 'Nuevos',
+  'admin.reports.customerAnalytics.segment.occasional': 'Ocasionales',
+  'admin.reports.customerAnalytics.segment.frequent': 'Frecuentes',
+  'admin.reports.customerAnalytics.segment.inactive': 'Inactivos',
+  'admin.reports.topProducts.heading': 'Productos top',
+  'admin.reports.topProducts.subtitle': 'Los productos más vendidos del período.',
+  'admin.reports.topProducts.viewAll': 'Ver todos',
+  'admin.reports.topProducts.units': 'unidades',
+  'admin.reports.trafficOverview.heading': 'Resumen de tráfico',
+  'admin.reports.trafficOverview.subtitle': 'Volumen y fuentes de las visitas.',
+  'admin.reports.trafficOverview.centerLabel.visits': 'visitas',
+  'admin.reports.trafficOverview.topPages.heading': 'Páginas más vistas',
+
+  // ─── auth: guard ────────────────────────────────────────────────
+  'auth.guard.hydrating': 'Cargando sesión...',
+
   // ─── admin: catalog (F5.3) ───────────────────────────────────────────
   'admin.catalog.title': 'Catálogo',
   'admin.catalog.subtitle':
@@ -964,8 +1056,7 @@ const es: Translations = {
   'admin.catalog.products.column.actions': 'Acciones',
   'admin.catalog.products.column.updatedAt': 'Actualizado',
   'admin.catalog.products.empty': 'No hay productos que coincidan con los filtros.',
-  'admin.catalog.products.emptyHint':
-    'Probá limpiar los filtros o crear un producto nuevo.',
+  'admin.catalog.products.emptyHint': 'Probá limpiar los filtros o crear un producto nuevo.',
   'admin.catalog.products.status.active': 'Activo',
   'admin.catalog.products.status.draft': 'Borrador',
   'admin.catalog.products.status.archived': 'Archivado',
@@ -1091,8 +1182,7 @@ const es: Translations = {
   'admin.catalog.media.alt': 'Texto alternativo',
   'admin.catalog.media.remove': 'Eliminar imagen',
   'admin.catalog.media.empty': 'Todavía no subiste imágenes.',
-  'admin.catalog.media.help':
-    'Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo 5MB por imagen.',
+  'admin.catalog.media.help': 'Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo 5MB por imagen.',
   'admin.catalog.pagination.previous': 'Anterior',
   'admin.catalog.pagination.next': 'Siguiente',
   'admin.catalog.pagination.page': 'Página',
@@ -1318,7 +1408,8 @@ const es: Translations = {
   'account.orders.list.loading': 'Cargando tus pedidos...',
   'account.orders.list.error': 'No pudimos cargar tus pedidos.',
   'account.orders.list.empty.title': 'Aún no tenés pedidos.',
-  'account.orders.list.empty.hint': 'Cuando hagas tu primera compra, vas a poder hacer seguimiento desde acá.',
+  'account.orders.list.empty.hint':
+    'Cuando hagas tu primera compra, vas a poder hacer seguimiento desde acá.',
   'account.orders.list.empty.cta': 'Explorar catálogo',
   'account.orders.list.filter.all': 'Todos',
   'account.orders.list.filter.pending': 'Pendiente',
@@ -1348,13 +1439,17 @@ const es: Translations = {
   'account.orders.detail.summary.status': 'Estado',
   'account.orders.detail.timeline.heading': 'Estado del envío',
   'account.orders.detail.timeline.received': 'Recibido en el dojo',
-  'account.orders.detail.timeline.receivedDescription': 'Confirmamos tu pedido y empezamos a prepararlo.',
+  'account.orders.detail.timeline.receivedDescription':
+    'Confirmamos tu pedido y empezamos a prepararlo.',
   'account.orders.detail.timeline.preparing': 'Preparando con cuidado',
-  'account.orders.detail.timeline.preparingDescription': 'Estamos embalando tus figuras con protección extra.',
+  'account.orders.detail.timeline.preparingDescription':
+    'Estamos embalando tus figuras con protección extra.',
   'account.orders.detail.timeline.shipped': 'En camino al viajero',
-  'account.orders.detail.timeline.shippedDescription': 'Salió de nuestro almacén y va rumbo a tu ciudad.',
+  'account.orders.detail.timeline.shippedDescription':
+    'Salió de nuestro almacén y va rumbo a tu ciudad.',
   'account.orders.detail.timeline.outForDelivery': 'Casi en tu santuario',
-  'account.orders.detail.timeline.outForDeliveryDescription': 'El courier está en la última milla y pronto llega a tu puerta.',
+  'account.orders.detail.timeline.outForDeliveryDescription':
+    'El courier está en la última milla y pronto llega a tu puerta.',
   'account.orders.detail.timeline.delivered': 'Entregado',
   'account.orders.detail.timeline.deliveredDescription': '¡Llegó! Que disfrutes tu colección.',
   'account.orders.detail.items.heading': 'Productos',
@@ -1381,16 +1476,19 @@ const es: Translations = {
   'account.orders.detail.tracking.notShipped': 'Aún no se ha generado un número de seguimiento.',
   'account.orders.detail.reorder': 'Volver a pedir',
   'account.orders.detail.notFound.title': 'No encontramos este pedido.',
-  'account.orders.detail.notFound.hint': 'Es posible que el link haya expirado o que el pedido pertenezca a otra cuenta.',
+  'account.orders.detail.notFound.hint':
+    'Es posible que el link haya expirado o que el pedido pertenezca a otra cuenta.',
   'account.orders.detail.notFound.back': 'Volver a mis pedidos',
-  'account.orders.detail.cancelled.banner': 'Este pedido fue cancelado. Si querés, podés hacer un nuevo pedido desde el catálogo.',
+  'account.orders.detail.cancelled.banner':
+    'Este pedido fue cancelado. Si querés, podés hacer un nuevo pedido desde el catálogo.',
   'account.orders.detail.addedDaysAgo': 'hace {days} días',
   'account.orders.detail.addedYesterday': 'ayer',
   'account.orders.detail.addedToday': 'hoy',
 
   // ─── account: wishlist "My Collection" (F2.3) ──────────────
   'account.wishlist.heading': 'My Collection',
-  'account.wishlist.subtitle': 'Tu colección curada de figuras, manga y merchandise. Guardá el contexto que tenés en la cabeza.',
+  'account.wishlist.subtitle':
+    'Tu colección curada de figuras, manga y merchandise. Guardá el contexto que tenés en la cabeza.',
   'account.wishlist.count': '{count} guardados',
   'account.wishlist.loading': 'Cargando tu colección...',
   'account.wishlist.error': 'No pudimos cargar tu colección.',
@@ -1406,7 +1504,8 @@ const es: Translations = {
   'account.wishlist.item.notifying': 'Te avisaremos cuando vuelva.',
   'account.wishlist.item.confirmRemove': '¿Quitar esta pieza de tu colección?',
   'account.wishlist.empty.title': 'Tu colección está vacía.',
-  'account.wishlist.empty.hint': 'Acá vas a ver las figuras, manga y merchandising que guardes para más tarde. Agregá notas personales y te avisaremos cuando vuelvan a estar disponibles.',
+  'account.wishlist.empty.hint':
+    'Acá vas a ver las figuras, manga y merchandising que guardes para más tarde. Agregá notas personales y te avisaremos cuando vuelvan a estar disponibles.',
   'account.wishlist.empty.cta': 'Explorar catálogo',
 
   'format.empty': '—',
@@ -1424,7 +1523,8 @@ const es: Translations = {
   'admin.inventory.hub.archivedProducts': 'Productos archivados',
   'admin.inventory.hub.archivedProductsHint': '23 productos dados de baja por desuso.',
   'admin.inventory.stock.title': 'Stock por producto',
-  'admin.inventory.stock.subtitle': 'Vista consolidada de existencias por producto, variante y depósito.',
+  'admin.inventory.stock.subtitle':
+    'Vista consolidada de existencias por producto, variante y depósito.',
   'admin.inventory.stock.searchPlaceholder': 'Buscar por nombre o SKU...',
   'admin.inventory.stock.filter.allStatuses': 'Todos los estados',
   'admin.inventory.stock.filter.allWarehouses': 'Todos los depósitos',
@@ -1445,7 +1545,8 @@ const es: Translations = {
   'admin.inventory.stock.actions.viewHistory': 'Ver historial',
   'admin.inventory.stock.actions.export': 'Exportar CSV',
   'admin.inventory.movements.title': 'Movimientos de inventario',
-  'admin.inventory.movements.subtitle': 'Entradas, salidas, ajustes y transferencias entre depósitos.',
+  'admin.inventory.movements.subtitle':
+    'Entradas, salidas, ajustes y transferencias entre depósitos.',
   'admin.inventory.movements.column.type': 'Tipo',
   'admin.inventory.movements.column.product': 'Producto',
   'admin.inventory.movements.column.quantity': 'Cantidad',
@@ -1461,7 +1562,8 @@ const es: Translations = {
   'admin.inventory.movements.empty': 'No hay movimientos registrados en el rango seleccionado.',
   'admin.inventory.movements.export': 'Exportar',
   'admin.inventory.warehouses.title': 'Depósitos',
-  'admin.inventory.warehouses.subtitle': 'Listado de almacenes físicos y sus métricas de ocupación.',
+  'admin.inventory.warehouses.subtitle':
+    'Listado de almacenes físicos y sus métricas de ocupación.',
   'admin.inventory.warehouses.card.address': 'Dirección',
   'admin.inventory.warehouses.card.manager': 'Encargado',
   'admin.inventory.warehouses.card.capacity': 'Capacidad',
@@ -1501,7 +1603,8 @@ const es: Translations = {
   'admin.marketing.hub.activeCoupons': 'Cupones activos',
   'admin.marketing.hub.activeCouponsHint': '4 vigentes + 2 programados para fin de año.',
   'admin.marketing.hub.activePromotions': 'Promociones vigentes',
-  'admin.marketing.hub.activePromotionsHint': '3 promociones activas. 1 BOGO + 1 envío gratis + 1 % off.',
+  'admin.marketing.hub.activePromotionsHint':
+    '3 promociones activas. 1 BOGO + 1 envío gratis + 1 % off.',
   'admin.marketing.hub.conversionRate': 'Tasa de conversión',
   'admin.marketing.hub.conversionRateHint': '3.8% sobre 12,400 sesiones con cupón aplicado.',
   'admin.marketing.hub.redemptionsMonth': 'Canjes este mes',
@@ -1542,7 +1645,8 @@ const es: Translations = {
   'admin.marketing.coupons.detail.edit': 'Editar',
   'admin.marketing.coupons.detail.deactivate': 'Desactivar',
   'admin.marketing.promotions.title': 'Promociones',
-  'admin.marketing.promotions.subtitle': 'Reglas automáticas (BOGO, % off, envío gratis) que se aplican al carrito.',
+  'admin.marketing.promotions.subtitle':
+    'Reglas automáticas (BOGO, % off, envío gratis) que se aplican al carrito.',
   'admin.marketing.promotions.create': 'Nueva promoción',
   'admin.marketing.promotions.column.name': 'Nombre',
   'admin.marketing.promotions.column.kind': 'Tipo',
@@ -1559,11 +1663,14 @@ const es: Translations = {
   'admin.marketing.promotions.builder.step.rules': '2. Reglas',
   'admin.marketing.promotions.builder.step.schedule': '3. Vigencia',
   'admin.marketing.promotions.builder.kind.bogo.title': 'BOGO (compra y llevá)',
-  'admin.marketing.promotions.builder.kind.bogo.description': 'Ej: 2x1, 3x2, 50% off en el segundo.',
+  'admin.marketing.promotions.builder.kind.bogo.description':
+    'Ej: 2x1, 3x2, 50% off en el segundo.',
   'admin.marketing.promotions.builder.kind.percent.title': 'Porcentaje de descuento',
-  'admin.marketing.promotions.builder.kind.percent.description': 'X% off sobre una categoría o producto.',
+  'admin.marketing.promotions.builder.kind.percent.description':
+    'X% off sobre una categoría o producto.',
   'admin.marketing.promotions.builder.kind.freeShipping.title': 'Envío gratis',
-  'admin.marketing.promotions.builder.kind.freeShipping.description': 'Activar envío gratis a partir de un subtotal mínimo.',
+  'admin.marketing.promotions.builder.kind.freeShipping.description':
+    'Activar envío gratis a partir de un subtotal mínimo.',
   'admin.marketing.promotions.builder.fields.buyQuantity': 'Cantidad a comprar',
   'admin.marketing.promotions.builder.fields.getQuantity': 'Cantidad bonificada',
   'admin.marketing.promotions.builder.fields.percentOff': '% descuento',
@@ -1582,7 +1689,8 @@ const es: Translations = {
   'admin.support.hub.pendingQuestions': 'Preguntas pendientes',
   'admin.support.hub.pendingQuestionsHint': '8 preguntas de producto sin responder.',
   'admin.support.hub.reviewsPending': 'Reseñas por moderar',
-  'admin.support.hub.reviewsPendingHint': '12 reseñas esperando aprobación. 2 marcadas como sospechosas.',
+  'admin.support.hub.reviewsPendingHint':
+    '12 reseñas esperando aprobación. 2 marcadas como sospechosas.',
   'admin.support.hub.urgentTickets': 'Tickets urgentes',
   'admin.support.hub.urgentTicketsHint': '2 tickets marcados como urgentes.',
   'admin.support.tickets.title': 'Tickets',
@@ -1642,10 +1750,12 @@ const es: Translations = {
 
   // ─── admin: settings — taxes (F5.5) ──────────────────────────────
   'admin.settings.taxes.title': 'Impuestos',
-  'admin.settings.taxes.subtitle': 'Configurá tasas por país y definí si los precios incluyen impuestos.',
+  'admin.settings.taxes.subtitle':
+    'Configurá tasas por país y definí si los precios incluyen impuestos.',
   'admin.settings.taxes.defaultRate': 'Tasa por defecto',
   'admin.settings.taxes.taxIncluded': 'Precios incluyen impuestos',
-  'admin.settings.taxes.taxIncludedHelp': 'Activá esta opción si los precios mostrados en el storefront ya incluyen IVA.',
+  'admin.settings.taxes.taxIncludedHelp':
+    'Activá esta opción si los precios mostrados en el storefront ya incluyen IVA.',
   'admin.settings.taxes.column.country': 'País',
   'admin.settings.taxes.column.region': 'Región',
   'admin.settings.taxes.column.rate': 'Tasa',
@@ -1661,7 +1771,8 @@ const es: Translations = {
   'admin.settings.currencies.title': 'Monedas',
   'admin.settings.currencies.subtitle': 'Lista de monedas aceptadas y tasas de conversión.',
   'admin.settings.currencies.base': 'Moneda base',
-  'admin.settings.currencies.baseHelp': 'La moneda base define los reportes y la conversión por defecto.',
+  'admin.settings.currencies.baseHelp':
+    'La moneda base define los reportes y la conversión por defecto.',
   'admin.settings.currencies.column.code': 'Código',
   'admin.settings.currencies.column.name': 'Nombre',
   'admin.settings.currencies.column.symbol': 'Símbolo',

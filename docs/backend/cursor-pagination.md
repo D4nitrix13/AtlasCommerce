@@ -84,10 +84,11 @@ COUNT(*) extra (caro a escala). Para conocer el total el cliente usa
 
 1. **`orderBy` debe terminar en columna única e indexada.** Laravel
    requiere esto para garantizar cursor estable:
-   ```php
-   $query->orderBy('email')->orderBy('id'); // ✓ email para sort, id para cursor
-   $query->orderBy('email');                 // ✗ email no es único
-   ```
+
+    ```php
+    $query->orderBy('email')->orderBy('id'); // ✓ email para sort, id para cursor
+    $query->orderBy('email');                 // ✗ email no es único
+    ```
 
 2. **`per_page` se clampea a 100.** Más que eso degrada la experiencia
    y satura la DB. Para exports masivos usar endpoint dedicado

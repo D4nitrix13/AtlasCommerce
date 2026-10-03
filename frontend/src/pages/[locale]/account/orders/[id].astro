@@ -58,198 +58,194 @@ const STATUS_HERO = {
 ---
 
 <AccountLayout title={t['account.orders.detail.heading']}>
-  {
-    !order && (
-      <section class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+  {!order && (
+    <section class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+      <div
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl"
+        aria-hidden="true"
+      >
+        🔍
+      </div>
+      <p class="text-base font-semibold text-slate-900 sm:text-lg">
+        {t['account.orders.detail.notFound.title']}
+      </p>
+      <p class="max-w-md text-sm text-slate-500">{t['account.orders.detail.notFound.hint']}</p>
+      <a
+        href={`${localePrefix}/account/orders`}
+        class="mt-2 inline-flex items-center gap-1 rounded-lg bg-[var(--primary,#7c3aed)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+      >
+        {t['account.orders.detail.notFound.back']}
+      </a>
+    </section>
+  )}
+
+  {order && (
+    <div class="flex flex-col gap-6">
+      <a
+        href={`${localePrefix}/account/orders`}
+        class="inline-flex w-fit items-center gap-1 text-sm font-medium text-[var(--primary,#7c3aed)] transition hover:underline focus-visible:outline-none focus-visible:underline"
+      >
+        ← {t['account.orders.detail.backToList']}
+      </a>
+
+      {order.status === 'cancelled' && (
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl"
-          aria-hidden="true"
+          role="status"
+          class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
         >
-          🔍
+          <span aria-hidden="true" class="text-base">
+            ⚠
+          </span>
+          <p>{t['account.orders.detail.cancelled.banner']}</p>
         </div>
-        <p class="text-base font-semibold text-slate-900 sm:text-lg">
-          {t['account.orders.detail.notFound.title']}
-        </p>
-        <p class="max-w-md text-sm text-slate-500">{t['account.orders.detail.notFound.hint']}</p>
-        <a
-          href={`${localePrefix}/account/orders`}
-          class="mt-2 inline-flex items-center gap-1 rounded-lg bg-[var(--primary,#7c3aed)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
-        >
-          {t['account.orders.detail.notFound.back']}
-        </a>
-      </section>
-    )
-  }
+      )}
 
-  {
-    order && (
-      <div class="flex flex-col gap-6">
-        <a
-          href={`${localePrefix}/account/orders`}
-          class="inline-flex w-fit items-center gap-1 text-sm font-medium text-[var(--primary,#7c3aed)] transition hover:underline focus-visible:outline-none focus-visible:underline"
-        >
-          ← {t['account.orders.detail.backToList']}
-        </a>
-
-        {order.status === 'cancelled' && (
-          <div
-            role="status"
-            class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-          >
-            <span aria-hidden="true" class="text-base">
-              ⚠
-            </span>
-            <p>{t['account.orders.detail.cancelled.banner']}</p>
+      <section
+        aria-labelledby="order-summary-heading"
+        class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      >
+        <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div class="flex flex-col gap-1">
+            <h1 id="order-summary-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
+              {orderIdTemplate.replace('{id}', order.id)}
+            </h1>
+            <p class="text-sm text-slate-500">
+              {t['account.orders.detail.summary.placedOn']}{' '}
+              <time datetime={order.date}>{formatDate(order.date)}</time>
+            </p>
           </div>
-        )}
+          <div class="flex flex-wrap items-center gap-2">
+            <Badge status={order.status} label={statusLabel(order.status)} />
+            <span
+              class:list={[
+                'inline-flex items-center rounded-full px-3 py-1 text-base font-bold tabular-nums',
+                STATUS_HERO[order.status as OrderStatus],
+              ]}
+            >
+              {formatCentsAsDecimal(order.totalCents, 'USD')}
+            </span>
+          </div>
+        </header>
 
-        <section
-          aria-labelledby="order-summary-heading"
-          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-        >
-          <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <div class="flex flex-col gap-1">
-              <h1 id="order-summary-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
-                {orderIdTemplate.replace('{id}', order.id)}
-              </h1>
-              <p class="text-sm text-slate-500">
-                {t['account.orders.detail.summary.placedOn']}{' '}
-                <time datetime={order.date}>{formatDate(order.date)}</time>
+        {(order.trackingNumber || order.trackingCarrier) && (
+          <div class="mt-4 flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+            <div class="flex-1">
+              <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+                {t['account.orders.detail.tracking.heading']}
+              </p>
+              <p class="mt-1 font-mono text-sm text-slate-900">
+                <span class="text-slate-500">{t['account.orders.detail.tracking.carrier']}:</span>{' '}
+                {order.trackingCarrier ?? '—'}
+                {' · '}
+                <span class="text-slate-500">
+                  {t['account.orders.detail.tracking.number']}:
+                </span>{' '}
+                {order.trackingNumber ?? '—'}
               </p>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <Badge status={order.status} label={statusLabel(order.status)} />
-              <span
-                class:list={[
-                  'inline-flex items-center rounded-full px-3 py-1 text-base font-bold tabular-nums',
-                  STATUS_HERO[order.status as OrderStatus],
-                ]}
+            {order.trackingUrl && (
+              <a
+                href={order.trackingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-[var(--primary,#7c3aed)] transition hover:border-[var(--primary,#7c3aed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
               >
-                {formatCentsAsDecimal(order.totalCents, 'USD')}
-              </span>
-            </div>
-          </header>
-
-          {(order.trackingNumber || order.trackingCarrier) && (
-            <div class="mt-4 flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
-              <div class="flex-1">
-                <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
-                  {t['account.orders.detail.tracking.heading']}
-                </p>
-                <p class="mt-1 font-mono text-sm text-slate-900">
-                  <span class="text-slate-500">{t['account.orders.detail.tracking.carrier']}:</span>{' '}
-                  {order.trackingCarrier ?? '—'}
-                  {' · '}
-                  <span class="text-slate-500">
-                    {t['account.orders.detail.tracking.number']}:
-                  </span>{' '}
-                  {order.trackingNumber ?? '—'}
-                </p>
-              </div>
-              {order.trackingUrl && (
-                <a
-                  href={order.trackingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-[var(--primary,#7c3aed)] transition hover:border-[var(--primary,#7c3aed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
-                >
-                  {t['account.orders.detail.tracking.openLabel']} ↗
-                </a>
-              )}
-            </div>
-          )}
-          {!order.trackingNumber && order.status !== 'cancelled' && (
-            <p class="mt-4 rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-500">
-              {t['account.orders.detail.tracking.notShipped']}
-            </p>
-          )}
-        </section>
-
-        <OrderTimeline
-          milestones={order.milestones}
-          heading={t['account.orders.detail.timeline.heading']}
-          labels={[
-            {
-              key: 'received',
-              title: t['account.orders.detail.timeline.received'],
-              description: t['account.orders.detail.timeline.receivedDescription'],
-              icon: '⛩',
-            },
-            {
-              key: 'preparing',
-              title: t['account.orders.detail.timeline.preparing'],
-              description: t['account.orders.detail.timeline.preparingDescription'],
-              icon: '🎨',
-            },
-            {
-              key: 'shipped',
-              title: t['account.orders.detail.timeline.shipped'],
-              description: t['account.orders.detail.timeline.shippedDescription'],
-              icon: '🚚',
-            },
-            {
-              key: 'outForDelivery',
-              title: t['account.orders.detail.timeline.outForDelivery'],
-              description: t['account.orders.detail.timeline.outForDeliveryDescription'],
-              icon: '🏠',
-            },
-            {
-              key: 'delivered',
-              title: t['account.orders.detail.timeline.delivered'],
-              description: t['account.orders.detail.timeline.deliveredDescription'],
-              icon: '✨',
-            },
-          ]}
-        />
-
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div class="lg:col-span-2">
-            <OrderItemsList
-              items={order.items}
-              currencyCode="USD"
-              locale={locale}
-              heading={t['account.orders.detail.items.heading']}
-              quantityLabel={t['account.orders.detail.items.quantity']}
-            />
-          </div>
-          <div class="flex flex-col gap-6">
-            <OrderShippingCard
-              address={order.shippingAddress}
-              heading={t['account.orders.detail.shipping.heading']}
-              labelRecipient={t['account.orders.detail.shipping.recipient']}
-              labelPhone={t['account.orders.detail.shipping.phone']}
-              labelAddress={t['account.orders.detail.shipping.address']}
-              labelCountry={t['account.orders.detail.shipping.country']}
-              labelReference={t['account.orders.detail.shipping.reference']}
-            />
-            <OrderPaymentSummary
-              payment={order.payment}
-              totalCents={order.totalCents}
-              currencyCode="USD"
-              heading={t['account.orders.detail.payment.heading']}
-              labelMethod={t['account.orders.detail.payment.method']}
-              methodCard={t['account.orders.detail.payment.methodCard']}
-              methodTransfer={t['account.orders.detail.payment.methodTransfer']}
-              methodCod={t['account.orders.detail.payment.methodCod']}
-              labelSubtotal={t['account.orders.detail.payment.subtotal']}
-              labelShipping={t['account.orders.detail.payment.shipping']}
-              shippingFree={t['account.orders.detail.payment.shippingFree']}
-              labelTotal={t['account.orders.detail.payment.total']}
-            />
-          </div>
-        </div>
-
-        {order.status === 'delivered' && order.items.length > 0 && (
-          <div class="flex justify-end">
-            <a
-              href={`${localePrefix}/products/${order.items[0].productSlug}`}
-              class="inline-flex items-center gap-2 rounded-lg bg-[var(--primary,#7c3aed)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
-            >
-              ↻ {t['account.orders.detail.reorder']}
-            </a>
+                {t['account.orders.detail.tracking.openLabel']} ↗
+              </a>
+            )}
           </div>
         )}
+        {!order.trackingNumber && order.status !== 'cancelled' && (
+          <p class="mt-4 rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-500">
+            {t['account.orders.detail.tracking.notShipped']}
+          </p>
+        )}
+      </section>
+
+      <OrderTimeline
+        milestones={order.milestones}
+        heading={t['account.orders.detail.timeline.heading']}
+        labels={[
+          {
+            key: 'received',
+            title: t['account.orders.detail.timeline.received'],
+            description: t['account.orders.detail.timeline.receivedDescription'],
+            icon: '⛩',
+          },
+          {
+            key: 'preparing',
+            title: t['account.orders.detail.timeline.preparing'],
+            description: t['account.orders.detail.timeline.preparingDescription'],
+            icon: '🎨',
+          },
+          {
+            key: 'shipped',
+            title: t['account.orders.detail.timeline.shipped'],
+            description: t['account.orders.detail.timeline.shippedDescription'],
+            icon: '🚚',
+          },
+          {
+            key: 'outForDelivery',
+            title: t['account.orders.detail.timeline.outForDelivery'],
+            description: t['account.orders.detail.timeline.outForDeliveryDescription'],
+            icon: '🏠',
+          },
+          {
+            key: 'delivered',
+            title: t['account.orders.detail.timeline.delivered'],
+            description: t['account.orders.detail.timeline.deliveredDescription'],
+            icon: '✨',
+          },
+        ]}
+      />
+
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2">
+          <OrderItemsList
+            items={order.items}
+            currencyCode="USD"
+            locale={locale}
+            heading={t['account.orders.detail.items.heading']}
+            quantityLabel={t['account.orders.detail.items.quantity']}
+          />
+        </div>
+        <div class="flex flex-col gap-6">
+          <OrderShippingCard
+            address={order.shippingAddress}
+            heading={t['account.orders.detail.shipping.heading']}
+            labelRecipient={t['account.orders.detail.shipping.recipient']}
+            labelPhone={t['account.orders.detail.shipping.phone']}
+            labelAddress={t['account.orders.detail.shipping.address']}
+            labelCountry={t['account.orders.detail.shipping.country']}
+            labelReference={t['account.orders.detail.shipping.reference']}
+          />
+          <OrderPaymentSummary
+            payment={order.payment}
+            totalCents={order.totalCents}
+            currencyCode="USD"
+            heading={t['account.orders.detail.payment.heading']}
+            labelMethod={t['account.orders.detail.payment.method']}
+            methodCard={t['account.orders.detail.payment.methodCard']}
+            methodTransfer={t['account.orders.detail.payment.methodTransfer']}
+            methodCod={t['account.orders.detail.payment.methodCod']}
+            labelSubtotal={t['account.orders.detail.payment.subtotal']}
+            labelShipping={t['account.orders.detail.payment.shipping']}
+            shippingFree={t['account.orders.detail.payment.shippingFree']}
+            labelTotal={t['account.orders.detail.payment.total']}
+          />
+        </div>
       </div>
-    )
-  }
+
+      {order.status === 'delivered' && order.items.length > 0 && (
+        <div class="flex justify-end">
+          <a
+            href={`${localePrefix}/products/${order.items[0].productSlug}`}
+            class="inline-flex items-center gap-2 rounded-lg bg-[var(--primary,#7c3aed)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+          >
+            ↻ {t['account.orders.detail.reorder']}
+          </a>
+        </div>
+      )}
+    </div>
+  )}
 </AccountLayout>

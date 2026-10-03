@@ -11,10 +11,7 @@
 import AdminLayout from '../../../../../layouts/AdminLayout.astro';
 import { getServerDictionary, getServerLocale } from '../../../../../i18n/server';
 import { adminUrl } from '../../../../../lib/path-helpers';
-import {
-  getAllInvoicesMock,
-  type AdminInvoiceStatus,
-} from '../../../../../data/sales-mock';
+import { getAllInvoicesMock, type AdminInvoiceStatus } from '../../../../../data/sales-mock';
 import { formatCentsAsDecimal, formatDate } from '../../../../../lib/formatters';
 
 const locale = getServerLocale(Astro.locals.locale);
@@ -39,15 +36,13 @@ const currentDueTo = Astro.url.searchParams.get('dueTo') ?? '';
 const currentPageRaw = Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10);
 const currentPage = Number.isFinite(currentPageRaw) && currentPageRaw > 0 ? currentPageRaw : 1;
 
-let filtered = currentStatus === 'all'
-  ? ALL_INVOICES
-  : ALL_INVOICES.filter((i) => i.status === currentStatus);
+let filtered =
+  currentStatus === 'all' ? ALL_INVOICES : ALL_INVOICES.filter((i) => i.status === currentStatus);
 
 if (currentQuery !== '') {
   const needle = currentQuery.toLowerCase();
   filtered = filtered.filter(
-    (i) =>
-      i.number.toLowerCase().includes(needle) || i.customer.name.toLowerCase().includes(needle),
+    (i) => i.number.toLowerCase().includes(needle) || i.customer.name.toLowerCase().includes(needle)
   );
 }
 
@@ -74,7 +69,8 @@ const STATUS_BADGE_CLASS: Record<AdminInvoiceStatus, string> = {
   cancelled: 'bg-slate-200 text-slate-600',
 };
 
-const statusLabel = (status: AdminInvoiceStatus): string => t[`admin.sales.invoices.status.${status}`];
+const statusLabel = (status: AdminInvoiceStatus): string =>
+  t[`admin.sales.invoices.status.${status}`];
 
 function detailHrefFor(invoiceId: string): string {
   return adminUrl(locale, `/sales/invoices/${invoiceId}`);
@@ -134,12 +130,24 @@ const showPagination = totalPages > 1;
             name="status"
             class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
           >
-            <option value="all" selected={currentStatus === 'all'}>{t['admin.sales.invoices.filters.all']}</option>
-            <option value="draft" selected={currentStatus === 'draft'}>{t['admin.sales.invoices.status.draft']}</option>
-            <option value="sent" selected={currentStatus === 'sent'}>{t['admin.sales.invoices.status.sent']}</option>
-            <option value="paid" selected={currentStatus === 'paid'}>{t['admin.sales.invoices.status.paid']}</option>
-            <option value="overdue" selected={currentStatus === 'overdue'}>{t['admin.sales.invoices.status.overdue']}</option>
-            <option value="cancelled" selected={currentStatus === 'cancelled'}>{t['admin.sales.invoices.status.cancelled']}</option>
+            <option value="all" selected={currentStatus === 'all'}>
+              {t['admin.sales.invoices.filters.all']}
+            </option>
+            <option value="draft" selected={currentStatus === 'draft'}>
+              {t['admin.sales.invoices.status.draft']}
+            </option>
+            <option value="sent" selected={currentStatus === 'sent'}>
+              {t['admin.sales.invoices.status.sent']}
+            </option>
+            <option value="paid" selected={currentStatus === 'paid'}>
+              {t['admin.sales.invoices.status.paid']}
+            </option>
+            <option value="overdue" selected={currentStatus === 'overdue'}>
+              {t['admin.sales.invoices.status.overdue']}
+            </option>
+            <option value="cancelled" selected={currentStatus === 'cancelled'}>
+              {t['admin.sales.invoices.status.cancelled']}
+            </option>
           </select>
         </div>
 
@@ -148,7 +156,9 @@ const showPagination = totalPages > 1;
             {t['admin.sales.invoices.filters.dueRange']}
           </legend>
           <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">{t['admin.sales.invoices.filters.dueFrom']}</span>
+            <span class="font-medium text-slate-600">
+              {t['admin.sales.invoices.filters.dueFrom']}
+            </span>
             <input
               type="date"
               name="dueFrom"
@@ -157,7 +167,9 @@ const showPagination = totalPages > 1;
             />
           </label>
           <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">{t['admin.sales.invoices.filters.dueTo']}</span>
+            <span class="font-medium text-slate-600">
+              {t['admin.sales.invoices.filters.dueTo']}
+            </span>
             <input
               type="date"
               name="dueTo"
@@ -185,115 +197,140 @@ const showPagination = totalPages > 1;
     </aside>
 
     <section class="flex flex-col gap-4">
-      {
-        showEmpty ? (
-          <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl" aria-hidden="true">🧾</div>
-            <p class="text-base font-semibold text-slate-900">{t['admin.sales.invoices.empty']}</p>
-            <p class="max-w-md text-sm text-slate-500">{t['admin.sales.invoices.emptyHint']}</p>
-          </div>
-        ) : (
-          <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <table class="w-full min-w-[820px] border-collapse text-left text-sm">
-              <caption class="sr-only">Lista de facturas admin</caption>
-              <thead class="border-b border-slate-200 bg-slate-50/60 text-xs uppercase tracking-wider text-slate-500">
-                <tr>
-                  <th scope="col" class="px-3 py-3 font-semibold">{t['admin.sales.invoices.column.number']}</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">{t['admin.sales.invoices.column.order']}</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">{t['admin.sales.invoices.column.customer']}</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">{t['admin.sales.invoices.column.issuedAt']}</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">{t['admin.sales.invoices.column.dueAt']}</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">{t['admin.sales.invoices.column.status']}</th>
-                  <th scope="col" class="px-3 py-3 text-right font-semibold">{t['admin.sales.invoices.column.total']}</th>
-                  <th scope="col" class="px-3 py-3 text-right font-semibold">{t['admin.sales.invoices.column.actions']}</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                {paginatedInvoices.map((invoice) => {
-                  const detailHref = detailHrefFor(invoice.id);
-                  const total = formatCentsAsDecimal(invoice.totalCents, 'USD');
-                  return (
-                    <tr class="group transition-colors hover:bg-slate-50/40">
-                      <td class="px-3 py-3 align-middle">
-                        <a href={detailHref} class="font-mono text-xs font-medium text-slate-900 transition-colors group-hover:text-slate-700 focus-visible:outline-none focus-visible:underline">
-                          {invoice.number}
-                        </a>
-                      </td>
-                      <td class="px-3 py-3 align-middle font-mono text-xs text-slate-500">
-                        #ORD-{invoice.orderId}
-                      </td>
-                      <td class="px-3 py-3 align-middle">
-                        <p class="font-medium text-slate-900">{invoice.customer.name}</p>
-                        <p class="text-xs text-slate-500">{invoice.customer.email}</p>
-                      </td>
-                      <td class="px-3 py-3 align-middle text-slate-600">
-                        <time datetime={invoice.issuedAt}>{formatDate(invoice.issuedAt)}</time>
-                      </td>
-                      <td class="px-3 py-3 align-middle text-slate-600">
-                        <time datetime={invoice.dueAt}>{formatDate(invoice.dueAt)}</time>
-                      </td>
-                      <td class="px-3 py-3 align-middle">
-                        <span class:list={['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', STATUS_BADGE_CLASS[invoice.status]]}>
-                          {statusLabel(invoice.status)}
-                        </span>
-                      </td>
-                      <td class="px-3 py-3 text-right align-middle font-semibold tabular-nums text-slate-900">
-                        {total}
-                      </td>
-                      <td class="px-3 py-3 text-right align-middle">
-                        <a
-                          href={detailHref}
-                          class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-                        >
-                          {t['admin.sales.invoices.viewDetail']} ↗
-                        </a>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )
-      }
-
-      {
-        showPagination && !showEmpty && (
-          <nav
-            aria-label={t['admin.sales.invoices.title']}
-            class="mt-2 flex items-center justify-between gap-2"
+      {showEmpty ? (
+        <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl"
+            aria-hidden="true"
           >
-            <a
-              href={pageHref(Math.max(1, clampedPage - 1))}
-              aria-disabled={clampedPage === 1 ? 'true' : undefined}
-              class:list={[
-                'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-                'hover:border-slate-300',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
-                clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-              ]}
-            >
-              ← {t['admin.sales.orders.pagination.previous']}
-            </a>
-            <p class="text-xs font-medium text-slate-600">
-              {t['admin.sales.orders.pagination.page']} {clampedPage}{' '}
-              {t['admin.sales.orders.pagination.of']} {totalPages}
-            </p>
-            <a
-              href={pageHref(Math.min(totalPages, clampedPage + 1))}
-              aria-disabled={clampedPage === totalPages ? 'true' : undefined}
-              class:list={[
-                'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-                'hover:border-slate-300',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
-                clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-              ]}
-            >
-              {t['admin.sales.orders.pagination.next']} →
-            </a>
-          </nav>
-        )
-      }
+            🧾
+          </div>
+          <p class="text-base font-semibold text-slate-900">{t['admin.sales.invoices.empty']}</p>
+          <p class="max-w-md text-sm text-slate-500">{t['admin.sales.invoices.emptyHint']}</p>
+        </div>
+      ) : (
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table class="w-full min-w-[820px] border-collapse text-left text-sm">
+            <caption class="sr-only">Lista de facturas admin</caption>
+            <thead class="border-b border-slate-200 bg-slate-50/60 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.sales.invoices.column.number']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.sales.invoices.column.order']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.sales.invoices.column.customer']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.sales.invoices.column.issuedAt']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.sales.invoices.column.dueAt']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.sales.invoices.column.status']}
+                </th>
+                <th scope="col" class="px-3 py-3 text-right font-semibold">
+                  {t['admin.sales.invoices.column.total']}
+                </th>
+                <th scope="col" class="px-3 py-3 text-right font-semibold">
+                  {t['admin.sales.invoices.column.actions']}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {paginatedInvoices.map((invoice) => {
+                const detailHref = detailHrefFor(invoice.id);
+                const total = formatCentsAsDecimal(invoice.totalCents, 'USD');
+                return (
+                  <tr class="group transition-colors hover:bg-slate-50/40">
+                    <td class="px-3 py-3 align-middle">
+                      <a
+                        href={detailHref}
+                        class="font-mono text-xs font-medium text-slate-900 transition-colors group-hover:text-slate-700 focus-visible:outline-none focus-visible:underline"
+                      >
+                        {invoice.number}
+                      </a>
+                    </td>
+                    <td class="px-3 py-3 align-middle font-mono text-xs text-slate-500">
+                      #ORD-{invoice.orderId}
+                    </td>
+                    <td class="px-3 py-3 align-middle">
+                      <p class="font-medium text-slate-900">{invoice.customer.name}</p>
+                      <p class="text-xs text-slate-500">{invoice.customer.email}</p>
+                    </td>
+                    <td class="px-3 py-3 align-middle text-slate-600">
+                      <time datetime={invoice.issuedAt}>{formatDate(invoice.issuedAt)}</time>
+                    </td>
+                    <td class="px-3 py-3 align-middle text-slate-600">
+                      <time datetime={invoice.dueAt}>{formatDate(invoice.dueAt)}</time>
+                    </td>
+                    <td class="px-3 py-3 align-middle">
+                      <span
+                        class:list={[
+                          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                          STATUS_BADGE_CLASS[invoice.status],
+                        ]}
+                      >
+                        {statusLabel(invoice.status)}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3 text-right align-middle font-semibold tabular-nums text-slate-900">
+                      {total}
+                    </td>
+                    <td class="px-3 py-3 text-right align-middle">
+                      <a
+                        href={detailHref}
+                        class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                      >
+                        {t['admin.sales.invoices.viewDetail']} ↗
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {showPagination && !showEmpty && (
+        <nav
+          aria-label={t['admin.sales.invoices.title']}
+          class="mt-2 flex items-center justify-between gap-2"
+        >
+          <a
+            href={pageHref(Math.max(1, clampedPage - 1))}
+            aria-disabled={clampedPage === 1 ? 'true' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+              'hover:border-slate-300',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
+              clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+            ]}
+          >
+            ← {t['admin.sales.orders.pagination.previous']}
+          </a>
+          <p class="text-xs font-medium text-slate-600">
+            {t['admin.sales.orders.pagination.page']} {clampedPage}{' '}
+            {t['admin.sales.orders.pagination.of']} {totalPages}
+          </p>
+          <a
+            href={pageHref(Math.min(totalPages, clampedPage + 1))}
+            aria-disabled={clampedPage === totalPages ? 'true' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
+              'hover:border-slate-300',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
+              clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
+            ]}
+          >
+            {t['admin.sales.orders.pagination.next']} →
+          </a>
+        </nav>
+      )}
     </section>
   </div>
 </AdminLayout>

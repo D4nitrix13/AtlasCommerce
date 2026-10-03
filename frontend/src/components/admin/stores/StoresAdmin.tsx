@@ -76,12 +76,10 @@ export default function StoresAdmin({ locale: _locale }: StoresAdminProps): Reac
         {
           method: 'POST',
           body: { enabled: !store.maintenance_mode },
-        },
+        }
       );
       setStores((prev) =>
-        prev === null
-          ? prev
-          : prev.map((s) => (s.id === store.id ? response.data : s)),
+        prev === null ? prev : prev.map((s) => (s.id === store.id ? response.data : s))
       );
     } catch (error_) {
       const apiError = error_ as ApiError;
@@ -127,14 +125,10 @@ export default function StoresAdmin({ locale: _locale }: StoresAdminProps): Reac
             data-testid={`store-row-${store.id}`}
           >
             <div>
-              <h3 className="text-base font-medium text-neutral-900">
-                {store.name}
-              </h3>
+              <h3 className="text-base font-medium text-neutral-900">{store.name}</h3>
               <p className="text-xs text-neutral-500">{store.slug}</p>
               {isDisabled && (
-                <p className="mt-1 text-xs text-rose-600">
-                  {t('admin.stores.disabled')}
-                </p>
+                <p className="mt-1 text-xs text-rose-600">{t('admin.stores.disabled')}</p>
               )}
             </div>
             <div className="flex items-center gap-3">
@@ -147,7 +141,7 @@ export default function StoresAdmin({ locale: _locale }: StoresAdminProps): Reac
                 {t(
                   store.maintenance_mode
                     ? 'admin.stores.maintenanceOn'
-                    : 'admin.stores.maintenanceOff',
+                    : 'admin.stores.maintenanceOff'
                 )}
               </span>
               <button
@@ -160,7 +154,7 @@ export default function StoresAdmin({ locale: _locale }: StoresAdminProps): Reac
                 {t(
                   store.maintenance_mode
                     ? 'admin.stores.disableMaintenance'
-                    : 'admin.stores.enableMaintenance',
+                    : 'admin.stores.enableMaintenance'
                 )}
               </button>
             </div>

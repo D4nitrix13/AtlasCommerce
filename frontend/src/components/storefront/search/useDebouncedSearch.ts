@@ -20,7 +20,10 @@ const SEARCH_DEBOUNCE_MS = 300;
  * Custom hook para mantener SearchPage simple y poder testearlo
  * aisladamente.
  */
-export function useDebouncedSearch(query: string, page: number): {
+export function useDebouncedSearch(
+  query: string,
+  page: number
+): {
   status: SearchStatus;
   response: SearchResponse | null;
   errorMessage: string;
@@ -40,16 +43,11 @@ export function useDebouncedSearch(query: string, page: number): {
 
     const controller = new AbortController();
     const timeout = window.setTimeout(() => {
-      void executeFetch(
-        trimmed,
-        page,
-        controller.signal,
-        {
-          setStatus,
-          setResponse,
-          setErrorMessage,
-        },
-      );
+      void executeFetch(trimmed, page, controller.signal, {
+        setStatus,
+        setResponse,
+        setErrorMessage,
+      });
     }, SEARCH_DEBOUNCE_MS);
 
     return () => {
@@ -75,7 +73,7 @@ async function executeFetch(
   q: string,
   nextPage: number,
   signal: AbortSignal,
-  setters: FetchSetters,
+  setters: FetchSetters
 ): Promise<void> {
   setters.setStatus('loading');
   setters.setErrorMessage('');
@@ -87,7 +85,7 @@ async function executeFetch(
 
     const data = await apiFetch<SearchResponse>(
       `${API_ENDPOINTS.storefront.productSearch}?${params.toString()}`,
-      { method: 'GET', signal },
+      { method: 'GET', signal }
     );
 
     setters.setResponse(data);

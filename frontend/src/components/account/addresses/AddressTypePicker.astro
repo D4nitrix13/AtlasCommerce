@@ -43,34 +43,34 @@ const helperId = `${name}-helper`;
 <fieldset class="space-y-2">
   <legend class="text-sm font-medium text-slate-800">{legend}</legend>
   <div role="radiogroup" class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-    {
-      B2B_ADDRESS_TYPES.map((type) => {
-        const isSelected = type.value === selected;
-        const id = `${name}-${type.value}`;
-        return (
-          <label
-            for={id}
-            class:list={[
-              'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-sm transition',
-              isSelected
-                ? 'border-[var(--primary,#059669)] bg-[color-mix(in_srgb,var(--primary,#059669)_8%,white)] text-slate-900'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
-            ]}
-          >
-            <input
-              id={id}
-              type="radio"
-              name={name}
-              value={type.value}
-              checked={isSelected}
-              class="sr-only"
-              data-testid={`b2b-address-type-${type.value}`}
-            />
-            <span class="font-semibold">{typeLabels[type.value]}</span>
-          </label>
-        );
-      })
-    }
+    {B2B_ADDRESS_TYPES.map((type) => {
+      const isSelected = type.value === selected;
+      const id = `${name}-${type.value}`;
+      return (
+        <label
+          for={id}
+          class:list={[
+            'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-sm transition',
+            isSelected
+              ? 'border-[var(--primary,#059669)] bg-[color-mix(in_srgb,var(--primary,#059669)_8%,white)] text-slate-900'
+              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+          ]}
+        >
+          <input
+            id={id}
+            type="radio"
+            name={name}
+            value={type.value}
+            checked={isSelected}
+            class="sr-only"
+            data-testid={`b2b-address-type-${type.value}`}
+          />
+          <span class="font-semibold">{typeLabels[type.value]}</span>
+        </label>
+      );
+    })}
   </div>
-  <p id={helperId} class="text-xs text-slate-500">{helper}</p>
+  <p id={helperId} class="text-xs text-slate-500">
+    {helper}
+  </p>
 </fieldset>

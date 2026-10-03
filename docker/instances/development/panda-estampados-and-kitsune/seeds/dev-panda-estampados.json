@@ -13,10 +13,10 @@
       ],
       "theme": {
         "short_name": "Panda DEV",
-        "logo_path": "tenants/panda-estampados/branding/logo.webp",
-        "login_logo_path": "tenants/panda-estampados/branding/logo.webp",
-        "accent_color": "#DC2626",
-        "accent_hover_color": "#B91C1C",
+        "logo_path": "/images/tenants/panda-estampados/branding/logo.webp",
+        "login_logo_path": "/images/tenants/panda-estampados/branding/logo.webp",
+        "accent_color": "#2D9D8E",
+        "accent_hover_color": "#258777",
         "support_email": "support@dev.panda-estampados.test"
       }
     },

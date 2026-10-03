@@ -53,127 +53,144 @@ const roots: CategoryNode[] = (childrenByParent.get(null) ?? [])
 const hasCategories = roots.length > 0;
 ---
 
-{
-  hasCategories ? (
-    <ul class="space-y-1" role="tree" aria-label={t['admin.catalog.categories.title']}>
-      {roots.map((node) => (
-        <li role="treeitem" aria-expanded="true" class="rounded-md">
-          <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50">
-            <div class="flex min-w-0 items-center gap-2">
-              {node.children.length > 0 ? (
-                <button
-                  type="button"
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                  aria-label={t['admin.catalog.categories.actions.collapse']}
-                  data-toggle-tree
-                  data-target={`tree-children-${node.id}`}
-                >
-                  <span aria-hidden="true" class="text-xs">▾</span>
-                </button>
-              ) : (
-                <span class="inline-block h-6 w-6 shrink-0" aria-hidden="true" />
-              )}
-              <a
-                href={adminUrl(locale, `/catalog/categories/${node.id}`)}
-                class="min-w-0 truncate text-sm font-medium text-slate-900 hover:text-violet-700 hover:underline"
+{hasCategories ? (
+  <ul class="space-y-1" role="tree" aria-label={t['admin.catalog.categories.title']}>
+    {roots.map((node) => (
+      <li role="treeitem" aria-expanded="true" class="rounded-md">
+        <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50">
+          <div class="flex min-w-0 items-center gap-2">
+            {node.children.length > 0 ? (
+              <button
+                type="button"
+                class="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                aria-label={t['admin.catalog.categories.actions.collapse']}
+                data-toggle-tree
+                data-target={`tree-children-${node.id}`}
               >
-                {node.name}
-              </a>
-              <span class="shrink-0 text-xs text-slate-500">
-                · {t['admin.catalog.categories.productsCount'].replace('{count}', String(node.productsCount))}
-              </span>
-              {node.children.length > 0 && (
-                <span class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                  {t['admin.catalog.categories.childrenCount'].replace('{count}', String(node.children.length))}
+                <span aria-hidden="true" class="text-xs">
+                  ▾
                 </span>
-              )}
-            </div>
-            <div class="flex shrink-0 items-center gap-1">
-              <a
-                href={`${adminUrl(locale, `/catalog/categories/${node.id}`)}?edit=1`}
-                class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                aria-label={`${t['admin.catalog.categories.actions.edit']}: ${node.name}`}
-                title={t['admin.catalog.categories.actions.edit']}
-              >
-                <span aria-hidden="true" class="text-xs">✎</span>
-              </a>
-              <button
-                type="button"
-                class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                aria-label={`${t['admin.catalog.categories.actions.addChild']}: ${node.name}`}
-                title={t['admin.catalog.categories.actions.addChild']}
-              >
-                <span aria-hidden="true" class="text-xs">+</span>
               </button>
-              <button
-                type="button"
-                class="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                aria-label={`${t['admin.catalog.categories.actions.delete']}: ${node.name}`}
-                title={t['admin.catalog.categories.actions.delete']}
-              >
-                <span aria-hidden="true" class="text-xs">🗑</span>
-              </button>
-            </div>
-          </div>
-
-          {node.children.length > 0 && (
-            <ul
-              id={`tree-children-${node.id}`}
-              role="group"
-              class="mt-1 space-y-1 border-l border-slate-200 pl-4"
+            ) : (
+              <span class="inline-block h-6 w-6 shrink-0" aria-hidden="true" />
+            )}
+            <a
+              href={adminUrl(locale, `/catalog/categories/${node.id}`)}
+              class="min-w-0 truncate text-sm font-medium text-slate-900 hover:text-violet-700 hover:underline"
             >
-              {node.children.map((child) => (
-                <li role="treeitem" aria-expanded="false" class="rounded-md">
-                  <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50">
-                    <div class="flex min-w-0 items-center gap-2">
-                      <span class="inline-block h-6 w-6 shrink-0" aria-hidden="true" />
-                      <a
-                        href={adminUrl(locale, `/catalog/categories/${child.id}`)}
-                        class="min-w-0 truncate text-sm font-medium text-slate-900 hover:text-violet-700 hover:underline"
-                      >
-                        {child.name}
-                      </a>
-                      <span class="shrink-0 text-xs text-slate-500">
-                        · {t['admin.catalog.categories.productsCount'].replace('{count}', String(child.productsCount))}
-                      </span>
-                    </div>
-                    <div class="flex shrink-0 items-center gap-1">
-                      <a
-                        href={`${adminUrl(locale, `/catalog/categories/${child.id}`)}?edit=1`}
-                        class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                        aria-label={`${t['admin.catalog.categories.actions.edit']}: ${child.name}`}
-                        title={t['admin.catalog.categories.actions.edit']}
-                      >
-                        <span aria-hidden="true" class="text-xs">✎</span>
-                      </a>
-                      <button
-                        type="button"
-                        class="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                        aria-label={`${t['admin.catalog.categories.actions.delete']}: ${child.name}`}
-                        title={t['admin.catalog.categories.actions.delete']}
-                      >
-                        <span aria-hidden="true" class="text-xs">🗑</span>
-                      </button>
-                    </div>
+              {node.name}
+            </a>
+            <span class="shrink-0 text-xs text-slate-500">
+              ·{' '}
+              {t['admin.catalog.categories.productsCount'].replace(
+                '{count}',
+                String(node.productsCount)
+              )}
+            </span>
+            {node.children.length > 0 && (
+              <span class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                {t['admin.catalog.categories.childrenCount'].replace(
+                  '{count}',
+                  String(node.children.length)
+                )}
+              </span>
+            )}
+          </div>
+          <div class="flex shrink-0 items-center gap-1">
+            <a
+              href={`${adminUrl(locale, `/catalog/categories/${node.id}`)}?edit=1`}
+              class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              aria-label={`${t['admin.catalog.categories.actions.edit']}: ${node.name}`}
+              title={t['admin.catalog.categories.actions.edit']}
+            >
+              <span aria-hidden="true" class="text-xs">
+                ✎
+              </span>
+            </a>
+            <button
+              type="button"
+              class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              aria-label={`${t['admin.catalog.categories.actions.addChild']}: ${node.name}`}
+              title={t['admin.catalog.categories.actions.addChild']}
+            >
+              <span aria-hidden="true" class="text-xs">
+                +
+              </span>
+            </button>
+            <button
+              type="button"
+              class="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+              aria-label={`${t['admin.catalog.categories.actions.delete']}: ${node.name}`}
+              title={t['admin.catalog.categories.actions.delete']}
+            >
+              <span aria-hidden="true" class="text-xs">
+                🗑
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {node.children.length > 0 && (
+          <ul
+            id={`tree-children-${node.id}`}
+            role="group"
+            class="mt-1 space-y-1 border-l border-slate-200 pl-4"
+          >
+            {node.children.map((child) => (
+              <li role="treeitem" aria-expanded="false" class="rounded-md">
+                <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50">
+                  <div class="flex min-w-0 items-center gap-2">
+                    <span class="inline-block h-6 w-6 shrink-0" aria-hidden="true" />
+                    <a
+                      href={adminUrl(locale, `/catalog/categories/${child.id}`)}
+                      class="min-w-0 truncate text-sm font-medium text-slate-900 hover:text-violet-700 hover:underline"
+                    >
+                      {child.name}
+                    </a>
+                    <span class="shrink-0 text-xs text-slate-500">
+                      ·{' '}
+                      {t['admin.catalog.categories.productsCount'].replace(
+                        '{count}',
+                        String(child.productsCount)
+                      )}
+                    </span>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-      <p class="text-sm font-medium text-slate-700">
-        {t['admin.catalog.categories.empty']}
-      </p>
-      <p class="mt-1 text-xs text-slate-500">
-        {t['admin.catalog.categories.emptyHint']}
-      </p>
-    </div>
-  )
-}
+                  <div class="flex shrink-0 items-center gap-1">
+                    <a
+                      href={`${adminUrl(locale, `/catalog/categories/${child.id}`)}?edit=1`}
+                      class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      aria-label={`${t['admin.catalog.categories.actions.edit']}: ${child.name}`}
+                      title={t['admin.catalog.categories.actions.edit']}
+                    >
+                      <span aria-hidden="true" class="text-xs">
+                        ✎
+                      </span>
+                    </a>
+                    <button
+                      type="button"
+                      class="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      aria-label={`${t['admin.catalog.categories.actions.delete']}: ${child.name}`}
+                      title={t['admin.catalog.categories.actions.delete']}
+                    >
+                      <span aria-hidden="true" class="text-xs">
+                        🗑
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
+    ))}
+  </ul>
+) : (
+  <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+    <p class="text-sm font-medium text-slate-700">{t['admin.catalog.categories.empty']}</p>
+    <p class="mt-1 text-xs text-slate-500">{t['admin.catalog.categories.emptyHint']}</p>
+  </div>
+)}
 
 <script>
   document.addEventListener('click', (event) => {

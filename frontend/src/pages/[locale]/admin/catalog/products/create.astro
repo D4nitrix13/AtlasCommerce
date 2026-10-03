@@ -12,11 +12,11 @@
  *
  * AGENTS.md §1: ~50 líneas.
  */
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import ProductForm from '../../../../components/admin/catalog/ProductForm.astro';
-import { getServerDictionary } from '../../../../i18n/server';
-import { adminUrl } from '../../../../lib/path-helpers';
-import { getServerLocale } from '../../../../i18n/server';
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import ProductForm from '../../../../../components/admin/catalog/ProductForm.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { adminUrl } from '../../../../../lib/path-helpers';
+import { getServerLocale } from '../../../../../i18n/server';
 
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);

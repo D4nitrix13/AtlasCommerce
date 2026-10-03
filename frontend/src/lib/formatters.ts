@@ -14,11 +14,11 @@
  * componente y mantiene consistencia visual (decimales, símbolo, locale).
  */
 
-export type MoneyPayload = {
+export interface MoneyPayload {
   cents: number;
   formatted: string;
   currency_code: string | null;
-};
+}
 
 const DEFAULT_LOCALE = 'es-NI';
 const DEFAULT_CURRENCY = 'USD';

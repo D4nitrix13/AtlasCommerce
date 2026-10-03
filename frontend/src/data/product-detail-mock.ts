@@ -111,12 +111,7 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
   stock: PRODUCTS[0].stock,
   badges: PRODUCTS[0].badges ?? [],
   // 4 imágenes placeholder — gallery Baymard requiere ≥3.
-  images: [
-    PLACEHOLDER_IMAGE,
-    PLACEHOLDER_IMAGE,
-    PLACEHOLDER_IMAGE,
-    PLACEHOLDER_IMAGE,
-  ],
+  images: [PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE],
   // Atributos: color × size.
   variantAttributes: [
     [
@@ -318,11 +313,11 @@ export function getAverageRating(reviews: readonly ProductReview[]): number {
  */
 export function findVariantByAttributes(
   variants: readonly ProductVariant[],
-  selected: Record<string, string>,
+  selected: Record<string, string>
 ): ProductVariant | null {
   return (
     variants.find((variant) =>
-      variant.attributes.every((attr) => selected[attr.type] === attr.id),
+      variant.attributes.every((attr) => selected[attr.type] === attr.id)
     ) ?? null
   );
 }

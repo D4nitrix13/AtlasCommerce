@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Metrics;
 
 use Illuminate\Support\Manager;
-use InvalidArgumentException;
 use Prometheus\CollectorRegistry;
 use Prometheus\Storage\Adapter;
 use Prometheus\Storage\APC;
@@ -58,10 +57,10 @@ final class MetricsStorageManager extends Manager
             'database' => (int) ($config['database'] ?? 0),
         ]);
 
-        if (! $adapter instanceof Adapter) {
-            throw new InvalidArgumentException('Redis adapter could not be instantiated.');
-        }
-
+        // RedisAdapter implements Adapter unconditionally, so the
+        // runtime instanceof check is always true — kept as a
+        // defensive null-check that PHPStan type system flags as
+        // dead code. Removed to satisfy static analysis.
         return $adapter;
     }
 
@@ -84,10 +83,9 @@ final class MetricsStorageManager extends Manager
 
         $adapter = new Predis(client: $client);
 
-        if (! $adapter instanceof Adapter) {
-            throw new InvalidArgumentException('Predis adapter could not be instantiated.');
-        }
-
+        // Predis implements Adapter unconditionally, so the runtime
+        // instanceof check is always true — removed to satisfy static
+        // analysis.
         return $adapter;
     }
 

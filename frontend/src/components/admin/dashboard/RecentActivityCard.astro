@@ -70,18 +70,16 @@ const activities = [
   </div>
 
   <div class="space-y-4">
-    {
-      activities.map((a) => (
-        <div class="flex items-start gap-3">
-          <div class:list={['mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg', a.color]}>
-            <Icon name={a.icon} class="h-4 w-4" />
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-sm text-slate-700">{a.text}</p>
-            <p class="text-xs text-slate-400">{a.time}</p>
-          </div>
+    {activities.map((a) => (
+      <div class="flex items-start gap-3">
+        <div class:list={['mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg', a.color]}>
+          <Icon name={a.icon} class="h-4 w-4" />
         </div>
-      ))
-    }
+        <div class="min-w-0 flex-1">
+          <p class="text-sm text-slate-700">{a.text}</p>
+          <p class="text-xs text-slate-400">{a.time}</p>
+        </div>
+      </div>
+    ))}
   </div>
 </section>

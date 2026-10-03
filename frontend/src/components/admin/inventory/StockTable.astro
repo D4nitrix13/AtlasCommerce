@@ -28,7 +28,16 @@ const { entries, emptyLabel } = Astro.props;
 
 const t = getServerDictionary(Astro.locals.locale);
 
-const STATUS_BADGES: Record<StockStatus, { labelKey: 'admin.inventory.stock.filter.inStock' | 'admin.inventory.stock.filter.lowStock' | 'admin.inventory.stock.filter.outOfStock'; class: string }> = {
+const STATUS_BADGES: Record<
+  StockStatus,
+  {
+    labelKey:
+      | 'admin.inventory.stock.filter.inStock'
+      | 'admin.inventory.stock.filter.lowStock'
+      | 'admin.inventory.stock.filter.outOfStock';
+    class: string;
+  }
+> = {
   in_stock: {
     labelKey: 'admin.inventory.stock.filter.inStock',
     class: 'bg-emerald-100 text-emerald-700',
@@ -108,80 +117,80 @@ const lastMovementByStockId: Record<string, string> = {
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
-        {
-          entries.length === 0 ? (
-            <tr>
-              <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">
-                {emptyLabel ?? t['admin.inventory.stock.empty']}
-              </td>
-            </tr>
-          ) : (
-            entries.map((entry) => {
-              const badge = STATUS_BADGES[entry.status];
-              const last = lastMovementByStockId[entry.id];
-              return (
-                <tr class="group hover:bg-slate-50/50">
-                  <td class="px-4 py-3">
-                    <div class="font-medium text-slate-900">{entry.productName}</div>
-                    <div class="mt-0.5 text-xs text-slate-500">{entry.variantLabel}</div>
-                  </td>
-                  <td class="px-4 py-3 font-mono text-xs text-slate-500">{entry.sku}</td>
-                  <td class="px-4 py-3 text-slate-600">{entry.warehouseName}</td>
-                  <td class="px-4 py-3 text-center">
-                    <span
-                      class:list={[
-                        'inline-flex min-w-[2.5rem] items-center justify-center rounded-md px-2 py-0.5 text-sm font-semibold',
-                        entry.currentStock <= 0
-                          ? 'text-rose-600'
-                          : entry.currentStock <= entry.lowStockThreshold
-                            ? 'text-amber-600'
-                            : 'text-slate-900',
-                      ]}
+        {entries.length === 0 ? (
+          <tr>
+            <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">
+              {emptyLabel ?? t['admin.inventory.stock.empty']}
+            </td>
+          </tr>
+        ) : (
+          entries.map((entry) => {
+            const badge = STATUS_BADGES[entry.status];
+            const last = lastMovementByStockId[entry.id];
+            return (
+              <tr class="group hover:bg-slate-50/50">
+                <td class="px-4 py-3">
+                  <div class="font-medium text-slate-900">{entry.productName}</div>
+                  <div class="mt-0.5 text-xs text-slate-500">{entry.variantLabel}</div>
+                </td>
+                <td class="px-4 py-3 font-mono text-xs text-slate-500">{entry.sku}</td>
+                <td class="px-4 py-3 text-slate-600">{entry.warehouseName}</td>
+                <td class="px-4 py-3 text-center">
+                  <span
+                    class:list={[
+                      'inline-flex min-w-[2.5rem] items-center justify-center rounded-md px-2 py-0.5 text-sm font-semibold',
+                      entry.currentStock <= 0
+                        ? 'text-rose-600'
+                        : entry.currentStock <= entry.lowStockThreshold
+                          ? 'text-amber-600'
+                          : 'text-slate-900',
+                    ]}
+                  >
+                    {entry.currentStock}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-center text-sm text-slate-500">
+                  {entry.lowStockThreshold}
+                </td>
+                <td class="px-4 py-3 text-xs text-slate-500">
+                  {last ? `hace ${formatRelative(last)}` : '—'}
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class:list={[
+                      'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      badge.class,
+                    ]}
+                  >
+                    {t[badge.labelKey]}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      data-open-adjust={entry.id}
+                      data-product={entry.productName}
+                      data-variant={entry.variantLabel}
+                      data-warehouse={entry.warehouseName}
+                      data-current={entry.currentStock}
+                      class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
                     >
-                      {entry.currentStock}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-center text-sm text-slate-500">{entry.lowStockThreshold}</td>
-                  <td class="px-4 py-3 text-xs text-slate-500">
-                    {last ? `hace ${formatRelative(last)}` : '—'}
-                  </td>
-                  <td class="px-4 py-3">
-                    <span
-                      class:list={[
-                        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
-                        badge.class,
-                      ]}
+                      {t['admin.inventory.stock.actions.adjust']}
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+                      title={t['admin.inventory.stock.actions.viewHistory']}
                     >
-                      {t[badge.labelKey]}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-right">
-                    <div class="inline-flex items-center gap-1">
-                      <button
-                        type="button"
-                        data-open-adjust={entry.id}
-                        data-product={entry.productName}
-                        data-variant={entry.variantLabel}
-                        data-warehouse={entry.warehouseName}
-                        data-current={entry.currentStock}
-                        class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
-                      >
-                        {t['admin.inventory.stock.actions.adjust']}
-                      </button>
-                      <button
-                        type="button"
-                        class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
-                        title={t['admin.inventory.stock.actions.viewHistory']}
-                      >
-                        ↗
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })
-          )
-        }
+                      ↗
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })
+        )}
       </tbody>
     </table>
   </div>

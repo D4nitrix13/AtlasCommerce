@@ -16,10 +16,10 @@ Backups locales de PostgreSQL para desarrollo y fixtures de testing.
 
 ```bash
 # 1. Levantar la app con datos fake (seeders):
-./scripts/docker-stack.sh bootstrap dev panda-estampados --with-seed
+./scripts/docker-stack.sh seed-db dev panda-estampados-and-kitsune --seed
 
 # 2. Cuando los datos estan utiles para el equipo, exportar:
-./scripts/docker-stack.sh db-backup dev panda-estampados
+./scripts/docker-stack.sh db-backup dev panda-estampados-and-kitsune
 # → db-backups/dev-panda-estampados-2026-08-26-1430.sql.gz
 
 # 3. Subir el .gz a donde el equipo lo pueda descargar (no a git):
@@ -30,13 +30,17 @@ Backups locales de PostgreSQL para desarrollo y fixtures de testing.
 
 # 4. Otro dev clona el repo + descarga el archivo a este directorio
 #    manualmente, despues restaura:
-./scripts/docker-stack.sh db-restore dev panda-estampados \
+./scripts/docker-stack.sh db-restore dev panda-estampados-and-kitsune \
     dev-panda-estampados-2026-08-26-1430.sql.gz
 
-# O como parte del bootstrap (recomendado para setup inicial):
-./scripts/docker-stack.sh bootstrap dev panda-estampados \
-    --with-backup dev-panda-estampados-2026-08-26-1430.sql.gz
+# O equivalente con seed-db cargando el dump directo:
+./scripts/docker-stack.sh seed-db dev panda-estampados-and-kitsune \
+    --sql dev-panda-estampados-2026-08-26-1430.sql.gz
 ```
+
+> **Nota**: el flag `--with-seed` / `--with-backup` que aparece en algunas
+> docs antiguas NO existe. Los flags correctos viven en `seed-db`
+> (`--seed`, `--sql`). El comando `bootstrap` solo regenera `APP_KEY`.
 
 ## Naming convention
 

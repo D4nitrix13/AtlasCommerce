@@ -5,11 +5,11 @@
  * Para colecciones paginadas, agrega `meta` y `links`.
  */
 
-export type ApiResponse<T> = {
+export interface ApiResponse<T> {
   data: T;
-};
+}
 
-export type PaginatedResponse<T> = {
+export interface PaginatedResponse<T> {
   data: T[];
   links?: {
     first?: string;
@@ -26,12 +26,12 @@ export type PaginatedResponse<T> = {
     to?: number | null;
     total?: number;
   };
-};
+}
 
-export type ApiValidationError = {
+export interface ApiValidationError {
   status: 422;
   message: string;
   errors: Record<string, string[]>;
-};
+}
 
 // ApiError viene de lib/api (runtime), lo importan los componentes desde ahí.

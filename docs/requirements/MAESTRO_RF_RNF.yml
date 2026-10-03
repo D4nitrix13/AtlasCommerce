@@ -1,7 +1,7 @@
 # MAESTRO_RF_RNF.yml
 # -----------------------------------------------------------------------------
 # Catálogo maestro de requisitos del ECM-PEK v1.0.0 (Panda Estampados + Kitsune).
-# Datos extraídos de scripts/requirements/req/rf_*.yml y rnf_*.yml.
+# Datos extraídos de docs/requirements/req/rf_*.yml y rnf_*.yml.
 # Fuentes investigadas y completadas por la IA (los HUs quedan marcados
 # como [HU-NN — confirmar con el equipo] porque no hay archivos hu_*.yml
 # en el repositorio; las fuentes regulatorias/estándar sí son externas
@@ -16,7 +16,7 @@ proyecto: "E-Commerce Multitienda Panda Estampados / Kitsune v1.0.0 (ECM-PEK)"
 version: "1.0"
 fecha: "01/09/2026"
 autor_documento:
-  - "Daniel Benjamin Perez Morales (stakeholder_001)"
+  - "Daniel Benjamin Pérez Morales (stakeholder_001)"
   - "Andy Joe Sanchez Calero (stakeholder_002)"
   - "Jeremy Joshua Perez Gonzales (stakeholder_003)"
 herramienta: "REM v1.0.0 (herramienta CASE propia del equipo)"
@@ -26,7 +26,7 @@ herramienta: "REM v1.0.0 (herramienta CASE propia del equipo)"
 # -----------------------------------------------------------------------------
 stakeholders:
   - uid: stakeholder_001
-    nombre: "Daniel Benjamin Perez Morales"
+    nombre: "Daniel Benjamin Pérez Morales"
     rol: "Líder / Desarrollador Full-Stack"
   - uid: stakeholder_002
     nombre: "Andy Joe Sanchez Calero"
@@ -50,14 +50,14 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "HU-02 [pendiente confirmar con el equipo]"
       - "OWASP Top 10 2021 — A07:2021 Identification and Authentication Failures"
       - "NIST SP 800-63B — Digital Identity Guidelines"
     dependencias: ["RNF-SEC-010", "RNF-SEC-011", "RNF-SEC-012", "RNF-SEC-014"]
     descripcion: "El sistema deberá permitir a los usuarios iniciar sesión mediante su email y contraseña. Las contraseñas se almacenarán cifradas con el algoritmo bcrypt (mínimo 10 rounds de salting)."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `backend/app/Http/Controllers/Api/Auth/AuthController.php::login`. Cubre OWASP A07:2021. Credenciales validadas con bcrypt cost 12 y rate limiter `login` (5/5min/IP+email) blinda contra brute force. Verificado por `backend/tests/Feature/AuthApiTest.php`."
 
   - code: RF-AUTH-002
@@ -69,14 +69,14 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "HU-01 [pendiente confirmar]"
       - "GDPR art. 6 y 7 — Base legal y consentimiento"
       - "Ley 896 de Protección de Datos Personales Nicaragua"
     dependencias: ["RNF-SEC-010", "RNF-SEC-011", "RNF-SEC-012", "RNF-SEC-014"]
     descripcion: "El sistema deberá permitir a un visitante crear una cuenta nueva en la tienda con email, contraseña y datos personales básicos, vinculado al tenant activo."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `AuthController::register`. Crea User + Customer + UserStore atómicamente y emite token Sanctum scoped al tenant."
 
   - code: RF-AUTH-003
@@ -88,14 +88,14 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "HU-03 [pendiente confirmar]"
       - "NIST SP 800-63B — sección 5.1.1.2 (password recovery)"
       - "OWASP Forgot Password Cheat Sheet"
     dependencias: ["RNF-SEC-010", "RNF-SEC-011", "RNF-SEC-012"]
     descripcion: "El sistema deberá permitir al usuario solicitar un enlace/token de recuperación de contraseña enviado a su email registrado, con expiración corta (≤ 1 hora) y un solo uso."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `AuthController::forgot` / `reset`. Token hasheado en `password_reset_tokens`. Verificado por `PasswordResetFlowTest.php`."
 
   - code: RF-AUTH-004
@@ -107,14 +107,14 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "HU-04 [pendiente confirmar]"
       - "RFC 6238 — TOTP: Time-Based One-Time Password"
       - "NIST SP 800-63B — Multi-Factor Authentication"
     dependencias: ["RNF-SEC-011"]
     descripcion: "El sistema deberá permitir a usuarios admin activar 2FA mediante TOTP (Google Authenticator, Authy, etc.) con un código de 6 dígitos renovado cada 30 segundos."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado vía `TwoFactorSetting` y `OtpChallenge`. Verificado por `TotpVerifyThrottleTest.php` y `TotpDestroyReAuthTest.php`."
 
   - code: RF-AUTH-005
@@ -126,13 +126,13 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "HU-05 [pendiente confirmar]"
       - "NIST SP 800-63B — Recovery codes for MFA"
     dependencias: ["RF-AUTH-004", "RNF-SEC-011"]
     descripcion: "El sistema deberá generar y permitir al usuario visualizar un set de códigos de un solo uso para recuperar acceso cuando pierde su dispositivo TOTP."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `RecoveryCode` model. Verificado por `RecoveryCodeServiceTest.php`."
 
   - code: RF-AUTH-006
@@ -144,14 +144,14 @@ rf:
     urgencia: puede esperar
     estado: en construcción
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "HU-06 [pendiente confirmar]"
       - "RFC 6749 — The OAuth 2.0 Authorization Framework"
       - "Análisis de competencia Shopify, marzo 2026 (reducir fricción de registro)"
     dependencias: ["RNF-SEC-010", "RNF-SEC-014"]
     descripcion: "El sistema deberá permitir a un visitante iniciar sesión o registrarse usando proveedores OAuth 2.0 (Google, Facebook)."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado vía `SocialAccount` model. Verificado por `OAuthRoundTripTest.php` y `SocialAuthControllerTest.php`."
 
   - code: RF-AUTH-007
@@ -163,7 +163,7 @@ rf:
     urgencia: puede esperar
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "HU-07 [pendiente confirmar]"
       - "FIDO2 / WebAuthn — passwordless authentication"
@@ -181,13 +181,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "NIST RBAC — Role Based Access Control (INCITS 359)"
     dependencias: ["RNF-SEC-015"]
     descripcion: "El sistema deberá permitir a un admin asignar uno o varios roles a un usuario, y editar qué permisos componen cada rol."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado MVP admin. Endpoints en /api/admin/roles: index, show, store, update, syncPermissions (atómico), destroy. Aislamiento por tenant vía role_id (admin bypasea vía CheckPermission). Validaciones: slug admin protegido (no se borra ni se renombra). 21 tests Feature, 56 assertions (#55)."
 
   - code: RF-AUTH-009
@@ -199,12 +199,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-AUTH-008", "RNF-SEC-015"]
     descripcion: "El sistema deberá permitir a un admin crear, listar, editar, suspender y eliminar usuarios internos, asociándolos a una o más tiendas."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado MVP admin. Endpoints en /api/admin/users: index (paginated con filtros q/role_id/store_id), show, store, update, suspend, reactivate, destroy. Aislamiento por tenant vía user_stores.store_id. Protecciones: no self-action (suspend/reactivate/destroy), no auto-demote, no borrar al ÚNICO admin del tenant (lockout). Permiso: auth.users.manage. 22 tests Feature, 54 assertions (#49)."
 
   # ===== Módulo: Carrito (CART) =====
@@ -217,13 +217,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
       - "HU de checkout [pendiente confirmar]"
     dependencias: ["RNF-PERF-020", "RNF-PERF-022", "RNF-USA-040", "RNF-USA-042"]
     descripcion: "El usuario podrá agregar productos al carrito con su variante y, cuando aplique, con el diseño personalizado adjunto."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado en `CartItemController::store`. Usa `CartLineKeyService` para IDs estables de línea. Verificado por `CartApiTest.php`."
 
   - code: RF-CART-011
@@ -235,12 +235,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
     dependencias: ["RF-CART-010", "RNF-USA-040"]
     descripcion: "El usuario podrá eliminar una línea específica del carrito."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado en `CartItemController::destroy`."
 
   - code: RF-CART-012
@@ -252,12 +252,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
     dependencias: ["RF-CART-010", "RNF-PERF-020", "RNF-USA-042"]
     descripcion: "El usuario podrá ver el detalle de su carrito: productos, cantidades, subtotal, impuestos, envío y total, con desglose por línea."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado en `CartController::show`. Totales calculados server-side."
 
   - code: RF-CART-013
@@ -288,13 +288,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, Catalog Manager)"
       - "Google Search Central — paginación y SEO (2024)"
     dependencias: ["RNF-PERF-022", "RNF-PERF-023", "RNF-USA-040"]
     descripcion: "El visitante podrá navegar el catálogo público paginado, con filtro automático por tienda resuelto vía tenant."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado en `ProductController::index`. Paginación cursor-based + filtro RLS. Eager loading evita N+1."
 
   - code: RF-CAT-021
@@ -306,12 +306,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, Catalog Manager)"
     dependencias: ["RNF-PERF-023", "RNF-USA-040", "RNF-USA-042"]
     descripcion: "El visitante podrá ver la ficha detallada de un producto: imágenes, descripción, variantes disponibles, precio y stock."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado en `ProductController::show`."
 
   - code: RF-CAT-022
@@ -323,12 +323,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, Catalog Manager)"
     dependencias: ["RNF-USA-040"]
     descripcion: "El visitante podrá explorar el árbol de categorías del catálogo y ver los productos asociados a cada una."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado MVP backend + frontend. Backend (#50): GET /api/storefront/products/search?q=&page=&per_page= con ranking en tiers (SKU exacto 100 → SKU contiene 90 → name starts-with 80 → title starts-with 70 → name contains 50 → title contains 40 → desc contains 30 → pubdesc contains 20). Aislamiento por tenant vía product_stores.store_id. Filtra is_active + published_at + is_visible. Paginación 1-50 items/página (default 20). 17 tests Feature, 47 assertions. Frontend (#50): página /[locale]/search con SearchBar + ResultsList + Pagination. Debounce 300ms. URL sync (q= y page=). Custom hooks useDebouncedSearch y useUrlStateSync. Lint + astro check limpios."
 
   - code: RF-CAT-023
@@ -340,12 +340,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, Catalog Manager)"
     dependencias: ["RNF-PERF-024"]
     descripcion: "El sistema deberá permitir a un producto tener múltiples variantes (color, talla, material) con su propio SKU, precio y stock."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado MVP backend. Endpoints en /api/admin/variants: index (paginated con filtros q/is_active/product_id), show, store, update, destroy. Aislamiento por tenant vía product padre. Validaciones: sku y barcode únicos globales. Soft delete. 14 tests Feature, 33 assertions (#54)."
 
   - code: RF-CAT-024
@@ -396,7 +396,7 @@ rf:
     dependencias: ["RNF-SEC-015", "RF-CAT-023"]
     descripcion: "El admin puede crear, listar, editar, archivar y eliminar productos, asociándolos a categorías, marcas y variantes."
     estado: en construcción
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
     comentarios: "Implementado MVP admin. Endpoints en /api/admin/products: index (paginated con filtros q/is_active/category_id/brand_id/store_id/with_trashed), show, store, update, archive, publish, syncStores (atómico), destroy. Aislamiento por tenant vía product_stores.store_id. Validaciones slug kebab-case único, sku único, FKs existentes. 19 tests Feature, 55 assertions (#51)."
 
   - code: RF-CAT-027
@@ -424,7 +424,7 @@ rf:
     importancia: vital
     urgencia: importante
     estabilidad: podría cambiar
-    autores: ["Andy Joe Sanchez Calero (stakeholder_2), Daniel Benjamin Perez Morales (stakeholder_1)"]
+    autores: ["Andy Joe Sanchez Calero (stakeholder_2), Daniel Benjamin Pérez Morales (stakeholder_1)"]
     fuentes:
       - "stakeholder_2 (Andy, Catalog Manager)"
       - "Google Search Central — search box y sitelinks"
@@ -432,7 +432,7 @@ rf:
     dependencias: ["RNF-PERF-024", "RNF-USA-042"]
     descripcion: "El visitante podrá buscar productos por nombre, descripción o SKU, con tolerancia a typos y ranking por relevancia."
     estado: en construcción
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_2)"]
     comentarios: "Implementado MVP backend + frontend. Backend (#50): GET /api/storefront/products/search?q=&page=&per_page= con ranking en tiers, paginación 1-50, aislamiento por tenant. 17 tests, 47 assertions. Frontend (#50): página /[locale]/search con SearchBar + ResultsList + Pagination. Debounce 300ms. URL sync (q= y page=). Custom hooks useDebouncedSearch y useUrlStateSync. Lint + astro check limpios. Pendiente: tsvector FTS, fuzzy con pg_trgm, Meilisearch/Typesense si >50K productos."
 
   - code: RF-CAT-029
@@ -444,7 +444,7 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev) — modelo B2B de Panda Estampados"
       - "Análisis de competencia Shopify B2B, marzo 2026"
@@ -463,7 +463,7 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RNF-SEC-015", "RNF-OBS-070"]
@@ -480,7 +480,7 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-AUTH-002"]
@@ -497,13 +497,13 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "GDPR art. 15 (derecho de acceso) y art. 17 (derecho al olvido)"
       - "Ley 896 de Protección de Datos Personales Nicaragua"
     dependencias: ["RNF-OBS-070", "RNF-SEC-015"]
     descripcion: "El cliente podrá solicitar la exportación de todos sus datos personales en formato portable y solicitar su eliminación completa."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado MVP. Endpoints en /es/account/*: GET data-export (payload JSON con TODA la PII del cliente: profile, addresses, orders, invoices, payments, refunds, returns, tickets, tokens, designs), POST deletion-request (genera token SHA-256 hashed con expiración 24h), DELETE account (verifica token + re-auth con password, anonimiza PII + soft-delete + revoca tokens Sanctum). Tenant isolation via customer_stores. 9 tests Feature, 67 assertions (#46). Pendiente: job asíncrono de hard-cleanup + anonimización retroactiva de orders/invoices."
 
   # ===== Módulo: Personalización (CUSTOM) =====
@@ -516,13 +516,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev) — core del modelo de negocio Panda"
       - "stakeholder_002 (Andy, UX/UI) — wireframes del editor"
     dependencias: ["RF-CUSTOM-031", "RF-CUSTOM-032", "RF-CUSTOM-033", "RF-CUSTOM-034"]
     descripcion: "El usuario podrá diseñar su estampado personalizado en un canvas web interactivo: agregar texto, imágenes y gráficos sobre el área imprimible del producto."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado en `frontend/src/components/custom-design/`. Es el feature central diferenciador de Panda Estampados."
 
   - code: RF-CUSTOM-031
@@ -534,12 +534,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_002 (Andy, UX/UI)"
     dependencias: ["RF-CUSTOM-030"]
     descripcion: "El usuario podrá organizar los elementos del diseño en capas, reordenarlas, bloquearlas, ocultarlas y ajustar opacidad."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado. Panel de layers en el editor."
 
   - code: RF-CUSTOM-032
@@ -586,13 +586,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "OWASP File Upload Cheat Sheet"
     dependencias: ["RF-CUSTOM-030", "RNF-SEC-013"]
     descripcion: "El usuario podrá subir sus propias imágenes (PNG, JPG, SVG) para usarlas en el diseño, con validación de tipo MIME, tamaño y escaneo básico."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado con validación estricta de MIME y almacenamiento en vsftpd."
 
   - code: RF-CUSTOM-035
@@ -604,12 +604,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-CUSTOM-030", "RF-CUSTOM-036"]
     descripcion: "El sistema deberá generar una vista previa (mockup) del diseño aplicado al producto en tiempo real o casi-real."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado con Canvas API y layer compositing."
 
   - code: RF-CUSTOM-036
@@ -638,12 +638,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-CUSTOM-030", "RF-CAT-023"]
     descripcion: "El cliente podrá combinar una variante (color/talla) con un diseño personalizado, y el sistema recordará esa combinación como línea de carrito."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Andy Joe Sanchez Calero (stakeholder_002)"]
     comentarios: "Implementado vía `CartLineKeyService`."
 
   # ===== Módulo: Ventas (SALES) =====
@@ -656,12 +656,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-CART-010", "RF-PAY-071", "RF-SALES-052", "RNF-USA-042"]
     descripcion: "Al confirmar el checkout, el sistema deberá crear la orden con su detalle, calcular totales, descontar stock y emitir la factura asociada."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `CheckoutService`. Verificado por `CheckoutApiTest.php`."
 
   - code: RF-SALES-051
@@ -673,12 +673,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-SALES-050", "RNF-USA-040"]
     descripcion: "El cliente podrá consultar el detalle y estado actual de sus órdenes; el admin podrá ver y editar órdenes de cualquier cliente."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `OrderController::show` (cliente) y admin equivalente."
 
   - code: RF-SALES-052
@@ -690,13 +690,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "DGI Nicaragua — requisitos formales de factura"
     dependencias: ["RF-SALES-050", "RF-TAX-110"]
     descripcion: "El sistema generará una factura numerada por cada orden pagada, con datos fiscales, IVA desglosado y PDF descargable."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Numeración correlativa por tienda."
 
   - code: RF-SALES-053
@@ -708,12 +708,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-SALES-050", "RF-CUSTOM-030"]
     descripcion: "Cada línea de orden correspondiente a un producto con diseño personalizado guardará el snapshot del diseño para reimpresión."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Snapshot del canvas persistido en la línea."
 
   - code: RF-SALES-054
@@ -725,7 +725,7 @@ rf:
     urgencia: puede esperar
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Política de cancelación: ventana de 24h post-pago"
@@ -744,12 +744,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RNF-SEC-015"]
     descripcion: "El admin podrá crear, listar, editar y desactivar almacenes físicos donde se guarda stock."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Modelo `Warehouse`."
 
   - code: RF-INV-061
@@ -761,12 +761,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-INV-060", "RF-CAT-026"]
     descripcion: "El sistema deberá mantener el stock por (producto + variante + almacén), consultable y editable por admin."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Verificado por `StockDecrementOnPaymentTest.php`."
 
   - code: RF-INV-062
@@ -778,12 +778,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-INV-061", "RNF-OBS-070"]
     descripcion: "El sistema deberá registrar cada entrada, salida, ajuste o transferencia de stock como movimiento inmutable, con motivo y referencia."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Modelo `InventoryMovement` con auditoría."
 
   # ===== Módulo: Marketing (MKT) =====
@@ -832,13 +832,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "PCI-DSS v4.0 — requisitos de almacenamiento de datos de pago"
     dependencias: ["RNF-SEC-015", "RNF-SEC-019"]
     descripcion: "El admin podrá configurar qué métodos de pago están disponibles por tienda (tarjeta, transferencia, efectivo contra entrega, pasarela X)."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado."
 
   - code: RF-PAY-071
@@ -850,14 +850,14 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "PCI-DSS v4.0 — protección de datos del titular de tarjeta"
       - "EMVCo 3-D Secure 2.0"
     dependencias: ["RF-CART-012", "RF-PAY-070", "RNF-SEC-013", "RNF-SEC-016"]
     descripcion: "El sistema deberá tokenizar los datos de pago (sin almacenar PAN), enviarlos a la pasarela y manejar el callback de éxito/fallo."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `PaymentController::process`. Verificado por `PaymentApiTest.php`."
 
   - code: RF-PAY-072
@@ -869,13 +869,13 @@ rf:
     urgencia: puede esperar
     estado: en construcción
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Práctica común en e-commerce LatAm"
     dependencias: ["RF-PAY-071"]
     descripcion: "El cliente podrá optar por pagar en cuotas (2, 3, 6 o 12) cuando la pasarela y el método lo permitan."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado parcialmente; depende de la pasarela."
 
   - code: RF-PAY-073
@@ -887,14 +887,14 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "PCI-DSS v4.0 — refund processing"
       - "Política comercial: 30 días post-compra"
     dependencias: ["RF-SALES-050", "RF-PAY-071", "RF-RET-090"]
     descripcion: "El admin podrá emitir un reembolso total o parcial sobre un pago, revirtiendo el cargo en la pasarela y restaurando el stock si corresponde."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Verificado por `RefundFlowTest.php` y `CartToRefundTest.php`."
 
   # ===== Módulo: Compras (PURCH) =====
@@ -907,12 +907,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RNF-SEC-015"]
     descripcion: "El admin podrá registrar proveedores con datos de contacto, condiciones comerciales y catálogo de productos que suministra."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Modelo `Supplier`."
 
   - code: RF-PURCH-101
@@ -924,12 +924,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-PURCH-100", "RF-INV-062"]
     descripcion: "El admin podrá generar órdenes de compra a proveedores, recibirlas parcialmente y actualizar el stock al recibir mercadería."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado."
 
   # ===== Módulo: Devoluciones (RET) =====
@@ -942,13 +942,13 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Política comercial: 30 días post-compra"
     dependencias: ["RF-SALES-050", "RNF-USA-042"]
     descripcion: "El cliente podrá solicitar la devolución de uno o varios productos de una orden, indicando motivo y adjuntando fotos del estado."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado."
 
   - code: RF-RET-091
@@ -960,12 +960,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-RET-090", "RF-PAY-073", "RF-SHIP-082"]
     descripcion: "El admin podrá aprobar, rechazar o solicitar más información sobre una solicitud de devolución; al aprobar, disparará el reembolso y el movimiento de inventario."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Verificado por `RefundFlowTest.php`."
 
   # ===== Módulo: Envíos (SHIP) =====
@@ -978,12 +978,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RNF-SEC-015"]
     descripcion: "El admin podrá definir zonas de envío geográficas (país, departamento, ciudad) con sus tarifas y tiempos de entrega."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Modelo `ShippingZone` con protección cross-tenant (ver `CrossTenantShippingZoneException`)."
 
   - code: RF-SHIP-081
@@ -995,12 +995,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RNF-SEC-015"]
     descripcion: "El admin podrá registrar couriers y empresas de envío disponibles, con sus servicios (express, estándar, etc.) y tarifas."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado."
 
   - code: RF-SHIP-082
@@ -1012,12 +1012,12 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-SALES-050", "RF-SHIP-080", "RF-SHIP-081"]
     descripcion: "Al confirmar el pago, el sistema deberá crear el envío con la zona y empresa de envío elegidas, calcular costo y asociar el número de guía."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `ShipmentService`. Verificado por `ShipmentOnPaymentTest.php`."
 
   - code: RF-SHIP-083
@@ -1029,7 +1029,7 @@ rf:
     urgencia: puede esperar
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Práctica común e-commerce"
@@ -1048,13 +1048,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "DGI Nicaragua — Ley de Equidad Fiscal (IVA 15%)"
     dependencias: ["RNF-SEC-015", "RF-SALES-052"]
     descripcion: "El admin podrá configurar tasas de impuesto (IVA) por tienda y por categoría de producto, con vigencia desde-hasta."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `tax_rate` en `stores` + tabla de reglas por categoría."
 
   # ===== Módulo: Monedas (CURR) =====
@@ -1067,13 +1067,13 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "B2C Kitsune con mercado objetivo japonés (JPY)"
     dependencias: ["RF-SALES-050", "RNF-USA-041"]
     descripcion: "Cada tienda podrá operar con su propia moneda (C$, USD, JPY, etc.), con tasas de conversión actualizables."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `Currency`, `ExchangeRate`, `MoneyFormatter` (que produce \"C$ 19.99 NIO\")."
 
   # ===== Módulo: Multi-Store (STOR) =====
@@ -1086,13 +1086,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "ADR de arquitectura multi-tenant [pendiente numerar]"
     dependencias: ["RNF-MT-001", "RNF-MT-002", "RNF-MT-003"]
     descripcion: "El sistema deberá hospedar múltiples tiendas (Panda Estampados, Kitsune) en una sola instancia backend, resolviendo el tenant activo según el dominio de la petición (cabecera Host)."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en `ResolveStoreFromDomain` (alias `store.domain`). Tabla `store_domains` mapea host → Store. Aislamiento cruzado por RLS."
 
   - code: RF-STOR-131
@@ -1122,7 +1122,7 @@ rf:
     urgencia: puede esperar
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-STOR-130"]
@@ -1157,12 +1157,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-SALES-050", "RNF-SEC-015"]
     descripcion: "El admin podrá consultar reportes de ventas por período, tienda, categoría o producto, con totales y comparativas."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Vista y export básico."
 
   - code: RF-RPT-141
@@ -1174,12 +1174,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-INV-061", "RNF-SEC-015"]
     descripcion: "El admin podrá consultar el stock actual por almacén, los productos con bajo stock y el historial de movimientos."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado."
 
   # ===== Módulo: Sistema (SYS) =====
@@ -1192,12 +1192,12 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RNF-OBS-070"]
     descripcion: "El sistema enviará notificaciones in-app a los admins sobre eventos clave: nueva orden, pago recibido, devolución solicitada, stock bajo."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Modelo `Notification`."
 
   - code: RF-SYS-151
@@ -1209,13 +1209,13 @@ rf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "ISO 27001 A.12.4 — Logging and monitoring"
     dependencias: ["RNF-OBS-070", "RNF-SEC-015"]
     descripcion: "El sistema deberá registrar toda acción de un usuario admin (creación, edición, eliminación) con timestamp, IP y valores antes/después."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Modelo `Audit` con scope `byAction`, `byTable`, `byUser`, `byStore`."
 
   # ===== Módulo: Soporte (SUP) =====
@@ -1228,7 +1228,7 @@ rf:
     urgencia: importante
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RF-AUTH-002", "RNF-SEC-015"]
@@ -1286,14 +1286,14 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "RF-STOR-130"
       - "ADR de arquitectura multi-tenant [pendiente numerar]"
       - "PostgreSQL 18 — Row Level Security (RLS)"
     dependencias: []
     descripcion: "El sistema deberá aislar los datos de cada tienda a nivel de base de datos mediante Row Level Security (RLS) en PostgreSQL 18, garantizando que ninguna consulta cross-tenant sea posible."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado con políticas RLS por schema/rol. Variable de sesión `app.current_store_id` fijada vía `RlsContextService`. Verificado por `RlsPolicyTest.php`."
 
   - code: RNF-MT-002
@@ -1305,13 +1305,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "RF-STOR-130"
       - "Caddy — virtual hosting por Host header"
     dependencias: ["RNF-MT-001"]
     descripcion: "Cada petición HTTP entrante será enrutada al tenant activo según la cabecera Host, mediante el middleware `ResolveStoreFromDomain`."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Si el host no existe en `store_domains`, retorna 404 JSON."
 
   - code: RNF-MT-003
@@ -1323,13 +1323,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Decisión de arquitectura multi-instancia [ver docs/architecture/decisions.md]"
     dependencias: ["RNF-SCAL-030"]
     descripcion: "Cada instancia Docker tendrá su propia red, base de datos, Redis y volúmenes, sin compartir estado con otras instancias."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado vía `scripts/docker-stack.sh` y archivos `docker/instances/{production,development}/<instancia>/`."
 
   # ===== Categoría: Seguridad (SEC) =====
@@ -1342,13 +1342,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP A07:2021 — Identification and Authentication Failures"
       - "Laravel Sanctum — documentación oficial"
     dependencias: []
     descripcion: "Todas las rutas API (excepto públicas explícitas) requerirán un token Sanctum válido y scoped al tenant activo."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Tokens emitidos con `createToken('name', ['ability:store'])` y middleware `auth:sanctum`."
 
   - code: RNF-SEC-011
@@ -1360,14 +1360,14 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP A07:2021"
       - "NIST SP 800-63B — MFA for privileged users"
       - "PCI-DSS v4.0 — Requirement 8.4.2"
     dependencias: ["RF-AUTH-004"]
     descripcion: "Los usuarios con rol admin tendrán MFA (TOTP) obligatorio; no podrán acceder al panel admin sin verificar el segundo factor."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `TwoFactorSetting::isEnabled()` + middleware de challenge."
 
   - code: RNF-SEC-012
@@ -1379,13 +1379,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Password Storage Cheat Sheet"
       - "NIST SP 800-63B — Memorized secrets"
     dependencias: []
     descripcion: "Las contraseñas se almacenarán hasheadas con bcrypt (cost 12 mínimo) y nunca en texto plano."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado vía cast `hashed` en `User::casts()`."
 
   - code: RNF-SEC-013
@@ -1397,13 +1397,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Transport Layer Protection Cheat Sheet"
       - "RFC 6797 — HTTP Strict Transport Security (HSTS)"
     dependencias: []
     descripcion: "Todo el tráfico en producción será HTTPS; Caddy emitirá y renovará certificados vía Let's Encrypt y forzará HSTS."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en Caddyfile (auto_https + HSTS max-age=31536000)."
 
   - code: RNF-SEC-014
@@ -1415,13 +1415,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP A07:2021"
       - "CWE-798 — Use of Hard-coded Credentials"
     dependencias: []
     descripcion: "Ninguna credencial (API keys, passwords, secrets) estará en el código fuente; todo se gestiona vía variables de entorno o vault."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `config/*.php` lee de `env()`; verificación por linter en CI."
 
   - code: RNF-SEC-015
@@ -1433,13 +1433,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "NIST RBAC (INCITS 359)"
       - "OWASP A01:2021 — Broken Access Control"
     dependencias: ["RNF-SEC-010"]
     descripcion: "Los permisos se asignarán por roles y los roles por tienda, de modo que un admin de Panda no pueda ver datos de Kitsune ni viceversa."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `User::hasAccessToStore()`, `User::hasPermission()` con bypass para slug `admin`."
 
   - code: RNF-SEC-016
@@ -1451,13 +1451,13 @@ rnf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP API Security Top 10 — API4:2023 Unrestricted Resource Consumption"
       - "OWASP Authentication Cheat Sheet"
     dependencias: ["RNF-SEC-010"]
     descripcion: "Los endpoints de login, registro, recuperación de password y checkout aplicarán rate limiting por IP y/o por usuario."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado con `RateLimiter::for('login', ...)`: 5 intentos/5min por IP+email."
 
   - code: RNF-SEC-017
@@ -1469,7 +1469,7 @@ rnf:
     urgencia: importante
     estado: en análisis
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Secure Headers Project"
       - "MDN — HTTP Headers"
@@ -1487,7 +1487,7 @@ rnf:
     urgencia: importante
     estado: verificado
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Cross-Site Request Forgery Prevention Cheat Sheet"
     dependencias: []
@@ -1504,7 +1504,7 @@ rnf:
     urgencia: importante
     estado: en análisis
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP A06:2021 — Vulnerable and Outdated Components"
     dependencias: []
@@ -1521,7 +1521,7 @@ rnf:
     urgencia: puede esperar
     estado: en análisis
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Secrets Management Cheat Sheet"
       - "PCI-DSS v4.0 — Requirement 3.6"
@@ -1539,7 +1539,7 @@ rnf:
     urgencia: puede esperar
     estado: en análisis
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Clickjacking Defense Cheat Sheet"
     dependencias: ["RNF-SEC-017"]
@@ -1557,12 +1557,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Laravel — Session driver Redis"
     dependencias: []
     descripcion: "Las sesiones de usuario se almacenarán en Redis (no en archivos), para permitir escalado horizontal y persistencia entre reinicios."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `SESSION_DRIVER=redis`."
 
   - code: RNF-PERF-021
@@ -1574,12 +1574,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Laravel — Cache driver Redis"
     dependencias: []
     descripcion: "El cache de aplicación (consultas frecuentes, fragmentos Blade, respuestas API) usará Redis como backend."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `CACHE_STORE=redis`."
 
   - code: RNF-PERF-022
@@ -1591,7 +1591,7 @@ rnf:
     urgencia: importante
     estado: en análisis
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP API4:2023"
       - "Buenas prácticas REST"
@@ -1627,7 +1627,7 @@ rnf:
     urgencia: importante
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Laravel — Eager Loading"
       - "Buenas prácticas ORM"
@@ -1646,13 +1646,13 @@ rnf:
     urgencia: importante
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Decisión de arquitectura multi-instancia"
     dependencias: []
     descripcion: "Cada instancia Docker (Panda, Kitsune, MM-Boutique, Morales Store) podrá escalarse de forma independiente según su carga real."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `docker/instances/{production,development}/<instancia>/` separados."
 
   - code: RNF-SCAL-031
@@ -1664,12 +1664,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Decisión interna del equipo"
     dependencias: []
     descripcion: "En desarrollo, el código backend y frontend se monta como bind mount desde el host, permitiendo hot reload sin rebuild de imágenes."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `docker/instances/development/*/docker-compose.yml` con `volumes: ./backend:/var/www/html`."
 
   - code: RNF-SCAL-032
@@ -1681,13 +1681,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Docker best practices — pin specific tags"
       - "Supply chain security"
     dependencias: []
     descripcion: "Las imágenes base usadas en Docker Compose tendrán tags de versión exactos (no `latest`) definidos en `docker/versions.env`."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `docker/versions.env`."
 
   - code: RNF-SCAL-033
@@ -1699,7 +1699,7 @@ rnf:
     urgencia: puede esperar
     estado: pendiente
     estabilidad: volátil
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Kubernetes HPA — Horizontal Pod Autoscaler"
@@ -1808,7 +1808,7 @@ rnf:
     urgencia: importante
     estado: verificado
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
     fuentes:
       - "stakeholder_003 (Jeremy, QA)"
       - "Buenas prácticas de ingeniería"
@@ -1826,12 +1826,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: []
     descripcion: "El código PHP pasa por Laravel Pint, el TypeScript por ESLint + Prettier, y el Markdown por markdownlint, ejecutados en pre-commit y CI."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)", "Jeremy Joshua Perez Gonzales (stakeholder_003)"]
     comentarios: "Implementado. `composer precommit` y `.github/workflows/quality-gate.yml`."
 
   - code: RNF-MAIN-052
@@ -1843,12 +1843,12 @@ rnf:
     urgencia: inmediata
     estado: en construcción
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "PHPStan — official documentation"
     dependencias: []
     descripcion: "El backend se analiza estáticamente con PHPStan en nivel 5 o superior, ejecutado en CI."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `composer analyse` invoca phpstan con `level: 5`."
 
   - code: RNF-MAIN-053
@@ -1860,13 +1860,13 @@ rnf:
     urgencia: importante
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Conventional Commits 1.0.0"
     dependencias: []
     descripcion: "Los mensajes de commit seguirán Conventional Commits, con el cuerpo del mensaje en español, scope (backend/frontend/docs/infra/ci) y descripción imperativa."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `commitlint` + `commitizen` configurados."
 
   - code: RNF-MAIN-054
@@ -1878,7 +1878,7 @@ rnf:
     urgencia: puede esperar
     estado: verificado
     estabilidad: podría cambiar
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Buenas prácticas REST API — Microsoft API Guidelines"
     dependencias: []
@@ -1896,12 +1896,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: []
     descripcion: "Cada instancia tendrá su propio cron de backup automatizado (pg_dump) con retención configurable."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `db-backups/` y comandos artisan documentados."
 
   - code: RNF-REL-061
@@ -1913,12 +1913,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Docker — HEALTHCHECK directive"
     dependencias: []
     descripcion: "Cada servicio Docker declarará un HEALTHCHECK que verifique su estado real (no solo que el proceso esté vivo)."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado en todos los `docker-compose.yml`."
 
   - code: RNF-REL-062
@@ -1930,13 +1930,13 @@ rnf:
     urgencia: importante
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "12-Factor App — Logs"
       - "Laravel — log channels"
     dependencias: []
     descripcion: "Los logs de aplicación se emitirán en formato JSON estructurado a stderr (no a archivos), para que el orquestador los recolecte."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. `LOG_CHANNEL=stderr` y Monolog JSON formatter."
 
   - code: RNF-REL-063
@@ -1948,7 +1948,7 @@ rnf:
     urgencia: importante
     estado: verificado
     estabilidad: volátil
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Google SRE Book — SLO engineering"
     dependencias: ["RNF-REL-060"]
@@ -1965,7 +1965,7 @@ rnf:
     urgencia: puede esperar
     estado: verificado
     estabilidad: volátil
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: ["RNF-REL-061"]
@@ -1983,13 +1983,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "ISO 27001 A.12.4.1 — Event logging"
       - "PCI-DSS v4.0 — Requirement 10"
     dependencias: []
     descripcion: "Toda acción realizada por un admin (crear/editar/eliminar en módulos sensibles) quedará registrada en una tabla `audits` inmutable, con timestamp, usuario, IP y valores antes/después."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Modelo `Audit` con scopes `byAction`, `byTable`, `byUser`, `byStore`, `latest`."
 
   - code: RNF-OBS-071
@@ -2001,7 +2001,7 @@ rnf:
     urgencia: puede esperar
     estado: pendiente
     estabilidad: volátil
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OpenTelemetry — specification"
     dependencias: ["RNF-OBS-072"]
@@ -2018,7 +2018,7 @@ rnf:
     urgencia: puede esperar
     estado: pendiente
     estabilidad: volátil
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
       - "Google SRE Book — Golden Signals"
@@ -2037,12 +2037,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: []
     descripcion: "El sistema deberá correr en las tres distribuciones Linux más comunes, sin dependencias de OS-específicas."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Scripts `setup-local.sh` y `docker-stack.sh` validados en las tres."
 
   - code: RNF-PORT-081
@@ -2054,12 +2054,12 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "stakeholder_001 (Daniel, lead dev)"
     dependencias: []
     descripcion: "Todos los entrypoints Docker invocarán binarios con su ruta absoluta (`/usr/bin/php`, `/usr/sbin/php-fpm`), sin depender de `$PATH`."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Patrón enforced por la skill `docker-stack-orchestration`."
 
   - code: RNF-PORT-082
@@ -2071,13 +2071,13 @@ rnf:
     urgencia: inmediata
     estado: verificado
     estabilidad: estable
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "OWASP Docker Security Top 10"
       - "CIS Docker Benchmark"
     dependencias: []
     descripcion: "Los contenedores ejecutarán sus procesos con un usuario no-root dedicado (`app`, `www-data`, etc.)."
-    verificado_por: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    verificado_por: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     comentarios: "Implementado. Enforced por `docker-stack-orchestration`."
 
   - code: RNF-PORT-083
@@ -2089,7 +2089,7 @@ rnf:
     urgency_coment: puede esperar
     estado: pendiente
     estabilidad: volátil
-    autores: ["Daniel Benjamin Perez Morales (stakeholder_001)"]
+    autores: ["Daniel Benjamin Pérez Morales (stakeholder_001)"]
     fuentes:
       - "Docker — multi-arch builds"
       - "Apple Silicon adoption"

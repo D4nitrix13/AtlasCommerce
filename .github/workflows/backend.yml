@@ -41,7 +41,7 @@ jobs:
 
       - name: Pint (lint dirty)
         working-directory: backend
-        run: vendor/bin/pint --dirty --format=github
+        run: vendor/bin/pint --dirty --test
 
       - name: PHPStan static analysis
         working-directory: backend
@@ -71,7 +71,11 @@ jobs:
 
     env:
       APP_ENV: testing
-      APP_KEY: base64:c2VjdXJlX2FwcF9rZXlfZm9yX2dpdGh1Yl9hY3Rpb25zXzMyX2J5dGVz
+      # APP_KEY se genera dinámicamente al instalar deps via artisan
+      # key:generate (paso 'Generate App Key'). NO se hardcodea en YAML
+      # porque GitGuardian detecta cualquier base64 de 32+ bytes como
+      # secret. La key generada se persiste en .env.testing (gitignored)
+      # para que artisan pueda firmar cookies en tests subsecuentes.
       DB_CONNECTION: pgsql
       DB_HOST: localhost
       DB_PORT: 5432
@@ -93,11 +97,16 @@ jobs:
           php-version: '8.5'
           coverage: none
 
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.json') }}
+          restore-keys: composer-${{ runner.os }}-
 
       - name: Install backend dependencies
         working-directory: backend
@@ -107,6 +116,22 @@ jobs:
         working-directory: backend
         run: php artisan migrate --force
 
+      - name: Generate App Key
+        working-directory: backend
+        run: |
+          if [ ! -f .env.testing ]; then cp .env.example .env.testing; fi
+          php artisan key:generate --env=testing --force
+          # Re-cargar config para que APP_KEY esté en process env
+          php artisan config:clear
+
       - name: Run tests
         working-directory: backend
-        run: vendor/bin/phpunit --compact
+        # Excluir tests que requieren credenciales OAuth reales (Google +
+        # Facebook client_id + client_secret). Esos providers no están
+        # configurados en CI por seguridad (los secrets viven solo en
+        # GitHub Secrets del repo del maintainer). Los tests
+        # correspondientes viven bajo tests/Feature/Auth/Social*.php
+        # y tests/Feature/Auth/OAuth*.php — están en grupo 'social-auth'
+        # y se excluyen via --exclude-group. Re-activar cuando se
+        # configuren secrets de OAuth en CI (ver docs/operations/secret-rotation.md).
+        run: vendor/bin/phpunit --no-progress --exclude-group social-auth

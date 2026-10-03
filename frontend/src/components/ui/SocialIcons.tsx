@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-type IconProps = {
+interface IconProps {
   /**
    * Tamaño del SVG en píxeles. Por defecto 18 para mantener consistencia
    * con los SVGs inline que existían antes en StorefrontLoginForm y
@@ -12,7 +12,7 @@ type IconProps = {
    * Aplicado al elemento raiz.
    */
   className?: string;
-};
+}
 
 /**
  * Icon de Google (g-brand multicolor) extraído a un componente reutilizable.

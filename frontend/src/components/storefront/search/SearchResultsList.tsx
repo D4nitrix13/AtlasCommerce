@@ -26,9 +26,7 @@ export default function SearchResultsList({ products, ariaLabel }: Props): React
           key={product.id}
           className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
         >
-          <h2 className="line-clamp-2 text-sm font-semibold text-slate-900">
-            {product.name}
-          </h2>
+          <h2 className="line-clamp-2 text-sm font-semibold text-slate-900">{product.name}</h2>
           <p className="mt-1 line-clamp-2 text-xs text-slate-500">
             {product.description ?? '\u2014'}
           </p>

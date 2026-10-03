@@ -7,7 +7,7 @@
 
 Todas las rutas activas:
 
-```
+```text
 /api/v1/{recurso}
 ```
 

@@ -31,14 +31,12 @@ const t = getServerDictionary(locale);
 ---
 
 <nav aria-label="Secundaria" class="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 md:grid-cols-5">
-  {
-    links.map((link) => (
-      <a
-        href={link.href}
-        class="text-sm text-slate-600 transition hover:text-[var(--primary,#1e293b)] focus:outline-none focus-visible:underline"
-      >
-        {t[link.labelKey]}
-      </a>
-    ))
-  }
+  {links.map((link) => (
+    <a
+      href={link.href}
+      class="text-sm text-slate-600 transition hover:text-[var(--primary,#1e293b)] focus:outline-none focus-visible:underline"
+    >
+      {t[link.labelKey]}
+    </a>
+  ))}
 </nav>

@@ -25,10 +25,10 @@
  * forgot-password usan `AuthLayout` + `AuthShell`).
  */
 import '../../styles/global.css';
-import { getBrandBySlug, type StoreBrand } from '../../config/stores';
-import { themeToBrand } from '../../lib/theme';
-import { getServerDictionary, getServerLocale } from '../../i18n/server';
-import AccountSidebar from '../../components/account/layout/AccountSidebar.astro';
+import { getBrandBySlug, type StoreBrand } from '../config/stores';
+import { themeToBrand } from '../lib/theme';
+import { getServerDictionary, getServerLocale } from '../i18n/server';
+import AccountSidebar from '../components/account/layout/AccountSidebar.astro';
 
 interface Props {
   title?: string;
@@ -49,15 +49,60 @@ const localePrefix = `/${locale}`;
 const currentPath = Astro.url.pathname;
 
 const navItems = [
-  { key: 'account.sidebar.nav.dashboard' as const, label: t['account.sidebar.nav.dashboard'], path: `${localePrefix}/account`, iconName: 'squares-2x2' },
-  { key: 'account.sidebar.nav.profile' as const, label: t['account.sidebar.nav.profile'], path: `${localePrefix}/account/profile`, iconName: 'user' },
-  { key: 'account.sidebar.nav.orders' as const, label: t['account.sidebar.nav.orders'], path: `${localePrefix}/account/orders`, iconName: 'shopping-cart' },
-  { key: 'account.sidebar.nav.addresses' as const, label: t['account.sidebar.nav.addresses'], path: `${localePrefix}/account/addresses`, iconName: 'building-office' },
-  { key: 'account.sidebar.nav.wishlist' as const, label: t['account.sidebar.nav.wishlist'], path: `${localePrefix}/account/wishlist`, iconName: 'gift' },
-  { key: 'account.sidebar.nav.security' as const, label: t['account.sidebar.nav.security'], path: `${localePrefix}/account/security`, iconName: 'shield-check' },
-  { key: 'account.sidebar.nav.tickets' as const, label: t['account.sidebar.nav.tickets'], path: `${localePrefix}/account/tickets`, iconName: 'chat-bubble-left-right' },
-  { key: 'account.sidebar.nav.notifications' as const, label: t['account.sidebar.nav.notifications'], path: `${localePrefix}/account/notifications`, iconName: 'bell' },
-  { key: 'account.sidebar.nav.privacy' as const, label: t['account.sidebar.nav.privacy'], path: `${localePrefix}/account/privacy`, iconName: 'cog-6-tooth' },
+  {
+    key: 'account.sidebar.nav.dashboard' as const,
+    label: t['account.sidebar.nav.dashboard'],
+    path: `${localePrefix}/account`,
+    iconName: 'squares-2x2',
+  },
+  {
+    key: 'account.sidebar.nav.profile' as const,
+    label: t['account.sidebar.nav.profile'],
+    path: `${localePrefix}/account/profile`,
+    iconName: 'user',
+  },
+  {
+    key: 'account.sidebar.nav.orders' as const,
+    label: t['account.sidebar.nav.orders'],
+    path: `${localePrefix}/account/orders`,
+    iconName: 'shopping-cart',
+  },
+  {
+    key: 'account.sidebar.nav.addresses' as const,
+    label: t['account.sidebar.nav.addresses'],
+    path: `${localePrefix}/account/addresses`,
+    iconName: 'building-office',
+  },
+  {
+    key: 'account.sidebar.nav.wishlist' as const,
+    label: t['account.sidebar.nav.wishlist'],
+    path: `${localePrefix}/account/wishlist`,
+    iconName: 'gift',
+  },
+  {
+    key: 'account.sidebar.nav.security' as const,
+    label: t['account.sidebar.nav.security'],
+    path: `${localePrefix}/account/security`,
+    iconName: 'shield-check',
+  },
+  {
+    key: 'account.sidebar.nav.tickets' as const,
+    label: t['account.sidebar.nav.tickets'],
+    path: `${localePrefix}/account/tickets`,
+    iconName: 'chat-bubble-left-right',
+  },
+  {
+    key: 'account.sidebar.nav.notifications' as const,
+    label: t['account.sidebar.nav.notifications'],
+    path: `${localePrefix}/account/notifications`,
+    iconName: 'bell',
+  },
+  {
+    key: 'account.sidebar.nav.privacy' as const,
+    label: t['account.sidebar.nav.privacy'],
+    path: `${localePrefix}/account/privacy`,
+    iconName: 'cog-6-tooth',
+  },
 ];
 ---
 

@@ -80,7 +80,9 @@ AtlasCommerce/
 ├── scripts/
 │   ├── docker-stack.sh       # Orquestador de las 4 instancias
 │   └── setup-local.sh
-└── Caddyfile                 # Configuración Caddy (prod)
+├── docker/
+│   ├── caddy/                # Caddyfile compartido (reverse proxy prod + dev)
+│   └── instances/            # 6 instancias: 3 prod + 3 dev
 ```
 
 ## Requisitos
@@ -104,7 +106,7 @@ todo.
 sudo ./scripts/docker-stack.sh hosts >> /etc/hosts
 
 # 3. (Opcional) Instalar el Caddyfile del repo:
-sudo cp Caddyfile /etc/caddy/Caddyfile
+sudo cp docker/caddy/Caddyfile /etc/caddy/Caddyfile
 sudo systemctl restart caddy
 
 # 4. Verificar:
@@ -271,9 +273,9 @@ artisan/vsftpd local en tu host.
 
 ## Licencia
 
-**Software propietario** — Copyright © 2026 Daniel Pérez (D4nitrix13). Todos
-los derechos reservados. NO es código abierto; no se distribuye bajo ninguna
-licencia pública (MIT, BSD, Apache, GPL u otra).
+**Software propietario** — Copyright © 2026 Daniel Benjamin Pérez Morales
+(D4nitrix13). Todos los derechos reservados. NO es código abierto; no se
+distribuye bajo ninguna licencia pública (MIT, BSD, Apache, GPL u otra).
 
 Para licenciamiento comercial, integración con terceros o cualquier uso que
 no esté explícitamente autorizado, contactar al titular. Ver

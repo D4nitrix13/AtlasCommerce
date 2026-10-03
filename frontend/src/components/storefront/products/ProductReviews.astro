@@ -41,51 +41,58 @@ const countLabel = labels.count.replace('{count}', String(reviewCount));
 const visibleReviews = reviews.slice(0, 5);
 ---
 
-<section aria-labelledby="reviews-heading" class="flex flex-col gap-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section
+  aria-labelledby="reviews-heading"
+  class="flex flex-col gap-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+>
   <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex flex-col gap-2">
       <h2 id="reviews-heading" class="text-xl font-bold text-slate-900">
         {labels.heading}
       </h2>
-      {
-        hasReviews ? (
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1" role="img" aria-label={`${labels.average} ${average} ${labels.outOf}`}>
-              {Array.from({ length: 5 }, (_, i) => {
-                const isFull = i < Math.floor(average);
-                const isHalf = !isFull && i < average;
-                return (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill={isFull ? '#facc15' : isHalf ? 'url(#halfGrad)' : '#e2e8f0'}
-                    stroke="currentColor"
-                    stroke-width="0"
-                    class="h-5 w-5 text-amber-400"
-                    aria-hidden="true"
-                  >
-                    {isHalf && (
-                      <defs>
-                        <linearGradient id="halfGrad" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="50%" stop-color="#facc15" />
-                          <stop offset="50%" stop-color="#e2e8f0" />
-                        </linearGradient>
-                      </defs>
-                    )}
-                    <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
-                  </svg>
-                );
-              })}
-            </div>
-            <div class="flex flex-col">
-              <span class="text-2xl font-bold tabular-nums text-slate-900">{average.toFixed(1)}</span>
-              <span class="text-xs text-slate-500">{labels.outOf} · {countLabel}</span>
-            </div>
+      {hasReviews ? (
+        <div class="flex items-center gap-3">
+          <div
+            class="flex items-center gap-1"
+            role="img"
+            aria-label={`${labels.average} ${average} ${labels.outOf}`}
+          >
+            {Array.from({ length: 5 }, (_, i) => {
+              const isFull = i < Math.floor(average);
+              const isHalf = !isFull && i < average;
+              return (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill={isFull ? '#facc15' : isHalf ? 'url(#halfGrad)' : '#e2e8f0'}
+                  stroke="currentColor"
+                  stroke-width="0"
+                  class="h-5 w-5 text-amber-400"
+                  aria-hidden="true"
+                >
+                  {isHalf && (
+                    <defs>
+                      <linearGradient id="halfGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="50%" stop-color="#facc15" />
+                        <stop offset="50%" stop-color="#e2e8f0" />
+                      </linearGradient>
+                    </defs>
+                  )}
+                  <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
+                </svg>
+              );
+            })}
           </div>
-        ) : (
-          <p class="text-sm text-slate-500">{labels.empty}</p>
-        )
-      }
+          <div class="flex flex-col">
+            <span class="text-2xl font-bold tabular-nums text-slate-900">{average.toFixed(1)}</span>
+            <span class="text-xs text-slate-500">
+              {labels.outOf} · {countLabel}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <p class="text-sm text-slate-500">{labels.empty}</p>
+      )}
     </div>
     <a
       href={writeHref}
@@ -95,63 +102,87 @@ const visibleReviews = reviews.slice(0, 5);
     </a>
   </header>
 
-  {
-    hasReviews && (
-      <ul class="flex list-none flex-col gap-4 p-0" role="list">
-        {visibleReviews.map((review) => (
-          <li class="flex flex-col gap-2 border-t border-slate-100 pt-4 first:border-t-0 first:pt-0">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-slate-900">{review.authorName}</span>
-                {review.verified && (
-                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                    {labels.verified}
-                  </span>
-                )}
-              </div>
-              <time class="text-xs text-slate-500" datetime={review.createdAt}>
-                {new Date(review.createdAt).toLocaleDateString('es-NI', { year: 'numeric', month: 'short', day: 'numeric' })}
-              </time>
+  {hasReviews && (
+    <ul class="flex list-none flex-col gap-4 p-0" role="list">
+      {visibleReviews.map((review) => (
+        <li class="flex flex-col gap-2 border-t border-slate-100 pt-4 first:border-t-0 first:pt-0">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold text-slate-900">{review.authorName}</span>
+              {review.verified && (
+                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="h-3 w-3"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M4.5 12.75l6 6 9-13.5"
+                    />
+                  </svg>
+                  {labels.verified}
+                </span>
+              )}
             </div>
-            <div class="flex items-center gap-1" role="img" aria-label={labels.starAlt.replace('{count}', String(review.rating))}>
-              {Array.from({ length: 5 }, (_, i) => (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill={i < review.rating ? '#facc15' : '#e2e8f0'}
-                  stroke="currentColor"
-                  stroke-width="0"
-                  class="h-4 w-4 text-amber-400"
-                  aria-hidden="true"
-                >
-                  <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
-                </svg>
-              ))}
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900">{review.title}</h3>
-            <p class="text-sm leading-relaxed text-slate-700">{review.body}</p>
-          </li>
-        ))}
-      </ul>
-    )
-  }
+            <time class="text-xs text-slate-500" datetime={review.createdAt}>
+              {new Date(review.createdAt).toLocaleDateString('es-NI', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </time>
+          </div>
+          <div
+            class="flex items-center gap-1"
+            role="img"
+            aria-label={labels.starAlt.replace('{count}', String(review.rating))}
+          >
+            {Array.from({ length: 5 }, (_, i) => (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={i < review.rating ? '#facc15' : '#e2e8f0'}
+                stroke="currentColor"
+                stroke-width="0"
+                class="h-4 w-4 text-amber-400"
+                aria-hidden="true"
+              >
+                <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
+              </svg>
+            ))}
+          </div>
+          <h3 class="text-sm font-semibold text-slate-900">{review.title}</h3>
+          <p class="text-sm leading-relaxed text-slate-700">{review.body}</p>
+        </li>
+      ))}
+    </ul>
+  )}
 
-  {
-    hasReviews && reviews.length > 5 && (
-      <div class="border-t border-slate-100 pt-4">
-        <a
-          href={viewAllHref}
-          class="inline-flex items-center gap-1 text-sm font-semibold text-[var(--primary,#475569)] hover:underline"
+  {hasReviews && reviews.length > 5 && (
+    <div class="border-t border-slate-100 pt-4">
+      <a
+        href={viewAllHref}
+        class="inline-flex items-center gap-1 text-sm font-semibold text-[var(--primary,#475569)] hover:underline"
+      >
+        {labels.viewAll}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="h-4 w-4"
+          aria-hidden="true"
         >
-          {labels.viewAll}
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </a>
-      </div>
-    )
-  }
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </a>
+    </div>
+  )}
 </section>

@@ -39,34 +39,32 @@ const { items, locale, labels } = Astro.props;
 ---
 
 <ul class="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-  {
-    items.map((item) => {
-      const productHref = `/${locale}/products/${item.productSlug}`;
-      const notifyEnabled = item.notifyWhenBack === true;
-      return (
-        <li class="list-none">
-          <WishlistItem
-            productHref={productHref}
-            productName={item.productName}
-            imageUrl={item.imageUrl}
-            priceCents={item.priceCents}
-            currencyCode={item.currency}
-            addedDaysAgo={item.addedDaysAgo}
-            personalNote={item.personalNote}
-            stock={item.stock}
-            notifyEnabled={notifyEnabled}
-            addedDaysAgoLabel={labels.addedDaysAgo}
-            addedYesterdayLabel={labels.addedYesterday}
-            addedTodayLabel={labels.addedToday}
-            personalNoteLabel={labels.personalNoteLabel}
-            outOfStockLabel={labels.outOfStockLabel}
-            onlyLeftLabel={labels.onlyLeftLabel}
-            moveToBagLabel={labels.moveToBagLabel}
-            removeLabel={labels.removeLabel}
-            notifyLabel={labels.notifyLabel}
-          />
-        </li>
-      );
-    })
-  }
+  {items.map((item) => {
+    const productHref = `/${locale}/products/${item.productSlug}`;
+    const notifyEnabled = item.notifyWhenBack === true;
+    return (
+      <li class="list-none">
+        <WishlistItem
+          productHref={productHref}
+          productName={item.productName}
+          imageUrl={item.imageUrl}
+          priceCents={item.priceCents}
+          currencyCode={item.currency}
+          addedDaysAgo={item.addedDaysAgo}
+          personalNote={item.personalNote}
+          stock={item.stock}
+          notifyEnabled={notifyEnabled}
+          addedDaysAgoLabel={labels.addedDaysAgo}
+          addedYesterdayLabel={labels.addedYesterday}
+          addedTodayLabel={labels.addedToday}
+          personalNoteLabel={labels.personalNoteLabel}
+          outOfStockLabel={labels.outOfStockLabel}
+          onlyLeftLabel={labels.onlyLeftLabel}
+          moveToBagLabel={labels.moveToBagLabel}
+          removeLabel={labels.removeLabel}
+          notifyLabel={labels.notifyLabel}
+        />
+      </li>
+    );
+  })}
 </ul>

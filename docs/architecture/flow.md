@@ -257,7 +257,7 @@ unificados en un solo puerto `:8000`. Ver
 ## 6. Lo que falta para llegar a producción
 
 1. ✅ **Caddyfile** con los virtualhosts para cada dominio real —
-   `docker/instances/production/<store>/Caddyfile`.
+   `docker/caddy/Caddyfile` (uno solo compartido entre instancias).
 2. ✅ **Seeder `store_domains`** cargando `panda-estampados.com`,
    `admin.panda-estampados.com`, `kitsune.com`, `admin.kitsune.com`,
    `mm-boutique.com`, `admin.mm-boutique.com`, `morales-store.com`,

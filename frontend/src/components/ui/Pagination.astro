@@ -66,10 +66,7 @@ const buildPageRange = (): number[] => {
   const MAX_VISIBLE_PAGES = 5;
   const startPage = Math.max(
     1,
-    Math.min(
-      currentPage - Math.floor(MAX_VISIBLE_PAGES / 2),
-      lastPage - MAX_VISIBLE_PAGES + 1,
-    ),
+    Math.min(currentPage - Math.floor(MAX_VISIBLE_PAGES / 2), lastPage - MAX_VISIBLE_PAGES + 1)
   );
   const endPage = Math.min(lastPage, startPage + MAX_VISIBLE_PAGES - 1);
   const range: number[] = [];
@@ -82,71 +79,75 @@ const buildPageRange = (): number[] => {
 const pageRange = buildPageRange();
 ---
 
-{
-  lastPage > 1 && (
-    <nav aria-label={ariaLabel} class:list={['flex items-center justify-between gap-2 border-t border-slate-200 pt-6', className]}>
-      {hasPrevious ? (
-        <a
-          href={buildPageUrl(previousPage)}
-          rel="prev"
-          class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-        >
-          ← {previousLabel}
-        </a>
-      ) : (
-        <span
-          aria-disabled="true"
-          class="cursor-not-allowed rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-400 opacity-60"
-        >
-          ← {previousLabel}
-        </span>
-      )}
+{lastPage > 1 && (
+  <nav
+    aria-label={ariaLabel}
+    class:list={[
+      'flex items-center justify-between gap-2 border-t border-slate-200 pt-6',
+      className,
+    ]}
+  >
+    {hasPrevious ? (
+      <a
+        href={buildPageUrl(previousPage)}
+        rel="prev"
+        class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+      >
+        ← {previousLabel}
+      </a>
+    ) : (
+      <span
+        aria-disabled="true"
+        class="cursor-not-allowed rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-400 opacity-60"
+      >
+        ← {previousLabel}
+      </span>
+    )}
 
-      <p class="text-sm text-slate-500">
-        {pageLabel} {currentPage} {ofLabel} {lastPage}
-      </p>
+    <p class="text-sm text-slate-500">
+      {pageLabel} {currentPage} {ofLabel} {lastPage}
+    </p>
 
-      <ol class="hidden items-center gap-1 md:flex">
-        {pageRange.map((page) => {
-          const isCurrent = page === currentPage;
-          return (
-            <li>
-              {isCurrent ? (
-                <span
-                  aria-current="page"
-                  class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-3 text-sm font-semibold text-white"
-                >
-                  {page}
-                </span>
-              ) : (
-                <a
-                  href={buildPageUrl(page)}
-                  class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-                >
-                  {page}
-                </a>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+    <ol class="hidden items-center gap-1 md:flex">
+      {pageRange.map((page) => {
+        const isCurrent = page === currentPage;
+        return (
+          <li>
+            {isCurrent ? (
+              <span
+                aria-current="page"
+                class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-3 text-sm font-semibold text-white"
+              >
+                {page}
+              </span>
+            ) : (
+              <a
+                href={buildPageUrl(page)}
+                class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              >
+                {page}
+              </a>
+            )}
+          </li>
+        );
+      })}
+    </ol>
 
-      {hasNext ? (
-        <a
-          href={buildPageUrl(nextPage)}
-          rel="next"
-          class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-        >
-          {nextLabel} →
-        </a>
-      ) : (
-        <span
-          aria-disabled="true"
-          class="cursor-not-allowed rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-400 opacity-60"
-        >
-          {nextLabel} →
-        </span>
-      )}
-    </nav>
-  )
-}
+    {hasNext ? (
+      <a
+        href={buildPageUrl(nextPage)}
+        rel="next"
+        class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+      >
+        {nextLabel} →
+      </a>
+    ) : (
+      <span
+        aria-disabled="true"
+        class="cursor-not-allowed rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-400 opacity-60"
+      >
+        {nextLabel} →
+      </span>
+    )}
+  </nav>
+)}

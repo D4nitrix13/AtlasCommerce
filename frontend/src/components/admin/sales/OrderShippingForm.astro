@@ -70,13 +70,11 @@ const CARRIER_OPTIONS: { value: string; label: string }[] = [
           required
           class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         >
-          {
-            CARRIER_OPTIONS.map((opt) => (
-              <option value={opt.value} selected={opt.value === (currentCarrier ?? '')}>
-                {opt.label}
-              </option>
-            ))
-          }
+          {CARRIER_OPTIONS.map((opt) => (
+            <option value={opt.value} selected={opt.value === (currentCarrier ?? '')}>
+              {opt.label}
+            </option>
+          ))}
         </select>
       </label>
 
@@ -100,11 +98,7 @@ const CARRIER_OPTIONS: { value: string; label: string }[] = [
       >
         {buttonSave}
       </button>
-      <p
-        class="hidden text-xs font-medium text-emerald-600"
-        role="status"
-        data-shipping-status
-      >
+      <p class="hidden text-xs font-medium text-emerald-600" role="status" data-shipping-status>
         ✓ {buttonSaved}
       </p>
     </div>

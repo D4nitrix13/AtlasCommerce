@@ -31,8 +31,8 @@ fi
 # Solo aplica si el container corre como root (default legacy); con
 # el Dockerfile fix actual el vendor/ ya viene correctamente own'd.
 if [ "$(id -u)" = "0" ] && [ -d vendor ]; then
-  HOST_UID_VAR="${HOST_UID:-1000}"
-  /bin/chown -R "${HOST_UID_VAR}:${HOST_UID_VAR}" vendor
+  CHOWN_TARGET_UID="${HOST_UID:-1000}"
+  /bin/chown -R "${CHOWN_TARGET_UID}:${CHOWN_TARGET_UID}" vendor
 fi
 
 # Cache de configuración limpio al arrancar (evita configs viejas

@@ -106,7 +106,8 @@ export function setLocale(locale: Locale): void {
 
 function subscribe(listener: () => void): () => void {
   if (typeof window === 'undefined') {
-    return () => {};
+    // SSR: no hay listeners registrados, devolvemos un unsubscribe no-op.
+    return () => undefined;
   }
 
   // Re-render cuando el pathname cambia (history navigation).

@@ -127,17 +127,20 @@ críticas (ver archivo para thresholds completos y `for:` durations):
 **Triage**:
 
 1. Identifica la route afectada:
+
    ```promql
    topk(5, sum by (route) (
      rate(atlascommerce_http_requests_total{status=~"5.."}[5m])
    ))
    ```
+
 2. Cruza con Sentry: busca errores recientes con la misma `route` y
    `trace_id` para ver el stack trace.
 3. Mira logs estructurados: filtra por `status=~"5.."` y `route=<X>`
    en Loki para ver el contexto completo de cada error.
 
 **Causas comunes**:
+
 - Deploy reciente con bug → rollback (ver `docs/runbooks/rollback-deployment.md`).
 - DB saturada → ver §4.4.
 - Dependencia externa caída → ver `status.panda-estampados.com` y proveedores.
@@ -150,11 +153,13 @@ críticas (ver archivo para thresholds completos y `for:` durations):
 **Triage**:
 
 1. Identifica las routes más lentas:
+
    ```promql
    topk(10, histogram_quantile(0.95,
      sum by (route, le) (rate(atlascommerce_http_request_duration_seconds_bucket[5m]))
    ))
    ```
+
 2. Compara con la misma métrica en otras tiendas (label store_id
    cuando esté disponible) — si es global, es backend; si es una
    sola tienda, es algo específico de esa tienda (probablemente DB).
@@ -162,6 +167,7 @@ críticas (ver archivo para thresholds completos y `for:` durations):
    busca spans con duración alta en DB/cache/queue.
 
 **Causas comunes**:
+
 - N+1 query → `scripts/check-n-plus-one.sh` o ver queries en traces.
 - DB connection pool agotado → métricas de DB (futuro).
 - Cold cache después de deploy → esperar 5-10 min.
@@ -172,6 +178,7 @@ críticas (ver archivo para thresholds completos y `for:` durations):
 **Síntoma**: p99 del checkout > 2s por 5 min. CRITICAL — bloquea revenue.
 
 **Triage**:
+
 1. **PRIORIDAD ALTA**: revenue impact. Pagar un coffee al on-call si se
    arregla en < 15 min.
 2. Verifica pasarela de pago (MercadoPago, etc.) primero — son la
@@ -184,12 +191,15 @@ críticas (ver archivo para thresholds completos y `for:` durations):
 **Síntoma**: `/health/ready` devuelve 503 por 2 min.
 
 **Triage**:
+
 1. `curl http://<instance>/health/ready` directo → confirma el payload.
 2. Verifica conexión del container al Postgres:
+
    ```bash
    ./scripts/docker-stack.sh exec dev panda-estampados-and-kitsune backend
      php artisan tinker --execute 'DB::connection()->selectOne("SELECT 1");'
    ```
+
 3. Si Postgres está caído: ver `docs/runbooks/database-down.md`.
 4. Si Postgres está OK pero el check falla: revisar network/firewall.
 
@@ -198,11 +208,14 @@ críticas (ver archivo para thresholds completos y `for:` durations):
 **Síntoma**: `/health/ready` devuelve 503 por 2 min con `storage.healthy=false`.
 
 **Triage**:
+
 1. Verifica el disk configurado:
+
    ```bash
    ./scripts/docker-stack.sh exec dev panda-estampados-and-kitsune backend
      php artisan tinker --execute 'Storage::disk()->put("test", "ok"); Storage::disk()->get("test");'
    ```
+
 2. Si es FTP (producción): ver si el servidor FTP responde.
 3. Si es local: ver espacio en disco (`df -h`).
 
@@ -211,10 +224,13 @@ críticas (ver archivo para thresholds completos y `for:` durations):
 **Síntoma**: queue_size > 1000 por 15 min.
 
 **Triage**:
+
 1. Verifica si hay workers corriendo:
+
    ```bash
    ./scripts/docker-stack.sh ps dev panda-estampados-and-kitsune backend
    ```
+
 2. Si no hay workers: restart `queue:work`.
 3. Si hay workers pero lento: jobs lentos (ver traces de jobs en
    Tempo si los hay).
@@ -226,6 +242,7 @@ críticas (ver archivo para thresholds completos y `for:` durations):
 reporta `up{job="atlascommerce-backend"} == 0`.
 
 **Triage**:
+
 1. Verifica Redis: `redis-cli -h redis ping`.
 2. Si Redis está caído: ver `docs/runbooks/redis-down.md`.
 3. Si Redis está OK pero /metrics falla: revisar conexión backend ↔ Redis.
@@ -235,6 +252,7 @@ reporta `up{job="atlascommerce-backend"} == 0`.
 **Síntoma**: Tasa de errores en Sentry > 2x el baseline (mediana 7d).
 
 **Triage**:
+
 1. Abrir Sentry → Issues → ordenar por frequency.
 2. Si es un error nuevo: puede ser release nuevo con bug → rollback.
 3. Si es un error conocido que de repente crece: ver cambios
@@ -278,11 +296,18 @@ Después de un incidente > 1h:
 
 ## 6. Referencias
 
-- [Fase 13 PR1 — Structured logging + correlation IDs](../Fase-13-Observabilidad/README.md#pr1) (`#121`)
-- [Fase 13 PR2 — Deep readiness probe](../Fase-13-Observabilidad/README.md#pr2) (`#122`)
-- [Fase 13 PR3 — Prometheus metrics](../Fase-13-Observabilidad/README.md#pr3) (`#123`)
-- [Fase 13 PR4 — OpenTelemetry tracing](../Fase-13-Observabilidad/README.md#pr4) (`#124`)
-- [Fase 13 PR5 — Sentry error tracking](../Fase-13-Observabilidad/README.md#pr5) (`#125`)
+- [Fase 13 PR1 — Structured logging + correlation IDs][pr1] (`#121`)
+- [Fase 13 PR2 — Deep readiness probe][pr2] (`#122`)
+- [Fase 13 PR3 — Prometheus metrics][pr3] (`#123`)
+- [Fase 13 PR4 — OpenTelemetry tracing][pr4] (`#124`)
+- [Fase 13 PR5 — Sentry error tracking][pr5] (`#125`)
+
+[pr1]: ../Fase-13-Observabilidad/README.md#pr1
+[pr2]: ../Fase-13-Observabilidad/README.md#pr2
+[pr3]: ../Fase-13-Observabilidad/README.md#pr3
+[pr4]: ../Fase-13-Observabilidad/README.md#pr4
+[pr5]: ../Fase-13-Observabilidad/README.md#pr5
+
 - [Google SRE Book — SLO Engineering](https://sre.google/sre-book/service-level-objectives/)
 - [W3C Trace Context](https://www.w3.org/TR/trace-context/)
 - [Prometheus alerting best practices](https://prometheus.io/docs/practices/alerting/)

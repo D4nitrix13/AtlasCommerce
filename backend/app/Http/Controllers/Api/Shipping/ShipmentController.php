@@ -23,8 +23,6 @@ class ShipmentController extends Controller
 {
     use CursorPaginates;
 
-    private const DEFAULT_PAGE_SIZE = 25;
-
     public function __construct(
         private readonly ShipmentService $shipments,
     ) {}

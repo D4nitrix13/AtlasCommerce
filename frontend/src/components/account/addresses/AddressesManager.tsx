@@ -87,7 +87,7 @@ export default function AddressesManager(): ReactElement {
     void (async (): Promise<void> => {
       try {
         const response = await apiFetch<{ data: Address[] }>(
-          API_ENDPOINTS.customers.accountAddresses,
+          API_ENDPOINTS.customers.accountAddresses
         );
         if (!cancelled) {
           setAddresses(response.data);
@@ -124,18 +124,13 @@ export default function AddressesManager(): ReactElement {
   };
 
   const refresh = async (): Promise<void> => {
-    const response = await apiFetch<{ data: Address[] }>(
-      API_ENDPOINTS.customers.accountAddresses,
-    );
+    const response = await apiFetch<{ data: Address[] }>(API_ENDPOINTS.customers.accountAddresses);
     setAddresses(response.data);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    if (
-      form.country.trim() === '' ||
-      form.detailed_address.trim() === ''
-    ) {
+    if (form.country.trim() === '' || form.detailed_address.trim() === '') {
       setFormError('required');
       return;
     }
@@ -260,18 +255,14 @@ export default function AddressesManager(): ReactElement {
                       </span>
                     )}
                   </div>
-                  <p className="mt-2 text-sm text-neutral-900">
-                    {address.detailed_address}
-                  </p>
+                  <p className="mt-2 text-sm text-neutral-900">{address.detailed_address}</p>
                   <p className="text-xs text-neutral-500">
                     {[address.municipality, address.department, address.country]
                       .filter(Boolean)
                       .join(', ')}
                   </p>
                   {address.reference !== null && address.reference !== '' && (
-                    <p className="mt-1 text-xs italic text-neutral-500">
-                      {address.reference}
-                    </p>
+                    <p className="mt-1 text-xs italic text-neutral-500">{address.reference}</p>
                   )}
                 </div>
                 <div className="flex flex-col gap-1 text-right">
@@ -318,9 +309,7 @@ export default function AddressesManager(): ReactElement {
             className="w-full max-w-md space-y-3 rounded-lg bg-white p-6 shadow-lg"
           >
             <h2 className="text-lg font-semibold text-neutral-900">
-              {editing !== null
-                ? t('account.addresses.edit')
-                : t('account.addresses.add')}
+              {editing !== null ? t('account.addresses.edit') : t('account.addresses.add')}
             </h2>
 
             <label className="block">
@@ -335,15 +324,9 @@ export default function AddressesManager(): ReactElement {
                 className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
                 data-testid="address-field-type"
               >
-                <option value="shipping">
-                  {t('account.addresses.type.shipping')}
-                </option>
-                <option value="billing">
-                  {t('account.addresses.type.billing')}
-                </option>
-                <option value="other">
-                  {t('account.addresses.type.other')}
-                </option>
+                <option value="shipping">{t('account.addresses.type.shipping')}</option>
+                <option value="billing">{t('account.addresses.type.billing')}</option>
+                <option value="other">{t('account.addresses.type.other')}</option>
               </select>
             </label>
 
@@ -367,9 +350,7 @@ export default function AddressesManager(): ReactElement {
               <input
                 type="text"
                 value={form.department}
-                onChange={(event) =>
-                  setForm({ ...form, department: event.target.value })
-                }
+                onChange={(event) => setForm({ ...form, department: event.target.value })}
                 className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
                 data-testid="address-field-department"
               />
@@ -382,9 +363,7 @@ export default function AddressesManager(): ReactElement {
               <input
                 type="text"
                 value={form.municipality}
-                onChange={(event) =>
-                  setForm({ ...form, municipality: event.target.value })
-                }
+                onChange={(event) => setForm({ ...form, municipality: event.target.value })}
                 className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
                 data-testid="address-field-municipality"
               />
@@ -397,9 +376,7 @@ export default function AddressesManager(): ReactElement {
               <input
                 type="text"
                 value={form.detailed_address}
-                onChange={(event) =>
-                  setForm({ ...form, detailed_address: event.target.value })
-                }
+                onChange={(event) => setForm({ ...form, detailed_address: event.target.value })}
                 className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
                 data-testid="address-field-detailed"
               />
@@ -412,9 +389,7 @@ export default function AddressesManager(): ReactElement {
               <input
                 type="text"
                 value={form.reference}
-                onChange={(event) =>
-                  setForm({ ...form, reference: event.target.value })
-                }
+                onChange={(event) => setForm({ ...form, reference: event.target.value })}
                 className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
                 data-testid="address-field-reference"
               />
@@ -424,9 +399,7 @@ export default function AddressesManager(): ReactElement {
               <input
                 type="checkbox"
                 checked={form.is_primary}
-                onChange={(event) =>
-                  setForm({ ...form, is_primary: event.target.checked })
-                }
+                onChange={(event) => setForm({ ...form, is_primary: event.target.checked })}
                 data-testid="address-field-primary"
               />
               <span className="text-sm text-neutral-700">
@@ -435,11 +408,7 @@ export default function AddressesManager(): ReactElement {
             </label>
 
             {formError !== null && (
-              <p
-                role="alert"
-                className="text-sm text-rose-600"
-                data-testid="address-form-error"
-              >
+              <p role="alert" className="text-sm text-rose-600" data-testid="address-form-error">
                 {t(resolveFormErrorKey(formError))}
               </p>
             )}

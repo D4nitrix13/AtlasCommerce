@@ -5,22 +5,22 @@ export const pandaTheme = {
     shortName: 'Panda',
     domains: ['panda-estampados.com', 'www.panda-estampados.com'],
     adminDomains: ['admin.panda-estampados.com', 'admin.localhost', 'admin.127.0.0.1'],
-    logoPath: '/api/storefront/assets/tenants/panda-estampados/branding/logo.webp',
-    loginLogoPath: '/api/storefront/assets/tenants/panda-estampados/branding/logo.webp',
+    logoPath: '/images/tenants/panda-estampados/branding/logo.webp',
+    loginLogoPath: '/images/tenants/panda-estampados/branding/logo.webp',
     // Paleta derivada del logo de Panda Estampados (monocromático
     // + acentos del "universo panda + estampados"). El logo es
     // estrictamente negro/blanco, así que los acentos de la web
     // expanden la paleta sin romper la identidad.
     //   60% blanco · 30% negro · 10% color de acento
     //
-    // Verde bambú (#7CB342) es el color de marca de Panda Estampados.
-    // Decisión revertida desde el negro monocromo (#0A0A0A) tras
-    // feedback visual: el login admin con aside en negro absoluto
-    // resultaba visualmente plano y desconectado del universo de
-    // marca. El verde bambú mantiene el logo B/N como protagonista
-    // y suma vida sin saturar.
-    accentColor: '#7CB342',        // verde bambú (acento principal, CTAs)
-    accentHoverColor: '#5a9a30',   // verde bambú oscuro (hover)
+    // Teal panda (#2D9D8E) es el color de marca de Panda Estampados.
+    // Tomado directamente del `fill` de las ilustraciones SVG del
+    // set amico (login/signup/forgot-password) para que CTAs y
+    // personaje visualicen la misma identidad. Reemplaza el verde
+    // bambú (#7CB342) que quedaba visualmente desconectado de las
+    // ilustraciones y se confundía con el "verde éxito" genérico.
+    accentColor: '#2D9D8E', // teal panda (acento principal, CTAs)
+    accentHoverColor: '#258777', // teal panda oscuro (hover)
     // Acentos secundarios reservados para badges / highlights:
     //   - Rosa chicle:    #FF6B9D  (estampados, badges "nuevo")
     //   - Amarillo sol:   #FFD93D  (sellos, ofertas)
