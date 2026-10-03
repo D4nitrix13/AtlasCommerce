@@ -110,8 +110,11 @@ configure.
 
 ## Referencias
 
-- `backend/database/seeders/DefaultAdminSeeder.php` (líneas 14-21 + 56-61)
-- `backend/app/Console/Commands/BootstrapTenantCommand.php::resolveAdminPassword()` (líneas 330-345)
+- `backend/database/seeders/DefaultAdminSeeder.php`
+  (líneas 14-21 + 56-61)
+- `backend/app/Console/Commands/BootstrapTenantCommand.php`
+  método `resolveAdminPassword()` (líneas 330-345)
 - `docker/instances/development/{tenant}/seeds/dev-<tenant>.json`
 - `docker/instances/production/{tenant}/seeds/<tenant>.json`
-- `docs/development/operations.md` — runbook de deploy con setup de secrets
+- `docs/development/operations.md` — runbook de deploy con setup
+  de secrets
