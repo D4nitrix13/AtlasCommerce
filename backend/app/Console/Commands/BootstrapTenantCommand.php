@@ -332,8 +332,12 @@ class BootstrapTenantCommand extends Command
     {
         $passwordEnvKey = $config['password_env'] ?? null;
         if ($passwordEnvKey !== null && $passwordEnvKey !== '') {
-            $fromEnv = env(key: $passwordEnvKey);
-            if ($fromEnv !== null && $fromEnv !== '') {
+            // Usar getenv en vez de env() helper porque Laravel cachea
+            // el valor de env() al primer lookup y no relee cambios via
+            // putenv() que se usan en tests. getenv() lee directamente
+            // del process env cada vez.
+            $fromEnv = getenv($passwordEnvKey);
+            if ($fromEnv !== false && $fromEnv !== '') {
                 return $fromEnv;
             }
         }
