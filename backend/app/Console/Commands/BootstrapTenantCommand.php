@@ -339,7 +339,12 @@ class BootstrapTenantCommand extends Command
         }
 
         $adminEmail = $config['email'] ?? '<unknown-admin>';
-        $isProduction = $this->app->environment('production');
+        // Usar getenv en vez de \$this->app->environment('production') para
+        // leer directamente del process env. application->environment()
+        // cachea el valor al bootstrap del container y no refleja cambios
+        // via putenv() que se usan en tests (Laravel env() helper lee
+        // del cache, no del process env).
+        $isProduction = getenv('APP_ENV') === 'production';
 
         if (isset($config['password']) && $config['password'] !== '') {
             // SECURITY: el seed JSON tiene un password literal configurado.

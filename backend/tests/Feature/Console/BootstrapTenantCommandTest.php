@@ -309,30 +309,44 @@ final class BootstrapTenantCommandTest extends TestCase
         // debe fallar ruidosamente para forzar al operador a configurar
         // el env var antes del deploy.
         // Ver docs/operations/default-admin-credentials.md.
-        $this->app->detectEnvironment(fn () => 'production');
+        //
+        // Usar getenv en vez de $this->app->detectEnvironment porque
+        // el código de producción lee getenv('APP_ENV') directamente
+        // (application->environment() cachea el valor al bootstrap).
+        $previousEnv = getenv('APP_ENV');
+        putenv('APP_ENV=production');
 
-        $this->writeConfig([
-            'tenants' => [
-                [
-                    'slug' => 'prod-fallback',
-                    'name' => 'Prod Fallback',
-                    'currency' => 'USD',
-                    'domains' => ['prod-fallback.com'],
+        try {
+            $this->writeConfig([
+                'tenants' => [
+                    [
+                        'slug' => 'prod-fallback',
+                        'name' => 'Prod Fallback',
+                        'currency' => 'USD',
+                        'domains' => ['prod-fallback.com'],
+                    ],
                 ],
-            ],
-            'admin_user' => [
-                'email' => 'admin@prod-fallback.com',
-                'password_env' => 'NEVER_SET_IN_PROD',
-            ],
-        ]);
+                'admin_user' => [
+                    'email' => 'admin@prod-fallback.com',
+                    'password_env' => 'NEVER_SET_IN_PROD',
+                ],
+            ]);
 
-        putenv('NEVER_SET_IN_PROD');
+            putenv('NEVER_SET_IN_PROD');
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/SECURITY.*APP_ENV=production.*admin@prod-fallback.com/s');
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessageMatches('/SECURITY.*APP_ENV=production.*admin@prod-fallback.com/s');
 
-        $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
-            ->run();
+            $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
+                ->run();
+        } finally {
+            // Restaurar APP_ENV para no contaminar otros tests.
+            if ($previousEnv === false) {
+                putenv('APP_ENV');
+            } else {
+                putenv('APP_ENV='.$previousEnv);
+            }
+        }
     }
 
     #[Test]
