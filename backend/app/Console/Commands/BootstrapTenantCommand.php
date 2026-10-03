@@ -16,6 +16,7 @@ use Core\Tenant\Application\RlsContextService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -331,14 +332,54 @@ class BootstrapTenantCommand extends Command
     {
         $passwordEnvKey = $config['password_env'] ?? null;
         if ($passwordEnvKey !== null && $passwordEnvKey !== '') {
-            $fromEnv = env(key: $passwordEnvKey);
-            if ($fromEnv !== null && $fromEnv !== '') {
+            // Usar getenv en vez de env() helper porque Laravel cachea
+            // el valor de env() al primer lookup y no relee cambios via
+            // putenv() que se usan en tests. getenv() lee directamente
+            // del process env cada vez.
+            $fromEnv = getenv($passwordEnvKey);
+            if ($fromEnv !== false && $fromEnv !== '') {
                 return $fromEnv;
             }
         }
 
+        $adminEmail = $config['email'] ?? '<unknown-admin>';
+        // Usar getenv en vez de \$this->app->environment('production') para
+        // leer directamente del process env. application->environment()
+        // cachea el valor al bootstrap del container y no refleja cambios
+        // via putenv() que se usan en tests (Laravel env() helper lee
+        // del cache, no del process env).
+        $isProduction = getenv('APP_ENV') === 'production';
+
         if (isset($config['password']) && $config['password'] !== '') {
+            // SECURITY: el seed JSON tiene un password literal configurado.
+            // Esto solo es aceptable en dev/testing — en producción se debe
+            // usar SIEMPRE password_env con una env var segura.
+            if ($isProduction) {
+                throw new RuntimeException(sprintf(
+                    'SECURITY: tenants:bootstrap con APP_ENV=production no acepta '
+                    .'admin_user.password literal en el seed JSON (admin: %s). '
+                    .'Configurar admin_user.password_env apuntando a una env var '
+                    .'segura (<TENANT>_ADMIN_PASSWORD) antes de deployar. '
+                    .'Ver docs/operations/default-admin-credentials.md.',
+                    $adminEmail,
+                ));
+            }
+
             return (string) $config['password'];
+        }
+
+        // SECURITY: fallback al literal "password". Solo aceptable en
+        // dev/testing. En producción este path DEBE fallar ruidosamente
+        // para forzar al operador a configurar una env var antes del deploy.
+        if ($isProduction) {
+            throw new RuntimeException(sprintf(
+                'SECURITY: tenants:bootstrap con APP_ENV=production requiere '
+                .'admin_user.password_env en el seed JSON (admin: %s). '
+                .'Ni password_env ni password están configurados — no se puede '
+                .'crear el admin user con un secret hardcodeado en prod. '
+                .'Ver docs/operations/default-admin-credentials.md.',
+                $adminEmail,
+            ));
         }
 
         return 'password';
