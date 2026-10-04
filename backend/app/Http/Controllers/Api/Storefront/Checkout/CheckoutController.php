@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Storefront\Checkout;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Storefront\Checkout\CheckoutConfirmRequest;
 use App\Http\Requests\Storefront\Checkout\CheckoutPlaceRequest;
@@ -17,10 +18,12 @@ use App\Models\Marketing\Coupon;
 use App\Models\Payments\Payment;
 use App\Models\Payments\PaymentMethod;
 use App\Models\Sales\Order;
+use App\Models\Sales\OrderStatusHistory;
 use App\Models\Shipping\ShippingZone;
 use App\Services\Sales\CheckoutService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -181,6 +184,15 @@ class CheckoutController extends Controller
      *
      * Webhook de pago simulado. Acepta `payment_intent_id` + `status`
      * y marca el Payment correspondiente como succeeded/failed.
+     *
+     * Garantías:
+     *  - Idempotente: PSPs reenvían webhooks; si el `payment_intent_id`
+     *    ya fue procesado (status succeeded + paid_at seteado), responde
+     *    200 sin side effects.
+     *  - Transición atómica: payment update + order Pending→Processing
+     *    + OrderStatusHistory entry ocurren en una sola transacción.
+     *  - Estados terminales: si la orden ya está Completed o Cancelled,
+     *    se rechaza con 409 (no se permite revertir un cierre).
      */
     public function confirm(CheckoutConfirmRequest $request, int $orderId): JsonResponse
     {
@@ -192,6 +204,15 @@ class CheckoutController extends Controller
             403,
             'La orden no pertenece al cliente autenticado.',
         );
+
+        // Estados terminales (Completed/Cancelled) bloquean cualquier
+        // mutación: un webhook tardío no puede revertir un cierre de orden.
+        if ($order->status->isTerminal()) {
+            abort(
+                code: Response::HTTP_CONFLICT,
+                message: "La orden #{$order->id} está en estado terminal '{$order->status->value}' y no puede modificarse.",
+            );
+        }
 
         $paymentIntentId = (string) $request->input('payment_intent_id');
         $status = (string) $request->input('status', 'succeeded');
@@ -209,10 +230,45 @@ class CheckoutController extends Controller
             ], status: Response::HTTP_NOT_FOUND);
         }
 
-        $payment->update([
-            'status' => $status,
-            'paid_at' => $status === 'succeeded' ? now() : null,
-        ]);
+        // Idempotencia: si el pago ya fue confirmado, devolvemos 200 sin
+        // tocar nada. Los PSPs reenvían webhooks por seguridad y nuestro
+        // procesamiento debe ser safe-by-default.
+        if ($status === 'succeeded' && $payment->paid_at !== null) {
+            return response()->json(data: [
+                'data' => [
+                    'order_id' => $order->id,
+                    'payment_intent_id' => $paymentIntentId,
+                    'status' => $payment->status,
+                    'order_status' => $order->status->value,
+                    'idempotent' => true,
+                ],
+            ]);
+        }
+
+        DB::transaction(callback: function () use ($order, $payment, $status): void {
+            $payment->update([
+                'status' => $status,
+                'paid_at' => $status === 'succeeded' ? now() : null,
+            ]);
+
+            // Solo transicionamos Pending→Processing en éxito. El guard
+            // de arriba descarta terminales (Completed/Cancelled), así que
+            // la única transición válida restante es Pending→Processing.
+            if ($status === 'succeeded' && $order->status === OrderStatus::Pending) {
+                $previousStatus = $order->status;
+
+                $order->status = OrderStatus::Processing;
+                $order->save();
+
+                OrderStatusHistory::query()->create([
+                    'order_id' => $order->id,
+                    'user_id' => null,
+                    'previous_status' => $previousStatus->value,
+                    'new_status' => OrderStatus::Processing->value,
+                    'observation' => 'Pago confirmado vía PSP webhook',
+                ]);
+            }
+        });
 
         return response()->json(data: [
             'data' => [
