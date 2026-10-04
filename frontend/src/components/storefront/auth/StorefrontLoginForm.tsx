@@ -1,10 +1,10 @@
 import { useState, type ReactElement } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { apiFetch, buildApiUrl } from '../../../lib/api';
+import { buildApiUrl } from '../../../lib/api';
 import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { useTranslations } from '../../../i18n';
 import { GoogleIcon, FacebookIcon } from '../../../components/ui/SocialIcons';
-import type { LoginResponse } from '../../../types/auth';
+import { useAuth } from '../../../stores/auth';
 
 /**
  * Form de login para clientes (storefront).
@@ -41,6 +41,7 @@ interface StorefrontLoginFormProps {
 export default function StorefrontLoginForm({
   callbackPath = '/account',
   forgotHref = 'forgot-password',
+  locale = 'es',
   locale: _locale = 'es',
 }: StorefrontLoginFormProps): ReactElement {
   const { t } = useTranslations();
@@ -66,21 +67,33 @@ export default function StorefrontLoginForm({
     window.location.assign(buildApiUrl(API_ENDPOINTS.auth.social.redirect(provider)));
   };
 
+  const auth = useAuth();
+
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setErrorMessage(null);
     setIsSubmitting(true);
 
     try {
-      await apiFetch<LoginResponse>(API_ENDPOINTS.auth.login, {
-        method: 'POST',
-        body: {
-          email,
-          password,
-          device_name: 'web-client',
-        },
+      // Usar el auth store: persiste el token Sanctum en memoria Y maneja
+      // el flow de 2FA. Sin esto, las páginas admin no ven al user como
+      // autenticado y redirigen a login (causando un loop visual).
+      const result = await auth.login({
+        email,
+        password,
+        device_name: 'web-client',
       });
 
+      if (result.kind === '2fa_required') {
+        // El store NO escribe token en este caso — necesitamos que la
+        // página siguiente (2fa challenge) sepa el challengeId.
+        // Redirigimos a la URL canónica de 2FA.
+        const pathLocale = (window.location.pathname.split('/')[1] || 'es');
+        window.location.href = `/${pathLocale}/account/2fa?challenge=${result.challengeId}`;
+        return;
+      }
+
+      // Login success: redirect.
       const params = new URLSearchParams(window.location.search);
       const fallback = `${window.location.origin}${callbackPath}`;
       const target = params.get('redirect') ?? fallback;
