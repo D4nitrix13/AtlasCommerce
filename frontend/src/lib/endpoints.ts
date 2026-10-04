@@ -24,6 +24,9 @@ export const API_ENDPOINTS = {
     logout: '/v1/auth/logout',
     me: '/v1/auth/me',
 
+    forgotPassword: '/v1/auth/forgot-password',
+    resetPassword: '/v1/auth/reset-password',
+
     twoFactor: {
       status: '/v1/auth/2fa',
 
@@ -48,6 +51,11 @@ export const API_ENDPOINTS = {
       },
 
       disable: '/v1/auth/2fa/disable',
+    },
+
+    social: {
+      redirect: (provider: string): string => `/v1/auth/social/${provider}/redirect`,
+      callback: (provider: string): string => `/v1/auth/social/${provider}/callback`,
     },
   },
 

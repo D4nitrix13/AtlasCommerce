@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { Check } from 'lucide-react';
 import { apiFetch } from '../../../lib/api';
+import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { useAuth } from '../../../stores/auth';
 import { useTranslations } from '../../../i18n';
 import { PasswordInput } from '../../../components/ui/PasswordInput';
@@ -98,7 +99,7 @@ export default function ResetPasswordForm({
 
     setIsSubmitting(true);
     try {
-      const response = await apiFetch<LoginResponse>('/auth/reset-password', {
+      const response = await apiFetch<LoginResponse>(API_ENDPOINTS.auth.resetPassword, {
         method: 'POST',
         body: {
           email,

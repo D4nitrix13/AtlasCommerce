@@ -122,6 +122,7 @@ const es: Translations = {
   'auth.signup.shell.submitLoading': 'Creando...',
   'auth.signup.shell.google': 'Google',
   'auth.signup.shell.facebook': 'Facebook',
+  'auth.signup.shell.facebookComingSoon': 'Próximamente — Facebook OAuth estará disponible pronto',
 
   'auth.forgot.shell.heading': 'Recuperar acceso',
   'auth.forgot.shell.subtitle':

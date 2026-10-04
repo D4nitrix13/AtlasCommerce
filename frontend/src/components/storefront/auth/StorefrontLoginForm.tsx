@@ -1,6 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { apiFetch } from '../../../lib/api';
+import { apiFetch, buildApiUrl } from '../../../lib/api';
+import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { useTranslations } from '../../../i18n';
 import { GoogleIcon, FacebookIcon } from '../../../components/ui/SocialIcons';
 import type { LoginResponse } from '../../../types/auth';
@@ -9,7 +10,8 @@ import type { LoginResponse } from '../../../types/auth';
  * Form de login para clientes (storefront).
  *
  * Estructura del design system:
- *   - Social login: Google + Facebook (botones secundarios)
+ *   - Social login: Google (botón secundario, Facebook deshabilitado
+ *     como funcionalidad futura — ver F2 del feature doc)
  *   - Divider "o con tu correo"
  *   - Email + password con toggle de visibilidad
  *   - Link "¿Olvidaste tu contraseña?"
@@ -51,11 +53,17 @@ export default function StorefrontLoginForm({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSocialLogin = (provider: 'google' | 'facebook'): void => {
+    // Facebook está deshabilitado como funcionalidad futura — el botón
+    // existe en el DOM pero el handler no navega. Si en el futuro se
+    // reactiva, basta con eliminar el early-return.
+    if (provider === 'facebook') {
+      return;
+    }
     // Navega al endpoint OAuth del backend. Cuando Socialite esté
-    // configurado (GOOGLE_CLIENT_ID, FACEBOOK_CLIENT_ID), el backend
-    // responde con un 302 a la página de OAuth del provider. Si las
-    // credenciales no están configuradas, devuelve 501.
-    window.location.assign(`/api/auth/social/${provider}/redirect`);
+    // configurado (GOOGLE_CLIENT_ID), el backend responde con un 302
+    // a la página de OAuth del provider. Si las credenciales no están
+    // configuradas, devuelve 501.
+    window.location.assign(buildApiUrl(API_ENDPOINTS.auth.social.redirect(provider)));
   };
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
@@ -64,7 +72,7 @@ export default function StorefrontLoginForm({
     setIsSubmitting(true);
 
     try {
-      await apiFetch<LoginResponse>('/auth/login', {
+      await apiFetch<LoginResponse>(API_ENDPOINTS.auth.login, {
         method: 'POST',
         body: {
           email,
@@ -109,11 +117,11 @@ export default function StorefrontLoginForm({
         </button>
         <button
           type="button"
-          onClick={() => {
-            handleSocialLogin('facebook');
-          }}
+          disabled
+          aria-disabled="true"
+          title={t('auth.login.shell.facebookComingSoon')}
           data-auth-link="social-facebook"
-          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+          className="flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-400 opacity-60"
         >
           <FacebookIcon />
           <span>{t('auth.login.shell.facebook')}</span>

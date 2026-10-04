@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { apiFetch } from '../../../lib/api';
+import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { useTranslations } from '../../../i18n';
 
 /**
@@ -61,7 +62,7 @@ export default function ForgotPasswordForm({
     setIsSubmitting(true);
     try {
       await apiFetch<{ message: string; expires_minutes: number; code?: string }>(
-        '/auth/forgot-password',
+        API_ENDPOINTS.auth.forgotPassword,
         { method: 'POST', body: { email: email.trim() } }
       );
       const params = new URLSearchParams({

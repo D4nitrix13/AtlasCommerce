@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { apiFetch } from '../../../lib/api';
+import { apiFetch, buildApiUrl } from '../../../lib/api';
+import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { useTranslations } from '../../../i18n';
 import { GoogleIcon, FacebookIcon } from '../../../components/ui/SocialIcons';
 import type { LoginResponse } from '../../../types/auth';
@@ -70,7 +71,7 @@ export default function RegisterForm({
 
     setIsSubmitting(true);
     try {
-      await apiFetch<LoginResponse>('/auth/register', {
+      await apiFetch<LoginResponse>(API_ENDPOINTS.auth.register, {
         method: 'POST',
         body: {
           first_name: firstName,
@@ -96,7 +97,12 @@ export default function RegisterForm({
   const filledBars = strength === 'weak' ? 1 : strength === 'medium' ? 3 : 4;
 
   const handleSocialLogin = (provider: 'google' | 'facebook'): void => {
-    window.location.assign(`/api/auth/social/${provider}/redirect`);
+    // Facebook está deshabilitado como funcionalidad futura — el botón
+    // existe en el DOM pero el handler no navega.
+    if (provider === 'facebook') {
+      return;
+    }
+    window.location.assign(buildApiUrl(API_ENDPOINTS.auth.social.redirect(provider)));
   };
 
   return (
@@ -129,11 +135,11 @@ export default function RegisterForm({
         </button>
         <button
           type="button"
-          onClick={() => {
-            handleSocialLogin('facebook');
-          }}
+          disabled
+          aria-disabled="true"
+          title={t('auth.signup.shell.facebookComingSoon')}
           data-auth-link="social-facebook"
-          className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+          className="flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-400 opacity-60"
         >
           <FacebookIcon />
           <span>{t('auth.signup.shell.facebook')}</span>

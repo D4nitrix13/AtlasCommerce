@@ -1,5 +1,22 @@
 const API_URL = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
 
+/**
+ * Construye una URL completa del backend a partir de un endpoint path
+ * (relativo a `PUBLIC_API_URL`). Usado para redirecciones de browser
+ * (window.location.assign) donde no se puede usar apiFetch porque
+ * necesitamos una URL completa, no una Response.
+ *
+ * Lanza si PUBLIC_API_URL no está configurado (mismo contrato que
+ * `resolveApiUrl` abajo).
+ */
+export function buildApiUrl(endpoint: string): string {
+  if (!API_URL) {
+    throw new Error('PUBLIC_API_URL is not configured.');
+  }
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${API_URL}${normalizedEndpoint}`;
+}
+
 import { getXsrfToken } from './csrf';
 
 interface ApiErrorResponse {

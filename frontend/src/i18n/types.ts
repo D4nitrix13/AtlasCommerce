@@ -129,6 +129,7 @@ export type TranslationKey =
   | 'auth.signup.shell.submitLoading'
   | 'auth.signup.shell.google'
   | 'auth.signup.shell.facebook'
+  | 'auth.signup.shell.facebookComingSoon'
   | 'auth.forgot.shell.heading'
   | 'auth.forgot.shell.subtitle'
   | 'auth.forgot.shell.leftHeading'
