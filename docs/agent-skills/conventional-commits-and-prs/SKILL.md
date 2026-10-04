@@ -29,6 +29,34 @@ tipo(scope): descripción corta en español
 [footer opcional - refs a issues, breaking changes]
 ```
 
+### NO markdown en el cuerpo del commit
+
+El cuerpo del commit debe ser prosa plana. NO uses:
+
+- Encabezados `##` o `###`.
+- Bullets `- ...` ni listas numeradas `1. ...`.
+- Negrita `**...**` ni cursiva `*...*`.
+- Checkmarks `✅` o `❌`.
+- Links con sintaxis `[texto](url)`.
+- Bloques de código ``` ni `inline`.
+- Tablas Markdown.
+
+El cuerpo es prosa envuelta a 72 columnas, estilo Linux kernel y
+Conventional Commits spec. El git log en terminal debe leerse como
+texto plano, no como markdown renderizado. Si el lector quiere ver
+la verificación detallada, abre el PR o los tests.
+
+La única excepción válida de markdown en un commit es cuando el
+cuerpo incluye una firma o trailer al final (por ejemplo
+`Refs: #123` o `BREAKING CHANGE: ...`) — esos son trailers
+estándar de git, no markdown.
+
+Razón: los mensajes de commit se ven en `git log`, `git show`,
+terminales, IDEs, `git blame`, herramientas de release automation,
+y changelogs. El markdown no renderiza bien en ninguno de esos
+contextos y obliga al lector a hacer parsing mental de la
+sintaxis. La prosa plana es portable, durable y profesional.
+
 ### Types
 
 | Type | When to use |
