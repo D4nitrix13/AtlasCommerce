@@ -1,0 +1,92 @@
+---
+/**
+ * `/[locale]/account/notifications` — Preferencias de notificación (Slice 2).
+ *
+ * Tabla de 3×4: filas = categorías (Pedidos / Promociones / Newsletter /
+ * Seguridad), columnas = canales (Email / SMS / Push). Cada celda es
+ * un `<Switch>` controlado. La fila de Seguridad está bloqueada
+ * (compliance: no se puede desactivar).
+ *
+ * Mock data:
+ *   - Estado inicial desde `account-mock.ts` (`getNotificationPrefs()`).
+ *   - `security` siempre viene con los 3 canales en true desde el mock.
+ *   - Cuando exista `PUT /api/account/notifications`, se cablea el submit.
+ *
+ * Decisión de UX:
+ *  - Botón "Guardar" disabled hasta que el state difiera del inicial
+ *    (feedback visual claro: no hay nada que guardar si no cambió nada).
+ *  - Estado `saved` se muestra inline como confirmación (sin toast global).
+ *  - El mensaje se limpia automáticamente al editar de nuevo.
+ */
+import AccountLayout from '../../../layouts/AccountLayout.astro';
+import NotificationsPreferencesTable from '../../../components/account/notifications/NotificationsPreferencesTable';
+import type {
+  NotificationChannel,
+  NotificationCategory,
+  PrefsMatrix,
+} from '../../../components/account/notifications/NotificationsPreferencesTable';
+import { getServerDictionary } from '../../../i18n/server';
+import { getNotificationPrefs } from '../../../data/account-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const prefs = getNotificationPrefs();
+
+const channels: Record<NotificationChannel, string> = {
+  email: t['account.notifications.channel.email'],
+  sms: t['account.notifications.channel.sms'],
+  push: t['account.notifications.channel.push'],
+};
+
+const categories: Record<NotificationCategory, { label: string; hint: string }> = {
+  orders: {
+    label: t['account.notifications.category.orders'],
+    hint: t['account.notifications.category.ordersHint'],
+  },
+  promotions: {
+    label: t['account.notifications.category.promotions'],
+    hint: t['account.notifications.category.promotionsHint'],
+  },
+  newsletter: {
+    label: t['account.notifications.category.newsletter'],
+    hint: t['account.notifications.category.newsletterHint'],
+  },
+  security: {
+    label: t['account.notifications.category.security'],
+    hint: t['account.notifications.category.securityHint'],
+  },
+};
+
+const initialMatrix: PrefsMatrix = prefs.matrix;
+---
+
+<AccountLayout title={t['account.notifications.heading']}>
+  <header class="mb-2">
+    <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">
+      {t['account.notifications.heading']}
+    </h1>
+    <p class="mt-1 max-w-2xl text-sm text-slate-500">{t['account.notifications.subtitle']}</p>
+  </header>
+
+  <section
+    aria-labelledby="notifications-prefs-heading"
+    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+  >
+    <h2 id="notifications-prefs-heading" class="sr-only">
+      {t['account.notifications.heading']}
+    </h2>
+    <p class="mb-4 text-sm text-slate-600">{t['account.notifications.intro']}</p>
+
+    <NotificationsPreferencesTable
+      client:load
+      initial={initialMatrix}
+      channels={channels}
+      categories={categories}
+      saveLabel={t['account.notifications.save']}
+      savingLabel={t['account.notifications.saving']}
+      savedLabel={t['account.notifications.saved']}
+      errorLabel={t['account.notifications.error']}
+      disabledHint={t['account.notifications.disabledHint']}
+    />
+  </section>
+</AccountLayout>

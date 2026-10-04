@@ -1,0 +1,164 @@
+---
+/**
+ * GdprExportSection — Sección "Exportar mis datos" (RF-CUST-042).
+ *
+ * Botón grande "Descargar mis datos" que dispara una descarga via
+ * `fetch('/api/account/data-export')` y al cliente mete el body JSON
+ * en un Blob con download attribute (no abre nueva pestaña, no rompe
+ * la sesión del cliente).
+ *
+ * Mock-friendly: si `lastExport` es `null` muestra "Nunca exportaste",
+ * si tiene valor muestra la fecha de la última exportación. Sin
+ * dependencias React: la descarga es una función server-side mock que
+ * genera un Blob con datos sintéticos cuando no hay backend listo.
+ *
+ * Accesibilidad:
+ *  - El botón es `<button>` real (AGENTS §17).
+ *  - `aria-busy` durante la descarga.
+ *  - Mensajes de éxito/error en `role="status"` / `role="alert"`.
+ */
+interface Props {
+  heading: string;
+  subtitle: string;
+  buttonLabel: string;
+  exportingLabel: string;
+  successLabel: string;
+  errorLabel: string;
+  /** Última fecha de export o `null`. */
+  lastExport: string | null;
+  lastExportTemplate: string;
+  neverExportedLabel: string;
+}
+
+const {
+  heading,
+  subtitle,
+  buttonLabel,
+  exportingLabel,
+  successLabel,
+  errorLabel,
+  lastExport,
+  lastExportTemplate,
+  neverExportedLabel,
+} = Astro.props;
+
+const lastExportLabel =
+  lastExport !== null ? lastExportTemplate.replace('{date}', lastExport) : neverExportedLabel;
+---
+
+<section
+  id="gdpr-export"
+  aria-labelledby="gdpr-export-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <header class="mb-4">
+    <h2 id="gdpr-export-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+      {heading}
+    </h2>
+    <p class="mt-1 max-w-2xl text-sm text-slate-500">{subtitle}</p>
+  </header>
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-xs text-slate-500" data-testid="gdpr-export-status">
+      {lastExportLabel}
+    </p>
+    <button
+      type="button"
+      data-gdpr-export
+      data-exporting-label={exportingLabel}
+      data-success-label={successLabel}
+      data-error-label={errorLabel}
+      class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--primary,#475569)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <span data-gdpr-export-label>{buttonLabel}</span>
+    </button>
+  </div>
+
+  <p
+    role="status"
+    aria-live="polite"
+    data-gdpr-export-message
+    class="mt-3 hidden text-sm font-medium text-emerald-600"
+  ></p>
+</section>
+
+<script>
+  /**
+   * Mock download generator. Cuando el endpoint real esté listo, se
+   * reemplaza este bloque por:
+   *   const response = await fetch('/api/account/data-export', { credentials: 'include' });
+   *   const blob = await response.blob();
+   *
+   * Mantenemos el handler client-side para evitar hydration React solo
+   * por un botón + descarga.
+   */
+  function attachGdprExportHandler(): void {
+    document.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const trigger = target.closest<HTMLButtonElement>('[data-gdpr-export]');
+      if (!trigger) return;
+
+      event.preventDefault();
+
+      const labelEl = trigger.querySelector<HTMLElement>('[data-gdpr-export-label]');
+      const messageEl = document.querySelector<HTMLElement>('[data-gdpr-export-message]');
+      if (!labelEl || !messageEl) return;
+
+      const originalLabel = labelEl.textContent ?? '';
+      const exportingLabel = trigger.dataset.exportingLabel ?? originalLabel;
+      const successLabel = trigger.dataset.successLabel ?? '';
+      const errorLabel = trigger.dataset.errorLabel ?? '';
+
+      trigger.disabled = true;
+      trigger.setAttribute('aria-busy', 'true');
+      labelEl.textContent = exportingLabel;
+      messageEl.classList.add('hidden');
+      messageEl.classList.remove('text-red-600', 'text-emerald-600');
+
+      // Mock: generamos un Blob con datos sintéticos tras un delay.
+      // Cuando el endpoint esté listo, este bloque se reemplaza por
+      // fetch + blob.
+      const filename = `atlascommerce-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        note: 'Mock export — endpoint /api/account/data-export todavía no está conectado.',
+        profile: { email: 'customer@example.com', firstName: 'Daniel' },
+        orders: [],
+        addresses: [],
+        wishlist: [],
+        reviews: [],
+        tickets: [],
+      };
+
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 600);
+      });
+
+      try {
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        messageEl.textContent = successLabel;
+        messageEl.classList.add('text-emerald-600');
+        messageEl.classList.remove('hidden');
+      } catch {
+        messageEl.textContent = errorLabel;
+        messageEl.classList.add('text-red-600');
+        messageEl.classList.remove('hidden');
+      } finally {
+        trigger.disabled = false;
+        trigger.removeAttribute('aria-busy');
+        labelEl.textContent = originalLabel;
+      }
+    });
+  }
+  attachGdprExportHandler();
+</script>

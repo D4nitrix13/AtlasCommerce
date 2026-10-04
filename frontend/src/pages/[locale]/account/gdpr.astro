@@ -1,0 +1,94 @@
+---
+/**
+ * `/[locale]/account/gdpr` — Privacidad y datos personales (RF-CUST-042).
+ *
+ * Slice 2 / página compuesta. Dos secciones apiladas dentro de cards:
+ *   1. Export — descarga de datos en JSON (derecho de acceso, GDPR art. 15).
+ *   2. Delete — solicitud de eliminación con typed confirmation (derecho
+ *      de olvido, GDPR art. 17 + Ley 896 Nicaragua).
+ *
+ * Si hay una solicitud de eliminación pendiente, el banner "Cancelar
+ * eliminación" aparece arriba de la card de Delete. Mock data en
+ * `account-mock.ts` controla la visibilidad (`PENDING_DELETION_MOCK`).
+ *
+ * El cliente debe estar autenticado para ver esta página — el backend
+ * filtra los datos por `User` actual. Sin auth, los endpoints responden
+ * 401 y la UI mock-fallback muestra empty state.
+ *
+ * Decisiones de diseño:
+ *  - Danger border en lugar de eliminar el aviso visual de "esto es serio".
+ *  - "ELIMINAR" como typed confirmation (patrón GitHub/Stripe).
+ *  - Helper text explicando que las órdenes se mantienen anónimas para
+ *    compliance fiscal (transparencia GDPR).
+ */
+import AccountLayout from '../../../layouts/AccountLayout.astro';
+import GdprExportSection from '../../../components/account/gdpr/GdprExportSection.astro';
+import GdprDeleteSection from '../../../components/account/gdpr/GdprDeleteSection.astro';
+import GdprDeletionPending from '../../../components/account/gdpr/GdprDeletionPending.astro';
+import { getServerDictionary } from '../../../i18n/server';
+import { LAST_DATA_EXPORT_MOCK, getPendingDeletion } from '../../../data/account-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const pendingDeletion = getPendingDeletion();
+const lastExport = LAST_DATA_EXPORT_MOCK;
+
+const deleteItems = [
+  t['account.gdpr.delete.items.profile'],
+  t['account.gdpr.delete.items.orders'],
+  t['account.gdpr.delete.items.addresses'],
+  t['account.gdpr.delete.items.wishlist'],
+  t['account.gdpr.delete.items.reviews'],
+  t['account.gdpr.delete.items.tickets'],
+];
+---
+
+<AccountLayout title={t['account.gdpr.heading']}>
+  <header class="mb-2">
+    <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">{t['account.gdpr.heading']}</h1>
+    <p class="mt-1 max-w-2xl text-sm text-slate-500">{t['account.gdpr.subtitle']}</p>
+  </header>
+
+  {pendingDeletion !== null && (
+    <GdprDeletionPending
+      request={pendingDeletion}
+      heading={t['account.gdpr.delete.cancel.heading']}
+      subtitle={t['account.gdpr.delete.cancel.subtitle']}
+      scheduledAtTemplate={t['account.gdpr.delete.cancel.scheduledAt']}
+      buttonLabel={t['account.gdpr.delete.cancel.button']}
+      cancellingLabel={t['account.gdpr.delete.cancel.cancelling']}
+      successLabel={t['account.gdpr.delete.cancel.success']}
+      errorLabel={t['account.gdpr.delete.cancel.error']}
+    />
+  )}
+
+  <GdprExportSection
+    heading={t['account.gdpr.export.heading']}
+    subtitle={t['account.gdpr.export.subtitle']}
+    buttonLabel={t['account.gdpr.export.button']}
+    exportingLabel={t['account.gdpr.export.exporting']}
+    successLabel={t['account.gdpr.export.success']}
+    errorLabel={t['account.gdpr.export.error']}
+    lastExport={lastExport}
+    lastExportTemplate={t['account.gdpr.export.lastExport']}
+    neverExportedLabel={t['account.gdpr.export.neverExported']}
+  />
+
+  <GdprDeleteSection
+    heading={t['account.gdpr.delete.heading']}
+    subtitle={t['account.gdpr.delete.subtitle']}
+    warning={t['account.gdpr.delete.warning']}
+    items={deleteItems}
+    taxNotice={t['account.gdpr.delete.items.taxNotice']}
+    confirmHeading={t['account.gdpr.delete.confirm.heading']}
+    confirmInstructionTemplate={t['account.gdpr.delete.confirm.instruction']}
+    confirmWord="ELIMINAR"
+    confirmPlaceholder={t['account.gdpr.delete.confirm.placeholder']}
+    confirmHelper={t['account.gdpr.delete.confirm.helper']}
+    buttonLabel={t['account.gdpr.delete.button']}
+    submittingLabel={t['account.gdpr.delete.submitting']}
+    successLabel={t['account.gdpr.delete.success']}
+    errorLabel={t['account.gdpr.delete.error']}
+    confirmPhrase={t['account.gdpr.delete.confirmPhrase']}
+  />
+</AccountLayout>

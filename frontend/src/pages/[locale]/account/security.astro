@@ -1,0 +1,105 @@
+---
+/**
+ * `/[locale]/account/security` — Seguridad de la cuenta del cliente (Slice 2).
+ *
+ * Tres secciones apiladas, cada una en su propio card:
+ *   1. Cambiar contraseña (form React con PasswordInput + StrengthMeter + Checklist).
+ *   2. Sesiones activas (server-rendered list, revoke por form POST).
+ *   3. Códigos de recuperación (reveal via `<details>`, regenerate con confirm).
+ *
+ * Mock data en `data/account-mock.ts`. Cuando `/api/account/security/*`
+ * esté listo, el bloque de mocks se reemplaza por fetch + hidratación
+ * puntual en el form de password (los otros dos son SSG-friendly).
+ *
+ * Multi-tenant: AccountLayout aplica los tokens del tenant en CSS vars.
+ * Esta vista no agrega variante propia.
+ */
+import AccountLayout from '../../../layouts/AccountLayout.astro';
+import SecurityPasswordForm from '../../../components/account/security/SecurityPasswordForm';
+import SecuritySessionsList from '../../../components/account/security/SecuritySessionsList.astro';
+import SecurityRecoveryCodes from '../../../components/account/security/SecurityRecoveryCodes.astro';
+import { getServerDictionary } from '../../../i18n/server';
+import { getActiveSessions, getRecoveryCodes } from '../../../data/account-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const sessions = getActiveSessions();
+const recoveryCodes = getRecoveryCodes();
+---
+
+<AccountLayout title={t['account.security.heading']}>
+  <header class="mb-2">
+    <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">{t['account.security.heading']}</h1>
+    <p class="mt-1 max-w-2xl text-sm text-slate-500">{t['account.security.subtitle']}</p>
+  </header>
+
+  <section
+    aria-labelledby="password-heading"
+    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+  >
+    <header class="mb-4">
+      <h2 id="password-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+        {t['account.security.password.heading']}
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">{t['account.security.password.subtitle']}</p>
+    </header>
+
+    <SecurityPasswordForm
+      client:load
+      currentLabel={t['account.security.password.currentLabel']}
+      newLabel={t['account.security.password.newLabel']}
+      confirmLabel={t['account.security.password.confirmLabel']}
+      showLabel={t['account.security.password.show']}
+      hideLabel={t['account.security.password.hide']}
+      strengthLabel={t['account.security.password.strengthLabel']}
+      checklistTitle={t['account.security.password.checklistTitle']}
+      checklist={{
+        minLength: t['account.security.password.tip.minLength'],
+        upperLower: t['account.security.password.tip.upperLower'],
+        number: t['account.security.password.tip.number'],
+        symbol: t['account.security.password.tip.symbol'],
+      }}
+      submitLabel={t['account.security.password.submit']}
+      submittingLabel={t['account.security.password.submitting']}
+      successLabel={t['account.security.password.success']}
+      errorEmptyLabel={t['account.security.password.error.empty']}
+      errorMismatchLabel={t['account.security.password.error.mismatch']}
+      errorWeakLabel={t['account.security.password.error.weak']}
+      errorGenericLabel={t['account.security.password.error.generic']}
+      weakLabel={t['account.security.password.strength.weak']}
+      fairLabel={t['account.security.password.strength.fair']}
+      goodLabel={t['account.security.password.strength.good']}
+      strongLabel={t['account.security.password.strength.strong']}
+    />
+  </section>
+
+  <SecuritySessionsList
+    sessions={sessions}
+    heading={t['account.security.sessions.heading']}
+    subtitle={t['account.security.sessions.subtitle']}
+    currentBadge={t['account.security.sessions.currentBadge']}
+    columnDevice={t['account.security.sessions.column.device']}
+    columnLocation={t['account.security.sessions.column.location']}
+    columnIp={t['account.security.sessions.column.ip']}
+    columnLastActive={t['account.security.sessions.column.lastActive']}
+    columnActions={t['account.security.sessions.column.actions']}
+    revokeLabel={t['account.security.sessions.revoke']}
+    revokeAllLabel={t['account.security.sessions.revokeAll']}
+    confirmRevoke={t['account.security.sessions.confirmRevoke']}
+    emptyLabel={t['account.security.sessions.empty']}
+    errorLabel={t['account.security.sessions.error']}
+  />
+
+  <SecurityRecoveryCodes
+    codes={recoveryCodes}
+    heading={t['account.security.recovery.heading']}
+    subtitle={t['account.security.recovery.subtitle']}
+    remainingTemplate={t['account.security.recovery.remaining']}
+    viewLabel={t['account.security.recovery.view']}
+    hideLabel={t['account.security.recovery.hide']}
+    warning={t['account.security.recovery.warning']}
+    regenerateLabel={t['account.security.recovery.regenerate']}
+    confirmRegenerate={t['account.security.recovery.confirmRegenerate']}
+    generatedAt={t['account.security.recovery.regenerated']}
+  />
+</AccountLayout>

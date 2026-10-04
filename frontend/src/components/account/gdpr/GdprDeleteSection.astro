@@ -1,0 +1,212 @@
+---
+/**
+ * GdprDeleteSection — Sección "Eliminar mi cuenta" (RF-CUST-042).
+ *
+ * Danger styling (red border + red heading) para que sea visualmente
+ * distinto del resto de la página. El usuario tiene que escribir la
+ * palabra "ELIMINAR" para habilitar el botón de submit (typed
+ * confirmation pattern, usado por GitHub/Stripe para acciones destructivas).
+ *
+ * UX:
+ *  - Lista enumerada de qué se eliminará (transparencia GDPR).
+ *  - Aviso de 30 días grace period.
+ *  - Input con placeholder + helper "Escribila exactamente".
+ *  - Botón disabled hasta matchear la palabra exacta (case-sensitive).
+ *  - Confirm extra via window.confirm() antes del submit.
+ *
+ * El handler de submit es client-side (mock): emite un evento custom
+ * `gdpr:request-deletion` que la página escucha para hacer el POST.
+ * Esto permite que el section se mantenga Astro puro sin React island
+ * y la página componga la lógica de red centralizada.
+ */
+interface Props {
+  heading: string;
+  subtitle: string;
+  warning: string;
+  items: string[];
+  taxNotice: string;
+  confirmHeading: string;
+  /** Template con placeholder {word}. */
+  confirmInstructionTemplate: string;
+  confirmWord: string;
+  confirmPlaceholder: string;
+  confirmHelper: string;
+  buttonLabel: string;
+  submittingLabel: string;
+  successLabel: string;
+  errorLabel: string;
+  confirmPhrase: string;
+}
+
+const {
+  heading,
+  subtitle,
+  warning,
+  items,
+  taxNotice,
+  confirmHeading,
+  confirmInstructionTemplate,
+  confirmWord,
+  confirmPlaceholder,
+  confirmHelper,
+  buttonLabel,
+  submittingLabel,
+  successLabel,
+  errorLabel,
+  confirmPhrase,
+} = Astro.props;
+
+const instruction = confirmInstructionTemplate.replace('{word}', confirmWord);
+---
+
+<section
+  id="gdpr-delete"
+  aria-labelledby="gdpr-delete-heading"
+  class="rounded-2xl border border-red-200 bg-red-50/30 p-5 shadow-sm sm:p-6"
+>
+  <header class="mb-4">
+    <h2 id="gdpr-delete-heading" class="text-base font-semibold text-red-700 sm:text-lg">
+      {heading}
+    </h2>
+    <p class="mt-1 max-w-2xl text-sm text-slate-600">{subtitle}</p>
+  </header>
+
+  <p class="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+    <span aria-hidden="true" class="mt-0.5 shrink-0">
+      ⚠
+    </span>
+    <span>{warning}</span>
+  </p>
+
+  <p class="mb-2 text-sm font-medium text-slate-700">{confirmHeading}</p>
+  <ul class="mb-4 space-y-1.5 text-sm text-slate-600">
+    {items.map((item) => (
+      <li class="flex items-start gap-2">
+        <span
+          class="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400"
+          aria-hidden="true"
+        ></span>
+        <span>{item}</span>
+      </li>
+    ))}
+  </ul>
+  <p class="mb-5 text-xs italic text-slate-500">{taxNotice}</p>
+
+  <form
+    method="get"
+    action="#"
+    data-gdpr-delete
+    data-confirm-word={confirmWord}
+    data-confirm-phrase={confirmPhrase}
+    data-submitting-label={submittingLabel}
+    class="flex flex-col gap-4"
+  >
+    <div class="flex flex-col gap-1.5">
+      <label for="gdpr-delete-confirm-input" class="text-sm font-medium text-slate-700">
+        {instruction}
+      </label>
+      <input
+        id="gdpr-delete-confirm-input"
+        name="confirmWord"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder={confirmPlaceholder}
+        aria-describedby="gdpr-delete-confirm-helper"
+        class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-sm tracking-wider text-slate-900 placeholder:text-slate-400 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+      />
+      <p id="gdpr-delete-confirm-helper" class="text-xs text-slate-500">
+        {confirmHelper}
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-end gap-3">
+      <button
+        type="submit"
+        data-gdpr-delete-submit
+        disabled
+        class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span data-gdpr-delete-submit-label>{buttonLabel}</span>
+      </button>
+    </div>
+  </form>
+
+  <p
+    role="alert"
+    aria-live="polite"
+    data-gdpr-delete-message
+    data-success-label={successLabel}
+    data-error-label={errorLabel}
+    class="mt-3 hidden text-sm font-medium"
+  ></p>
+</section>
+
+<script>
+  /**
+   * Typed confirmation + confirm dialog + submit event emission.
+   *
+   * El form NO tiene action real (mock). Cuando llegue el endpoint,
+   * se reemplaza el dispatchEvent por un POST a `/api/account/deletion-request`.
+   */
+  function attachGdprDeleteHandler(): void {
+    document.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      const form = target.closest<HTMLFormElement>('[data-gdpr-delete]');
+      if (!form) return;
+      const submit = form.querySelector<HTMLButtonElement>('[data-gdpr-delete-submit]');
+      if (!submit) return;
+
+      const expected = form.dataset.confirmWord ?? '';
+      submit.disabled = target.value !== expected;
+    });
+
+    document.addEventListener('submit', (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      if (!form.hasAttribute('data-gdpr-delete')) return;
+      event.preventDefault();
+
+      const input = form.querySelector<HTMLInputElement>('#gdpr-delete-confirm-input');
+      const submit = form.querySelector<HTMLButtonElement>('[data-gdpr-delete-submit]');
+      const labelEl = form.querySelector<HTMLElement>('[data-gdpr-delete-submit-label]');
+      const messageEl = document.querySelector<HTMLElement>('[data-gdpr-delete-message]');
+      if (!input || !submit || !labelEl || !messageEl) return;
+
+      const expected = form.dataset.confirmWord ?? '';
+      const confirmPhrase = form.dataset.confirmPhrase ?? '';
+      const submittingLabel = form.dataset.submittingLabel ?? '';
+
+      if (input.value !== expected) {
+        input.focus();
+        return;
+      }
+
+      if (window.confirm(confirmPhrase) === false) {
+        return;
+      }
+
+      submit.disabled = true;
+      input.disabled = true;
+      submit.setAttribute('aria-busy', 'true');
+      labelEl.textContent = submittingLabel;
+      messageEl.classList.add('hidden');
+
+      // Mock: simulamos la respuesta exitosa. Cuando el endpoint esté
+      // listo, este bloque se reemplaza por fetch + redirect/refresh.
+      window.setTimeout(() => {
+        const successLabel = messageEl.dataset.successLabel ?? '';
+        messageEl.textContent = successLabel;
+        messageEl.classList.add('text-emerald-700');
+        messageEl.classList.remove('text-red-600');
+        messageEl.classList.remove('hidden');
+
+        // En producción: reload de la página para mostrar el estado
+        // "Eliminación pendiente" (si el backend devuelve el flag) o
+        // redirigir a una pantalla de despedida.
+      }, 500);
+    });
+  }
+  attachGdprDeleteHandler();
+</script>

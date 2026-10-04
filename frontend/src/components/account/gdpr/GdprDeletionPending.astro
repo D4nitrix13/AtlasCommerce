@@ -1,0 +1,133 @@
+---
+/**
+ * GdprDeletionPending — Banner/card de "Eliminación pendiente".
+ *
+ * Solo se renderiza cuando `request` no es `null`. Muestra la fecha
+ * programada y un botón para cancelar la solicitud.
+ *
+ * Mock-friendly: el handler de cancel emite un evento custom para que
+ * la página decida qué hacer. Sin React island — Astro puro con
+ * confirm dialog + reload.
+ */
+import { formatDate } from '../../../lib/formatters';
+
+interface DeletionRequest {
+  requestId: string;
+  requestedAt: string;
+  scheduledFor: string;
+}
+
+interface Props {
+  request: DeletionRequest;
+  heading: string;
+  subtitle: string;
+  scheduledAtTemplate: string;
+  buttonLabel: string;
+  cancellingLabel: string;
+  successLabel: string;
+  errorLabel: string;
+}
+
+const {
+  request,
+  heading,
+  subtitle,
+  scheduledAtTemplate,
+  buttonLabel,
+  cancellingLabel,
+  successLabel,
+  errorLabel,
+} = Astro.props;
+
+const scheduledLabel = scheduledAtTemplate.replace('{date}', formatDate(request.scheduledFor));
+---
+
+<section
+  id="gdpr-deletion-pending"
+  aria-labelledby="gdpr-deletion-pending-heading"
+  data-request-id={request.requestId}
+  class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-6"
+>
+  <header class="mb-3">
+    <h2
+      id="gdpr-deletion-pending-heading"
+      class="text-base font-semibold text-amber-900 sm:text-lg"
+    >
+      {heading}
+    </h2>
+    <p class="mt-1 max-w-2xl text-sm text-amber-800">{subtitle}</p>
+  </header>
+
+  <p class="mb-4 text-sm font-medium text-amber-900">{scheduledLabel}</p>
+
+  <div class="flex flex-wrap items-center justify-end gap-3">
+    <button
+      type="button"
+      data-gdpr-cancel-deletion
+      data-cancelling-label={cancellingLabel}
+      class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-amber-300 bg-white px-5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <span data-gdpr-cancel-deletion-label>{buttonLabel}</span>
+    </button>
+  </div>
+
+  <p
+    role="status"
+    aria-live="polite"
+    data-gdpr-cancel-message
+    data-success-label={successLabel}
+    data-error-label={errorLabel}
+    class="mt-3 hidden text-sm font-medium"
+  ></p>
+</section>
+
+<script>
+  /**
+   * Mock: emite un evento custom y muestra mensaje de éxito. Cuando
+   * exista `POST /api/account/deletion-cancel`, este handler se conecta
+   * al endpoint real con reload de la página.
+   */
+  function attachGdprCancelHandler(): void {
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const trigger = target.closest<HTMLButtonElement>('[data-gdpr-cancel-deletion]');
+      if (!trigger) return;
+      event.preventDefault();
+
+      const card = document.querySelector<HTMLElement>('[data-request-id]');
+      const labelEl = trigger.querySelector<HTMLElement>('[data-gdpr-cancel-deletion-label]');
+      const messageEl = document.querySelector<HTMLElement>('[data-gdpr-cancel-message]');
+      if (!card || !labelEl || !messageEl) return;
+
+      const cancellingLabel = trigger.dataset.cancellingLabel ?? '';
+      const originalLabel = labelEl.textContent ?? '';
+      const requestId = card.dataset.requestId ?? '';
+
+      trigger.disabled = true;
+      trigger.setAttribute('aria-busy', 'true');
+      labelEl.textContent = cancellingLabel;
+      messageEl.classList.add('hidden');
+
+      // Mock: simulación inmediata. En producción, esto sería:
+      //   await fetch('/api/account/deletion-cancel', { method: 'POST' });
+      //   window.location.reload();
+      window.setTimeout(() => {
+        const successLabel = messageEl.dataset.successLabel ?? '';
+        messageEl.textContent = successLabel;
+        messageEl.classList.add('text-emerald-700');
+        messageEl.classList.remove('text-red-600');
+        messageEl.classList.remove('hidden');
+
+        trigger.disabled = false;
+        trigger.removeAttribute('aria-busy');
+        labelEl.textContent = originalLabel;
+
+        // Emite evento para que la página oculte el banner cuando
+        // exista el flujo real.
+        document.dispatchEvent(new CustomEvent('gdpr:cancel-success', { detail: { requestId } }));
+      }, 400);
+    });
+  }
+  attachGdprCancelHandler();
+</script>
