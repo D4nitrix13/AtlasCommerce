@@ -1,0 +1,120 @@
+---
+/**
+ * SecurityRecoveryCodes — Card de códigos de recovery (post-2FA).
+ *
+ * Muestra el contador restante + lista (reveal/hide) + botón
+ * "Regenerar códigos" con confirm. La lista NO viene en claro del
+ * backend en producción — solo se muestra tras setup inicial o tras
+ * regenerate explícito. Aquí en mock viene ya revelada.
+ *
+ * UX: el reveal/hide es client-side via `<details>` para evitar
+ * hydration. El botón regenerate es un form POST con confirm gate
+ * (mismo patrón que `SecuritySessionsList`).
+ */
+import type { RecoveryCodesMock } from '../../../data/account-mock';
+
+interface Props {
+  codes: RecoveryCodesMock;
+  heading: string;
+  subtitle: string;
+  remainingTemplate: string;
+  viewLabel: string;
+  hideLabel: string;
+  warning: string;
+  regenerateLabel: string;
+  confirmRegenerate: string;
+  generatedAt: string;
+}
+
+const {
+  codes,
+  heading,
+  subtitle,
+  remainingTemplate,
+  viewLabel,
+  hideLabel,
+  warning,
+  regenerateLabel,
+  confirmRegenerate,
+  generatedAt,
+} = Astro.props;
+
+const remainingLabel = remainingTemplate.replace('{count}', String(codes.remaining));
+const hasPlainCodes = codes.plainCodes !== null && codes.plainCodes.length > 0;
+---
+
+<section
+  aria-labelledby="recovery-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <header class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 id="recovery-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+        {heading}
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">{subtitle}</p>
+    </div>
+    <span class="inline-flex items-center gap-2 self-start rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 sm:self-auto">
+      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+      {remainingLabel}
+    </span>
+  </header>
+
+  <details class="group rounded-lg border border-slate-200 bg-slate-50">
+    <summary class="flex cursor-pointer items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+      <span>{viewLabel}</span>
+      <span class="text-xs font-normal text-slate-500 group-open:hidden" aria-hidden="true">
+        ▾
+      </span>
+      <span class="hidden text-xs font-normal text-slate-500 group-open:inline" aria-hidden="true">
+        ▴ {hideLabel}
+      </span>
+    </summary>
+    <div class="border-t border-slate-200 px-4 py-4">
+      {hasPlainCodes ? (
+        <ul class="grid grid-cols-2 gap-2 font-mono text-sm text-slate-800 sm:grid-cols-3">
+          {codes.plainCodes?.map((code) => (
+            <li class="rounded-md bg-white px-3 py-2 text-center tracking-wider shadow-sm">
+              {code}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="font-mono text-xs text-slate-500">• • • • • • • • • •</p>
+      )}
+      <p class="mt-3 flex items-start gap-2 text-xs text-amber-700">
+        <span aria-hidden="true">⚠</span>
+        <span>{warning}</span>
+      </p>
+    </div>
+  </details>
+
+  <p class="mt-3 text-xs text-slate-500">{generatedAt}</p>
+
+  <div class="mt-4 flex justify-end border-t border-slate-100 pt-4">
+    <form method="post" action="#" data-confirm={confirmRegenerate}>
+      <button
+        type="submit"
+        class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+      >
+        {regenerateLabel}
+      </button>
+    </form>
+  </div>
+</section>
+
+<script>
+  // Confirm gate compartido con SecuritySessionsList. Idempotente.
+  function attachConfirmGate(): void {
+    document.addEventListener('submit', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLFormElement)) return;
+      const confirmMessage = target.dataset.confirm;
+      if (confirmMessage === undefined || confirmMessage === '') return;
+      if (window.confirm(confirmMessage) === false) {
+        event.preventDefault();
+      }
+    });
+  }
+  attachConfirmGate();
+</script>

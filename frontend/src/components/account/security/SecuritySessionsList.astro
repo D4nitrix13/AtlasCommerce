@@ -1,0 +1,156 @@
+---
+/**
+ * SecuritySessionsList — Lista de sesiones activas con acciones de revoke.
+ *
+ * Cada sesión (excepto la actual) tiene un `<button>` que dispara un
+ * confirm() antes de submit. Cuando exista `DELETE /api/account/sessions/{id}`,
+ * se cambia el form a un POST con redirect (sin JS).
+ *
+ * Decisión visual: la sesión actual NO muestra botón revoke (no puedes
+ * cerrar tu propia sesión desde acá — para eso está el botón "Cerrar
+ * sesión" del sidebar). Las otras sí.
+ *
+ * AGENTS §9: el orden de clases sigue intención (layout → spacing → color).
+ */
+import type { ActiveSessionMock } from '../../../data/account-mock';
+import { formatDate } from '../../../lib/formatters';
+
+interface Props {
+  sessions: ActiveSessionMock[];
+  heading: string;
+  subtitle: string;
+  currentBadge: string;
+  columnDevice: string;
+  columnLocation: string;
+  columnIp: string;
+  columnLastActive: string;
+  columnActions: string;
+  revokeLabel: string;
+  revokeAllLabel: string;
+  confirmRevoke: string;
+  emptyLabel: string;
+  errorLabel: string;
+}
+
+const {
+  sessions,
+  heading,
+  subtitle,
+  currentBadge,
+  columnDevice,
+  columnLocation,
+  columnIp,
+  columnLastActive,
+  columnActions,
+  revokeLabel,
+  revokeAllLabel,
+  confirmRevoke,
+  emptyLabel,
+  errorLabel,
+} = Astro.props;
+
+const otherSessions = sessions.filter((session) => session.isCurrent === false);
+const hasSessions = sessions.length > 0;
+const hasOthers = otherSessions.length > 0;
+---
+
+<section
+  aria-labelledby="sessions-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <header class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 id="sessions-heading" class="text-base font-semibold text-slate-900 sm:text-lg">
+        {heading}
+      </h2>
+      <p class="mt-1 text-sm text-slate-500">{subtitle}</p>
+    </div>
+  </header>
+
+  {!hasSessions && (
+    <p class="py-6 text-center text-sm text-slate-500" role="status">
+      {emptyLabel}
+    </p>
+  )}
+
+  {hasSessions && (
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="sr-only sm:not-sr-only">
+          <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-wider text-slate-500">
+            <th class="py-2 pr-4 font-semibold">{columnDevice}</th>
+            <th class="py-2 pr-4 font-semibold">{columnLocation}</th>
+            <th class="py-2 pr-4 font-semibold">{columnIp}</th>
+            <th class="py-2 pr-4 font-semibold">{columnLastActive}</th>
+            <th class="py-2 font-semibold">{columnActions}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {sessions.map((session) => (
+            <tr class="flex flex-col gap-1 py-3 sm:table-row sm:gap-0 sm:py-2">
+              <td class="flex items-center gap-2 sm:pr-4">
+                <span class="font-medium text-slate-900">{session.device}</span>
+                {session.isCurrent && (
+                  <span class="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--primary,#7c3aed)_12%,white)] px-2 py-0.5 text-xs font-medium text-[var(--primary,#7c3aed)]">
+                    {currentBadge}
+                  </span>
+                )}
+                <p class="text-xs text-slate-500 sm:hidden">
+                  {session.browser} · {session.os}
+                </p>
+              </td>
+              <td class="text-slate-700 sm:pr-4">{session.location}</td>
+              <td class="font-mono text-xs text-slate-500 sm:pr-4">{session.ip}</td>
+              <td class="text-xs text-slate-500 sm:pr-4">
+                <time datetime={session.lastActiveAt}>{formatDate(session.lastActiveAt)}</time>
+              </td>
+              <td class="pt-2 sm:pt-0 sm:text-right">
+                {session.isCurrent === false && (
+                  <form method="post" action="#" data-confirm={confirmRevoke}>
+                    <button
+                      type="submit"
+                      class="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+                    >
+                      {revokeLabel}
+                    </button>
+                  </form>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+
+  {hasOthers && (
+    <div class="mt-4 flex justify-end border-t border-slate-100 pt-4">
+      <form method="post" action="#" data-confirm={errorLabel}>
+        <button
+          type="submit"
+          class="text-sm font-medium text-[var(--primary,#7c3aed)] hover:underline"
+        >
+          {revokeAllLabel}
+        </button>
+      </form>
+    </div>
+  )}
+</section>
+
+<script>
+  // Confirm gate para los forms con `data-confirm`. Idempotente: cada
+  // componente que monta este patrón (sessions/recovery) puede incluir
+  // el mismo script y el listener se chequea por sí mismo sin pisarse.
+  function attachConfirmGate(): void {
+    document.addEventListener('submit', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLFormElement)) return;
+      const confirmMessage = target.dataset.confirm;
+      if (confirmMessage === undefined || confirmMessage === '') return;
+      if (window.confirm(confirmMessage) === false) {
+        event.preventDefault();
+      }
+    });
+  }
+  attachConfirmGate();
+</script>
