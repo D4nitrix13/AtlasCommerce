@@ -282,11 +282,6 @@ final class SeedFilesValidationTest extends TestCase
     #[Test]
     public function falls_back_to_default_password_when_neither_env_nor_literal_provided(): void
     {
-        // Contrato actualizado: en APP_ENV=testing (default en CI), cae
-        // al literal 'password' como fallback. En APP_ENV=production
-        // este path falla con RuntimeException — ver test
-        // throws_in_production_when_neither_password_env_nor_literal
-        // en BootstrapTenantCommandTest, y docs/operations/default-admin-credentials.md.
         $json = [
             'tenants' => [
                 [
@@ -314,7 +309,7 @@ final class SeedFilesValidationTest extends TestCase
                 ->firstOrFail();
             $this->assertTrue(
                 Hash::check(value: 'password', hashedValue: $user->password),
-                'Sin password_env ni password literal, debe usar default "password" en dev/test.',
+                'Sin password_env ni password literal, debe usar default "password".',
             );
         } finally {
             @unlink($tmpPath);

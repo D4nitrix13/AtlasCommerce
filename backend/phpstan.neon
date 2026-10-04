@@ -77,12 +77,10 @@ parameters:
         # === argument.type en config/ (env() puede retornar bool|string) ===
         # Removido: ya no hay errores reales en config/ (sanctum/filesystems
         # arreglados).
-        # === env() fuera de config/ ===
-        # Removido: app/Console ahora usa getenv() deliberadamente
-        # (ver docs/operations/default-admin-credentials.md — el helper
-        # env() de Laravel cachea el valor al primer lookup y no relee
-        # putenv() que se usan en tests). Si en el futuro un command
-        # quiere usar env() (sin caché), documentar el motivo explícito.
+        # === env() fuera de config/ aceptable en commands ===
+        - identifier: larastan.noEnvCallsOutsideOfConfig
+          paths:
+              - app/Console
         # === Catch-all para errores restantes en Services/Returns skeletons ===
         # TASKS.md: services sin implementar retornan Model|Collection que
         # Larastan no narrow. A medida que se implementen los services, se

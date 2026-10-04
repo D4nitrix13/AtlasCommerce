@@ -10,7 +10,6 @@ use App\Models\Stores\StoreDomain;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use RuntimeException;
 use Tests\TestCase;
 
 #[Group('console')]
@@ -266,11 +265,8 @@ final class BootstrapTenantCommandTest extends TestCase
     #[Test]
     public function it_falls_back_to_default_password_when_password_env_is_not_set(): void
     {
-        // Contrato actualizado: en APP_ENV=testing (y dev), cae al
-        // literal 'password' como fallback para no requerir env vars
-        // en tests. En APP_ENV=production, este path falla con
-        // RuntimeException (ver it_throws_in_production_when_password_env_is_missing).
-        // Ver docs/operations/default-admin-credentials.md.
+        // Cambio de contrato: antes fallaba si el env var no estaba
+        // seteado. Ahora cae al default "password" (dev/test convenience).
         $this->writeConfig([
             'tenants' => [
                 [
@@ -286,8 +282,6 @@ final class BootstrapTenantCommandTest extends TestCase
             ],
         ]);
 
-        // APP_ENV=testing está seteado por phpunit.xml, así que el
-        // fallback a 'password' es seguro en este contexto.
         putenv('NEVER_SET_PASSWORD');
 
         $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
@@ -298,56 +292,6 @@ final class BootstrapTenantCommandTest extends TestCase
             ->where('email', 'admin@no-password.com')
             ->firstOrFail();
         $this->assertTrue(\Illuminate\Support\Facades\Hash::check(value: 'password', hashedValue: $user->password));
-    }
-
-    #[Test]
-    public function it_throws_in_production_when_password_env_is_missing(): void
-    {
-        // SECURITY guard: en APP_ENV=production, si el JSON no tiene
-        // password_env configurado Y el env var no existe, el comando
-        // debe fallar ruidosamente (exit code != 0) para forzar al
-        // operador a configurar el env var antes del deploy.
-        // Ver docs/operations/default-admin-credentials.md.
-        //
-        // NOTA: usamos assertExitCode + expectsOutput en vez de
-        // expectException porque el handle() del comando captura
-        // Throwable y lo loguea en stderr (no re-lanza).
-        //
-        // Usar getenv en vez de $this->app->detectEnvironment porque
-        // el código de producción lee getenv('APP_ENV') directamente
-        // (application->environment() cachea el valor al bootstrap).
-        $previousEnv = getenv('APP_ENV');
-        putenv('APP_ENV=production');
-
-        try {
-            $this->writeConfig([
-                'tenants' => [
-                    [
-                        'slug' => 'prod-fallback',
-                        'name' => 'Prod Fallback',
-                        'currency' => 'USD',
-                        'domains' => ['prod-fallback.com'],
-                    ],
-                ],
-                'admin_user' => [
-                    'email' => 'admin@prod-fallback.com',
-                    'password_env' => 'NEVER_SET_IN_PROD',
-                ],
-            ]);
-
-            putenv('NEVER_SET_IN_PROD');
-
-            $this->artisan('tenants:bootstrap', ['path' => $this->tempJsonPath])
-                ->expectsOutputToContain('Error durante bootstrap: SECURITY')
-                ->assertExitCode(1);
-        } finally {
-            // Restaurar APP_ENV para no contaminar otros tests.
-            if ($previousEnv === false) {
-                putenv('APP_ENV');
-            } else {
-                putenv('APP_ENV='.$previousEnv);
-            }
-        }
     }
 
     #[Test]

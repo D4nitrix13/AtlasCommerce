@@ -73,6 +73,29 @@ export interface ProductReview {
   readonly status: ReviewStatus;
 }
 
+/**
+ * Q&A product questions — preguntas que los clientes dejan en la página
+ * de un producto y que el admin modera antes de publicar la respuesta.
+ *
+ * Sigue el patrón clásico de Bazaarvoice / Shopify Q&A:
+ *   pending   → recién creada, sin responder
+ *   answered  → admin respondió y publicó
+ *   rejected  → admin rechazó (pregunta inapropiada)
+ *   flagged   → marcada por palabras clave (spam)
+ */
+export type QuestionStatus = 'pending' | 'answered' | 'rejected' | 'flagged';
+
+export interface ProductQuestion {
+  readonly id: string;
+  readonly productName: string;
+  readonly productImage: string;
+  readonly customerName: string;
+  readonly question: string;
+  readonly answer: string | null;
+  readonly createdAt: string;
+  readonly status: QuestionStatus;
+}
+
 export const supportTickets: readonly SupportTicket[] = [
   {
     id: 'tkt-001',
@@ -650,6 +673,141 @@ export const productReviews: readonly ProductReview[] = [
     title: 'Para mi restaurante',
     body: 'Pedí 4 para mi equipo de cocina. Cómodos, lavables y el bordado del logo aguantó 50+ lavadas.',
     createdAt: '2026-09-20T16:45:00Z',
+    status: 'pending',
+  },
+] as const;
+
+/**
+ * Cola de moderación de preguntas (Q&A).
+ *
+ * 12 items mezcla de status: 6 pending (sin responder), 3 answered
+ * (con respuesta del admin), 1 rejected (inapropiada) y 2 flagged
+ * (palabras clave spam). El admin típicamente arranca el día
+ * contestando las `pending` y resuelve las `flagged` (rechazar spam o
+ * marcar como válida manualmente).
+ */
+export const productQuestions: readonly ProductQuestion[] = [
+  {
+    id: 'q-001',
+    productName: 'Camiseta Kitsune Edición Limitada',
+    productImage: '👕',
+    customerName: 'Carlos López',
+    question: '¿Esta camiseta queda bien si la lavo en lavadora o se encoge?',
+    answer: null,
+    createdAt: '2026-09-26T08:14:00Z',
+    status: 'pending',
+  },
+  {
+    id: 'q-002',
+    productName: 'Taza Personalizada Logo',
+    productImage: '☕',
+    customerName: 'María García',
+    question: '¿Puedo pedir la taza con un logo en relieve o solo impresión plana?',
+    answer: null,
+    createdAt: '2026-09-26T07:30:00Z',
+    status: 'pending',
+  },
+  {
+    id: 'q-003',
+    productName: 'Hoodie Bordado Premium',
+    productImage: '🧥',
+    customerName: 'Roberto Sánchez',
+    question: '¿Tienen hoodies en talla XS para mujer?',
+    answer:
+      'Sí, manejamos XS en todos los modelos. Al hacer tu pedido selecciona "Talla XS" en el selector antes de pagar.',
+    createdAt: '2026-09-25T16:00:00Z',
+    status: 'answered',
+  },
+  {
+    id: 'q-004',
+    productName: 'Botella Térmica 500ml',
+    productImage: '🍶',
+    customerName: 'Ana Martínez',
+    question: '¿La botella mantiene el agua fría 24 horas o menos?',
+    answer: null,
+    createdAt: '2026-09-25T14:20:00Z',
+    status: 'pending',
+  },
+  {
+    id: 'q-005',
+    productName: 'Gorra Bordada Kitsune',
+    productImage: '🧢',
+    customerName: 'Laura Díaz',
+    question: '¿El bordado de la visera es igual que en la foto?',
+    answer:
+      'Sí, bordado plano con hilos polyester de alta calidad. El color y posición matchean exactamente con la foto del producto.',
+    createdAt: '2026-09-25T10:15:00Z',
+    status: 'answered',
+  },
+  {
+    id: 'q-006',
+    productName: 'Mochila Urbana 20L',
+    productImage: '🎒',
+    customerName: 'Diego Castro',
+    question: '¿La mochila tiene compartimento para laptop de 15"?',
+    answer: null,
+    createdAt: '2026-09-25T09:00:00Z',
+    status: 'pending',
+  },
+  {
+    id: 'q-007',
+    productName: 'Cuaderno Personalizado A5',
+    productImage: '📓',
+    customerName: 'Patricia Ruiz',
+    question: '¿Puedo pedir el cuaderno con hojas cuadriculadas en lugar de rayadas?',
+    answer: null,
+    createdAt: '2026-09-24T20:30:00Z',
+    status: 'pending',
+  },
+  {
+    id: 'q-008',
+    productName: 'Stickers Pack x10',
+    productImage: '🏷️',
+    customerName: 'Jorge Vega',
+    question: '¿Los stickers son resistentes al agua?',
+    answer:
+      'Sí, son vinilo glossy con adhesivo industrial. Resisten lluvia, lavavajillas y exposición UV sin desteñirse.',
+    createdAt: '2026-09-24T15:45:00Z',
+    status: 'answered',
+  },
+  {
+    id: 'q-009',
+    productName: 'Lanyard Sublimado',
+    productImage: '🎫',
+    customerName: 'Sofía Aguilar',
+    question: 'COMPRA URGENTE compre ya https://spam-link.example tengo tarjeta lista',
+    answer: null,
+    createdAt: '2026-09-24T12:10:00Z',
+    status: 'flagged',
+  },
+  {
+    id: 'q-010',
+    productName: 'Calendario 2026 Personalizado',
+    productImage: '📅',
+    customerName: 'Miguel Herrera',
+    question: '¿Pueden empezar el calendario desde cualquier mes o solo enero?',
+    answer: null,
+    createdAt: '2026-09-24T10:00:00Z',
+    status: 'pending',
+  },
+  {
+    id: 'q-011',
+    productName: 'Mousepad XL Personalizado',
+    productImage: '🖱️',
+    customerName: 'Valentina Cruz',
+    question: 'ganar dinero fácil desde casa urgente click',
+    answer: null,
+    createdAt: '2026-09-23T19:20:00Z',
+    status: 'flagged',
+  },
+  {
+    id: 'q-012',
+    productName: 'Parche Bordado 7cm',
+    productImage: '🧵',
+    customerName: 'Lucía Mendoza',
+    question: '¿Venden los parches sueltos o solo en pack?',
+    answer: null,
+    createdAt: '2026-09-23T16:00:00Z',
     status: 'pending',
   },
 ] as const;

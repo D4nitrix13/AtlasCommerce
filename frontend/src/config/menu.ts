@@ -85,6 +85,21 @@ const RAW_MENU: readonly AdminMenuSection[] = [
     ],
   },
   {
+    label: 'Pagos',
+    items: [
+      { name: 'Resumen', href: '/payments', icon: 'banknotes' },
+      { name: 'Métodos', href: '/payments/methods', icon: 'shopping-cart' },
+      { name: 'Cuotas', href: '/payments/installments', icon: 'chart-bar' },
+    ],
+  },
+  {
+    label: 'Envíos',
+    items: [
+      { name: 'Zonas', href: '/shipping/zones', icon: 'archive-box' },
+      { name: 'Transportistas', href: '/shipping/companies', icon: 'truck' },
+    ],
+  },
+  {
     label: 'Soporte',
     items: [
       { name: 'Tickets', href: '/support/tickets', icon: 'chat-bubble-left-right' },
