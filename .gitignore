@@ -46,3 +46,7 @@ backend/backend/
 # Root-level vendor/ (local Composer autoload — not the backend's).
 # Absolute path so backend/vendor/ stays unaffected.
 /vendor/
+
+# Generated artifacts (no commit)
+.archify/
+docs/uml/build/
