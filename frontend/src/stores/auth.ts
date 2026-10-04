@@ -126,7 +126,11 @@ export function getAuthUser(): User | null {
 }
 
 export function isAuthenticated(): boolean {
-  return state.token !== null;
+  // CR2: la auth es via cookie httpOnly de Sanctum. JS no puede leer
+  // el token raw, asi que `state.token` es null. Pero `state.user` se
+  // hidrata via /api/v1/auth/me con credentials: 'include' (que envia
+  // la cookie automaticamente). Si user esta presente, estamos authed.
+  return state.user !== null || state.token !== null;
 }
 
 /**
