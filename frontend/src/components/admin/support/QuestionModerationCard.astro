@@ -1,0 +1,174 @@
+---
+/**
+ * QuestionModerationCard — Card de moderación de Q&A (F5.5).
+ *
+ * Espejo de `ReviewModerationCard.astro` pero para preguntas de producto.
+ * Renderiza una pregunta pendiente con:
+ *   - Emoji "imagen" placeholder del producto + nombre
+ *   - Body de la pregunta (texto plano)
+ *   - Si ya tiene respuesta publicada, la muestra inline con quote
+ *   - Autor + fecha
+ *   - Botones de acción (responder / rechazar / marcar como spam)
+ *
+ * El toggle "responder" expande un `<textarea>` inline. La sección
+ * colapsable usa `data-toggle-answer` para que el JS de abajo lo
+ * muestre sin salir de la card (UX clásica Bazaarvoice / Shopify Q&A).
+ *
+ * **AGENTS.md §1**: ~150 líneas — card densa con formulario inline.
+ *
+ * **i18n**: labels + placeholders localizados.
+ */
+import { getServerDictionary } from '../../../i18n/server';
+import type { ProductQuestion } from '../../../data/support-mock';
+
+interface Props {
+  question: ProductQuestion;
+}
+
+const { question } = Astro.props;
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_PILL: Record<ProductQuestion['status'], string> = {
+  pending: 'bg-amber-100 text-amber-800',
+  answered: 'bg-emerald-100 text-emerald-800',
+  rejected: 'bg-rose-100 text-rose-800',
+  flagged: 'bg-slate-100 text-slate-700',
+};
+
+const formatDate = (iso: string): string => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-NI', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+---
+
+<article
+  class:list={[
+    'rounded-2xl border bg-white shadow-sm',
+    question.status === 'flagged' ? 'border-rose-200 ring-1 ring-rose-100' : 'border-slate-200',
+  ]}
+  data-question-id={question.id}
+>
+  <div class="flex gap-4 p-5">
+    <div
+      class="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-3xl"
+      aria-hidden="true"
+    >
+      {question.productImage}
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex items-baseline justify-between gap-3">
+        <p class="truncate text-sm font-semibold text-slate-900">{question.productName}</p>
+        <span
+          class:list={[
+            'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
+            STATUS_PILL[question.status],
+          ]}
+        >
+          {t[`admin.support.questions.status.${question.status}`]}
+        </span>
+      </div>
+
+      <p class="mt-2 text-sm leading-relaxed text-slate-800">
+        <span class="font-semibold text-slate-900">Q:</span> {question.question}
+      </p>
+
+      {question.answer && (
+        <blockquote class="mt-2 rounded-lg border-l-4 border-emerald-300 bg-emerald-50/60 px-3 py-2 text-sm text-slate-700">
+          <span class="font-semibold text-emerald-700">A:</span> {question.answer}
+          <p class="mt-1 text-[10px] uppercase tracking-wider text-emerald-700">
+            {t['admin.support.questions.card.publishedAnswer']}
+          </p>
+        </blockquote>
+      )}
+
+      <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
+        <span class="font-medium text-slate-700">{question.customerName}</span>
+        <span aria-hidden="true">·</span>
+        <time datetime={question.createdAt}>
+          {t['admin.support.questions.card.askedOn']} {formatDate(question.createdAt)}
+        </time>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-slate-100 bg-slate-50/50 px-5 py-3">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          data-toggle-answer={question.id}
+          class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        >
+          <span aria-hidden="true">↩</span>
+          <span>{t['admin.support.questions.card.answer']}</span>
+        </button>
+        <button
+          type="button"
+          data-question-action="reject"
+          data-confirm={t['admin.support.questions.card.rejectConfirm']}
+          class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+        >
+          <span aria-hidden="true">✕</span>
+          <span>{t['admin.support.questions.card.reject']}</span>
+        </button>
+      </div>
+      <button
+        type="button"
+        data-question-action="flag"
+        class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+      >
+        <span aria-hidden="true">⚑</span>
+        <span>{t['admin.support.questions.card.flag']}</span>
+      </button>
+    </div>
+
+    <div data-answer-form={question.id} class="answer-form mt-3 hidden space-y-2">
+      <textarea
+        rows="3"
+        placeholder={t['admin.support.questions.card.answerPlaceholder']}
+        class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+      ></textarea>
+      <div class="flex justify-end">
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-800"
+        >
+          {t['admin.support.questions.card.publish']}
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+  /**
+   * Toggle del formulario inline de respuesta (mismo patrón que
+   * ReviewModerationCard).
+   */
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const toggle = target.closest<HTMLElement>('[data-toggle-answer]');
+    if (!toggle) return;
+    const id = toggle.dataset.toggleAnswer;
+    const form = document.querySelector<HTMLElement>(`[data-answer-form="${id}"]`);
+    if (form) form.classList.toggle('hidden');
+  });
+
+  /**
+   * Confirmación al rechazar (evita clicks accidentales).
+   */
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const trigger = target.closest<HTMLElement>('[data-question-action="reject"]');
+    if (!trigger) return;
+    const message = trigger.dataset.confirm ?? '';
+    if (message.length > 0 && !window.confirm(message)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  });
+</script>

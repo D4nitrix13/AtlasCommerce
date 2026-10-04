@@ -1,14 +1,129 @@
 ---
+/**
+ * Devoluciones — admin (F5.5).
+ *
+ * Tabla de 15 return requests del mock con todos los status del flujo
+ * (pending/approved/rejected/completed/cancelled). Mismas columnas que
+ * la tabla admin de returns original (`ReturnsAdmin.tsx`), pero SSR
+ * puro consumiendo el mock (F5.5 pattern).
+ *
+ * El componente React `ReturnsAdmin.tsx` se conserva (sigue conectado
+ * a `/api/v1/admin/returns`) pero esta página Astro lo reemplaza con
+ * el patrón F5.5 consistente con el resto del admin.
+ *
+ * **AGENTS.md §1**: ~140 líneas — header + 5 summary cards + tabla.
+ *
+ * **i18n**: headers + labels de status localizados.
+ */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import ReturnsAdmin from '../../../../components/admin/returns/ReturnsAdmin';
-import es from '../../../../i18n/locales/es';
+import ReturnRequestRow from '../../../../components/admin/returns/ReturnRequestRow.astro';
+import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
+import { returnRequests } from '../../../../data/returns-mock';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+function formatDate(iso: string | null): string {
+  if (iso === null) return '—';
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-NI' : 'en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(iso));
+}
+
+const counts = {
+  pending: returnRequests.filter((r) => r.status === 'pending').length,
+  approved: returnRequests.filter((r) => r.status === 'approved').length,
+  completed: returnRequests.filter((r) => r.status === 'completed').length,
+  rejected: returnRequests.filter((r) => r.status === 'rejected').length,
+  cancelled: returnRequests.filter((r) => r.status === 'cancelled').length,
+};
+
+const showEmpty = returnRequests.length === 0;
 ---
 
-<AdminLayout title={es['admin.returns.title'] + ' · Admin'}>
+<AdminLayout title={`${t['admin.returns.title']} | Admin`}>
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-slate-900">{es['admin.returns.title']}</h1>
-    <p class="mt-1 text-sm text-slate-500">{es['admin.returns.subtitle']}</p>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.returns.title']}</h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.returns.subtitle']}</p>
   </div>
 
-  <ReturnsAdmin client:load />
+  <section class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {t['admin.returns.status.pending']}
+      </p>
+      <p class="mt-1 text-2xl font-bold tabular-nums text-amber-700">{counts.pending}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {t['admin.returns.status.approved']}
+      </p>
+      <p class="mt-1 text-2xl font-bold tabular-nums text-sky-700">{counts.approved}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {t['admin.returns.status.completed']}
+      </p>
+      <p class="mt-1 text-2xl font-bold tabular-nums text-emerald-700">{counts.completed}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {t['admin.returns.status.rejected']}
+      </p>
+      <p class="mt-1 text-2xl font-bold tabular-nums text-rose-700">{counts.rejected}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {t['admin.returns.status.cancelled']}
+      </p>
+      <p class="mt-1 text-2xl font-bold tabular-nums text-slate-700">{counts.cancelled}</p>
+    </div>
+  </section>
+
+  {showEmpty ? (
+    <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+      <p class="text-base font-semibold text-slate-900">{t['admin.returns.table.empty']}</p>
+    </div>
+  ) : (
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table class="w-full min-w-[860px] border-collapse text-left text-sm">
+        <thead class="border-b border-slate-200 bg-slate-50/60 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.returns.table.id']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.returns.table.order']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.returns.table.reason']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.returns.table.status']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.returns.table.requestedAt']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.returns.table.resolvedAt']}
+            </th>
+            <th scope="col" class="px-3 py-3 text-right font-semibold">
+              {t['admin.returns.table.actions']}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {returnRequests.map((request) => (
+            <ReturnRequestRow
+              request={request}
+              formatDate={formatDate}
+              viewDetailLabel={t['admin.purchases.orders.viewDetail']}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
 </AdminLayout>

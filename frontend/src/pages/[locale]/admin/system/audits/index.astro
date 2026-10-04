@@ -1,0 +1,281 @@
+---
+/**
+ * Log de auditoría — admin (F5.5).
+ *
+ * Tabla densa con 25 entries del log. Filtros laterales via GET params
+ * (status quo del proyecto, AGENTS §18 — back/forward del navegador sin
+ * hydration JS).
+ *
+ * Patrón idéntico a `admin/sales/orders/index.astro`:
+ *   - Sidebar con filtros (user, action prefix, result, fecha)
+ *   - Tabla con timestamp + user + action + resource + IP + result + detail
+ *   - Empty state explícito
+ *
+ * **AGENTS.md §1**: ~280 líneas — sidebar filtros + tabla + empty/loading.
+ *
+ * **i18n**: headers + filtros + labels de status localizados.
+ */
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import { getServerDictionary, getServerLocale } from '../../../../../i18n/server';
+import { auditLog } from '../../../../../data/system-mock';
+import { adminUrl } from '../../../../../lib/path-helpers';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+const ALL_RESULTS = ['all', 'success', 'failure'] as const;
+type ResultFilter = (typeof ALL_RESULTS)[number];
+
+const ALL_ACTION_PREFIXES = [
+  'all',
+  'order',
+  'return',
+  'product',
+  'stock',
+  'ticket',
+  'user',
+  'coupon',
+  'review',
+  'supplier',
+  'settings',
+] as const;
+type ActionPrefix = (typeof ALL_ACTION_PREFIXES)[number];
+
+function parseResult(value: string | null): ResultFilter {
+  if (value === null) return 'all';
+  return (ALL_RESULTS as readonly string[]).includes(value) ? (value as ResultFilter) : 'all';
+}
+
+function parseActionPrefix(value: string | null): ActionPrefix {
+  if (value === null) return 'all';
+  return (ALL_ACTION_PREFIXES as readonly string[]).includes(value)
+    ? (value as ActionPrefix)
+    : 'all';
+}
+
+const currentResult = parseResult(Astro.url.searchParams.get('result'));
+const currentAction = parseActionPrefix(Astro.url.searchParams.get('action'));
+const currentUser = (Astro.url.searchParams.get('user') ?? '').trim();
+const currentDateFrom = Astro.url.searchParams.get('dateFrom') ?? '';
+const currentDateTo = Astro.url.searchParams.get('dateTo') ?? '';
+
+let filtered = auditLog;
+
+if (currentResult !== 'all') {
+  filtered = filtered.filter((entry) => entry.result === currentResult);
+}
+if (currentAction !== 'all') {
+  filtered = filtered.filter((entry) => entry.action.startsWith(`${currentAction}.`));
+}
+if (currentUser !== '') {
+  const needle = currentUser.toLowerCase();
+  filtered = filtered.filter((entry) => entry.userEmail.toLowerCase().includes(needle));
+}
+if (currentDateFrom !== '') {
+  filtered = filtered.filter((entry) => entry.timestamp >= currentDateFrom);
+}
+if (currentDateTo !== '') {
+  filtered = filtered.filter((entry) => entry.timestamp.slice(0, 10) <= currentDateTo);
+}
+
+const showEmpty = filtered.length === 0;
+
+const RESULT_PILL: Record<'success' | 'failure', string> = {
+  success: 'bg-emerald-100 text-emerald-700',
+  failure: 'bg-rose-100 text-rose-700',
+};
+
+function formatTimestamp(iso: string): string {
+  const date = new Date(iso);
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-NI' : 'en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+---
+
+<AdminLayout title={`${t['admin.system.audits.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.system.audits.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.system.audits.subtitle']}</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
+    <aside
+      aria-label={t['admin.system.audits.filters.user']}
+      class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
+      <form method="get" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-user" class="text-sm font-medium text-slate-700">
+            {t['admin.system.audits.filters.user']}
+          </label>
+          <input
+            id="filter-user"
+            name="user"
+            type="search"
+            value={currentUser}
+            placeholder="admin@kitsune..."
+            class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-action" class="text-sm font-medium text-slate-700">
+            Acción
+          </label>
+          <select
+            id="filter-action"
+            name="action"
+            class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          >
+            {ALL_ACTION_PREFIXES.map((prefix) => (
+              <option value={prefix} selected={currentAction === prefix}>
+                {prefix === 'all' ? t['admin.system.audits.filters.allActions'] : prefix}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-result" class="text-sm font-medium text-slate-700">
+            {t['admin.system.audits.table.result']}
+          </label>
+          <select
+            id="filter-result"
+            name="result"
+            class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          >
+            {ALL_RESULTS.map((result) => (
+              <option value={result} selected={currentResult === result}>
+                {result === 'all'
+                  ? t['admin.system.audits.filters.allResults']
+                  : t[`admin.system.audits.result.${result}`]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <fieldset class="flex flex-col gap-2 border-t border-slate-100 pt-4">
+          <legend class="text-sm font-medium text-slate-700">
+            {t['admin.system.audits.filters.date']}
+          </legend>
+          <label class="flex flex-col gap-1.5 text-xs">
+            <span class="font-medium text-slate-600">
+              {t['admin.system.audits.filters.dateFrom']}
+            </span>
+            <input
+              type="date"
+              name="dateFrom"
+              value={currentDateFrom}
+              class="block w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            />
+          </label>
+          <label class="flex flex-col gap-1.5 text-xs">
+            <span class="font-medium text-slate-600">
+              {t['admin.system.audits.filters.dateTo']}
+            </span>
+            <input
+              type="date"
+              name="dateTo"
+              value={currentDateTo}
+              class="block w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            />
+          </label>
+        </fieldset>
+
+        <div class="flex flex-col gap-2 border-t border-slate-100 pt-4">
+          <button
+            type="submit"
+            class="inline-flex h-9 items-center justify-center rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+          >
+            {t['admin.system.audits.filters.apply']}
+          </button>
+          <a
+            href={adminUrl(locale, '/system/audits')}
+            class="inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+          >
+            {t['admin.system.audits.filters.clear']}
+          </a>
+        </div>
+      </form>
+    </aside>
+
+    <section>
+      {showEmpty ? (
+        <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+          <p class="text-base font-semibold text-slate-900">
+            {t['admin.system.audits.table.empty']}
+          </p>
+        </div>
+      ) : (
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table class="w-full min-w-[860px] border-collapse text-left text-sm">
+            <thead class="border-b border-slate-200 bg-slate-50/60 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.system.audits.table.timestamp']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.system.audits.table.user']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.system.audits.table.action']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.system.audits.table.resource']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.system.audits.table.ip']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.system.audits.table.result']}
+                </th>
+                <th scope="col" class="px-3 py-3 font-semibold">
+                  {t['admin.system.audits.table.detail']}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {filtered.map((entry) => (
+                <tr class="transition-colors hover:bg-slate-50/40">
+                  <td class="px-3 py-3 align-top font-mono text-xs text-slate-600">
+                    {formatTimestamp(entry.timestamp)}
+                  </td>
+                  <td class="px-3 py-3 align-top text-slate-700">{entry.userEmail}</td>
+                  <td class="px-3 py-3 align-top">
+                    <span class="inline-flex rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-700">
+                      {entry.action}
+                    </span>
+                  </td>
+                  <td class="px-3 py-3 align-top font-mono text-xs text-slate-600">
+                    {entry.resource}
+                  </td>
+                  <td class="px-3 py-3 align-top font-mono text-xs text-slate-500">
+                    {entry.ipAddress}
+                  </td>
+                  <td class="px-3 py-3 align-top">
+                    <span
+                      class:list={[
+                        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                        RESULT_PILL[entry.result],
+                      ]}
+                    >
+                      {t[`admin.system.audits.result.${entry.result}`]}
+                    </span>
+                  </td>
+                  <td class="px-3 py-3 align-top text-xs text-slate-600">{entry.detail}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  </div>
+</AdminLayout>

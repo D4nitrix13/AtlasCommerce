@@ -1,0 +1,110 @@
+---
+/**
+ * Preguntas de producto — admin (F5.5).
+ *
+ * Cola de moderación de Q&A. 12 preguntas del mock, agrupadas como
+ * cards (no tabla porque cada card tiene textarea inline para
+ * responder). Cada card usa `QuestionModerationCard.astro`.
+ *
+ * Filtro simple por status via GET param. La página default muestra
+ * solo `pending` para que el admin tenga trabajo al entrar.
+ *
+ * Layout responsive: 2 columnas en desktop, 1 en mobile.
+ *
+ * **AGENTS.md §1**: ~80 líneas — header + filtros + grid.
+ */
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import QuestionModerationCard from '../../../../../components/admin/support/QuestionModerationCard.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { productQuestions } from '../../../../../data/support-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const ALL_STATUSES = ['all', 'pending', 'answered', 'rejected', 'flagged'] as const;
+type StatusFilter = (typeof ALL_STATUSES)[number];
+
+function parseStatus(value: string | null): StatusFilter {
+  if (value === null) return 'pending';
+  return (ALL_STATUSES as readonly string[]).includes(value) ? (value as StatusFilter) : 'pending';
+}
+
+const currentStatus = parseStatus(Astro.url.searchParams.get('status'));
+
+const filteredQuestions =
+  currentStatus === 'all'
+    ? productQuestions
+    : productQuestions.filter((q) => q.status === currentStatus);
+
+const statusCounts = {
+  pending: productQuestions.filter((q) => q.status === 'pending').length,
+  answered: productQuestions.filter((q) => q.status === 'answered').length,
+  rejected: productQuestions.filter((q) => q.status === 'rejected').length,
+  flagged: productQuestions.filter((q) => q.status === 'flagged').length,
+};
+---
+
+<AdminLayout title={`${t['admin.support.questions.title']} | Admin`}>
+  <div class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+        {t['admin.support.questions.title']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.support.questions.subtitle']}</p>
+    </div>
+  </div>
+
+  <nav
+    aria-label={t['admin.support.questions.title']}
+    class="mb-4 flex flex-wrap items-center gap-2"
+  >
+    {ALL_STATUSES.map((status) => {
+      const isActive = currentStatus === status;
+      const count = status === 'all' ? productQuestions.length : statusCounts[status];
+      return (
+        <a
+          href={`?status=${status}`}
+          aria-current={isActive ? 'page' : undefined}
+          class:list={[
+            'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition',
+            isActive
+              ? 'border-slate-900 bg-slate-900 text-white'
+              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50',
+          ]}
+        >
+          <span>
+            {status === 'all'
+              ? t['admin.support.questions.filter.allStatuses']
+              : t[`admin.support.questions.filter.${status}`]}
+          </span>
+          <span
+            class:list={[
+              'inline-flex items-center justify-center rounded-full px-1.5 text-[10px]',
+              isActive ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600',
+            ]}
+          >
+            {count}
+          </span>
+        </a>
+      );
+    })}
+  </nav>
+
+  <p class="mb-4 text-xs text-slate-500">
+    Mostrando {filteredQuestions.length} {filteredQuestions.length === 1 ? 'pregunta' : 'preguntas'}
+    {currentStatus === 'all'
+      ? `(de ${productQuestions.length} totales)`
+      : `con estado "${t[`admin.support.questions.filter.${currentStatus}`]}"`}
+  </p>
+
+  {filteredQuestions.length === 0 ? (
+    <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+      <p class="text-base font-semibold text-slate-900">{t['admin.support.questions.empty']}</p>
+    </div>
+  ) : (
+    <section class="grid gap-4 xl:grid-cols-2">
+      {filteredQuestions.map((question) => (
+        <QuestionModerationCard question={question} />
+      ))}
+    </section>
+  )}
+</AdminLayout>

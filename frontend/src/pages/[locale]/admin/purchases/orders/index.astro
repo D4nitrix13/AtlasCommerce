@@ -1,0 +1,140 @@
+---
+/**
+ * Órdenes de compra — admin (F5.5).
+ *
+ * Tabla de 15 purchase orders del mock con columnas:
+ *   número · supplier · items · total · fecha de orden · esperada ·
+ *   status (pending/approved/shipped/received/cancelled) · ver detalle.
+ *
+ * **AGENTS.md §1**: ~190 líneas — header + tabla + empty state.
+ *
+ * **i18n**: headers + labels de status localizados.
+ */
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import { getServerDictionary, getServerLocale } from '../../../../../i18n/server';
+import { purchaseOrders } from '../../../../../data/purchases-mock';
+import { formatCentsAsDecimal } from '../../../../../lib/formatters';
+
+const locale = getServerLocale(Astro.locals.locale);
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_PILL: Record<string, string> = {
+  pending: 'bg-amber-100 text-amber-800',
+  approved: 'bg-sky-100 text-sky-800',
+  shipped: 'bg-violet-100 text-violet-800',
+  received: 'bg-emerald-100 text-emerald-800',
+  cancelled: 'bg-slate-100 text-slate-700',
+};
+
+function formatDate(iso: string | null): string {
+  if (iso === null) return '—';
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-NI' : 'en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(iso));
+}
+
+const showEmpty = purchaseOrders.length === 0;
+
+const sortedOrders = [...purchaseOrders].sort((a, b) => b.placedAt.localeCompare(a.placedAt));
+---
+
+<AdminLayout title={`${t['admin.purchases.orders.title']} | Admin`}>
+  <div class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+        {t['admin.purchases.orders.title']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.purchases.orders.subtitle']}</p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+    >
+      <span aria-hidden="true">+</span>
+      <span>{t['admin.purchases.orders.createOrder']}</span>
+    </button>
+  </div>
+
+  {showEmpty ? (
+    <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+      <p class="text-base font-semibold text-slate-900">{t['admin.purchases.orders.empty']}</p>
+    </div>
+  ) : (
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table class="w-full min-w-[960px] border-collapse text-left text-sm">
+        <thead class="border-b border-slate-200 bg-slate-50/60 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.purchases.orders.column.number']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.purchases.orders.column.supplier']}
+            </th>
+            <th scope="col" class="px-3 py-3 text-right font-semibold">
+              {t['admin.purchases.orders.column.items']}
+            </th>
+            <th scope="col" class="px-3 py-3 text-right font-semibold">
+              {t['admin.purchases.orders.column.total']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.purchases.orders.column.placedAt']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.purchases.orders.column.expectedAt']}
+            </th>
+            <th scope="col" class="px-3 py-3 font-semibold">
+              {t['admin.purchases.orders.column.status']}
+            </th>
+            <th scope="col" class="px-3 py-3 text-right font-semibold">
+              {t['admin.purchases.orders.column.actions']}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {sortedOrders.map((order) => (
+            <tr class="transition-colors hover:bg-slate-50/40">
+              <td class="px-3 py-3 align-top font-mono text-xs font-medium text-slate-900">
+                {order.number}
+              </td>
+              <td class="px-3 py-3 align-top">
+                <p class="font-medium text-slate-900">{order.supplierName}</p>
+              </td>
+              <td class="px-3 py-3 text-right align-top tabular-nums text-slate-700">
+                {order.itemsCount}
+              </td>
+              <td class="px-3 py-3 text-right align-top font-semibold tabular-nums text-slate-900">
+                {formatCentsAsDecimal(order.totalCents, 'USD')}
+              </td>
+              <td class="px-3 py-3 align-top text-xs text-slate-600">
+                {formatDate(order.placedAt)}
+              </td>
+              <td class="px-3 py-3 align-top text-xs text-slate-600">
+                {formatDate(order.expectedAt)}
+              </td>
+              <td class="px-3 py-3 align-top">
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    STATUS_PILL[order.status],
+                  ]}
+                >
+                  {t[`admin.purchases.orders.status.${order.status}`]}
+                </span>
+              </td>
+              <td class="px-3 py-3 text-right align-top">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                >
+                  {t['admin.purchases.orders.viewDetail']} ↗
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</AdminLayout>

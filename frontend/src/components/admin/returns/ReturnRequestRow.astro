@@ -1,0 +1,66 @@
+---
+/**
+ * ReturnRequestRow — Fila de tabla de return requests admin (F5.5).
+ *
+ * Componente "tonto" (sin estado) que renderiza una fila de la tabla
+ * de devoluciones. Vive separado para que `returns/index.astro` se
+ * mantenga por debajo del umbral `max-lines-per-function` del lint
+ * (40 líneas por arrow function).
+ *
+ * **AGENTS.md §1**: ~50 líneas — fila de tabla.
+ *
+ * **i18n**: status pill localizada vía `t`.
+ */
+import { getServerDictionary } from '../../../i18n/server';
+import { formatCentsAsDecimal } from '../../../lib/formatters';
+import type { ReturnRequestMock } from '../../../data/returns-mock';
+
+interface Props {
+  request: ReturnRequestMock;
+  formatDate: (iso: string | null) => string;
+  viewDetailLabel: string;
+}
+
+const { request, formatDate, viewDetailLabel } = Astro.props;
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_PILL: Record<string, string> = {
+  pending: 'bg-amber-100 text-amber-800',
+  approved: 'bg-sky-100 text-sky-800',
+  rejected: 'bg-rose-100 text-rose-800',
+  completed: 'bg-emerald-100 text-emerald-800',
+  cancelled: 'bg-slate-100 text-slate-700',
+};
+---
+
+<tr class="transition-colors hover:bg-slate-50/40">
+  <td class="px-3 py-3 align-top font-mono text-xs font-medium text-slate-900">#{request.id}</td>
+  <td class="px-3 py-3 align-top">
+    <p class="font-medium text-slate-900">{request.orderNumber}</p>
+    <p class="text-xs text-slate-500">{request.customerName}</p>
+  </td>
+  <td class="px-3 py-3 align-top text-sm text-slate-700">
+    <span class="line-clamp-2 max-w-md">{request.reason}</span>
+  </td>
+  <td class="px-3 py-3 align-top">
+    <span
+      class:list={[
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+        STATUS_PILL[request.status],
+      ]}
+    >
+      {t[`admin.returns.status.${request.status}`]}
+    </span>
+  </td>
+  <td class="px-3 py-3 align-top text-xs text-slate-600">{formatDate(request.requestedAt)}</td>
+  <td class="px-3 py-3 align-top text-xs text-slate-600">{formatDate(request.resolvedAt)}</td>
+  <td class="px-3 py-3 text-right align-top">
+    <p class="text-sm font-semibold text-slate-900">
+      {request.amountCents === 0 ? '—' : formatCentsAsDecimal(request.amountCents, 'USD')}
+    </p>
+    <button type="button" class="mt-1 text-xs font-medium text-emerald-600 hover:underline">
+      {viewDetailLabel} ↗
+    </button>
+  </td>
+</tr>

@@ -1,0 +1,112 @@
+---
+/**
+ * Proveedores — admin (F5.5).
+ *
+ * Tabla de 8 proveedores del mock con columnas:
+ *   nombre · contacto (email + teléfono) · país · total comprado ·
+ *   # órdenes · status (active/inactive).
+ *
+ **AGENTS.md §1**: ~150 líneas — header + tabla + empty state.
+ *
+ * **i18n**: headers + labels de status localizados.
+ */
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
+import { suppliers } from '../../../../../data/purchases-mock';
+import { formatCentsAsDecimal } from '../../../../../lib/formatters';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const STATUS_PILL: Record<'active' | 'inactive', string> = {
+  active: 'bg-emerald-100 text-emerald-700',
+  inactive: 'bg-slate-100 text-slate-600',
+};
+
+const showEmpty = suppliers.length === 0;
+
+const sortedSuppliers = [...suppliers].sort(
+  (a, b) => b.totalPurchasedCents - a.totalPurchasedCents
+);
+---
+
+<AdminLayout title={`${t['admin.purchases.suppliers.title']} | Admin`}>
+  <div class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+        {t['admin.purchases.suppliers.title']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.purchases.suppliers.subtitle']}</p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+    >
+      <span aria-hidden="true">+</span>
+      <span>{t['admin.purchases.suppliers.addSupplier']}</span>
+    </button>
+  </div>
+
+  {showEmpty ? (
+    <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+      <p class="text-base font-semibold text-slate-900">{t['admin.purchases.suppliers.empty']}</p>
+    </div>
+  ) : (
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table class="w-full min-w-[860px] border-collapse text-left text-sm">
+        <thead class="border-b border-slate-200 bg-slate-50/60 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th scope="col" class="px-4 py-3 font-semibold">
+              {t['admin.purchases.suppliers.column.name']}
+            </th>
+            <th scope="col" class="px-4 py-3 font-semibold">
+              {t['admin.purchases.suppliers.column.contact']}
+            </th>
+            <th scope="col" class="px-4 py-3 font-semibold">
+              {t['admin.purchases.suppliers.column.country']}
+            </th>
+            <th scope="col" class="px-4 py-3 text-right font-semibold">
+              {t['admin.purchases.suppliers.column.totalPurchased']}
+            </th>
+            <th scope="col" class="px-4 py-3 text-right font-semibold">
+              {t['admin.purchases.suppliers.column.ordersCount']}
+            </th>
+            <th scope="col" class="px-4 py-3 font-semibold">
+              {t['admin.purchases.suppliers.column.status']}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {sortedSuppliers.map((supplier) => (
+            <tr class="transition-colors hover:bg-slate-50/40">
+              <td class="px-4 py-3 align-top">
+                <p class="font-medium text-slate-900">{supplier.name}</p>
+              </td>
+              <td class="px-4 py-3 align-top">
+                <p class="text-sm text-slate-700">{supplier.contactName}</p>
+                <p class="text-xs text-slate-500">{supplier.contactEmail}</p>
+                <p class="font-mono text-xs text-slate-500">{supplier.contactPhone}</p>
+              </td>
+              <td class="px-4 py-3 align-top text-slate-700">{supplier.country}</td>
+              <td class="px-4 py-3 text-right align-top font-semibold tabular-nums text-slate-900">
+                {formatCentsAsDecimal(supplier.totalPurchasedCents, 'USD')}
+              </td>
+              <td class="px-4 py-3 text-right align-top tabular-nums text-slate-700">
+                {supplier.ordersCount}
+              </td>
+              <td class="px-4 py-3 align-top">
+                <span
+                  class:list={[
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    STATUS_PILL[supplier.status],
+                  ]}
+                >
+                  {t[`admin.purchases.suppliers.status.${supplier.status}`]}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</AdminLayout>
