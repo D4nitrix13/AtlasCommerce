@@ -11,7 +11,6 @@ use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetSessionDomainFromHost;
 use App\Http\Middleware\StoreMaintenanceMode;
-use App\Http\Middleware\ValidateStatefulCsrf;
 use App\Http\Middleware\ValidateStoreIdHeader;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -74,8 +73,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             SetSessionDomainFromHost::class,
             EnsureFrontendRequestsAreStateful::class,
-            // RF-SEC-018: CSRF para requests stateful. Skip si Bearer token.
-            ValidateStatefulCsrf::class,
         ]);
 
         // CR2: SetSessionDomainFromHost también en el web group. Sin
@@ -97,6 +94,21 @@ return Application::configure(basePath: dirname(__DIR__))
         // frontend HTML; acá los re-aplicamos a responses API/HTML
         // del backend (RF-SEC-017 + RF-SEC-021).
         $middleware->append(SecurityHeaders::class);
+
+        // CR2 fix: XSRF-TOKEN debe viajar RAW (no cifrado) entre el
+        // backend y el JS del frontend. Sanctum doble-submit cookie:
+        //   1. Backend genera token raw y lo setea como cookie
+        //   2. Frontend lee el valor raw via document.cookie
+        //   3. Frontend lo copia al header X-XSRF-TOKEN
+        //   4. Backend compara header vs session token (raw)
+        //
+        // Si EncryptCookies cifra el cookie XSRF-TOKEN, el JS lee un
+        // blob JSON cifrado, lo manda como header, y el backend
+        // compara ese blob contra el token raw → mismatch → 419 CSRF.
+        //
+        // EncryptCookies ya descifra el cookie entrante en decrypt(),
+        // pero NO descifra headers — X-XSRF-TOKEN llega tal cual lo
+        // mandó el JS. Por eso necesitamos que la cookie salga RAW.
 
         $middleware->alias([
             'store.domain' => ResolveStoreFromDomain::class,
