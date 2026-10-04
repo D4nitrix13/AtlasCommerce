@@ -1,0 +1,168 @@
+---
+/**
+ * Métodos de pago — admin (F5.6).
+ *
+ * Tabla de los métodos configurados (5 items del mock: Visa/MC, Amex,
+ * SPEI, OXXO, Yappy). Cada fila muestra código + nombre + tipo + comisión
+ * + volumen procesado + estado + acciones (toggle active).
+ *
+ * Patrón Shopify Admin: tipo con badge semántico (card=sky, transfer=violet,
+ * cash=amber, wallet=emerald, crypto=slate). Comisión desglosada como
+ * `X% + $Y` cuando hay fee fijo.
+ *
+ * **AGENTS.md §1**: ~200 líneas — header + tabla + badges.
+ */
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import { getServerDictionary } from '../../../../../i18n/server';
+import {
+  paymentMethods,
+  type PaymentMethodType,
+  type PaymentMethod,
+} from '../../../../../data/payments-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+const TYPE_BADGE: Record<PaymentMethodType, string> = {
+  card: 'bg-sky-100 text-sky-700',
+  transfer: 'bg-violet-100 text-violet-700',
+  cash: 'bg-amber-100 text-amber-700',
+  wallet: 'bg-emerald-100 text-emerald-700',
+  crypto: 'bg-slate-100 text-slate-700',
+};
+
+const TYPE_LABEL_KEY: Record<
+  PaymentMethodType,
+  | 'admin.payments.methods.type.card'
+  | 'admin.payments.methods.type.transfer'
+  | 'admin.payments.methods.type.cash'
+  | 'admin.payments.methods.type.wallet'
+  | 'admin.payments.methods.type.crypto'
+> = {
+  card: 'admin.payments.methods.type.card',
+  transfer: 'admin.payments.methods.type.transfer',
+  cash: 'admin.payments.methods.type.cash',
+  wallet: 'admin.payments.methods.type.wallet',
+  crypto: 'admin.payments.methods.type.crypto',
+};
+
+const formatFee = (method: PaymentMethod): string => {
+  const percentPart = `${method.feePercent}%`;
+  if (method.feeFixedCents === 0) return percentPart;
+  const fixedDollars = method.feeFixedCents / 100;
+  const fixedPart = new Intl.NumberFormat('es-NI', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(fixedDollars);
+  return `${percentPart} + ${fixedPart}`;
+};
+
+const formatAmount = (cents: number): string => {
+  return new Intl.NumberFormat('es-NI', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+};
+
+const hasMethods = paymentMethods.length > 0;
+---
+
+<AdminLayout title={`${t['admin.payments.methods.title']} | Admin`}>
+  <div class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+        {t['admin.payments.methods.title']}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.payments.methods.subtitle']}</p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+    >
+      <span aria-hidden="true">+</span>
+      <span>{t['admin.payments.methods.create']}</span>
+    </button>
+  </div>
+
+  {hasMethods ? (
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              <th class="px-5 py-3">{t['admin.payments.methods.column.code']}</th>
+              <th class="px-5 py-3">{t['admin.payments.methods.column.name']}</th>
+              <th class="px-5 py-3">{t['admin.payments.methods.column.type']}</th>
+              <th class="px-5 py-3 text-right">{t['admin.payments.methods.column.fees']}</th>
+              <th class="px-5 py-3 text-right">{t['admin.payments.methods.column.processed']}</th>
+              <th class="px-5 py-3">{t['admin.payments.methods.column.status']}</th>
+              <th class="px-5 py-3 text-right">{t['admin.payments.methods.column.actions']}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {paymentMethods.map((method) => (
+              <tr class="group hover:bg-slate-50/50">
+                <td class="px-5 py-3 font-mono text-xs font-bold text-slate-700">{method.code}</td>
+                <td class="px-5 py-3 font-medium text-slate-900">{method.name}</td>
+                <td class="px-5 py-3">
+                  <span
+                    class:list={[
+                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      TYPE_BADGE[method.type],
+                    ]}
+                  >
+                    {t[TYPE_LABEL_KEY[method.type]]}
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-right font-mono text-xs text-slate-700">
+                  {formatFee(method)}
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <div class="text-sm font-semibold text-slate-900">
+                    {formatAmount(method.processedAmountCents)}
+                  </div>
+                  <div class="text-xs text-slate-500">{method.processedCount} ops</div>
+                </td>
+                <td class="px-5 py-3">
+                  <span
+                    class:list={[
+                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      method.isActive
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-slate-100 text-slate-500',
+                    ]}
+                  >
+                    {method.isActive
+                      ? t['admin.payments.methods.status.active']
+                      : t['admin.payments.methods.status.inactive']}
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <button
+                    type="button"
+                    class:list={[
+                      'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition focus:outline-none focus-visible:ring-2',
+                      method.isActive
+                        ? 'text-slate-500 hover:bg-slate-100 hover:text-rose-600 focus-visible:ring-slate-300'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-emerald-600 focus-visible:ring-slate-300',
+                    ]}
+                    aria-label={`${method.isActive ? t['admin.payments.methods.status.inactive'] : t['admin.payments.methods.status.active']}: ${method.name}`}
+                  >
+                    {method.isActive
+                      ? t['admin.payments.methods.status.inactive']
+                      : t['admin.payments.methods.status.active']}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ) : (
+    <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm font-medium text-slate-700">{t['admin.payments.methods.empty']}</p>
+    </div>
+  )}
+</AdminLayout>
