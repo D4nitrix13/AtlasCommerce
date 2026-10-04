@@ -17,7 +17,7 @@ export function buildApiUrl(endpoint: string): string {
   return `${API_URL}${normalizedEndpoint}`;
 }
 
-import { getXsrfToken } from './csrf';
+import { getXsrfToken, bootstrapCsrf } from './csrf';
 
 interface ApiErrorResponse {
   message?: string;
@@ -125,6 +125,17 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
 
   // CR2: CSRF token en POST/PUT/DELETE/PATCH (NO en GET — Sanctum no
   // lo chequea y agregar header en GET solo agrega ruido al preflight).
+  //
+  // Si la cookie XSRF-TOKEN no está seteada todavía (AuthLayout acaba
+  // de montar y el inline script del CSR cookie está en flight), esperamos
+  // a que bootstrapCsrf() la setee antes de mandar la request. Sin esto
+  // el backend responde 419 CSRF token mismatch en el primer POST
+  // post-mount. Solo agrega latencia al primer POST (~50ms); los
+  // siguientes son instantáneos porque la cookie ya está.
+  if (isStateChangingMethod(rest.method) && getXsrfToken() === null) {
+    await bootstrapCsrf();
+  }
+
   const xsrfToken = getXsrfToken();
   const shouldInjectXsrf = isStateChangingMethod(rest.method) && xsrfToken !== null;
 
