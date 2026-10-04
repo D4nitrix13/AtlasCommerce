@@ -1,0 +1,32 @@
+---
+/**
+ * Roles y permisos — admin (RF-AUTH-008).
+ *
+ * Wrapper Astro que monta el React island `RolesAdmin`. La lista de
+ * roles + el drawer de matriz de permisos vive en el componente.
+ *
+ * El header (título + subtítulo) vive en la página para que el page
+ * shell sea independiente del estado de hidratación del island.
+ *
+ * Permiso backend: el controller `RoleController` requiere
+ * `auth.roles.manage`. El rol `admin` (slug) NO se puede eliminar
+ * (protección server-side); el frontend lo refleja con un badge
+ * "Protegido" en la card.
+ *
+ * **AGENTS.md §1**: ~25 líneas — header + mount del island.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import RolesAdmin from '../../../../components/admin/roles/RolesAdmin';
+import { getServerDictionary } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+---
+
+<AdminLayout title={`${t['admin.roles.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.roles.title']}</h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.roles.subtitle']}</p>
+  </div>
+
+  <RolesAdmin client:only="react" />
+</AdminLayout>

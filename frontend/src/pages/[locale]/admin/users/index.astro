@@ -1,0 +1,32 @@
+---
+/**
+ * Gestión de usuarios internos — admin (RF-AUTH-009).
+ *
+ * Wrapper Astro que monta el React island `UsersAdmin`. La lógica
+ * de fetch + filtros + modal de detalle + modal de creación vive en
+ * el componente.
+ *
+ * El header (título + subtítulo) vive en la página para que el page
+ * shell sea independiente del estado de hidratación del island.
+ *
+ * Permiso backend: el controller `UserController` requiere
+ * `auth.users.manage` y filtra por tenant via `accessibleStoreIds`.
+ * El frontend solo consume la respuesta.
+ *
+ * **AGENTS.md §1**: ~25 líneas — header + mount del island.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import UsersAdmin from '../../../../components/admin/users/UsersAdmin';
+import { getServerDictionary } from '../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+---
+
+<AdminLayout title={`${t['admin.users.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.users.title']}</h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.users.subtitle']}</p>
+  </div>
+
+  <UsersAdmin client:only="react" />
+</AdminLayout>
