@@ -1,0 +1,205 @@
+---
+/**
+ * Hub de Configuración — admin (F5.6).
+ *
+ * Sigue el mismo patrón de F5.5 que `/admin/inventory` y `/admin/
+ * marketing`: 4-6 cards de overview (perfil, theme, currencies, taxes,
+ * maintenance) + sección de resumen del tenant (tenant + dominio +
+ * contacto + estado del theme + maintenance switch).
+ *
+ * Los hrefs apuntan a las páginas ya existentes (settings/store,
+ * settings/theme, settings/taxes, settings/currencies) y al wrapper
+ * React que maneja el toggle de maintenance (settings/store, ya entregado
+ * por F5.5 con `StoresAdmin`).
+ *
+ * **AGENTS.md §1**: ~140 líneas — header + 5 cards + resumen.
+ */
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import Icon from '../../../../components/ui/Icon.astro';
+import { getServerDictionary } from '../../../../i18n/server';
+import { tenantSettings } from '../../../../data/settings-mock';
+
+const t = getServerDictionary(Astro.locals.locale);
+
+interface HubCard {
+  href: string;
+  title: string;
+  hint: string;
+  icon: string;
+  accent: 'violet' | 'sky' | 'emerald' | 'amber' | 'rose';
+}
+
+const cards: HubCard[] = [
+  {
+    href: '/admin/settings/store',
+    title: t['admin.settings.hub.tenantProfile'],
+    hint: t['admin.settings.hub.tenantProfileHint'],
+    icon: 'building-office',
+    accent: 'violet',
+  },
+  {
+    href: '/admin/settings/theme',
+    title: t['admin.settings.hub.theme'],
+    hint: t['admin.settings.hub.themeHint'],
+    icon: 'tag',
+    accent: 'sky',
+  },
+  {
+    href: '/admin/settings/taxes',
+    title: t['admin.settings.hub.taxes'],
+    hint: t['admin.settings.hub.taxesHint'],
+    icon: 'document-text',
+    accent: 'emerald',
+  },
+  {
+    href: '/admin/settings/currencies',
+    title: t['admin.settings.hub.currencies'],
+    hint: t['admin.settings.hub.currenciesHint'],
+    icon: 'banknotes',
+    accent: 'amber',
+  },
+  {
+    href: '/admin/settings/store',
+    title: t['admin.settings.hub.maintenance'],
+    hint: t['admin.settings.hub.maintenanceHint'],
+    icon: 'cog-6-tooth',
+    accent: 'rose',
+  },
+];
+
+const accentClass: Record<HubCard['accent'], string> = {
+  violet: 'bg-violet-50 text-violet-600',
+  sky: 'bg-sky-50 text-sky-600',
+  emerald: 'bg-emerald-50 text-emerald-600',
+  amber: 'bg-amber-50 text-amber-600',
+  rose: 'bg-rose-50 text-rose-600',
+};
+
+const themeBadgeClass =
+  tenantSettings.themeStatus === 'configured'
+    ? 'bg-emerald-100 text-emerald-700'
+    : 'bg-slate-100 text-slate-500';
+
+const maintenanceBadgeClass = tenantSettings.maintenanceEnabled
+  ? 'bg-amber-100 text-amber-700'
+  : 'bg-slate-100 text-slate-500';
+
+const formatTimestamp = (iso: string): string => {
+  const d = new Date(iso);
+  return d.toLocaleString('es-NI', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+---
+
+<AdminLayout title={`${t['admin.settings.title']} | Admin`}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.settings.title']}</h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.settings.subtitle']}</p>
+  </div>
+
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    {cards.map((card) => (
+      <a
+        href={card.href}
+        class="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow"
+      >
+        <div
+          class:list={[
+            'mb-4 grid h-10 w-10 place-items-center rounded-xl',
+            accentClass[card.accent],
+          ]}
+        >
+          <Icon name={card.icon} class="h-5 w-5" />
+        </div>
+        <h2 class="text-base font-bold text-slate-950 group-hover:text-slate-700">{card.title}</h2>
+        <p class="mt-1 text-sm text-slate-500">{card.hint}</p>
+      </a>
+    ))}
+  </section>
+
+  <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="mb-4 text-base font-bold text-slate-950">
+      {t['admin.settings.hub.summary.heading']}
+    </h2>
+
+    <dl class="grid gap-x-6 gap-y-4 md:grid-cols-2">
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {t['admin.settings.hub.summary.tenant']}
+        </dt>
+        <dd class="mt-1 text-sm font-semibold text-slate-900">{tenantSettings.tenantName}</dd>
+      </div>
+
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {t['admin.settings.hub.summary.domain']}
+        </dt>
+        <dd class="mt-1 font-mono text-sm text-slate-700">{tenantSettings.tenantDomain}</dd>
+      </div>
+
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {t['admin.settings.hub.summary.contact']}
+        </dt>
+        <dd class="mt-1 text-sm text-slate-700">
+          <a href={`mailto:${tenantSettings.contactEmail}`} class="hover:underline">
+            {tenantSettings.contactEmail}
+          </a>
+          <span class="mx-2 text-slate-300">·</span>
+          <span>{tenantSettings.contactPhone}</span>
+        </dd>
+      </div>
+
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {t['admin.settings.hub.summary.lastSync']}
+        </dt>
+        <dd class="mt-1 text-sm text-slate-700">
+          <time datetime={tenantSettings.lastSyncedAt}>
+            {formatTimestamp(tenantSettings.lastSyncedAt)}
+          </time>
+        </dd>
+      </div>
+
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {t['admin.settings.hub.summary.themeStatus']}
+        </dt>
+        <dd class="mt-1">
+          <span
+            class:list={[
+              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+              themeBadgeClass,
+            ]}
+          >
+            {tenantSettings.themeStatus === 'configured'
+              ? t['admin.settings.hub.summary.themeStatusConfigured']
+              : t['admin.settings.hub.summary.themeStatusDefault']}
+          </span>
+        </dd>
+      </div>
+
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {t['admin.settings.hub.maintenance']}
+        </dt>
+        <dd class="mt-1">
+          <span
+            class:list={[
+              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+              maintenanceBadgeClass,
+            ]}
+          >
+            {tenantSettings.maintenanceEnabled
+              ? t['admin.settings.hub.summary.maintenanceOn']
+              : t['admin.settings.hub.summary.maintenanceOff']}
+          </span>
+        </dd>
+      </div>
+    </dl>
+  </section>
+</AdminLayout>
