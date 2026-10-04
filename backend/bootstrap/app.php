@@ -78,6 +78,20 @@ return Application::configure(basePath: dirname(__DIR__))
             ValidateStatefulCsrf::class,
         ]);
 
+        // CR2: SetSessionDomainFromHost también en el web group. Sin
+        // esto, /sanctum/csrf-cookie (que corre en web middleware) emite
+        // la cookie XSRF-TOKEN con Domain = exact host (admin.panda-estampados.com)
+        // porque SESSION_DOMAIN=null, pero el POST a /api/v1/* carga la
+        // sesión del cookie Domain = .panda-estampados.com. Resultado:
+        // DOS sesiones distintas, DOS tokens XSRF-TOKEN distintos,
+        // y el frontend lee el del web mientras el backend valida el del
+        // api → 419 CSRF token mismatch en el primer POST post-mount.
+        // Prepended ANTES de StartSession para que el Domain quede
+        // seteado antes de emitir el Set-Cookie.
+        $middleware->web(prepend: [
+            SetSessionDomainFromHost::class,
+        ]);
+
         // SecurityHeaders: aplica a TODAS las responses (web + api).
         // Defense-in-depth — Caddyfile ya emite estos headers para el
         // frontend HTML; acá los re-aplicamos a responses API/HTML
@@ -104,7 +118,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Defense-in-depth: el redirect endpoint corta temprano si no
         // hay session — ese corte debe devolver JSON claro, no redirect
         // a login (que confundiría al frontend).
-        $exceptions->render(function (\App\Exceptions\SocialAuth\OAuthException $e, Request $request) {
+        $exceptions->render(function (App\Exceptions\SocialAuth\OAuthException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json(
                     data: ['message' => $e->getMessage()],
