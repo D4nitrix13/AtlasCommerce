@@ -1,11 +1,19 @@
 import { useState, type ReactElement } from 'react';
 import { authStore, useAuth } from '../../../stores/auth';
 import { useTranslations } from '../../../i18n';
+import { withLocale } from '../../../lib/path-helpers';
 import LanguageSwitcher from '../../ui/LanguageSwitcher';
 
 /**
  * Header de la sidebar admin: brand + email + rol del user, language
  * switcher y botón de logout.
+ *
+ * F0.6 — post-logout redirect va a la RAÍZ del sistema (`/${locale}/`),
+ * no al login. La convención de UX es logout → home. Mandar al usuario
+ * al login cuando YA se está deslogueando es contradictorio: el token
+ * recién invalidado no le permite pasar de nuevo sin volver a tipear
+ * sus credenciales, y la mayoría de las veces el logout es el final de
+ * la sesión, no un intermedio para volver a entrar.
  */
 export default function AdminUserMenu(): ReactElement {
   const { user } = useAuth();
@@ -18,10 +26,11 @@ export default function AdminUserMenu(): ReactElement {
     try {
       await authStore.logout();
     } finally {
-      // Preserva el locale en la URL post-logout.
+      // Preserva el locale en la URL post-logout. El destino es la
+      // home del storefront (no el login) — ver docblock arriba.
       const localeMatch = window.location.pathname.match(/^\/(es|en)/);
-      const localePrefix = localeMatch !== null ? localeMatch[0] : '/es';
-      window.location.href = `${localePrefix}/auth/login`;
+      const locale: 'es' | 'en' = localeMatch?.[0] === '/en' ? 'en' : 'es';
+      window.location.href = withLocale('/', locale);
     }
   };
 
