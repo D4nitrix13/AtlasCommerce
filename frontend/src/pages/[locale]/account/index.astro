@@ -7,45 +7,65 @@
  *   2. QuickActionsGrid   → 8 atajos a las tareas más comunes.
  *   3. RecentOrdersList   → últimos 5 pedidos con status pill.
  *
- * Filosófica Baymard §2.6:
+ * Filosofía Baymard §2.6:
  *   - Returning users son task-oriented → no hay hero, no recommendations.
  *   - Asumir que olvidaron la nav → atajos obvios cada vez.
  *
- * Mock data:
- *   - `CURRENT_USER` y `RECENT_ORDERS_MOCK` viven en `data/account-mock.ts`.
- *   - Cuando `/api/storefront/me` y `/api/storefront/orders` existan,
- *     reemplazar el bloque `import * as mock` por fetch + hydration.
+ * F1.1 — Migrado de mock a fetch real vía `getAccountDashboardData`.
+ * El SSR de Astro pasa la cookie del browser al backend Sanctum stateful
+ * (CR2) para que `/me` y `/orders` reconozcan al user autenticado.
  *
- * Multi-tenant:
- *   - `CURRENT_USER.storeSlug` (mock) define saludo + variant del banner.
- *   - `Astro.locals.tenant.tenantSlug` (real) se usa como fallback si
- *     el mock queda vacío.
+ * Tenant:
+ *   - El variant del banner (panda/kitsune/neutral) sale del tenant
+ *     resuelto por middleware (`Astro.locals.tenant.tenantSlug`), NO del
+ *     user (mock usaba storeSlug del user — bug latente, ahora fijo).
  */
 import AccountLayout from '../../../layouts/AccountLayout.astro';
 import DashboardWelcomeBanner from '../../../components/account/dashboard/DashboardWelcomeBanner.astro';
 import QuickActionsGrid from '../../../components/account/dashboard/QuickActionsGrid.astro';
 import RecentOrdersList from '../../../components/account/dashboard/RecentOrdersList.astro';
 import { getServerDictionary, getServerLocale } from '../../../i18n/server';
-import { CURRENT_USER, getRecentOrders, type OrderStatus } from '../../../data/account-mock';
+import { getAccountDashboardData } from '../../../lib/server/account';
+import type { OrderStatus } from '../../../data/account-mock';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
 
-// Store resolution: prioridad al mock del user, fallback al tenant
-// resuelto por middleware. Si tampoco, null → variant neutral.
-const effectiveStoreSlug = CURRENT_USER.storeSlug ?? Astro.locals.tenant?.tenantSlug ?? null;
+// SSR fetch al backend. La cookie httpOnly de Sanctum viaja en el
+// header Cookie para que el backend reconozca al user autenticado.
+// Si no hay cookie, los endpoints devuelven 401 (la AccountAuthGuard del
+// layout ya bloqueó usuarios anónimos, así que acá SIEMPRE hay cookie).
+const cookieHeader = Astro.request.headers.get('Cookie') ?? '';
+const dashboard = await getAccountDashboardData(
+  Astro.url.origin,
+  cookieHeader,
+  { limit: 5 },
+);
 
-const isKitsune = effectiveStoreSlug === 'kitsune';
-const greetingTemplate = isKitsune
-  ? t['account.dashboard.greeting.kitsune']
-  : t['account.dashboard.greeting.panda'];
-const greeting = greetingTemplate.replace('{name}', CURRENT_USER.firstName);
+// Fallback del userName: si /me falló (poco probable post-guard pero pasa
+// si Sanctum rechaza el token entre el guard y este fetch), usamos un
+// genérico local. La página NUNCA debe mostrar "Daniel Benjamin" (mock).
+const fallbackFirstName =
+  locale === 'en' ? 'Customer' : 'Cliente';
+const firstName =
+  dashboard.user?.full_name?.split(' ')[0] ?? fallbackFirstName;
+
+// Variant del banner: viene del tenant resuelto por middleware backend,
+// NO del user. Si el tenant no se resolvió, caemos a neutral.
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const isKitsune = tenantSlug === 'kitsune';
+const isPanda = tenantSlug === 'panda-estampados';
 
 const bannerVariant: 'kitsune' | 'panda' | 'neutral' = isKitsune
   ? 'kitsune'
-  : effectiveStoreSlug === 'panda-estampados'
+  : isPanda
     ? 'panda'
     : 'neutral';
+
+const greetingTemplate = isKitsune
+  ? t['account.dashboard.greeting.kitsune']
+  : t['account.dashboard.greeting.panda'];
+const greeting = greetingTemplate.replace('{name}', firstName);
 
 // Locale-prefixed hrefs para los atajos.
 const localePrefix = `/${locale}`;
@@ -108,13 +128,11 @@ const quickActions = [
     iconName: 'cog-6-tooth',
   },
 ];
-
-const recentOrders = getRecentOrders(5);
 ---
 
 <AccountLayout title={t['account.layout.title']}>
   <DashboardWelcomeBanner
-    userName={CURRENT_USER.firstName}
+    userName={firstName}
     greeting={greeting}
     subtitle={t['account.dashboard.subtitle']}
     variant={bannerVariant}
@@ -123,7 +141,7 @@ const recentOrders = getRecentOrders(5);
   <QuickActionsGrid heading={t['account.dashboard.quickActions.heading']} items={quickActions} />
 
   <RecentOrdersList
-    orders={recentOrders}
+    orders={dashboard.orders}
     heading={t['account.dashboard.recentOrders.heading']}
     viewAllLabel={t['account.dashboard.recentOrders.viewAll']}
     viewAllHref={`${localePrefix}/account/orders`}
@@ -134,7 +152,7 @@ const recentOrders = getRecentOrders(5);
     emptyTitle={t['account.dashboard.recentOrders.empty']}
     emptyHint={t['account.dashboard.recentOrders.emptyHint']}
     loading={false}
-    error={false}
+    error={dashboard.errors.orders}
     loadingLabel={t['account.dashboard.recentOrders.loading']}
     errorLabel={t['account.dashboard.recentOrders.error']}
   />
