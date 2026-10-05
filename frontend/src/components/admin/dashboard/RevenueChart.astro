@@ -8,9 +8,10 @@
  * chartId random por instancia para evitar colisiones si hay multiples
  * charts en la misma page.
  *
- * **MOCK DATA**: `labels` (12 meses) + `values` (revenue por mes) hardcoded.
- * Migrar a `Astro.fetch('/api/v1/admin/metrics/revenue/monthly')` en sesion
- * futura. Mismo patron que RevenueOverviewCard (commit actual).
+ * F3 — labels + values llegan como props desde el page (data real del
+ * endpoint /api/v1/admin/metrics/revenue/yearly). Si las props vienen
+ * vacías, el componente cae a un shape de "sin datos" (12 ceros con
+ * labels Ene-Dic) para que el chart no rompa.
  *
  * **AGENTS.md §18** (performance): Chart.js dynamic import = codigo se
  * carga solo cuando el componente se monta (no en el bundle inicial).
@@ -19,7 +20,8 @@
  * solo "Ingresos" renderiza datos reales. Los otros 2 son placeholder
  * para switch entre dataset del mismo endpoint o 3 endpoints distintos.
  *
- * **AGENTS.md §11**: NO implementa loading/error (MOCK data).
+ * **AGENTS.md §11**: si las props vienen null/vacías, el componente
+ * muestra el chart vacío (12 ceros) — el caller decide si ocultar.
  *
  * **i18n**: todas las labels visibles vienen del diccionario del locale.
  * Los strings que necesita el script del cliente se serializan via
@@ -27,12 +29,20 @@
  */
 import { getServerDictionary } from '../../../i18n/server';
 
+interface Props {
+  labels?: readonly string[];
+  values?: readonly number[];
+}
+
+const { labels: inputLabels, values: inputValues } = Astro.props;
+
 const t = getServerDictionary(Astro.locals.locale);
 
 const chartId = `revenue-chart-${Math.random().toString(36).slice(2)}`;
 
-const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-const values = [18000, 22000, 20000, 28000, 32000, 30000, 36000, 38000, 42000, 40000, 45000, 48000];
+const defaultLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const labels = inputLabels ?? defaultLabels;
+const values = inputValues ?? new Array(12).fill(0);
 ---
 
 <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

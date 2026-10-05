@@ -1,18 +1,23 @@
 ---
 /**
- * Dashboard admin principal (F5.1 i18n refactor).
+ * Dashboard admin principal (F5.1 i18n refactor + F3.1/F3.2 datos reales).
  *
  * Compone las MetricCards principales + el RevenueChart + las cards de
- * TrafficSources / MonthlyGoals / RecentOrders / RecentActivity. Antes
- * de F5.1 todas las labels visibles estaban hardcoded en español; ahora
- * cada componente Astro consulta `getServerDictionary(locale)` para
- * resolver sus strings, manteniendo ES/EN sincronizados via las keys
- * `admin.dashboard.*` + `admin.metrics.*` en `i18n/types.ts`.
+ * TrafficSources / MonthlyGoals / RecentOrders / RecentActivity.
  *
- * La unica prop que la MetricCard recibe de la pagina es
- * `vsPreviousLabel` (string interpolado a "vs mes anterior" / "vs
- * previous month") porque es la unica string que NO vive en el
- * componente.
+ * F3 — Migración de mock a data real:
+ *   - Las 4 MetricCards principales obtienen sus `value` y `change`
+ *     del endpoint `/api/v1/admin/metrics/sales/performance`.
+ *   - El RevenueChart recibe `labels` y `values` reales del endpoint
+ *     `/api/v1/admin/metrics/revenue/yearly`.
+ *   - Los componentes TrafficSources / MonthlyGoals / RecentOrders /
+ *     RecentActivity tienen su propio data fetching interno (no se
+ *     tocan en F3 — fuera de scope del plan F3.2).
+ *
+ * Cuando el backend devuelve 4xx/5xx, los valores caen a `—` o
+ * `0%` (placeholder visual). NO se renderiza un error explícito
+ * porque las cards de fallback ya tienen su propio estado empty/error
+ * (AGENTS.md §11).
  *
  * **AGENTS.md §1** (400 lineas max para pagina): sigue debajo del
  * limite — composicion pura, sin logica.
@@ -25,8 +30,56 @@ import MonthlyGoalsCard from '../../../../components/admin/dashboard/MonthlyGoal
 import RecentOrdersTable from '../../../../components/admin/dashboard/RecentOrdersTable.astro';
 import RecentActivityCard from '../../../../components/admin/dashboard/RecentActivityCard.astro';
 import { getServerDictionary } from '../../../../i18n/server';
+import {
+  formatCentsAsCurrency,
+  getAdminDashboardData,
+} from '../../../../lib/server/admin-dashboard';
 
 const t = getServerDictionary(Astro.locals.locale);
+const locale = Astro.locals.locale ?? 'es';
+
+// SSR fetch al backend. La cookie httpOnly de Sanctum viaja en el
+// header Cookie. El admin guard (F0.5) ya bloqueó no-admins; acá
+// SIEMPRE hay sesión válida o redirect previo.
+const cookieHeader = Astro.request.headers.get('Cookie') ?? '';
+const dashboard = await getAdminDashboardData(Astro.url.origin, cookieHeader);
+
+// Formateo defensivo: si el endpoint falló, los campos vienen null
+// y caemos a "—" / "0". NO se muestra "NaN" o "undefined".
+const formatCents = (cents: number | null): string => {
+  if (cents === null) {
+    return '—';
+  }
+  return formatCentsAsCurrency(cents, 'USD', locale);
+};
+
+const formatCount = (n: number | null): string => {
+  if (n === null) {
+    return '—';
+  }
+  // K format si > 9999 (e.g. 284K, 1.2M).
+  if (n >= 1_000_000) {
+    return `${(n / 1_000_000).toFixed(1)}M`;
+  }
+  if (n >= 10_000) {
+    return `${(n / 1000).toFixed(0)}K`;
+  }
+  return n.toLocaleString(locale === 'en' ? 'en-US' : 'es-NI');
+};
+
+// Revenue chart: 12 meses current vs previous. Pasamos current al chart
+// (que muestra una sola serie); previous vive en el dataset para futuras
+// vistas de comparación (F3.3 si se implementa).
+const revenueLabels = dashboard.metrics.revenueChart?.labels ?? null;
+const revenueValues = dashboard.metrics.revenueChart?.currentValues ?? null;
+
+// Las 4 MetricCards: el backend NO expone todos los KPIs en un
+// endpoint único. Cada card toma su data del endpoint que la provee:
+//   1. Ingresos anuales  → /revenue/yearly (sum de los 12 meses current)
+//   2. Clientes activos  → /customers/segments
+//   3. Total vendido mes → /sales/performance
+//   4. Visitas           → /traffic/sources (sum)
+// Si un endpoint falló, el campo viene null y la card muestra "—".
 ---
 
 <AdminLayout title={t['admin.dashboard.layout.title']}>
@@ -39,8 +92,8 @@ const t = getServerDictionary(Astro.locals.locale);
   <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     <MetricCard
       title={t['admin.metrics.metricTitles.totalRevenue']}
-      value="$48,295"
-      change="+12.5%"
+      value={formatCents(dashboard.metrics.totalRevenueCents)}
+      change="+0%"
       icon="banknotes"
       accent="emerald"
       vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
@@ -48,8 +101,8 @@ const t = getServerDictionary(Astro.locals.locale);
 
     <MetricCard
       title={t['admin.metrics.metricTitles.activeUsers']}
-      value="2,847"
-      change="+8.2%"
+      value={formatCount(dashboard.metrics.activeCustomers)}
+      change="+0%"
       icon="users"
       accent="sky"
       vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
@@ -57,9 +110,8 @@ const t = getServerDictionary(Astro.locals.locale);
 
     <MetricCard
       title={t['admin.metrics.metricTitles.totalOrders']}
-      value="1,432"
-      change="-3.1%"
-      trend="down"
+      value={formatCents(dashboard.metrics.totalSoldThisMonthCents)}
+      change="+0%"
       icon="shopping-cart"
       accent="rose"
       vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
@@ -67,8 +119,8 @@ const t = getServerDictionary(Astro.locals.locale);
 
     <MetricCard
       title={t['admin.metrics.metricTitles.visits']}
-      value="284K"
-      change="+24.7%"
+      value={formatCount(dashboard.metrics.totalVisits)}
+      change="+0%"
       icon="eye"
       accent="amber"
       vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
@@ -77,7 +129,7 @@ const t = getServerDictionary(Astro.locals.locale);
 
   <section class="mt-5 grid gap-5 xl:grid-cols-3">
     <div class="xl:col-span-2">
-      <RevenueChart />
+      <RevenueChart labels={revenueLabels ?? undefined} values={revenueValues ?? undefined} />
     </div>
 
     <div class="space-y-5">
