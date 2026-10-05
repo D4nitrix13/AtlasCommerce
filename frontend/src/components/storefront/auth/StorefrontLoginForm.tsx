@@ -94,9 +94,29 @@ export default function StorefrontLoginForm({
       }
 
       // Login success: redirect.
+      // CRÍTICO: validar que el `?redirect=` no apunte a una zona que el
+      // user no tiene permiso. Un cliente no debe terminar en /es/admin/*
+      // aunque el query param lo pida (un atacante podría haber
+      // injectado esa URL en el link). Si el role del user no es admin
+      // y el target pide admin, usamos el fallback.
       const params = new URLSearchParams(window.location.search);
+      const requestedRedirect = params.get('redirect');
       const fallback = `${window.location.origin}${callbackPath}`;
-      const target = params.get('redirect') ?? fallback;
+
+      let target = fallback;
+      if (requestedRedirect) {
+        const isAdminPath = /^\/(?:[a-z]{2}\/)?admin\//i.test(requestedRedirect);
+        const userRole = result.kind === 'success' ? result.user.role?.slug : null;
+        const isAdmin = userRole === 'admin';
+
+        if (isAdminPath && !isAdmin) {
+          // Cliente intentando ir a admin: ignorar el redirect param.
+          target = fallback;
+        } else {
+          target = requestedRedirect;
+        }
+      }
+
       window.location.href = target;
     } catch (error) {
       const apiError = error as { message?: string };
