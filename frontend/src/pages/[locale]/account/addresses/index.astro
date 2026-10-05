@@ -16,11 +16,12 @@
  * Wrapper Astro que monta los React islands. La lógica CRUD vive en
  * el componente React; este archivo solo compone el layout.
  *
- * Auth: el backend exige Sanctum token + Customer asociado al User.
- * Si no hay sesión, el usuario verá la respuesta del backend como
- * 401/404 (handled por el componente).
+ * F0.4 — Migrada de AuthLayout a AccountLayout para que el
+ * AccountAuthGuard (envuelto por el layout) proteja la página.
+ * AuthLayout NO tiene guard → usuarios anónimos llegaban a esta página
+ * y veían el formulario de NetworkError del AddressesManager.
  */
-import AuthLayout from '../../../../layouts/AuthLayout.astro';
+import AccountLayout from '../../../../layouts/AccountLayout.astro';
 import AddressesManager from '../../../../components/account/addresses/AddressesManager';
 import AddressTypePicker from '../../../../components/account/addresses/AddressTypePicker.astro';
 import BusinessInfoForm from '../../../../components/account/addresses/BusinessInfoForm.astro';
@@ -44,17 +45,21 @@ const DEFAULT_SELECTED_TYPE: AddressTypeB2b = (B2B_ADDRESS_TYPES[0]?.value ??
   'headquarters') as AddressTypeB2b;
 ---
 
-<AuthLayout title={t['account.addresses.title']}>
-  <main class="mx-auto max-w-4xl px-4 py-8">
-    <h1 class="mb-2 text-2xl font-bold text-neutral-900">{t['account.addresses.title']}</h1>
-    <p class="mb-6 text-sm text-neutral-600">
-      {isPandaB2B ? t['account.addresses.b2b.subtitle'] : t['account.addresses.subtitle']}
-    </p>
+<AccountLayout title={t['account.addresses.title']}>
+  <section aria-labelledby="addresses-heading" class="flex flex-col gap-6">
+    <header>
+      <h1 id="addresses-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
+        {t['account.addresses.title']}
+      </h1>
+      <p class="mt-1 max-w-2xl text-sm text-slate-500">
+        {isPandaB2B ? t['account.addresses.b2b.subtitle'] : t['account.addresses.subtitle']}
+      </p>
+    </header>
 
     {isPandaB2B && (
       <section
         aria-labelledby="b2b-addresses-heading"
-        class="mb-8 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-white p-5 shadow-sm sm:p-6"
+        class="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-white p-5 shadow-sm sm:p-6"
       >
         <header class="mb-4 flex items-start gap-3">
           <span
@@ -145,5 +150,5 @@ const DEFAULT_SELECTED_TYPE: AddressTypeB2b = (B2B_ADDRESS_TYPES[0]?.value ??
     )}
 
     <AddressesManager client:only="react" />
-  </main>
-</AuthLayout>
+  </section>
+</AccountLayout>

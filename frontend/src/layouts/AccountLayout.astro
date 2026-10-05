@@ -7,6 +7,10 @@
  *   - `<head>` con theme tokens del tenant en CSS vars (`--primary`,
  *     `--primary-hover`) para que TODO el subtree herede el branding
  *     sin hardcodear hexes.
+ *   - `<AccountAuthGuard client:load />` (F0.4): gateo client-side de
+ *     auth — redirige a `/account/login?redirect=...` si no hay
+ *     sesión Sanctum. Pages públicas (login, signup, forgot, reset,
+ *     2fa) usan `AuthLayout` y NO pasan por acá.
  *   - `<AccountSidebar>` con los items de navegación.
  *   - `<slot />` con el contenido de la página concreta.
  *
@@ -14,11 +18,6 @@
  *   - `Astro.locals.tenant.tenantSlug` (del middleware) → brand.
  *   - `Astro.locals.theme` (del middleware) → override dinámico.
  *   - Fallback: DEFAULT_BRAND.
- *
- * Auth:
- *   - Esta versión NO envuelve con AuthGuard (todavía no existe un
- *     customer-side AuthGuard unificado). En F2 se integrará cuando
- *     `/api/storefront/me` exista.
  *
  * **AGENTS.md §16**: shell — siempre via este layout para
  * `/[locale]/account/*` (excepto auth pages: login, signup,
@@ -28,6 +27,7 @@ import '../styles/global.css';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
 import { themeToBrand } from '../lib/theme';
 import { getServerDictionary, getServerLocale } from '../i18n/server';
+import AccountAuthGuard from '../components/account/auth/AccountAuthGuard';
 import AccountSidebar from '../components/account/layout/AccountSidebar.astro';
 
 interface Props {
@@ -124,6 +124,8 @@ const navItems = [
     class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased"
     style={themeRootStyle}
   >
+    <AccountAuthGuard client:load />
+
     <main
       id="main-content"
       class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:gap-8 lg:px-8 lg:py-10"
