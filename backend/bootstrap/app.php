@@ -46,6 +46,25 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // F0.2 — bugfix: por defecto Laravel 11+ registra un callback
+        // `redirectGuestsTo(fn () => route('login'))`. Cuando una ruta
+        // API recibe un request SIN header `Accept: application/json`,
+        // `Authenticate::unauthenticated()` (vendor) llama a
+        // `$this->redirectTo($request)` ANTES de tirar la excepción.
+        // Ese callback resuelve `route('login')`, que NO está registrada
+        // en este proyecto (los endpoints reales son
+        // `/api/v1/auth/login` vía POST), y lanza
+        // `Symfony\Component\Routing\Exception\RouteNotFoundException`
+        // → 500 Internal Server Error. El cliente recibe stack trace.
+        //
+        // Fix: sobreescribimos el callback para devolver null. Para
+        // rutas `api/*` el handler de excepciones devuelve JSON 401 vía
+        // `shouldRenderJsonWhen`; para el resto, `redirect()->guest(null)`
+        // degenera a 401 noContent (no redirect). En ambos casos, NO
+        // 500. El frontend Astro maneja sus propias páginas de login —
+        // no necesitamos una ruta web `login` en Laravel.
+        $middleware->redirectGuestsTo(static fn (): ?string => null);
+
         // CorrelationId va al INICIO del stack global para que cualquier
         // middleware o handler que loguee tenga IDs de trazabilidad
         // disponibles desde el primer momento (RF-OBS-130 — Fase 13).
