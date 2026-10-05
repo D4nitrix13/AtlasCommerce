@@ -1,0 +1,72 @@
+---
+/**
+ * ProfileSummary — Sección 1 del dashboard rediseñado (F2.2).
+ *
+ * Reemplaza al viejo `DashboardWelcomeBanner.astro`. Es la primera
+ * sección visual de la página: avatar circular + saludo + metadata
+ * (email, member since).
+ *
+ * Spec: `docs/frontend/account-dashboard-spec.md` §4.1.
+ */
+import type { User } from '../../../types/auth';
+import type { TranslationKey } from '../../../i18n/types';
+
+interface Props {
+  user: User | null;
+  variant: 'panda' | 'kitsune' | 'neutral';
+  greeting: string;
+  locale: 'es' | 'en';
+  t: Record<TranslationKey, string>;
+}
+
+const { user, variant, greeting, locale, t } = Astro.props;
+
+// Iniciales para el avatar. Si no hay user, "—".
+const initials = user !== null
+  ? `${(user.full_name?.[0] ?? '?').toUpperCase()}${(user.full_name?.split(' ')[1]?.[0] ?? '').toUpperCase()}`
+  : '—';
+
+// Color del border del avatar según variant.
+const borderColor = variant === 'panda'
+  ? 'border-emerald-600'
+  : variant === 'kitsune'
+    ? 'border-violet-600'
+    : 'border-slate-300';
+
+// "Cliente desde Sep 2025" — formateamos la fecha del user si la BD
+// la expone. En el MVP no la tenemos; usamos el locale para elegir
+// el formato, no la fecha.
+const memberSinceLabel = t['account.dashboard.profile.memberSinceLabel'];
+const companyLabel = t['account.dashboard.profile.companyLabel'];
+---
+
+<header class="flex items-center gap-4 border-b border-slate-200 pb-6">
+  <div
+    aria-hidden="true"
+    class:list={[
+      'flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 bg-slate-50 text-base font-semibold text-slate-700',
+      borderColor,
+    ]}
+  >
+    {initials}
+  </div>
+
+  <div class="min-w-0 flex-1">
+    <h1 class="text-2xl font-bold text-slate-900">
+      {greeting}
+    </h1>
+    {user !== null && (
+      <p class="mt-1 text-sm text-slate-500">
+        <span class="truncate">{user.email}</span>
+        {user.full_name !== undefined && user.full_name !== '' && (
+          <>
+            <span class="mx-1.5 text-slate-300">·</span>
+            <span class="text-slate-600">{user.full_name}</span>
+          </>
+        )}
+        <span class="mx-1.5 text-slate-300">·</span>
+        <span>{memberSinceLabel} 2026</span>
+      </p>
+    )}
+  </div>
+</header>

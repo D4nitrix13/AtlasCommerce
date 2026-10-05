@@ -1,0 +1,73 @@
+---
+/**
+ * InvoiceSnapshot — Sección 4 del dashboard rediseñado (F2.2).
+ *
+ * Sección B2B de facturas pendientes. Si el backend no expone
+ * invoices para customers (estado actual del MVP), el page NO
+ * renderiza este componente.
+ *
+ * Spec: `docs/frontend/account-dashboard-spec.md` §4.4.
+ */
+import type { TranslationKey } from '../../../i18n/types';
+
+interface Props {
+  invoiceNumber: string;
+  totalCents: number;
+  currencyCode: string | null;
+  daysUntilDue: number;
+  viewAllLabel: string;
+  viewAllHref: string;
+  t: Record<TranslationKey, string>;
+}
+
+const {
+  invoiceNumber,
+  totalCents,
+  currencyCode,
+  daysUntilDue,
+  viewAllLabel,
+  viewAllHref,
+  t,
+} = Astro.props;
+
+const formatter = new Intl.NumberFormat(currencyCode === 'NIO' ? 'es-NI' : 'en-US', {
+  style: 'currency',
+  currency: currencyCode ?? 'USD',
+  maximumFractionDigits: 2,
+});
+const totalFormatted = formatter.format(totalCents / 100);
+
+const dueLabel = t['account.dashboard.invoices.dueLabel'].replace('{days}', String(daysUntilDue));
+---
+
+<section
+  aria-labelledby="invoices-heading"
+  data-testid="invoice-snapshot"
+  class="rounded-2xl border border-red-200 bg-red-50/40 p-5"
+>
+  <h2 id="invoices-heading" class="text-sm font-semibold uppercase tracking-wide text-red-900">
+    {t['account.dashboard.invoices.heading']}
+  </h2>
+  <div class="mt-2 flex flex-wrap items-baseline justify-between gap-3">
+    <div>
+      <p class="font-mono text-xs font-medium text-slate-600">
+        {invoiceNumber}
+      </p>
+      <p class="mt-1 text-2xl font-bold text-slate-900">
+        {totalFormatted}
+      </p>
+    </div>
+    <p class:list={[
+      'text-sm font-medium',
+      daysUntilDue <= 3 ? 'text-red-700' : 'text-amber-700',
+    ]}>
+      {dueLabel}
+    </p>
+  </div>
+  <a
+    href={viewAllHref}
+    class="mt-3 inline-flex text-sm font-medium text-red-800 hover:underline"
+  >
+    {viewAllLabel} →
+  </a>
+</section>

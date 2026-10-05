@@ -1,0 +1,61 @@
+---
+/**
+ * QuickActionsBar — Sección 5 del dashboard rediseñado (F2.2).
+ *
+ * Reemplaza al viejo `QuickActionsGrid.astro`. Layout inline (pills
+ * en flex-wrap), NO grid de cards icon-based. 5 acciones B2B para
+ * Panda Estampados.
+ *
+ * Spec: `docs/frontend/account-dashboard-spec.md` §4.5.
+ *
+ * Por qué NO un grid de cards icon-based: las acciones son lineales
+ * y frecuentes (un comprador B2B hace 3-5 cotizaciones/semana). El
+ * grid obliga a decidir cuál clickear; las pills son escaneables
+ * de un vistazo (Baymard #58, 81% NO usan icon-based dashboard).
+ */
+import type { TranslationKey } from '../../../i18n/types';
+
+interface ActionItem {
+  label: string;
+  href: string;
+  testId: string;
+}
+
+interface Props {
+  heading: string;
+  items: ActionItem[];
+  variant: 'panda' | 'kitsune' | 'neutral';
+}
+
+const { heading, items, variant } = Astro.props;
+
+const pillClass = variant === 'panda'
+  ? 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+  : variant === 'kitsune'
+    ? 'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100'
+    : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100';
+---
+
+<section
+  aria-labelledby="quick-actions-heading"
+  data-testid="quick-actions-bar"
+  class="flex flex-col gap-3"
+>
+  <h2 id="quick-actions-heading" class="text-base font-semibold text-slate-900">
+    {heading}
+  </h2>
+  <div class="flex flex-wrap gap-2">
+    {items.map((item) => (
+      <a
+        href={item.href}
+        data-testid={item.testId}
+        class:list={[
+          'rounded-full border px-4 py-2 text-sm font-medium transition',
+          pillClass,
+        ]}
+      >
+        {item.label}
+      </a>
+    ))}
+  </div>
+</section>

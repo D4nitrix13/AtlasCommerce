@@ -1,0 +1,43 @@
+---
+/**
+ * NotificationsSnapshot — Sección 8 del dashboard rediseñado (F2.2).
+ *
+ * Si `unreadCount === 0` o `null` (endpoint no disponible), el page
+ * NO renderiza este componente (per spec §7).
+ *
+ * Spec: `docs/frontend/account-dashboard-spec.md` §4.8.
+ */
+import type { TranslationKey } from '../../../i18n/types';
+
+interface Props {
+  unreadCount: number;
+  viewAllLabel: string;
+  viewAllHref: string;
+  t: Record<TranslationKey, string>;
+}
+
+const { unreadCount, viewAllLabel, viewAllHref, t } = Astro.props;
+
+const unreadText = t['account.dashboard.notifications.unread'].replace('{count}', String(unreadCount));
+---
+
+<section
+  aria-labelledby="notifications-snapshot-heading"
+  data-testid="notifications-snapshot"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+>
+  <header class="flex items-center justify-between gap-2">
+    <h2 id="notifications-snapshot-heading" class="text-base font-semibold text-slate-900">
+      {t['account.dashboard.notifications.heading']}
+      <span class="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">
+        {unreadText}
+      </span>
+    </h2>
+    <a
+      href={viewAllHref}
+      class="text-sm font-medium text-[var(--primary,#059669)] hover:underline"
+    >
+      {viewAllLabel} →
+    </a>
+  </header>
+</section>

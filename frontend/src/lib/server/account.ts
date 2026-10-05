@@ -9,39 +9,74 @@ import type { OrderStatus, RecentOrderMock } from '../../data/account-mock';
  * stateful (CR2). Encapsula la lógica de fetch + transform + error
  * handling para que la página .astro se quede con solo presentación.
  *
+ * F2.2 — Extendido con datos para las 8 secciones del dashboard
+ * rediseñado (ver `docs/frontend/account-dashboard-spec.md`):
+ *   - 2FA status (TOTP enabled)         → SecuritySnapshot
+ *   - Direcciones del Customer           → AddressesSnapshot
+ *   - Cotizaciones pendientes (RFQ)      → RfqSnapshot
+ *   - Notificaciones sin leer            → NotificationsSnapshot
+ *   - User + orders (existente F1.1)     → ProfileSummary + OrderStatusCard×3
+ *
  * Endpoints consumidos:
- *   - GET /api/v1/auth/me       → User actual (full_name, role, etc.)
- *   - GET /api/v1/orders        → órdenes del cliente autenticado.
- *     El backend resuelve el Customer desde `users.id` (RF-CUST-040);
- *     si el user NO tiene Customer asociado devuelve 404.
+ *   - GET /api/v1/auth/me                  → User
+ *   - GET /api/v1/orders?limit=N          → RecentOrderMock[]
+ *   - GET /api/v1/auth/2fa/totp/status     → { enabled, enabled_at }
+ *   - GET /api/v1/account/addresses        → CustomerAddress[]
+ *   - GET /api/v1/storefront/rfq           → RFQ list (PENDIENTE — endpoint
+ *     solo existe como POST. Cuando se cree, el helper lo enchufa
+ *     sin tocar la API del caller.)
+ *   - GET /api/v1/account/notifications    → notif count (PENDIENTE —
+ *     mismo caso: el helper ya hace el fetch, devuelve null si 404
+ *     y la sección queda oculta per spec §7.)
  *
  * Multi-tenant: el middleware backend ya resolvió la tienda activa
  * vía `store.domain` antes de llegar a estas rutas. El locale del
  * storefront viene del middleware Astro (`Astro.locals.locale`).
  *
- * Response shape:
- *   {
- *     user: User | null,                // null si /me falló
- *     orders: RecentOrderMock[],        // [] si /orders falló O vacío
- *     errors: { me?: true, orders?: true },
- *   }
- *
- * Failure modes:
- *   - /me falla (401, 500): la página debe redirigir al login (o
- *     mostrar fallback). El caller decide — `getAccountDashboardData`
- *     no redirige.
- *   - /orders 404 (no Customer profile): orders=[], errors.orders=undefined
- *     (404 en /orders es esperado para admin/staff sin perfil de cliente,
- *     no es un error de UX — se trata como "no hay órdenes").
- *   - /orders 500/502/etc: orders=[], errors.orders=true (mostrar CTA retry).
+ * Failure modes (por sección, independientes — un 5xx en /me no
+ * rompe /orders):
+ *   - 401/500 en /me: user=null, errors.me=true. La página usa
+ *     fallback "Cliente" para el nombre.
+ *   - 404 en /orders: orders=[], errors.orders=false. Caso normal
+ *     para admin/staff sin Customer profile — no es error de UX.
+ *   - 4xx/5xx en /orders: orders=[], errors.orders=true.
+ *   - 404 en /addresses (no Customer): addresses=[], errors.addresses=false.
+ *   - Cualquier status en /2fa, /rfq, /notifications no disponibles:
+ *     el campo queda null y la sección se oculta per spec.
  */
 export interface AccountDashboardData {
   user: User | null;
   orders: RecentOrderMock[];
+  twoFactor: TwoFactorSnapshot | null;
+  addresses: AddressSnapshot;
+  rfqPendingCount: number | null;
+  notificationsUnread: number | null;
   errors: {
     me: boolean;
     orders: boolean;
+    twoFactor: boolean;
+    addresses: boolean;
+    rfq: boolean;
+    notifications: boolean;
   };
+}
+
+export interface TwoFactorSnapshot {
+  enabled: boolean;
+  enabledAt: string | null;
+}
+
+export interface AddressSnapshotItem {
+  id: number;
+  addressType: 'shipping' | 'billing' | 'other' | string;
+  label: string;
+  isPrimary: boolean;
+}
+
+export interface AddressSnapshot {
+  list: AddressSnapshotItem[];
+  total: number;
+  hasPrimary: boolean;
 }
 
 interface BackendUserMeResponse {
@@ -50,8 +85,6 @@ interface BackendUserMeResponse {
 
 interface BackendOrderListResponse {
   data: BackendOrder[];
-  // Cursor pagination metadata (next_cursor, prev_cursor, etc.) — ignorado
-  // por el dashboard que solo muestra los últimos 5.
 }
 
 interface BackendOrder {
@@ -76,16 +109,47 @@ interface BackendOrderItem {
   subtotal_cents: number;
 }
 
-/**
- * Mapea el status string del backend (`pending`, `processing`, etc.)
- * al union de `OrderStatus` del componente.
- *
- * Defensivo: si el backend agrega un status nuevo que el componente
- * no conoce, devolvemos 'pending' como fallback visible (NO Illegal.
- *
- * Acceptamos las variants comunes del backend; cualquier valor
- * fuera del union cae a 'pending' (gris en el Badge).
- */
+interface BackendTwoFactorResponse {
+  enabled: boolean;
+  enabled_at: string | null;
+  unused_recovery_codes: number;
+}
+
+interface BackendAddressResource {
+  id: number;
+  customer_id: number;
+  address_type: string;
+  country: string | null;
+  department: string | null;
+  municipality: string | null;
+  detailed_address: string | null;
+  reference: string | null;
+  is_primary: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+interface BackendAddressListResponse {
+  data: BackendAddressResource[];
+}
+
+interface BackendRfqListResponse {
+  data: BackendRfqResource[];
+  meta?: {
+    pending_count?: number;
+  };
+}
+
+interface BackendRfqResource {
+  id: number;
+  status: string;
+  [key: string]: unknown;
+}
+
+interface BackendNotificationCountResponse {
+  unread_count: number;
+}
+
 function normalizeOrderStatus(rawStatus: string): OrderStatus {
   const known: readonly OrderStatus[] = [
     'pending',
@@ -100,12 +164,6 @@ function normalizeOrderStatus(rawStatus: string): OrderStatus {
   return 'pending';
 }
 
-/**
- * Convierte un `BackendOrder` al shape `RecentOrderMock` que consume
- * el componente `RecentOrdersList.astro`. Mantiene compatibilidad
- * con los field names actuales (`id`, `date`, `status`, `total`, `items`)
- * para no tocar el componente en este PR.
- */
 function toRecentOrderMock(order: BackendOrder): RecentOrderMock {
   const itemsCount = order.items.reduce(
     (sum: number, item: BackendOrderItem): number => sum + item.quantity,
@@ -121,20 +179,32 @@ function toRecentOrderMock(order: BackendOrder): RecentOrderMock {
   };
 }
 
+function toAddressSnapshotItem(addr: BackendAddressResource): AddressSnapshotItem {
+  const city = addr.municipality ?? '';
+  const dept = addr.department ?? '';
+  const label = [city, dept].filter((s) => s !== '').join(', ');
+
+  return {
+    id: addr.id,
+    addressType: addr.address_type,
+    label: label !== '' ? label : (addr.country ?? ''),
+    isPrimary: addr.is_primary,
+  };
+}
+
 /**
  * Helper principal. Llama al backend en paralelo y devuelve los
  * datos del dashboard con errors por endpoint.
  *
- * @param origin   Base URL del backend (típicamente `Astro.url.origin`).
- * @param cookie   Cookie header del request entrante (Sanctum stateful).
- * @param options.limit  Cantidad máxima de órdenes a devolver (default 5).
+ * Si `limit` no se pasa, default 3 (suficiente para la sección hero
+ * de pedidos que muestra 3 cards).
  */
 export async function getAccountDashboardData(
   origin: string,
   cookie: string,
   options: { limit?: number } = {},
 ): Promise<AccountDashboardData> {
-  const limit = options.limit ?? 5;
+  const limit = options.limit ?? 3;
   const headers: HeadersInit = {
     Accept: 'application/json',
   };
@@ -142,20 +212,29 @@ export async function getAccountDashboardData(
     headers.Cookie = cookie;
   }
 
-  // Fetch en paralelo — ambos endpoints son independientes. Si uno
-  // falla, el otro sigue su flujo.
-  const [meResult, ordersResult] = await Promise.allSettled([
-    fetch(new URL('/api/v1/auth/me', origin), { headers }),
-    fetch(new URL(`/api/v1/orders?limit=${String(limit)}`, origin), { headers }),
+  const fetchOptions: RequestInit = { headers };
+
+  const [
+    meResult,
+    ordersResult,
+    twoFactorResult,
+    addressesResult,
+    rfqResult,
+    notificationsResult,
+  ] = await Promise.allSettled([
+    fetch(new URL('/api/v1/auth/me', origin), fetchOptions),
+    fetch(new URL(`/api/v1/orders?limit=${String(limit)}`, origin), fetchOptions),
+    fetch(new URL('/api/v1/auth/2fa/totp/status', origin), fetchOptions),
+    fetch(new URL('/api/v1/account/addresses', origin), fetchOptions),
+    fetch(new URL('/api/v1/storefront/rfq', origin), fetchOptions),
+    fetch(new URL('/api/v1/account/notifications/unread', origin), fetchOptions),
   ]);
 
   let user: User | null = null;
   let meError = false;
-
   if (meResult.status === 'fulfilled') {
-    const response = meResult.value;
-    if (response.ok) {
-      const body = (await response.json()) as BackendUserMeResponse;
+    if (meResult.value.ok) {
+      const body = (await meResult.value.json()) as BackendUserMeResponse;
       user = body.user;
     } else {
       meError = true;
@@ -166,27 +245,107 @@ export async function getAccountDashboardData(
 
   let orders: RecentOrderMock[] = [];
   let ordersError = false;
-
   if (ordersResult.status === 'fulfilled') {
-    const response = ordersResult.value;
-    if (response.ok) {
-      const body = (await response.json()) as BackendOrderListResponse;
+    if (ordersResult.value.ok) {
+      const body = (await ordersResult.value.json()) as BackendOrderListResponse;
       orders = (body.data ?? []).map(toRecentOrderMock);
-    } else if (response.status !== 404) {
-      // 404 = "user sin Customer profile" → ordenes vacías, NO error.
-      // 4xx/5xx = error real de backend.
+    } else if (ordersResult.value.status !== 404) {
       ordersError = true;
     }
   } else {
     ordersError = true;
   }
 
+  let twoFactor: TwoFactorSnapshot | null = null;
+  let twoFactorError = false;
+  if (twoFactorResult.status === 'fulfilled') {
+    if (twoFactorResult.value.ok) {
+      const body = (await twoFactorResult.value.json()) as BackendTwoFactorResponse;
+      twoFactor = {
+        enabled: body.enabled,
+        enabledAt: body.enabled_at,
+      };
+    } else {
+      twoFactorError = true;
+    }
+  } else {
+    twoFactorError = true;
+  }
+
+  let addresses: AddressSnapshot = { list: [], total: 0, hasPrimary: false };
+  let addressesError = false;
+  if (addressesResult.status === 'fulfilled') {
+    if (addressesResult.value.ok) {
+      const body = (await addressesResult.value.json()) as BackendAddressListResponse;
+      const list = (body.data ?? []).map(toAddressSnapshotItem);
+      addresses = {
+        list,
+        total: list.length,
+        hasPrimary: list.some((a) => a.isPrimary),
+      };
+    } else if (addressesResult.value.status !== 404) {
+      addressesError = true;
+    }
+  } else {
+    addressesError = true;
+  }
+
+  let rfqPendingCount: number | null = null;
+  let rfqError = false;
+  if (rfqResult.status === 'fulfilled') {
+    if (rfqResult.value.ok) {
+      const body = (await rfqResult.value.json()) as BackendRfqListResponse;
+      // El backend puede exponer `meta.pending_count` o contar a mano.
+      const metaCount = body.meta?.pending_count;
+      if (typeof metaCount === 'number') {
+        rfqPendingCount = metaCount;
+      } else if (Array.isArray(body.data)) {
+        rfqPendingCount = body.data.filter(
+          (r: BackendRfqResource): boolean => r.status === 'pending' || r.status === 'awaiting_approval',
+        ).length;
+      } else {
+        rfqPendingCount = 0;
+      }
+    } else if (rfqResult.value.status === 404) {
+      // Endpoint no existe — rfqPendingCount queda null, sección se oculta.
+      rfqPendingCount = null;
+    } else {
+      rfqError = true;
+    }
+  } else {
+    rfqError = true;
+  }
+
+  let notificationsUnread: number | null = null;
+  let notificationsError = false;
+  if (notificationsResult.status === 'fulfilled') {
+    if (notificationsResult.value.ok) {
+      const body = (await notificationsResult.value.json()) as BackendNotificationCountResponse;
+      notificationsUnread = body.unread_count;
+    } else if (notificationsResult.value.status === 404) {
+      // Endpoint no existe — null, sección oculta.
+      notificationsUnread = null;
+    } else {
+      notificationsError = true;
+    }
+  } else {
+    notificationsError = true;
+  }
+
   return {
     user,
     orders,
+    twoFactor,
+    addresses,
+    rfqPendingCount,
+    notificationsUnread,
     errors: {
       me: meError,
       orders: ordersError,
+      twoFactor: twoFactorError,
+      addresses: addressesError,
+      rfq: rfqError,
+      notifications: notificationsError,
     },
   };
 }
