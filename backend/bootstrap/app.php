@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\HealthController;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CorrelationIdMiddleware;
+use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HttpMetricsMiddleware;
 use App\Http\Middleware\HttpTracingMiddleware;
 use App\Http\Middleware\ResolveStoreFromDomain;
@@ -115,6 +116,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'validate.store_id' => ValidateStoreIdHeader::class,
             'store.maintenance' => StoreMaintenanceMode::class,
             'permission' => CheckPermission::class,
+            // F0.1 — gating de User autenticado en rutas /api/v1/admin/*.
+            // Acepta slugs comma-separated (role:admin o role:admin,staff).
+            // Customers (otro modelo) usan auth propia y NO llegan acá
+            // gracias a auth:sanctum. Ver `EnsureUserHasRole`.
+            'role' => EnsureUserHasRole::class,
             // CR2: alias de la middleware de Sanctum para uso futuro en
             // rutas específicas si fuera necesario (ej: rutas con auth
             // vía cookie que no estén en el grupo api).

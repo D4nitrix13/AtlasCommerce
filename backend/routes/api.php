@@ -2,11 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Account\BulkCartController;
 use App\Http\Controllers\Api\Admin\AttributeController;
 use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Admin\CustomerController;
+use App\Http\Controllers\Api\Admin\Inventory\MovementController as AdminInventoryMovementController;
+use App\Http\Controllers\Api\Admin\Inventory\StockController as AdminInventoryStockController;
+use App\Http\Controllers\Api\Admin\Inventory\WarehouseController as AdminInventoryWarehouseController;
+use App\Http\Controllers\Api\Admin\Marketing\CouponAdminController;
+use App\Http\Controllers\Api\Admin\Marketing\PromotionAdminController;
+use App\Http\Controllers\Api\Admin\Marketing\PromotionProductAdminController;
 use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductImageController;
@@ -17,6 +24,9 @@ use App\Http\Controllers\Api\Admin\PromotionProductController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\StoreController;
 use App\Http\Controllers\Api\Admin\StoreSocialLinkController;
+use App\Http\Controllers\Api\Admin\Support\QuestionAdminController;
+use App\Http\Controllers\Api\Admin\Support\ReviewAdminController;
+use App\Http\Controllers\Api\Admin\Support\TicketAdminController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\WholesalePriceController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -38,21 +48,11 @@ use App\Http\Controllers\Api\Reviews\ProductReviewController;
 use App\Http\Controllers\Api\Sales\OrderController;
 use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetController;
+use App\Http\Controllers\Api\Storefront\Checkout\CheckoutController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
-use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
-use App\Http\Controllers\Api\Account\BulkCartController;
-use App\Http\Controllers\Api\Admin\Inventory\MovementController as AdminInventoryMovementController;
-use App\Http\Controllers\Api\Admin\Inventory\StockController as AdminInventoryStockController;
-use App\Http\Controllers\Api\Admin\Inventory\WarehouseController as AdminInventoryWarehouseController;
-use App\Http\Controllers\Api\Admin\Marketing\CouponAdminController;
-use App\Http\Controllers\Api\Admin\Marketing\PromotionAdminController;
-use App\Http\Controllers\Api\Admin\Marketing\PromotionProductAdminController;
-use App\Http\Controllers\Api\Admin\Support\QuestionAdminController;
-use App\Http\Controllers\Api\Admin\Support\ReviewAdminController;
-use App\Http\Controllers\Api\Admin\Support\TicketAdminController;
-use App\Http\Controllers\Api\Storefront\Checkout\CheckoutController;
 use App\Http\Controllers\Api\Storefront\RfqController;
+use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
 use App\Http\Controllers\Api\Tracking\TrackingController;
@@ -315,7 +315,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
     |
     */
 
-    Route::prefix('admin')->group(function (): void {
+    // F0.1 — gateo de User autenticado en /api/v1/admin/*. Acepta admin
+    // y staff (roles internos del sistema); los permisos granulares los
+    // sigue manejando el middleware `permission:`. Customers (otro
+    // modelo) usan auth propia y NO llegan acá gracias a auth:sanctum.
+    Route::prefix('admin')->middleware('role:admin,staff')->group(function (): void {
         // Theme admin (gestión del branding del store). El tenant se
         // resuelve via store.domain middleware (definido en el group
         // prefix 'admin' arriba) — store resuelto en
