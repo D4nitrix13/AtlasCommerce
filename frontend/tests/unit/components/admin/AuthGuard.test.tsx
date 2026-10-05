@@ -68,9 +68,9 @@ describe('components/admin/auth/AuthGuard', () => {
     });
   });
 
-  it('NO redirige en /admin/auth/login (path público)', async () => {
+  it('NO redirige en /account/login (path público)', async () => {
     Object.defineProperty(window, 'location', {
-      value: { ...originalLocation, pathname: '/es/admin/auth/login', href: '', replace: vi.fn() },
+      value: { ...originalLocation, pathname: '/es/account/login', href: '', replace: vi.fn() },
       writable: true,
       configurable: true,
     });
@@ -90,11 +90,11 @@ describe('components/admin/auth/AuthGuard', () => {
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
-  it('NO redirige en /admin/auth/forgot-password', async () => {
+  it('NO redirige en /account/forgot-password', async () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...originalLocation,
-        pathname: '/es/admin/auth/forgot-password',
+        pathname: '/es/account/forgot-password',
         href: '',
         replace: vi.fn(),
       },
@@ -117,11 +117,11 @@ describe('components/admin/auth/AuthGuard', () => {
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
-  it('NO redirige en /admin/auth/2fa', async () => {
+  it('NO redirige en /account/2fa', async () => {
     Object.defineProperty(window, 'location', {
       value: {
         ...originalLocation,
-        pathname: '/es/admin/auth/2fa',
+        pathname: '/es/account/2fa',
         search: '?token=42',
         href: '',
         replace: vi.fn(),
@@ -145,7 +145,7 @@ describe('components/admin/auth/AuthGuard', () => {
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
-  it('redirige a /es/admin/auth/login cuando path es /es/admin/dashboard sin auth', async () => {
+  it('redirige a /es/account/login cuando path es /es/admin/dashboard sin auth', async () => {
     const replaceMock = vi.fn();
     Object.defineProperty(window.location, 'replace', {
       value: replaceMock,
@@ -160,7 +160,7 @@ describe('components/admin/auth/AuthGuard', () => {
     });
 
     const calledWith = replaceMock.mock.calls[0]?.[0] as string;
-    expect(calledWith).toContain('/es/admin/auth/login');
+    expect(calledWith).toContain('/es/account/login');
     expect(calledWith).toContain('redirect=');
   });
 
@@ -184,7 +184,7 @@ describe('components/admin/auth/AuthGuard', () => {
     });
 
     const calledWith = replaceMock.mock.calls[0]?.[0] as string;
-    expect(calledWith).toContain('/en/admin/auth/login');
-    expect(calledWith).not.toContain('/es/admin/auth/login');
+    expect(calledWith).toContain('/en/account/login');
+    expect(calledWith).not.toContain('/es/account/login');
   });
 });

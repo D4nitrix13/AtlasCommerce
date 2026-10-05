@@ -118,7 +118,7 @@ describe("components/admin/auth/ForgotPasswordForm", () => {
   });
 
   describe("submit exitoso", () => {
-    it("llama a /auth/forgot-password y redirige a reset-password", async () => {
+    it("llama a /v1/auth/forgot-password y redirige a reset-password", async () => {
       const user = userEvent.setup();
       mockApiFetch.mockResolvedValue({
         message: "ok",
@@ -135,7 +135,7 @@ describe("components/admin/auth/ForgotPasswordForm", () => {
 
       await waitFor(() => {
         expect(mockApiFetch).toHaveBeenCalledWith(
-          "/auth/forgot-password",
+          "/v1/auth/forgot-password",
           expect.objectContaining({
             method: "POST",
             body: expect.objectContaining({ email: "admin@panda-estampados.com" }),

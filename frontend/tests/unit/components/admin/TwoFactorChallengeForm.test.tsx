@@ -148,6 +148,6 @@ describe('components/admin/auth/TwoFactorChallengeForm', () => {
 
     const recoveryLink = screen.getByText('auth.twoFactor.recoveryLink');
     expect(recoveryLink).toBeInTheDocument();
-    expect(recoveryLink.closest('a')).toHaveAttribute('href', '/es/admin/auth/login');
+    expect(recoveryLink.closest('a')).toHaveAttribute('href', '/es/auth/login');
   });
 });

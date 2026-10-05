@@ -174,7 +174,7 @@ describe('components/admin/auth/ResetPasswordForm', () => {
   });
 
   describe('envío exitoso', () => {
-    it('llama a POST /auth/reset-password con todos los datos correctos', async () => {
+    it('llama a POST /v1/auth/reset-password con todos los datos correctos', async () => {
       const user = userEvent.setup();
       mockApiFetch.mockResolvedValue({
         token: '1|abc123',
@@ -199,7 +199,7 @@ describe('components/admin/auth/ResetPasswordForm', () => {
 
       await waitFor(() => {
         expect(mockApiFetch).toHaveBeenCalledWith(
-          '/auth/reset-password',
+          '/v1/auth/reset-password',
           expect.objectContaining({
             method: 'POST',
             body: {
