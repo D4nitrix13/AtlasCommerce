@@ -343,12 +343,14 @@ const publicApiUrl = (import.meta.env.PUBLIC_API_URL ?? '').replace(/\/$/, '');
       const badgeEls = document.querySelectorAll<HTMLElement>('[data-badge="orders-pending"]');
       if (badgeEls.length === 0) return;
 
-      // Bridge global seteado por el script is:inline de arriba.
+      // apiBase ya incluye `/api`, y el endpoint NO debe tener prefijo
+      // adicional. Antes había `${apiBase}/api/v1/...` que producía
+      // `/api/api/v1/...` (404). El path canónico vive en endpoints.ts.
       const apiBase =
         (window as unknown as { __ATLAS_ADMIN_API_BASE__?: string }).__ATLAS_ADMIN_API_BASE__ ?? '';
 
       try {
-        const response = await fetch(`${apiBase}/api/v1/admin/orders/recent?limit=50`, {
+        const response = await fetch(`${apiBase}/v1/admin/orders/recent?limit=50`, {
           credentials: 'include',
           headers: { Accept: 'application/json' },
         });
