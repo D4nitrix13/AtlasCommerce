@@ -1,12 +1,13 @@
 import { useEffect, type ReactElement } from 'react';
-import { authStore, useAuth } from '../../stores/auth';
+import { authStore, isAdminUser, useAuth } from '../../stores/auth';
 import { useTranslations } from '../../i18n';
 import { stripLocaleFromPath, withLocale } from '../../lib/path-helpers';
 
 /**
  * Componente client-only que decide el redirect de `/admin/`:
- *   - autenticado  → `/admin/dashboard`
- *   - no autenticado → `/auth/login?redirect=<current path>`
+ *   - autenticado + rol admin/staff → `/admin/dashboard`
+ *   - autenticado + otro rol (Customer, etc) → `/account` (customer area)
+ *   - no autenticado → `/account/login?redirect=<current path>`
  *
  * Hidrata el auth store al mount (lee token de localStorage) y decide
  * el destino una vez que `isHydrating === false`. Mientras tanto,
@@ -15,10 +16,14 @@ import { stripLocaleFromPath, withLocale } from '../../lib/path-helpers';
  * Diferencia con `AuthGuard`: `AuthGuard` se monta en páginas
  * internas del admin y redirige SOLO si no está autenticado.
  * `AdminHomeRedirect` se monta en el entrypoint del admin (`/admin/`)
- * y decide el destino según auth (login o dashboard).
+ * y decide el destino según auth + role.
+ *
+ * F0.5 — agregado el role-check: Customer que tipea `/admin/` no debe
+ * caer en el dashboard aunque esté autenticado con el User store
+ * (defensa en profundidad — el backend ya rechaza en F0.1).
  */
 export default function AdminHomeRedirect(): ReactElement {
-  const { isAuthenticated, isHydrating } = useAuth();
+  const { user, isAuthenticated, isHydrating } = useAuth();
   const { t } = useTranslations();
 
   useEffect(() => {
@@ -30,11 +35,23 @@ export default function AdminHomeRedirect(): ReactElement {
     if (isHydrating) return;
 
     const { locale, barePath } = stripLocaleFromPath(window.location.pathname);
-    const target = isAuthenticated
-      ? withLocale('/admin/dashboard', locale)
-      : `${withLocale('/account/login', locale)}?redirect=${encodeURIComponent(barePath)}`;
+
+    let target: string;
+    if (!isAuthenticated || !isAdminUser(user)) {
+      // No autenticado O no es admin/staff — enviarlo al área de cliente.
+      // Mantenemos `?redirect=` solo cuando es "no autenticado" (es un
+      // login con vuelta atrás); cuando es "no es admin" mandamos al
+      // dashboard de cliente sin redirect (no tiene sentido volver a
+      // /admin/ — sigue sin tener acceso).
+      target = isAuthenticated
+        ? withLocale('/account', locale)
+        : `${withLocale('/account/login', locale)}?redirect=${encodeURIComponent(barePath)}`;
+    } else {
+      target = withLocale('/admin/dashboard', locale);
+    }
+
     window.location.replace(target);
-  }, [isAuthenticated, isHydrating]);
+  }, [isAuthenticated, isHydrating, user]);
 
   return (
     <div

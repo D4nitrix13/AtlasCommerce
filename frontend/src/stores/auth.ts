@@ -129,6 +129,38 @@ export function getAuthUser(): User | null {
   return state.user;
 }
 
+/**
+ * Roles internos con acceso al panel admin (`/admin/*`).
+ *
+ * Espejo de `App\Http\Middleware\EnsureUserHasRole` en el backend (F0.1).
+ * Si agregás un slug acá, agregalo también al middleware y a la lista
+ * `role:admin,staff` en `routes/api.php` para mantener frontend y
+ * backend sincronizados.
+ */
+export const ADMIN_ROLE_SLUGS: readonly string[] = ['admin', 'staff'] as const;
+
+/**
+ * ¿El user autenticado pertenece al panel admin?
+ *
+ * Devuelve false cuando:
+ *   - `user === null` (no autenticado — caller maneja el redirect).
+ *   - `user.role === null` (sin rol asignado).
+ *   - `user.role.slug` no está en `ADMIN_ROLE_SLUGS` (Customer u otro).
+ *
+ * Defensiva con `null`/`undefined` para tolerar User shapes incompletos
+ * durante el hydration; los callers ya bloquean "no authed" antes de
+ * llegar acá.
+ */
+export function isAdminUser(user: User | null): boolean {
+  if (user === null) {
+    return false;
+  }
+  if (user.role === null) {
+    return false;
+  }
+  return (ADMIN_ROLE_SLUGS as readonly string[]).includes(user.role.slug);
+}
+
 export function isAuthenticated(): boolean {
   // CR2: la auth es via cookie httpOnly de Sanctum. JS no puede leer
   // el token raw, asi que `state.token` es null. Pero `state.user` se

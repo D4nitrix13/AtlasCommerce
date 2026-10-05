@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { authStore, getActiveStoreId } from '../../../src/stores/auth';
+import { ADMIN_ROLE_SLUGS, authStore, getActiveStoreId, isAdminUser } from '../../../src/stores/auth';
 import type { LoginResponse, User } from '../../../src/types/auth';
 
 beforeEach(() => {
@@ -310,5 +310,52 @@ describe('stores/auth', () => {
         message: 'Credenciales inválidas',
       });
     });
+  });
+});
+
+/**
+ * F0.5 — espejo del `EnsureUserHasRole` backend. El helper frontend
+ * decide si un User autenticado puede acceder al panel admin.
+ */
+describe('stores/auth · isAdminUser (F0.5)', () => {
+  it('ADMIN_ROLE_SLUGS contiene admin y staff (espejo del backend)', () => {
+    expect(ADMIN_ROLE_SLUGS).toContain('admin');
+    expect(ADMIN_ROLE_SLUGS).toContain('staff');
+  });
+
+  it('devuelve false cuando user es null', () => {
+    expect(isAdminUser(null)).toBe(false);
+  });
+
+  it('devuelve false cuando user.role es null', () => {
+    const noRole: User = {
+      ...fakeUser,
+      role: null,
+      role_id: null,
+    };
+    expect(isAdminUser(noRole)).toBe(false);
+  });
+
+  it('devuelve true cuando role.slug es "admin"', () => {
+    const admin: User = { ...fakeUser, role: { id: 1, slug: 'admin', name: 'Admin' } };
+    expect(isAdminUser(admin)).toBe(true);
+  });
+
+  it('devuelve true cuando role.slug es "staff"', () => {
+    const staff: User = { ...fakeUser, role: { id: 2, slug: 'staff', name: 'Staff' } };
+    expect(isAdminUser(staff)).toBe(true);
+  });
+
+  it('devuelve false cuando role.slug no está en ADMIN_ROLE_SLUGS', () => {
+    const customer: User = {
+      ...fakeUser,
+      role: { id: 3, slug: 'customer', name: 'Customer' },
+    };
+    expect(isAdminUser(customer)).toBe(false);
+  });
+
+  it('devuelve false cuando role.slug es un string vacío (defensa)', () => {
+    const empty: User = { ...fakeUser, role: { id: 4, slug: '', name: '' } };
+    expect(isAdminUser(empty)).toBe(false);
   });
 });
