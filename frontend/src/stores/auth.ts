@@ -39,7 +39,11 @@ interface AuthState {
 const initialState: AuthState = {
   token: readTokenFromStorage(),
   user: null,
-  isHydrating: false,
+  // CR2: arrancamos con isHydrating=true para que los componentes que
+  // dependen de la auth (AdminHomeRedirect, AuthGuard) NO redirijan
+  // antes de que hydrate() haya llamado a /api/v1/auth/me. El set
+  // isHydrating=false al final de hydrate() despierta a esos effects.
+  isHydrating: true,
 };
 
 /**
@@ -353,7 +357,10 @@ export function useAuth(): {
   return {
     user: snapshot.user,
     token: snapshot.token,
-    isAuthenticated: snapshot.token !== null,
+    // CR2: la auth es via cookie httpOnly de Sanctum. `snapshot.token`
+    // es null (no se puede leer la cookie desde JS), pero `snapshot.user`
+    // se hidrata via /api/v1/auth/me. Si user esta presente, authed.
+    isAuthenticated: snapshot.user !== null || snapshot.token !== null,
     isHydrating: snapshot.isHydrating,
     login,
     logout,
