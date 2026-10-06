@@ -164,8 +164,12 @@ export async function getAdminDashboardData(
   origin: string,
   cookie: string,
 ): Promise<AdminDashboardData> {
+  // F0.x follow-up: `Origin` requerido por Sanctum stateful (CR2).
+  // Ver getAccountDashboardData en lib/server/account.ts para el
+  // rationale completo.
   const headers: HeadersInit = {
     Accept: 'application/json',
+    Origin: origin,
   };
   if (cookie !== '') {
     headers.Cookie = cookie;

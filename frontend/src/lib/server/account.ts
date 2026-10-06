@@ -10,28 +10,15 @@ import type { OrderStatus, RecentOrderMock } from '../../data/account-mock';
  * handling para que la página .astro se quede con solo presentación.
  *
  * F2.2 — Extendido con datos para las 8 secciones del dashboard
- * rediseñado (ver `docs/frontend/account-dashboard-spec.md`):
- *   - 2FA status (TOTP enabled)         → SecuritySnapshot
- *   - Direcciones del Customer           → AddressesSnapshot
- *   - Cotizaciones pendientes (RFQ)      → RfqSnapshot
- *   - Notificaciones sin leer            → NotificationsSnapshot
- *   - User + orders (existente F1.1)     → ProfileSummary + OrderStatusCard×3
+ * rediseñado (ver `docs/frontend/account-dashboard-spec.md`).
  *
- * Endpoints consumidos:
+ * Endpoints consumidos (todos bajo el middleware `store.domain` + `auth:sanctum`):
  *   - GET /api/v1/auth/me                  → User
  *   - GET /api/v1/orders?limit=N          → RecentOrderMock[]
  *   - GET /api/v1/auth/2fa/totp/status     → { enabled, enabled_at }
  *   - GET /api/v1/account/addresses        → CustomerAddress[]
- *   - GET /api/v1/storefront/rfq           → RFQ list (PENDIENTE — endpoint
- *     solo existe como POST. Cuando se cree, el helper lo enchufa
- *     sin tocar la API del caller.)
- *   - GET /api/v1/account/notifications    → notif count (PENDIENTE —
- *     mismo caso: el helper ya hace el fetch, devuelve null si 404
- *     y la sección queda oculta per spec §7.)
- *
- * Multi-tenant: el middleware backend ya resolvió la tienda activa
- * vía `store.domain` antes de llegar a estas rutas. El locale del
- * storefront viene del middleware Astro (`Astro.locals.locale`).
+ *   - GET /api/v1/storefront/rfq           → RFQ list (null si 404)
+ *   - GET /api/v1/account/notifications    → notif count (null si 404)
  *
  * Failure modes (por sección, independientes — un 5xx en /me no
  * rompe /orders):
@@ -205,14 +192,19 @@ export async function getAccountDashboardData(
   options: { limit?: number } = {},
 ): Promise<AccountDashboardData> {
   const limit = options.limit ?? 3;
+  // F0.x follow-up: `Origin` es REQUERIDO por Sanctum stateful
+  // (CR2) para identificar requests same-origin y aceptar la cookie
+  // de sesión. Sin este header, /me devuelve 401 aunque la cookie
+  // sea válida. El browser lo manda automáticamente, pero el `fetch`
+  // de Node (undici) que usa Astro en SSR NO — hay que setearlo
+  // explícito.
   const headers: HeadersInit = {
     Accept: 'application/json',
+    Origin: origin,
   };
   if (cookie !== '') {
     headers.Cookie = cookie;
   }
-
-  const fetchOptions: RequestInit = { headers };
 
   const [
     meResult,
@@ -222,12 +214,12 @@ export async function getAccountDashboardData(
     rfqResult,
     notificationsResult,
   ] = await Promise.allSettled([
-    fetch(new URL('/api/v1/auth/me', origin), fetchOptions),
-    fetch(new URL(`/api/v1/orders?limit=${String(limit)}`, origin), fetchOptions),
-    fetch(new URL('/api/v1/auth/2fa/totp/status', origin), fetchOptions),
-    fetch(new URL('/api/v1/account/addresses', origin), fetchOptions),
-    fetch(new URL('/api/v1/storefront/rfq', origin), fetchOptions),
-    fetch(new URL('/api/v1/account/notifications/unread', origin), fetchOptions),
+    fetch(new URL('/api/v1/auth/me', origin), { headers }),
+    fetch(new URL(`/api/v1/orders?limit=${String(limit)}`, origin), { headers }),
+    fetch(new URL('/api/v1/auth/2fa/totp/status', origin), { headers }),
+    fetch(new URL('/api/v1/account/addresses', origin), { headers }),
+    fetch(new URL('/api/v1/storefront/rfq', origin), { headers }),
+    fetch(new URL('/api/v1/account/notifications/unread', origin), { headers }),
   ]);
 
   let user: User | null = null;

@@ -55,7 +55,7 @@ const dashboard = await getAccountDashboardData(
   { limit: 3 },
 );
 
-// Fallback del nombre (per spec §4.1).
+// F1.1 fallback del nombre (per spec §4.1).
 const fallbackFirstName = locale === 'en' ? 'Customer' : 'Cliente';
 const firstName =
   dashboard.user?.full_name?.split(' ')[0] ?? fallbackFirstName;

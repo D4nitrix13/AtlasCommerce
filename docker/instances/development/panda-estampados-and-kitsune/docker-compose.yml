@@ -155,8 +155,26 @@ services:
       - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
       - FTP_ROOT=/
       - LOG_CHANNEL=stderr
+      # F0.x follow-up — Sanctum stateful cookies en dev. Sin este
+      # env, /api/v1/auth/me desde un cliente browser (F1.1) responde
+      # 401 porque Sanctum no reconoce el host como stateful. Lista
+      # espejo de docker/caddy/Caddyfile @panda_dev handle (mismos
+      # hosts que el dev Caddyfile enruta a esta instancia).
+      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000,localhost:4321,panda-estampados.com,www.panda-estampados.com,admin.panda-estampados.com,kitsune.com,www.kitsune.com,admin.kitsune.com,127.0.0.1,127.0.0.1:8000
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      # F0.x follow-up: el SSR del frontend hace fetch a `${Astro.url.origin}/api/*`
+      # (same-origin). Para que el resolve DNS funcione dentro del container,
+      # mapeamos los public hosts al gateway del docker network (que es donde
+      # Caddy está bindeado en el host). Sin esto, la SSR fetch de
+      # `getAccountDashboardData` retorna NXDOMAIN y la página muestra el
+      # fallback "Cliente" en vez del user real.
+      - "panda-estampados.com:host-gateway"
+      - "www.panda-estampados.com:host-gateway"
+      - "admin.panda-estampados.com:host-gateway"
+      - "kitsune.com:host-gateway"
+      - "www.kitsune.com:host-gateway"
+      - "admin.kitsune.com:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy

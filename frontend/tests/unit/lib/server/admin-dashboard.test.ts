@@ -212,6 +212,9 @@ describe('lib/server/getAdminDashboardData (F3)', () => {
       const headers = init?.headers as Record<string, string> | undefined;
       expect(headers?.Cookie).toBe('sanctum=xyz');
       expect(headers?.Accept).toBe('application/json');
+      // F0.x — Origin requerido por Sanctum stateful (mismo rationale
+      // que en account.test.ts).
+      expect(headers?.Origin).toBe('http://localhost');
     }
   });
 

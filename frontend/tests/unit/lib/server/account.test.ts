@@ -287,6 +287,31 @@ describe('lib/server/getAccountDashboardData (F1.1 + F2.2)', () => {
     expect(result.orders[0]?.date).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
+  it('F0.x — Origin header se setea con el origin (Sanctum stateful CR2)', async () => {
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, _init?: RequestInit): Promise<Response> => {
+        return mockResponse({
+          user: { id: 1, email: 'a@a.com', full_name: 'A', role: null, role_id: null, store_ids: [], is_active: true, permissions: [] },
+          data: [],
+        });
+      },
+    );
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await getAccountDashboardData('https://panda-estampados.com', 'session=abc');
+
+    // Cada uno de los 6 fetches debe llevar Origin = 'https://panda-estampados.com'
+    // para que Sanctum stateful reconozca el request como same-origin
+    // y NO rechace la cookie de sesión.
+    expect(fetchMock).toHaveBeenCalledTimes(6);
+    for (const call of fetchMock.mock.calls) {
+      const init = call[1] as RequestInit | undefined;
+      expect(init).toBeDefined();
+      const headers = init!.headers as Record<string, string>;
+      expect(headers.Origin).toBe('https://panda-estampados.com');
+    }
+  });
+
   it('limit se pasa como query param al endpoint /orders', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
       const url = typeof input === 'string' ? input : input.toString();
