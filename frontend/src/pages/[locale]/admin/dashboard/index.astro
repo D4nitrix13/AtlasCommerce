@@ -25,6 +25,7 @@
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import MetricCard from '../../../../components/admin/dashboard/MetricCard.astro';
 import RevenueChart from '../../../../components/admin/dashboard/RevenueChart.astro';
+import DateRangeFilter from '../../../../components/admin/dashboard/DateRangeFilter.astro';
 import TrafficSourcesCard from '../../../../components/admin/dashboard/TrafficSourcesCard.astro';
 import MonthlyGoalsCard from '../../../../components/admin/dashboard/MonthlyGoalsCard.astro';
 import RecentOrdersTable from '../../../../components/admin/dashboard/RecentOrdersTable.astro';
@@ -43,6 +44,29 @@ const locale = Astro.locals.locale ?? 'es';
 // SIEMPRE hay sesión válida o redirect previo.
 const cookieHeader = Astro.request.headers.get('Cookie') ?? '';
 const dashboard = await getAdminDashboardData(Astro.url.origin, cookieHeader);
+
+// F3.3 — rango de fechas desde URL state `?range=`. Default '30d'
+// (el más común para SaaS dashboards). El backend NO soporta `?range=`
+// en los endpoints de metrics — el filtro es UI shell hasta que se
+// agregue soporte server-side. RecentOrdersTable sí acepta el param.
+type DateRange = '7d' | '30d' | '90d' | 'all';
+const VALID_RANGES: ReadonlySet<DateRange> = new Set(['7d', '30d', '90d', 'all']);
+const rawRange = Astro.url.searchParams.get('range');
+const selectedRange: DateRange = (
+  rawRange !== null && VALID_RANGES.has(rawRange as DateRange) ? rawRange : '30d'
+) as DateRange;
+
+// Calcular `since` ISO date para pasar a RecentOrdersTable.
+function rangeToSinceIso(range: DateRange): string | null {
+  if (range === 'all') {
+    return null;
+  }
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString();
+}
+const sinceIso = rangeToSinceIso(selectedRange);
 
 // Formateo defensivo: si el endpoint falló, los campos vienen null
 // y caemos a "—" / "0". NO se muestra "NaN" o "undefined".
@@ -83,10 +107,17 @@ const revenueValues = dashboard.metrics.revenueChart?.currentValues ?? null;
 ---
 
 <AdminLayout title={t['admin.dashboard.layout.title']}>
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.dashboard.title']}</h1>
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.dashboard.title']}</h1>
 
-    <p class="mt-1 text-sm text-slate-500">{t['admin.dashboard.subtitle']}</p>
+      <p class="mt-1 text-sm text-slate-500">{t['admin.dashboard.subtitle']}</p>
+    </div>
+
+    <DateRangeFilter
+      selected={selectedRange}
+      basePath={Astro.url.pathname}
+    />
   </div>
 
   <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

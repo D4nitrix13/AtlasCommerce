@@ -1,0 +1,67 @@
+---
+/**
+ * DateRangeFilter — F3.3 selector de rango de fechas para el admin
+ * dashboard.
+ *
+ * UX: 4 pills inline (7d, 30d, 90d, all). El activo tiene bg sólido,
+ * los otros border-only. Click navega a `?range=X` (URL state para
+ * shareable / backable).
+ *
+ * Scope honesto: el backend NO expone `?range=` en los endpoints
+ * de metrics (revenue/yearly, sales/performance) ni en
+ * /admin/orders/recent. El componente escribe el URL state; las
+ * pages que lo soporten (RecentOrdersTable sí acepta `?since=`)
+ * pueden leerlo y pasar al backend. Las que no (metrics) lo ignoran
+ * hasta que el backend se actualice — F3.3 queda como shell UI
+ * preparada, no como mentira funcional.
+ *
+ * Spec: `odd/tasks/dashboards-redesign-and-auth.md` F3.3.
+ */
+type DateRange = '7d' | '30d' | '90d' | 'all';
+
+const RANGES: ReadonlyArray<{ value: DateRange; label: string }> = [
+  { value: '7d', label: '7d' },
+  { value: '30d', label: '30d' },
+  { value: '90d', label: '90d' },
+  { value: 'all', label: 'Todo' },
+] as const;
+
+interface Props {
+  selected: DateRange;
+  /** Base path (locale-prefixed) del dashboard. Ej: `/es/admin/dashboard`. */
+  basePath: string;
+  /** Concatena `?range=X` al basePath. Si querés más params, override. */
+  buildHref?: (range: DateRange) => string;
+}
+
+const { selected, basePath, buildHref } = Astro.props;
+
+const buildHrefDefault = (range: DateRange): string =>
+  range === '30d' ? basePath : `${basePath}?range=${range}`;
+---
+
+<nav
+  aria-label="Rango de fechas"
+  data-testid="date-range-filter"
+  class="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs"
+>
+  {RANGES.map((r) => {
+    const href = buildHref ? buildHref(r.value) : buildHrefDefault(r.value);
+    const isSelected = r.value === selected;
+    return (
+      <a
+        href={href}
+        aria-current={isSelected ? 'page' : undefined}
+        data-testid={`date-range-${r.value}`}
+        class:list={[
+          'rounded-md px-3 py-1.5 font-medium transition',
+          isSelected
+            ? 'bg-[var(--primary,#059669)] text-white shadow-sm'
+            : 'text-slate-600 hover:bg-slate-50',
+        ]}
+      >
+        {r.label}
+      </a>
+    );
+  })}
+</nav>
