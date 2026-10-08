@@ -29,6 +29,8 @@ package "Núcleo Multitenant" {
     + hasFeature(slug: String): Boolean
     + primaryDomain(): DominioTienda
     + obtenerConfiguracion(clave: String): String
+    + activarModoMantenimiento(): void
+    + desactivarModoMantenimiento(): void
   }
 
   class DominioTienda {
@@ -37,6 +39,10 @@ package "Núcleo Multitenant" {
     - domain: String
     - isPrimary: Boolean
     - isActive: Boolean
+    - verifiedAt: DateTime
+    + marcarComoPrimario(): void
+    + verificar(): void
+    + desactivar(): void
   }
 
   class ConfiguracionTienda {
@@ -45,6 +51,10 @@ package "Núcleo Multitenant" {
     - clave: String
     - valor: String
     - tipoDato: String
+    - isPublic: Boolean
+    + obtenerValor(): String
+    + esValorBooleano(): Boolean
+    + serializar(): String
   }
 
   class StoreFeature {
@@ -52,16 +62,21 @@ package "Núcleo Multitenant" {
     - tiendaId: UUID
     - slug: String
     - isActive: Boolean
+    + activar(): void
+    + desactivar(): void
   }
 
   class StoreTheme {
     - id: UUID
     - tiendaId: UUID
-    - nombre: String
+    - shortName: String
+    - logoPath: String
+    - accentColor: String
     - primaryColor: String
-    - secondaryColor: String
-    - cssPersonalizado: String
-    - activo: Boolean
+    - supportEmail: String
+    - tokens: JSON
+    + regenerarTokens(): void
+    + obtenerColor(nombre: String): String
   }
 
   class Moneda {
@@ -69,14 +84,23 @@ package "Núcleo Multitenant" {
     - codigoISO: String
     - nombre: String
     - simbolo: String
+    - decimalPlaces: Integer
+    - isPrimary: Boolean
+    - isActive: Boolean
+    + latestRate(): TasaCambio
+    + activar(): void
+    + desactivar(): void
+    + formatear(montoCents: Integer): String
   }
 
   class TasaCambio {
     - id: UUID
     - monedaOrigenId: UUID
     - monedaDestinoId: UUID
-    - tasa: Decimal
+    - value: Decimal
     - fechaVigencia: Date
+    + calcularInversa(): Decimal
+    + esValida(): Boolean
   }
 
   class Impuesto {
@@ -87,6 +111,8 @@ package "Núcleo Multitenant" {
     - tipoContribuyente: TipoContribuyente
     - retencionIRPorcentaje: Decimal
     - activo: Boolean
+    + calcularImpuesto(montoBase: Decimal): Decimal
+    + aplicar(subtotal: Decimal): Decimal
   }
 
   enum TipoContribuyente {
@@ -116,7 +142,11 @@ package "Identidad y Acceso" {
     + hasAccessToStore(storeId: Integer): Boolean
     + hasPermission(slug: String): Boolean
     + habilitarSegundoFactor(metodo: String): void
+    + desactivarSegundoFactor(): void
     + verificarContrasena(contrasena: String): Boolean
+    + cambiarContrasena(nuevaContrasena: String): void
+    + marcarCorreoVerificado(): void
+    + registrarAcceso(): void
   }
 
   class CredencialSegundoFactor {
@@ -129,6 +159,9 @@ package "Identidad y Acceso" {
     - recoveryCodesGeneratedAt: DateTime
     + isEnabled(): Boolean
     + validarCodigo(codigo: String): Boolean
+    + habilitar(): void
+    + deshabilitar(): void
+    + regenerarCodigosRecuperacion(): void
   }
 
   enum TipoSegundoFactor {
@@ -143,6 +176,7 @@ package "Identidad y Acceso" {
     - usadoEn: DateTime
     - creadoEn: DateTime
     + marcarUsado(): void
+    + esValido(): Boolean
   }
 
   class CuentaSocial {
@@ -151,24 +185,39 @@ package "Identidad y Acceso" {
     - provider: String
     - idExterno: String
     - datosExtra: JSON
+    + obtenerAvatarUrl(): String
+    + desvincular(): void
   }
 
   class TokenResetContrasena {
     - id: UUID
     - usuarioId: UUID
+    - email: String
     - tokenHash: String
     - expiraEn: DateTime
     - usadoEn: DateTime
+    - requestIp: String
+    - userAgent: String
+    + isValid(): Boolean
+    + marcarComoUsado(): void
+    + esExpirado(): Boolean
   }
 
   class OtpChallenge {
     - id: UUID
     - usuarioId: UUID
-    - codigoHash: String
-    - consumedAt: DateTime
+    - type: String
+    - codeHash: String
+    - context: JSON
     - expiresAt: DateTime
+    - consumedAt: DateTime
     - attempts: Integer
-    - maxAttempts: Integer
+    + isUsable(): Boolean
+    + isExpired(): Boolean
+    + isExhausted(): Boolean
+    + validar(codigo: String): Boolean
+    + consumir(): void
+    + incrementarIntento(): void
   }
 
   class Rol {
@@ -177,7 +226,11 @@ package "Identidad y Acceso" {
     - slug: String
     - descripcion: String
     - isActive: Boolean
-    + perteneceA(nombre: String): Boolean
+    + asignarPermiso(permisoId: UUID): void
+    + revocarPermiso(permisoId: UUID): void
+    + tienePermiso(slug: String): Boolean
+    + activar(): void
+    + desactivar(): void
   }
 
   class Permiso {
@@ -185,7 +238,8 @@ package "Identidad y Acceso" {
     - nombre: String
     - slug: String
     - modulo: String
-    - accion: String
+    - descripcion: String
+    + esDeModulo(modulo: String): Boolean
   }
 
   class UsuarioTienda {
@@ -195,6 +249,9 @@ package "Identidad y Acceso" {
     - rolId: UUID
     - activo: Boolean
     - asignadoEn: DateTime
+    + activar(): void
+    + desactivar(): void
+    + cambiarRol(rolId: UUID): void
   }
 
   class BitacoraAuditoria {
@@ -209,6 +266,8 @@ package "Identidad y Acceso" {
     - datosNuevos: JSON
     - ipOrigen: String
     - ocurridoEn: DateTime
+    + obtenerCambios(): Map
+    + compararCon(otro: BitacoraAuditoria): Map
   }
 }
 
@@ -221,7 +280,6 @@ Tienda "1" *-- "many" StoreFeature
 Tienda "1" --> "0..1" StoreTheme
 Tienda "1" --> "1" Moneda : "moneda por defecto"
 Tienda "1" *-- "many" Impuesto
-Moneda "1" --> "many" TasaCambio
 TasaCambio "many" --> "1" Moneda : "moneda origen y destino"
 Impuesto "many" --> "1" TipoContribuyente
 

@@ -29,6 +29,8 @@ package "Clientes" {
     + getFullNameAttribute(): String
     + anonimizar(): void
     + solicitarEliminacion(): void
+    + activar(): void
+    + desactivar(): void
   }
 
   enum TipoCliente {
@@ -40,13 +42,16 @@ package "Clientes" {
   class Direccion {
     - id: UUID
     - clienteId: UUID
-    - linea1: String
-    - linea2: String
-    - ciudad: String
-    - departamento: String
-    - codigoPostal: String
-    - pais: String
-    - esPrincipal: Boolean
+    - addressType: String
+    - country: String
+    - department: String
+    - municipality: String
+    - detailedAddress: String
+    - reference: String
+    - isPrimary: Boolean
+    + marcarComoPrincipal(): void
+    + esPrincipal(): Boolean
+    + formatearCompleta(): String
   }
 
   class ClienteTienda {
@@ -55,6 +60,10 @@ package "Clientes" {
     - tiendaId: UUID
     - customerType: TipoCliente
     - active: Boolean
+    - createdAt: DateTime
+    + activar(): void
+    + desactivar(): void
+    + cambiarTipo(tipo: TipoCliente): void
   }
 }
 
@@ -67,7 +76,10 @@ package "Marketing" {
     - nombre: String
     - visibilidad: VisibilidadLista
     - fechaCreacion: DateTime
+    + agregarProducto(productoId: UUID): void
+    + eliminarProducto(productoId: UUID): void
     + esPublica(): Boolean
+    + cambiarVisibilidad(nueva: VisibilidadLista): void
   }
 
   enum VisibilidadLista {
@@ -81,6 +93,7 @@ package "Marketing" {
     - listaDeseosId: UUID
     - productoId: UUID
     - anadidoEn: DateTime
+    + obtenerProducto(): Producto
   }
 
   class Cupon {
@@ -96,6 +109,8 @@ package "Marketing" {
     + esValido(): Boolean
     + calcularDescuento(montoCents: Integer): Integer
     + registrarUso(): Boolean
+    + activar(): void
+    + desactivar(): void
   }
 
   enum TipoDescuento {
@@ -114,6 +129,8 @@ package "Marketing" {
     - isActive: Boolean
     + esVigente(): Boolean
     + calcularDescuento(items: List<ItemCarrito>): Integer
+    + activar(): void
+    + desactivar(): void
   }
 
   class CuponUso {
@@ -121,8 +138,10 @@ package "Marketing" {
     - cuponId: UUID
     - clienteId: UUID
     - pedidoId: UUID
-    - montoDescontadoCents: Integer
-    - usadoEn: DateTime
+    - usedAt: DateTime
+    + obtenerCupon(): Cupon
+    + obtenerCliente(): Cliente
+    + obtenerPedido(): Pedido
   }
 }
 

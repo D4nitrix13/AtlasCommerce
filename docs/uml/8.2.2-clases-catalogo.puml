@@ -16,6 +16,11 @@ package "Catálogo" {
     - nombre: String
     - slug: String
     - descripcion: String
+    - logoUrl: String
+    - isActive: Boolean
+    + activar(): void
+    + desactivar(): void
+    + contarProductos(): Integer
   }
 
   class Categoria {
@@ -24,6 +29,14 @@ package "Catálogo" {
     - slug: String
     - categoriaPadreId: UUID
     - nivelJerarquia: Integer
+    - descripcion: String
+    - imagenPath: String
+    - isActive: Boolean
+    + esRaiz(): Boolean
+    + obtenerHijos(): List<Categoria>
+    + obtenerAncestros(): List<Categoria>
+    + activar(): void
+    + desactivar(): void
   }
 
   abstract class Producto <<abstract>> {
@@ -41,6 +54,10 @@ package "Catálogo" {
     - publishedAt: DateTime
     + calcularPrecio(tiendaId: UUID): Decimal
     + calcularPrecioMayorista(cantidad: Integer): Decimal
+    + publicar(): void
+    + despublicar(): void
+    + activar(): void
+    + desactivar(): void
     + scopeActive(query): Query
     + scopePublished(query): Query
     + scopeByCategory(query, categoryId: Integer): Query
@@ -49,12 +66,16 @@ package "Catálogo" {
 
   class ProductoSimple {
     - peso: Decimal
+    + calcularCostoEnvio(): Decimal
   }
 
   class ProductoPersonalizable {
     - tiempoProduccionDias: Integer
     - requiereAprobacionDiseno: Boolean
     - tecnicasPermitidas: List<TecnicaImpresion>
+    + tiempoEstimadoProduccion(): Integer
+    + agregarOpcion(opcion: OpcionPersonalizacion): void
+    + eliminarOpcion(opcionId: UUID): void
   }
 
   class VarianteProducto {
@@ -62,37 +83,53 @@ package "Catálogo" {
     - productId: UUID
     - sku: String
     - nameVariant: String
-    - precioAdicionalCents: Integer
+    - priceCents: Integer
+    - costCents: Integer
+    - barcode: String
     - isActive: Boolean
+    + calcularPrecioConAtributos(): Decimal
+    + activar(): void
+    + desactivar(): void
   }
 
   class ImagenProducto {
     - id: UUID
     - productId: UUID
-    - url: String
-    - textoAlternativo: String
-    - orden: Integer
-    - esPrincipal: Boolean
+    - imageUrl: String
+    - altText: String
+    - sortOrder: Integer
+    - isPrimary: Boolean
+    + marcarComoPrincipal(): void
+    + reordenar(nuevoOrden: Integer): void
   }
 
   class Atributo {
     - id: UUID
     - nombre: String
-    - tipoDato: String
+    - slug: String
+    - type: String
+    - isFilterable: Boolean
+    - isRequired: Boolean
+    + esFiltrable(): Boolean
+    + esRequerido(): Boolean
   }
 
   class ValorAtributo {
     - id: UUID
     - atributoId: UUID
+    - productId: UUID
     - valor: String
+    + obtenerAtributo(): Atributo
   }
 
   class PrecioMayorista {
     - id: UUID
     - productId: UUID
-    - cantidadMinima: Integer
-    - precioUnitarioCents: Integer
-    - isActive: Boolean
+    - storeId: UUID
+    - minQty: Integer
+    - priceCents: Integer
+    + aplicaPara(cantidad: Integer): Boolean
+    + calcularDescuento(cantidad: Integer): Integer
   }
 
   class ProductoTienda {
@@ -100,11 +137,22 @@ package "Catálogo" {
     - productId: UUID
     - storeId: UUID
     - slug: String
+    - publicTitle: String
     - publicPriceCents: Integer
-    - descripcionPublica: String
+    - publicDescription: String
+    - metaTitle: String
+    - metaDescription: String
+    - ogImageUrl: String
     - isVisible: Boolean
     - isFeatured: Boolean
+    - sortOrder: Integer
     - publishedAt: DateTime
+    - unpublishedAt: DateTime
+    + publicar(): void
+    + despublicar(): void
+    + marcarComoDestacado(): void
+    + quitarDestacado(): void
+    + generarSlug(): String
   }
 }
 
@@ -118,6 +166,8 @@ package "Personalización" {
     - obligatorio: Boolean
     - costoAdicionalCents: Integer
     - orden: Integer
+    + esObligatoria(): Boolean
+    + calcularCostoTotal(cantidadOpciones: Integer): Integer
   }
 
   enum TipoOpcionPersonalizacion {
@@ -149,6 +199,8 @@ package "Personalización" {
     - altoMM: Decimal
     - urlPlantilla: String
     - coloresMaximos: Integer
+    + calcularArea(): Decimal
+    + obtenerUrlPlantilla(): String
   }
 
   class DisenoPersonalizado {
@@ -162,6 +214,7 @@ package "Personalización" {
     - fechaAprobacion: DateTime
     + validarDiseno(): Boolean
     + aprobar(operadorId: UUID): void
+    + rechazar(motivo: String): void
   }
 }
 
@@ -178,6 +231,7 @@ Producto "1" *-- "many" ImagenProducto
 Producto "1" *-- "many" PrecioMayorista
 Producto "many" -- "many" Atributo : "definido vía"
 ValorAtributo "*" --> "1" Atributo
+ValorAtributo "*" --> "1" Producto
 Producto "many" -- "many" Tienda : "publicado vía"
 ProductoTienda "*" --> "1" Producto
 ProductoTienda "*" --> "1" Tienda

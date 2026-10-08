@@ -25,6 +25,7 @@ package "Carrito y Checkout" {
     + vaciar(): void
     + convertirAPedido(): Pedido
     + estaExpirado(): Boolean
+    + renovarExpiracion(): void
   }
 
   enum EstadoCarrito {
@@ -42,6 +43,7 @@ package "Carrito y Checkout" {
     - cantidad: Integer
     - precioUnitarioCents: Integer
     + calcularSubtotal(): Integer
+    + cambiarCantidad(nueva: Integer): void
   }
 
   class ItemCarritoMayorista {
@@ -52,6 +54,7 @@ package "Carrito y Checkout" {
     - cantidadMinima: Integer
     - precioUnitarioCents: Integer
     + calcularSubtotal(): Integer
+    + validarCantidadMinima(cantidad: Integer): Boolean
   }
 }
 
@@ -62,6 +65,11 @@ package "Inventario" {
     - nombre: String
     - ubicacion: String
     - esPrincipal: Boolean
+    - isActive: Boolean
+    + activar(): void
+    + desactivar(): void
+    + marcarComoPrincipal(): void
+    + obtenerStockTotal(productoId: UUID): Integer
   }
 
   class RegistroInventario {
@@ -86,10 +94,14 @@ package "Inventario" {
     - registroInventarioId: UUID
     - tipoMovimiento: TipoMovimiento
     - cantidad: Integer
+    - stockAnterior: Integer
+    - stockNuevo: Integer
     - motivo: String
-    - referencia: String
     - usuarioId: UUID
     - ocurridoEn: DateTime
+    + esEntrada(): Boolean
+    + esSalida(): Boolean
+    + calcularDelta(): Integer
   }
 
   enum TipoMovimiento {
@@ -108,6 +120,8 @@ package "Pedidos y Ventas" {
     - nombre: String
     - descripcion: String
     - active: Boolean
+    + activar(): void
+    + desactivar(): void
   }
 
   class Pedido {
@@ -137,6 +151,7 @@ package "Pedidos y Ventas" {
     + marcarEntregado(): void
     + calcularTotal(): Integer
     + esCancelable(): Boolean
+    + obtenerHistorial(): List<HistorialEstadoPedido>
   }
 
   enum EstadoPedido {
@@ -169,6 +184,7 @@ package "Pedidos y Ventas" {
     - cambiadoPorUsuarioId: UUID
     - notas: String
     - cambiadoEn: DateTime
+    + esTransicionValida(desde: EstadoPedido, hasta: EstadoPedido): Boolean
   }
 
   class Factura {
@@ -179,6 +195,7 @@ package "Pedidos y Ventas" {
     - emitidaEn: DateTime
     - usuarioEmisorId: UUID
     + generarPDF(): String
+    + descargar(): String
   }
 
   class CierreCaja {
@@ -197,6 +214,7 @@ package "Pedidos y Ventas" {
     + calcularMontoEsperado(): Integer
     + validar(): void
     + rechazar(observaciones: String): void
+    + calcularDiferencia(): Integer
   }
 
   enum EstadoCierreCaja {

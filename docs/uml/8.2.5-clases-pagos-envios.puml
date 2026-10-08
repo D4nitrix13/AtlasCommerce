@@ -19,6 +19,9 @@ package "Pagos" {
     - tipo: TipoMetodoPago
     - comisionPorcentaje: Decimal
     - isActive: Boolean
+    + activar(): void
+    + desactivar(): void
+    + calcularComision(montoCents: Integer): Integer
   }
 
   enum TipoMetodoPago {
@@ -45,6 +48,7 @@ package "Pagos" {
     + marcarCompletado(): void
     + marcarFallido(motivo: String): void
     + reembolsar(montoCents: Integer): Reembolso
+    + calcularMontoConComision(): Integer
   }
 
   enum EstadoPago {
@@ -63,6 +67,8 @@ package "Pagos" {
     - cruda: JSON
     - estadoDevuelto: String
     - webhookRecibidoEn: DateTime
+    + obtenerRespuestaCruda(): JSON
+    + fueExitosa(): Boolean
   }
 
   class PagoFactura {
@@ -71,6 +77,8 @@ package "Pagos" {
     - facturaId: UUID
     - appliedAmountCents: Integer
     - appliedAt: DateTime
+    + obtenerPago(): Pago
+    + obtenerFactura(): Factura
   }
 
   interface PasarelaPago <<interface>> {
@@ -85,6 +93,7 @@ package "Pagos" {
     - monedasSoportadas: List<String>
     + encriptarCredenciales(credenciales: String): void
     + probarConexion(): Boolean
+    + cambiarModo(nuevo: ModoPasarela): void
   }
 
   enum ModoPasarela {
@@ -116,6 +125,7 @@ package "Envíos" {
     + marcarEntregado(): void
     + marcarDevuelto(): void
     + calcularCosto(peso: Decimal, destino: Direccion): Integer
+    + obtenerEstado(): EstadoEnvio
   }
 
   enum EstadoEnvio {
@@ -130,15 +140,25 @@ package "Envíos" {
     - id: UUID
     - nombre: String
     - urlRastreo: String
+    - phone: String
+    - email: String
     - isActive: Boolean
+    + activar(): void
+    + desactivar(): void
+    + obtenerUrlRastreo(guia: String): String
   }
 
   class ZonaEnvio {
     - id: UUID
     - tiendaId: UUID
     - nombre: String
+    - descripcion: String
     - departamentosCubiertos: List<String>
-    - costoBaseCents: Integer
+    - baseCostCents: Integer
+    - isActive: Boolean
+    + cubre(departamento: String): Boolean
+    + activar(): void
+    + desactivar(): void
   }
 }
 

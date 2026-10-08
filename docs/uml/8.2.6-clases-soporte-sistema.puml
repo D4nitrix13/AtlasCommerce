@@ -29,6 +29,7 @@ package "Soporte" {
     + reabrir(motivo: String): void
     + escalar(): void
     + tiempoRespuesta(): Duration
+    + agregarMensaje(contenido: String, autorId: UUID): MensajeTicket
   }
 
   enum EstadoTicket {
@@ -59,6 +60,8 @@ package "Soporte" {
     - contenido: String
     - adjuntoUrl: String
     - enviadoEn: DateTime
+    + obtenerAutor(): Usuario
+    + obtenerTicket(): TicketSoporte
   }
 
   class PreguntaProducto {
@@ -72,6 +75,8 @@ package "Soporte" {
     - creadaEn: DateTime
     - respondidaEn: DateTime
     + responder(contenido: String, usuarioId: UUID): void
+    + rechazar(motivo: String): void
+    + esPendiente(): Boolean
   }
 
   enum EstadoPregunta {
@@ -92,6 +97,7 @@ package "Soporte" {
     - creadaEn: DateTime
     + aprobar(moderadorId: UUID): void
     + rechazar(moderadorId: UUID, motivo: String): void
+    + esAprobada(): Boolean
   }
 }
 
@@ -136,6 +142,8 @@ package "Devoluciones" {
     - cantidad: Integer
     - motivoDetallado: String
     - amountCents: Integer
+    + obtenerLineaPedido(): LineaPedido
+    + calcularMontoTotal(): Integer
   }
 
   class Reembolso {
@@ -148,6 +156,7 @@ package "Devoluciones" {
     - procesadoEn: DateTime
     + procesar(referencia: String): void
     + marcarRechazado(motivo: String): void
+    + obtenerPago(): Pago
   }
 
   enum EstadoReembolso {
@@ -210,6 +219,7 @@ package "Sistema" {
     - enviadaEn: DateTime
     + marcarComoLeida(): void
     + enviar(usuarioId: UUID, datos: JSON): void
+    + esNoLeida(): Boolean
   }
 
   enum TipoNotificacion {
