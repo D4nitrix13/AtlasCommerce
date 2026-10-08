@@ -111,6 +111,20 @@ class PermissionsCatalogSeeder extends Seeder
             ],
         );
 
+        // CA.1 (customer-auth sprint, commit 1 de 5) — crea el rol
+        // customer. NO tiene permisos administrativos: los customers
+        // usan el storefront como usuarios regulares via Sanctum
+        // stateful cookies (auth:web). Este rol es el que vincula un
+        // User con un Customer en customer.user_id.
+        Role::query()->updateOrCreate(
+            attributes: ['slug' => 'customer'],
+            values: [
+                'name' => 'Customer',
+                'description' => 'Cliente del storefront. Autenticado via Sanctum stateful (auth:web). Sin permisos administrativos — accede a su propio Customer profile.',
+                'is_active' => true,
+            ],
+        );
+
         // Rol staff: permisos operativos básicos (NO incluye admin-bypass).
         $staffPermissions = [
             'sales.orders.view',
