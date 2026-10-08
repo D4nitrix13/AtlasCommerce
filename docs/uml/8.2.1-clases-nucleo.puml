@@ -222,8 +222,8 @@ Tienda "1" --> "0..1" StoreTheme
 Tienda "1" --> "1" Moneda : "moneda por defecto"
 Tienda "1" *-- "many" Impuesto
 Moneda "1" --> "many" TasaCambio
-TasaCambio "many" --> "1" Moneda : "origen"
-TasaCambio "many" --> "1" Moneda : "destino"
+TasaCambio "many" --> "1" Moneda : "moneda origen"
+TasaCambio "many" --> "1" Moneda : "moneda destino"
 Impuesto "many" --> "1" TipoContribuyente
 
 ' ============================================================
