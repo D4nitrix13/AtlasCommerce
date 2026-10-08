@@ -280,31 +280,31 @@ package "Identidad y Acceso" {
 ' ============================================================
 ' RELACIONES — NÚCLEO MULTITENANT
 ' ============================================================
-Tienda "1" *-- "many" DominioTienda
-Tienda "1" *-- "many" ConfiguracionTienda
-Tienda "1" *-- "many" StoreFeature
+Tienda "1" *-- "*" DominioTienda
+Tienda "1" *-- "*" ConfiguracionTienda
+Tienda "1" *-- "*" StoreFeature
 Tienda "1" --> "0..1" StoreTheme
 Tienda "1" --> "1" Moneda : "moneda por defecto"
-Tienda "1" *-- "many" Impuesto
-TasaCambio "many" --> "1" Moneda : "moneda origen y destino"
-Impuesto "many" --> "1" TipoContribuyente
+Tienda "1" *-- "*" Impuesto
+TasaCambio "*" --> "1" Moneda : "moneda origen y destino"
+Impuesto "*" --> "1" TipoContribuyente
 
 ' ============================================================
 ' RELACIONES — IDENTIDAD Y ACCESO
 ' ============================================================
 Usuario "1" --> "0..1" CredencialSegundoFactor
-CredencialSegundoFactor "many" --> "1" TipoSegundoFactor
-Usuario "1" *-- "many" CodigoRecuperacion
-Usuario "1" *-- "many" CuentaSocial
-Usuario "1" *-- "many" TokenResetContrasena
-Usuario "1" *-- "many" OtpChallenge
-Usuario "many" --> "many" Rol : "asignado vía"
-Rol "many" --> "many" Permiso : "otorga"
-Usuario "many" -- "many" Tienda : "asignado vía"
+CredencialSegundoFactor "*" --> "1" TipoSegundoFactor
+Usuario "1" *-- "*" CodigoRecuperacion
+Usuario "1" *-- "*" CuentaSocial
+Usuario "1" *-- "*" TokenResetContrasena
+Usuario "1" *-- "*" OtpChallenge
+Usuario "*" --> "*" Rol : "asignado vía"
+Rol "*" --> "*" Permiso : "otorga"
+Usuario "*" -- "*" Tienda : "asignado vía"
 UsuarioTienda "*" --> "1" Usuario : "empleado"
 UsuarioTienda "*" --> "1" Tienda
 UsuarioTienda "*" --> "1" Rol : "rol específico en tienda"
-Usuario "1" --> "many" BitacoraAuditoria
+Usuario "1" --> "*" BitacoraAuditoria
 BitacoraAuditoria "*" --> "1" Tienda
 
 @enduml

@@ -227,26 +227,26 @@ package "Personalización" {
 ' ============================================================
 Producto <|-- ProductoSimple
 Producto <|-- ProductoPersonalizable
-Producto "many" --> "1" Marca : "marca"
-Producto "many" --> "1" Categoria : "categoría"
-Categoria "many" --> "0..1" Categoria : "categoría padre"
-Producto "1" *-- "many" VarianteProducto
-Producto "1" *-- "many" ImagenProducto
-Producto "1" *-- "many" PrecioMayorista
-Producto "many" -- "many" Atributo : "definido vía"
+Producto "*" --> "1" Marca : "marca"
+Producto "*" --> "1" Categoria : "categoría"
+Categoria "*" --> "0..1" Categoria : "categoría padre"
+Producto "1" *-- "*" VarianteProducto
+Producto "1" *-- "*" ImagenProducto
+Producto "1" *-- "*" PrecioMayorista
+Producto "*" -- "*" Atributo : "definido vía"
 ValorAtributo "*" --> "1" Atributo
 ValorAtributo "*" --> "1" Producto
-Producto "many" -- "many" Tienda : "publicado vía"
+Producto "*" -- "*" Tienda : "publicado vía"
 ProductoTienda "*" --> "1" Producto
 ProductoTienda "*" --> "1" Tienda
-ProductoPersonalizable "1" --> "many" TecnicaImpresion : "permite"
+ProductoPersonalizable "1" --> "*" TecnicaImpresion : "permite"
 
 ' ============================================================
 ' RELACIONES — PERSONALIZACIÓN
 ' ============================================================
-ProductoPersonalizable "1" *-- "many" OpcionPersonalizacion
-ProductoPersonalizable "1" *-- "many" AreaImpresion
-OpcionPersonalizacion "many" --> "1" TipoOpcionPersonalizacion
-AreaImpresion "many" --> "1" TecnicaImpresion
+ProductoPersonalizable "1" *-- "*" OpcionPersonalizacion
+ProductoPersonalizable "1" *-- "*" AreaImpresion
+OpcionPersonalizacion "*" --> "1" TipoOpcionPersonalizacion
+AreaImpresion "*" --> "1" TecnicaImpresion
 
 @enduml

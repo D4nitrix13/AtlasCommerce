@@ -238,44 +238,44 @@ package "Pedidos y Ventas" {
 ' ============================================================
 ' RELACIONES — CARRITO Y CHECKOUT
 ' ============================================================
-Cliente "1" *-- "many" Carrito
+Cliente "1" *-- "*" Carrito
 Carrito "*" --> "1" Tienda
 Carrito "*" --> "1" Moneda
-Carrito "many" --> "1" EstadoCarrito
-Carrito "1" *-- "many" ItemCarrito
+Carrito "*" --> "1" EstadoCarrito
+Carrito "1" *-- "*" ItemCarrito
 ItemCarrito "*" --> "1" Producto
 ItemCarrito "*" --> "0..1" VarianteProducto
-Carrito "1" *-- "many" ItemCarritoMayorista
+Carrito "1" *-- "*" ItemCarritoMayorista
 ItemCarritoMayorista "*" --> "1" Producto
 Carrito "1" --> "0..1" Pedido : "se convierte en"
 
 ' ============================================================
 ' RELACIONES — INVENTARIO
 ' ============================================================
-Almacen "1" *-- "many" RegistroInventario
+Almacen "1" *-- "*" RegistroInventario
 RegistroInventario "*" --> "1" Producto
 RegistroInventario "*" --> "0..1" VarianteProducto
-RegistroInventario "1" *-- "many" MovimientoInventario
-MovimientoInventario "many" --> "1" TipoMovimiento
+RegistroInventario "1" *-- "*" MovimientoInventario
+MovimientoInventario "*" --> "1" TipoMovimiento
 MovimientoInventario "*" --> "1" Usuario : "registrado por"
 
 ' ============================================================
 ' RELACIONES — PEDIDOS Y VENTAS
 ' ============================================================
-Cliente "1" *-- "many" Pedido
+Cliente "1" *-- "*" Pedido
 Pedido "*" --> "1" Tienda
 Pedido "*" --> "0..1" Direccion
 Pedido "*" --> "0..1" CanalVenta
-Pedido "many" --> "1" EstadoPedido
+Pedido "*" --> "1" EstadoPedido
 Pedido "*" --> "1" Moneda
 Pedido "*" --> "0..1" Usuario : "creador administrativo"
-Pedido "1" *-- "many" LineaPedido
-Pedido "1" *-- "many" HistorialEstadoPedido
+Pedido "1" *-- "*" LineaPedido
+Pedido "1" *-- "*" HistorialEstadoPedido
 Pedido "1" -- "0..1" Factura
 HistorialEstadoPedido "*" --> "0..1" Usuario : "cambiado por"
-Tienda "1" *-- "many" CierreCaja
+Tienda "1" *-- "*" CierreCaja
 CierreCaja "*" --> "0..1" Usuario : "validado por"
-CierreCaja "many" --> "1" EstadoCierreCaja
+CierreCaja "*" --> "1" EstadoCierreCaja
 LineaPedido "*" --> "1" Producto
 LineaPedido "*" --> "0..1" VarianteProducto
 

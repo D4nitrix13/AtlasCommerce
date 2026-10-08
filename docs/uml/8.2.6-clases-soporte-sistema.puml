@@ -258,42 +258,42 @@ package "Sistema" {
 ' ============================================================
 ' RELACIONES — SOPORTE
 ' ============================================================
-Cliente "1" *-- "many" TicketSoporte
-Tienda "1" *-- "many" TicketSoporte
+Cliente "1" *-- "*" TicketSoporte
+Tienda "1" *-- "*" TicketSoporte
 TicketSoporte "*" --> "0..1" Pedido : "asociado a"
-TicketSoporte "many" --> "1" EstadoTicket
-TicketSoporte "many" --> "1" PrioridadTicket
-TicketSoporte "many" --> "1" MetodoAsignacion
+TicketSoporte "*" --> "1" EstadoTicket
+TicketSoporte "*" --> "1" PrioridadTicket
+TicketSoporte "*" --> "1" MetodoAsignacion
 TicketSoporte "*" --> "0..1" Usuario : "asignado a"
-TicketSoporte "1" *-- "many" MensajeTicket
+TicketSoporte "1" *-- "*" MensajeTicket
 MensajeTicket "*" --> "1" Usuario : "autor"
-Producto "1" *-- "many" PreguntaProducto
-Cliente "1" *-- "many" PreguntaProducto
-PreguntaProducto "many" --> "1" EstadoPregunta
-Producto "1" *-- "many" ResenaProducto
-Cliente "1" *-- "many" ResenaProducto
+Producto "1" *-- "*" PreguntaProducto
+Cliente "1" *-- "*" PreguntaProducto
+PreguntaProducto "*" --> "1" EstadoPregunta
+Producto "1" *-- "*" ResenaProducto
+Cliente "1" *-- "*" ResenaProducto
 ResenaProducto "*" --> "0..1" Pedido
 
 ' ============================================================
 ' RELACIONES — DEVOLUCIONES
 ' ============================================================
-Pedido "1" *-- "many" Devolucion
+Pedido "1" *-- "*" Devolucion
 Devolucion "*" --> "1" Cliente
-Devolucion "many" --> "1" EstadoDevolucion
-Devolucion "many" --> "1" TipoResolucionDevolucion
-Devolucion "1" *-- "many" ItemDevolucion
+Devolucion "*" --> "1" EstadoDevolucion
+Devolucion "*" --> "1" TipoResolucionDevolucion
+Devolucion "1" *-- "*" ItemDevolucion
 ItemDevolucion "*" --> "1" LineaPedido
-Pago "1" *-- "many" Reembolso
-Reembolso "many" --> "1" EstadoReembolso
+Pago "1" *-- "*" Reembolso
+Reembolso "*" --> "1" EstadoReembolso
 
 ' ============================================================
 ' RELACIONES — SISTEMA
 ' ============================================================
-Respaldo "many" --> "1" TipoRespaldo
-Respaldo "many" --> "1" EstadoRespaldo
-Respaldo "many" --> "1" FrecuenciaRespaldo
-Usuario "1" *-- "many" Notificacion
-Tienda "1" *-- "many" Notificacion
-Notificacion "many" --> "1" TipoNotificacion
+Respaldo "*" --> "1" TipoRespaldo
+Respaldo "*" --> "1" EstadoRespaldo
+Respaldo "*" --> "1" FrecuenciaRespaldo
+Usuario "1" *-- "*" Notificacion
+Tienda "1" *-- "*" Notificacion
+Notificacion "*" --> "1" TipoNotificacion
 
 @enduml

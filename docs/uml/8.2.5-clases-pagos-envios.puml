@@ -176,29 +176,29 @@ package "Envíos" {
 ' RELACIONES — PAGOS
 ' ============================================================
 PasarelaPago <|.. PasarelaGenerica
-Tienda "1" *-- "many" MetodoPago
-MetodoPago "many" --> "1" TipoMetodoPago
+Tienda "1" *-- "*" MetodoPago
+MetodoPago "*" --> "1" TipoMetodoPago
 MetodoPago "*" --> "1" PasarelaPago
-Cliente "1" *-- "many" Pago
+Cliente "1" *-- "*" Pago
 Pago "*" --> "1" MetodoPago
 Pago "*" --> "1" Moneda
-Pago "many" --> "1" EstadoPago
-Pago "1" *-- "many" TransaccionPago
+Pago "*" --> "1" EstadoPago
+Pago "1" *-- "*" TransaccionPago
 TransaccionPago "*" --> "1" PasarelaPago
-Pago "many" -- "many" Factura : "aplicado vía"
+Pago "*" -- "*" Factura : "aplicado vía"
 PagoFactura "*" --> "1" Pago
 PagoFactura "*" --> "1" Factura
-PasarelaGenerica "many" --> "1" ModoPasarela
+PasarelaGenerica "*" --> "1" ModoPasarela
 
 ' ============================================================
 ' RELACIONES — ENVÍOS
 ' ============================================================
 ServicioEnvio <|.. EmpresaEnvio
-Pedido "1" *-- "many" Envio
+Pedido "1" *-- "*" Envio
 Envio "*" --> "1" EmpresaEnvio
 Envio "*" --> "0..1" ZonaEnvio
 Envio "*" --> "1" Moneda
-Envio "many" --> "1" EstadoEnvio
-Tienda "1" *-- "many" ZonaEnvio
+Envio "*" --> "1" EstadoEnvio
+Tienda "1" *-- "*" ZonaEnvio
 
 @enduml
