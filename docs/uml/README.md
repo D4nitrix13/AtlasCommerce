@@ -3,72 +3,88 @@
 Diagramas UML del capítulo 8 "Análisis Orientado a Objetos" de AtlasCommerce
 (Avance 3, Ing. Software I — UNI).
 
-## Archivos
+## Estructura de archivos
 
-| # | Archivo | Sección | Descripción |
-|---|---------|---------|-------------|
-| 01 | `8.1-casos-de-uso.puml` | 8.1 | Diagrama de casos de uso con 4 actores y 18 CU |
-| 02 | `8.2-clases-sistema-completo.puml` | 8.2 | Diagrama de clases completo del sistema |
-| 03 | `8.2-clases-modulo-pedidos.puml` | 8.2 | Vista reducida centrada en el módulo de Pedidos |
-| 04 | `8.3-actividad-checkout-pago.puml` | 8.3 | Proceso de checkout y pago (HU-03/04/05) |
-| 05 | `8.3-actividad-gestion-pedidos.puml` | 8.3 | Proceso de gestión de pedidos (HU-10) |
-| 06 | `8.3-actividad-control-stock.puml` | 8.3 | Proceso de control de stock (HU-09, RF-INV) |
-| 07 | `8.4-secuencia-registro-2fa.puml` | 8.4 | Secuencia de registro + 2FA (HU-02) |
-| 08 | `8.4-secuencia-checkout-pasarela.puml` | 8.4 | Secuencia de checkout + pasarela (HU-04/05) |
-| 09 | `8.4-secuencia-gestion-pedido.puml` | 8.4 | Secuencia de gestión de pedido (HU-10) |
-| 10 | `8.5-estado-pedido.puml` | 8.5 | Diagrama de estados de Pedido (alineado con código) |
-| 11 | `8.5-estado-2fa.puml` | 8.5 | Diagrama de estados del ciclo 2FA de Usuario |
-| — | `8.1.1-coleman/*.md` | 8.1.1 | 18 plantillas de Coleman (una por CU) |
+### 8.1 — Diagramas de casos de uso (1 diagrama)
+
+| Archivo | Descripción |
+|---------|-------------|
+| `8.1-casos-de-uso.puml` | Diagrama general con 4 actores y 18 CU |
+
+### 8.1.1 — Plantillas de Coleman (18 tablas)
+
+Ver `8.1.1-coleman/` — un archivo `.md` por cada caso de uso, más `ALL-COLEMANS.md` consolidado y `README.md` índice.
+
+### 8.2 — Diagramas de clases (7 diagramas, divididos por módulos)
+
+| Archivo | Subsección | Paquetes incluidos |
+|---------|------------|---------------------|
+| `8.2.1-clases-nucleo.puml` | Núcleo del sistema | Núcleo Multitenant + Identidad y Acceso |
+| `8.2.2-clases-catalogo.puml` | Catálogo | Catálogo + Personalización |
+| `8.2.3-clases-clientes-marketing.puml` | Clientes y marketing | Clientes + Marketing |
+| `8.2.4-clases-operaciones.puml` | Operaciones | Carrito/Checkout + Inventario + Pedidos y Ventas |
+| `8.2.5-clases-pagos-envios.puml` | Pagos y envíos | Pagos + Envíos |
+| `8.2.6-clases-soporte-sistema.puml` | Soporte y sistema | Soporte + Devoluciones + Sistema |
+| `8.2-clases-modulo-pedidos.puml` | Módulo de Pedidos (vista reducida) | Solo Pedidos |
+
+### 8.3 — Diagramas de actividades (3 diagramas)
+
+| Archivo | Subsección | Proceso |
+|---------|------------|---------|
+| `8.3.1-actividad-checkout-pago.puml` | Proceso de checkout y pago | HU-03/04/05 |
+| `8.3.2-actividad-gestion-pedidos.puml` | Gestión de pedidos por el operador | HU-10 |
+| `8.3.3-actividad-control-stock.puml` | Control de stock | HU-09, RF-INV |
+
+### 8.4 — Diagramas de secuencia (3 diagramas)
+
+| Archivo | Subsección | Escenario |
+|---------|------------|-----------|
+| `8.4.1-secuencia-registro-2fa.puml` | Registro e inicio de sesión con 2FA | HU-02 |
+| `8.4.2-secuencia-checkout-pasarela.puml` | Checkout completo con pasarela de pago | HU-04/05 |
+| `8.4.3-secuencia-gestion-pedido.puml` | Gestión de pedido por el operador | HU-10 |
+
+### 8.5 — Diagramas de estados (2 diagramas)
+
+| Archivo | Subsección | Entidad |
+|---------|------------|---------|
+| `8.5.1-estado-pedido.puml` | Entidad Pedido | Pedido |
+| `8.5.2-estado-2fa.puml` | Ciclo de verificación 2FA | Usuario/Credencial2FA |
 
 ## Renderizado
 
-### Opción Docker (recomendada — no requiere instalar nada)
+### Opción Docker (recomendada)
 
 ```bash
-# Renderizar todo (PNG + PDF)
-./render-uml.sh
-
-# Limpiar build/ y re-renderizar desde cero
-./render-uml.sh --clean
-
-# Solo PNG (más rápido para Word)
-./render-uml.sh --png-only
-
-# Solo PDF
-./render-uml.sh --pdf-only
+./render-uml.sh              # SVG + PDF
+./render-uml.sh --clean      # limpia build/ y re-renderiza
+./render-uml.sh --svg-only   # solo SVG
+./render-uml.sh --pdf-only   # solo PDF
 ```
 
 Salida:
 
-- `build/png/*.png` — imágenes individuales para insertar en el documento Word.
-- `build/pdf/*.pdf` — un PDF por diagrama (vectorial, alta calidad).
-
-### Opción CLI nativa (si tenés PlantUML + Java instalados)
-
-```bash
-# Renderizar un diagrama a PNG
-plantuml -tpng 8.1-casos-de-uso.puml
-
-# Renderizar todos a PNG y PDF
-plantuml -tpng -tpdf *.puml
-```
+- `build/svg/*.svg` — 16 diagramas vectoriales para insertar en el documento.
+- `build/pdf/*.pdf` — 16 PDFs de respaldo.
 
 ### Opción VS Code
 
 Instalá la extensión [PlantUML de jebbs](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml)
-y abrí cualquier `.puml` — ves el preview en vivo y exportás con click derecho
-`Export Current Diagram`.
+y abrí cualquier `.puml` — preview en vivo y exportás con `Export Current Diagram`.
 
-## Requisitos del sistema
+## Requisitos
 
 - **Docker** (recomendado): la imagen `plantuml/plantuml` ya trae Java + Graphviz.
-- O bien: **Java 11+** y **PlantUML** (`apt install plantuml` en Debian/Ubuntu,
-  `brew install plantuml` en macOS).
+- O bien: **Java 11+** y **PlantUML** standalone.
+
+## Cambios respecto al Avance 1 (medidas aplicadas por la profe)
+
+1. **Diagramas 8.3 y 8.4 divididos en sub-secciones** (8.3.1, 8.3.2, 8.3.3; 8.4.1, 8.4.2, 8.4.3) según el índice del documento.
+2. **Diagramas 8.5 divididos en sub-secciones** (8.5.1 para Pedido, 8.5.2 para 2FA).
+3. **Diagrama de clases 8.2 dividido en 7 sub-diagramas** (8.2.1 a 8.2.6 + 8.2 vista reducida del módulo Pedidos) porque el sistema tiene muchos módulos y clases.
+4. **Cada clase tiene métodos visibles** (no se ocultan con `hide methods`) para diferenciarlo de un diagrama entidad-relación.
+5. **Multiplicidades explícitas en ambos extremos** de cada relación, con roles cuando aplica.
 
 ## Decisiones de modelado
-
-Las decisiones de diseño están documentadas en la conversación del Avance 3.
-Resumen breve:
 
 - Multitenant con `Tienda` como aggregate root.
 - Producto global, publicado por tienda vía `ProductoTienda`.
@@ -77,10 +93,9 @@ Resumen breve:
 - Impuestos Nicaragua: IVA 15% + retención IR 1-2% B2B.
 - `DEVUELTO` y `REEMBOLSADO` son sub-estados modelados vía entidades separadas (`Devolucion` + `Reembolso`).
 - Personalización separada en `opción` (cliente) y `técnica` (taller).
+- 4 estados de Pedido alineados con la implementación real (no 10 académicos).
 
----
-
-## Nota de trazabilidad con la implementación (recomendado para el documento)
+## Nota de trazabilidad con la implementación
 
 > **Trazabilidad con la implementación.** Los nombres de clases en este diagrama
 > siguen convención UML académica en español (ej. `Usuario` ↔ `User`, `Pedido` ↔
@@ -117,11 +132,12 @@ Resumen breve:
 > - **Pago ↔ Factura**: en el modelo académico, `Pedido` se relaciona con `Pago`
 >   directamente. En la implementación, `Pago` se relaciona con `Customer` y se
 >   vincula a `Factura` (no a `Pedido` directamente) mediante la tabla pivot
->   `PagoFactura` con campos `montoAplicado` y `aplicadoEn`. Esto permite que
+>   `PagoFactura` con campos `appliedAmountCents` y `appliedAt`. Esto permite que
 >   un solo pago cubra múltiples facturas (ej. pago grande que cubre 3 invoices).
 >
-> - **Entidades nuevas agregadas al modelo académico** (presentes en la
->   implementación): `CanalVenta`, `HistorialEstadoPedido`, `Reembolso`,
->   `PagoFactura`, `StoreTheme`, `PrecioMayorista`, `Notificacion`,
+> - **Entidades presentes en la implementación pero no en el UML simplificado**:
+>   `OrderStatusHistory`, `OrderCustomDesign`, `InvoiceStatusHistory`,
+>   `SalesChannel`, `StoreTheme`, `WholesalePrice`, `Notificacion`,
 >   `PreguntaProducto`, `ResenaProducto`, `CodigoRecuperacion`, `CuentaSocial`,
 >   `TokenResetContrasena`, `ItemCarritoMayorista`, `DisenoPersonalizado`.
+>   La mayoría están incluidas en los diagramas 8.2.x.

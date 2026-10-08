@@ -5,11 +5,10 @@ start
 :Selecciona productos desde el storefront;
 :Selecciona variante (talla, color, etc.) y agrega al carrito;
 
-repeat
+while (¿Continúa modificando carrito?) is (sí)
   :Modificar carrito (agregar / cambiar cantidad / eliminar ítem);
   :Ver subtotal y total;
-
-repeat while (¿Continúa modificando carrito?) is (sí) not (no)
+endwhile (no, continúa al checkout)
 
 :Confirma "Ir a checkout";
 

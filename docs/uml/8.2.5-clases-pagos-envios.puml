@@ -1,0 +1,174 @@
+@startuml 8.2.5 - Diagrama de Clases (Pagos y Envíos)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+
+' ============================================================
+' 8.2.5 — PAGOS Y ENVÍOS
+' Paquetes: Pagos + Envíos
+' ============================================================
+
+package "Pagos" {
+
+  class MetodoPago {
+    - id: UUID
+    - tiendaId: UUID
+    - pasarelaPagoId: UUID
+    - nombre: String
+    - tipo: TipoMetodoPago
+    - comisionPorcentaje: Decimal
+    - isActive: Boolean
+  }
+
+  enum TipoMetodoPago {
+    TARJETA_CREDITO
+    TARJETA_DEBITO
+    TRANSFERENCIA_BANCARIA
+    SINPE_MOVIL
+    PAYPAL
+    EFECTIVO_CONTRAENTREGA
+  }
+
+  class Pago {
+    - id: UUID
+    - clienteId: UUID
+    - paymentMethodId: UUID
+    - tiendaId: UUID
+    - currencyId: UUID
+    - amountCents: Integer
+    - exchangeRateSnapshot: Decimal
+    - reference: String
+    - status: EstadoPago
+    - paidAt: DateTime
+    - notes: String
+    + marcarCompletado(): void
+    + marcarFallido(motivo: String): void
+    + reembolsar(montoCents: Integer): Reembolso
+  }
+
+  enum EstadoPago {
+    PENDIENTE
+    COMPLETADO
+    FALLIDO
+    REEMBOLSADO
+    CANCELADO
+  }
+
+  class TransaccionPago {
+    - id: UUID
+    - pagoId: UUID
+    - pasarelaPagoId: UUID
+    - referenciaPasarela: String
+    - cruda: JSON
+    - estadoDevuelto: String
+    - webhookRecibidoEn: DateTime
+  }
+
+  class PagoFactura {
+    - id: UUID
+    - pagoId: UUID
+    - facturaId: UUID
+    - appliedAmountCents: Integer
+    - appliedAt: DateTime
+  }
+
+  interface PasarelaPago <<interface>> {
+    + iniciarPago(pago: Pago): RespuestaPasarela
+    + verificarFirma(headers: Map, cuerpo: String): Boolean
+    + procesarWebhook(cuerpo: JSON): EventoPago
+  }
+
+  class PasarelaGenerica <<realization>> {
+    - credencialesCifradas: String
+    - modo: ModoPasarela
+    - monedasSoportadas: List<String>
+    + encriptarCredenciales(credenciales: String): void
+    + probarConexion(): Boolean
+  }
+
+  enum ModoPasarela {
+    PRUEBA
+    PRODUCCION
+  }
+}
+
+package "Envíos" {
+
+  interface ServicioEnvio <<interface>> {
+    + cotizar(origen: Direccion, destino: Direccion, peso: Decimal): Decimal
+    + generarGuia(envio: Envio): String
+    + rastrear(guia: String): EstadoEnvio
+  }
+
+  class Envio {
+    - id: UUID
+    - orderId: UUID
+    - shippingCompanyId: UUID
+    - shippingZoneId: UUID
+    - currencyId: UUID
+    - trackingCode: String
+    - shippingCostCents: Integer
+    - status: EstadoEnvio
+    - shippedAt: DateTime
+    - deliveredAt: DateTime
+    + marcarEnviado(guia: String): void
+    + marcarEntregado(): void
+    + marcarDevuelto(): void
+    + calcularCosto(peso: Decimal, destino: Direccion): Integer
+  }
+
+  enum EstadoEnvio {
+    PENDIENTE
+    EN_TRANSITO
+    ENTREGADO
+    DEVUELTO
+    PERDIDO
+  }
+
+  class EmpresaEnvio {
+    - id: UUID
+    - nombre: String
+    - urlRastreo: String
+    - isActive: Boolean
+  }
+
+  class ZonaEnvio {
+    - id: UUID
+    - tiendaId: UUID
+    - nombre: String
+    - departamentosCubiertos: List<String>
+    - costoBaseCents: Integer
+  }
+}
+
+' ============================================================
+' RELACIONES — PAGOS
+' ============================================================
+PasarelaPago <|.. PasarelaGenerica
+Tienda "1" *-- "many" MetodoPago
+MetodoPago "many" --> "1" TipoMetodoPago
+MetodoPago "*" --> "1" PasarelaPago
+Cliente "1" *-- "many" Pago
+Pago "*" --> "1" MetodoPago
+Pago "*" --> "1" Moneda
+Pago "many" --> "1" EstadoPago
+Pago "1" *-- "many" TransaccionPago
+TransaccionPago "*" --> "1" PasarelaPago
+Pago "many" -- "many" Factura : "aplicado vía"
+PagoFactura "*" --> "1" Pago
+PagoFactura "*" --> "1" Factura
+PasarelaGenerica "many" --> "1" ModoPasarela
+
+' ============================================================
+' RELACIONES — ENVÍOS
+' ============================================================
+ServicioEnvio <|.. EmpresaEnvio
+Pedido "1" *-- "many" Envio
+Envio "*" --> "1" EmpresaEnvio
+Envio "*" --> "0..1" ZonaEnvio
+Envio "*" --> "1" Moneda
+Envio "many" --> "1" EstadoEnvio
+Tienda "1" *-- "many" ZonaEnvio
+
+@enduml

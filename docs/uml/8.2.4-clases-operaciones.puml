@@ -1,0 +1,254 @@
+@startuml 8.2.4 - Diagrama de Clases (Operaciones: Carrito, Pedidos, Inventario)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+
+' ============================================================
+' 8.2.4 — OPERACIONES
+' Paquetes: Carrito y Checkout + Inventario + Pedidos y Ventas
+' ============================================================
+
+package "Carrito y Checkout" {
+
+  class Carrito {
+    - id: UUID
+    - clienteId: UUID
+    - tiendaId: UUID
+    - currencyId: UUID
+    - status: EstadoCarrito
+    - expiresAt: DateTime
+    + calcularSubtotal(): Decimal
+    + calcularTotal(): Decimal
+    + agregarItem(productoId: UUID, cantidad: Integer): ItemCarrito
+    + removerItem(itemId: UUID): void
+    + vaciar(): void
+    + convertirAPedido(): Pedido
+    + estaExpirado(): Boolean
+  }
+
+  enum EstadoCarrito {
+    ACTIVO
+    CONVERTIDO
+    ABANDONADO
+    EXPIRADO
+  }
+
+  class ItemCarrito {
+    - id: UUID
+    - carritoId: UUID
+    - productoId: UUID
+    - varianteId: UUID
+    - cantidad: Integer
+    - precioUnitarioCents: Integer
+    + calcularSubtotal(): Integer
+  }
+
+  class ItemCarritoMayorista {
+    - id: UUID
+    - carritoId: UUID
+    - productoId: UUID
+    - varianteId: UUID
+    - cantidadMinima: Integer
+    - precioUnitarioCents: Integer
+    + calcularSubtotal(): Integer
+  }
+}
+
+package "Inventario" {
+
+  class Almacen {
+    - id: UUID
+    - nombre: String
+    - ubicacion: String
+    - esPrincipal: Boolean
+  }
+
+  class RegistroInventario {
+    - id: UUID
+    - almacenId: UUID
+    - productoId: UUID
+    - varianteId: UUID
+    - currentStock: Integer
+    - minimumStock: Integer
+    - reservedStock: Integer
+    + isLow(): Boolean
+    + getAvailableStockAttribute(): Integer
+    + reservar(cantidad: Integer): Boolean
+    + liberar(cantidad: Integer): void
+    + descontar(cantidad: Integer): void
+    + reponer(cantidad: Integer): void
+    + ajustar(stockFisico: Integer, motivo: String): void
+  }
+
+  class MovimientoInventario {
+    - id: UUID
+    - registroInventarioId: UUID
+    - tipoMovimiento: TipoMovimiento
+    - cantidad: Integer
+    - motivo: String
+    - referencia: String
+    - usuarioId: UUID
+    - ocurridoEn: DateTime
+  }
+
+  enum TipoMovimiento {
+    ENTRADA
+    SALIDA
+    AJUSTE
+    RESERVA
+    LIBERACION
+  }
+}
+
+package "Pedidos y Ventas" {
+
+  class CanalVenta {
+    - id: UUID
+    - nombre: String
+    - descripcion: String
+    - active: Boolean
+  }
+
+  class Pedido {
+    - id: UUID
+    - tiendaId: UUID
+    - clienteId: UUID
+    - shippingAddressId: UUID
+    - salesChannelId: UUID
+    - userCreatorId: UUID
+    - currencyId: UUID
+    - orderNumber: String
+    - status: EstadoPedido
+    - subtotalCents: Integer
+    - discountCents: Integer
+    - taxCents: Integer
+    - shippingCents: Integer
+    - totalCents: Integer
+    - exchangeRateSnapshot: Decimal
+    - totalInBaseCurrencyCents: Integer
+    - notes: String
+    - orderedAt: DateTime
+    + confirmarPago(): void
+    + cancelar(motivo: String): void
+    + marcarEnProduccion(): void
+    + marcarPreparadoEnvio(): void
+    + marcarEnviado(guia: String, empresaId: UUID): void
+    + marcarEntregado(): void
+    + calcularTotal(): Integer
+    + esCancelable(): Boolean
+  }
+
+  enum EstadoPedido {
+    PENDIENTE
+    PROCESANDO
+    COMPLETADO
+    CANCELADO
+  }
+
+  class LineaPedido {
+    - id: UUID
+    - pedidoId: UUID
+    - productoId: UUID
+    - varianteId: UUID
+    - customDesignId: UUID
+    - cantidad: Integer
+    - unitPriceCents: Integer
+    - discountCents: Integer
+    - subtotalCents: Integer
+    - productNameSnapshot: String
+    - productSkuSnapshot: String
+    + calcularSubtotal(): Integer
+  }
+
+  class HistorialEstadoPedido {
+    - id: UUID
+    - pedidoId: UUID
+    - estadoAnterior: EstadoPedido
+    - estadoNuevo: EstadoPedido
+    - cambiadoPorUsuarioId: UUID
+    - notas: String
+    - cambiadoEn: DateTime
+  }
+
+  class Factura {
+    - id: UUID
+    - pedidoId: UUID
+    - numeroFactura: String
+    - urlPDF: String
+    - emitidaEn: DateTime
+    - usuarioEmisorId: UUID
+    + generarPDF(): String
+  }
+
+  class CierreCaja {
+    - id: UUID
+    - tiendaId: UUID
+    - fecha: Date
+    - montoEsperadoEfectivoCents: Integer
+    - montoEsperadoPasarelaCents: Integer
+    - montoReportadoEfectivoCents: Integer
+    - montoReportadoPasarelaCents: Integer
+    - diferenciaCents: Integer
+    - estado: EstadoCierreCaja
+    - validadoPorUsuarioId: UUID
+    - validadoEn: DateTime
+    - observaciones: String
+    + calcularMontoEsperado(): Integer
+    + validar(): void
+    + rechazar(observaciones: String): void
+  }
+
+  enum EstadoCierreCaja {
+    PENDIENTE
+    EN_REVISION
+    VALIDADO
+    RECHAZADO
+  }
+}
+
+' ============================================================
+' RELACIONES — CARRITO Y CHECKOUT
+' ============================================================
+Cliente "1" *-- "many" Carrito
+Carrito "*" --> "1" Tienda
+Carrito "*" --> "1" Moneda
+Carrito "many" --> "1" EstadoCarrito
+Carrito "1" *-- "many" ItemCarrito
+ItemCarrito "*" --> "1" Producto
+ItemCarrito "*" --> "0..1" VarianteProducto
+Carrito "1" *-- "many" ItemCarritoMayorista
+ItemCarritoMayorista "*" --> "1" Producto
+Carrito "1" --> "0..1" Pedido : "se convierte en"
+
+' ============================================================
+' RELACIONES — INVENTARIO
+' ============================================================
+Almacen "1" *-- "many" RegistroInventario
+RegistroInventario "*" --> "1" Producto
+RegistroInventario "*" --> "0..1" VarianteProducto
+RegistroInventario "1" *-- "many" MovimientoInventario
+MovimientoInventario "many" --> "1" TipoMovimiento
+MovimientoInventario "*" --> "1" Usuario : "registrado por"
+
+' ============================================================
+' RELACIONES — PEDIDOS Y VENTAS
+' ============================================================
+Cliente "1" *-- "many" Pedido
+Pedido "*" --> "1" Tienda
+Pedido "*" --> "0..1" Direccion
+Pedido "*" --> "0..1" CanalVenta
+Pedido "many" --> "1" EstadoPedido
+Pedido "*" --> "1" Moneda
+Pedido "*" --> "0..1" Usuario : "creador administrativo"
+Pedido "1" *-- "many" LineaPedido
+Pedido "1" *-- "many" HistorialEstadoPedido
+Pedido "1" -- "0..1" Factura
+HistorialEstadoPedido "*" --> "0..1" Usuario : "cambiado por"
+Tienda "1" *-- "many" CierreCaja
+CierreCaja "*" --> "0..1" Usuario : "validado por"
+CierreCaja "many" --> "1" EstadoCierreCaja
+LineaPedido "*" --> "1" Producto
+LineaPedido "*" --> "0..1" VarianteProducto
+
+@enduml

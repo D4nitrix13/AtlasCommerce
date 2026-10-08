@@ -1,0 +1,194 @@
+@startuml 8.2.2 - Diagrama de Clases (Catálogo)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+
+' ============================================================
+' 8.2.2 — CATÁLOGO
+' Paquetes: Catálogo + Personalización
+' ============================================================
+
+package "Catálogo" {
+
+  class Marca {
+    - id: UUID
+    - nombre: String
+    - slug: String
+    - descripcion: String
+  }
+
+  class Categoria {
+    - id: UUID
+    - nombre: String
+    - slug: String
+    - categoriaPadreId: UUID
+    - nivelJerarquia: Integer
+  }
+
+  abstract class Producto <<abstract>> {
+    - id: UUID
+    - categoryId: UUID
+    - brandId: UUID
+    - currencyId: UUID
+    - name: String
+    - slug: String
+    - description: String
+    - sku: String
+    - basePriceCents: Integer
+    - costCents: Integer
+    - isActive: Boolean
+    - publishedAt: DateTime
+    + calcularPrecio(tiendaId: UUID): Decimal
+    + calcularPrecioMayorista(cantidad: Integer): Decimal
+    + scopeActive(query): Query
+    + scopePublished(query): Query
+    + scopeByCategory(query, categoryId: Integer): Query
+    + scopeByBrand(query, brandId: Integer): Query
+  }
+
+  class ProductoSimple {
+    - peso: Decimal
+  }
+
+  class ProductoPersonalizable {
+    - tiempoProduccionDias: Integer
+    - requiereAprobacionDiseno: Boolean
+    - tecnicasPermitidas: List<TecnicaImpresion>
+  }
+
+  class VarianteProducto {
+    - id: UUID
+    - productId: UUID
+    - sku: String
+    - nameVariant: String
+    - precioAdicionalCents: Integer
+    - isActive: Boolean
+  }
+
+  class ImagenProducto {
+    - id: UUID
+    - productId: UUID
+    - url: String
+    - textoAlternativo: String
+    - orden: Integer
+    - esPrincipal: Boolean
+  }
+
+  class Atributo {
+    - id: UUID
+    - nombre: String
+    - tipoDato: String
+  }
+
+  class ValorAtributo {
+    - id: UUID
+    - atributoId: UUID
+    - valor: String
+  }
+
+  class PrecioMayorista {
+    - id: UUID
+    - productId: UUID
+    - cantidadMinima: Integer
+    - precioUnitarioCents: Integer
+    - isActive: Boolean
+  }
+
+  class ProductoTienda {
+    - id: UUID
+    - productId: UUID
+    - storeId: UUID
+    - slug: String
+    - publicPriceCents: Integer
+    - descripcionPublica: String
+    - isVisible: Boolean
+    - isFeatured: Boolean
+    - publishedAt: DateTime
+  }
+}
+
+package "Personalización" {
+
+  class OpcionPersonalizacion {
+    - id: UUID
+    - productId: UUID
+    - nombre: String
+    - tipoOpcion: TipoOpcionPersonalizacion
+    - obligatorio: Boolean
+    - costoAdicionalCents: Integer
+    - orden: Integer
+  }
+
+  enum TipoOpcionPersonalizacion {
+    TEXTO_PERSONALIZADO
+    IMAGEN_SUBIDA
+    SELECCION_COLOR
+    SELECCION_POSICION
+    ESTAMPADO
+    SUBLIMACION
+    BORDADO
+    DTF
+    VINIL_TEXTIL
+  }
+
+  enum TecnicaImpresion {
+    ESTAMPADO
+    SUBLIMACION
+    BORDADO
+    DTF
+    VINIL_TEXTIL
+  }
+
+  class AreaImpresion {
+    - id: UUID
+    - productId: UUID
+    - tecnica: TecnicaImpresion
+    - nombre: String
+    - anchoMM: Decimal
+    - altoMM: Decimal
+    - urlPlantilla: String
+    - coloresMaximos: Integer
+  }
+
+  class DisenoPersonalizado {
+    - id: UUID
+    - orderItemId: UUID
+    - opcionPersonalizacionId: UUID
+    - areaImpresionId: UUID
+    - valorIngresado: String
+    - archivoSubidoId: UUID
+    - aprobadaPorOperador: Boolean
+    - fechaAprobacion: DateTime
+    + validarDiseno(): Boolean
+    + aprobar(operadorId: UUID): void
+  }
+}
+
+' ============================================================
+' RELACIONES — CATÁLOGO
+' ============================================================
+Producto <|-- ProductoSimple
+Producto <|-- ProductoPersonalizable
+Producto "many" --> "1" Marca : "marca"
+Producto "many" --> "1" Categoria : "categoría"
+Categoria "many" --> "0..1" Categoria : "categoría padre"
+Producto "1" *-- "many" VarianteProducto
+Producto "1" *-- "many" ImagenProducto
+Producto "1" *-- "many" PrecioMayorista
+Producto "many" -- "many" Atributo : "definido vía"
+ValorAtributo "*" --> "1" Atributo
+Producto "many" -- "many" Tienda : "publicado vía"
+ProductoTienda "*" --> "1" Producto
+ProductoTienda "*" --> "1" Tienda
+ProductoPersonalizable "1" --> "many" TecnicaImpresion : "permite"
+
+' ============================================================
+' RELACIONES — PERSONALIZACIÓN
+' ============================================================
+ProductoPersonalizable "1" *-- "many" OpcionPersonalizacion
+ProductoPersonalizable "1" *-- "many" AreaImpresion
+OpcionPersonalizacion "many" --> "1" TipoOpcionPersonalizacion
+AreaImpresion "many" --> "1" TecnicaImpresion
+
+@enduml

@@ -1,0 +1,267 @@
+@startuml 8.2.6 - Diagrama de Clases (Soporte, Devoluciones, Sistema)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+
+' ============================================================
+' 8.2.6 — SOPORTE, DEVOLUCIONES Y SISTEMA
+' Paquetes: Soporte + Devoluciones + Sistema
+' ============================================================
+
+package "Soporte" {
+
+  class TicketSoporte {
+    - id: UUID
+    - tiendaId: UUID
+    - clienteId: UUID
+    - pedidoId: UUID
+    - subject: String
+    - description: String
+    - status: EstadoTicket
+    - priority: PrioridadTicket
+    - metodoAsignacion: MetodoAsignacion
+    - asignadoAUsuarioId: UUID
+    - abiertoEn: DateTime
+    - cerradoEn: DateTime
+    + asignar(usuarioId: UUID): void
+    + cerrar(usuarioId: UUID): void
+    + reabrir(motivo: String): void
+    + escalar(): void
+    + tiempoRespuesta(): Duration
+  }
+
+  enum EstadoTicket {
+    ABIERTO
+    EN_PROGRESO
+    ESPERANDO_CLIENTE
+    RESUELTO
+    CERRADO
+  }
+
+  enum PrioridadTicket {
+    BAJA
+    MEDIA
+    ALTA
+    URGENTE
+  }
+
+  enum MetodoAsignacion {
+    ROUND_ROBIN
+    MANUAL_POR_SUPERVISOR
+    AUTOMATICA_POR_TIENDA
+  }
+
+  class MensajeTicket {
+    - id: UUID
+    - ticketId: UUID
+    - autorId: UUID
+    - contenido: String
+    - adjuntoUrl: String
+    - enviadoEn: DateTime
+  }
+
+  class PreguntaProducto {
+    - id: UUID
+    - productoId: UUID
+    - clienteId: UUID
+    - pregunta: String
+    - respuesta: String
+    - respondidaPorUsuarioId: UUID
+    - estado: EstadoPregunta
+    - creadaEn: DateTime
+    - respondidaEn: DateTime
+    + responder(contenido: String, usuarioId: UUID): void
+  }
+
+  enum EstadoPregunta {
+    PENDIENTE
+    RESPONDIDA
+    RECHAZADA
+  }
+
+  class ResenaProducto {
+    - id: UUID
+    - productoId: UUID
+    - clienteId: UUID
+    - pedidoId: UUID
+    - calificacion: Integer
+    - comentario: String
+    - aprobada: Boolean
+    - moderadaPorUsuarioId: UUID
+    - creadaEn: DateTime
+    + aprobar(moderadorId: UUID): void
+    + rechazar(moderadorId: UUID, motivo: String): void
+  }
+}
+
+package "Devoluciones" {
+
+  class Devolucion {
+    - id: UUID
+    - tiendaId: UUID
+    - pedidoId: UUID
+    - clienteId: UUID
+    - motivo: String
+    - tipoResolucion: TipoResolucionDevolucion
+    - status: EstadoDevolucion
+    - montoReembolsadoCents: Integer
+    - requestedAt: DateTime
+    - resolvedAt: DateTime
+    + totalAmountCents(): Integer
+    + aprobar(): void
+    + rechazar(motivo: String): void
+    + marcarRecibida(): void
+    + crearReembolso(): Reembolso
+  }
+
+  enum TipoResolucionDevolucion {
+    REEMBOLSO_DINERO
+    CAMBIO_PRODUCTO
+    NOTA_CREDITO
+  }
+
+  enum EstadoDevolucion {
+    SOLICITADA
+    APROBADA
+    RECHAZADA
+    RECIBIDA
+    REEMBOLSADA
+  }
+
+  class ItemDevolucion {
+    - id: UUID
+    - devolucionId: UUID
+    - lineaPedidoId: UUID
+    - cantidad: Integer
+    - motivoDetallado: String
+    - amountCents: Integer
+  }
+
+  class Reembolso {
+    - id: UUID
+    - pagoId: UUID
+    - montoCents: Integer
+    - motivo: String
+    - referenciaPasarela: String
+    - status: EstadoReembolso
+    - procesadoEn: DateTime
+    + procesar(referencia: String): void
+    + marcarRechazado(motivo: String): void
+  }
+
+  enum EstadoReembolso {
+    SOLICITADO
+    APROBADO
+    PROCESADO
+    RECHAZADO
+  }
+}
+
+package "Sistema" {
+
+  class Respaldo {
+    - id: UUID
+    - nombreArchivo: String
+    - tipoRespaldo: TipoRespaldo
+    - status: EstadoRespaldo
+    - tamanoBytes: BigInt
+    - urlAlmacenamiento: String
+    - cifradoCon: String
+    - frecuencia: FrecuenciaRespaldo
+    - retencionDias: Integer
+    - fechaExpiracion: Date
+    - creadoEn: DateTime
+    - restauradoEn: DateTime
+    + ejecutar(): void
+    + restaurar(): void
+    + verificarIntegridad(): Boolean
+    + eliminar(): void
+  }
+
+  enum TipoRespaldo {
+    COMPLETO
+    INCREMENTAL
+  }
+
+  enum EstadoRespaldo {
+    EN_PROGRESO
+    COMPLETADO
+    FALLIDO
+  }
+
+  enum FrecuenciaRespaldo {
+    DIARIO
+    SEMANAL
+    MENSUAL
+    MANUAL
+  }
+
+  class Notificacion {
+    - id: UUID
+    - usuarioId: UUID
+    - tiendaId: UUID
+    - tipo: TipoNotificacion
+    - titulo: String
+    - mensaje: String
+    - datos: JSON
+    - leida: Boolean
+    - leidaEn: DateTime
+    - enviadaEn: DateTime
+    + marcarComoLeida(): void
+    + enviar(usuarioId: UUID, datos: JSON): void
+  }
+
+  enum TipoNotificacion {
+    PEDIDO_CREADO
+    PEDIDO_PAGADO
+    PEDIDO_ENVIADO
+    STOCK_BAJO
+    TICKET_ASIGNADO
+    PROMOCION
+    SISTEMA
+  }
+}
+
+' ============================================================
+' RELACIONES — SOPORTE
+' ============================================================
+Cliente "1" *-- "many" TicketSoporte
+Tienda "1" *-- "many" TicketSoporte
+TicketSoporte "*" --> "0..1" Pedido : "asociado a"
+TicketSoporte "many" --> "1" EstadoTicket
+TicketSoporte "many" --> "1" PrioridadTicket
+TicketSoporte "many" --> "1" MetodoAsignacion
+TicketSoporte "*" --> "0..1" Usuario : "asignado a"
+TicketSoporte "1" *-- "many" MensajeTicket
+MensajeTicket "*" --> "1" Usuario : "autor"
+Producto "1" *-- "many" PreguntaProducto
+Cliente "1" *-- "many" PreguntaProducto
+PreguntaProducto "many" --> "1" EstadoPregunta
+Producto "1" *-- "many" ResenaProducto
+Cliente "1" *-- "many" ResenaProducto
+ResenaProducto "*" --> "0..1" Pedido
+
+' ============================================================
+' RELACIONES — DEVOLUCIONES
+' ============================================================
+Pedido "1" *-- "many" Devolucion
+Devolucion "*" --> "1" Cliente
+Devolucion "many" --> "1" EstadoDevolucion
+Devolucion "many" --> "1" TipoResolucionDevolucion
+Devolucion "1" *-- "many" ItemDevolucion
+ItemDevolucion "*" --> "1" LineaPedido
+Pago "1" *-- "many" Reembolso
+Reembolso "many" --> "1" EstadoReembolso
+
+' ============================================================
+' RELACIONES — SISTEMA
+' ============================================================
+Respaldo "many" --> "1" TipoRespaldo
+Respaldo "many" --> "1" EstadoRespaldo
+Respaldo "many" --> "1" FrecuenciaRespaldo
+Usuario "1" *-- "many" Notificacion
+Tienda "1" *-- "many" Notificacion
+Notificacion "many" --> "1" TipoNotificacion
+
+@enduml

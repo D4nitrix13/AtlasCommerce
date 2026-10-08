@@ -1,0 +1,247 @@
+@startuml 8.2.1 - Diagrama de Clases (Núcleo del Sistema)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+
+' ============================================================
+' 8.2.1 — NÚCLEO DEL SISTEMA
+' Paquetes: Núcleo Multitenant + Identidad y Acceso
+' ============================================================
+
+package "Núcleo Multitenant" {
+
+  class Tienda <<aggregate root>> {
+    - id: UUID
+    - currencyId: UUID
+    - nombre: String
+    - slug: String
+    - logoPath: String
+    - faviconPath: String
+    - email: String
+    - phone: String
+    - whatsapp: String
+    - primaryColor: String
+    - secondaryColor: String
+    - taxRate: Decimal
+    - maintenanceMode: Boolean
+    - isActive: Boolean
+    + hasFeature(slug: String): Boolean
+    + primaryDomain(): DominioTienda
+    + obtenerConfiguracion(clave: String): String
+  }
+
+  class DominioTienda {
+    - id: UUID
+    - tiendaId: UUID
+    - domain: String
+    - isPrimary: Boolean
+    - isActive: Boolean
+  }
+
+  class ConfiguracionTienda {
+    - id: UUID
+    - tiendaId: UUID
+    - clave: String
+    - valor: String
+    - tipoDato: String
+  }
+
+  class StoreFeature {
+    - id: UUID
+    - tiendaId: UUID
+    - slug: String
+    - isActive: Boolean
+  }
+
+  class StoreTheme {
+    - id: UUID
+    - tiendaId: UUID
+    - nombre: String
+    - primaryColor: String
+    - secondaryColor: String
+    - cssPersonalizado: String
+    - activo: Boolean
+  }
+
+  class Moneda {
+    - id: UUID
+    - codigoISO: String
+    - nombre: String
+    - simbolo: String
+  }
+
+  class TasaCambio {
+    - id: UUID
+    - monedaOrigenId: UUID
+    - monedaDestinoId: UUID
+    - tasa: Decimal
+    - fechaVigencia: Date
+  }
+
+  class Impuesto {
+    - id: UUID
+    - tiendaId: UUID
+    - nombre: String
+    - porcentaje: Decimal
+    - tipoContribuyente: TipoContribuyente
+    - retencionIRPorcentaje: Decimal
+    - activo: Boolean
+  }
+
+  enum TipoContribuyente {
+    B2C_MINORISTA
+    B2B_MAYORISTA
+    AMBOS
+  }
+}
+
+package "Identidad y Acceso" {
+
+  class Usuario {
+    - id: UUID
+    - roleId: UUID
+    - firstName: String
+    - lastName: String
+    - email: String
+    - password: String
+    - phone: String
+    - isActive: Boolean
+    - emailVerifiedAt: DateTime
+    - twoFactorEnabled: Boolean
+    - registeredAt: DateTime
+    - lastLoginAt: DateTime
+    + getFullNameAttribute(): String
+    + hasTwoFactorEnabled(): Boolean
+    + hasAccessToStore(storeId: Integer): Boolean
+    + hasPermission(slug: String): Boolean
+    + habilitarSegundoFactor(metodo: String): void
+    + verificarContrasena(contrasena: String): Boolean
+  }
+
+  class CredencialSegundoFactor {
+    - id: UUID
+    - usuarioId: UUID
+    - metodo: TipoSegundoFactor
+    - secret: String
+    - enabledAt: DateTime
+    - lastUsedAt: DateTime
+    - recoveryCodesGeneratedAt: DateTime
+    + isEnabled(): Boolean
+    + validarCodigo(codigo: String): Boolean
+  }
+
+  enum TipoSegundoFactor {
+    OTP_EMAIL
+    TOTP
+  }
+
+  class CodigoRecuperacion {
+    - id: UUID
+    - usuarioId: UUID
+    - codigoHash: String
+    - usadoEn: DateTime
+    - creadoEn: DateTime
+    + marcarUsado(): void
+  }
+
+  class CuentaSocial {
+    - id: UUID
+    - usuarioId: UUID
+    - provider: String
+    - idExterno: String
+    - datosExtra: JSON
+  }
+
+  class TokenResetContrasena {
+    - id: UUID
+    - usuarioId: UUID
+    - tokenHash: String
+    - expiraEn: DateTime
+    - usadoEn: DateTime
+  }
+
+  class OtpChallenge {
+    - id: UUID
+    - usuarioId: UUID
+    - codigoHash: String
+    - consumedAt: DateTime
+    - expiresAt: DateTime
+    - attempts: Integer
+    - maxAttempts: Integer
+  }
+
+  class Rol {
+    - id: UUID
+    - nombre: String
+    - slug: String
+    - descripcion: String
+    - isActive: Boolean
+    + perteneceA(nombre: String): Boolean
+  }
+
+  class Permiso {
+    - id: UUID
+    - nombre: String
+    - slug: String
+    - modulo: String
+    - accion: String
+  }
+
+  class UsuarioTienda {
+    - id: UUID
+    - usuarioId: UUID
+    - tiendaId: UUID
+    - rolId: UUID
+    - activo: Boolean
+    - asignadoEn: DateTime
+  }
+
+  class BitacoraAuditoria {
+    - id: UUID
+    - usuarioId: UUID
+    - tiendaId: UUID
+    - accion: String
+    - modulo: String
+    - entidad: String
+    - entidadId: UUID
+    - datosAnteriores: JSON
+    - datosNuevos: JSON
+    - ipOrigen: String
+    - ocurridoEn: DateTime
+  }
+}
+
+' ============================================================
+' RELACIONES — NÚCLEO MULTITENANT
+' ============================================================
+Tienda "1" *-- "many" DominioTienda
+Tienda "1" *-- "many" ConfiguracionTienda
+Tienda "1" *-- "many" StoreFeature
+Tienda "1" --> "0..1" StoreTheme
+Tienda "1" --> "1" Moneda : "moneda por defecto"
+Tienda "1" *-- "many" Impuesto
+Moneda "1" --> "many" TasaCambio
+TasaCambio "many" --> "1" Moneda : "origen"
+TasaCambio "many" --> "1" Moneda : "destino"
+Impuesto "many" --> "1" TipoContribuyente
+
+' ============================================================
+' RELACIONES — IDENTIDAD Y ACCESO
+' ============================================================
+Usuario "1" --> "0..1" CredencialSegundoFactor
+CredencialSegundoFactor "many" --> "1" TipoSegundoFactor
+Usuario "1" *-- "many" CodigoRecuperacion
+Usuario "1" *-- "many" CuentaSocial
+Usuario "1" *-- "many" TokenResetContrasena
+Usuario "1" *-- "many" OtpChallenge
+Usuario "many" --> "many" Rol : "asignado vía"
+Rol "many" --> "many" Permiso : "otorga"
+Usuario "many" -- "many" Tienda : "asignado vía"
+UsuarioTienda "*" --> "1" Usuario : "empleado"
+UsuarioTienda "*" --> "1" Tienda
+UsuarioTienda "*" --> "1" Rol : "rol específico en tienda"
+Usuario "1" --> "many" BitacoraAuditoria
+BitacoraAuditoria "*" --> "1" Tienda
+
+@enduml

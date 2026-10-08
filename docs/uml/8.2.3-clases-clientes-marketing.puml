@@ -1,0 +1,154 @@
+@startuml 8.2.3 - Diagrama de Clases (Clientes y Marketing)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+
+' ============================================================
+' 8.2.3 — CLIENTES Y MARKETING
+' Paquetes: Clientes + Marketing
+' ============================================================
+
+package "Clientes" {
+
+  class Cliente {
+    - id: UUID
+    - userId: UUID
+    - customerType: TipoCliente
+    - identityDocument: String
+    - firstName: String
+    - lastName: String
+    - email: String
+    - phone: String
+    - isActive: Boolean
+    - registeredAt: DateTime
+    - anonymizedAt: DateTime
+    - deletionRequestedAt: DateTime
+    + isAnonymized(): Boolean
+    + hasPendingDeletionToken(): Boolean
+    + getFullNameAttribute(): String
+    + anonimizar(): void
+    + solicitarEliminacion(): void
+  }
+
+  enum TipoCliente {
+    MINORISTA
+    MAYORISTA
+    CORPORATIVO
+  }
+
+  class Direccion {
+    - id: UUID
+    - clienteId: UUID
+    - linea1: String
+    - linea2: String
+    - ciudad: String
+    - departamento: String
+    - codigoPostal: String
+    - pais: String
+    - esPrincipal: Boolean
+  }
+
+  class ClienteTienda {
+    - id: UUID
+    - clienteId: UUID
+    - tiendaId: UUID
+    - customerType: TipoCliente
+    - active: Boolean
+  }
+}
+
+package "Marketing" {
+
+  class ListaDeseos {
+    - id: UUID
+    - clienteId: UUID
+    - tiendaId: UUID
+    - nombre: String
+    - visibilidad: VisibilidadLista
+    - fechaCreacion: DateTime
+    + esPublica(): Boolean
+  }
+
+  enum VisibilidadLista {
+    PRIVADA
+    PUBLICA
+    COMPARTIDA_CON_ENLACE
+  }
+
+  class ItemListaDeseos {
+    - id: UUID
+    - listaDeseosId: UUID
+    - productoId: UUID
+    - anadidoEn: DateTime
+  }
+
+  class Cupon {
+    - id: UUID
+    - tiendaId: UUID
+    - codigo: String
+    - tipoDescuento: TipoDescuento
+    - valorCents: Integer
+    - fechaExpiracion: Date
+    - usosMaximos: Integer
+    - usosActuales: Integer
+    - isActive: Boolean
+    + esValido(): Boolean
+    + calcularDescuento(montoCents: Integer): Integer
+    + registrarUso(): Boolean
+  }
+
+  enum TipoDescuento {
+    PORCENTAJE
+    MONTO_FIJO
+  }
+
+  class Promocion {
+    - id: UUID
+    - tiendaId: UUID
+    - nombre: String
+    - descripcion: String
+    - fechaInicio: Date
+    - fechaFin: Date
+    - condiciones: JSON
+    - isActive: Boolean
+    + esVigente(): Boolean
+    + calcularDescuento(items: List<ItemCarrito>): Integer
+  }
+
+  class CuponUso {
+    - id: UUID
+    - cuponId: UUID
+    - clienteId: UUID
+    - pedidoId: UUID
+    - montoDescontadoCents: Integer
+    - usadoEn: DateTime
+  }
+}
+
+' ============================================================
+' RELACIONES — CLIENTES
+' ============================================================
+Usuario "1" --> "0..1" Cliente : "vinculado a"
+Cliente "1" *-- "many" Direccion : "direcciones"
+Cliente "many" -- "many" Tienda : "vinculado vía"
+ClienteTienda "*" --> "1" Cliente
+ClienteTienda "*" --> "1" Tienda
+Cliente "many" --> "1" TipoCliente
+
+' ============================================================
+' RELACIONES — MARKETING
+' ============================================================
+Cliente "1" *-- "many" ListaDeseos
+ListaDeseos "*" --> "1" Tienda
+ListaDeseos "many" --> "1" VisibilidadLista
+ListaDeseos "1" *-- "many" ItemListaDeseos
+ItemListaDeseos "*" --> "1" Producto
+Tienda "1" *-- "many" Cupon
+Cupon "many" --> "1" TipoDescuento
+Tienda "1" *-- "many" Promocion
+Cupon "1" *-- "many" CuponUso
+CuponUso "*" --> "1" Cliente
+CuponUso "*" --> "1" Pedido
+
+@enduml
