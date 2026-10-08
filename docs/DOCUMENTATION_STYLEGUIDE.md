@@ -282,6 +282,56 @@ No uses bloques sin lenguaje para árboles de carpetas.
 
 ---
 
+## Naming convention para archivos `.md`
+
+Los nombres de archivo dentro de `docs/` siguen reglas estrictas para
+mantener consistencia y que la navegación sea predecible.
+
+### Reglas
+
+1. **kebab-case obligatorio.** Sin espacios, sin underscores, sin
+   camelCase. Ej: `data-flow.md`, `auth-2fa.md`.
+2. **Inglés para nombres de archivo, español para el contenido.**
+   Ej: `recovery.md` (no `recuperacion.md`), `csrf.md` (no
+   `proteccion-csrf.md`).
+3. **Corto pero descriptivo.** Si necesitás más de 4 palabras para
+   describir el contenido, probablemente es un topic que merece su
+   propio subdirectorio.
+4. **READMEs en cada subdirectorio.** Todo subdir de `docs/`
+   DEBE tener un `README.md` que explique qué hay adentro y para
+   quién. Sin excepciones. Las READMEs se listan en el README.md
+   del directorio padre.
+5. **No duplicar concerns entre subdirs.** Si un doc encaja en
+   dos, va al que matchea su AUDIENCIA (humano vs AI, dev vs ops,
+   backend vs frontend) o se consolida en uno solo.
+
+### Patrones comunes
+
+- Snapshot / single-source-of-truth: `credentials.md`,
+  `environments.md`, `tech-stack.md`.
+- ADRs: `decisions.md` dentro de `architecture/`.
+- Runbooks incident-specific: `database-down.md`,
+  `redis-down.md` (kebab-case, sustantivo + condición).
+- Estilo lifecycle (template copy-paste): `rollback.md`,
+  `cleanup-checklist.md`.
+- Diagramas: `data-flow.md`, `diagrams.md` (índice).
+- Specs de feature: `dashboard-specs.md` (índice de specs que
+  aparecerán), no `account-dashboard-spec.md` (demasiado largo).
+
+### Anti-patrones a evitar
+
+- `recovery-methods.md`, `auth-2fa.md`, `observability-runbook.md`
+  — verboso. Acortar a `recovery.md`, `two-factor.md`,
+  `observability.md` (el sufijo `-runbook` se infiere del directorio).
+- `default-admin-credentials.md` — el sufijo `default-` no aporta,
+  va implícito. Usar `admin-credentials.md`.
+- `componentes-arquitectura.md` — español en el nombre, va contra
+  la regla 2. Usar `components.md` o `architecture-components.md`.
+- Sin `README.md` en subdirs — bloquea la navegación (humana
+  y de IA). Cada subdir DEBE tener uno.
+
+---
+
 ## Comandos de terminal
 
 Los comandos deben usar bloque `bash`.

@@ -1,160 +1,90 @@
 # Documentación Técnica — AtlasCommerce
 
-Plataforma ecommerce **multi-instancia** desplegada como 3
-stacks `Docker` independientes (`panda-estampados-and-kitsune`,
-`mm-boutique`, `morales-store`). Dentro de la instancia
-`panda-estampados-and-kitsune` corre **multi-store** con 2
-tenants (Panda Estampados + Kitsune) que comparten backend
-`Laravel`, base de datos `PostgreSQL`, `Redis` y panel
-administrativo. Las otras dos instancias son single-brand.
+Plataforma ecommerce **multi-instancia** desplegada como 3 stacks
+`Docker` independientes (`panda-estampados-and-kitsune`, `mm-boutique`,
+`morales-store`). Dentro de `panda-estampados-and-kitsune` corre
+**multi-store** con 2 tenants (Panda Estampados + Kitsune) que
+comparten backend `Laravel`, base de datos `PostgreSQL`, `Redis` y
+panel administrativo. Las otras dos instancias son single-brand.
 
 ## Qué es el proyecto
 
-AtlasCommerce se compone de 4 marcas comerciales repartidas
-entre las 3 instancias:
-
-| Marca | Dominio público | Enfoque | Instancia |
+| Marca | Dominio | Enfoque | Instancia |
 | --- | --- | --- | --- |
-| **Panda Estampados** | `panda-estampados.com` | B2B — estampados, RFQ, bulk | `panda-estampados-and-kitsune` |
-| **Kitsune Store** | `kitsune.com` | B2C — anime, cultura japonesa | `panda-estampados-and-kitsune` |
-| **MM Boutique** | `mm-boutique.com` | Single-tenant | `mm-boutique` |
-| **Morales Store** | `morales-store.com` | Single-tenant | `morales-store` |
+| Panda Estampados | `panda-estampados.com` | B2B estampados, RFQ, bulk | `panda-estampados-and-kitsune` |
+| Kitsune Store | `kitsune.com` | B2C anime, cultura japonesa | `panda-estampados-and-kitsune` |
+| MM Boutique | `mm-boutique.com` | Single-tenant | `mm-boutique` |
+| Morales Store | `morales-store.com` | Single-tenant | `morales-store` |
 
-Cada instancia es una unidad aislada con su propia BD, Redis,
-backend y frontend. Ver
-[architecture/multi-instance-roadmap.md](architecture/multi-instance-roadmap.md
-"architecture/multi-instance-roadmap.md") para la historia del
-despliegue multi-instancia.
+## Índice
 
-## Cómo leer esta documentación
+### Empezar (1ra vez)
 
-### Empezar de cero
+`getting-started/README.md` — setup paso a paso, ordenado.
 
-```txt
-1. getting-started/README.md        # Setup completo paso a paso
-2. getting-started/prerequisites.md # Instalar PHP, Node, Docker, Caddy
-3. getting-started/installation.md # Clonar repo + composer/pnpm install
-4. getting-started/databases.md     # Levantar Postgres + Redis
-5. getting-started/backend-setup.md # Configurar Laravel
-6. getting-started/frontend-setup.md # Configurar Astro
-7. getting-started/local-domains.md # Hosts locales multi-tienda
-8. operations/caddy.md             # Reverse proxy (dev + prod)
-9. getting-started/seed.md         # Datos iniciales
-```
+### Entender la arquitectura
 
-### Ya está todo instalado, quiero desarrollar
+`architecture/README.md` — índice del directorio (overview, multi-store,
+multi-instance, ADRs, etc).
 
-```txt
-- development/README.md            # Workflow diario
-- development/backend.md           # Comandos Laravel
-- development/frontend.md          # Comandos Astro
-- development/testing.md           # PHPUnit + Playwright
-- development/linting.md           # Linters
-- development/git-workflow.md      # Commits + PRs
-- development/core-migration.md    # Migración app/Core/
-- development/plugins.md           # Plugins Composer
-- development/sessions-log.md      # Log de sesiones recientes
-```
+### Backend (Laravel)
 
-### Quiero entender la arquitectura
+`backend/README.md` — índice del backend. Después `architecture/tech-backend.md`
+y `architecture/tech-database.md` para el stack.
 
-```txt
-- architecture/overview.md          # Arquitectura general
-- architecture/multi-store.md       # Multi-tienda a fondo
-- architecture/multi-instance-roadmap.md # Roadmap multi-instancia
-- architecture/flow.md              # Diagramas de flujo
-- architecture/decisions.md         # ADR (decisiones documentadas)
-- architecture/assets-naming-convention.md # Nombres de assets
-- architecture/architecture-diagrams.md # Diagramas con Archify
-```
+### Frontend (Astro + React)
+
+`frontend/README.md` — índice del frontend. Después
+`architecture/tech-frontend.md` para el stack.
+
+### Workflow diario de dev
+
+`development/README.md` — comandos del día a día, linting, testing,
+git workflow.
+
+### Producción y operaciones
+
+`operations/README.md` — deploy, monitoring, secrets, runbooks.
 
 ### Stack tecnológico
 
-```txt
-- stack/README.md                   # Vista general
-- stack/backend.md                  # PHP + Laravel
-- stack/frontend.md                 # Astro + React
-- stack/database.md                 # PostgreSQL + Redis
-- stack/infrastructure.md           # Docker + Caddy + K8s
-```
+`architecture/tech-stack.md` — vista general. Detalles por capa en
+`architecture/tech-{backend,database,frontend,infrastructure}.md`.
 
-### Detalles por capa
+### Base de datos
 
-```txt
-- backend/README.md                 # Estructura del backend
-- backend/api/routes.md             # Rutas API
-- backend/api/authentication.md     # Sanctum
-- backend/auth/auth-2fa.md          # 2FA (TOTP, Email OTP, WebAuthn)
-- backend/auth/recovery-methods.md  # Métodos de recuperación
-- backend/laravel/componentes-arquitectura.md
-- backend/laravel/composer-tools.md # Pint + Larastan
-- backend/stores/stores-module.md   # Multi-tienda
-- backend/stores/store-context.md
-- backend/stores/permissions-by-store.md
-- backend/cursor-pagination.md
-- backend/emails-i18n.md
-- backend/n-plus-one-prevention.md
-- backend/test-coverage.md
-- development/releases/v2.0.0.md   # Release notes (última versión)
+`database/README.md` — modelo de datos multi-store.
 
-- database/README.md                # DB
-- database/data-model.md            # ER
+### Diagramas
 
-- frontend/README.md                # Frontend
-- frontend/estructura.md
-- frontend/storefront.md
-- frontend/admin-panel.md
-- frontend/api-client.md
-- frontend/design-references.md     # Baymard + nicho
-- frontend/storybook.md            # Storybook 10 (UI primitives)
-- frontend/image-optimization.md
-- frontend/browsers-support.md
-
-- operations/README.md              # Índice
-- operations/docker.md
-- operations/caddy.md
-- operations/deployment.md
-- operations/environments.md
-- operations/backups.md
-- operations/secret-rotation.md
-- operations/oauth-providers.md
-- operations/sla-and-healthchecks.md
-- operations/observability-runbook.md
-```
-
-### Diagramas de arquitectura
-
-Los diagramas visuales (flowchart, sequence, data-flow,
-lifecycle) se generan con la skill **Archify**. Ver
-[architecture/architecture-diagrams.md](architecture/architecture-diagrams.md
-"architecture/architecture-diagrams.md") para cómo generarlos
-y dónde está el diagrama actual.
-
-```txt
-.archify/architecture-atlascommerce-<fecha>/
-└── atlascommerce-architecture.html  # diagrama standalone
-```
+`architecture/diagrams.md` — diagramas Archify. `uml/` — entregable
+académico (PUML + PlantUML + renderizado).
 
 ### Estilo de la documentación
 
-La guía oficial está en
-[DOCUMENTATION_STYLEGUIDE.md](DOCUMENTATION_STYLEGUIDE.md "DOCUMENTATION_STYLEGUIDE.md").
+`DOCUMENTATION_STYLEGUIDE.md` — reglas de formato, naming convention,
+prohibido markdown en el body. Obligatorio antes de crear/editar un
+`.md`.
 
-Reglas resumidas:
+### Académico (UNI)
 
-- 80 caracteres por línea.
-- Español con nombres técnicos en inglés.
-- Bloques de código con lenguaje explícito.
-- Encabezados sin saltos de niveles.
-- Estados: `Implementado`, `Pendiente`, `Recomendado`, `Fase futura`.
+`requirements/STAKEHOLDERS.md`, `requirements/TASKS.md` —
+entregables del proyecto universitario. NO es doc operativa.
 
-## Convenciones
+## Convenciones rápidas
 
-- Los nombres técnicos (clases, archivos, rutas, endpoints) se
-  mantienen en inglés.
-- La documentación se escribe en español con tono técnico.
-- Lo implementado se documenta como hecho; lo pendiente se marca
-  explícitamente.
-- Las recomendaciones arquitectónicas se identifican como tales.
-- Las menciones a PRs y commits van con su SHA corto entre
-  paréntesis cuando aporta trazabilidad.
+- Nombres técnicos en inglés (`Store`, `Astro`, `PUBLIC_API_URL`).
+- Prosa en español, 80 chars por línea, sin markdown en el body
+  del commit ni en el de los docs.
+- Filenames en kebab-case: `data-flow.md` no `dataFlow.md` ni
+  `data_flow.md`.
+- Cada subdir tiene un README.md que explica qué hay adentro.
+
+## Notas
+
+- Las `agent-skills/` son para IAs (no devs humanos). Empezá por
+  `getting-started/` y dejá `agent-skills/` para Claude Code.
+- Si buscás una contraseña de admin dev, está en
+  `getting-started/credentials.md`.
+- Si buscás qué hacer cuando algo se rompe, está en
+  `operations/runbooks/`.
