@@ -180,6 +180,8 @@ package "Personalización" {
     BORDADO
     DTF
     VINIL_TEXTIL
+    + descripcion(): String
+    + requiereArchivo(): Boolean
   }
 
   enum TecnicaImpresion {
@@ -188,6 +190,8 @@ package "Personalización" {
     BORDADO
     DTF
     VINIL_TEXTIL
+    + descripcion(): String
+    + requiereSetupPrevio(): Boolean
   }
 
   class AreaImpresion {

@@ -38,6 +38,8 @@ package "Soporte" {
     ESPERANDO_CLIENTE
     RESUELTO
     CERRADO
+    + descripcion(): String
+    + esFinal(): Boolean
   }
 
   enum PrioridadTicket {
@@ -45,12 +47,16 @@ package "Soporte" {
     MEDIA
     ALTA
     URGENTE
+    + descripcion(): String
+    + tiempoRespuestaHoras(): Integer
   }
 
   enum MetodoAsignacion {
     ROUND_ROBIN
     MANUAL_POR_SUPERVISOR
     AUTOMATICA_POR_TIENDA
+    + descripcion(): String
+    + requiereIntervencionHumana(): Boolean
   }
 
   class MensajeTicket {
@@ -83,6 +89,8 @@ package "Soporte" {
     PENDIENTE
     RESPONDIDA
     RECHAZADA
+    + descripcion(): String
+    + esFinal(): Boolean
   }
 
   class ResenaProducto {
@@ -125,6 +133,8 @@ package "Devoluciones" {
     REEMBOLSO_DINERO
     CAMBIO_PRODUCTO
     NOTA_CREDITO
+    + descripcion(): String
+    + requiereReembolso(): Boolean
   }
 
   enum EstadoDevolucion {
@@ -133,6 +143,8 @@ package "Devoluciones" {
     RECHAZADA
     RECIBIDA
     REEMBOLSADA
+    + descripcion(): String
+    + esFinal(): Boolean
   }
 
   class ItemDevolucion {
@@ -164,6 +176,8 @@ package "Devoluciones" {
     APROBADO
     PROCESADO
     RECHAZADO
+    + descripcion(): String
+    + esFinal(): Boolean
   }
 }
 
@@ -191,12 +205,16 @@ package "Sistema" {
   enum TipoRespaldo {
     COMPLETO
     INCREMENTAL
+    + descripcion(): String
+    + incluyeDatosHistoricos(): Boolean
   }
 
   enum EstadoRespaldo {
     EN_PROGRESO
     COMPLETADO
     FALLIDO
+    + descripcion(): String
+    + esFinal(): Boolean
   }
 
   enum FrecuenciaRespaldo {
@@ -204,6 +222,8 @@ package "Sistema" {
     SEMANAL
     MENSUAL
     MANUAL
+    + descripcion(): String
+    + esAutomatica(): Boolean
   }
 
   class Notificacion {
@@ -230,6 +250,8 @@ package "Sistema" {
     TICKET_ASIGNADO
     PROMOCION
     SISTEMA
+    + descripcion(): String
+    + requiereAccionUsuario(): Boolean
   }
 }
 

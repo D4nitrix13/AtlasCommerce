@@ -119,6 +119,9 @@ package "Núcleo Multitenant" {
     B2C_MINORISTA
     B2B_MAYORISTA
     AMBOS
+    + descripcion(): String
+    + requiereRetencionIR(): Boolean
+    + aplicaA(tipoCliente: TipoCliente): Boolean
   }
 }
 
@@ -167,6 +170,9 @@ package "Identidad y Acceso" {
   enum TipoSegundoFactor {
     OTP_EMAIL
     TOTP
+    + descripcion(): String
+    + requiereDispositivoFisico(): Boolean
+    + requiereConexionInternet(): Boolean
   }
 
   class CodigoRecuperacion {

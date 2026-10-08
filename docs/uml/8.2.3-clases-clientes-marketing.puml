@@ -37,6 +37,9 @@ package "Clientes" {
     MINORISTA
     MAYORISTA
     CORPORATIVO
+    + descripcion(): String
+    + esMayorista(): Boolean
+    + requiereAprobacion(): Boolean
   }
 
   class Direccion {
@@ -86,6 +89,9 @@ package "Marketing" {
     PRIVADA
     PUBLICA
     COMPARTIDA_CON_ENLACE
+    + descripcion(): String
+    + esPublica(): Boolean
+    + esCompartible(): Boolean
   }
 
   class ItemListaDeseos {
@@ -116,6 +122,8 @@ package "Marketing" {
   enum TipoDescuento {
     PORCENTAJE
     MONTO_FIJO
+    + descripcion(): String
+    + calcularDescuento(montoCents: Integer, valor: Integer): Integer
   }
 
   class Promocion {

@@ -33,6 +33,9 @@ package "Carrito y Checkout" {
     CONVERTIDO
     ABANDONADO
     EXPIRADO
+    + descripcion(): String
+    + esFinal(): Boolean
+    + esRecuperable(): Boolean
   }
 
   class ItemCarrito {
@@ -110,6 +113,8 @@ package "Inventario" {
     AJUSTE
     RESERVA
     LIBERACION
+    + descripcion(): String
+    + modificaStock(): Boolean
   }
 }
 
@@ -159,6 +164,9 @@ package "Pedidos y Ventas" {
     PROCESANDO
     COMPLETADO
     CANCELADO
+    + descripcion(): String
+    + esFinal(): Boolean
+    + esCancelable(): Boolean
   }
 
   class LineaPedido {
@@ -222,6 +230,8 @@ package "Pedidos y Ventas" {
     EN_REVISION
     VALIDADO
     RECHAZADO
+    + descripcion(): String
+    + esFinal(): Boolean
   }
 }
 
