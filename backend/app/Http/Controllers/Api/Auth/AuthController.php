@@ -79,7 +79,14 @@ class AuthController extends Controller
 
         $currentStoreId = $storeContext->getStoreId();
 
-        if ($currentStoreId !== null && ! $user->hasAccessToStore(storeId: $currentStoreId)) {
+        // CA.3 — los customers con role='customer' bypasean el chequeo
+        // de store access. La lógica de Customer es a nivel de
+        // customer_stores pivot (el Customer se vincula a la tienda
+        // al registrarse en CA.2), no de user_stores. Un admin/staff
+        // sí necesita user_stores para acceder a /admin/* — un customer
+        // no debería ser bloqueado del storefront por ese check.
+        $isCustomer = $user->role?->slug === 'customer';
+        if ($currentStoreId !== null && ! $isCustomer && ! $user->hasAccessToStore(storeId: $currentStoreId)) {
             RateLimiter::hit(key: $loginKey, decaySeconds: 300);
             throw ValidationException::withMessages([
                 'email' => ['No tienes acceso a esta tienda.'],
@@ -128,11 +135,24 @@ class AuthController extends Controller
         // seguidos lockean al user durante 5 min).
         RateLimiter::clear(key: $loginKey);
 
+        // CA.3 (customer-auth sprint) — si el user tiene role='customer',
+        // incluimos el Customer profile en la response para que el
+        // frontend storefront auth store (CA.4) pueda hidratar al
+        // Customer sin un /me round-trip extra. Para admin/staff, el
+        // campo va null (no tienen Customer profile).
+        $customer = null;
+        if ($user->role?->slug === 'customer') {
+            $customer = \App\Models\Customers\Customer::query()
+                ->where(column: 'user_id', operator: '=', value: $user->id)
+                ->first();
+        }
+
         return response()->json(data: [
             'token' => $token->plainTextToken,
             'user' => new UserResource(
                 resource: $user->load(['role', 'stores']),
             ),
+            'customer' => $customer !== null ? new \App\Http\Resources\Customers\CustomerResource(resource: $customer) : null,
         ]);
     }
 
