@@ -282,6 +282,16 @@ class AuthController extends Controller
             'user' => new UserResource(
                 resource: $user->load(['role', 'stores']),
             ),
+            // CA.3 — si el user es role='customer', incluimos su Customer
+            // profile. Admin/staff reciben null (mismo shape que login).
+            // Mismo patrón que AuthController::login.
+            'customer' => $user->role?->slug === 'customer'
+                ? new \App\Http\Resources\Customers\CustomerResource(
+                    resource: \App\Models\Customers\Customer::query()
+                        ->where(column: 'user_id', operator: '=', value: $user->id)
+                        ->first(),
+                )
+                : null,
         ]);
     }
 }

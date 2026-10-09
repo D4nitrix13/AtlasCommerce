@@ -6,15 +6,15 @@ const { mockHydrate } = vi.hoisted(() => ({
   mockHydrate: vi.fn(),
 }));
 
-vi.mock('../../../../../src/stores/auth', () => ({
-  useAuth: () => ({
+vi.mock('../../../../../src/stores/customer-auth', () => ({
+  useCustomerAuth: () => ({
     isAuthenticated: false,
     isHydrating: false,
   }),
-  authStore: {
+  customerAuthStore: {
     hydrate: mockHydrate,
     subscribe: () => () => {},
-    getSnapshot: () => ({ token: null, user: null, isHydrating: false }),
+    getSnapshot: () => ({ token: null, user: null, customer: null, isHydrating: false }),
   },
 }));
 

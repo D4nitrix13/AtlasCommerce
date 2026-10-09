@@ -1,10 +1,16 @@
 import { useEffect, type ReactElement } from 'react';
-import { authStore, useAuth } from '../../../stores/auth';
+import { customerAuthStore, useCustomerAuth } from '../../../stores/customer-auth';
 import { useTranslations } from '../../../i18n';
 import { isPublicAdminPath, stripLocaleFromPath, withLocale } from '../../../lib/path-helpers';
 
 /**
  * Guard client-side para rutas `/account/*` del cliente.
+ *
+ * CA.4 — actualizado para usar `stores/customer-auth` (el nuevo
+ * auth store de Customers, separado del admin auth store de
+ * `stores/auth.ts`). Las páginas `/account/*` son territorio del
+ * Customer — el admin no las usa (usa `/admin/*` con su propio
+ * AuthGuard). Por eso este guard consulta SOLO el customer store.
  *
  * Espejo de `components/admin/auth/AuthGuard` para la sección post-login
  * del cliente (dashboard, orders, wishlist, security, etc.). El token
@@ -27,11 +33,11 @@ import { isPublicAdminPath, stripLocaleFromPath, withLocale } from '../../../lib
  *   login para que el language switcher no lo "pierda".
  */
 export default function AccountAuthGuard(): ReactElement | null {
-  const { isAuthenticated, isHydrating } = useAuth();
+  const { isAuthenticated, isHydrating } = useCustomerAuth();
   const { t } = useTranslations();
 
   useEffect(() => {
-    void authStore.hydrate();
+    void customerAuthStore.hydrate();
   }, []);
 
   useEffect(() => {

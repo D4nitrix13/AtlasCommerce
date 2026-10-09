@@ -20,7 +20,9 @@
 export const API_ENDPOINTS = {
   auth: {
     login: '/v1/auth/login',
-    register: '/v1/auth/register',
+    // CA.2 (customer-auth sprint) — endpoint público del storefront
+    // para registrar Customers. Ver backend/tests/Feature/Auth/StorefrontRegisterTest.php.
+    register: '/v1/storefront/auth/register',
     logout: '/v1/auth/logout',
     me: '/v1/auth/me',
 
