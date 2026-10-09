@@ -48,6 +48,7 @@ use App\Http\Controllers\Api\Reviews\ProductReviewController;
 use App\Http\Controllers\Api\Sales\OrderController;
 use App\Http\Controllers\Api\Shipping\ShipmentController;
 use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetController;
+use App\Http\Controllers\Api\Storefront\Auth\StorefrontAuthController;
 use App\Http\Controllers\Api\Storefront\Checkout\CheckoutController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
@@ -97,6 +98,15 @@ Route::middleware(['store.domain'])->group(function (): void {
     // tienda activa resuelta por store.domain.
     Route::post('auth/forgot-password', [PasswordResetTokenController::class, 'forgot'])
         ->name('auth.forgot-password');
+
+    // CA.2 (customer-auth sprint, commit 2 de 5) — register de
+    // Customer desde el storefront. Endpoint público (no requiere
+    // auth) envuelto en store.domain para resolver la tienda activa
+    // y asociar el Customer nuevo vía customer_stores pivot. La
+    // rate limit está implementada en el controller (10/min por IP)
+    // para alinearse con el patrón de /auth/login.
+    Route::post('storefront/auth/register', [StorefrontAuthController::class, 'register'])
+        ->name('storefront.auth.register');
 
     Route::post('auth/reset-password', [PasswordResetTokenController::class, 'reset'])
         ->name('auth.reset-password');
