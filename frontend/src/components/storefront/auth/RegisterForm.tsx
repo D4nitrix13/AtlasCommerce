@@ -1,10 +1,10 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { apiFetch, buildApiUrl } from '../../../lib/api';
+import { buildApiUrl } from '../../../lib/api';
 import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { useTranslations } from '../../../i18n';
 import { GoogleIcon, FacebookIcon } from '../../../components/ui/SocialIcons';
-import type { LoginResponse } from '../../../types/auth';
+import { customerAuthStore, useCustomerAuth } from '../../../stores/customer-auth';
 
 /**
  * Form de registro para clientes.
@@ -52,10 +52,21 @@ export default function RegisterForm({
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // CA.5 — usamos el customer auth store (CA.4) en vez de apiFetch
+  // directo. El store se hidrata via /me si Sanctum stateful ya tiene
+  // la cookie; si el backend falla, el store queda en estado limpio
+  // y el form muestra el error. customerAuthStore.register es la
+  // función que llama POST /v1/storefront/auth/register (CA.2).
+  // `hydrate` vive en el store, no en el hook — el hook solo expone
+  // register/login/logout. Por eso importamos el store directamente.
+  useCustomerAuth();
 
   const score = useMemo(() => scorePassword(password), [password]);
   const strength = useMemo(() => strengthLevel(score), [score]);
@@ -69,26 +80,44 @@ export default function RegisterForm({
       return;
     }
 
+    if (password !== passwordConfirmation) {
+      setErrorMessage(t('auth.signup.shell.passwordMismatch'));
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await apiFetch<LoginResponse>(API_ENDPOINTS.auth.register, {
-        method: 'POST',
-        body: {
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          password,
-          device_name: 'web-client',
-        },
+      await customerAuthStore.register({
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password,
+        password_confirmation: passwordConfirmation,
+        phone: phone !== '' ? phone : undefined,
+        customer_type: 'retail',
       });
+
+      // Hidratar el store desde /me antes de redirigir. customer
+      // ya quedó en el state, pero /me es la fuente autoritativa
+      // (por si el backend normalizó algo del payload en register).
+      await customerAuthStore.hydrate();
 
       const params = new URLSearchParams(window.location.search);
       const fallback = `${window.location.origin}${callbackPath}`;
       const target = params.get('redirect') ?? fallback;
       window.location.href = target;
     } catch (error) {
-      const apiError = error as { message?: string };
-      setErrorMessage(apiError.message ?? t('auth.passwordReset.error.generic'));
+      const apiError = error as {
+        message?: string;
+        errors?: Record<string, string[]>;
+      };
+      const fieldErrors = apiError.errors;
+      const firstFieldError = fieldErrors
+        ? Object.values(fieldErrors).flat()[0]
+        : undefined;
+      setErrorMessage(
+        firstFieldError ?? apiError.message ?? t('auth.passwordReset.error.generic'),
+      );
       setIsSubmitting(false);
     }
   };
@@ -272,6 +301,49 @@ export default function RegisterForm({
             )}
           </span>
         </p>
+      </div>
+
+      {/* CA.5 — password_confirmation (validation cliente-side antes de
+          mandar al backend, que también lo valida via same:password). */}
+      <div>
+        <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-slate-700 mb-1.5">
+          {t('auth.signup.shell.passwordConfirmationLabel')}
+        </label>
+        <div className="relative">
+          <input
+            id="passwordConfirmation"
+            name="password_confirmation"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            required
+            minLength={8}
+            placeholder={t('auth.signup.shell.passwordConfirmationPlaceholder')}
+            value={passwordConfirmation}
+            onChange={(event) => {
+              setPasswordConfirmation(event.target.value);
+            }}
+            className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+          />
+        </div>
+      </div>
+
+      {/* CA.5 — phone opcional. El backend acepta el campo como null. */}
+      <div>
+        <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1.5">
+          {t('auth.signup.shell.phoneLabel')}
+        </label>
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          placeholder={t('auth.signup.shell.phonePlaceholder')}
+          value={phone}
+          onChange={(event) => {
+            setPhone(event.target.value);
+          }}
+          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+        />
       </div>
 
       <label htmlFor="acceptTerms" className="flex items-start gap-2 cursor-pointer">

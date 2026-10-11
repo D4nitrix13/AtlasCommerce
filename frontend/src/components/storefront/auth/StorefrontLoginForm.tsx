@@ -4,7 +4,7 @@ import { buildApiUrl } from '../../../lib/api';
 import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { useTranslations } from '../../../i18n';
 import { GoogleIcon, FacebookIcon } from '../../../components/ui/SocialIcons';
-import { useAuth } from '../../../stores/auth';
+import { useCustomerAuth } from '../../../stores/customer-auth';
 
 /**
  * Form de login para clientes (storefront).
@@ -67,7 +67,11 @@ export default function StorefrontLoginForm({
     window.location.assign(buildApiUrl(API_ENDPOINTS.auth.social.redirect(provider)));
   };
 
-  const auth = useAuth();
+  // CA.5 — usamos el customer auth store (CA.4) en vez del admin
+  // auth store. /account/* es territorio del customer, no del
+  // admin. El customer login no soporta 2FA flow (CA.3 retorna
+  // el customer data en /auth/login sin challenge).
+  const { login: customerLogin } = useCustomerAuth();
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -75,44 +79,21 @@ export default function StorefrontLoginForm({
     setIsSubmitting(true);
 
     try {
-      // Usar el auth store: persiste el token Sanctum en memoria Y maneja
-      // el flow de 2FA. Sin esto, las páginas admin no ven al user como
-      // autenticado y redirigen a login (causando un loop visual).
-      const result = await auth.login({
-        email,
-        password,
-        device_name: 'web-client',
-      });
+      await customerLogin(email, password);
 
-      if (result.kind === '2fa_required') {
-        // El store NO escribe token en este caso — necesitamos que la
-        // página siguiente (2fa challenge) sepa el challengeId.
-        // Redirigimos a la URL canónica de 2FA.
-        const pathLocale = (window.location.pathname.split('/')[1] || 'es');
-        window.location.href = `/${pathLocale}/account/2fa?challenge=${result.challengeId}`;
-        return;
-      }
-
-      // Login success: redirect.
-      // CRÍTICO: validar que el `?redirect=` no apunte a una zona que el
-      // user no tiene permiso. Un cliente no debe terminar en /es/admin/*
-      // aunque el query param lo pida (un atacante podría haber
-      // injectado esa URL en el link). Si el role del user no es admin
-      // y el target pide admin, usamos el fallback.
+      // Login success: redirect al Account del customer.
+      // CRÍTICO: el `?redirect=` no debe apuntar a /admin/* — un
+      // cliente no debe terminar en admin aunque el query param lo
+      // pida (un atacante podría haber injectado esa URL). Si el target
+      // pide admin, usamos el fallback.
       const params = new URLSearchParams(window.location.search);
       const requestedRedirect = params.get('redirect');
       const fallback = `${window.location.origin}${callbackPath}`;
 
       let target = fallback;
-      if (requestedRedirect) {
+      if (requestedRedirect !== null && requestedRedirect !== '') {
         const isAdminPath = /^\/(?:[a-z]{2}\/)?admin\//i.test(requestedRedirect);
-        const userRole = result.kind === 'success' ? result.user.role?.slug : null;
-        const isAdmin = userRole === 'admin';
-
-        if (isAdminPath && !isAdmin) {
-          // Cliente intentando ir a admin: ignorar el redirect param.
-          target = fallback;
-        } else {
+        if (!isAdminPath) {
           target = requestedRedirect;
         }
       }
