@@ -23,10 +23,20 @@ JSON por instancia bajo
 
 ## Customer
 
-No existe auth de Customer en MVP. Ver `odd/tasks/customer-auth.md`
-(F0.x follow-up) para el spec del sprint dedicado. Mientras tanto,
-los Customers se administran vía `CustomerController` (admin-side) y
-no pueden hacer login propio.
+| Slug tienda | Email | Password | Notes |
+| --- | --- | --- | --- |
+| `panda-estampados` | `cliente@panda-estampados.test` | `password` | 3 orders B2B (NIO), customer_type=wholesale. Seeder: `CustomerTestSeeder`. |
+| `kitsune` | `cliente@kitsune.test` | `password` | 2 orders B2C (USD), customer_type=retail. Mismo seeder. |
+
+Convención: `cliente@<slug>.test` / `password`. Los customers se
+crean via `php artisan db:seed --class=CustomerTestSeeder` (o el
+`db:seed` default que ya lo incluye via `DatabaseSeeder`).
+
+Los customers también pueden registrarse via el form público en
+`/es/account/signup` (ver `odd/tasks/customer-auth.md` — sprint
+CA.1-CA.5 ya mergeado). El register flow crea User(role=customer) +
+Customer profile linked via `customer.user_id` + Sanctum stateful
+cookie.
 
 ## Service accounts (Mail, OAuth, etc.)
 
