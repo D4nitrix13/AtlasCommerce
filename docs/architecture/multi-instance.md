@@ -797,13 +797,14 @@ antiguos.
 ## Decisiones arquitectónicas vinculadas
 
 - `architecture/overview.md` — Diagrama del sistema actual.
-- `architecture/multi-store.md` — Multi-tenant design.
+- `architecture/multi-store.md` — Multi-store design dentro de una
+  instancia.
 - `architecture/decisions.md` — ADRs (incluirá F1.1, F2.5, F3.5).
-- `architecture/flow.md` — Request flow diagrams.
+- `architecture/data-flow.md` — Request flow diagrams.
 
 ## Documentación relacionada
 
-- `docs/deployment/instances.md` — Deploy por instancia.
+- `docs/operations/instances.md` — Deploy por instancia.
 - `docs/development/plugins.md` — Guía de plugins Composer.
 - `docs/getting-started/` — Setup base sin cambios.
 

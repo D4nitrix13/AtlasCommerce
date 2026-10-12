@@ -11,13 +11,10 @@
 
 ## Problema que resuelve
 
-Panda Estampados y Kitsune son dos marcas
-comerciales con identidad, público y catálogo
-distintos, pero comparten operaciones, inventario
-y administración dentro de la misma instancia Docker.
-El sistema debe presentar dos tiendas independientes
-para el cliente final mientras mantiene una plataforma
-unificada para el dueño.
+Panda y Kitsune son tiendas diferentes para el cliente, pero forman parte
+de una misma operación administrativa. Comparten inventario y
+administración dentro de la misma instancia Docker, con catálogos, precios
+públicos y experiencias de compra distintos por marca.
 
 ## Definiciones
 

@@ -2,9 +2,10 @@
 
 Guía operativa para registrar los providers OAuth de los tenants
 (Panda Estampados, Kitsune, MM-Boutique, Morales Store) en Google
-Cloud Console y Facebook Developers. Cada combinación tenant × env
-× provider requiere una **Authorized Redirect URI** propia en la
-consola del provider.
+Cloud Console y Facebook Developers. Panda y Kitsune son tiendas
+diferentes para el cliente, pero forman parte de una misma operación
+administrativa. Cada combinación tenant × env × provider requiere una
+**Authorized Redirect URI** propia en la consola del provider.
 
 **Estado**: Implementado en el SDD `oauth-google-facebook-login`
 (PRs #17–#21 merged). Esta guía documenta el paso a paso para
