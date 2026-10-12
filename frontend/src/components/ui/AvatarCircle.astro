@@ -1,0 +1,100 @@
+---
+/**
+ * AvatarCircle — primitive de avatar con iniciales + gradiente del tenant.
+ *
+ * Por qué existe: el home de Bonfire (design-references-bonfire §4) usa
+ * "fotos de personas rotadas" en los testimonios. Para no exponer PII
+ * de clientes B2B (decisión D4) mostramos avatares SVG con iniciales,
+ * gradiente del tenant y rotación entre -8 y +13 grados. El
+ * `customerName` "María González" se reduce a "MG".
+ *
+ * Por qué gradiente y no color sólido: el gradiente le da profundidad
+ * al avatar sin requerir foto; queda más cálido que un círculo plano y
+ * remite al lenguaje Bonfire de "ilustración naïve". El `accentColor`
+ * es el color base del tenant; el segundo tono se deriva via
+ * color-mix en el browser.
+ *
+ * Por qué `role` se renderiza fuera del avatar: el nombre y rol son
+ * metadata del cliente, no parte de la identidad visual del avatar.
+ * El caller decide si mostrarlos (CustomerStories los muestra al
+ * lado; otros callers pueden omitir el rol).
+ *
+ * Accesibilidad: el avatar lleva `aria-hidden="true"` porque el
+ * `customerName` se renderiza como texto adyacente; no queremos
+ * que screen readers lean dos veces. La inicial no se anuncia.
+ */
+interface Props {
+  /** Nombre completo del cliente. Se usan las iniciales. */
+  name: string;
+  /** Rol o empresa del cliente (opcional, se muestra debajo). */
+  role?: string;
+  /** Color base del avatar. Default: var(--primary). */
+  accentColor?: string;
+  /** Rotación en grados. Default: 0. Rango Bonfire: -8 a +13. */
+  rotation?: number;
+  /** Tamaño predefinido. Default: md. */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Clases Tailwind extra (margin, position, etc). */
+  class?: string;
+}
+
+const SIZE_CLASSES: Record<NonNullable<Props['size']>, string> = {
+  sm: 'h-12 w-12 text-base',
+  md: 'h-16 w-16 text-lg',
+  lg: 'h-20 w-20 text-xl',
+  xl: 'h-28 w-28 text-3xl',
+};
+
+// Construye las iniciales a partir del nombre: primera letra del
+// primer token + primera letra del último token. Funciona para
+// "María González" → "MG" y para "Carlos" → "CA" (fallback al
+// primer caracter dos veces). Si el nombre viene vacío, default "?".
+function buildInitials(fullName: string): string {
+  const trimmed = fullName.trim();
+  if (trimmed === '') {
+    return '?';
+  }
+
+  const tokens = trimmed.split(/\s+/);
+  if (tokens.length === 1) {
+    const single = tokens[0] ?? '';
+    return single.slice(0, 2).toUpperCase();
+  }
+
+  const first = tokens[0] ?? '';
+  const last = tokens[tokens.length - 1] ?? '';
+  const a = first.charAt(0);
+  const b = last.charAt(0);
+  return (a + b).toUpperCase();
+}
+
+const {
+  name,
+  role,
+  accentColor,
+  rotation = 0,
+  size = 'md',
+  class: className = '',
+} = Astro.props;
+
+const initials = buildInitials(name);
+const sizeClass = SIZE_CLASSES[size];
+const gradient = `linear-gradient(135deg, ${accentColor ?? 'var(--primary, #2D9D8E)'} 0%, color-mix(in srgb, ${accentColor ?? 'var(--primary, #2D9D8E)'} 60%, white) 100%)`;
+const transform = rotation === 0 ? undefined : `transform: rotate(${rotation}deg);`;
+---
+
+<div class:list={['inline-flex flex-col items-center', className]}>
+  <span
+    aria-hidden="true"
+    class:list={[
+      'flex items-center justify-center rounded-full font-semibold text-white shadow-sm ring-2 ring-white',
+      sizeClass,
+    ]}
+    style={`background: ${gradient}; ${transform ?? ''}`}
+  >
+    {initials}
+  </span>
+  {role !== undefined && (
+    <span class="mt-2 text-xs text-slate-500 sm:text-sm">{role}</span>
+  )}
+</div>

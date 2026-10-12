@@ -1,0 +1,72 @@
+---
+/**
+ * Squiggle — primitive decorativo: trazo a mano inspirado en los garabatos
+ * del home de Bonfire.
+ *
+ * Por qué existe: el home de Bonfire (design-references-bonfire §4) rompe la
+ * grilla con trazos sueltos tipo "hand-drawn" en ámbar o khaki. Replicamos
+ * la mecánica con paths SVG simples que el caller posiciona y dimensiona
+ * via `class`. Se renderiza inline para que Astro no haga un round-trip por
+ * asset y para que el `currentColor` herede del contexto.
+ *
+ * Por qué tres variantes: arc (curva corta), wave (curva larga) y loop
+ * (lazo cerrado) cubren los tres usos típicos de Bonfire: subrayado de
+ * CTA, acento sobre un heading y ornamento libre en una esquina.
+ *
+ * Accesibilidad: el componente es decorativo; el caller debe pasar
+ * `aria-hidden="true"` desde el contexto. Lo marcamos aquí por
+ * seguridad para evitar lecturas por screen reader.
+ */
+type SquiggleVariant = 'arc' | 'wave' | 'loop';
+
+interface Props {
+  /** Variante del trazo. Default: arc. */
+  variant?: SquiggleVariant;
+  /** Color del trazo. Default: ámbar Bonfire. */
+  color?: string;
+  /** Grosor del trazo en píxeles. Default: 3. */
+  strokeWidth?: number;
+  /** Clases Tailwind para tamaño y posición. Default: 100x12. */
+  class?: string;
+}
+
+// Los paths están copiados de los garabatos de la referencia visual: curvas
+// Bézier suaves con un solo trazo continuo. No son precisos milimétricamente
+// — la gracia es que se vean dibujados a mano, no perfectos.
+const PATHS: Record<SquiggleVariant, string> = {
+  arc: 'M2 8 C 8 2, 20 2, 30 8 S 52 14, 60 8',
+  wave: 'M2 10 C 12 2, 24 18, 38 10 S 64 2, 78 10 S 108 18, 118 10',
+  loop: 'M10 10 C 4 4, 18 2, 22 8 S 14 22, 22 20 S 30 6, 16 8',
+};
+
+const VIEW_BOXES: Record<SquiggleVariant, string> = {
+  arc: '0 0 64 16',
+  wave: '0 0 120 20',
+  loop: '0 0 36 24',
+};
+
+const {
+  variant = 'arc',
+  color = '#F6C36F',
+  strokeWidth = 3,
+  class: className = 'h-3 w-16',
+} = Astro.props;
+
+const path = PATHS[variant];
+const viewBox = VIEW_BOXES[variant];
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox={viewBox}
+  fill="none"
+  preserveAspectRatio="none"
+  stroke={color}
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  class:list={['pointer-events-none', className]}
+>
+  <path d={path} />
+</svg>
