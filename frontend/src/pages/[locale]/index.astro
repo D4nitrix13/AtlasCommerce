@@ -3,26 +3,30 @@
  * Home pública del storefront (`/[locale]/`).
  *
  * F3.1 — Tenant detection.
+ * F4.x — Sprint home Bonfire: composición completa para Panda B2B.
  *
  * Resuelve el tenant desde `Astro.locals.tenant?.tenantSlug` y renderiza
  * una composición distinta según el caso:
  *
- *   - `panda-estampados` → `TenantHero` (copy B2B estampados) +
- *     categorías top B2B + CTAs a RFQ y bulk-order.
+ *   - `panda-estampados` → home B2B estilo Bonfire:
+ *     TenantHero + StatsBar (cifras) + FeaturedCategories +
+ *     ProcessSteps (4 pasos Cotiza→Entrega) + ClientLogos (rubros)
+ *     + MaterialsCard (materiales y tintas) + CustomerStories
+ *     (testimonios con métricas) + FaqAccordion (Q&A operacional).
+ *     Total ~9 secciones en scroll largo.
  *   - cualquier otro     → composición B2C Bonfire-adapted:
- *     `HomeHero` (con trustBadges) + categorías + productos destacados
- *     + `UseCases` (segmentos del tenant desde `data/tenants.ts`) +
- *     `CtaBanner` de cierre.
+ *     HomeHero + categorías + productos destacados + UseCases +
+ *     CtaBanner de cierre (intacta del sprint F1.4/F4.x anterior).
  *
- * Esto mantiene el comportamiento F1.4 de Panda B2B intacto y reemplaza
- * la composición B2C por la nueva forma del plan de home-redesign
- * (commit 2 de 5).
+ * Esto mantiene el comportamiento previo intacto y reemplaza la rama
+ * B2B por la nueva forma del plan panda-bonfire-complete.
  *
  * Mock data:
- *   - Categorías y productos viven en `data/products.ts` (B2C) y
- *     `data/b2b-mock.ts` (B2B). Use cases por tenant en
- *     `data/tenants.ts`. Cuando los endpoints existan, todos se
- *     reemplazan por fetch + hidratación.
+ *   - Categorías viven en `data/b2b-mock.ts` (B2B) y `data/products.ts`
+ *     (B2C). Las stats, process, logos, stories, materials y faq se
+ *     definen acá como arreglos tipados. Cuando el endpoint
+ *     `/api/storefront/b2b/home` exista, esta construcción se mueve a
+ *     un fetch server-side con la misma shape.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import HomeHero from '../../components/storefront/home/HomeHero.astro';
@@ -31,6 +35,12 @@ import CtaBanner from '../../components/storefront/home/CtaBanner.astro';
 import FeaturedCategories from '../../components/storefront/home/FeaturedCategories.astro';
 import FeaturedProducts from '../../components/storefront/home/FeaturedProducts.astro';
 import TenantHero from '../../components/storefront/b2b/TenantHero.astro';
+import StatsBar from '../../components/storefront/b2b/StatsBar.astro';
+import ProcessSteps from '../../components/storefront/b2b/ProcessSteps.astro';
+import ClientLogos from '../../components/storefront/b2b/ClientLogos.astro';
+import CustomerStories from '../../components/storefront/b2b/CustomerStories.astro';
+import FaqAccordion from '../../components/storefront/b2b/FaqAccordion.astro';
+import MaterialsCard from '../../components/storefront/b2b/MaterialsCard.astro';
 import { getServerDictionary } from '../../i18n/server';
 import { CATEGORIES, getFeaturedProducts } from '../../data/products';
 import { B2B_CATEGORIES } from '../../data/b2b-mock';
@@ -69,6 +79,120 @@ const localizedUseCases = rawUseCases.map((useCase) => ({
   label: t[useCase.labelKey] ?? useCase.labelKey,
   href: useCase.href,
 }));
+
+// ─── B2B Panda — mock data para las secciones nuevas (F4.x) ─────────
+// En el sprint actual los datos viven acá; cuando el endpoint
+// `/api/storefront/b2b/home` exista, se reemplaza por fetch + hidratación
+// conservando la misma shape.
+const b2bStats = [
+  { value: '500+', label: 'Empresas atendidas', iconKey: 'building-office' },
+  { value: '10.000+', label: 'Estampados producidos', iconKey: 'cube' },
+  { value: '24 h', label: 'Tiempo de respuesta', iconKey: 'bolt' },
+  { value: '98%', label: 'Pedidos a tiempo', iconKey: 'shield-check' },
+];
+
+const b2bProcessSteps = [
+  {
+    iconKey: 'document-text',
+    title: t['storefront.b2b.home.process.step1.title'],
+    description: t['storefront.b2b.home.process.step1.description'],
+  },
+  {
+    iconKey: 'eye',
+    title: t['storefront.b2b.home.process.step2.title'],
+    description: t['storefront.b2b.home.process.step2.description'],
+  },
+  {
+    iconKey: 'cube',
+    title: t['storefront.b2b.home.process.step3.title'],
+    description: t['storefront.b2b.home.process.step3.description'],
+  },
+  {
+    iconKey: 'truck',
+    title: t['storefront.b2b.home.process.step4.title'],
+    description: t['storefront.b2b.home.process.step4.description'],
+  },
+];
+
+const b2bClientLogos = [
+  { iconKey: 'building-office', label: 'Restaurante La Esquina' },
+  { iconKey: 'users', label: 'Escuela Pública Central' },
+  { iconKey: 'star', label: 'Festival Verano' },
+  { iconKey: 'gift', label: 'ONG Manos Solidarias' },
+  { iconKey: 'shopping-cart', label: 'Club Deportivo Norte' },
+  { iconKey: 'tag', label: 'Hotel Boutique Sur' },
+];
+
+const b2bCustomerStories = [
+  {
+    quote:
+      'Necesitábamos 300 playeras en 5 días para el evento corporativo. Panda entregó 2 días antes y con calidad excelente.',
+    customerName: 'María González',
+    customerRole: 'Coordinadora de Eventos, Restaurante La Esquina',
+    metricValue: '300 unidades',
+    metricLabel: 'Entregadas en 3 días',
+    avatarIconKey: 'user',
+  },
+  {
+    quote:
+      'Los uniformes del colegio se ven impecables. Hicimos 4 pedidos en el año con descuentos por volumen automáticos.',
+    customerName: 'Carlos Mendoza',
+    customerRole: 'Director Administrativo, Escuela Pública Central',
+    metricValue: '1.200 unidades',
+    metricLabel: 'Uniformes por ciclo escolar',
+    avatarIconKey: 'users',
+  },
+  {
+    quote:
+      'Para la temporada recibimos playeras, hoodies y tazas. Una sola cotización consolidada, todo entregado a tiempo.',
+    customerName: 'Andrea Ruiz',
+    customerRole: 'Coordinadora, Club Deportivo Norte',
+    metricValue: '98%',
+    metricLabel: 'Pedidos entregados a tiempo',
+    avatarIconKey: 'star',
+  },
+];
+
+const b2bMaterialsFeatures = [
+  {
+    iconKey: 'shield-check',
+    label: t['storefront.b2b.home.materials.feature1.label'],
+    description: t['storefront.b2b.home.materials.feature1.description'],
+  },
+  {
+    iconKey: 'eye',
+    label: t['storefront.b2b.home.materials.feature2.label'],
+    description: t['storefront.b2b.home.materials.feature2.description'],
+  },
+  {
+    iconKey: 'cog-6-tooth',
+    label: t['storefront.b2b.home.materials.feature3.label'],
+    description: t['storefront.b2b.home.materials.feature3.description'],
+  },
+];
+
+const b2bFaqItems = [
+  {
+    question: t['storefront.b2b.home.faq.q1.question'],
+    answer: t['storefront.b2b.home.faq.q1.answer'],
+  },
+  {
+    question: t['storefront.b2b.home.faq.q2.question'],
+    answer: t['storefront.b2b.home.faq.q2.answer'],
+  },
+  {
+    question: t['storefront.b2b.home.faq.q3.question'],
+    answer: t['storefront.b2b.home.faq.q3.answer'],
+  },
+  {
+    question: t['storefront.b2b.home.faq.q4.question'],
+    answer: t['storefront.b2b.home.faq.q4.answer'],
+  },
+  {
+    question: t['storefront.b2b.home.faq.q5.question'],
+    answer: t['storefront.b2b.home.faq.q5.answer'],
+  },
+];
 ---
 
 <StorefrontLayout title={t['storefront.search.title']} cartCount={cartCount}>
@@ -94,11 +218,46 @@ const localizedUseCases = rawUseCases.map((useCase) => ({
         ]}
       />
 
+      <StatsBar
+        heading={t['storefront.b2b.home.stats.heading']}
+        stats={b2bStats}
+      />
+
       <FeaturedCategories
         categories={B2B_CATEGORIES}
         heading={t['storefront.b2b.home.featuredCategories.heading']}
         viewAllLabel={t['storefront.b2b.home.featuredCategories.viewAll']}
         viewAllHref={productsHref}
+      />
+
+      <ProcessSteps
+        heading={t['storefront.b2b.home.process.heading']}
+        subheading={t['storefront.b2b.home.process.subheading']}
+        steps={b2bProcessSteps}
+      />
+
+      <ClientLogos
+        heading={t['storefront.b2b.home.clients.heading']}
+        subheading={t['storefront.b2b.home.clients.subheading']}
+        logos={b2bClientLogos}
+      />
+
+      <MaterialsCard
+        heading={t['storefront.b2b.home.materials.heading']}
+        eyebrow={t['storefront.b2b.home.materials.eyebrow']}
+        body={t['storefront.b2b.home.materials.body']}
+        features={b2bMaterialsFeatures}
+      />
+
+      <CustomerStories
+        heading={t['storefront.b2b.home.stories.heading']}
+        subheading={t['storefront.b2b.home.stories.subheading']}
+        stories={b2bCustomerStories}
+      />
+
+      <FaqAccordion
+        heading={t['storefront.b2b.home.faq.heading']}
+        items={b2bFaqItems}
       />
     </>
   ) : (
