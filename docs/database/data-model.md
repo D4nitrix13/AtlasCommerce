@@ -10,7 +10,9 @@ base de datos `PostgreSQL`. Dentro de la instancia
 `panda-estampados-and-kitsune` conviven dos marcas (`Panda
 Estampados` y `Kitsune Store`) que comparten backend, BD e
 inventario pero presentan catálogos, pedidos y reportes
-separados vía `store_id`. Las instancias `mm-boutique` y
+separados vía `store_id`. Panda y Kitsune son tiendas diferentes
+para el cliente, pero forman parte de una misma operación
+administrativa. Las instancias `mm-boutique` y
 `morales-store` son single-brand — el `store_id` se mantiene
 en esquema pero apunta siempre a la misma marca.
 

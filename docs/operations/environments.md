@@ -137,6 +137,9 @@ cada una expone puertos distintos en el host.
 
 ### Instancia `panda-estampados-and-kitsune` (multi-brand)
 
+Panda y Kitsune son tiendas diferentes para el cliente, pero forman parte
+de una misma operación administrativa.
+
 ```txt
 127.0.0.1   panda-estampados.com
 127.0.0.1   www.panda-estampados.com

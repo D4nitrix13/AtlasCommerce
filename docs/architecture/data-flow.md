@@ -17,7 +17,7 @@ separados.
 
 ## 1. Topología de despliegue
 
-Una sola instancia Docker atienda los dominios de su tenant.
+Una sola instancia Docker atiende los dominios de su tenant.
 El routing por dominio se resuelve en el edge (Caddy) y se
 enriquece en el backend vía middleware. Las instancias `mm-
 boutique` y `morales-store` exponen dominios únicos; la

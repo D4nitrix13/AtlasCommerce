@@ -9,7 +9,9 @@ aislada con su propia base de datos `PostgreSQL`, su
 `Redis`, su backend `Laravel`, su frontend `Astro` y su
 reverse proxy `Caddy`. Multi-store opera dentro de una misma
 instancia cuando el dueño comparte operación entre marcas
-(caso `panda-estampados-and-kitsune`).
+(caso `panda-estampados-and-kitsune`). Panda y Kitsune son tiendas
+diferentes para el cliente, pero forman parte de una misma operación
+administrativa.
 
 ```txt
                                                   Internet (HTTPS)

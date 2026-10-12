@@ -3,11 +3,13 @@
 > **Scope (2026-09-26):** Los ADRs 001-007 fueron escritos
 > cuando Panda Estampados + Kitsune era el único stack
 > desplegado. Aplican vigentes **dentro de una instancia
-> multi-store** (no cross-instance). La decisión de operar
-> como **3 instancias independientes** no está capturada
-> como ADR formal en este archivo — queda pendiente para una
-> fase posterior de docs formal. Esta nota aclara el scope de
-> lectura de los ADRs históricos.
+> multi-store** (no cross-instance). Panda y Kitsune son
+> tiendas diferentes para el cliente, pero forman parte
+> de una misma operación administrativa. La decisión de
+> operar como **3 instancias independientes** no está
+> capturada como ADR formal en este archivo — queda
+> pendiente para una fase posterior de docs formal. Esta
+> nota aclara el scope de lectura de los ADRs históricos.
 
 Registro de decisiones de arquitectura
 significativas. Cada entrada describe una decisión,
