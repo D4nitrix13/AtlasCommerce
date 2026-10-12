@@ -1,0 +1,107 @@
+---
+/**
+ * ClientLogos — grilla B2B de clientes que estampan con Panda.
+ *
+ * Patrón Bonfire-style de "trusted by" pero con labels genéricos de
+ * rubro en lugar de logos reales (decisión D4 — riesgo legal de usar
+ * marcas registradas ajenas sin permiso). Cada slot muestra un icono
+ * SVG con el color del tenant + un label de rubro (Restaurante,
+ * Escuela, ONG, etc.).
+ *
+ * Por qué `iconKey: string` y no enum cerrado:
+ *   Mismo criterio que StatsBar/ProcessSteps/UseCases. Icon.astro
+ *   fallback a squares-2x2 si el nombre no existe, lo que permite
+ *   agregar rubros sin refactor tipado.
+ *
+ * Por qué los logos son data del caller (no i18n): cada label es un
+ * rubro genérico cuyo contenido vive mejor como array tipado que
+ * como string suelto en el locale. En el futuro vendrá de un
+ * endpoint /api/storefront/b2b/clients/featured con el mismo shape.
+ *
+ * Empty-safe: si logos está vacío no renderiza ni la sección ni el
+ * heading. Permitiendo que la página oculte el bloque cuando no hay
+ * clientes destacados sin tener que envolver en condicionales.
+ *
+ * Tenant-aware: el color del icono interior de cada tarjeta usa
+ * var(--primary), igual que el resto de componentes b2b/.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h2.
+ *   - Lista semántica <ul> con <li> por logo.
+ *   - Si el logo tiene href, el <li> envuelve un <a>; si no, queda
+ *     solo como card inerte.
+ *   - Iconos aria-hidden (el label ya comunica el rubro).
+ */
+import Icon from '../../ui/Icon.astro';
+
+export interface ClientLogo {
+  /** Nombre que resuelve `Icon.astro`. Fallback: squares-2x2. */
+  iconKey: string;
+  /** Etiqueta de rubro del cliente (Restaurante, Escuela, etc). */
+  label: string;
+  /** Enlace opcional a landing del vertical o ancla. */
+  href?: string;
+}
+
+interface Props {
+  heading: string;
+  subheading?: string;
+  logos: readonly ClientLogo[];
+}
+
+const { heading, subheading, logos } = Astro.props;
+---
+
+{logos.length > 0 && (
+  <section
+    aria-labelledby="b2b-clients-heading"
+    class="border-y border-slate-200 bg-white"
+  >
+    <div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+      <header class="mb-8 text-center sm:mb-10">
+        <h2
+          id="b2b-clients-heading"
+          class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+        >
+          {heading}
+        </h2>
+        {subheading && (
+          <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
+        )}
+      </header>
+
+      <ul class="grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-6">
+        {logos.map((logo) => (
+          <li class="list-none">
+            {logo.href ? (
+              <a
+                href={logo.href}
+                class="group flex h-full flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+              >
+                <span
+                  aria-hidden="true"
+                  class="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-slate-50"
+                  style="color: var(--primary, #475569);"
+                >
+                  <Icon name={logo.iconKey} class="h-6 w-6" />
+                </span>
+                <span class="text-sm font-medium text-slate-700">{logo.label}</span>
+              </a>
+            ) : (
+              <div class="flex h-full flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-center">
+                <span
+                  aria-hidden="true"
+                  class="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-slate-50"
+                  style="color: var(--primary, #475569);"
+                >
+                  <Icon name={logo.iconKey} class="h-6 w-6" />
+                </span>
+                <span class="text-sm font-medium text-slate-700">{logo.label}</span>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
