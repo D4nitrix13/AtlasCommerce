@@ -52,18 +52,23 @@ export interface LocalizableUseCase {
 /**
  * Mapa de tenants a sus use cases de la home B2C.
  *
- * Panda ya tiene sus 4 verticales acordadas en §7 del plan
- * (individuos, eventos, empresas, equipos). Kitsune suma sus 4
- * verticales nicho otaku en este commit (figuras, anime, manga,
- * cosplay). Los otros 2 tenants (MM-Boutique, Morales Store) quedan
- * con array vacío hasta el commit 4 del plan; el componente
- * `UseCases.astro` es empty-safe y no renderiza la sección si el
- * array está vacío.
+ * Cada tenant tiene 4 verticales acordadas en §7 del plan: Panda
+ * segmenta por tipo de cliente, Kitsune por nicho otaku, MM-Boutique
+ * por ocasión (boutique aspiracional: eventos, diario, trabajo,
+ * accesorios) y Morales Store por demografía (tienda general:
+ * mujer, hombre, niños, accesorios). El componente `UseCases.astro`
+ * es empty-safe y no renderiza la sección si el array está vacío;
+ * eso permite agregar un tenant nuevo en cualquier momento sin que
+ * rompa la home.
  *
- * Iconos de Kitsune: se reutilizan nombres validados del set
- * existente en `Icon.astro` para evitar el fallback silencioso a
- * `squares-2x2` (cube, eye, document-text, users — todos presentes).
- * Los slugs `figures/anime/manga/cosplay` siguen la tabla de §7.
+ * Iconos: todos los `iconKey` se validan contra el set existente en
+ * `Icon.astro` (que tiene fallback a `squares-2x2` para nombres
+ * desconocidos). MM-Boutique reutiliza iconos ya presentes (gift,
+ * shopping-cart, building-office, tag). Morales Store usa star para
+ * mujer porque el set no tiene iconos diferenciados por género:
+ * star refleja el posicionamiento aspiracional de la sección,
+ * aunque rompe la simetría con MM-Boutique — la elección se
+ * documenta en el body del commit 4.
  */
 export const TENANT_USE_CASES: Record<TenantSlug, readonly LocalizableUseCase[]> = {
   'panda-estampados': [
@@ -110,8 +115,50 @@ export const TENANT_USE_CASES: Record<TenantSlug, readonly LocalizableUseCase[]>
       href: '/products?category=cosplay',
     },
   ],
-  'mm-boutique': [],
-  'morales-store': [],
+  'mm-boutique': [
+    {
+      iconKey: 'gift',
+      labelKey: 'storefront.home.mm.useCase.eventos',
+      href: '/products?segment=eventos',
+    },
+    {
+      iconKey: 'shopping-cart',
+      labelKey: 'storefront.home.mm.useCase.diario',
+      href: '/products?segment=diario',
+    },
+    {
+      iconKey: 'building-office',
+      labelKey: 'storefront.home.mm.useCase.trabajo',
+      href: '/products?segment=trabajo',
+    },
+    {
+      iconKey: 'tag',
+      labelKey: 'storefront.home.mm.useCase.accesorios',
+      href: '/products?segment=accesorios',
+    },
+  ],
+  'morales-store': [
+    {
+      iconKey: 'star',
+      labelKey: 'storefront.home.morales.useCase.mujer',
+      href: '/products?segment=mujer',
+    },
+    {
+      iconKey: 'user',
+      labelKey: 'storefront.home.morales.useCase.hombre',
+      href: '/products?segment=hombre',
+    },
+    {
+      iconKey: 'users',
+      labelKey: 'storefront.home.morales.useCase.ninos',
+      href: '/products?segment=ninos',
+    },
+    {
+      iconKey: 'tag',
+      labelKey: 'storefront.home.morales.useCase.accesorios',
+      href: '/products?segment=accesorios',
+    },
+  ],
 } as const;
 
 /**
