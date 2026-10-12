@@ -169,7 +169,7 @@ Adicionalmente:
   por ejemplo `GET /passkeys/login/options`,
   `POST /passkeys/login`, `POST /user/passkeys`.
 
-Ver [backend/auth/auth-2fa.md](../auth/auth-2fa.md
+Ver [backend/auth/two-factor.md](../auth/two-factor.md
 "Autenticación de Dos Factores") para detalles del
 sistema 2FA.
 
