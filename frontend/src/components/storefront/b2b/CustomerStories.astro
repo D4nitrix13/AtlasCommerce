@@ -1,0 +1,118 @@
+---
+/**
+ * CustomerStories — testimonios B2B con cifras destacadas para Panda.
+ *
+ * Patrón Bonfire-style de "case study stat" pero aplicado al contexto
+ * B2B estampados: cada story muestra un quote corto, el nombre y rol
+ * del cliente (genéricos para evitar PII), una métrica cuantificable
+ * (cantidad estampada + tiempo) y un avatar SVG.
+ *
+ * Por qué avatars son iconos SVG y no fotos:
+ *   Decisión D4 — usar fotos reales expondría PII del cliente y nos
+ *   obligaría a gestionar consentimientos. Los iconos SVG del set
+ *   Icon.astro dan una sensación humana sin el riesgo.
+ *
+ * Por qué los stories viven como props y no en i18n:
+ *   Cada story es un objeto con 4 strings; serializar 3 stories como
+ *   keys planas en i18n (story1.quote, story1.customerName, ...) es
+ *   más ruido que beneficio. El caller pasa un array tipado y los
+ *   nombres/roles/métricas son casos realistas en español peninsular
+ *   o neutro que no necesitan variante por locale para el MVP. Cuando
+ *   haya casos reales vendrán del backend en los dos idiomas.
+ *
+ * Empty-safe: si stories está vacío no se renderiza ni la sección ni
+ * el heading.
+ *
+ * Tenant-aware: el círculo del avatar usa bg-[var(--primary)] con
+ * texto blanco interno y los números métricos se muestran en bold con
+ * el mismo color heredado, igual que el resto de componentes b2b/.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h2.
+ *   - Lista semántica <ul> con <li> por story.
+ *   - Las comillas tipográficas (« » en es, " " en en) se manejan en
+ *     el quote text que llega como prop.
+ *   - Iconos aria-hidden (quote + nombre ya transmiten identidad).
+ */
+import Icon from '../../ui/Icon.astro';
+
+export interface CustomerStory {
+  /** Cita textual del cliente (1-2 frases). */
+  quote: string;
+  /** Nombre completo del cliente. */
+  customerName: string;
+  /** Cargo + empresa del cliente. */
+  customerRole: string;
+  /** Cifra destacada (ej. "300 unidades", "98% satisfacción"). */
+  metricValue: string;
+  /** Label que acompaña la métrica (ej. "Entregadas en 3 días"). */
+  metricLabel: string;
+  /** Nombre que resuelve Icon.astro para el avatar. Fallback: user. */
+  avatarIconKey: string;
+}
+
+interface Props {
+  heading: string;
+  subheading?: string;
+  stories: readonly CustomerStory[];
+}
+
+const { heading, subheading, stories } = Astro.props;
+---
+
+{stories.length > 0 && (
+  <section
+    aria-labelledby="b2b-stories-heading"
+    class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+  >
+    <header class="mb-10 text-center sm:mb-12">
+      <h2
+        id="b2b-stories-heading"
+        class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+      >
+        {heading}
+      </h2>
+      {subheading && (
+        <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
+      )}
+    </header>
+
+    <ul class="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      {stories.map((story) => (
+        <li class="list-none">
+          <article class="flex h-full flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md sm:p-7">
+            <div class="flex items-start gap-4">
+              <span
+                aria-hidden="true"
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white shadow-sm"
+                style="background: var(--primary, #475569);"
+              >
+                <Icon name={story.avatarIconKey} class="h-6 w-6" />
+              </span>
+              <div class="flex flex-1 flex-col gap-1">
+                <p class="text-sm font-semibold text-slate-900">{story.customerName}</p>
+                <p class="text-xs text-slate-600 sm:text-sm">{story.customerRole}</p>
+              </div>
+            </div>
+
+            <blockquote class="flex-1 border-l-4 border-slate-200 pl-4 text-sm leading-relaxed text-slate-700 sm:text-base">
+              <span aria-hidden="true" class="select-none">“</span>
+              {story.quote}
+              <span aria-hidden="true" class="select-none">”</span>
+            </blockquote>
+
+            <div class="mt-auto flex items-baseline justify-between gap-3 border-t border-slate-100 pt-4">
+              <span
+                class="text-xl font-bold tracking-tight sm:text-2xl"
+                style="color: var(--primary, #475569);"
+              >
+                {story.metricValue}
+              </span>
+              <span class="text-xs text-slate-600 sm:text-sm">{story.metricLabel}</span>
+            </div>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

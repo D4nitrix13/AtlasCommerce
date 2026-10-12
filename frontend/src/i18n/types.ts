@@ -1250,6 +1250,10 @@ export type TranslationKey =
   | 'storefront.b2b.home.clients.heading'
   | 'storefront.b2b.home.clients.subheading'
 
+  // ─── storefront: B2B Panda — Bonfire gap (stories) ──────────────────
+  | 'storefront.b2b.home.stories.heading'
+  | 'storefront.b2b.home.stories.subheading'
+
   // ─── storefront: RFQ flow (F3.2) ────────────────────────────────────
   | 'storefront.rfq.title'
   | 'storefront.rfq.heading'
