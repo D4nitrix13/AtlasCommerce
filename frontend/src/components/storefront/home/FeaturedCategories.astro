@@ -7,8 +7,19 @@
  *
  * Tenant-aware: el accent del hover usa `--primary`. El grid colapsa a
  * 2 cols en mobile, 4 en desktop.
+ *
+ * Enriquecimiento visual Bonfire (sprint visual fidelity B2C):
+ *   - Sombra azul-fría de tres capas con inset, replicando la sombra
+ *     custom de Bonfire (rgba 204,219,240,.2 + rgb 189,202,216). Se
+ *     aplica via `style` inline porque Tailwind no mapea
+ *     box-shadow tan específico.
+ *   - Squiggle ámbar decorativa en la esquina superior derecha del
+ *     header de sección, detrás del heading.
+ *   - Mantiene API pública intacta: las sombras y el squiggle son
+ *     aditivos, no rompen contratos.
  */
 import type { Category } from '../../../types/catalog';
+import Squiggle from '../../ui/Squiggle.astro';
 
 interface Props {
   categories: readonly Category[];
@@ -20,8 +31,13 @@ interface Props {
 const { categories, heading, viewAllLabel, viewAllHref } = Astro.props;
 ---
 
-<section aria-label={heading} class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
-  <header class="mb-8 flex items-end justify-between gap-4">
+<section aria-label={heading} class="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+  <header class="relative mb-8 flex items-end justify-between gap-4">
+    <Squiggle
+      variant="arc"
+      color="#F6C36F"
+      class="pointer-events-none absolute -right-2 -top-3 hidden h-3 w-14 opacity-70 sm:block"
+    />
     <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{heading}</h2>
     <a
       href={viewAllHref}
@@ -37,7 +53,8 @@ const { categories, heading, viewAllLabel, viewAllHref } = Astro.props;
       <li class="list-none">
         <a
           href={category.href}
-          class="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          class="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
         >
           <img
             src={category.imageUrl}

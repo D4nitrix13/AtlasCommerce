@@ -8,8 +8,15 @@
  *
  * El heading + "Ver todos" sigue la jerarquía de h2 para que la home
  * mantenga el orden semántico correcto (h1 = hero, h2 = secciones).
+ *
+ * Enriquecimiento visual Bonfire (sprint visual fidelity B2C):
+ *   - Blob mint decorativo detrás de la sección con opacidad baja.
+ *   - El hover del grid lo maneja `ProductGrid`/`ProductCard`; este
+ *     componente solo agrega el wrapper decorativo.
+ *   - Sin nuevos props: API intacta, el Blob vive dentro del section.
  */
 import ProductGrid from '../products/ProductGrid.astro';
+import Blob from '../../ui/Blob.astro';
 import type { Product } from '../../../types/catalog';
 import type { ProductCardLabels } from '../products/ProductCard.astro';
 
@@ -38,8 +45,14 @@ const {
 } = Astro.props;
 ---
 
-<section aria-label={heading} class="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 sm:pb-16 lg:pb-20">
-  <header class="mb-8 flex items-end justify-between gap-4">
+<section aria-label={heading} class="relative overflow-hidden mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 sm:pb-16 lg:pb-20">
+  <Blob
+    color="mint"
+    size="lg"
+    class="pointer-events-none absolute -right-32 top-10 hidden opacity-30 blur-2xl md:block"
+  />
+
+  <header class="relative mb-8 flex items-end justify-between gap-4">
     <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{heading}</h2>
     <a
       href={viewAllHref}
