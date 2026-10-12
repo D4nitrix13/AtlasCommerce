@@ -564,6 +564,9 @@ const en: Translations = {
   'storefront.b2b.home.featuredCategories.heading': 'What we print most for businesses',
   'storefront.b2b.home.featuredCategories.viewAll': 'View full catalog',
 
+  // B2B Panda — Bonfire gap: StatsBar (F4.x — sprint home Bonfire)
+  'storefront.b2b.home.stats.heading': 'Why they print with us',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',
