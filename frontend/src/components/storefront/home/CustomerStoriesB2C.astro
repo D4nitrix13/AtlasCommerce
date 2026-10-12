@@ -1,0 +1,161 @@
+---
+/**
+ * CustomerStoriesB2C — testimonios B2C con quote, identidad del cliente
+ * y métrica destacada, equivalentes visuales al `CustomerStories` B2B
+ * pero con copy y mock data orientados a la audiencia B2C (Kitsune,
+ * MM-Boutique, Morales Store).
+ *
+ * Patrón Bonfire-style de "case study stat" (design-references-bonfire
+ * §4): cada story muestra un quote corto, nombre y rol del cliente
+ * (genéricos para evitar PII), una métrica cuantificable (cantidad de
+ * compras, rating, etc.) y un avatar SVG rotado.
+ *
+ * Por qué un componente separado de CustomerStories B2B:
+ *   La rama B2B Panda ya tiene un componente homónimo en
+ *   `components/storefront/b2b/CustomerStories.astro` con copy
+ *   corporativo (coordinadora de eventos, directora administrativa,
+ *   etc.). La rama B2C necesita copy "fan / cliente recurrente" más
+ *   cercano a testimonials de e-commerce. Mantener dos componentes
+ *   separados evita reescribir la API del B2B y deja la decisión
+ *   evolutiva en manos de cada rama por separado. La forma visual
+ *   (avatar rotado, métrica destacada, sombra azul-fría) sí se
+ *   replica 1:1.
+ *
+ * Por qué avatars son `AvatarCircle` y no iconos planos:
+ *   El home de Bonfire (design-references-bonfire §4) rota "fotos de
+ *   personas" entre -8 y +13 grados para dar textura humana. Para
+ *   evitar PII usamos `AvatarCircle` con iniciales, gradiente del
+ *   tenant y rotaciones del mismo rango. El `customerName` "Marcos
+ *   R." se reduce a "MR".
+ *
+ * Por qué los stories viven como props y no en i18n:
+ *   Mismo razonamiento que el CustomerStories B2B: cada story es un
+ *   objeto con 4-5 strings; serializarlos como keys planas
+ *   (story1.quote, story1.customerName, ...) es más ruido que
+ *   beneficio. El caller pasa un array tipado y los nombres/roles
+ *   son casos realistas en español neutro que no necesitan variante
+ *   por locale para el MVP. Cuando haya casos reales vendrán del
+ *   backend en los dos idiomas.
+ *
+ * Empty-safe: si stories está vacío no se renderiza ni la sección ni
+ * el heading.
+ *
+ * Tenant-aware: el gradiente del avatar usa `var(--primary)` y los
+ * números métricos se muestran en bold con el mismo color heredado.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h2.
+ *   - Lista semántica <ul> con <li> por story.
+ *   - El avatar lleva aria-hidden porque el customerName se renderiza
+ *     como texto adyacente.
+ */
+import AvatarCircle from '../../ui/AvatarCircle.astro';
+import Blob from '../../ui/Blob.astro';
+
+export interface CustomerStory {
+  /** Cita textual del cliente (1-2 frases). */
+  quote: string;
+  /** Nombre completo del cliente. */
+  customerName: string;
+  /** Rol o tipo de cliente (coleccionista, cliente recurrente, etc.). */
+  customerRole: string;
+  /** Cifra destacada (ej. "200+ compras", "98% recomienda", "4.9/5"). */
+  metricValue: string;
+  /** Label que acompaña la métrica (ej. "Estrellas promedio"). */
+  metricLabel: string;
+  /**
+   * Reservado por compat con la API previa; ignorado en este sprint
+   * porque los avatares pasan a `AvatarCircle` que deriva las
+   * iniciales del `customerName`. Lo dejamos declarado para que
+   * los callsites existentes no rompan TS.
+   */
+  avatarIconKey?: string;
+  /** Rotación opcional del avatar en grados (rango Bonfire: -8 a 13). */
+  avatarRotation?: number;
+}
+
+interface Props {
+  heading: string;
+  subheading?: string;
+  stories: readonly CustomerStory[];
+}
+
+const { heading, subheading, stories } = Astro.props;
+
+// Rotación por índice cuando el caller no la pasa: Marcos (0°) Ana
+// (-8°) Diego (+10°). Reproduce el patrón "torcido" del home Bonfire
+// sin requerir que el caller calcule cada una.
+const FALLBACK_ROTATIONS: readonly number[] = [0, -8, 10];
+---
+
+{stories.length > 0 && (
+  <section
+    aria-labelledby="b2c-stories-heading"
+    class="relative overflow-hidden mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+  >
+    <Blob
+      color="peach"
+      size="lg"
+      class="pointer-events-none absolute -left-32 top-20 opacity-30 blur-2xl"
+    />
+    <Blob
+      color="mint"
+      size="md"
+      class="pointer-events-none absolute -right-20 bottom-10 hidden opacity-30 blur-2xl md:block"
+    />
+
+    <header class="mb-10 text-center sm:mb-12">
+      <h2
+        id="b2c-stories-heading"
+        class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+      >
+        {heading}
+      </h2>
+      {subheading && (
+        <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
+      )}
+    </header>
+
+    <ul class="relative grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      {stories.map((story, index) => {
+        const rotation = story.avatarRotation ?? FALLBACK_ROTATIONS[index] ?? 0;
+        return (
+          <li class="list-none">
+            <article
+              class="flex h-full flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md sm:p-7"
+              style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
+            >
+              <div class="flex items-start gap-4">
+                <AvatarCircle
+                  name={story.customerName}
+                  size="lg"
+                  rotation={rotation}
+                />
+                <div class="flex flex-1 flex-col gap-1">
+                  <p class="text-sm font-semibold text-slate-900">{story.customerName}</p>
+                  <p class="text-xs text-slate-600 sm:text-sm">{story.customerRole}</p>
+                </div>
+              </div>
+
+              <blockquote class="flex-1 border-l-4 border-slate-200 pl-4 text-sm leading-relaxed text-slate-700 sm:text-base">
+                <span aria-hidden="true" class="select-none">“</span>
+                {story.quote}
+                <span aria-hidden="true" class="select-none">”</span>
+              </blockquote>
+
+              <div class="mt-auto flex items-baseline justify-between gap-3 border-t border-slate-100 pt-4">
+                <span
+                  class="text-xl font-bold tracking-tight sm:text-2xl"
+                  style="color: var(--primary, #475569);"
+                >
+                  {story.metricValue}
+                </span>
+                <span class="text-xs text-slate-600 sm:text-sm">{story.metricLabel}</span>
+              </div>
+            </article>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+)}

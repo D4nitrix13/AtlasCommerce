@@ -640,6 +640,18 @@ const es: Translations = {
   'storefront.b2b.home.ctaFinal.heading': 'Lleve su estampado al siguiente nivel',
   'storefront.b2b.home.ctaFinal.ctaLabel': 'Iniciar cotización',
 
+  // B2C Kitsune/MM/Morales — Bonfire gap: DarkHeroCard
+  'storefront.b2c.home.darkHero.eyebrow': 'Tu merch personalizado',
+  'storefront.b2c.home.darkHero.heading': 'Diseña y entrega',
+  'storefront.b2c.home.darkHero.body':
+    'Sin pedido mínimo, sin inventario. Desde tu idea hasta tu puerta.',
+  'storefront.b2c.home.darkHero.ctaLabel': 'Empezar a diseñar',
+
+  // B2C Kitsune/MM/Morales — Bonfire gap: CustomerStoriesB2C
+  'storefront.b2c.home.stories.heading': 'Lo que dicen nuestros clientes',
+  'storefront.b2c.home.stories.subheading':
+    'Historias reales de fans, coleccionistas y clientes recurrentes',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Cotización | Panda Estampados',
   'storefront.rfq.heading': 'Solicitá tu cotización personalizada',

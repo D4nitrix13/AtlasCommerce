@@ -1,0 +1,104 @@
+---
+/**
+ * DarkHeroCardB2C — card oscura tipo "card hero" de Bonfire, adaptada
+ * a la rama B2C.
+ *
+ * Por qué existe: el home de Bonfire tiene una sección con fondo
+ * verde bosque #234338 (design-references-bonfire §5) que usa
+ * eyebrow + H3 blanco + CTA outline blanco + mockup del producto +
+ * squiggle ámbar. Replicamos la mecánica para B2C (Kitsune, MM-Boutique,
+ * Morales Store).
+ *
+ * Por qué slate-900 y no un derivado del accent del tenant:
+ *   El verde bosque Bonfire #234338 es branded (no copiable). Usamos
+ *   `bg-slate-900` (equivalente neutral de #1B1E24 char/footer Bonfire)
+ *   como dark surface para mantener contraste alto. El CTA Final
+ *   charcoal que viene después en la composición usa el mismo fondo,
+ *   lo que crea ritmo narrativo: dos pausas oscuras con contenido
+ *   fuerte entremedio.
+ *
+ * Por qué el contenido B2C es "Tu merch personalizado":
+ *   En B2C el visitante típico es un fan / coleccionista / cliente
+ *   individual. La card le habla directamente sobre personalización
+ *   sin MOQ ("Sin pedido mínimo, sin inventario. Desde tu idea hasta
+ *   tu puerta."). Es la misma promesa de la home Bonfire
+ *   ("Made for your team") reescrita para audiencia de consumidor
+ *   final.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h3.
+ *   - CTA es un <a> real.
+ *   - Decorativos aria-hidden.
+ */
+import ProductMockup from '../../ui/ProductMockup.astro';
+import Squiggle from '../../ui/Squiggle.astro';
+
+interface Props {
+  /** Etiqueta pequeña arriba del heading (MAYÚSCULAS). */
+  eyebrow: string;
+  /** Heading principal de la card. */
+  heading: string;
+  /** Texto descriptivo de la propuesta. */
+  body: string;
+  /** Texto del CTA outline. */
+  ctaLabel: string;
+  /** URL del CTA outline. */
+  ctaHref: string;
+}
+
+const { eyebrow, heading, body, ctaLabel, ctaHref } = Astro.props;
+---
+
+<section
+  aria-labelledby="b2c-dark-hero-heading"
+  class="bg-slate-900 py-12 sm:py-16 lg:py-20"
+>
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6">
+    <div class="relative grid grid-cols-1 items-center gap-8 rounded-2xl bg-slate-900 px-6 py-10 sm:px-10 sm:py-12 lg:grid-cols-2 lg:gap-12 lg:py-14">
+      <Squiggle
+        variant="wave"
+        color="#F6C36F"
+        class="pointer-events-none absolute left-4 top-6 h-4 w-32 opacity-80"
+      />
+      <Squiggle
+        variant="loop"
+        color="#F6C36F"
+        class="pointer-events-none absolute bottom-10 left-12 hidden h-10 w-12 opacity-50 md:block"
+      />
+
+      <div class="flex flex-col gap-4">
+        <p class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-300 sm:text-sm">
+          <span
+            aria-hidden="true"
+            class="inline-block h-1.5 w-1.5 rounded-full bg-amber-300"
+          />
+          {eyebrow}
+        </p>
+        <h3
+          id="b2c-dark-hero-heading"
+          class="text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl"
+        >
+          {heading}
+        </h3>
+        <p class="max-w-xl text-base text-slate-300 sm:text-lg">{body}</p>
+        <div class="mt-2">
+          <a
+            href={ctaHref}
+            class="inline-flex h-11 items-center justify-center rounded-2xl border-2 border-white px-6 text-sm font-semibold text-white transition hover:bg-white hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+          >
+            {ctaLabel}
+          </a>
+        </div>
+      </div>
+
+      <div class="relative flex h-56 items-center justify-center lg:h-64">
+        <ProductMockup
+          variant="shirt"
+          logoText="B2C"
+          rotation={5}
+          class="relative h-48 w-48 lg:h-56 lg:w-56"
+        />
+      </div>
+    </div>
+  </div>
+</section>
