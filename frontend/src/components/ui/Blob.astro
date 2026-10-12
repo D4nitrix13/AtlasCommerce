@@ -1,0 +1,62 @@
+---
+/**
+ * Blob — primitive decorativo: fondo orgánico con border-radius irregular.
+ *
+ * Por qué existe: el home de Bonfire (design-references-bonfire §4) usa
+ * blobs con border-radius 62%/38%/45%/55% para romper la grilla. En lugar
+ * de embeber imágenes o mask-image, renderizamos un div con border-radius
+ * custom — más liviano, scaleable, y la opacidad/blur se aplican con
+ * Tailwind normal.
+ *
+ * Por qué tres colores: el sitio Bonfire mezcla melocotón, ámbar y menta
+ * como acentos pasteles. El caller elige según el contexto (menta para
+ * secciones frías/financieras, melocotón para hero, ámbar para acentos).
+ *
+ * Por qué size: controla el tamaño de la caja; el caller decide posición
+ * absoluta y z-index en `class`. Mantenemos size en `sm`/`md`/`lg` para
+ * no obligar al caller a recordar px magic numbers.
+ *
+ * Accesibilidad: el blob es puramente decorativo; marcamos aria-hidden
+ * para que no aparezca en el árbol de accesibilidad.
+ */
+type BlobColor = 'peach' | 'mint' | 'amber';
+type BlobSize = 'sm' | 'md' | 'lg';
+
+interface Props {
+  /** Tono del blob. Default: peach. */
+  color?: BlobColor;
+  /** Tamaño predefinido. Default: md. */
+  size?: BlobSize;
+  /** Clases Tailwind extra (position, z-index, etc). */
+  class?: string;
+}
+
+// Los hex son decorativos (no branded), copiados tal cual de la
+// referencia visual de Bonfire §1.
+const COLOR_HEX: Record<BlobColor, string> = {
+  peach: '#FCDACF',
+  mint: '#CBECE1',
+  amber: '#F6C36F',
+};
+
+const SIZE_CLASSES: Record<BlobSize, string> = {
+  sm: 'h-32 w-32',
+  md: 'h-64 w-64',
+  lg: 'h-96 w-96',
+};
+
+const {
+  color = 'peach',
+  size = 'md',
+  class: className = '',
+} = Astro.props;
+
+const fill = COLOR_HEX[color];
+const sizeClass = SIZE_CLASSES[size];
+---
+
+<div
+  aria-hidden="true"
+  class:list={['pointer-events-none', sizeClass, className]}
+  style={`background: ${fill}; border-radius: 62% 38% 45% 55% / 55% 48% 52% 45%;`}
+></div>

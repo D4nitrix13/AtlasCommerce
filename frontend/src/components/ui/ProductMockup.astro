@@ -1,0 +1,121 @@
+---
+/**
+ * ProductMockup — primitive SVG de mockup de producto estampable.
+ *
+ * Por qué existe: el sprint anterior del home B2B Panda quiso mostrar
+ * playeras, hoodies, mugs y sombreros con el logo del cliente estampado,
+ * pero no teníamos fotos reales (ni tiempo de generarlas por sprint). El
+ * sitio de Bonfire resuelve esto con ilustraciones naive de productos
+ * (design-references-bonfire §4); replicamos el patrón con SVGs simples
+ * de siluetas de productos + un logo genérico al centro.
+ *
+ * Por qué cuatro variantes: shirt, hoodie, mug y hat cubren los
+ * productos que un cliente B2B de estampados puede pedir. Cada variante
+ * tiene su propio path de silueta; el logo interior es constante
+ * (centrado, color del tenant vía `--primary` por defecto).
+ *
+ * Por qué `logoText` y no `logoSrc`: en este sprint no hay uploads de
+ * logos de cliente; mostramos texto ("Panda" por defecto) que el caller
+ * puede sobreescribir por marca ("Acme", etc). Cuando exista
+ * `/api/storefront/logos/:tenantId/:logoId` se reemplaza el `<text>` por
+ * un `<image>` sin tocar el resto del componente.
+ *
+ * Tenant-aware: el color del logo estampado usa `var(--primary)` que
+ * StorefrontLayout setea por tenant; el `accentColor` prop es override
+ * opcional para forzar un color específico en Storybook o tests.
+ *
+ * Accesibilidad: el mockup es decorativo; aria-hidden por defecto. Si
+ * un caller lo usa como ilustración principal, puede sobreescribir
+ * desde el contexto, pero el caso de uso previsto es siempre detrás
+ * del copy del tenant.
+ */
+type ProductVariant = 'shirt' | 'hoodie' | 'mug' | 'hat';
+
+interface Props {
+  /** Variante de producto. Default: shirt. */
+  variant?: ProductVariant;
+  /** Color del logo estampado. Default: var(--primary). */
+  accentColor?: string;
+  /** Texto del logo estampado (1-3 palabras recomendado). */
+  logoText?: string;
+  /** Rotación en grados. Útil para el patrón Bonfire (-8 a +13). */
+  rotation?: number;
+  /** Clases Tailwind para tamaño y posición. Default: 160x160. */
+  class?: string;
+}
+
+// Cada variante tiene su path de silueta en un viewBox 200x200 y la
+// posición del "logo" (cx, cy) en coordenadas del mismo viewBox. La
+// silueta se pinta con un color de relleno neutro y borde para que el
+// logo destaque. La forma no pretende realismo — es illustrative.
+const SHAPES: Record<
+  ProductVariant,
+  { body: string; logoX: number; logoY: number; viewBox: string }
+> = {
+  shirt: {
+    body: 'M40 50 L70 30 Q100 50 130 30 L160 50 L150 90 L140 80 L140 170 L60 170 L60 80 L50 90 Z',
+    logoX: 100,
+    logoY: 120,
+    viewBox: '0 0 200 200',
+  },
+  hoodie: {
+    body: 'M40 60 Q60 30 80 50 Q100 30 120 50 Q140 30 160 60 L150 100 L140 90 L140 170 L60 170 L60 90 L50 100 Z',
+    logoX: 100,
+    logoY: 125,
+    viewBox: '0 0 200 200',
+  },
+  mug: {
+    body: 'M55 60 L55 160 Q55 175 70 175 L130 175 Q145 175 145 160 L145 60 Z M145 80 Q175 80 175 110 Q175 140 145 140',
+    logoX: 100,
+    logoY: 120,
+    viewBox: '0 0 200 200',
+  },
+  hat: {
+    body: 'M40 150 L160 150 L155 145 Q150 60 100 60 Q50 60 45 145 Z M100 50 Q70 50 60 60 L140 60 Q130 50 100 50 Z',
+    logoX: 100,
+    logoY: 110,
+    viewBox: '0 0 200 200',
+  },
+};
+
+const {
+  variant = 'shirt',
+  accentColor,
+  logoText = 'Panda',
+  rotation = 0,
+  class: className = 'h-40 w-40',
+} = Astro.props;
+
+const shape = SHAPES[variant];
+const fillColor = accentColor ?? 'var(--primary, #2D9D8E)';
+const rotationTransform = rotation === 0 ? undefined : `rotate(${rotation} 100 100)`;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox={shape.viewBox}
+  class:list={['pointer-events-none', className]}
+  aria-hidden="true"
+>
+  <g transform={rotationTransform}>
+    <path
+      d={shape.body}
+      fill="#FFFFFF"
+      stroke="#CBD5E1"
+      stroke-width="2"
+      stroke-linejoin="round"
+    />
+    <text
+      x={shape.logoX}
+      y={shape.logoY}
+      text-anchor="middle"
+      dominant-baseline="middle"
+      font-family="Inter, system-ui, sans-serif"
+      font-size="20"
+      font-weight="700"
+      fill={fillColor}
+    >
+      {logoText}
+    </text>
+  </g>
+</svg>
