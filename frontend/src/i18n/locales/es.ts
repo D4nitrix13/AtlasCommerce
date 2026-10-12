@@ -569,6 +569,23 @@ const es: Translations = {
   // B2B Panda — Bonfire gap: StatsBar (F4.x — sprint home Bonfire)
   'storefront.b2b.home.stats.heading': 'Por qué estampan con nosotros',
 
+  // B2B Panda — Bonfire gap: ProcessSteps
+  'storefront.b2b.home.process.heading': 'Cómo funciona',
+  'storefront.b2b.home.process.subheading':
+    'De la cotización inicial hasta la entrega, en cuatro pasos',
+  'storefront.b2b.home.process.step1.title': 'Cotizá',
+  'storefront.b2b.home.process.step1.description':
+    'Envíanos tu diseño o idea y te respondemos en menos de 24 horas con cotización detallada.',
+  'storefront.b2b.home.process.step2.title': 'Aprobá',
+  'storefront.b2b.home.process.step2.description':
+    'Ajustamos el diseño, elegís técnica de estampado y confirmás muestra digital.',
+  'storefront.b2b.home.process.step3.title': 'Producimos',
+  'storefront.b2b.home.process.step3.description':
+    'Estampamos en tu plazo. Línea de producción dedicada para clientes B2B con capacidad mensual alta.',
+  'storefront.b2b.home.process.step4.title': 'Entregamos',
+  'storefront.b2b.home.process.step4.description':
+    'Despachamos a tu dirección o sucursales. Tracking incluido para pedidos superiores a 50 unidades.',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Cotización | Panda Estampados',
   'storefront.rfq.heading': 'Solicitá tu cotización personalizada',

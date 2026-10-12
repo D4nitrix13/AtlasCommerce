@@ -1,0 +1,101 @@
+---
+/**
+ * ProcessSteps — explainer horizontal de 4 pasos para Panda Estampados.
+ *
+ * Patrón Bonfire-style de "stepper 1-2-3-4" para mostrar el flujo de
+ * trabajo B2B de un vistazo: cotización → aprobación → producción →
+ * entrega. Replica la sección homónima que Bonfire tiene en su home
+ * para reducir la fricción perceptual del usuario nuevo.
+ *
+ * Por qué los `titles` y `descriptions` llegan como props y no como
+ * strings dentro del componente: cada paso es independiente y permite
+ * reordenarlos, ocultarlos o agregar un quinto (post-venta) sin tocar
+ * el archivo. Esto desacopla la composición visual del contenido.
+ *
+ * Por qué `iconKey: string` y no enum cerrado:
+ *   Mismo criterio que UseCases y StatsBar. Icon.astro fallback a
+ *   squares-2x2 si el nombre no existe, así sumar íconos no requiere
+ *   refactor tipado.
+ *
+ * Empty-safe: si el array steps está vacío no se renderiza ni la
+ * sección ni el heading. Igual que StatsBar y la mayoría de secciones
+ * B2B: la página decide cuándo omitir pasando [].
+ *
+ * Tenant-aware: el número circular grande usa bg-[var(--primary)] y
+ * el icono interior hereda el color del texto blanco. Lo demás queda
+ * neutral (slate) para no competir visualmente con el TenantHero.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h2 (jerarquía h1=hero, h2=sección).
+ *   - <ol> semántica para los pasos (orden importa en el flujo).
+ *   - aria-current="step" solo si la página decide resaltar uno
+ *     (no se usa en este MVP porque la home es informativa, no wizard).
+ *   - Iconos aria-hidden (el número del step ya transmite la posición).
+ */
+import Icon from '../../ui/Icon.astro';
+
+export interface ProcessStep {
+  /** Nombre que resuelve `Icon.astro`. Fallback: squares-2x2. */
+  iconKey: string;
+  /** Título del paso (corto, ya traducido). */
+  title: string;
+  /** Descripción del paso (1-2 frases, ya traducida). */
+  description: string;
+}
+
+interface Props {
+  heading: string;
+  subheading?: string;
+  steps: readonly ProcessStep[];
+}
+
+const { heading, subheading, steps } = Astro.props;
+---
+
+{steps.length > 0 && (
+  <section
+    aria-labelledby="b2b-process-heading"
+    class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+  >
+    <header class="mb-10 text-center sm:mb-12">
+      <h2
+        id="b2b-process-heading"
+        class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+      >
+        {heading}
+      </h2>
+      {subheading && (
+        <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
+      )}
+    </header>
+
+    <ol class="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-4">
+      {steps.map((step, index) => (
+        <li class="relative list-none rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+          <div class="flex items-start gap-4">
+            <span
+              aria-hidden="true"
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-sm"
+              style="background: var(--primary, #475569);"
+            >
+              {index + 1}
+            </span>
+            <div class="flex flex-1 flex-col gap-2">
+              <span
+                aria-hidden="true"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-slate-50"
+                style="color: var(--primary, #475569);"
+              >
+                <Icon name={step.iconKey} class="h-5 w-5" />
+              </span>
+              <h3 class="text-base font-semibold text-slate-900 sm:text-lg">
+                {step.title}
+              </h3>
+              <p class="text-sm text-slate-600 sm:text-base">{step.description}</p>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+)}
