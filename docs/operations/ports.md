@@ -21,6 +21,12 @@ cambiarlo.
 | `prod mm-boutique`                     | —        | —     | —       | —        | —     |
 | `prod morales-store`                   | —        | —     | —       | —        | —     |
 
+> Los defaults de dev (`6432`, `7379`, `9000`, `5321`, `2121`) viven en
+> `docker/instances/development/<store>/environment/.env.example` de cada
+> tienda. Cada instancia tiene su propio `.env` (gitignored) que pisa
+> esos valores; shiftar puertos por instancia es la forma soportada de
+> correr 2 dev en paralelo.
+
 `—` significa que **no se publica al host**. Esa decisión es deliberada:
 las instancias de prod resuelven HTTP/HTTPS por Caddy vía dominio
 (`panda-estampados.com`, `mm-boutique.com`, `morales-store.com`, etc.)

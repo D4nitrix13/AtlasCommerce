@@ -2,6 +2,11 @@
 
 > **RNF-SEC-020**: Los secrets críticos (APP_KEY, claves de pasarela
 > de pago, etc.) se rotarán según un calendario documentado.
+>
+> **Service names:** los ejemplos usan `backend` y `postgres` que
+> son los nombres canónicos de dev. En prod esos servicios se llaman
+> `app` y `db`; el dispatcher `scripts/docker-stack.sh` los traduce
+> automáticamente — pasá el nombre canónico y el stage.
 
 ## Inventario de secrets
 
