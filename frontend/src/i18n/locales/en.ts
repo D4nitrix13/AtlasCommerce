@@ -584,6 +584,11 @@ const en: Translations = {
   'storefront.b2b.home.process.step4.description':
     'We ship to your address or branches. Tracking included for orders above 50 units.',
 
+  // B2B Panda — Bonfire gap: ClientLogos
+  'storefront.b2b.home.clients.heading': 'Who prints with Panda',
+  'storefront.b2b.home.clients.subheading':
+    'Businesses, schools, NGOs, restaurants and sports clubs across the country',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',
