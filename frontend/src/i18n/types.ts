@@ -1278,6 +1278,16 @@ export type TranslationKey =
   | 'storefront.b2b.home.materials.feature3.label'
   | 'storefront.b2b.home.materials.feature3.description'
 
+  // ─── storefront: B2B Panda — Bonfire gap (dark hero card) ──────────
+  | 'storefront.b2b.home.darkHero.eyebrow'
+  | 'storefront.b2b.home.darkHero.heading'
+  | 'storefront.b2b.home.darkHero.body'
+  | 'storefront.b2b.home.darkHero.ctaLabel'
+
+  // ─── storefront: B2B Panda — Bonfire gap (final CTA full-width) ────
+  | 'storefront.b2b.home.ctaFinal.heading'
+  | 'storefront.b2b.home.ctaFinal.ctaLabel'
+
   // ─── storefront: RFQ flow (F3.2) ────────────────────────────────────
   | 'storefront.rfq.title'
   | 'storefront.rfq.heading'

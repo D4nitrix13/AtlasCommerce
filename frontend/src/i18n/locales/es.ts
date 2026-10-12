@@ -629,6 +629,17 @@ const es: Translations = {
   'storefront.b2b.home.materials.feature3.description':
     'Serigrafía, bordado, vinilo textil, sublimación.',
 
+  // B2B Panda — Bonfire gap: DarkHeroCard (F4.x — sprint visual fidelity)
+  'storefront.b2b.home.darkHero.eyebrow': 'Estampado B2B',
+  'storefront.b2b.home.darkHero.heading': 'Hecho para tu equipo',
+  'storefront.b2b.home.darkHero.body':
+    'Sin inventario mínimo, sin disputas de marca. Diseño + estampado + entrega para tu empresa.',
+  'storefront.b2b.home.darkHero.ctaLabel': 'Cotizar mi pedido',
+
+  // B2B Panda — Bonfire gap: CtaFinal (F4.x — sprint visual fidelity)
+  'storefront.b2b.home.ctaFinal.heading': 'Lleve su estampado al siguiente nivel',
+  'storefront.b2b.home.ctaFinal.ctaLabel': 'Iniciar cotización',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Cotización | Panda Estampados',
   'storefront.rfq.heading': 'Solicitá tu cotización personalizada',

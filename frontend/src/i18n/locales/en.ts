@@ -627,6 +627,17 @@ const en: Translations = {
   'storefront.b2b.home.materials.feature3.description':
     'Screen printing, embroidery, textile vinyl, sublimation.',
 
+  // B2B Panda — Bonfire gap: DarkHeroCard (F4.x — sprint visual fidelity)
+  'storefront.b2b.home.darkHero.eyebrow': 'B2B printing',
+  'storefront.b2b.home.darkHero.heading': 'Made for your team',
+  'storefront.b2b.home.darkHero.body':
+    'No minimum inventory, no brand disputes. Design + print + delivery for your company.',
+  'storefront.b2b.home.darkHero.ctaLabel': 'Quote my order',
+
+  // B2B Panda — Bonfire gap: CtaFinal (F4.x — sprint visual fidelity)
+  'storefront.b2b.home.ctaFinal.heading': 'Take your custom merch to the next level',
+  'storefront.b2b.home.ctaFinal.ctaLabel': 'Start a quote',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',
