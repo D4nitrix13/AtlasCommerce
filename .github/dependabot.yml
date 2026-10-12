@@ -1,8 +1,8 @@
 version: 2
 
 updates:
-  # Frontend (Astro + React + pnpm)
-  - package-ecosystem: "npm"
+  # Frontend (Astro + React + Bun)
+  - package-ecosystem: "bun"
     directory: "/frontend"
     schedule:
       interval: "weekly"

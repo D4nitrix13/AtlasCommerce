@@ -17,17 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
-      - name: Install pnpm dependencies
+          bun-version: '1.4'
+      - name: Install Bun dependencies
         working-directory: frontend
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
   quality:
     name: Lint + Typecheck + Storybook build
@@ -35,30 +30,22 @@ jobs:
     needs: install
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
-      - name: Install pnpm dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
+          bun-version: '1.4'
 
       - name: ESLint
         working-directory: frontend
-        run: pnpm exec eslint "src/**/*.{ts,tsx,astro}"
+        run: bunx eslint "src/**/*.{ts,tsx,astro}"
 
       - name: Prettier check
         working-directory: frontend
-        run: pnpm exec prettier --check "src/**/*.{ts,tsx,astro,css,md}"
+        run: bunx prettier --check "src/**/*.{ts,tsx,astro,css,md}"
 
       - name: TypeScript typecheck
         working-directory: frontend
-        run: pnpm exec astro check
+        run: bun run astro check
 
       - name: Storybook build
         working-directory: frontend
-        run: pnpm storybook:build --quiet
+        run: bun run storybook:build --quiet

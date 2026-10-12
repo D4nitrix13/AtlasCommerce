@@ -25,12 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: '22'
-
-      - name: Install markdownlint-cli
-        run: npm install -g markdownlint-cli
-
+          bun-version: '1.4'
+      - name: Install markdownlint-cli globally
+        run: bun add -g markdownlint-cli
       - name: Lint markdown files
         run: markdownlint "**/*.md" --ignore node_modules --ignore vendor --ignore dist --ignore .astro --ignore 'frontend/storybook-static/**'
