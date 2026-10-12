@@ -8,19 +8,30 @@
  *   - Muestra bullets de propuesta de valor operativa (volumen / RFQ /
  *     NET 30) en lugar de emocional / fandom.
  *   - CTAs apuntan a `bulk-order` y `rfq` (no al catálogo genérico).
- *   - Accent color usa `var(--primary)` — Panda lo resuelve a esmeralda
- *     (#059669) vía StorefrontLayout.astro.
+ *   - Accent color usa `var(--primary)` — Panda lo resuelve a teal
+ *     #2D9D8E vía StorefrontLayout.astro.
  *
- * Patrón B2B (design-refs §7.1):
+ * Patrón B2B (design-refs §7):
  *   "Action-required + account status" → no es un hero emocional,
  *   es una propuesta de valor operativa con CTA primario claro.
  *
+ * Enriquecimiento visual Bonfire (F4.x — sprint visual fidelity):
+ *   3 ProductMockup flotando alrededor del hero con rotaciones del
+ *   rango Bonfire (-8° a +13°) y 2 Blob decorativos detrás del copy.
+ *   1 Squiggle ámbar cerca del CTA primario. Toda la decoración vive
+ *   en `aria-hidden` y z-index bajo para no afectar lectura ni
+ *   contraste del contenido principal. La API del componente no cambia.
+ *
  * Accesibilidad (AGENTS §17):
- *   - `<section>` con `aria-labelledby`.
- *   - CTAs son `<a>` reales (no `<div onclick>`).
- *   - Bullets usan `<ul>` semántica con íconos `aria-hidden`.
- *   - Imagen decorativa `aria-hidden`.
+ *   - <section> con aria-labelledby.
+ *   - CTAs son <a> reales (no <div onclick>).
+ *   - Bullets usan <ul> semántica con íconos aria-hidden.
+ *   - Imagen decorativa aria-hidden.
  */
+import Blob from '../../ui/Blob.astro';
+import Squiggle from '../../ui/Squiggle.astro';
+import ProductMockup from '../../ui/ProductMockup.astro';
+
 interface HeroBullet {
   /** Ícono emoji o glifo corto — solo decorativo, aria-hidden. */
   icon: string;
@@ -54,51 +65,89 @@ const { eyebrow, title, subtitle, primaryCta, secondaryCta, bullets } = Astro.pr
     style="background: var(--secondary, #10b981);"
   ></div>
 
-  <div class="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
-    <p class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800 backdrop-blur">
-      <span
-        aria-hidden="true"
-        class="inline-block h-1.5 w-1.5 rounded-full"
-        style="background: var(--primary, #059669);"
+  <Blob
+    color="mint"
+    size="lg"
+    class="pointer-events-none absolute -right-24 top-10 opacity-50 blur-2xl"
+  />
+  <Blob
+    color="peach"
+    size="md"
+    class="pointer-events-none absolute -left-20 bottom-10 hidden opacity-50 blur-2xl md:block"
+  />
+
+  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-12 lg:py-28">
+    <div class="flex flex-col items-start gap-6">
+      <p class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800 backdrop-blur">
+        <span
+          aria-hidden="true"
+          class="inline-block h-1.5 w-1.5 rounded-full"
+          style="background: var(--primary, #059669);"
+        />
+        {eyebrow}
+      </p>
+
+      <h1
+        id="tenant-hero-heading"
+        class="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+      >
+        {title}
+      </h1>
+
+      <p class="max-w-2xl text-base text-slate-700 sm:text-lg">{subtitle}</p>
+
+      {bullets.length > 0 && (
+        <ul class="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
+          {bullets.map((bullet) => (
+            <li class="flex items-start gap-2 text-sm text-slate-700 sm:text-base">
+              <span aria-hidden="true" class="mt-0.5 text-base">
+                {bullet.icon}
+              </span>
+              <span>{bullet.text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div class="relative mt-2 flex flex-wrap items-center gap-3">
+        <a
+          href={primaryCta.href}
+          class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#059669)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#047857)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#059669)] focus-visible:ring-offset-2"
+        >
+          {primaryCta.label}
+        </a>
+        <a
+          href={secondaryCta.href}
+          class="inline-flex h-11 items-center justify-center rounded-lg border border-emerald-300 bg-white px-6 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#059669)] focus-visible:ring-offset-2"
+        >
+          {secondaryCta.label}
+        </a>
+        <Squiggle
+          variant="wave"
+          color="#F6C36F"
+          class="pointer-events-none absolute -right-6 -top-8 h-4 w-24 opacity-80 sm:-right-12 sm:-top-10"
+        />
+      </div>
+    </div>
+
+    <div class="relative hidden h-[420px] lg:block">
+      <ProductMockup
+        variant="shirt"
+        logoText="Panda"
+        class="absolute right-4 top-6 h-48 w-48"
       />
-      {eyebrow}
-    </p>
-
-    <h1
-      id="tenant-hero-heading"
-      class="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
-    >
-      {title}
-    </h1>
-
-    <p class="max-w-2xl text-base text-slate-700 sm:text-lg">{subtitle}</p>
-
-    {bullets.length > 0 && (
-      <ul class="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
-        {bullets.map((bullet) => (
-          <li class="flex items-start gap-2 text-sm text-slate-700 sm:text-base">
-            <span aria-hidden="true" class="mt-0.5 text-base">
-              {bullet.icon}
-            </span>
-            <span>{bullet.text}</span>
-          </li>
-        ))}
-      </ul>
-    )}
-
-    <div class="mt-2 flex flex-wrap items-center gap-3">
-      <a
-        href={primaryCta.href}
-        class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#059669)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#047857)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#059669)] focus-visible:ring-offset-2"
-      >
-        {primaryCta.label}
-      </a>
-      <a
-        href={secondaryCta.href}
-        class="inline-flex h-11 items-center justify-center rounded-lg border border-emerald-300 bg-white px-6 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#059669)] focus-visible:ring-offset-2"
-      >
-        {secondaryCta.label}
-      </a>
+      <ProductMockup
+        variant="mug"
+        logoText="Panda"
+        rotation={-8}
+        class="absolute left-2 top-20 h-32 w-32"
+      />
+      <ProductMockup
+        variant="hat"
+        logoText="Panda"
+        rotation={12}
+        class="absolute bottom-4 left-12 h-36 w-36"
+      />
     </div>
   </div>
 </section>
