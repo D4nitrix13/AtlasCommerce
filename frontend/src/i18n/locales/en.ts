@@ -503,6 +503,12 @@ const en: Translations = {
   'storefront.home.useCases.heading': 'For whoever you are',
   'storefront.home.useCases.subheading': 'Choose the vertical that best represents you',
   'storefront.home.ctaBanner.label': 'Take your design to the next level',
+
+  // Panda use cases (Commit 2 of plan)
+  'storefront.home.panda.useCase.individual': 'Individuals',
+  'storefront.home.panda.useCase.eventos': 'Events',
+  'storefront.home.panda.useCase.empresas': 'Businesses',
+  'storefront.home.panda.useCase.equipos': 'Teams and sports',
   'storefront.productCard.badge.new': 'New',
   'storefront.productCard.badge.sale': 'Sale',
   'storefront.productCard.badge.lowStock': 'Low stock',

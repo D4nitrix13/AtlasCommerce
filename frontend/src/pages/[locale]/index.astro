@@ -9,26 +9,32 @@
  *
  *   - `panda-estampados` → `TenantHero` (copy B2B estampados) +
  *     categorías top B2B + CTAs a RFQ y bulk-order.
- *   - cualquier otro     → `HeroBanner` (F1.4 B2C Kitsune) +
- *     categorías B2C de F1.4.
+ *   - cualquier otro     → composición B2C Bonfire-adapted:
+ *     `HomeHero` (con trustBadges) + categorías + productos destacados
+ *     + `UseCases` (segmentos del tenant desde `data/tenants.ts`) +
+ *     `CtaBanner` de cierre.
  *
- * Esto mantiene el comportamiento F1.4 intacto para Kitsune y agrega la
- * rama B2B sin duplicar layouts. Si en el futuro hay más tenants, esta
- * lógica escala con un switch/if-else sobre `tenantSlug`.
+ * Esto mantiene el comportamiento F1.4 de Panda B2B intacto y reemplaza
+ * la composición B2C por la nueva forma del plan de home-redesign
+ * (commit 2 de 5).
  *
  * Mock data:
  *   - Categorías y productos viven en `data/products.ts` (B2C) y
- *     `data/b2b-mock.ts` (B2B). Cuando los endpoints existan, ambos
- *     se reemplazan por fetch + hidratación.
+ *     `data/b2b-mock.ts` (B2B). Use cases por tenant en
+ *     `data/tenants.ts`. Cuando los endpoints existan, todos se
+ *     reemplazan por fetch + hidratación.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
-import HeroBanner from '../../components/storefront/home/HeroBanner.astro';
+import HomeHero from '../../components/storefront/home/HomeHero.astro';
+import UseCases from '../../components/storefront/home/UseCases.astro';
+import CtaBanner from '../../components/storefront/home/CtaBanner.astro';
 import FeaturedCategories from '../../components/storefront/home/FeaturedCategories.astro';
 import FeaturedProducts from '../../components/storefront/home/FeaturedProducts.astro';
 import TenantHero from '../../components/storefront/b2b/TenantHero.astro';
 import { getServerDictionary } from '../../i18n/server';
 import { CATEGORIES, getFeaturedProducts } from '../../data/products';
 import { B2B_CATEGORIES } from '../../data/b2b-mock';
+import { getUseCasesForTenant } from '../../data/tenants';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -51,6 +57,18 @@ const cardLabels = {
   outOfStock: t['storefront.productCard.outOfStock'],
   viewDetail: t['storefront.productCard.viewDetail'],
 };
+
+// Los use cases vienen del data layer como `{ iconKey, labelKey, href }`.
+// Acá resolvemos `labelKey` contra el dictionary `t` para producir la
+// shape final `{ iconKey, label, href }` que espera `UseCases.astro`.
+// El fallback al `labelKey` cubre el caso de una key faltante durante
+// el rollout (no se renderiza string vacía).
+const rawUseCases = getUseCasesForTenant(tenantSlug);
+const localizedUseCases = rawUseCases.map((useCase) => ({
+  iconKey: useCase.iconKey,
+  label: t[useCase.labelKey] ?? useCase.labelKey,
+  href: useCase.href,
+}));
 ---
 
 <StorefrontLayout title={t['storefront.search.title']} cartCount={cartCount}>
@@ -85,7 +103,7 @@ const cardLabels = {
     </>
   ) : (
     <>
-      <HeroBanner
+      <HomeHero
         eyebrow={t['storefront.home.hero.eyebrow']}
         title={t['storefront.home.hero.title']}
         subtitle={t['storefront.home.hero.subtitle']}
@@ -97,6 +115,11 @@ const cardLabels = {
           label: t['storefront.home.hero.ctaSecondary'],
           href: searchHref,
         }}
+        trustBadges={[
+          { iconKey: 'shield-check', label: t['storefront.home.trustBadge.riskFree'] },
+          { iconKey: 'cube', label: t['storefront.home.trustBadge.noInventory'] },
+          { iconKey: 'bolt', label: t['storefront.home.trustBadge.easyUse'] },
+        ]}
       />
 
       <FeaturedCategories
@@ -116,6 +139,18 @@ const cardLabels = {
         loadingLabel={t['storefront.productGrid.loading']}
         emptyLabel={t['storefront.productGrid.empty']}
         emptyHint={t['storefront.productGrid.emptyHint']}
+      />
+
+      <UseCases
+        heading={t['storefront.home.useCases.heading']}
+        subheading={t['storefront.home.useCases.subheading']}
+        cases={localizedUseCases}
+      />
+
+      <CtaBanner
+        heading={t['storefront.home.ctaBanner.label']}
+        ctaLabel={t['storefront.home.hero.ctaPrimary']}
+        ctaHref={productsHref}
       />
     </>
   )}
