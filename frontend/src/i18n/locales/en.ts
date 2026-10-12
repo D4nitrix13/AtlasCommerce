@@ -612,6 +612,21 @@ const en: Translations = {
   'storefront.b2b.home.faq.q5.answer':
     'Yes, we ship to any department in Nicaragua and Central America. For corporate orders with multiple branches we use a dedicated courier with personalised tracking.',
 
+  // B2B Panda — Bonfire gap: MaterialsCard
+  'storefront.b2b.home.materials.heading': 'Materials and inks',
+  'storefront.b2b.home.materials.eyebrow': 'Quality you can feel',
+  'storefront.b2b.home.materials.body':
+    'We work with certified textiles and eco-friendly inks. Every order ships with a technical sheet covering material origin and certifications.',
+  'storefront.b2b.home.materials.feature1.label': 'Organic cotton',
+  'storefront.b2b.home.materials.feature1.description':
+    'GOTS certified, pesticide free.',
+  'storefront.b2b.home.materials.feature2.label': 'Eco-friendly inks',
+  'storefront.b2b.home.materials.feature2.description':
+    'Water-based, no phthalates or heavy metals.',
+  'storefront.b2b.home.materials.feature3.label': 'Multiple techniques',
+  'storefront.b2b.home.materials.feature3.description':
+    'Screen printing, embroidery, textile vinyl, sublimation.',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',
