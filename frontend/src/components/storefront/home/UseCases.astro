@@ -1,0 +1,80 @@
+---
+/**
+ * UseCases — sección "personas" / verticales de la home B2C.
+ *
+ * Inspirada en la home de Bonfire: un H2 + subheading + grilla de cards
+ * vertical. Cada card combina un icono circular con un label y enlaza a un
+ * destino del vertical (categoría, landing, etc.).
+ *
+ * Por qué `iconKey: string` (no enum cerrado):
+ *   Los iconos disponibles crecen con cada tenant y cada historia de
+ *   Storybook mock. Pasar `string` permite que el componente delegue
+ *   en `Icon.astro` (que tiene fallback a `squares-2x2` para nombres
+ *   desconocidos) sin necesitar un refactor cada vez que se agrega un
+ *   icono. La validación semántica queda en los datos, no en el tipo.
+ *
+ * Por qué `Icon.astro` y no `lucide-react` directo:
+ *   `Icon.astro` renderiza SVG inline en el servidor — cero hidratación
+ *   React, mismo set de paths que lucide. Mantener los componentes
+ *   storefront en Astro puro evita el costo de un `client:` directive
+ *   para algo que no necesita interactividad.
+ *
+ * Empty-safe: si `cases.length === 0` no se renderiza nada — ni la
+ * sección ni el heading. Esto deja al caller la decisión de omitir
+ * la sección pasando un array vacío.
+ *
+ * Tenant-aware: el círculo del icono usa `--primary`; el borde usa el
+ * gris neutro slate, igual que `FeaturedCategories`.
+ */
+import Icon from '../../ui/Icon.astro';
+
+export interface UseCase {
+  /** Nombre que resuelve `Icon.astro`. Fallback: `squares-2x2`. */
+  iconKey: string;
+  /** Etiqueta visible, ya traducida por i18n. */
+  label: string;
+  /** Destino del vertical (categoría, landing, etc.). */
+  href: string;
+}
+
+interface Props {
+  heading: string;
+  subheading?: string;
+  cases: readonly UseCase[];
+}
+
+const { heading, subheading, cases } = Astro.props;
+---
+
+{cases.length > 0 && (
+  <section aria-label={heading} class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+    <div class="mb-8 text-center">
+      <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{heading}</h2>
+      {subheading && (
+        <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
+      )}
+    </div>
+
+    <ul class="grid list-none grid-cols-2 gap-6 p-0 sm:grid-cols-3 lg:grid-cols-4">
+      {cases.map((useCase) => (
+        <li class="list-none">
+          <a
+            href={useCase.href}
+            class="group flex flex-col items-center gap-3 rounded-xl p-4 text-center transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          >
+            <span
+              aria-hidden="true"
+              class="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md"
+              style="color: var(--primary, #475569);"
+            >
+              <Icon name={useCase.iconKey} class="h-7 w-7" />
+            </span>
+            <span class="text-sm font-semibold text-slate-800 sm:text-base">
+              {useCase.label}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

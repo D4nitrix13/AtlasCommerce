@@ -1,0 +1,127 @@
+---
+/**
+ * HomeHero — hero del storefront B2C (home).
+ *
+ * Variante "Bonfire" de HeroBanner: mismo layout base (eyebrow + h1 +
+ * subtítulo + CTAs) con una fila opcional de trustBadges debajo de los
+ * CTAs. Las badges son chips pill-shape con icono + texto que refuerzan
+ * propuesta de valor (riesgo, inventario, facilidad).
+ *
+ * DIFERENCIA con HeroBanner (F1.4):
+ *   - Acepta `trustBadges?: readonly TrustBadge[]` opcional.
+ *   - Renderiza la fila solo si el array tiene items (empty-safe).
+ *   - HomeHeroCta se redeclara localmente en lugar de importar el tipo
+ *     `HeroCta` de HeroBanner.astro: mantiene HomeHero autocontenido y
+ *     permite refactorizar cualquiera de los dos sin acoplamiento.
+ *
+ * Tenant-aware: usa `--primary` del theme root seteado por
+ * `StorefrontLayout.astro`. Cada tienda (Kitsune violeta, Panda
+ * esmeralda, etc.) obtiene su propio hero sin tocar el componente.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h1.
+ *   - Iconos de badges son `aria-hidden` (decorativos; el label ya
+ *     transmite el mensaje).
+ *   - CTAs son `<a>` reales.
+ */
+export interface HomeHeroCta {
+  label: string;
+  href: string;
+}
+
+export interface TrustBadge {
+  /** Texto que se muestra al usuario, ya traducido por i18n. */
+  label: string;
+  /** Clave que resuelve `Icon.astro` (set lucide inline). */
+  iconKey: 'shield-check' | 'archive-box' | 'bolt' | 'check' | (string & {});
+}
+
+import Icon from '../../ui/Icon.astro';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  subtitle: string;
+  primaryCta: HomeHeroCta;
+  secondaryCta?: HomeHeroCta;
+  trustBadges?: readonly TrustBadge[];
+}
+
+const { eyebrow, title, subtitle, primaryCta, secondaryCta, trustBadges } = Astro.props;
+
+// Empty-safe: la fila solo aparece si hay badges con label no vacío.
+const visibleBadges = (trustBadges ?? []).filter((badge) => badge.label.trim().length > 0);
+const hasBadges = visibleBadges.length > 0;
+---
+
+<section
+  aria-labelledby="home-hero-heading"
+  class="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100"
+>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-20 blur-3xl"
+    style="background: var(--primary, #475569);"
+  ></div>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full opacity-10 blur-3xl"
+    style="background: var(--primary, #475569);"
+  ></div>
+
+  <div class="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
+    {eyebrow && (
+      <p class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 backdrop-blur">
+        <span
+          aria-hidden="true"
+          class="inline-block h-1.5 w-1.5 rounded-full"
+          style="background: var(--primary, #475569);"
+        />
+        {eyebrow}
+      </p>
+    )}
+
+    <h1
+      id="home-hero-heading"
+      class="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+    >
+      {title}
+    </h1>
+
+    <p class="max-w-2xl text-base text-slate-600 sm:text-lg">{subtitle}</p>
+
+    <div class="mt-2 flex flex-wrap items-center gap-3">
+      <a
+        href={primaryCta.href}
+        class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+      >
+        {primaryCta.label}
+      </a>
+      {secondaryCta && (
+        <a
+          href={secondaryCta.href}
+          class="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+        >
+          {secondaryCta.label}
+        </a>
+      )}
+    </div>
+
+    {hasBadges && (
+      <ul class="mt-4 flex flex-wrap items-center gap-2" aria-label="Beneficios">
+        {visibleBadges.map((badge) => (
+          <li class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-700 backdrop-blur sm:text-sm">
+            <span
+              aria-hidden="true"
+              class="inline-flex h-4 w-4 items-center justify-center"
+              style="color: var(--primary, #475569);"
+            >
+              <Icon name={badge.iconKey} class="h-4 w-4" />
+            </span>
+            {badge.label}
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>
