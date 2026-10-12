@@ -495,6 +495,14 @@ const en: Translations = {
   'storefront.home.featuredCategories.viewAll': 'See all',
   'storefront.home.featuredProducts.heading': 'Featured this week',
   'storefront.home.featuredProducts.viewAll': 'See all products',
+
+  // B2C home additions (Commit 1 of plan)
+  'storefront.home.trustBadge.riskFree': '100% risk-free',
+  'storefront.home.trustBadge.noInventory': 'No inventory',
+  'storefront.home.trustBadge.easyUse': 'Easy to use',
+  'storefront.home.useCases.heading': 'For whoever you are',
+  'storefront.home.useCases.subheading': 'Choose the vertical that best represents you',
+  'storefront.home.ctaBanner.label': 'Take your design to the next level',
   'storefront.productCard.badge.new': 'New',
   'storefront.productCard.badge.sale': 'Sale',
   'storefront.productCard.badge.lowStock': 'Low stock',
