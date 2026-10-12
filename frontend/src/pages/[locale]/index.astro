@@ -41,6 +41,8 @@ import ClientLogos from '../../components/storefront/b2b/ClientLogos.astro';
 import CustomerStories from '../../components/storefront/b2b/CustomerStories.astro';
 import FaqAccordion from '../../components/storefront/b2b/FaqAccordion.astro';
 import MaterialsCard from '../../components/storefront/b2b/MaterialsCard.astro';
+import DarkHeroCard from '../../components/storefront/b2b/DarkHeroCard.astro';
+import CtaFinal from '../../components/storefront/b2b/CtaFinal.astro';
 import { getServerDictionary } from '../../i18n/server';
 import { CATEGORIES, getFeaturedProducts } from '../../data/products';
 import { B2B_CATEGORIES } from '../../data/b2b-mock';
@@ -249,6 +251,14 @@ const b2bFaqItems = [
         features={b2bMaterialsFeatures}
       />
 
+      <DarkHeroCard
+        eyebrow={t['storefront.b2b.home.darkHero.eyebrow']}
+        heading={t['storefront.b2b.home.darkHero.heading']}
+        body={t['storefront.b2b.home.darkHero.body']}
+        ctaLabel={t['storefront.b2b.home.darkHero.ctaLabel']}
+        ctaHref={rfqHref}
+      />
+
       <CustomerStories
         heading={t['storefront.b2b.home.stories.heading']}
         subheading={t['storefront.b2b.home.stories.subheading']}
@@ -258,6 +268,12 @@ const b2bFaqItems = [
       <FaqAccordion
         heading={t['storefront.b2b.home.faq.heading']}
         items={b2bFaqItems}
+      />
+
+      <CtaFinal
+        heading={t['storefront.b2b.home.ctaFinal.heading']}
+        ctaLabel={t['storefront.b2b.home.ctaFinal.ctaLabel']}
+        ctaHref={rfqHref}
       />
     </>
   ) : (
