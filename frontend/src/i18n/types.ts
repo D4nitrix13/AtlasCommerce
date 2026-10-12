@@ -1254,6 +1254,19 @@ export type TranslationKey =
   | 'storefront.b2b.home.stories.heading'
   | 'storefront.b2b.home.stories.subheading'
 
+  // ─── storefront: B2B Panda — Bonfire gap (faq) ──────────────────────
+  | 'storefront.b2b.home.faq.heading'
+  | 'storefront.b2b.home.faq.q1.question'
+  | 'storefront.b2b.home.faq.q1.answer'
+  | 'storefront.b2b.home.faq.q2.question'
+  | 'storefront.b2b.home.faq.q2.answer'
+  | 'storefront.b2b.home.faq.q3.question'
+  | 'storefront.b2b.home.faq.q3.answer'
+  | 'storefront.b2b.home.faq.q4.question'
+  | 'storefront.b2b.home.faq.q4.answer'
+  | 'storefront.b2b.home.faq.q5.question'
+  | 'storefront.b2b.home.faq.q5.answer'
+
   // ─── storefront: RFQ flow (F3.2) ────────────────────────────────────
   | 'storefront.rfq.title'
   | 'storefront.rfq.heading'

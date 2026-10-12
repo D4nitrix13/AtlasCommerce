@@ -596,6 +596,24 @@ const es: Translations = {
   'storefront.b2b.home.stories.subheading':
     'Historias reales de estampado B2B con números verificables',
 
+  // B2B Panda — Bonfire gap: FaqAccordion
+  'storefront.b2b.home.faq.heading': 'Preguntas frecuentes',
+  'storefront.b2b.home.faq.q1.question': '¿Cuál es el pedido mínimo?',
+  'storefront.b2b.home.faq.q1.answer':
+    'El MOQ es de 10 unidades por diseño. Para pedidos mayores a 100 unidades accedés a descuentos por volumen automáticamente.',
+  'storefront.b2b.home.faq.q2.question': '¿Cómo funciona el pago a 30 días (NET 30)?',
+  'storefront.b2b.home.faq.q2.answer':
+    'NET 30 está disponible para clientes con historial de crédito aprobado. Solicitá evaluación al iniciar tu segunda orden.',
+  'storefront.b2b.home.faq.q3.question': '¿Pueden estampar mi propio diseño o necesito uno creado?',
+  'storefront.b2b.home.faq.q3.answer':
+    'Aceptamos diseños en formato vectorial (SVG, AI, PDF) o bitmap de alta resolución (mínimo 300 dpi). Si necesitás diseño desde cero, tenemos equipo creativo con tarifas competitivas.',
+  'storefront.b2b.home.faq.q4.question': '¿Cuánto tarda un pedido?',
+  'storefront.b2b.home.faq.q4.answer':
+    'Pedidos estándar: 5-7 días hábiles después de aprobar muestra. Pedidos urgentes (suscripción premium): 48-72 horas con cargo adicional.',
+  'storefront.b2b.home.faq.q5.question': '¿Envían a todo el país?',
+  'storefront.b2b.home.faq.q5.answer':
+    'Sí, despachamos a cualquier departamento de Nicaragua y Centroamérica. Para pedidos corporativos con múltiples sucursales usamos courier dedicado con tracking personalizado.',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Cotización | Panda Estampados',
   'storefront.rfq.heading': 'Solicitá tu cotización personalizada',

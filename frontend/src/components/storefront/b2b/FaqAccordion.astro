@@ -1,0 +1,92 @@
+---
+/**
+ * FaqAccordion — accordion accesible de preguntas frecuentes B2B.
+ *
+ * Patrón Bonfire-style: H2 + lista vertical de Q&A colapsables. El
+ * FAQ es crítico para Panda porque aclara dudas operativas B2B que
+ * frenen el funnel de cotización: MOQ, NET 30, lead time, devoluciones.
+ *
+ * Por qué usa <details>/<summary> nativos y no un componente React:
+ *   Cero JavaScript, accesibilidad heredada del navegador (focus,
+ *   keyboard nav con Enter/Espacio, Escape para cerrar via prevent
+ *   nativo del summary), screen reader announce automático. Esto
+ *   mantiene la home 100% Astro estática (sin hidratación). Si en el
+ *   futuro se necesita acordeón simultáneo (sólo uno abierto a la
+ *   vez) o transiciones animadas, se cambia por un componente
+ *   interactivo en una fase posterior.
+ *
+ * Empty-safe: si items está vacío no renderiza ni la sección ni el
+ * heading. La página decide cuándo omitir pasando [].
+ *
+ * Tenant-aware: el borde lateral del <summary> usa
+ * border-[var(--primary)] cuando está abierto para anclar el
+ * feedback visual con el color del brand.
+ *
+ * Accesibilidad (HTML5 <details>/<summary> por defecto):
+ *   - Toggle con Enter y Espacio heredado del navegador.
+ *   - <summary> es interactivo y anunciable como botón.
+ *   - Usamos <h2> para el heading y <h3> por cada question para
+ *     respetar la jerarquía de encabezados.
+ *   - El id del heading se deriva del índice del item para anclar
+ *     fragmentos (#faq-q-3).
+ */
+export interface FaqItem {
+  /** Pregunta (heading interno). */
+  question: string;
+  /** Respuesta (puede tener saltos de línea). */
+  answer: string;
+}
+
+interface Props {
+  heading: string;
+  items: readonly FaqItem[];
+}
+
+const { heading, items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <section
+    aria-labelledby="b2b-faq-heading"
+    class="border-t border-slate-200 bg-slate-50/60"
+  >
+    <div class="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+      <h2
+        id="b2b-faq-heading"
+        class="text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+      >
+        {heading}
+      </h2>
+
+      <div class="mt-8 flex flex-col gap-3 sm:mt-10">
+        {items.map((item, index) => (
+          <details
+            class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition open:border-[var(--primary,#475569)] open:shadow-md"
+          >
+            <summary
+              id={`faq-q-${index}`}
+              class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-base font-semibold text-slate-900 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 sm:px-6 sm:py-5 sm:text-lg"
+            >
+              <span class="flex-1">{item.question}</span>
+              <span
+                aria-hidden="true"
+                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition group-open:rotate-45 group-open:border-[var(--primary,#475569)] group-open:text-[var(--primary,#475569)]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+                </svg>
+              </span>
+            </summary>
+            <div
+              role="region"
+              aria-labelledby={`faq-q-${index}`}
+              class="border-t border-slate-200 px-5 py-4 text-sm leading-relaxed text-slate-700 sm:px-6 sm:py-5 sm:text-base"
+            >
+              {item.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
