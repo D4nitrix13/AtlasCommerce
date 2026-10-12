@@ -510,6 +510,12 @@ const es: Translations = {
   'storefront.home.panda.useCase.eventos': 'Eventos',
   'storefront.home.panda.useCase.empresas': 'Empresas',
   'storefront.home.panda.useCase.equipos': 'Equipos y deportes',
+
+  // Kitsune use cases (Commit 3 of plan)
+  'storefront.home.kitsune.useCase.figures': 'Figuras',
+  'storefront.home.kitsune.useCase.anime': 'Anime',
+  'storefront.home.kitsune.useCase.manga': 'Manga',
+  'storefront.home.kitsune.useCase.cosplay': 'Cosplay',
   'storefront.productCard.badge.new': 'Novedades',
   'storefront.productCard.badge.sale': 'Oferta',
   'storefront.productCard.badge.lowStock': 'Últimas unidades',
