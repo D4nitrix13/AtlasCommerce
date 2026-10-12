@@ -566,6 +566,9 @@ const es: Translations = {
   'storefront.b2b.home.featuredCategories.heading': 'Lo que más estampamos para empresas',
   'storefront.b2b.home.featuredCategories.viewAll': 'Ver todo el catálogo',
 
+  // B2B Panda — Bonfire gap: StatsBar (F4.x — sprint home Bonfire)
+  'storefront.b2b.home.stats.heading': 'Por qué estampan con nosotros',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Cotización | Panda Estampados',
   'storefront.rfq.heading': 'Solicitá tu cotización personalizada',
