@@ -22,6 +22,10 @@
  * primary con 8 por ciento de opacidad para mantener el ritmo visual
  * sin competir con el TenantHero.
  *
+ * Enriquecimiento visual Bonfire (F4.x — sprint visual fidelity):
+ *   1 ProductMockup de playera rotada -5 grados al lado derecho
+ *   desktop y 1 Squiggle ámbar decorativo arriba del heading.
+ *
  * Accesibilidad:
  *   - <section> + aria-labelledby al h2.
  *   - Lista semántica <ul> con <li> por feature (3 features = <li>).
@@ -29,6 +33,8 @@
  *   - El eyebrow es un <p> con role=presentation o un span semántico.
  */
 import Icon from '../../ui/Icon.astro';
+import Squiggle from '../../ui/Squiggle.astro';
+import ProductMockup from '../../ui/ProductMockup.astro';
 
 export interface MaterialsFeature {
   /** Nombre que resuelve `Icon.astro`. Fallback: squares-2x2. */
@@ -49,7 +55,12 @@ interface Props {
 const { heading, eyebrow, body, features } = Astro.props;
 ---
 
-<section aria-labelledby="b2b-materials-heading" class="border-t border-slate-200 bg-white">
+<section aria-labelledby="b2b-materials-heading" class="relative border-t border-slate-200 bg-white">
+  <Squiggle
+    variant="wave"
+    color="#F6C36F"
+    class="pointer-events-none absolute left-6 top-10 hidden h-4 w-28 opacity-60 lg:block"
+  />
   <div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
     <div class="grid grid-cols-1 gap-10 rounded-2xl border border-slate-200 bg-slate-50/40 p-6 shadow-sm sm:p-10 lg:grid-cols-5 lg:gap-12">
       <div class="flex flex-col gap-4 lg:col-span-2">
@@ -68,6 +79,12 @@ const { heading, eyebrow, body, features } = Astro.props;
           {heading}
         </h2>
         <p class="text-base text-slate-600 sm:text-lg">{body}</p>
+        <ProductMockup
+          variant="shirt"
+          logoText="Panda"
+          rotation={-5}
+          class="mt-4 hidden h-40 w-40 self-start lg:block"
+        />
       </div>
 
       {features.length > 0 && (

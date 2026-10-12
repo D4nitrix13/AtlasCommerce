@@ -4,9 +4,10 @@
  *
  * Patrón Bonfire-style de "trusted by" pero con labels genéricos de
  * rubro en lugar de logos reales (decisión D4 — riesgo legal de usar
- * marcas registradas ajenas sin permiso). Cada slot muestra un icono
- * SVG con el color del tenant + un label de rubro (Restaurante,
- * Escuela, ONG, etc.).
+ * marcas registradas ajenas sin permiso). El diseño replica el badge
+ * de marca de Bonfire: rectángulo blanco con border-radius 16 (r-card),
+ * icono en un círculo pequeño en la esquina superior izquierda, label
+ * prominente debajo, y sombra azul-fría de 3 capas.
  *
  * Por qué `iconKey: string` y no enum cerrado:
  *   Mismo criterio que StatsBar/ProcessSteps/UseCases. Icon.astro
@@ -70,37 +71,46 @@ const { heading, subheading, logos } = Astro.props;
         )}
       </header>
 
-      <ul class="grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-6">
-        {logos.map((logo) => (
-          <li class="list-none">
-            {logo.href ? (
-              <a
-                href={logo.href}
-                class="group flex h-full flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+      <ul class="grid list-none grid-cols-2 gap-5 p-0 sm:grid-cols-3 lg:grid-cols-6">
+        {logos.map((logo) => {
+          // El badge Bonfire-style: rectángulo blanco, radius 16, sombra
+          // azul-fría de 3 capas (replicada del design system del doc
+          // design-references-bonfire §3) y un inset border slate-200.
+          // El icono vive en un círculo 40x40 dentro del badge.
+          const badgeContent = (
+            <>
+              <span
+                aria-hidden="true"
+                class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50"
+                style="color: var(--primary, #475569);"
               >
-                <span
-                  aria-hidden="true"
-                  class="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-slate-50"
-                  style="color: var(--primary, #475569);"
+                <Icon name={logo.iconKey} class="h-5 w-5" />
+              </span>
+              <span class="text-sm font-semibold text-slate-800">{logo.label}</span>
+            </>
+          );
+
+          return (
+            <li class="list-none">
+              {logo.href ? (
+                <a
+                  href={logo.href}
+                  class="group flex h-full flex-col items-start gap-3 rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+                  style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
                 >
-                  <Icon name={logo.iconKey} class="h-6 w-6" />
-                </span>
-                <span class="text-sm font-medium text-slate-700">{logo.label}</span>
-              </a>
-            ) : (
-              <div class="flex h-full flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-center">
-                <span
-                  aria-hidden="true"
-                  class="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-slate-50"
-                  style="color: var(--primary, #475569);"
+                  {badgeContent}
+                </a>
+              ) : (
+                <div
+                  class="flex h-full flex-col items-start gap-3 rounded-2xl border border-slate-200 bg-white p-5 text-left"
+                  style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
                 >
-                  <Icon name={logo.iconKey} class="h-6 w-6" />
-                </span>
-                <span class="text-sm font-medium text-slate-700">{logo.label}</span>
-              </div>
-            )}
-          </li>
-        ))}
+                  {badgeContent}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   </section>
