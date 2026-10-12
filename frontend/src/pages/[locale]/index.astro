@@ -34,6 +34,8 @@ import UseCases from '../../components/storefront/home/UseCases.astro';
 import CtaBanner from '../../components/storefront/home/CtaBanner.astro';
 import FeaturedCategories from '../../components/storefront/home/FeaturedCategories.astro';
 import FeaturedProducts from '../../components/storefront/home/FeaturedProducts.astro';
+import DarkHeroCardB2C from '../../components/storefront/home/DarkHeroCardB2C.astro';
+import CustomerStoriesB2C from '../../components/storefront/home/CustomerStoriesB2C.astro';
 import TenantHero from '../../components/storefront/b2b/TenantHero.astro';
 import StatsBar from '../../components/storefront/b2b/StatsBar.astro';
 import ProcessSteps from '../../components/storefront/b2b/ProcessSteps.astro';
@@ -81,6 +83,41 @@ const localizedUseCases = rawUseCases.map((useCase) => ({
   label: t[useCase.labelKey] ?? useCase.labelKey,
   href: useCase.href,
 }));
+
+// ─── B2C — mock data para las secciones nuevas (sprint visual fidelity) ──
+// Mismo patrón que B2B Panda: los datos viven en este archivo hasta que
+// el endpoint backend exista. Las stories son fans / clientes
+// recurrentes, no corporativo, para que el tono del testimonials ring
+// con la audiencia B2C (Kitsune, MM-Boutique, Morales Store).
+const b2cCustomerStories = [
+  {
+    quote:
+      'Encontré la figura de Saber que buscaba hace años. Llegó perfectamente empacada y con todos los accesorios originales.',
+    customerName: 'Marcos R.',
+    customerRole: 'Coleccionista otaku',
+    metricValue: '200+',
+    metricLabel: 'compras en la tienda',
+    avatarIconKey: 'user',
+  },
+  {
+    quote:
+      'Las camisetas son de calidad increíble. Compré 5 para mi familia en eventos de la comunidad y todos quedaron encantados.',
+    customerName: 'Ana L.',
+    customerRole: 'Cliente recurrente',
+    metricValue: '98%',
+    metricLabel: 'recomienda la tienda',
+    avatarIconKey: 'users',
+  },
+  {
+    quote:
+      'Tuve un problema con un envío y el servicio al cliente me lo resolvió en horas. Eso vale más que el producto mismo.',
+    customerName: 'Diego M.',
+    customerRole: 'Cliente',
+    metricValue: '24h',
+    metricLabel: 'tiempo de respuesta',
+    avatarIconKey: 'star',
+  },
+];
 
 // ─── B2B Panda — mock data para las secciones nuevas (F4.x) ─────────
 // En el sprint actual los datos viven acá; cuando el endpoint
@@ -316,10 +353,24 @@ const b2bFaqItems = [
         emptyHint={t['storefront.productGrid.emptyHint']}
       />
 
+      <DarkHeroCardB2C
+        eyebrow={t['storefront.b2c.home.darkHero.eyebrow']}
+        heading={t['storefront.b2c.home.darkHero.heading']}
+        body={t['storefront.b2c.home.darkHero.body']}
+        ctaLabel={t['storefront.b2c.home.darkHero.ctaLabel']}
+        ctaHref={productsHref}
+      />
+
       <UseCases
         heading={t['storefront.home.useCases.heading']}
         subheading={t['storefront.home.useCases.subheading']}
         cases={localizedUseCases}
+      />
+
+      <CustomerStoriesB2C
+        heading={t['storefront.b2c.home.stories.heading']}
+        subheading={t['storefront.b2c.home.stories.subheading']}
+        stories={b2cCustomerStories}
       />
 
       <CtaBanner
