@@ -591,6 +591,11 @@ const es: Translations = {
   'storefront.b2b.home.clients.subheading':
     'Empresas, escuelas, ONGs, restaurantes y equipos deportivos en todo el país',
 
+  // B2B Panda — Bonfire gap: CustomerStories
+  'storefront.b2b.home.stories.heading': 'Lo que dicen nuestros clientes',
+  'storefront.b2b.home.stories.subheading':
+    'Historias reales de estampado B2B con números verificables',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Cotización | Panda Estampados',
   'storefront.rfq.heading': 'Solicitá tu cotización personalizada',

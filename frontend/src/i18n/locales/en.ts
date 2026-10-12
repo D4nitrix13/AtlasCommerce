@@ -589,6 +589,11 @@ const en: Translations = {
   'storefront.b2b.home.clients.subheading':
     'Businesses, schools, NGOs, restaurants and sports clubs across the country',
 
+  // B2B Panda — Bonfire gap: CustomerStories
+  'storefront.b2b.home.stories.heading': 'What our clients say',
+  'storefront.b2b.home.stories.subheading':
+    'Real B2B print stories with verifiable numbers',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',
