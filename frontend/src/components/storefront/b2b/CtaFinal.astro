@@ -1,0 +1,53 @@
+---
+/**
+ * CtaFinal — sección full-width con fondo charcoal y CTA outline
+ * blanco de ancho completo. Replica la "CTA Final" del home de Bonfire
+ * (design-references-bonfire §5) adaptada al slate-900 de Panda.
+ *
+ * Por qué una sección tan simple: el patrón Bonfire usa este bloque
+ * como remate de la página. Copy + un único CTA sin decorativos para
+ * no competir con las cards previas. El contraste charcoal/blanco
+ * cierra la página con un anclaje visual fuerte.
+ *
+ * Tenant-aware: el border-radius 16 (r-card) y el outline blanco 2px
+ * son los del design system. El fondo slate-900 reemplaza el
+ * #1B1E24 de Bonfire para mantener la paleta neutral de Panda.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h2.
+ *   - CTA es un <a> real.
+ *   - Sin decorativos (sección de cierre limpia).
+ */
+interface Props {
+  /** Heading del cierre. */
+  heading: string;
+  /** Texto del CTA full-width. */
+  ctaLabel: string;
+  /** URL del CTA. */
+  ctaHref: string;
+}
+
+const { heading, ctaLabel, ctaHref } = Astro.props;
+---
+
+<section
+  aria-labelledby="b2b-cta-final-heading"
+  class="bg-slate-900 py-12 sm:py-16 lg:py-20"
+>
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6">
+    <div class="flex flex-col items-center gap-6 text-center">
+      <h2
+        id="b2b-cta-final-heading"
+        class="max-w-3xl text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl"
+      >
+        {heading}
+      </h2>
+      <a
+        href={ctaHref}
+        class="inline-flex h-12 w-full max-w-md items-center justify-center rounded-2xl border-2 border-white px-6 text-base font-semibold text-white transition hover:bg-white hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+      >
+        {ctaLabel}
+      </a>
+    </div>
+  </div>
+</section>
