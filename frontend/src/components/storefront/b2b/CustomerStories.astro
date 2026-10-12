@@ -7,10 +7,13 @@
  * del cliente (genéricos para evitar PII), una métrica cuantificable
  * (cantidad estampada + tiempo) y un avatar SVG.
  *
- * Por qué avatars son iconos SVG y no fotos:
- *   Decisión D4 — usar fotos reales expondría PII del cliente y nos
- *   obligaría a gestionar consentimientos. Los iconos SVG del set
- *   Icon.astro dan una sensación humana sin el riesgo.
+ * Por qué avatars son `AvatarCircle` y no iconos planos:
+ *   El home de Bonfire (design-references-bonfire §4) rota "fotos de
+ *   personas" entre -8 y +13 grados para dar textura humana. Para
+ *   evitar PII (decisión D4) usamos `AvatarCircle` con iniciales,
+ *   gradiente del tenant y rotaciones del mismo rango. El campo
+ *   `avatarIconKey` legacy se ignora en este sprint: el componente
+ *   deriva las iniciales del `customerName` automáticamente.
  *
  * Por qué los stories viven como props y no en i18n:
  *   Cada story es un objeto con 4 strings; serializar 3 stories como
@@ -23,18 +26,24 @@
  * Empty-safe: si stories está vacío no se renderiza ni la sección ni
  * el heading.
  *
- * Tenant-aware: el círculo del avatar usa bg-[var(--primary)] con
- * texto blanco interno y los números métricos se muestran en bold con
- * el mismo color heredado, igual que el resto de componentes b2b/.
+ * Tenant-aware: el gradiente del avatar usa `var(--primary)` y los
+ * números métricos se muestran en bold con el mismo color heredado.
+ *
+ * Enriquecimiento visual Bonfire (F4.x — sprint visual fidelity):
+ *   avatares de 20x20 (lg) con rotaciones del rango Bonfire por
+ *   story, un Blob pastels decorativo detrás de cada card, y la
+ *   card Bonfire-style con border-radius 16 y sombra azul-fría.
  *
  * Accesibilidad:
  *   - <section> + aria-labelledby al h2.
  *   - Lista semántica <ul> con <li> por story.
  *   - Las comillas tipográficas (« » en es, " " en en) se manejan en
  *     el quote text que llega como prop.
- *   - Iconos aria-hidden (quote + nombre ya transmiten identidad).
+ *   - El avatar lleva aria-hidden porque el customerName se renderiza
+ *     como texto adyacente.
  */
-import Icon from '../../ui/Icon.astro';
+import AvatarCircle from '../../ui/AvatarCircle.astro';
+import Blob from '../../ui/Blob.astro';
 
 export interface CustomerStory {
   /** Cita textual del cliente (1-2 frases). */
@@ -47,8 +56,15 @@ export interface CustomerStory {
   metricValue: string;
   /** Label que acompaña la métrica (ej. "Entregadas en 3 días"). */
   metricLabel: string;
-  /** Nombre que resuelve Icon.astro para el avatar. Fallback: user. */
-  avatarIconKey: string;
+  /**
+   * Reservado por compat con la API previa; ignorado en este sprint
+   * porque los avatares pasan a `AvatarCircle` que deriva las
+   * iniciales del `customerName`. Lo dejamos declarado para que
+   * los callsites existentes no rompan TS.
+   */
+  avatarIconKey?: string;
+  /** Rotación opcional del avatar en grados (rango Bonfire: -8 a 13). */
+  avatarRotation?: number;
 }
 
 interface Props {
@@ -58,13 +74,29 @@ interface Props {
 }
 
 const { heading, subheading, stories } = Astro.props;
+
+// Rotación por índice cuando el caller no la pasa: María (0°) Carlos
+// (-8°) Andrea (+10°). Reproduce el patrón "torcido" del home Bonfire
+// sin requerir que el caller calcule cada una.
+const FALLBACK_ROTATIONS: readonly number[] = [0, -8, 10];
 ---
 
 {stories.length > 0 && (
   <section
     aria-labelledby="b2b-stories-heading"
-    class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+    class="relative overflow-hidden mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
   >
+    <Blob
+      color="peach"
+      size="lg"
+      class="pointer-events-none absolute -left-32 top-20 opacity-30 blur-2xl"
+    />
+    <Blob
+      color="mint"
+      size="md"
+      class="pointer-events-none absolute -right-20 bottom-10 hidden opacity-30 blur-2xl md:block"
+    />
+
     <header class="mb-10 text-center sm:mb-12">
       <h2
         id="b2b-stories-heading"
@@ -77,42 +109,46 @@ const { heading, subheading, stories } = Astro.props;
       )}
     </header>
 
-    <ul class="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
-      {stories.map((story) => (
-        <li class="list-none">
-          <article class="flex h-full flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md sm:p-7">
-            <div class="flex items-start gap-4">
-              <span
-                aria-hidden="true"
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white shadow-sm"
-                style="background: var(--primary, #475569);"
-              >
-                <Icon name={story.avatarIconKey} class="h-6 w-6" />
-              </span>
-              <div class="flex flex-1 flex-col gap-1">
-                <p class="text-sm font-semibold text-slate-900">{story.customerName}</p>
-                <p class="text-xs text-slate-600 sm:text-sm">{story.customerRole}</p>
+    <ul class="relative grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      {stories.map((story, index) => {
+        const rotation = story.avatarRotation ?? FALLBACK_ROTATIONS[index] ?? 0;
+        return (
+          <li class="list-none">
+            <article
+              class="flex h-full flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md sm:p-7"
+              style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
+            >
+              <div class="flex items-start gap-4">
+                <AvatarCircle
+                  name={story.customerName}
+                  size="lg"
+                  rotation={rotation}
+                />
+                <div class="flex flex-1 flex-col gap-1">
+                  <p class="text-sm font-semibold text-slate-900">{story.customerName}</p>
+                  <p class="text-xs text-slate-600 sm:text-sm">{story.customerRole}</p>
+                </div>
               </div>
-            </div>
 
-            <blockquote class="flex-1 border-l-4 border-slate-200 pl-4 text-sm leading-relaxed text-slate-700 sm:text-base">
-              <span aria-hidden="true" class="select-none">“</span>
-              {story.quote}
-              <span aria-hidden="true" class="select-none">”</span>
-            </blockquote>
+              <blockquote class="flex-1 border-l-4 border-slate-200 pl-4 text-sm leading-relaxed text-slate-700 sm:text-base">
+                <span aria-hidden="true" class="select-none">“</span>
+                {story.quote}
+                <span aria-hidden="true" class="select-none">”</span>
+              </blockquote>
 
-            <div class="mt-auto flex items-baseline justify-between gap-3 border-t border-slate-100 pt-4">
-              <span
-                class="text-xl font-bold tracking-tight sm:text-2xl"
-                style="color: var(--primary, #475569);"
-              >
-                {story.metricValue}
-              </span>
-              <span class="text-xs text-slate-600 sm:text-sm">{story.metricLabel}</span>
-            </div>
-          </article>
-        </li>
-      ))}
+              <div class="mt-auto flex items-baseline justify-between gap-3 border-t border-slate-100 pt-4">
+                <span
+                  class="text-xl font-bold tracking-tight sm:text-2xl"
+                  style="color: var(--primary, #475569);"
+                >
+                  {story.metricValue}
+                </span>
+                <span class="text-xs text-slate-600 sm:text-sm">{story.metricLabel}</span>
+              </div>
+            </article>
+          </li>
+        );
+      })}
     </ul>
   </section>
 )}
