@@ -18,11 +18,21 @@
  * `StorefrontLayout.astro`. Cada tienda (Kitsune violeta, Panda
  * esmeralda, etc.) obtiene su propio hero sin tocar el componente.
  *
+ * Enriquecimiento visual Bonfire (sprint visual fidelity B2C):
+ *   además del copy a la izquierda, en desktop se renderiza una grilla
+ *   de mockups flotando a la derecha (variantes shirt / hoodie / mug
+ *   con rotaciones del rango -8 a +13) y decorativos pastel
+ *   (Squiggle ámbar + dos Blobs mint/peach) detrás del contenido.
+ *   Los decorativos se mantienen `aria-hidden` y viven en `z-index`
+ *   bajo, sin reducir el contraste del copy.
+ *
  * Accesibilidad:
  *   - <section> + aria-labelledby al h1.
  *   - Iconos de badges son `aria-hidden` (decorativos; el label ya
  *     transmite el mensaje).
  *   - CTAs son `<a>` reales.
+ *   - Mockups SVG y decorativos son `aria-hidden` (no transmiten
+ *     información que no esté en el copy).
  */
 export interface HomeHeroCta {
   label: string;
@@ -37,6 +47,9 @@ export interface TrustBadge {
 }
 
 import Icon from '../../ui/Icon.astro';
+import Blob from '../../ui/Blob.astro';
+import ProductMockup from '../../ui/ProductMockup.astro';
+import Squiggle from '../../ui/Squiggle.astro';
 
 interface Props {
   eyebrow?: string;
@@ -69,59 +82,104 @@ const hasBadges = visibleBadges.length > 0;
     style="background: var(--primary, #475569);"
   ></div>
 
-  <div class="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
-    {eyebrow && (
-      <p class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 backdrop-blur">
-        <span
-          aria-hidden="true"
-          class="inline-block h-1.5 w-1.5 rounded-full"
-          style="background: var(--primary, #475569);"
-        />
-        {eyebrow}
-      </p>
-    )}
+  <Blob
+    color="mint"
+    size="md"
+    class="pointer-events-none absolute -left-24 top-32 hidden opacity-50 blur-2xl lg:block"
+  />
+  <Blob
+    color="peach"
+    size="md"
+    class="pointer-events-none absolute -right-20 bottom-10 hidden opacity-50 blur-2xl lg:block"
+  />
 
-    <h1
-      id="home-hero-heading"
-      class="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
-    >
-      {title}
-    </h1>
+  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-12 lg:py-28">
+    <div class="flex flex-col items-start gap-6">
+      {eyebrow && (
+        <p class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 backdrop-blur">
+          <span
+            aria-hidden="true"
+            class="inline-block h-1.5 w-1.5 rounded-full"
+            style="background: var(--primary, #475569);"
+          />
+          {eyebrow}
+        </p>
+      )}
 
-    <p class="max-w-2xl text-base text-slate-600 sm:text-lg">{subtitle}</p>
-
-    <div class="mt-2 flex flex-wrap items-center gap-3">
-      <a
-        href={primaryCta.href}
-        class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+      <h1
+        id="home-hero-heading"
+        class="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
       >
-        {primaryCta.label}
-      </a>
-      {secondaryCta && (
+        {title}
+      </h1>
+
+      <p class="max-w-2xl text-base text-slate-600 sm:text-lg">{subtitle}</p>
+
+      <div class="relative mt-2 flex flex-wrap items-center gap-3">
+        <Squiggle
+          variant="wave"
+          color="#F6C36F"
+          class="pointer-events-none absolute -bottom-5 left-0 hidden h-3 w-24 lg:block"
+        />
         <a
-          href={secondaryCta.href}
-          class="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          href={primaryCta.href}
+          class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
         >
-          {secondaryCta.label}
+          {primaryCta.label}
         </a>
+        {secondaryCta && (
+          <a
+            href={secondaryCta.href}
+            class="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          >
+            {secondaryCta.label}
+          </a>
+        )}
+      </div>
+
+      {hasBadges && (
+        <ul class="mt-4 flex flex-wrap items-center gap-2" aria-label="Beneficios">
+          {visibleBadges.map((badge) => (
+            <li class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-700 backdrop-blur sm:text-sm">
+              <span
+                aria-hidden="true"
+                class="inline-flex h-4 w-4 items-center justify-center"
+                style="color: var(--primary, #475569);"
+              >
+                <Icon name={badge.iconKey} class="h-4 w-4" />
+              </span>
+              {badge.label}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
 
-    {hasBadges && (
-      <ul class="mt-4 flex flex-wrap items-center gap-2" aria-label="Beneficios">
-        {visibleBadges.map((badge) => (
-          <li class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-700 backdrop-blur sm:text-sm">
-            <span
-              aria-hidden="true"
-              class="inline-flex h-4 w-4 items-center justify-center"
-              style="color: var(--primary, #475569);"
-            >
-              <Icon name={badge.iconKey} class="h-4 w-4" />
-            </span>
-            {badge.label}
-          </li>
-        ))}
-      </ul>
-    )}
+    <div
+      aria-hidden="true"
+      class="relative mx-auto hidden h-72 w-full max-w-md items-center justify-center lg:flex lg:h-96"
+    >
+      <div class="absolute left-2 top-2 -rotate-12">
+        <ProductMockup
+          variant="mug"
+          logoText="B2C"
+          class="h-28 w-28 drop-shadow-md sm:h-32 sm:w-32"
+        />
+      </div>
+      <div class="absolute -left-4 bottom-6 -rotate-8">
+        <ProductMockup
+          variant="hat"
+          logoText="B2C"
+          class="h-24 w-24 drop-shadow-md sm:h-28 sm:w-28"
+        />
+      </div>
+      <div class="absolute right-2 top-6 rotate-[12deg]">
+        <ProductMockup
+          variant="shirt"
+          logoText="B2C"
+          class="h-44 w-44 drop-shadow-lg sm:h-52 sm:w-52"
+        />
+      </div>
+    </div>
   </div>
 </section>

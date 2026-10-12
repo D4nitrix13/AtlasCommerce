@@ -3,35 +3,50 @@
  * UseCases — sección "personas" / verticales de la home B2C.
  *
  * Inspirada en la home de Bonfire: un H2 + subheading + grilla de cards
- * vertical. Cada card combina un icono circular con un label y enlaza a un
- * destino del vertical (categoría, landing, etc.).
+ * vertical. Cada card combina un avatar circular con iniciales del
+ * vertical y un label, y enlaza a un destino del vertical (categoría,
+ * landing, etc.).
  *
- * Por qué `iconKey: string` (no enum cerrado):
- *   Los iconos disponibles crecen con cada tenant y cada historia de
- *   Storybook mock. Pasar `string` permite que el componente delegue
- *   en `Icon.astro` (que tiene fallback a `squares-2x2` para nombres
- *   desconocidos) sin necesitar un refactor cada vez que se agrega un
- *   icono. La validación semántica queda en los datos, no en el tipo.
+ * Por qué AvatarCircle y no Icon plano:
+ *   El sprint visual fidelity B2C replica el patrón Bonfire de "fotos
+ *   de personas rotadas" en los testimonios (design-references-bonfire
+ *   §4). Para los verticales B2C usamos el mismo primitive
+ *   `AvatarCircle` con las iniciales del label, lo que da textura
+ *   humana sin requerir PII ni assets fotográficos. La rotación
+ *   varía por índice para imitar el desorden editorial de Bonfire.
  *
- * Por qué `Icon.astro` y no `lucide-react` directo:
- *   `Icon.astro` renderiza SVG inline en el servidor — cero hidratación
- *   React, mismo set de paths que lucide. Mantener los componentes
- *   storefront en Astro puro evita el costo de un `client:` directive
- *   para algo que no necesita interactividad.
+ * Por qué AvatarCircle en lugar de `label.toUpperCase().slice(0,2)`:
+ *   El primitive ya implementa `buildInitials` (primera letra del
+ *   primer token + primera letra del último). Para nombres de
+ *   verticales de una palabra ("Figures", "Anime", "Manga") aplica
+ *   el fallback de tomar las dos primeras letras, lo que da
+ *   "FI", "AN", "MA" — visualmente consistente con "MG" de "María
+ *   González" usado en CustomerStories.
+ *
+ * Por qué `iconKey: string` se conserva en la API:
+ *   Los callers existentes (ver `data/tenants.ts`) ya pasan iconKey
+ *   en `LocalizableUseCase`. Mantener la prop evita romper
+ *   `index.astro`; el campo simplemente se ignora porque el avatar
+ *   ya comunica el vertical. Se documenta explícitamente arriba.
  *
  * Empty-safe: si `cases.length === 0` no se renderiza nada — ni la
  * sección ni el heading. Esto deja al caller la decisión de omitir
  * la sección pasando un array vacío.
  *
- * Tenant-aware: el círculo del icono usa `--primary`; el borde usa el
- * gris neutro slate, igual que `FeaturedCategories`.
+ * Tenant-aware: el gradiente del avatar usa `--primary`; el hover del
+ * card usa gris neutro slate. Mismo lenguaje que `FeaturedCategories`.
  */
-import Icon from '../../ui/Icon.astro';
+import AvatarCircle from '../../ui/AvatarCircle.astro';
+import Squiggle from '../../ui/Squiggle.astro';
 
 export interface UseCase {
-  /** Nombre que resuelve `Icon.astro`. Fallback: `squares-2x2`. */
-  iconKey: string;
-  /** Etiqueta visible, ya traducida por i18n. */
+  /** Reservado por compat con la API previa; ignorado en este sprint
+   * porque los avatares pasan a `AvatarCircle` que deriva las
+   * iniciales del `label`. Lo dejamos declarado para que los
+   * callsites existentes no rompan TS. */
+  iconKey?: string;
+  /** Etiqueta visible, ya traducida por i18n. Se usa también para
+   * derivar las iniciales del AvatarCircle. */
   label: string;
   /** Destino del vertical (categoría, landing, etc.). */
   href: string;
@@ -44,10 +59,16 @@ interface Props {
 }
 
 const { heading, subheading, cases } = Astro.props;
+
+// Rotación por índice cuando no se especifica explícitamente: ciclo
+// de -8 / 0 / +10 / -5 que reproduce el patrón "torcido" de Bonfire
+// sin requerir que el caller calcule cada ángulo. El orden es
+// estable: el primer vertical siempre rota -8, el segundo 0, etc.
+const FALLBACK_ROTATIONS: readonly number[] = [-8, 0, 10, -5];
 ---
 
 {cases.length > 0 && (
-  <section aria-label={heading} class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+  <section aria-label={heading} class="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
     <div class="mb-8 text-center">
       <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{heading}</h2>
       {subheading && (
@@ -55,26 +76,33 @@ const { heading, subheading, cases } = Astro.props;
       )}
     </div>
 
-    <ul class="grid list-none grid-cols-2 gap-6 p-0 sm:grid-cols-3 lg:grid-cols-4">
-      {cases.map((useCase) => (
-        <li class="list-none">
-          <a
-            href={useCase.href}
-            class="group flex flex-col items-center gap-3 rounded-xl p-4 text-center transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-          >
-            <span
-              aria-hidden="true"
-              class="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md"
-              style="color: var(--primary, #475569);"
+    <Squiggle
+      variant="loop"
+      color="#D1C59E"
+      class="pointer-events-none absolute right-6 top-6 hidden h-6 w-6 opacity-50 sm:block"
+    />
+
+    <ul class="relative grid list-none grid-cols-2 gap-6 p-0 sm:grid-cols-3 lg:grid-cols-4">
+      {cases.map((useCase, index) => {
+        const rotation = FALLBACK_ROTATIONS[index] ?? 0;
+        return (
+          <li class="list-none">
+            <a
+              href={useCase.href}
+              class="group flex flex-col items-center gap-3 rounded-xl p-4 text-center transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
             >
-              <Icon name={useCase.iconKey} class="h-7 w-7" />
-            </span>
-            <span class="text-sm font-semibold text-slate-800 sm:text-base">
-              {useCase.label}
-            </span>
-          </a>
-        </li>
-      ))}
+              <AvatarCircle
+                name={useCase.label}
+                size="lg"
+                rotation={rotation}
+              />
+              <span class="text-sm font-semibold text-slate-800 sm:text-base">
+                {useCase.label}
+              </span>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </section>
 )}
