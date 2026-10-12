@@ -1,10 +1,19 @@
 ---
 /**
- * FaqAccordion — accordion accesible de preguntas frecuentes B2B.
+ * FaqAccordion — accordion accesible de preguntas frecuentes.
  *
- * Patrón Bonfire-style: H2 + lista vertical de Q&A colapsables. El
- * FAQ es crítico para Panda porque aclara dudas operativas B2B que
- * frenen el funnel de cotización: MOQ, NET 30, lead time, devoluciones.
+ * Patrón Bonfire-style (design-references-bonfire §5): H2 + lista
+ * vertical de Q&A colapsables. Usado tanto en la rama B2B Panda
+ * (dudas operativas: MOQ, NET 30, lead time) como en futuras
+ * composiciones B2C (envíos, devoluciones, garantías).
+ *
+ * Por qué reubicado a `components/storefront/FaqAccordion.astro`
+ * (raíz de storefront) en lugar de quedarse en `b2b/`:
+ *   El FAQ no es específico de B2B ni B2C — el patrón visual y la
+ *   API son idénticos para cualquier vertical. Moverlo a la raíz
+ *   marca el contrato de "componente compartido del storefront" y
+ *   evita que la rama B2C duplique el código si quiere adoptarlo
+ *   en una iteración futura.
  *
  * Por qué usa <details>/<summary> nativos y no un componente React:
  *   Cero JavaScript, accesibilidad heredada del navegador (focus,
@@ -18,24 +27,24 @@
  * Empty-safe: si items está vacío no renderiza ni la sección ni el
  * heading. La página decide cuándo omitir pasando [].
  *
- * Tenant-aware: el botón + del summary usa un círculo teal oscuro
- * (var(--primary, #475569)) que es el equivalente Panda del teal
- * #415F62 de Bonfire. La fuente queda neutral slate-900 para no
- * competir con el brand.
+ * Tenant-aware: el botón + del summary usa un círculo slate-700
+ * neutro (independiente del accent del tenant) que es el equivalente
+ * funcional del teal #415F62 de Bonfire. La fuente queda neutral
+ * slate-900 para no competir con el brand.
  *
  * Enriquecimiento visual Bonfire (F4.x — sprint visual fidelity):
- *   el `+` de expand/collapse se pinta en un círculo teal oscuro
- *   (slate-700 en Panda) y los dividers pasan a border-slate-200
- *   para acercarse a la paleta cream de Bonfire sin abandonar las
- *   neutrales de Panda.
+ *   el `+` de expand/collapse se pinta en un círculo slate-700 y los
+ *   dividers pasan a border-slate-200 para acercarse a la paleta
+ *   cream de Bonfire sin abandonar las neutrales del storefront.
  *
  * Accesibilidad (HTML5 <details>/<summary> por defecto):
  *   - Toggle con Enter y Espacio heredado del navegador.
  *   - <summary> es interactivo y anunciable como botón.
- *   - Usamos <h2> para el heading y <h3> por cada question para
- *     respetar la jerarquía de encabezados.
- *   - El id del heading se deriva del índice del item para anclar
- *     fragmentos (#faq-q-3).
+ *   - Usamos <h2> para el heading y el id se deriva del prefijo
+ *     neutral `faq-heading` (no `b2b-faq-heading`) porque el
+ *     componente es shared.
+ *   - El id del item se deriva del índice para anclar fragmentos
+ *     (#faq-q-3).
  */
 export interface FaqItem {
   /** Pregunta (heading interno). */
@@ -54,12 +63,12 @@ const { heading, items } = Astro.props;
 
 {items.length > 0 && (
   <section
-    aria-labelledby="b2b-faq-heading"
+    aria-labelledby="faq-heading"
     class="border-t border-slate-200 bg-slate-50/60"
   >
     <div class="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
       <h2
-        id="b2b-faq-heading"
+        id="faq-heading"
         class="text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
       >
         {heading}

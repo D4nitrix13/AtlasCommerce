@@ -2,13 +2,15 @@ import type { Meta, StoryObj } from '@storybook/astro';
 import FaqAccordion from './FaqAccordion.astro';
 
 /**
- * FaqAccordion — accordion accesible de preguntas frecuentes B2B
- * Panda. Implementado con <details>/<summary> nativos (cero JS) y
- * por eso no requiere hidratación. Tenant-aware vía `--primary` para
- * el borde del item abierto; empty-safe si items está vacío.
+ * FaqAccordion — accordion accesible de preguntas frecuentes.
+ * Implementado con <details>/<summary> nativos (cero JS) y por eso
+ * no requiere hidratación. Reubicado de `b2b/` a la raíz de
+ * `storefront/` para que esté disponible para todas las ramas del
+ * storefront. Tenant-aware vía `--primary` para el focus ring del
+ * summary; empty-safe si items está vacío.
  */
 const meta: Meta<typeof FaqAccordion> = {
-  title: 'Storefront/B2B/FaqAccordion',
+  title: 'Storefront/FaqAccordion',
   component: FaqAccordion,
   tags: ['autodocs'],
   argTypes: {

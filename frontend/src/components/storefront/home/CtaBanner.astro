@@ -3,23 +3,35 @@
  * CtaBanner — banda full-width de cierre de la composición B2C.
  *
  * Toma el rol de "banner de llamada a la acción" final que en la home
- * de Bonfire antecede al footer. Fondo accent del tenant (vía
- * `--primary`), texto blanco, H2 centrado y un único botón CTA.
+ * de Bonfire antecede al footer. Fondo charcoal slate-900 neutro
+ * (replica el #1B1E24 char/footer Bonfire, sin copiarlo), texto
+ * blanco, H2 centrado y un único botón CTA outline blanco.
  *
- * Por qué fondo accent sin prop de color:
- *   Mantiene el patrón tenant-aware del proyecto: el caller no elige
- *   color — lo resuelve `StorefrontLayout.astro` desde la config del
- *   tenant. Esto evita que una variante de tenant olvide pasar el
- *   accent y termine con un color por defecto inconsistente.
+ * Por qué slate-900 y no el accent del tenant:
+ *   El diseño original de Bonfire cierra la home con un banner
+ *   charcoal full-width (design-references-bonfire §5) que actúa
+ *   como pausa dramática antes del footer. La versión previa de
+ *   este componente usaba el accent del tenant, lo que compite con
+ *   el H1 del hero. Cambiar a slate-900 da contraste alto,
+ *   coherencia con `DarkHeroCardB2C` y crea ritmo narrativo: dos
+ *   pausas oscuras (DarkHeroCard a mitad de página + este banner al
+ *   final) con secciones claras entremedias.
+ *
+ * Enriquecimiento visual Bonfire (sprint visual fidelity B2C):
+ *   Squiggle ámbar decorativa flotando sobre la sección, mismo
+ *   lenguaje que las otras secciones. Sin nuevos props: el Squiggle
+ *   vive dentro del section.
  *
  * Accesibilidad:
  *   - <section> + aria-labelledby al h2.
  *   - CTA es `<a>` (navegación), no `<button>`.
  *   - H2 mantiene la jerarquía semántica (h1 = hero, h2 = secciones).
- *   - Focus visible con outline que contrasta con el accent usando
- *     `outline-color: var(--primary)` y `outline` blanco externo para
- *     garantizar contraste AA sobre cualquier accent.
+ *   - Focus visible con outline blanco externo para garantizar
+ *     contraste AA sobre el fondo charcoal.
+ *   - Squiggle decorativa con aria-hidden.
  */
+import Squiggle from '../../ui/Squiggle.astro';
+
 interface Props {
   heading: string;
   ctaLabel: string;
@@ -31,10 +43,20 @@ const { heading, ctaLabel, ctaHref } = Astro.props;
 
 <section
   aria-labelledby="cta-banner-heading"
-  class="w-full"
-  style="background: var(--primary, #475569);"
+  class="relative w-full overflow-hidden bg-slate-900"
 >
-  <div class="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 py-12 text-center sm:px-6 sm:py-16 lg:py-20">
+  <Squiggle
+    variant="loop"
+    color="#F6C36F"
+    class="pointer-events-none absolute left-8 top-8 h-12 w-12 opacity-40"
+  />
+  <Squiggle
+    variant="arc"
+    color="#F6C36F"
+    class="pointer-events-none absolute bottom-10 right-12 hidden h-3 w-20 opacity-50 md:block"
+  />
+
+  <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 py-12 text-center sm:px-6 sm:py-16 lg:py-20">
     <h2
       id="cta-banner-heading"
       class="max-w-3xl text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl"
@@ -44,7 +66,7 @@ const { heading, ctaLabel, ctaHref } = Astro.props;
 
     <a
       href={ctaHref}
-      class="inline-flex h-12 items-center justify-center rounded-lg bg-white px-7 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      class="inline-flex h-12 items-center justify-center rounded-2xl border-2 border-white bg-transparent px-7 text-sm font-semibold text-white transition hover:bg-white hover:text-slate-900 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
     >
       {ctaLabel}
     </a>
