@@ -515,6 +515,16 @@ const en: Translations = {
   'storefront.home.kitsune.useCase.anime': 'Anime',
   'storefront.home.kitsune.useCase.manga': 'Manga',
   'storefront.home.kitsune.useCase.cosplay': 'Cosplay',
+
+  // MM-Boutique + Morales Store use cases (Commit 4 of plan)
+  'storefront.home.mm.useCase.eventos': 'Events',
+  'storefront.home.mm.useCase.diario': 'Everyday',
+  'storefront.home.mm.useCase.trabajo': 'Work',
+  'storefront.home.mm.useCase.accesorios': 'Accessories',
+  'storefront.home.morales.useCase.mujer': 'Women',
+  'storefront.home.morales.useCase.hombre': 'Men',
+  'storefront.home.morales.useCase.ninos': 'Kids',
+  'storefront.home.morales.useCase.accesorios': 'Accessories',
   'storefront.productCard.badge.new': 'New',
   'storefront.productCard.badge.sale': 'Sale',
   'storefront.productCard.badge.lowStock': 'Low stock',
