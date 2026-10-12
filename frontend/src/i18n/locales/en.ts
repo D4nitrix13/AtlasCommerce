@@ -594,6 +594,24 @@ const en: Translations = {
   'storefront.b2b.home.stories.subheading':
     'Real B2B print stories with verifiable numbers',
 
+  // B2B Panda — Bonfire gap: FaqAccordion
+  'storefront.b2b.home.faq.heading': 'Frequently asked questions',
+  'storefront.b2b.home.faq.q1.question': 'What is the minimum order quantity?',
+  'storefront.b2b.home.faq.q1.answer':
+    'The MOQ is 10 units per design. Orders above 100 units get automatic volume discounts.',
+  'storefront.b2b.home.faq.q2.question': 'How does NET 30 payment work?',
+  'storefront.b2b.home.faq.q2.answer':
+    'NET 30 is available for customers with an approved credit history. Request an evaluation when starting your second order.',
+  'storefront.b2b.home.faq.q3.question': 'Can you print my own design or do I need one created?',
+  'storefront.b2b.home.faq.q3.answer':
+    'We accept vector (SVG, AI, PDF) or high-resolution bitmap (minimum 300 dpi). If you need design from scratch, our creative team offers competitive rates.',
+  'storefront.b2b.home.faq.q4.question': 'How long does an order take?',
+  'storefront.b2b.home.faq.q4.answer':
+    'Standard orders: 5-7 business days after proof approval. Urgent orders (premium subscription): 48-72 hours with an extra fee.',
+  'storefront.b2b.home.faq.q5.question': 'Do you ship nationwide?',
+  'storefront.b2b.home.faq.q5.answer':
+    'Yes, we ship to any department in Nicaragua and Central America. For corporate orders with multiple branches we use a dedicated courier with personalised tracking.',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',
