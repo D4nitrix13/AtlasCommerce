@@ -614,6 +614,21 @@ const es: Translations = {
   'storefront.b2b.home.faq.q5.answer':
     'Sí, despachamos a cualquier departamento de Nicaragua y Centroamérica. Para pedidos corporativos con múltiples sucursales usamos courier dedicado con tracking personalizado.',
 
+  // B2B Panda — Bonfire gap: MaterialsCard
+  'storefront.b2b.home.materials.heading': 'Materiales y tintas',
+  'storefront.b2b.home.materials.eyebrow': 'Calidad que se nota',
+  'storefront.b2b.home.materials.body':
+    'Trabajamos con textiles certificados y tintas ecológicas. Cada pedido incluye ficha técnica con origen de materiales y certificaciones.',
+  'storefront.b2b.home.materials.feature1.label': 'Algodón orgánico',
+  'storefront.b2b.home.materials.feature1.description':
+    'Certificado GOTS, libre de pesticidas.',
+  'storefront.b2b.home.materials.feature2.label': 'Tintas eco-friendly',
+  'storefront.b2b.home.materials.feature2.description':
+    'Base agua, sin ftalatos ni metales pesados.',
+  'storefront.b2b.home.materials.feature3.label': 'Técnicas múltiples',
+  'storefront.b2b.home.materials.feature3.description':
+    'Serigrafía, bordado, vinilo textil, sublimación.',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Cotización | Panda Estampados',
   'storefront.rfq.heading': 'Solicitá tu cotización personalizada',
