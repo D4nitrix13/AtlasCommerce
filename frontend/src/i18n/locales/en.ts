@@ -638,6 +638,18 @@ const en: Translations = {
   'storefront.b2b.home.ctaFinal.heading': 'Take your custom merch to the next level',
   'storefront.b2b.home.ctaFinal.ctaLabel': 'Start a quote',
 
+  // B2C Kitsune/MM/Morales — Bonfire gap: DarkHeroCard
+  'storefront.b2c.home.darkHero.eyebrow': 'Your custom merch',
+  'storefront.b2c.home.darkHero.heading': 'Design and deliver',
+  'storefront.b2c.home.darkHero.body':
+    'No minimum order, no inventory. From your idea to your door.',
+  'storefront.b2c.home.darkHero.ctaLabel': 'Start designing',
+
+  // B2C Kitsune/MM/Morales — Bonfire gap: CustomerStoriesB2C
+  'storefront.b2c.home.stories.heading': 'What our customers say',
+  'storefront.b2c.home.stories.subheading':
+    'Real stories from fans, collectors and repeat customers',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',

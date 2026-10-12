@@ -1288,6 +1288,16 @@ export type TranslationKey =
   | 'storefront.b2b.home.ctaFinal.heading'
   | 'storefront.b2b.home.ctaFinal.ctaLabel'
 
+  // ─── storefront: B2C Kitsune/MM/Morales — Bonfire gap (dark hero) ──
+  | 'storefront.b2c.home.darkHero.eyebrow'
+  | 'storefront.b2c.home.darkHero.heading'
+  | 'storefront.b2c.home.darkHero.body'
+  | 'storefront.b2c.home.darkHero.ctaLabel'
+
+  // ─── storefront: B2C Kitsune/MM/Morales — Bonfire gap (stories) ────
+  | 'storefront.b2c.home.stories.heading'
+  | 'storefront.b2c.home.stories.subheading'
+
   // ─── storefront: RFQ flow (F3.2) ────────────────────────────────────
   | 'storefront.rfq.title'
   | 'storefront.rfq.heading'
