@@ -804,9 +804,16 @@ antiguos.
 
 ## Documentación relacionada
 
-- `docs/operations/instances.md` — Deploy por instancia.
+- `docs/operations/deployment.md` — Deploy por instancia (workflow
+  operativo consolidado).
+- `docs/architecture/tech-infrastructure.md` — Docker multi-instance
+  y `Caddy` (topología actual).
+- `docs/architecture/tech-database.md` — Postgres + Redis + Storage
+  por instancia.
+- `docs/operations/backups.md` — Backups por instancia
+  (`scripts/docker-stack.sh db-backup`).
 - `docs/development/plugins.md` — Guía de plugins Composer.
-- `docs/getting-started/` — Setup base sin cambios.
+- `docs/getting-started/local-setup.md` — Setup local multi-tienda.
 
 ## Convenciones
 

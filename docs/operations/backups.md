@@ -3,6 +3,12 @@
 > Mentalidad clave: **cada instancia tiene su propia base de datos**.
 > NO existe un solo Postgres; hay 6 (3 dev + 3 prod). Un backup
 > que falla por tienda no compromete el sistema entero.
+>
+> **Operación canónica:** todo dump/restore va por
+> `scripts/docker-stack.sh db-backup <stage> <store>` y
+> `scripts/docker-stack.sh db-restore <stage> <store> <file>`. El
+> dispatcher resuelve stage + store, valida la combinación, y
+> dispatchea contra el `postgres` (dev) o `db` (prod) del tenant.
 
 ## Qué respaldar
 

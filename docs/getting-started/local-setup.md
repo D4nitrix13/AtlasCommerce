@@ -62,7 +62,10 @@ Pegar al final de `/etc/hosts` (usar `sudo`):
 ### 3.2. Caddy
 
 ```bash
-sudo cp Caddyfile /etc/caddy/Caddyfile
+# El Caddyfile canónico vive en docker/caddy/Caddyfile (cubre las
+# 3 instancias dev; la sección de prod se ignora si las redes de
+# producción no están levantadas).
+sudo cp docker/caddy/Caddyfile /etc/caddy/Caddyfile
 sudo caddy fmt --overwrite /etc/caddy/Caddyfile
 sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy

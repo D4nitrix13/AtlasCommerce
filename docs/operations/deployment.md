@@ -66,7 +66,7 @@ y 3 instancias prod, una por store.
 > **Convención de dominios:** cada store tiene su propio subdominio
 > `api.*` para la API, opcional. En dev local se rutea todo por
 > path (`/api/*`) sobre el mismo host. Ver
-> [`operations/caddy.md`](caddy.md "operations/caddy.md") § Config.
+> [`getting-started/caddy.md`](../getting-started/caddy.md "caddy.md") § Config.
 
 ### Puertos expuestos (públicos)
 
@@ -152,7 +152,7 @@ api.panda-estampados.com {
 ```
 
 Para el setup completo de Caddy (multi-tenant routing, producción),
-ver [`operations/caddy.md`](caddy.md "operations/caddy.md").
+ver [`getting-started/caddy.md`](../getting-started/caddy.md "caddy.md").
 
 ## Servicios Docker
 
@@ -236,7 +236,7 @@ nano docker/instances/production/<store>/environment/.env
 
 Configurar los registros `A` en el proveedor de dominios (un VPS
 por instancia, IPs distintas según la store). Ver
-[`stack/infrastructure.md`](../stack/infrastructure.md "stack/infrastructure.md")
+[`architecture/tech-infrastructure.md`](../architecture/tech-infrastructure.md "architecture/tech-infrastructure.md")
 § Configuración DNS para la tabla completa.
 
 ### 5. Iniciar servicios
@@ -331,8 +331,9 @@ anterior (no hay estrategia de release artifacts en este momento).
 
 Para respuesta a incidentes durante deploy (services down, errores
 de migración, etc.), ver
-[`operations/observability-runbook.md`](observability-runbook.md "observability-runbook.md").
-# Deploy Multi-Instance — Workflow por Instancia
+[`operations/observability.md`](observability.md "operations/observability.md").
+
+## Deploy Multi-Instance — Workflow por Instancia
 
 > Guía paso a paso para deployar una instancia del sistema en un
 > servidor nuevo. Asume que ya tenés el repo clonado y un servidor
@@ -665,7 +666,7 @@ Mínimo viable:
 - **Métricas**: Prometheus + Grafana (opcional, para VPS grandes).
 
 Para setup de monitoreo per-instance con Prometheus, ver
-[`operations/observability-runbook.md`](../operations/observability-runbook.md "operations/observability-runbook.md").
+[`operations/observability.md`](../operations/observability.md "operations/observability.md").
 
 ---
 
@@ -818,7 +819,7 @@ flowchart TD
 
 - [`docker/instances/README.md`](../../docker/instances/README.md) — Índice
   de instancias.
-- [`multi-instance-roadmap.md`](../architecture/multi-instance-roadmap.md) —
+- [`multi-instance.md`](../architecture/multi-instance.md) —
   Roadmap completo.
 - [`linting.md`](../development/linting.md) — Linters del proyecto.
 - [`installation.md`](../getting-started/installation.md) — Setup de dev local.

@@ -111,7 +111,7 @@ dev el routing lo hace el Caddy local (system service) apuntado a
 `127.0.0.1:9000` (backend) y `127.0.0.1:5321` (frontend).
 
 Para detalle del setup dev ver
-[`operations/caddy.md`](../operations/caddy.md "operations/caddy.md").
+[`getting-started/caddy.md`](../../getting-started/caddy.md "getting-started/caddy.md").
 
 ### Comandos
 
@@ -174,7 +174,8 @@ CDN; Caddy termina TLS del origen.
 ## Almacenamiento de objetos
 
 Producción debería usar `S3` o compatible para assets grandes. Ver
-[`stack/database.md`](database.md "stack/database.md") sección Storage.
+[`architecture/tech-database.md`](../architecture/tech-database.md "architecture/tech-database.md")
+sección Storage.
 
 ## Monitoreo y logs
 
@@ -185,7 +186,7 @@ Stack candidato (a evaluar):
 - **Sentry** para tracking de errores.
 
 Para el runbook de detección de incidentes ver
-[`operations/observability-runbook.md`](../operations/observability-runbook.md "observability-runbook.md").
+[`operations/observability.md`](../operations/observability.md "operations/observability.md").
 
 ## Respaldo
 
@@ -197,4 +198,4 @@ Para el runbook de detección de incidentes ver
 
 - [`operations/deployment.md`](../operations/deployment.md "operations/deployment.md")
 - [`operations/docker.md`](../operations/docker.md "operations/docker.md")
-- [`operations/caddy.md`](../operations/caddy.md "operations/caddy.md")
+- [`getting-started/caddy.md`](../../getting-started/caddy.md "getting-started/caddy.md")

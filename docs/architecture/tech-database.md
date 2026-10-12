@@ -37,10 +37,15 @@ geométricos e índices espaciales.
 # Levantar el stack de una instancia (dev)
 ./scripts/docker-stack.sh up development panda-estampados-and-kitsune
 
-# Equivale a (NO usar directo, pero a modo ilustrativo):
+# Equivale a (NO usar directo, solo a modo ilustrativo del mapeo):
 # cd docker/instances/development/panda-estampados-and-kitsune
 # docker compose up -d postgres
 ```
+
+> **Operación canónica:** todos los comandos de `docker compose` van
+> por `scripts/docker-stack.sh <cmd> <stage> <store>`. Resuelve stage y
+> store, valida la combinación, y traduce service names entre dev
+> (`backend`, `postgres`) y prod (`app`, `db`). Ver AGENTS.md raíz.
 
 El compose de la instancia define el servicio `postgres`:
 
