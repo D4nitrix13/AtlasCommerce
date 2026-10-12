@@ -18,9 +18,16 @@
  * Empty-safe: si items está vacío no renderiza ni la sección ni el
  * heading. La página decide cuándo omitir pasando [].
  *
- * Tenant-aware: el borde lateral del <summary> usa
- * border-[var(--primary)] cuando está abierto para anclar el
- * feedback visual con el color del brand.
+ * Tenant-aware: el botón + del summary usa un círculo teal oscuro
+ * (var(--primary, #475569)) que es el equivalente Panda del teal
+ * #415F62 de Bonfire. La fuente queda neutral slate-900 para no
+ * competir con el brand.
+ *
+ * Enriquecimiento visual Bonfire (F4.x — sprint visual fidelity):
+ *   el `+` de expand/collapse se pinta en un círculo teal oscuro
+ *   (slate-700 en Panda) y los dividers pasan a border-slate-200
+ *   para acercarse a la paleta cream de Bonfire sin abandonar las
+ *   neutrales de Panda.
  *
  * Accesibilidad (HTML5 <details>/<summary> por defecto):
  *   - Toggle con Enter y Espacio heredado del navegador.
@@ -61,7 +68,7 @@ const { heading, items } = Astro.props;
       <div class="mt-8 flex flex-col gap-3 sm:mt-10">
         {items.map((item, index) => (
           <details
-            class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition open:border-[var(--primary,#475569)] open:shadow-md"
+            class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition open:border-slate-300 open:shadow-md"
           >
             <summary
               id={`faq-q-${index}`}
@@ -70,9 +77,9 @@ const { heading, items } = Astro.props;
               <span class="flex-1">{item.question}</span>
               <span
                 aria-hidden="true"
-                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition group-open:rotate-45 group-open:border-[var(--primary,#475569)] group-open:text-[var(--primary,#475569)]"
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-700 text-white shadow-sm transition group-open:rotate-45"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
                 </svg>
               </span>
