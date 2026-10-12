@@ -1234,6 +1234,18 @@ export type TranslationKey =
   // ─── storefront: B2B Panda — Bonfire gap (stats) ─────────────────────
   | 'storefront.b2b.home.stats.heading'
 
+  // ─── storefront: B2B Panda — Bonfire gap (process) ──────────────────
+  | 'storefront.b2b.home.process.heading'
+  | 'storefront.b2b.home.process.subheading'
+  | 'storefront.b2b.home.process.step1.title'
+  | 'storefront.b2b.home.process.step1.description'
+  | 'storefront.b2b.home.process.step2.title'
+  | 'storefront.b2b.home.process.step2.description'
+  | 'storefront.b2b.home.process.step3.title'
+  | 'storefront.b2b.home.process.step3.description'
+  | 'storefront.b2b.home.process.step4.title'
+  | 'storefront.b2b.home.process.step4.description'
+
   // ─── storefront: RFQ flow (F3.2) ────────────────────────────────────
   | 'storefront.rfq.title'
   | 'storefront.rfq.heading'

@@ -567,6 +567,23 @@ const en: Translations = {
   // B2B Panda — Bonfire gap: StatsBar (F4.x — sprint home Bonfire)
   'storefront.b2b.home.stats.heading': 'Why they print with us',
 
+  // B2B Panda — Bonfire gap: ProcessSteps
+  'storefront.b2b.home.process.heading': 'How it works',
+  'storefront.b2b.home.process.subheading':
+    'From the initial quote to delivery, in four steps',
+  'storefront.b2b.home.process.step1.title': 'Get a quote',
+  'storefront.b2b.home.process.step1.description':
+    'Send us your design or idea and we will respond in under 24 hours with a detailed quote.',
+  'storefront.b2b.home.process.step2.title': 'Approve',
+  'storefront.b2b.home.process.step2.description':
+    'We tweak the design, you pick the print technique and confirm the digital proof.',
+  'storefront.b2b.home.process.step3.title': 'We produce',
+  'storefront.b2b.home.process.step3.description':
+    'We print on your timeline. Dedicated production line for B2B clients with high monthly capacity.',
+  'storefront.b2b.home.process.step4.title': 'We deliver',
+  'storefront.b2b.home.process.step4.description':
+    'We ship to your address or branches. Tracking included for orders above 50 units.',
+
   // ─── storefront: RFQ flow (F3.2) ─────────────────────────────────────
   'storefront.rfq.title': 'Quote | Panda Estampados',
   'storefront.rfq.heading': 'Request your custom quote',
