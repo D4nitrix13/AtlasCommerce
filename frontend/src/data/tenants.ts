@@ -53,10 +53,17 @@ export interface LocalizableUseCase {
  * Mapa de tenants a sus use cases de la home B2C.
  *
  * Panda ya tiene sus 4 verticales acordadas en §7 del plan
- * (individuos, eventos, empresas, equipos). Los otros 3 tenants
- * quedan con array vacío hasta sus commits siguientes (3 y 4 del
- * plan); el componente `UseCases.astro` es empty-safe y no renderiza
- * la sección si el array está vacío.
+ * (individuos, eventos, empresas, equipos). Kitsune suma sus 4
+ * verticales nicho otaku en este commit (figuras, anime, manga,
+ * cosplay). Los otros 2 tenants (MM-Boutique, Morales Store) quedan
+ * con array vacío hasta el commit 4 del plan; el componente
+ * `UseCases.astro` es empty-safe y no renderiza la sección si el
+ * array está vacío.
+ *
+ * Iconos de Kitsune: se reutilizan nombres validados del set
+ * existente en `Icon.astro` para evitar el fallback silencioso a
+ * `squares-2x2` (cube, eye, document-text, users — todos presentes).
+ * Los slugs `figures/anime/manga/cosplay` siguen la tabla de §7.
  */
 export const TENANT_USE_CASES: Record<TenantSlug, readonly LocalizableUseCase[]> = {
   'panda-estampados': [
@@ -81,7 +88,28 @@ export const TENANT_USE_CASES: Record<TenantSlug, readonly LocalizableUseCase[]>
       href: '/panda-estampados/products?segment=equipos',
     },
   ],
-  kitsune: [],
+  kitsune: [
+    {
+      iconKey: 'cube',
+      labelKey: 'storefront.home.kitsune.useCase.figures',
+      href: '/products?category=figures',
+    },
+    {
+      iconKey: 'eye',
+      labelKey: 'storefront.home.kitsune.useCase.anime',
+      href: '/products?category=anime',
+    },
+    {
+      iconKey: 'document-text',
+      labelKey: 'storefront.home.kitsune.useCase.manga',
+      href: '/products?category=manga',
+    },
+    {
+      iconKey: 'users',
+      labelKey: 'storefront.home.kitsune.useCase.cosplay',
+      href: '/products?category=cosplay',
+    },
+  ],
   'mm-boutique': [],
   'morales-store': [],
 } as const;
