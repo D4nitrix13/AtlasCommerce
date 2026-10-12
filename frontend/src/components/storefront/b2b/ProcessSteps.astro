@@ -25,6 +25,12 @@
  * el icono interior hereda el color del texto blanco. Lo demás queda
  * neutral (slate) para no competir visualmente con el TenantHero.
  *
+ * Enriquecimiento visual Bonfire (F4.x — sprint visual fidelity):
+ *   los números circulares crecen de 12 a 14 en desktop con un
+ *   gradiente del tenant en lugar de color sólido, y se agrega un
+ *   Squiggle ámbar decorativo a la izquierda del heading para
+ *   anclar la sección con el lenguaje hand-drawn de Bonfire.
+ *
  * Accesibilidad:
  *   - <section> + aria-labelledby al h2 (jerarquía h1=hero, h2=sección).
  *   - <ol> semántica para los pasos (orden importa en el flujo).
@@ -33,6 +39,7 @@
  *   - Iconos aria-hidden (el número del step ya transmite la posición).
  */
 import Icon from '../../ui/Icon.astro';
+import Squiggle from '../../ui/Squiggle.astro';
 
 export interface ProcessStep {
   /** Nombre que resuelve `Icon.astro`. Fallback: squares-2x2. */
@@ -50,13 +57,24 @@ interface Props {
 }
 
 const { heading, subheading, steps } = Astro.props;
+
+// El gradiente del círculo se construye una sola vez para que el
+// browser cachee la declaración y no se repita por cada step.
+const numberGradient =
+  'background-image: linear-gradient(135deg, var(--primary, #475569) 0%, color-mix(in srgb, var(--primary, #475569) 70%, white) 100%);';
 ---
 
 {steps.length > 0 && (
   <section
     aria-labelledby="b2b-process-heading"
-    class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+    class="relative overflow-hidden mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
   >
+    <Squiggle
+      variant="wave"
+      color="#F6C36F"
+      class="pointer-events-none absolute left-2 top-16 hidden h-5 w-32 opacity-30 lg:block"
+    />
+
     <header class="mb-10 text-center sm:mb-12">
       <h2
         id="b2b-process-heading"
@@ -75,8 +93,8 @@ const { heading, subheading, steps } = Astro.props;
           <div class="flex items-start gap-4">
             <span
               aria-hidden="true"
-              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-sm"
-              style="background: var(--primary, #475569);"
+              class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-sm sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+              style={numberGradient}
             >
               {index + 1}
             </span>
