@@ -56,7 +56,12 @@ const navLinks = [
     href: productsHref,
     matchPrefix: productsHref,
   },
+  // La búsqueda se representa como search pill en el centro del header,
+  // no como item del nav. Mantengo "search" en la lista para mantener
+  // la nav completa como fallback y para contextos donde la search pill
+  // no aplica (mobile/tablet).
   { labelKey: 'storefront.header.nav.search' as const, href: searchHref, matchPrefix: searchHref },
+  { labelKey: 'storefront.header.nav.cases' as const, href: searchHref },
 ];
 
 const searchPlaceholder = t['storefront.header.searchPlaceholder'];

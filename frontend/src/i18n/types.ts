@@ -1104,6 +1104,7 @@ export type TranslationKey =
   | 'storefront.header.nav.home'
   | 'storefront.header.nav.products'
   | 'storefront.header.nav.search'
+  | 'storefront.header.nav.cases'
   | 'storefront.header.nav.account'
   | 'storefront.header.nav.cart'
   | 'storefront.header.cartBadge'

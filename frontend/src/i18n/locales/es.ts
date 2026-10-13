@@ -915,6 +915,7 @@ const es: Translations = {
   'storefront.header.nav.home': 'Inicio',
   'storefront.header.nav.products': 'Productos',
   'storefront.header.nav.search': 'Buscar',
+  'storefront.header.nav.cases': 'Casos',
   'storefront.header.nav.account': 'Mi cuenta',
   'storefront.header.nav.cart': 'Carrito',
   'storefront.header.cartBadge': '{count} en el carrito',
