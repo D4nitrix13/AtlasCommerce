@@ -559,6 +559,8 @@ const es: Translations = {
     'Polos, hoodies, tazas y más con tu logo o diseño. Producción consistente, entregas puntuales y descuentos por volumen.',
   'storefront.b2b.home.hero.ctaPrimary': 'Cotizar volumen',
   'storefront.b2b.home.hero.ctaSecondary': 'Solicitar cotización',
+  'storefront.b2b.home.hero.exploreLabel': 'Explorar',
+  'storefront.b2b.home.hero.trendingLabel': 'Proyectos recientes',
   'storefront.b2b.home.bullet.bulk': 'Precios por volumen desde 10 unidades',
   'storefront.b2b.home.bullet.rfq': 'Cotizaciones personalizadas en 24h',
   'storefront.b2b.home.bullet.multiBranch': 'Multi-sucursal: sede, almacén, oficina, eventos',

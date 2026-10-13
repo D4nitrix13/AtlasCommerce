@@ -557,6 +557,8 @@ const en: Translations = {
     'Polos, hoodies, mugs and more with your logo or design. Consistent production, on-time delivery and volume discounts.',
   'storefront.b2b.home.hero.ctaPrimary': 'Quote volume order',
   'storefront.b2b.home.hero.ctaSecondary': 'Request custom quote',
+  'storefront.b2b.home.hero.exploreLabel': 'Explore',
+  'storefront.b2b.home.hero.trendingLabel': 'Recent projects',
   'storefront.b2b.home.bullet.bulk': 'Volume pricing from 10 units',
   'storefront.b2b.home.bullet.rfq': 'Custom quotes in 24h',
   'storefront.b2b.home.bullet.multiBranch': 'Multi-branch: HQ, warehouse, office, events',

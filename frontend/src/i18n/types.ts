@@ -1224,6 +1224,8 @@ export type TranslationKey =
   | 'storefront.b2b.home.hero.subtitle'
   | 'storefront.b2b.home.hero.ctaPrimary'
   | 'storefront.b2b.home.hero.ctaSecondary'
+  | 'storefront.b2b.home.hero.exploreLabel'
+  | 'storefront.b2b.home.hero.trendingLabel'
   | 'storefront.b2b.home.bullet.bulk'
   | 'storefront.b2b.home.bullet.rfq'
   | 'storefront.b2b.home.bullet.multiBranch'
