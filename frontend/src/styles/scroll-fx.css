@@ -1,0 +1,108 @@
+/* === Scroll-driven animations ===
+   Replica el lenguaje de motion de bonfire.com: secciones que entran
+   con fade+slide al entrar el viewport, decorativos que reaccionan al
+   scroll. CSS-only con scroll-timeline donde esta soportado,
+   IntersectionObserver fallback donde no (Safari actual, Firefox
+   estable). El script scroll-fx.ts detecta soporte y agrega data-attrs
+   para que el fallback funcione.
+   ========================================================================== */
+
+/* Reduced motion: desactiva todo el motion (accesibilidad). */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal-stagger] > *,
+  [data-parallax-slow],
+  [data-parallax-fast] {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Cada seccion con [data-reveal] arranca invisible y se anima al entrar
+   el viewport. animation-timeline='view()' significa que la animacion
+   corre mientras el elemento esta dentro del viewport; animation-range
+   'cover 0% cover 50%' mapea el progreso del scroll sobre la cobertura
+   del elemento. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: reveal-up linear both;
+  animation-timeline: view();
+  animation-range: cover 0% cover 50%;
+}
+
+@keyframes reveal-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger para hijos directos (cards de grid, etc). Cada hijo tiene
+   delay incremental de 80ms para que entren en cascada visual. */
+[data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: reveal-up linear both;
+  animation-timeline: view();
+  animation-range: cover 0% cover 40%;
+}
+
+[data-reveal-stagger] > *:nth-child(1) { animation-delay: 0ms; }
+[data-reveal-stagger] > *:nth-child(2) { animation-delay: 80ms; }
+[data-reveal-stagger] > *:nth-child(3) { animation-delay: 160ms; }
+[data-reveal-stagger] > *:nth-child(4) { animation-delay: 240ms; }
+[data-reveal-stagger] > *:nth-child(5) { animation-delay: 320ms; }
+[data-reveal-stagger] > *:nth-child(6) { animation-delay: 400ms; }
+
+/* Parallax para decorativos (Squiggle, Blob). Cada elemento se mueve
+   verticalmente en proporcion al scroll. Menos porcentaje = mas sutil.
+   Solo los elementos decorativos reciben esto — el contenido nunca. */
+[data-parallax-slow] {
+  animation: parallax-slow linear both;
+  animation-timeline: scroll(root);
+}
+
+[data-parallax-fast] {
+  animation: parallax-fast linear both;
+  animation-timeline: scroll(root);
+}
+
+@keyframes parallax-slow {
+  to { transform: translateY(-15%); }
+}
+
+@keyframes parallax-fast {
+  to { transform: translateY(-30%); }
+}
+
+/* Fallback para browsers sin scroll-timeline (Safari < 18, Firefox estable).
+   El script scroll-fx.ts aplica data-revealed cuando el elemento entra
+   al viewport via IntersectionObserver, y mueve data-parallax-*
+   manualmente. Mantener estas clases para que el fallback funcione
+   inclusive si la animacion CSS no se dispara. */
+[data-revealed] {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Los hero mockups rotan al entrar al viewport. Aplica a los wrappers
+   que contienen [data-reveal-rotate]. */
+[data-reveal-rotate] {
+  opacity: 0;
+  animation: reveal-rotate linear both;
+  animation-timeline: view();
+  animation-range: cover 0% cover 50%;
+}
+
+@keyframes reveal-rotate {
+  from {
+    opacity: 0;
+    transform: var(--tw-rotate, 0) translateY(40px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: var(--tw-rotate, 0) translateY(0) scale(1);
+  }
+}
