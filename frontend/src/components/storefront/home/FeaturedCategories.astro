@@ -17,21 +17,60 @@
  *     header de sección, detrás del heading.
  *   - Mantiene API pública intacta: las sombras y el squiggle son
  *     aditivos, no rompen contratos.
+ *
+ * Enriquecimiento Bonfire (sprint decoratives completes):
+ *   - StarBurst ámbar rotada en la esquina inferior izquierda del
+ *     grid, replicando los girasoles que Bonfire usa detrás del
+ *     "Explore our most popular custom products".
+ *   - CategoryBadge (opcional via prop `badges`) en top-left de cada
+ *     card que lo defina — replica los chips Popular New Eco-friendly
+ *     de Bonfire.
  */
 import type { Category } from '../../../types/catalog';
 import Squiggle from '../../ui/Squiggle.astro';
+import StarBurst from '../../ui/StarBurst.astro';
+import CategoryBadge from './CategoryBadge.astro';
+
+interface BadgeConfig {
+  label: string;
+  tone?: 'emerald' | 'slate' | 'amber';
+}
 
 interface Props {
   categories: readonly Category[];
   heading: string;
   viewAllLabel: string;
   viewAllHref: string;
+  /**
+   * Mapa opcional de badges por slug de categoria. Solo las categorias
+   * con entrada en el mapa muestran badge. Default: sin badges.
+   */
+  badges?: Record<string, BadgeConfig>;
 }
 
-const { categories, heading, viewAllLabel, viewAllHref } = Astro.props;
+const { categories, heading, viewAllLabel, viewAllHref, badges = {} } = Astro.props;
 ---
 
-<section aria-label={heading} class="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+<section
+  aria-label={heading}
+  class="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+  data-reveal-stagger
+>
+  <StarBurst
+    variant="sun"
+    color="#F6C36F"
+    stroke-width={2.5}
+    size={140}
+    rotation={-12}
+    class="absolute -right-6 -top-2 hidden opacity-50 lg:block"
+  />
+  <StarBurst
+    variant="asterisk"
+    color="#D1C59E"
+    size={70}
+    rotation={28}
+    class="absolute -left-2 bottom-12 hidden opacity-50 lg:block"
+  />
   <header class="relative mb-8 flex items-end justify-between gap-4">
     <Squiggle
       variant="arc"
@@ -49,26 +88,34 @@ const { categories, heading, viewAllLabel, viewAllHref } = Astro.props;
   </header>
 
   <ul class="grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-4">
-    {categories.map((category) => (
-      <li class="list-none">
-        <a
-          href={category.href}
-          class="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-          style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
-        >
-          <img
-            src={category.imageUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            class="absolute inset-0 h-full w-full object-cover opacity-90 transition group-hover:scale-105 group-hover:opacity-100"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
-          <span class="relative z-10 p-4 text-base font-bold text-white sm:text-lg">
-            {category.name}
-          </span>
-        </a>
-      </li>
-    ))}
+    {categories.map((category) => {
+      const badge = badges[category.slug];
+      return (
+        <li class="list-none">
+          <a
+            href={category.href}
+            class="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+            style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
+          >
+            {badge && (
+              <span class="absolute left-3 top-3 z-20">
+                <CategoryBadge label={badge.label} tone={badge.tone} />
+              </span>
+            )}
+            <img
+              src={category.imageUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              class="absolute inset-0 h-full w-full object-cover opacity-90 transition group-hover:scale-105 group-hover:opacity-100"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
+            <span class="relative z-10 p-4 text-base font-bold text-white sm:text-lg">
+              {category.name}
+            </span>
+          </a>
+        </li>
+      );
+    })}
   </ul>
 </section>
