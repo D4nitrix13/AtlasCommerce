@@ -52,7 +52,7 @@ const isActive = (link: NavLink): boolean => {
             href={link.href}
             aria-current={active ? 'page' : undefined}
             class:list={[
-              'inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition',
+              'inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-base font-medium transition',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)]',
               active
                 ? 'bg-slate-100 text-[var(--primary,#1e293b)]'
@@ -63,7 +63,7 @@ const isActive = (link: NavLink): boolean => {
             <svg
               aria-hidden="true"
               viewBox="0 0 20 20"
-              class="h-3.5 w-3.5 shrink-0 opacity-60"
+              class="h-4 w-4 shrink-0 opacity-60"
               fill="none"
               stroke="currentColor"
               stroke-width="2.5"
