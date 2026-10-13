@@ -565,6 +565,28 @@ const en: Translations = {
   'storefront.b2b.home.bullet.net30': 'NET 30 available for approved customers',
   'storefront.b2b.home.featuredCategories.heading': 'What we print most for businesses',
   'storefront.b2b.home.featuredCategories.viewAll': 'View full catalog',
+  'storefront.b2b.home.featuredCategories.badge.popular': 'Popular',
+  'storefront.b2b.home.featuredCategories.badge.new': 'New',
+  'storefront.b2b.home.featuredCategories.badge.eco': 'Eco-friendly',
+
+  // B2B Panda — Bonfire gap: TrustedBy (new section)
+  'storefront.b2b.home.trustedBy.eyebrow': 'Trusted by our customers',
+  'storefront.b2b.home.trustedBy.heading': 'Brands that print with us',
+  'storefront.b2b.home.trustedBy.subheading': 'Shops, schools, teams, and NGOs that trust Panda Estampados',
+  'storefront.b2b.home.trustedBy.persona.comercios': 'Shops',
+  'storefront.b2b.home.trustedBy.persona.escuelas': 'Schools',
+  'storefront.b2b.home.trustedBy.persona.equipos': 'Teams',
+  'storefront.b2b.home.trustedBy.persona.ongs': 'NGOs',
+  'storefront.b2b.home.trustedBy.pill.comercios': 'Shops',
+  'storefront.b2b.home.trustedBy.pill.restaurantes': 'Restaurants',
+  'storefront.b2b.home.trustedBy.pill.escuelas': 'Schools',
+  'storefront.b2b.home.trustedBy.pill.hospitales': 'Hospitals',
+  'storefront.b2b.home.trustedBy.pill.ongs': 'NGOs',
+  'storefront.b2b.home.trustedBy.pill.eventos': 'Events',
+  'storefront.b2b.home.trustedBy.pill.deportes': 'Sports',
+  'storefront.b2b.home.trustedBy.pill.retail': 'Retail',
+  'storefront.b2b.home.trustedBy.pill.mayoristas': 'Wholesale',
+  'storefront.b2b.home.trustedBy.pill.hospitalidad': 'Hospitality',
 
   // B2B Panda — Bonfire gap: StatsBar (F4.x — sprint home Bonfire)
   'storefront.b2b.home.stats.heading': 'Why they print with us',

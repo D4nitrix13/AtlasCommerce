@@ -45,6 +45,7 @@ import FaqAccordion from '../../components/storefront/FaqAccordion.astro';
 import MaterialsCard from '../../components/storefront/b2b/MaterialsCard.astro';
 import DarkHeroCard from '../../components/storefront/b2b/DarkHeroCard.astro';
 import CtaFinal from '../../components/storefront/b2b/CtaFinal.astro';
+import TrustedBy from '../../components/storefront/TrustedBy.astro';
 import { getServerDictionary } from '../../i18n/server';
 import { CATEGORIES, getFeaturedProducts } from '../../data/products';
 import { B2B_CATEGORIES } from '../../data/b2b-mock';
@@ -267,6 +268,11 @@ const b2bFaqItems = [
         heading={t['storefront.b2b.home.featuredCategories.heading']}
         viewAllLabel={t['storefront.b2b.home.featuredCategories.viewAll']}
         viewAllHref={productsHref}
+        badges={{
+          'estampados-personalizados': { label: t['storefront.b2b.home.featuredCategories.badge.popular'] },
+          'regalos-corporativos': { label: t['storefront.b2b.home.featuredCategories.badge.new'] },
+          'sublimacion': { label: t['storefront.b2b.home.featuredCategories.badge.eco'], tone: 'emerald' },
+        }}
       />
 
       <ProcessSteps
@@ -279,6 +285,30 @@ const b2bFaqItems = [
         heading={t['storefront.b2b.home.clients.heading']}
         subheading={t['storefront.b2b.home.clients.subheading']}
         logos={b2bClientLogos}
+      />
+
+      <TrustedBy
+        eyebrow={t['storefront.b2b.home.trustedBy.eyebrow']}
+        heading={t['storefront.b2b.home.trustedBy.heading']}
+        subheading={t['storefront.b2b.home.trustedBy.subheading']}
+        personas={[
+          { variant: 'creator', label: t['storefront.b2b.home.trustedBy.persona.comercios'], rotation: -3 },
+          { variant: 'school', label: t['storefront.b2b.home.trustedBy.persona.escuelas'], rotation: 2 },
+          { variant: 'artist', label: t['storefront.b2b.home.trustedBy.persona.equipos'], rotation: -2 },
+          { variant: 'organizer', label: t['storefront.b2b.home.trustedBy.persona.ongs'], rotation: 4 },
+        ]}
+        pills={[
+          t['storefront.b2b.home.trustedBy.pill.comercios'],
+          t['storefront.b2b.home.trustedBy.pill.restaurantes'],
+          t['storefront.b2b.home.trustedBy.pill.escuelas'],
+          t['storefront.b2b.home.trustedBy.pill.hospitales'],
+          t['storefront.b2b.home.trustedBy.pill.ongs'],
+          t['storefront.b2b.home.trustedBy.pill.eventos'],
+          t['storefront.b2b.home.trustedBy.pill.deportes'],
+          t['storefront.b2b.home.trustedBy.pill.retail'],
+          t['storefront.b2b.home.trustedBy.pill.mayoristas'],
+          t['storefront.b2b.home.trustedBy.pill.hospitalidad'],
+        ]}
       />
 
       <MaterialsCard
