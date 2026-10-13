@@ -26,6 +26,7 @@
  *   </StorefrontLayout>
  */
 import '../styles/global.css';
+import '../styles/scroll-fx.css';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
 import StorefrontHeader from '../components/storefront/layout/StorefrontHeader.astro';
 import StorefrontFooter from '../components/storefront/layout/StorefrontFooter.astro';
@@ -77,5 +78,11 @@ const tenantFavicon = tenantSlug
     </main>
 
     <StorefrontFooter brand={brand} locale={locale} />
+
+    {/* Scroll-driven animations fallback para Safari/Firefox. Chrome/Edge
+        115+ corren animation-timeline nativamente via scroll-fx.css. */}
+    <script>
+      import '../scripts/scroll-fx.ts';
+    </script>
   </body>
 </html>
