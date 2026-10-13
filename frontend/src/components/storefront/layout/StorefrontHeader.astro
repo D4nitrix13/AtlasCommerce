@@ -2,21 +2,33 @@
 /**
  * StorefrontHeader — header principal de la tienda.
  *
- * Composición: brand (izquierda) + nav (centro) + actions (derecha).
- * Es sticky en top para mantener la nav visible al hacer scroll, y
- * aplica un borde sutil inferior para separarse del contenido.
+ * Composición: brand (izquierda) + nav (centro) + search pill (en
+ * desktop) + CTA Cotizar (en desktop) + actions (derecha, login + cart
+ * + locale switcher). Es sticky para mantener la nav visible al hacer
+ * scroll y aplica un borde sutil inferior para separarse del contenido.
  *
- * El header es tenant-aware: recibe `brand` del layout padre (que lo
- * resuelve vía `getBrandBySlug`). El cartCount también lo pasa el
- * layout (hoy hardcoded a 0; el estado del carrito se hidratará en F1.4).
+ * El header es tenant-aware: recibe `brand` del layout padre y expone
+ * el accent del tenant (Panda teal #2D9D8E, Kitsune violeta, etc) vía
+ * `var(--primary)` setteado por StorefrontLayout. El search pill apunta
+ * a /search?q=... y el CTA Cotizar apunta a /rfq — ambas rutas ya
+ * existen para los flujos B2B de Panda.
+ *
+ * Patrón Bonfire (design-references-bonfire §5): nav blanco 64px con
+ * search pill prominente en el centro y CTA verde a la derecha, igual
+ * que bonfire.com. En mobile/tablet el search pill y el CTA se ocultan
+ * para preservar el menú hamburguesa + acciones de la derecha; en
+ * desktop ambos aparecen inline.
  *
  * Accesibilidad:
- *  - `<header>` semántico.
- *  - nav con aria-label="Principal".
- *  - cart link con aria-label descriptivo cuando hay items.
+ *  - <header> semántico.
+ *  - Nav con aria-label="Principal".
+ *  - Search input con <label class="sr-only"> para lectores.
+ *  - Cart link con aria-label descriptivo cuando hay items.
+ *  - Focus ring global con var(--primary) para coherencia con CTA.
  */
 import type { StoreBrand } from '../../../config/stores';
 import { getServerDictionary } from '../../../i18n/server';
+import Icon from '../../ui/Icon.astro';
 import StorefrontHeaderBrand from './StorefrontHeaderBrand.astro';
 import StorefrontHeaderNav from './StorefrontHeaderNav.astro';
 import StorefrontHeaderActions from './StorefrontHeaderActions.astro';
@@ -33,6 +45,7 @@ const t = getServerDictionary(locale);
 const homeHref = `/${locale}`;
 const productsHref = `/${locale}/products`;
 const searchHref = `/${locale}/search`;
+const rfqHref = `/${locale}/rfq`;
 const accountHref = `/${locale}/account`;
 const cartHref = `/${locale}/cart`;
 
@@ -43,14 +56,24 @@ const navLinks = [
     href: productsHref,
     matchPrefix: productsHref,
   },
+  // La búsqueda se representa como search pill en el centro del header,
+  // no como item del nav. Mantengo "search" en la lista para mantener
+  // la nav completa como fallback y para contextos donde la search pill
+  // no aplica (mobile/tablet).
   { labelKey: 'storefront.header.nav.search' as const, href: searchHref, matchPrefix: searchHref },
+  { labelKey: 'storefront.header.nav.cases' as const, href: searchHref },
 ];
+
+const searchPlaceholder = t['storefront.header.searchPlaceholder'];
+const searchLabel = t['storefront.header.searchLabel'];
+const ctaLabel = t['storefront.header.ctaCotizar'];
 ---
 
 <header class="sticky top-0 z-30 w-full border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center gap-3">
-      <StorefrontHeaderBrand brand={brand} homeHref={homeHref} />
+  <div class="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-3 px-4 sm:px-6 lg:gap-8 lg:px-10">
+    <StorefrontHeaderBrand brand={brand} homeHref={homeHref} />
+
+    <div class="hidden flex-1 md:flex">
       <StorefrontHeaderNav
         links={navLinks}
         openMenuLabel={t['storefront.header.openMenu']}
@@ -58,6 +81,46 @@ const navLinks = [
       />
     </div>
 
-    <StorefrontHeaderActions cartHref={cartHref} accountHref={accountHref} cartCount={cartCount} />
+    {/* Search pill patrón Bonfire: input redondeado con lupa a la
+        izquierda. flex-1 + max-w-md para llenar el espacio entre nav
+        y CTA sin romper el layout en anchos intermedios. Oculto en
+        mobile/tablet donde el toggle del nav cubre la búsqueda. */}
+    <form
+      action={searchHref}
+      method="get"
+      role="search"
+      class="hidden lg:flex max-w-md flex-1 mx-4"
+    >
+      <label class="relative w-full">
+        <span class="sr-only">{searchLabel}</span>
+        <Icon
+          name="magnifying-glass"
+          class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+        />
+        <input
+          name="q"
+          type="search"
+          autocomplete="off"
+          placeholder={searchPlaceholder}
+          class="h-12 w-full rounded-full border border-slate-300 bg-slate-50 pl-12 pr-5 text-base text-slate-900 placeholder:text-slate-400 transition focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+        />
+      </label>
+    </form>
+
+    {/* CTA prominente estilo Bonfire: botón verde teal del tenant.
+        Antes de las acciones existentes (login + cart + lang) para
+        ser el último llamado a la acción visible antes del carrito. */}
+    <a
+      href={rfqHref}
+      class="hidden lg:inline-flex h-12 items-center justify-center rounded-lg bg-[var(--primary,#2D9D8E)] px-6 text-base font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2"
+    >
+      {ctaLabel}
+    </a>
+
+    <StorefrontHeaderActions
+      cartHref={cartHref}
+      accountHref={accountHref}
+      cartCount={cartCount}
+    />
   </div>
 </header>

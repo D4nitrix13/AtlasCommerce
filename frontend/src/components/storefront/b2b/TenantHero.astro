@@ -1,39 +1,47 @@
 ---
 /**
- * TenantHero — Hero B2B para Panda Estampados (design-refs §3.4 + §7).
+ * TenantHero — Hero B2B estilo Bonfire para Panda Estampados.
  *
- * DIFERENCIA con `HeroBanner.astro` (F1.4, B2C Kitsune):
- *   - Copy específico B2B: "Estampados personalizados para tu empresa"
- *     vs hero otaku de Kitsune.
- *   - Muestra bullets de propuesta de valor operativa (volumen / RFQ /
- *     NET 30) en lugar de emocional / fandom.
- *   - CTAs apuntan a `bulk-order` y `rfq` (no al catálogo genérico).
- *   - Accent color usa `var(--primary)` — Panda lo resuelve a teal
- *     #2D9D8E vía StorefrontLayout.astro.
+ * Diferencia con HeroBanner (B2C Kitsune): copy B2B operativo, sin
+ * emoción otaku. Accent usa `var(--primary)` que Panda resuelve a
+ * teal #2D9D8E vía StorefrontLayout.
  *
- * Patrón B2B (design-refs §7):
- *   "Action-required + account status" → no es un hero emocional,
- *   es una propuesta de valor operativa con CTA primario claro.
+ * Patrón Bonfire (design-references-bonfire §4):
+ *   Fondo crema neutro en lugar de gradient emerald, H1 masivo
+ *   centrado con tracking apretado y line-height 1.05, eyebrow pill
+ *   oscuro a la izquierda de un trending link, subtítulo grande
+ *   acotado a max-width 2xl, y decorativos del catálogo Bonfire — un
+ *   Squiggle ámbar en la esquina superior izquierda, otro abajo a
+ *   la derecha, dos Blobs (menta y melocotón) detrás del copy, y tres
+ *   ProductMockup flotando alrededor del H1 con rotaciones del rango
+ *   Bonfire (-8° a +12°). En mobile/tablet el hero es copy full-width
+ *   sin decorativos ni mockups flotando para respetar mobile-first.
  *
- * Enriquecimiento visual Bonfire (F4.x — sprint visual fidelity):
- *   3 ProductMockup flotando alrededor del hero con rotaciones del
- *   rango Bonfire (-8° a +13°) y 2 Blob decorativos detrás del copy.
- *   1 Squiggle ámbar cerca del CTA primario. Toda la decoración vive
- *   en `aria-hidden` y z-index bajo para no afectar lectura ni
- *   contraste del contenido principal. La API del componente no cambia.
+ * API: la firma no cambia respecto al sprint anterior — recibe las
+ * mismas props (eyebrow, title, subtitle, primaryCta, secondaryCta,
+ * bullets) para no romper el contrato con index.astro. Las props
+ * eyebrow y bullets no se renderizan: el H1 más los CTAs cubren el
+ * espacio que antes ocupaban los bullets, y el eyebrow pill Bonfire
+ * viene de la nueva clave i18n `exploreLabel`. Mantener las props
+ * evita migración y deja la puerta abierta a cambios futuros.
  *
- * Accesibilidad (AGENTS §17):
- *   - <section> con aria-labelledby.
- *   - CTAs son <a> reales (no <div onclick>).
- *   - Bullets usan <ul> semántica con íconos aria-hidden.
- *   - Imagen decorativa aria-hidden.
+ * Accesibilidad:
+ *  - <section> con aria-labelledby apuntando al H1.
+ *  - Eyebrow pill es <span> decorativo con aria-hidden para no
+ *    duplicar contenido (ya está implícito en el copy del H1).
+ *  - Decorativos (Squiggle, Blob, ProductMockup) son aria-hidden
+ *    en su primitive y pointer-events-none para no romper clicks.
+ *  - El trending link es <a> real con href a /products, navegable
+ *    con teclado y focus-visible destacado con el accent teal.
  */
 import Blob from '../../ui/Blob.astro';
 import Squiggle from '../../ui/Squiggle.astro';
 import ProductMockup from '../../ui/ProductMockup.astro';
+import { getServerDictionary } from '../../../i18n/server';
 
 interface HeroBullet {
-  /** Ícono emoji o glifo corto — solo decorativo, aria-hidden. */
+  /** Solo decorativo — no se renderiza en este sprint pero se conserva
+   *  en la API para no romper el contrato con index.astro. */
   icon: string;
   text: string;
 }
@@ -47,107 +55,111 @@ interface Props {
   bullets: readonly HeroBullet[];
 }
 
-const { eyebrow, title, subtitle, primaryCta, secondaryCta, bullets } = Astro.props;
+const { title, subtitle, primaryCta, secondaryCta } = Astro.props;
+const t = getServerDictionary(Astro.locals.locale);
+const productsHref = `/${Astro.locals.locale}/products`;
+const exploreLabel = t['storefront.b2b.home.hero.exploreLabel'];
+const trendingLabel = t['storefront.b2b.home.hero.trendingLabel'];
 ---
 
 <section
   aria-labelledby="tenant-hero-heading"
-  class="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-emerald-50/60"
+  class="relative overflow-hidden bg-slate-50 py-16 sm:py-20 lg:py-28"
 >
-  <div
-    aria-hidden="true"
-    class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-20 blur-3xl"
-    style="background: var(--primary, #059669);"
-  ></div>
-  <div
-    aria-hidden="true"
-    class="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full opacity-10 blur-3xl"
-    style="background: var(--secondary, #10b981);"
-  ></div>
-
+  {/* Decorativos detrás del copy — Solo desktop. Los primitives ya
+      traen aria-hidden y pointer-events-none; el caller añade hidden
+      lg:block para colapsarlos en mobile/tablet. */}
+  <Squiggle
+    variant="wave"
+    class="absolute top-12 left-8 w-24 rotate-[-8deg] opacity-50 hidden lg:block"
+  />
+  <Squiggle
+    variant="wave"
+    class="absolute bottom-16 right-16 w-32 rotate-[12deg] opacity-50 hidden lg:block"
+  />
   <Blob
     color="mint"
-    size="lg"
-    class="pointer-events-none absolute -right-24 top-10 opacity-50 blur-2xl"
+    class="absolute top-1/4 left-0 -translate-x-1/2 w-72 h-72 opacity-30 hidden lg:block"
   />
   <Blob
     color="peach"
-    size="md"
-    class="pointer-events-none absolute -left-20 bottom-10 hidden opacity-50 blur-2xl md:block"
+    class="absolute bottom-0 right-0 translate-x-1/4 w-96 h-96 opacity-25 hidden lg:block"
   />
 
-  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-12 lg:py-28">
-    <div class="flex flex-col items-start gap-6">
-      <p class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800 backdrop-blur">
+  {/* Container con max-width estándar de Bonfire (1248px) y padding
+      lateral progresivo. relative para anclar los mockups flotantes. */}
+  <div class="relative mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-10">
+    {/* Bloque de copy. En mobile/tablet ocupa todo el ancho; en
+        desktop se centra con max-width 5xl (1024px) para que el H1
+        tenga espacio amplio para varias lineas sin sentirse agobiado. */}
+    <div class="lg:max-w-5xl lg:mx-auto lg:text-center">
+      {/* Eyebrow pill + trending link. El pill es aria-hidden porque
+          su contenido (Explorar) ya está implícito en el copy del H1
+          y no aporta información nueva — es marca visual. */}
+      <div class="flex items-center gap-3 flex-wrap lg:justify-center">
         <span
           aria-hidden="true"
-          class="inline-block h-1.5 w-1.5 rounded-full"
-          style="background: var(--primary, #059669);"
-        />
-        {eyebrow}
-      </p>
+          class="inline-flex items-center gap-2 rounded-full bg-slate-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white"
+        >
+          {exploreLabel}
+        </span>
+        <a
+          href={productsHref}
+          class="inline-flex items-center gap-1 rounded-md text-sm font-medium text-slate-700 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2"
+        >
+          {trendingLabel}
+          <span aria-hidden="true">›</span>
+        </a>
+      </div>
 
       <h1
         id="tenant-hero-heading"
-        class="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+        class="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl"
       >
         {title}
       </h1>
 
-      <p class="max-w-2xl text-base text-slate-700 sm:text-lg">{subtitle}</p>
+      <p class="mt-6 text-lg leading-relaxed text-slate-600 sm:text-xl lg:mx-auto max-w-2xl">
+        {subtitle}
+      </p>
 
-      {bullets.length > 0 && (
-        <ul class="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
-          {bullets.map((bullet) => (
-            <li class="flex items-start gap-2 text-sm text-slate-700 sm:text-base">
-              <span aria-hidden="true" class="mt-0.5 text-base">
-                {bullet.icon}
-              </span>
-              <span>{bullet.text}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div class="relative mt-2 flex flex-wrap items-center gap-3">
+      {/* CTAs lado a lado. El primario usa el accent teal primario
+          del tenant vía var(--primary); el secundario es un outline
+          neutro slate para no competir visualmente. */}
+      <div class="mt-8 flex flex-wrap items-center gap-3 lg:justify-center">
         <a
           href={primaryCta.href}
-          class="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#059669)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#047857)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#059669)] focus-visible:ring-offset-2"
+          class="inline-flex h-12 items-center justify-center rounded-lg bg-[var(--primary,#2D9D8E)] px-7 text-base font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2"
         >
           {primaryCta.label}
         </a>
         <a
           href={secondaryCta.href}
-          class="inline-flex h-11 items-center justify-center rounded-lg border border-emerald-300 bg-white px-6 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#059669)] focus-visible:ring-offset-2"
+          class="inline-flex h-12 items-center justify-center rounded-lg border border-slate-300 bg-white px-7 text-base font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
         >
           {secondaryCta.label}
         </a>
-        <Squiggle
-          variant="wave"
-          color="#F6C36F"
-          class="pointer-events-none absolute -right-6 -top-8 h-4 w-24 opacity-80 sm:-right-12 sm:-top-10"
-        />
       </div>
     </div>
 
-    <div class="relative hidden h-[420px] lg:block">
-      <ProductMockup
-        variant="shirt"
-        logoText="Panda"
-        class="absolute right-4 top-6 h-48 w-48"
-      />
-      <ProductMockup
-        variant="mug"
-        logoText="Panda"
-        rotation={-8}
-        class="absolute left-2 top-20 h-32 w-32"
-      />
-      <ProductMockup
-        variant="hat"
-        logoText="Panda"
-        rotation={12}
-        class="absolute bottom-4 left-12 h-36 w-36"
-      />
-    </div>
+    {/* Mockups flotando alrededor del copy. Solo desktop (lg+).
+        Posicionados en los extremos del lienzo para emular el layout
+        editorial Bonfire donde las fotos saturan los bordes laterales.
+        Tamaño agrandado (h-72 a 80, w-56 a 72) para llenar más espacio. */}
+    <ProductMockup
+      variant="shirt"
+      logoText="Panda"
+      class="absolute left-2 top-24 h-72 w-60 rotate-[-8deg] hidden lg:block xl:left-10"
+    />
+    <ProductMockup
+      variant="mug"
+      logoText="Panda"
+      class="absolute left-44 top-72 h-36 w-36 rotate-[-12deg] hidden lg:block"
+    />
+    <ProductMockup
+      variant="shirt"
+      logoText="Panda"
+      class="absolute right-2 top-32 h-80 w-64 rotate-[12deg] hidden lg:block xl:right-10"
+    />
   </div>
 </section>
