@@ -1,0 +1,101 @@
+---
+/**
+ * StarBurst — primitive decorativo Bonfire-style.
+ *
+ * Replica los girasoles y estrellas rotadas que Bonfire usa en el fondo
+ * del grid "Explore our most popular custom products" (imagen de
+ * referencia del usuario). SVG inline, sin dependencias externas.
+ *
+ * Por qué este primitive existe:
+ *   El grid de categorías de Panda tiene un fondo crema neutro. Bonfire
+ *   lo rompe con figuras geométricas a 8-12 picos rotadas 8-22 grados,
+ *   dibujadas con stroke ámbar o melocotón de tres píxeles. Eso evita
+ *   que el grid se vea plano y le da la energía editorial característica.
+ *   Replicamos esa energía con un primitive reutilizable.
+ *
+ * Tres variantes:
+ *   - sun: 12 picos simétricos, círculo central, ~110px de diámetro.
+ *   - star: 8 picos cortos, más compacto (~70px), para spots pequeños.
+ *   - asterisk: cruz irregular con 4-6 trazos, ~50px, ideal entre cards.
+ *
+ * Accesibilidad: aria-hidden porque es decorativo. stroke-linecap
+ * round para emular el trazo a mano de las ilustraciones de Bonfire.
+ */
+interface Props {
+  variant?: 'sun' | 'star' | 'asterisk';
+  /** Color del trazo. Default: ámbar de la paleta Bonfire. */
+  color?: string;
+  /** Ancho del trazo en píxeles. Default: 3. */
+  strokeWidth?: number;
+  /** Rotación inicial en grados. Default: 0. */
+  rotation?: number;
+  /** Tamaño aproximado en píxeles (ancho y alto del viewBox). */
+  size?: number;
+  class?: string;
+}
+
+const {
+  variant = 'sun',
+  color = '#F6C36F',
+  strokeWidth = 3,
+  rotation = 0,
+  size = 120,
+  class: className = '',
+} = Astro.props;
+
+const viewBox = `0 0 100 100`;
+---
+
+<svg
+  aria-hidden="true"
+  viewBox={viewBox}
+  width={size}
+  height={size}
+  class={`pointer-events-none ${className}`}
+  style={`transform: rotate(${rotation}deg); color: ${color};`}
+  fill="none"
+  stroke="currentColor"
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  {variant === 'sun' && (
+    <>
+      <circle cx="50" cy="50" r="14" fill="currentColor" stroke="none" opacity="0.4" />
+      {/* 12 rayos alrededor del centro */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i * 30 * Math.PI) / 180;
+        const x1 = 50 + Math.cos(angle) * 22;
+        const y1 = 50 + Math.sin(angle) * 22;
+        const x2 = 50 + Math.cos(angle) * 38;
+        const y2 = 50 + Math.sin(angle) * 38;
+        return <line x1={x1} y1={y1} x2={x2} y2={y2} />;
+      })}
+      <circle cx="50" cy="50" r="6" fill="currentColor" stroke="none" />
+    </>
+  )}
+  {variant === 'star' && (
+    <>
+      {/* 8 rayos cortos para spot compacto */}
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i * 45 * Math.PI) / 180;
+        const x1 = 50 + Math.cos(angle) * 12;
+        const y1 = 50 + Math.sin(angle) * 12;
+        const x2 = 50 + Math.cos(angle) * 30;
+        const y2 = 50 + Math.sin(angle) * 30;
+        return <line x1={x1} y1={y1} x2={x2} y2={y2} />;
+      })}
+      <circle cx="50" cy="50" r="8" fill="currentColor" stroke="none" opacity="0.5" />
+    </>
+  )}
+  {variant === 'asterisk' && (
+    <>
+      {/* Trazos irregulares tipo asterisco, emulando trazos a mano de Bonfire */}
+      <path d="M 30 50 Q 50 48 70 50" />
+      <path d="M 35 35 Q 50 50 65 65" />
+      <path d="M 35 65 Q 50 50 65 35" />
+      <path d="M 50 30 L 50 70" />
+      <circle cx="50" cy="50" r="3" fill="currentColor" stroke="none" />
+    </>
+  )}
+</svg>
