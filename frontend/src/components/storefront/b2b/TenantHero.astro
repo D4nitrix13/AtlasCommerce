@@ -88,10 +88,11 @@ const trendingLabel = t['storefront.b2b.home.hero.trendingLabel'];
 
   {/* Container con max-width estándar de Bonfire (1248px) y padding
       lateral progresivo. relative para anclar los mockups flotantes. */}
-  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="relative mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-10">
     {/* Bloque de copy. En mobile/tablet ocupa todo el ancho; en
-        desktop se centra con max-width 3xl y texto centrado. */}
-    <div class="lg:max-w-3xl lg:mx-auto lg:text-center">
+        desktop se centra con max-width 5xl (1024px) para que el H1
+        tenga espacio amplio para varias lineas sin sentirse agobiado. */}
+    <div class="lg:max-w-5xl lg:mx-auto lg:text-center">
       {/* Eyebrow pill + trending link. El pill es aria-hidden porque
           su contenido (Explorar) ya está implícito en el copy del H1
           y no aporta información nueva — es marca visual. */}
@@ -113,7 +114,7 @@ const trendingLabel = t['storefront.b2b.home.hero.trendingLabel'];
 
       <h1
         id="tenant-hero-heading"
-        class="mt-6 text-4xl font-bold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl xl:text-7xl"
+        class="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl"
       >
         {title}
       </h1>
@@ -142,22 +143,23 @@ const trendingLabel = t['storefront.b2b.home.hero.trendingLabel'];
     </div>
 
     {/* Mockups flotando alrededor del copy. Solo desktop (lg+).
-        Usa rotate- en Tailwind (no la prop rotation del primitive)
-        para rotar todo el wrapper y heredar bien el pointer-events. */}
+        Posicionados en los extremos del lienzo para emular el layout
+        editorial Bonfire donde las fotos saturan los bordes laterales.
+        Tamaño agrandado (h-72 a 80, w-56 a 72) para llenar más espacio. */}
     <ProductMockup
       variant="shirt"
       logoText="Panda"
-      class="absolute left-8 top-32 h-56 w-48 rotate-[-8deg] hidden lg:block"
+      class="absolute left-2 top-24 h-72 w-60 rotate-[-8deg] hidden lg:block xl:left-10"
     />
     <ProductMockup
       variant="mug"
       logoText="Panda"
-      class="absolute left-40 bottom-24 h-32 w-32 rotate-[-12deg] hidden lg:block"
+      class="absolute left-44 top-72 h-36 w-36 rotate-[-12deg] hidden lg:block"
     />
     <ProductMockup
       variant="shirt"
       logoText="Panda"
-      class="absolute right-12 top-40 h-72 w-56 rotate-[12deg] hidden lg:block"
+      class="absolute right-2 top-32 h-80 w-64 rotate-[12deg] hidden lg:block xl:right-10"
     />
   </div>
 </section>
