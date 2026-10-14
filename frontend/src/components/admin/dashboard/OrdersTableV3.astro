@@ -1,0 +1,144 @@
+---
+/**
+ * OrdersTableV3 — Tabla de pedidos recientes para el dashboard v3.
+ *
+ * Replica la tabla "Pedidos recientes" del mockup Bonfire (vista 11):
+ * 5 columnas (Orden, Cliente, Total, Estado, Hace), 5 filas, hover
+ * sutil, sin dependencias externas.
+ *
+ * Accesibilidad (AGENTS.md §17):
+ *   - `<table>` semantico con `<caption>` (sr-only) + `<thead>/<tbody>`.
+ *   - Header sticky al scroll horizontal: el patron `<div
+ *     class="overflow-x-auto">` permite scroll en mobile sin perder
+ *     headers.
+ *   - Cada fila es `<tr>` con `<td>` real (no `<div>`).
+ *   - Status pills usan el componente `Badge` UI (primitivo
+ *     compartido) en lugar de reinventar el color.
+ *
+ * Datos:
+ *   - `orders` viene del caller (composition del page). Por ahora son
+ *     mock estaticos hasta que el endpoint
+ *     `GET /api/v1/admin/orders/recent` este disponible para v3.
+ */
+import Badge from '../../ui/Badge.astro';
+
+export type OrderStatus = 'production' | 'paid' | 'shipped' | 'delivered';
+
+interface OrderRow {
+  /** ID visible, ej "#AT-2481". */
+  orderNumber: string;
+  /** Nombre del cliente / empresa. */
+  customer: string;
+  /** Total ya formateado, ej "$1.240". */
+  total: string;
+  /** Status mapeable a Badge (processing = production, etc). */
+  status: OrderStatus;
+  /** Texto relativo, ej "hace 8 min". Llave i18n pre-resolved por caller. */
+  ago: string;
+}
+
+interface Props {
+  /** Titulo i18n del bloque. */
+  heading: string;
+  /** Label i18n del link "Ver todas". */
+  viewAllLabel: string;
+  /** Headers i18n de las 5 columnas. */
+  columns: {
+    order: string;
+    customer: string;
+    total: string;
+    status: string;
+    ago: string;
+  };
+  /** Filas a renderizar. */
+  orders: readonly OrderRow[];
+  /** Status label i18n por status (las pills muestran este texto). */
+  statusLabels: Record<OrderStatus, string>;
+  /** URL del link "Ver todas". */
+  viewAllHref?: string;
+}
+
+const {
+  heading,
+  viewAllLabel,
+  columns,
+  orders,
+  statusLabels,
+  viewAllHref = '#',
+} = Astro.props;
+
+// Mapeo del status v3 al variant del Badge UI primitive.
+// production -> 'processing' (mismo color violeta).
+const STATUS_VARIANT: Record<OrderStatus, 'processing' | 'delivered' | 'shipped' | 'pending'> =
+  {
+    production: 'processing',
+    paid: 'delivered',
+    shipped: 'shipped',
+    delivered: 'delivered',
+  };
+---
+
+<section
+  aria-labelledby="orders-table-v3-heading"
+  class="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+>
+  <header
+    class="flex items-center justify-between px-6 py-5"
+    style="box-shadow: inset 0 -1px 0 #e5e7eb"
+  >
+    <h2 id="orders-table-v3-heading" class="text-lg font-bold text-slate-900 sm:text-xl">
+      {heading}
+    </h2>
+    <a
+      href={viewAllHref}
+      class="text-[13px] font-semibold text-[var(--primary,#2d9d8e)] hover:underline"
+    >
+      {viewAllLabel}
+    </a>
+  </header>
+
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[560px] text-left">
+      <thead>
+        <tr class="bg-[var(--primary-soft,#e6f7f4)]">
+          <th class="px-4 py-3 text-[12px] font-bold uppercase tracking-wide text-slate-600">
+            {columns.order}
+          </th>
+          <th class="px-4 py-3 text-[12px] font-bold uppercase tracking-wide text-slate-600">
+            {columns.customer}
+          </th>
+          <th class="px-4 py-3 text-[12px] font-bold uppercase tracking-wide text-slate-600">
+            {columns.total}
+          </th>
+          <th class="px-4 py-3 text-[12px] font-bold uppercase tracking-wide text-slate-600">
+            {columns.status}
+          </th>
+          <th class="px-4 py-3 text-right text-[12px] font-bold uppercase tracking-wide text-slate-600">
+            {columns.ago}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          orders.map((order) => (
+            <tr class="border-b border-slate-100 transition hover:bg-slate-50 last:border-0">
+              <td class="whitespace-nowrap px-4 py-3.5 text-[14px] font-semibold text-slate-900">
+                {order.orderNumber}
+              </td>
+              <td class="px-4 py-3.5 text-[14px] text-slate-600">{order.customer}</td>
+              <td class="px-4 py-3.5 text-[14px] font-bold text-slate-900">
+                {order.total}
+              </td>
+              <td class="px-4 py-3.5">
+                <Badge status={STATUS_VARIANT[order.status]} label={statusLabels[order.status]} />
+              </td>
+              <td class="whitespace-nowrap px-4 py-3.5 text-right text-[13px] text-slate-400">
+                {order.ago}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

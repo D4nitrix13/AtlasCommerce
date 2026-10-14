@@ -1,0 +1,276 @@
+---
+/**
+ * DashboardV3Section — Composición full del dashboard v3 (Bonfire 11).
+ *
+ * Vivir acá permite que tanto `/admin/` como `/admin/dashboard/`
+ * compartan la MISMA composición. Cada page es solo un wrapper que
+ * monta `<DashboardV3Section />`. Evita duplicar imports, mocks y
+ * props y mantiene una single source of truth.
+ *
+ * Componentes:
+ *   - KpiCardV3 (4 cards: Ingresos, Pedidos, Clientes, Conversion).
+ *   - RevenueChartV3 (area chart 30 dias, SVG inline).
+ *   - CategoryDonutV3 (mix de catalogo, SVG inline).
+ *   - OrdersTableV3 (5 filas recientes).
+ *   - TopProductsV3 (5 productos mas vendidos).
+ *   - ActivityFeedV3 (3 alertas).
+ *   - DateRangeFilterV3 (selector 7d/30d/90d/All — visual).
+ *
+ * Datos: mock estaticos. Cuando el backend exponga endpoints v3-friendly
+ * (`/api/v1/admin/metrics/v3/summary` u opt-in flag), el caller de este
+ * componente (la page) puede reemplazarlos por fetch real.
+ */
+import KpiCardV3 from './KpiCardV3.astro';
+import RevenueChartV3 from './RevenueChartV3.astro';
+import CategoryDonutV3 from './CategoryDonutV3.astro';
+import DateRangeFilterV3 from './DateRangeFilterV3.astro';
+import OrdersTableV3 from './OrdersTableV3.astro';
+import TopProductsV3 from './TopProductsV3.astro';
+import ActivityFeedV3 from './ActivityFeedV3.astro';
+import type { TranslationKey } from '../../../i18n/types';
+
+interface Props {
+  /**
+   * Diccionario `Record<TranslationKey, string>` ya resuelto por la page.
+   * Parametrizar el componente asi evita un import adicional aca y
+   * mantiene el componente libre de dependencias de `Astro.locals`.
+   */
+  t: Record<TranslationKey, string>;
+}
+
+const { t } = Astro.props;
+
+interface ChartPoint {
+  x: number;
+  y: number;
+  label?: string;
+}
+
+/**
+ * Genera 30 puntos para el revenue chart, variando con un patron
+ * realista (tendencia levemente creciente + ruido). Y se mapea al
+ * viewBox 0-210 (eje invertido: y mas bajo = valor mas alto).
+ */
+function buildRevenuePoints(): ChartPoint[] {
+  const WIDTH = 680;
+  const COUNT = 30;
+  const values = [
+    32, 38, 28, 45, 55, 48, 62, 70, 58, 65, 75, 82, 70, 78, 88, 80, 92, 95,
+    88, 95, 100, 92, 98, 105, 110, 102, 108, 115, 120, 128,
+  ];
+  const minValue = 25;
+  const maxValue = 130;
+  const yMin = 30;
+  const yMax = 180;
+
+  return values.map((value, i) => {
+    const x = (WIDTH / (COUNT - 1)) * i;
+    const ratio = (value - minValue) / (maxValue - minValue);
+    const y = yMax - ratio * (yMax - yMin);
+    return { x, y };
+  });
+}
+
+const revenuePoints = buildRevenuePoints();
+
+const topProducts = [
+  { name: 'Playera Premium', unitsLabel: '342', revenueLabel: '$6.148' },
+  { name: 'Hoodie French Terry', unitsLabel: '198', revenueLabel: '$4.752' },
+  { name: 'Gorra Bordada', unitsLabel: '142', revenueLabel: '$2.260' },
+  { name: 'Taza Personalizada', unitsLabel: '128', revenueLabel: '$1.408' },
+  { name: 'Sudadera Kitsune', unitsLabel: '89', revenueLabel: '$4.272' },
+];
+
+const recentOrders = [
+  {
+    orderNumber: '#AT-2481',
+    customer: 'Colegio San Martín',
+    total: '$1.240',
+    status: 'production' as const,
+    ago: `8 ${t['admin.dashboard.v3.recentOrders.time.minutes']}`,
+  },
+  {
+    orderNumber: '#AT-2480',
+    customer: 'Estudio Norte',
+    total: '$680',
+    status: 'paid' as const,
+    ago: `24 ${t['admin.dashboard.v3.recentOrders.time.minutes']}`,
+  },
+  {
+    orderNumber: '#AT-2479',
+    customer: 'Fundación Arco',
+    total: '$3.920',
+    status: 'shipped' as const,
+    ago: `1 ${t['admin.dashboard.v3.recentOrders.time.hour']}`,
+  },
+  {
+    orderNumber: '#AT-2478',
+    customer: 'Marta Quiroga',
+    total: '$342',
+    status: 'paid' as const,
+    ago: `3 ${t['admin.dashboard.v3.recentOrders.time.hours']}`,
+  },
+  {
+    orderNumber: '#AT-2477',
+    customer: 'Hotel Vista Hermosa',
+    total: '$2.180',
+    status: 'delivered' as const,
+    ago: `5 ${t['admin.dashboard.v3.recentOrders.time.hours']}`,
+  },
+];
+
+const categorySegments = [
+  {
+    value: 42,
+    color: 'var(--primary, #2d9d8e)',
+    label: t['admin.dashboard.v3.category.tshirts'],
+  },
+  {
+    value: 24,
+    color: '#EAB24B',
+    label: t['admin.dashboard.v3.category.hoodies'],
+  },
+  {
+    value: 16,
+    color: '#951318',
+    label: t['admin.dashboard.v3.category.caps'],
+  },
+  {
+    value: 18,
+    color: '#9FB0BC',
+    label: t['admin.dashboard.v3.category.accessories'],
+  },
+];
+
+const statusLabels = {
+  production: t['admin.dashboard.v3.recentOrders.status.production'],
+  paid: t['admin.dashboard.v3.recentOrders.status.paid'],
+  shipped: t['admin.dashboard.v3.recentOrders.status.shipped'],
+  delivered: t['admin.dashboard.v3.recentOrders.status.delivered'],
+};
+
+const vsPrevious = t['admin.dashboard.v3.kpi.vsPrevious'];
+
+const activityAlerts = [
+  {
+    severity: 'warning' as const,
+    title: t['admin.dashboard.v3.activity.rfqTitle'],
+    body: t['admin.dashboard.v3.activity.rfqBody'],
+  },
+  {
+    severity: 'warning' as const,
+    title: t['admin.dashboard.v3.activity.lowStockTitle'],
+    body: t['admin.dashboard.v3.activity.lowStockBody'],
+  },
+  {
+    severity: 'info' as const,
+    title: t['admin.dashboard.v3.activity.shippingTitle'],
+    body: t['admin.dashboard.v3.activity.shippingBody'],
+  },
+];
+
+const chartId = `dash-revenue-${Math.random().toString(36).slice(2)}`;
+const donutId = `dash-donut-${Math.random().toString(36).slice(2)}`;
+---
+
+<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1.5 text-[13px] font-bold uppercase tracking-wider text-[var(--primary,#2d9d8e)]">
+      {t['admin.dashboard.v3.eyebrow']}
+    </p>
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+      {t['admin.dashboard.v3.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.dashboard.v3.subtitle']}</p>
+  </div>
+
+  <DateRangeFilterV3
+    selected="30d"
+    labels={{
+      r7d: t['admin.dashboard.v3.dateRange.7d'],
+      r30d: t['admin.dashboard.v3.dateRange.30d'],
+      r90d: t['admin.dashboard.v3.dateRange.90d'],
+      rall: t['admin.dashboard.v3.dateRange.all'],
+    }}
+  />
+</div>
+
+<section
+  aria-label={t['admin.dashboard.v3.title']}
+  data-reveal-stagger
+  class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4"
+>
+  <KpiCardV3
+    label={t['admin.dashboard.v3.kpi.revenue']}
+    value="$184.320"
+    delta={t['admin.dashboard.v3.kpi.revenueDelta']}
+    trend="up"
+    context={vsPrevious}
+  />
+  <KpiCardV3
+    label={t['admin.dashboard.v3.kpi.orders']}
+    value="1.247"
+    delta={t['admin.dashboard.v3.kpi.ordersDelta']}
+    trend="up"
+    context={vsPrevious}
+  />
+  <KpiCardV3
+    label={t['admin.dashboard.v3.kpi.customers']}
+    value="863"
+    delta={t['admin.dashboard.v3.kpi.customersDelta']}
+    trend="up"
+    context={vsPrevious}
+  />
+  <KpiCardV3
+    label={t['admin.dashboard.v3.kpi.conversion']}
+    value="3,8%"
+    delta={t['admin.dashboard.v3.kpi.conversionDelta']}
+    trend="down"
+    context={vsPrevious}
+  />
+</section>
+
+<section class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+  <RevenueChartV3
+    chartId={chartId}
+    heading={t['admin.dashboard.v3.revenueChart.heading']}
+    subtitle={t['admin.dashboard.v3.revenueChart.subtitle']}
+    totalLabel="$1,42M"
+    totalDelta="+22,8%"
+    points={revenuePoints}
+  />
+
+  <CategoryDonutV3
+    chartId={donutId}
+    heading={t['admin.dashboard.v3.categoryChart.heading']}
+    subtitle={t['admin.dashboard.v3.categoryChart.subtitle']}
+    categories={categorySegments}
+  />
+</section>
+
+<section class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+  <OrdersTableV3
+    heading={t['admin.dashboard.v3.recentOrders.heading']}
+    viewAllLabel={t['admin.dashboard.v3.recentOrders.viewAll']}
+    columns={{
+      order: t['admin.dashboard.v3.recentOrders.col.order'],
+      customer: t['admin.dashboard.v3.recentOrders.col.customer'],
+      total: t['admin.dashboard.v3.recentOrders.col.total'],
+      status: t['admin.dashboard.v3.recentOrders.col.status'],
+      ago: t['admin.dashboard.v3.recentOrders.col.ago'],
+    }}
+    orders={recentOrders}
+    statusLabels={statusLabels}
+  />
+
+  <TopProductsV3
+    heading={t['admin.dashboard.v3.topProducts.heading']}
+    unitsSuffix={t['admin.dashboard.v3.topProducts.units']}
+    products={topProducts}
+  />
+</section>
+
+<ActivityFeedV3
+  heading={t['admin.dashboard.v3.activity.heading']}
+  alerts={activityAlerts}
+/>

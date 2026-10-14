@@ -1,0 +1,122 @@
+---
+/**
+ * ActivityFeedV3 — Tarjetas de alertas y actividad para el dashboard v3.
+ *
+ * Replica la seccion "Alerts / activity" del mockup Bonfire (vista 11):
+ * 3 cards horizontales (RFQ por responder, Stock bajo, Envios en
+ * tiempo), icono + titulo + subtitulo.
+ *
+ * Estructura:
+ *   - Grid responsive: 1 col mobile, 3 cols `sm:`.
+ *   - Cada card tiene un ring de color distinto segun severidad
+ *     (amber para alerta, primary para info positivo).
+ *   - Los iconos son SVG inline (sin librerias).
+ *
+ * Accesibilidad:
+ *   - `<section aria-labelledby>` para el heading del grupo.
+ *   - Cada `<article>` con `<h3>` para el titulo del alert (screen
+ *     readers anuncian "RFQ por responder: Vencen en 6 h").
+ *   - Los iconos decorativos son `aria-hidden`.
+ */
+type Severity = 'warning' | 'info';
+
+interface AlertItem {
+  severity: Severity;
+  title: string;
+  body: string;
+}
+
+interface IconDefinition {
+  /** Path SVG (line-art). */
+  path: string;
+  /** Segunda path SVG opcional para iconos compuestos. */
+  path2?: string;
+}
+
+const ALERT_ICONS: Record<Severity, IconDefinition> = {
+  warning: { path: 'M12 9v4m0 4h.01M10.3 3.9 2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z' },
+  info: { path: 'M20 6 9 17l-5-5' },
+};
+
+const SEVERITY_STYLE: Record<Severity, { card: string; iconWrap: string; iconColor: string; ring: string }> = {
+  warning: {
+    card: '',
+    iconWrap: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+    ring: 'shadow-[inset_0_0_0_1px_#fde68a]',
+  },
+  info: {
+    card: '',
+    iconWrap: '',
+    iconColor: '',
+    ring: '',
+  },
+};
+
+interface Props {
+  heading: string;
+  alerts: readonly AlertItem[];
+}
+
+const { heading, alerts } = Astro.props;
+
+const dangerCardStyle = 'shadow-[0_1px_2px_rgba(160,180,200,0.10),_0_4px_12px_rgba(160,180,200,0.12),_inset_0_0_0_1px_#fde68a]';
+
+const infoCardStyle = 'border border-slate-200';
+const infoIconWrap = 'bg-[var(--primary-soft,#e6f7f4)]';
+const infoIconColor = 'text-[var(--primary,#2d9d8e)]';
+---
+
+<section
+  aria-labelledby="activity-feed-v3-heading"
+  class="mt-6"
+>
+  <h2 id="activity-feed-v3-heading" class="sr-only">{heading}</h2>
+
+  <ul class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    {
+      alerts.map((alert) => {
+        const icon = ALERT_ICONS[alert.severity];
+        const isInfo = alert.severity === 'info';
+        return (
+          <li>
+            <article
+              class:list={[
+                'flex gap-4 rounded-2xl bg-white p-5',
+                isInfo ? infoCardStyle : dangerCardStyle,
+              ]}
+            >
+              <span
+                class:list={[
+                  'grid h-9 w-9 shrink-0 place-items-center rounded-xl',
+                  isInfo ? infoIconWrap : SEVERITY_STYLE.warning.iconWrap,
+                ]}
+                aria-hidden="true"
+              >
+                <svg
+                  class:list={[
+                    'h-5 w-5',
+                    isInfo ? infoIconColor : SEVERITY_STYLE.warning.iconColor,
+                  ]}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d={icon.path} />
+                  {icon.path2 && <path d={icon.path2} />}
+                </svg>
+              </span>
+              <div class="min-w-0">
+                <h3 class="truncate text-[14px] font-bold text-slate-900">{alert.title}</h3>
+                <p class="mt-0.5 text-[13px] text-slate-500">{alert.body}</p>
+              </div>
+            </article>
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
