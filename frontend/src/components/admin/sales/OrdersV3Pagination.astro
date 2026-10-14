@@ -1,0 +1,121 @@
+---
+/**
+ * OrdersV3Pagination — Footer de paginacion numeric + anterior/sig.
+ *
+ * Replica el bloque del mockup Bonfire (vista 12): "Mostrando X-Y de
+ * Z ordenes" + botones cuadrados 1..N + anterior/siguiente. El boton
+ * activo usa `bg-[var(--primary)] text-white`.
+ *
+ * El page (`orders/index.astro`) calcula `currentPage`, `totalPages`,
+ * `from`, `to`, `prevHref`, `nextHref` y `pageHrefFor`. Este componente
+ * solo compone.
+ *
+ * Empty state: si `totalPages <= 1`, no se renderiza (un solo page no
+ * necesita controles — pero esto lo decide el caller, no aca).
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - `<nav aria-label>` landmark.
+ *   - `aria-current="page"` en el boton activo.
+ *   - `aria-disabled="true"` + clase pointer-events-none en prev/next
+ *     cuando no hay target.
+ */
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  from: number;
+  to: number;
+  /** `null` cuando no hay pagina anterior. */
+  prevHref: string | null;
+  /** `null` cuando no hay pagina siguiente. */
+  nextHref: string | null;
+  pageHrefFor: (page: number) => string;
+}
+
+interface Props {
+  navLabel: string;
+  previousLabel: string;
+  nextLabel: string;
+  showingTemplate: string; // "Mostrando {from}-{to} de {total}"
+  pageOfTemplate: string; // "Página {page} de {total}"
+  pagination: PaginationProps;
+}
+
+const {
+  navLabel,
+  previousLabel,
+  nextLabel,
+  showingTemplate,
+  pageOfTemplate,
+  pagination,
+} = Astro.props;
+
+const numericPages: number[] = [];
+for (let p = 1; p <= pagination.totalPages; p += 1) {
+  numericPages.push(p);
+}
+---
+
+<nav
+  aria-label={navLabel}
+  class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm shadow-sm"
+>
+  <p class="text-xs text-slate-600">
+    {showingTemplate
+      .replace('{from}', String(pagination.from))
+      .replace('{to}', String(pagination.to))
+      .replace('{total}', String(pagination.total))}
+  </p>
+
+  <div class="flex items-center gap-1.5">
+    <a
+      href={pagination.prevHref ?? '#'}
+      aria-disabled={pagination.prevHref === null ? 'true' : undefined}
+      class:list={[
+        'inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2',
+        pagination.prevHref === null
+          ? 'pointer-events-none cursor-not-allowed opacity-40'
+          : '',
+      ]}
+    >
+      {previousLabel}
+    </a>
+
+    {numericPages.map((pageNum) => {
+      const isActive = pageNum === pagination.currentPage;
+      return (
+        <a
+          href={pagination.pageHrefFor(pageNum)}
+          aria-label={pageOfTemplate
+            .replace('{page}', String(pageNum))
+            .replace('{total}', String(pagination.totalPages))}
+          aria-current={isActive ? 'page' : undefined}
+          class:list={[
+            'inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-xs font-medium transition',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2',
+            isActive
+              ? 'bg-[var(--primary,#2d9d8e)] text-white shadow-sm'
+              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+          ]}
+        >
+          {pageNum}
+        </a>
+      );
+    })}
+
+    <a
+      href={pagination.nextHref ?? '#'}
+      aria-disabled={pagination.nextHref === null ? 'true' : undefined}
+      class:list={[
+        'inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2',
+        pagination.nextHref === null
+          ? 'pointer-events-none cursor-not-allowed opacity-40'
+          : '',
+      ]}
+    >
+      {nextLabel}
+    </a>
+  </div>
+</nav>

@@ -1,0 +1,199 @@
+---
+/**
+ * OrdersTableV3 — Tabla densa de orders admin (Bonfire mockup 12).
+ *
+ * Replica la tabla "Órdenes" del mockup Bonfire (vista 12):
+ *  - Header sticky con fondo `bg-slate-50`.
+ *  - 8 columnas: checkbox (40px) + orden + cliente + fecha + unidades
+ *    + total + estado + actions (kebab 3 dots).
+ *  - Hover `bg-slate-50`, last row sin border-bottom.
+ *  - Status pills usan `Badge` UI primitive (mismo color palette que
+ *    el resto del admin).
+ *  - Filas interactivas: checkbox per-row + click en kebab abre un
+ *    dropdown `<details>` con Ver / Editar / Reembolso.
+ *
+ * Esta tabla NO incluye paginacion propia: el caller la compone con
+ * `<PaginationV3>` o un `nav` aparte. Tampoco incluye empty state —
+ * el caller decide cuando mostrarlo (0 orders / filtros sin match).
+ *
+ * Accesibilidad (AGENTS.md §17):
+ *   - `<table>` semantico con `<caption>` (sr-only).
+ *   - Header sticky: la celda `<th>` usa `sticky top-0`.
+ *   - Cada fila es `<tr>` real (no `<div>` imitando tabla).
+ *   - Status pills son `Badge` (no reinventar color).
+ *   - Kebab dropdown usa `<details>` nativo (sin JS).
+ *
+ * AGENTS.md §11: solo success + empty. Empty state lo decide el caller.
+ */
+import Badge from '../../ui/Badge.astro';
+import { formatCentsAsDecimal, formatDate } from '../../../lib/formatters';
+import type { AdminOrderMock } from '../../../data/sales-mock';
+
+interface Props {
+  orders: readonly AdminOrderMock[];
+  currencyCode: string;
+  /** Headers i18n del thead. */
+  columns: {
+    order: string;
+    customer: string;
+    date: string;
+    units: string;
+    total: string;
+    status: string;
+    actions: string;
+  };
+  /** Texto sr-only del checkbox maestro + per-row. */
+  columnSelect: string;
+  detailHrefFor: (orderId: string) => string;
+  statusLabels: Record<AdminOrderMock['status'], string>;
+  actionLabels: {
+    view: string;
+    edit: string;
+    refund: string;
+    actionsFor: string; // "Acciones para {order}"
+  };
+}
+
+const {
+  orders,
+  currencyCode,
+  columns,
+  columnSelect,
+  detailHrefFor,
+  statusLabels,
+  actionLabels,
+} = Astro.props;
+
+function countItems(order: AdminOrderMock): number {
+  return order.items.reduce((sum, item) => sum + item.quantity, 0);
+}
+---
+
+<div
+  class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+  data-orders-table
+>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[860px] border-collapse text-left text-sm">
+      <caption class="sr-only">{columnSelect}</caption>
+      <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+        <tr>
+          <th scope="col" class="w-10 px-3 py-3">
+            <span class="sr-only">{columnSelect}</span>
+          </th>
+          <th scope="col" class="whitespace-nowrap px-3 py-3 font-semibold">
+            {columns.order}
+          </th>
+          <th scope="col" class="px-3 py-3 font-semibold">
+            {columns.customer}
+          </th>
+          <th scope="col" class="whitespace-nowrap px-3 py-3 font-semibold">
+            {columns.date}
+          </th>
+          <th scope="col" class="whitespace-nowrap px-3 py-3 text-right font-semibold">
+            {columns.units}
+          </th>
+          <th scope="col" class="whitespace-nowrap px-3 py-3 text-right font-semibold">
+            {columns.total}
+          </th>
+          <th scope="col" class="px-3 py-3 font-semibold">
+            {columns.status}
+          </th>
+          <th scope="col" class="w-12 px-3 py-3">
+            <span class="sr-only">{columns.actions}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {orders.map((order) => {
+          const detailHref = detailHrefFor(order.id);
+          const placedOn = formatDate(order.date);
+          const itemsTotal = countItems(order);
+          const total = formatCentsAsDecimal(order.totalCents, currencyCode);
+          const actionsFor = actionLabels.actionsFor.replace('{order}', order.number);
+          return (
+            <tr
+              class="group transition-colors hover:bg-slate-50/60"
+              data-order-row={order.id}
+            >
+              <td class="px-3 py-3 align-middle">
+                <input
+                  type="checkbox"
+                  name="selectedOrders"
+                  value={order.id}
+                  aria-label={actionsFor}
+                  data-order-checkbox
+                  class="h-4 w-4 rounded border-slate-300 text-[var(--primary,#2d9d8e)] focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,0.28))]"
+                />
+              </td>
+              <td class="whitespace-nowrap px-3 py-3 align-middle">
+                <a
+                  href={detailHref}
+                  class="font-mono text-xs font-semibold text-slate-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2 focus-visible:rounded"
+                >
+                  {order.number}
+                </a>
+              </td>
+              <td class="px-3 py-3 align-middle">
+                <p class="font-medium text-slate-900">{order.customer.name}</p>
+                <p class="text-xs text-slate-500">{order.customer.email}</p>
+              </td>
+              <td class="whitespace-nowrap px-3 py-3 align-middle text-slate-600">
+                <time datetime={order.date}>{placedOn}</time>
+              </td>
+              <td class="whitespace-nowrap px-3 py-3 text-right align-middle tabular-nums text-slate-700">
+                {itemsTotal}
+              </td>
+              <td class="whitespace-nowrap px-3 py-3 text-right align-middle font-semibold tabular-nums text-slate-900">
+                {total}
+              </td>
+              <td class="px-3 py-3 align-middle">
+                <Badge status={order.status} label={statusLabels[order.status]} />
+              </td>
+              <td class="px-3 py-3 align-middle">
+                <details class="relative inline-block">
+                  <summary
+                    class="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2"
+                    aria-label={actionsFor}
+                  >
+                    <span aria-hidden="true" class="text-lg leading-none">⋮</span>
+                  </summary>
+                  <div
+                    class="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                    role="menu"
+                  >
+                    <a
+                      href={detailHref}
+                      role="menuitem"
+                      class="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+                    >
+                      {actionLabels.view}
+                    </a>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      data-row-action="edit"
+                      data-order-id={order.id}
+                      class="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+                    >
+                      {actionLabels.edit}
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      data-row-action="refund"
+                      data-order-id={order.id}
+                      class="block w-full px-3 py-2 text-left text-sm text-rose-600 hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+                    >
+                      {actionLabels.refund}
+                    </button>
+                  </div>
+                </details>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+</div>

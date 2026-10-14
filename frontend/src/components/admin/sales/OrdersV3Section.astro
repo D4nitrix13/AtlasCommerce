@@ -1,0 +1,247 @@
+---
+/**
+ * OrdersV3Section — Composición slim de orders admin v3 (Bonfire 12).
+ *
+ * Compone los 5 bloques del mockup Bonfire:
+ *   1. Header (eyebrow + H1 + count).
+ *   2. <OrdersV3Filters /> card (search + status + date from + date to).
+ *   3. <BulkActionsBar /> (visible cuando count > 0).
+ *   4. <OrdersTableV3 /> (rows + checkboxes + kebab) o empty state.
+ *   5. <OrdersV3Pagination /> (numeric + anterior/sig).
+ *
+ * El `<script>` inline orquesta el estado de seleccion del cliente:
+ * togglea el bulk bar + mantiene el contador actualizado.
+ *
+ * El page (`orders/index.astro`) calcula todo lo server-side (filter
+ * via query params, paginacion, idioma) y pasa resultados pre-procesados.
+ *
+ * AGENTS.md §1: composicion pura, ≤250 lineas (componente mediano).
+ */
+import OrdersTableV3 from './OrdersTableV3.astro';
+import BulkActionsBar from './BulkActionsBar.astro';
+import OrdersV3Filters from './OrdersV3Filters.astro';
+import OrdersV3Pagination from './OrdersV3Pagination.astro';
+import type { TranslationKey } from '../../../i18n/types';
+import type { AdminOrderMock, AdminOrderStatus } from '../../../data/sales-mock';
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  from: number;
+  to: number;
+  prevHref: string | null;
+  nextHref: string | null;
+  pageHrefFor: (page: number) => string;
+}
+
+interface Props {
+  t: Record<TranslationKey, string>;
+  orders: readonly AdminOrderMock[];
+  totalFiltered: number;
+  currencyCode: string;
+  detailHrefFor: (orderId: string) => string;
+  current: {
+    query: string;
+    status: 'all' | AdminOrderStatus;
+    dateFrom: string;
+    dateTo: string;
+  };
+  clearFiltersHref: string;
+  baseHref: string;
+  pagination: PaginationProps;
+  statusLabels: Record<AdminOrderStatus, string>;
+  showEmpty: boolean;
+}
+
+const {
+  t,
+  orders,
+  totalFiltered,
+  currencyCode,
+  detailHrefFor,
+  current,
+  clearFiltersHref,
+  baseHref,
+  pagination,
+  statusLabels,
+  showEmpty,
+} = Astro.props;
+
+const columns = {
+  order: t['admin.sales.orders.v3.column.order'],
+  customer: t['admin.sales.orders.v3.column.customer'],
+  date: t['admin.sales.orders.v3.column.date'],
+  units: t['admin.sales.orders.v3.column.units'],
+  total: t['admin.sales.orders.v3.column.total'],
+  status: t['admin.sales.orders.v3.column.status'],
+};
+
+const actionLabels = {
+  view: t['admin.sales.orders.v3.view'],
+  edit: t['admin.sales.orders.v3.edit'],
+  refund: t['admin.sales.orders.v3.refund'],
+  actionsFor: t['admin.sales.orders.v3.column.actionsFor'],
+};
+
+const statusOptions = {
+  all: t['admin.sales.orders.v3.filter.all'],
+  pending: t['admin.sales.orders.v3.filter.pending'],
+  processing: t['admin.sales.orders.v3.filter.processing'],
+  shipped: t['admin.sales.orders.v3.filter.shipped'],
+  delivered: t['admin.sales.orders.v3.filter.delivered'],
+  cancelled: t['admin.sales.orders.v3.filter.cancelled'],
+};
+---
+
+<div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+  <header class="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <p class="mb-1 text-[11px] font-bold uppercase tracking-wider text-[var(--primary,#2d9d8e)]">
+        {t['admin.sales.orders.v3.eyebrow']}
+      </p>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        {t['admin.sales.orders.v3.title']}
+      </h1>
+    </div>
+    <p class="text-xs font-medium text-slate-500" data-orders-count>
+      {t['admin.sales.orders.v3.countOf'].replace('{count}', String(totalFiltered))}
+    </p>
+  </header>
+
+  <OrdersV3Filters
+    formAction={baseHref}
+    clearHref={clearFiltersHref}
+    current={current}
+    heading={t['admin.sales.orders.v3.filters.heading']}
+    searchLabel={t['admin.sales.orders.v3.filters.searchLabel']}
+    searchPlaceholder={t['admin.sales.orders.v3.search']}
+    statusLabel={t['admin.sales.orders.v3.filters.statusLabel']}
+    dateFromLabel={t['admin.sales.orders.v3.filters.dateFromLabel']}
+    dateToLabel={t['admin.sales.orders.v3.filters.dateToLabel']}
+    statusOptions={statusOptions}
+    applyLabel={t['admin.sales.orders.v3.filters.apply']}
+    clearLabel={t['admin.sales.orders.v3.filters.clear']}
+    visualOnlyHint={t['admin.sales.orders.v3.filters.visualOnlyHint']}
+  />
+
+  <div class="mb-3">
+    <BulkActionsBar
+      labelSelectedCount={t['admin.sales.orders.v3.bulk.selected']}
+      labelExportCsv={t['admin.sales.orders.v3.bulk.export']}
+      labelMarkShipped={t['admin.sales.orders.v3.bulk.markShipped']}
+      labelClearSelection={t['admin.sales.orders.v3.bulk.cancel']}
+    />
+  </div>
+
+  {showEmpty ? (
+    <div
+      class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center"
+      data-orders-empty
+    >
+      <div
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-500"
+        aria-hidden="true"
+      >
+        ⌕
+      </div>
+      <p class="text-base font-semibold text-slate-900">
+        {t['admin.sales.orders.v3.empty']}
+      </p>
+      <p class="max-w-md text-sm text-slate-500">
+        {t['admin.sales.orders.v3.emptyHint']}
+      </p>
+      <a
+        href={clearFiltersHref}
+        class="mt-2 inline-flex h-9 items-center rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+      >
+        {t['admin.sales.orders.v3.refresh']}
+      </a>
+    </div>
+  ) : (
+    <div data-reveal>
+      <OrdersTableV3
+        orders={orders}
+        currencyCode={currencyCode}
+        columns={{ ...columns, actions: t['admin.sales.orders.v3.column.actions'] }}
+        columnSelect={t['admin.sales.orders.v3.column.select']}
+        detailHrefFor={detailHrefFor}
+        statusLabels={statusLabels}
+        actionLabels={actionLabels}
+      />
+
+      {pagination.totalPages > 1 && (
+        <OrdersV3Pagination
+          navLabel={t['admin.sales.orders.v3.pagination.label']}
+          previousLabel={t['admin.sales.orders.v3.pagination.previous']}
+          nextLabel={t['admin.sales.orders.v3.pagination.next']}
+          showingTemplate={t['admin.sales.orders.v3.pagination.showing']}
+          pageOfTemplate={t['admin.sales.orders.v3.pagination.pageOf']}
+          pagination={pagination}
+        />
+      )}
+    </div>
+  )}
+</div>
+
+<script>
+  /**
+   * Sincroniza el bulk bar (visible cuando count > 0) y mantiene el
+   * contador actualizado en i18n con interpolacion `{count}`.
+   *
+   * Acciones bulk son stubs visuales: log a `console.info`. Cuando
+   * se implemente `POST /api/v1/admin/orders/bulk`, aqui va el fetch.
+   */
+  type BulkAction = 'exportCsv' | 'markShipped' | 'clear';
+
+  function syncBulkBar(): void {
+    const checked = document.querySelectorAll<HTMLInputElement>(
+      '[data-order-checkbox]:checked'
+    );
+    const count = checked.length;
+    const bar = document.querySelector<HTMLElement>('[data-bulk-bar]');
+    if (!bar) return;
+    bar.toggleAttribute('hidden', count === 0);
+    const countEl = bar.querySelector<HTMLElement>('[data-bulk-count]');
+    if (countEl) {
+      const template = countEl.dataset.template ?? countEl.textContent ?? '';
+      countEl.textContent = template.replace('{count}', String(count));
+    }
+  }
+
+  function selectedOrderIds(): string[] {
+    return Array.from(
+      document.querySelectorAll<HTMLInputElement>('[data-order-checkbox]:checked')
+    ).map((cb) => cb.value);
+  }
+
+  document.addEventListener('change', (event) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.matches?.('[data-order-checkbox]')) syncBulkBar();
+  });
+
+  document.addEventListener('click', (event) => {
+    const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+      '[data-bulk-action]'
+    );
+    if (!target) return;
+    const action = (target.dataset.bulkAction ?? '') as BulkAction;
+    if (action === 'clear') {
+      document.querySelectorAll<HTMLInputElement>('[data-order-checkbox]').forEach((cb) => {
+        cb.checked = false;
+      });
+      syncBulkBar();
+      // eslint-disable-next-line no-console
+      console.info('[orders-v3] selection cleared');
+      return;
+    }
+    // eslint-disable-next-line no-console
+    console.info('[orders-v3] bulk action requested (stub):', action, selectedOrderIds());
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncBulkBar, { once: true });
+  } else {
+    syncBulkBar();
+  }
+</script>
