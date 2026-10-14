@@ -1604,6 +1604,7 @@ export type TranslationKey =
   | 'storefront.checkout.v3.cardDetails'
   | 'storefront.checkout.v3.edit'
   | 'storefront.checkout.v3.shippingFreeLabel'
+  | 'storefront.checkout.v3.termsHint'
 
   // ─── formatters ──────────────────────────────────────────────────────
   | 'format.empty'

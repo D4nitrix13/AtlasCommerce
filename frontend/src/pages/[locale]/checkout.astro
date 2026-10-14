@@ -1,346 +1,194 @@
 ---
 /**
- * `/[locale]/checkout` — flujo multi-step completo (F4.1).
+ * `/[locale]/checkout` — flujo multi-step V3 estilo Bonfire.
  *
- * Composición de los 4 steps + summary + trust badges. El stepper
- * es clickeable a steps anteriores vía query param `?step=`. Steps
- * futuros están deshabilitados (no accesibles desde la UI).
- *
- * Baymard §5.2 gold standard:
- *  - 2-col grid (form izquierda · summary sticky derecha) desktop
- *  - single-col stacked mobile (summary arriba expandible)
- *  - Express checkout (Apple Pay / Google Pay) en step 1
- *  - Trust badges cerca del CTA
- *  - Sticky order summary con items + breakdown
+ * Replica el IA mockup `09-checkout.html`:
+ *  - H1 "Finalizar compra".
+ *  - Stepper horizontal de 3 pasos (Envío / Pago / Revisión) con
+ *    círculos numerados conectados por líneas; activo en `--primary`,
+ *    completado con check.
+ *  - 2-col grid desktop (form izquierda · summary sticky derecha).
+ *  - Background `bg-slate-50` en `<main>`.
+ *  - Empty cart → redirect a `/cart` con locale preservado.
  *
  * Decisiones:
- *  - El carrito es MOCK (mismo demo de `cart.astro`); cuando exista
- *    el cart store global, `cartItems` se hidrata del store y los
- *    handlers de submit se reemplazan por mutaciones reales.
- *  - Los pasos se navegan por GET (no hay persistencia real entre
- *    steps). El submit final en review step es POST placeholder.
- *  - Los errores de validación inline son placeholders (el form no
- *    tiene JS de validación; el backend lo hará al integrar).
+ *  - El carrito es MOCK (mismo demo de `cart.astro` v3). Cuando exista
+ *    el cart store global, `cartItems` se hidrata del store.
+ *  - Los pasos se navegan por GET (sin JS): cada step es un `?step=`
+ *    alias; steps futuros se ocultan vía `<fieldset hidden>` para que
+ *    no aparezcan en el AT.
+ *  - Submit final es un `<button type="submit">` que navega a
+ *    `?step=success` (placeholder sin backend real).
+ *  - Single source of truth de totales: pre-computamos acá y los
+ *    pasamos al summary; cuando exista el backend, esto se hidrata
+ *    de la misma forma.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
-import CheckoutStepper from '../../components/storefront/checkout/CheckoutStepper.astro';
-import CheckoutSummary from '../../components/storefront/checkout/CheckoutSummary.astro';
-import CheckoutContactStep from '../../components/storefront/checkout/CheckoutContactStep.astro';
-import CheckoutShippingStep from '../../components/storefront/checkout/CheckoutShippingStep.astro';
-import CheckoutPaymentStep from '../../components/storefront/checkout/CheckoutPaymentStep.astro';
-import CheckoutReviewStep from '../../components/storefront/checkout/CheckoutReviewStep.astro';
-import CheckoutTrustBadges from '../../components/storefront/checkout/CheckoutTrustBadges.astro';
-import CheckoutSuccess from '../../components/storefront/checkout/CheckoutSuccess.astro';
+import CheckoutStepperV3 from '../../components/storefront/checkout/CheckoutStepperV3.astro';
+import CheckoutSummaryV3 from '../../components/storefront/checkout/CheckoutSummaryV3.astro';
+import CheckoutFormV3, {
+  type CheckoutV3StepId,
+} from '../../components/storefront/checkout/CheckoutFormV3.astro';
 import { getServerDictionary } from '../../i18n/server';
-import {
-  CHECKOUT_CART_ITEMS,
-  CHECKOUT_STEPS,
-  SAVED_ADDRESSES,
-  SHIPPING_METHODS,
-  PAYMENT_METHODS,
-  IS_USER_LOGGED_IN,
-  getCheckoutSubtotalCents,
-} from '../../data/checkout-mock';
+import { PRODUCTS, findProductBySlug } from '../../data/products';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
 const checkoutBaseHref = `/${locale}/checkout`;
+const cartHref = `/${locale}/cart`;
 
-// Step actual desde query param `?step=`. Default = 'contact'.
-// Si el carrito está vacío, renderizamos empty state (no steps).
+// ─── Step actual desde query param `?step=`. Default = 'shipping'.
+const VALID_STEPS: readonly CheckoutV3StepId[] = ['shipping', 'payment', 'review'];
 const url = new URL(Astro.request.url);
-const rawStep = url.searchParams.get('step') ?? 'contact';
-const stepParam = CHECKOUT_STEPS.find((entry) => entry.id === rawStep);
-const currentStepId = stepParam?.id ?? 'contact';
+const rawStep = url.searchParams.get('step') ?? 'shipping';
+const currentStepId: CheckoutV3StepId =
+  (VALID_STEPS as readonly string[]).includes(rawStep)
+    ? (rawStep as CheckoutV3StepId)
+    : 'shipping';
 
-// Empty cart placeholder
-const cartItems = CHECKOUT_CART_ITEMS;
-const isEmpty = cartItems.length === 0;
+// ─── Mock cart: 2 items demo (mismas elecciones que cart.astro v3).
+const demoCart = [
+  { productSlug: PRODUCTS[0].slug, quantity: 2 },
+  { productSlug: PRODUCTS[2].slug, quantity: 1 },
+];
 
-// Paso especial: success page (cuando el form de review se submita,
-// el backend redirige a ?step=success con el número de orden). Hoy
-// no hay backend, pero exponemos el flow visualmente.
-// Comparamos contra `rawStep` (no `currentStepId`) porque `'success'`
-// no está en el union `CheckoutStepId` — es un alias especial resuelto
-// por la página, no un step normal del stepper.
-const isSuccessStep = rawStep === 'success';
+const cartItems = demoCart
+  .map((entry) => {
+    const product = findProductBySlug(entry.productSlug);
+    if (product === null) {
+      return null;
+    }
+    return {
+      id: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      priceCents: product.priceCents,
+      currency: product.currency ?? 'USD',
+      quantity: entry.quantity,
+    };
+  })
+  .filter((item): item is NonNullable<typeof item> => item !== null);
 
-// Order number placeholder — en producción vendría del backend.
-const PLACEHOLDER_ORDER_NUMBER = `ORD-${Date.now().toString().slice(-7)}`;
+// ─── Empty-safe: si no hay items, redirigimos a /cart.
+if (cartItems.length === 0) {
+  return Astro.redirect(cartHref);
+}
 
-// ─── Labels por step ─────────────────────────────────────────────────
-const stepperLabels = CHECKOUT_STEPS.map((entry) => ({
-  id: entry.id,
-  label: t[`storefront.checkout.stepper.${entry.id}`],
-}));
+// ─── Labels del stepper.
+const stepperSteps = [
+  { id: 'shipping', label: t['storefront.checkout.v3.step1'] },
+  { id: 'payment', label: t['storefront.checkout.v3.step2'] },
+  { id: 'review', label: t['storefront.checkout.v3.step3'] },
+];
 
+// ─── Labels del form.
+const formLabels = {
+  shippingHeading: t['storefront.checkout.v3.shippingHeading'],
+  paymentHeading: t['storefront.checkout.v3.paymentHeading'],
+  reviewHeading: t['storefront.checkout.v3.reviewHeading'],
+  reviewHint: t['storefront.checkout.v3.reviewHint'],
+  previous: t['storefront.checkout.v3.previous'],
+  next: t['storefront.checkout.v3.next'],
+  placeOrder: t['storefront.checkout.v3.placeOrder'],
+  shipping: {
+    shippingHeading: t['storefront.checkout.v3.shippingHeading'],
+    name: t['storefront.checkout.v3.shipping.name'],
+    email: t['storefront.checkout.v3.shipping.email'],
+    phone: t['storefront.checkout.v3.shipping.phone'],
+    address1: t['storefront.checkout.v3.shipping.address1'],
+    address2: t['storefront.checkout.v3.shipping.address2'],
+    city: t['storefront.checkout.v3.shipping.city'],
+    state: t['storefront.checkout.v3.shipping.state'],
+    postal: t['storefront.checkout.v3.shipping.postal'],
+    country: t['storefront.checkout.v3.shipping.country'],
+  },
+  payment: {
+    paymentHeading: t['storefront.checkout.v3.paymentHeading'],
+    paymentMethod: t['storefront.checkout.v3.payment.method'],
+    card: t['storefront.checkout.v3.payment.card'],
+    transfer: t['storefront.checkout.v3.payment.transfer'],
+    cod: t['storefront.checkout.v3.payment.cod'],
+    cardDetails: t['storefront.checkout.v3.cardDetails'],
+    cardNumber: t['storefront.checkout.v3.payment.cardNumber'],
+    expiry: t['storefront.checkout.v3.payment.expiry'],
+    cvv: t['storefront.checkout.v3.payment.cvv'],
+    cardName: t['storefront.checkout.v3.payment.cardName'],
+  },
+  review: {
+    qty: t['storefront.checkout.v3.qty'],
+    subtotal: t['storefront.checkout.v3.subtotal'],
+  },
+};
+
+// ─── Labels del summary.
 const summaryLabels = {
-  heading: t['storefront.checkout.summary.heading'],
-  subtotal: t['storefront.checkout.summary.subtotal'],
-  discount: t['storefront.checkout.summary.discount'],
-  shipping: t['storefront.checkout.summary.shipping'],
-  shippingFree: t['storefront.checkout.summary.shippingFree'],
-  shippingPending: t['storefront.checkout.summary.shippingPending'],
-  tax: t['storefront.checkout.summary.tax'],
-  total: t['storefront.checkout.summary.total'],
-  itemCount: t['storefront.checkout.summary.itemCount'],
-  expand: t['storefront.checkout.summary.expand'],
-  collapse: t['storefront.checkout.summary.collapse'],
+  summary: t['storefront.checkout.v3.summary'],
+  emptyItems: t['storefront.checkout.v3.empty'],
+  subtotal: t['storefront.checkout.v3.subtotal'],
+  shippingCost: t['storefront.checkout.v3.shippingCost'],
+  shippingFree: t['storefront.checkout.v3.shippingFree'],
+  tax: t['storefront.checkout.v3.tax'],
+  total: t['storefront.checkout.v3.total'],
+  cta: t['storefront.checkout.v3.placeOrder'],
+  termsHint: t['storefront.checkout.v3.termsHint'],
 };
 
-const trustLabels = {
-  ssl: t['storefront.checkout.trust.ssl'],
-  visa: t['storefront.checkout.trust.visa'],
-  mastercard: t['storefront.checkout.trust.mastercard'],
-  net30: t['storefront.checkout.trust.net30'],
-  gdpr: t['storefront.checkout.trust.gdpr'],
-};
-
-const contactLabels = {
-  heading: t['storefront.checkout.contact.heading'],
-  subtitle: t['storefront.checkout.contact.subtitle'],
-  emailLabel: t['storefront.checkout.contact.emailLabel'],
-  emailPlaceholder: t['storefront.checkout.contact.emailPlaceholder'],
-  subscribeLabel: t['storefront.checkout.contact.subscribeLabel'],
-  guestOption: t['storefront.checkout.contact.guestOption'],
-  memberLogin: t['storefront.checkout.contact.memberLogin'],
-  memberHint: t['storefront.checkout.contact.memberHint'],
-  continueAsGuest: t['storefront.checkout.contact.continueAsGuest'],
-  continueToShipping: t['storefront.checkout.contact.continueToShipping'],
-  errorEmailEmpty: t['storefront.checkout.contact.error.emailEmpty'],
-  errorEmailInvalid: t['storefront.checkout.contact.error.emailInvalid'],
-  expressHeading: t['storefront.checkout.express.heading'],
-  expressSubtitle: t['storefront.checkout.express.subtitle'],
-  applePay: t['storefront.checkout.express.applePay'],
-  googlePay: t['storefront.checkout.express.googlePay'],
-};
-
-const shippingLabels = {
-  heading: t['storefront.checkout.shipping.heading'],
-  subtitle: t['storefront.checkout.shipping.subtitle'],
-  firstName: t['storefront.checkout.shipping.firstName'],
-  lastName: t['storefront.checkout.shipping.lastName'],
-  phone: t['storefront.checkout.shipping.phone'],
-  country: t['storefront.checkout.shipping.country'],
-  department: t['storefront.checkout.shipping.department'],
-  municipality: t['storefront.checkout.shipping.municipality'],
-  address1: t['storefront.checkout.shipping.address1'],
-  address2: t['storefront.checkout.shipping.address2'],
-  reference: t['storefront.checkout.shipping.reference'],
-  savedAddresses: t['storefront.checkout.shipping.savedAddresses'],
-  useNewAddress: t['storefront.checkout.shipping.useNewAddress'],
-  methodHeading: t['storefront.checkout.shipping.methodHeading'],
-  methodStandard: t['storefront.checkout.shipping.methodStandard'],
-  methodStandardHint: t['storefront.checkout.shipping.methodStandardHint'],
-  methodExpress: t['storefront.checkout.shipping.methodExpress'],
-  methodExpressHint: t['storefront.checkout.shipping.methodExpressHint'],
-  methodPickup: t['storefront.checkout.shipping.methodPickup'],
-  methodPickupHint: t['storefront.checkout.shipping.methodPickupHint'],
-  continueToPayment: t['storefront.checkout.shipping.continueToPayment'],
-  backToContact: t['storefront.checkout.shipping.backToContact'],
-};
-
-const paymentLabels = {
-  heading: t['storefront.checkout.payment.heading'],
-  subtitle: t['storefront.checkout.payment.subtitle'],
-  methodCard: t['storefront.checkout.payment.methodCard'],
-  methodTransfer: t['storefront.checkout.payment.methodTransfer'],
-  methodCod: t['storefront.checkout.payment.methodCod'],
-  methodNet30: t['storefront.checkout.payment.methodNet30'],
-  cardNumber: t['storefront.checkout.payment.cardNumber'],
-  cardName: t['storefront.checkout.payment.cardName'],
-  cardExpiry: t['storefront.checkout.payment.cardExpiry'],
-  cardCvc: t['storefront.checkout.payment.cardCvc'],
-  billingSame: t['storefront.checkout.payment.billingSame'],
-  billingDifferent: t['storefront.checkout.payment.billingDifferent'],
-  net30Hint: t['storefront.checkout.payment.net30Hint'],
-  continueToReview: t['storefront.checkout.payment.continueToReview'],
-  backToShipping: t['storefront.checkout.payment.backToShipping'],
-};
-
-const reviewLabels = {
-  heading: t['storefront.checkout.review.heading'],
-  subtitle: t['storefront.checkout.review.subtitle'],
-  contact: t['storefront.checkout.review.contact'],
-  shippingAddress: t['storefront.checkout.review.shippingAddress'],
-  shippingMethod: t['storefront.checkout.review.shippingMethod'],
-  paymentMethod: t['storefront.checkout.review.paymentMethod'],
-  edit: t['storefront.checkout.review.edit'],
-  placeOrder: t['storefront.checkout.review.placeOrder'],
-  placingOrder: t['storefront.checkout.review.placingOrder'],
-  backToPayment: t['storefront.checkout.review.backToPayment'],
-  itemsHeading: t['storefront.checkout.review.itemsHeading'],
-};
-
-const termsLabels = {
-  label: t['storefront.checkout.terms.label'],
-  privacyLink: t['storefront.checkout.terms.privacyLink'],
-  errorRequired: t['storefront.checkout.terms.errorRequired'],
-};
-
-const successLabels = {
-  title: t['storefront.checkout.success.title'],
-  subtitle: t['storefront.checkout.success.subtitle'],
-  orderNumber: t['storefront.checkout.success.orderNumber'],
-  confirmationEmail: t['storefront.checkout.success.confirmationEmail'],
-  continueShopping: t['storefront.checkout.success.continueShopping'],
-  viewOrder: t['storefront.checkout.success.viewOrder'],
-  help: t['storefront.checkout.success.help'],
-};
-
-// ─── Hrefs entre steps ─────────────────────────────────────────────
-const stepHref = (id: string): string => `${checkoutBaseHref}?step=${id}`;
-const contactHref = stepHref('contact');
-const shippingHref = stepHref('shipping');
-const paymentHref = stepHref('payment');
-const reviewHref = stepHref('review');
-const loginHref = `/${locale}/account/login?redirect=${encodeURIComponent(checkoutBaseHref)}`;
-const termsHref = `/${locale}/legal/terms`;
-const catalogHref = `/${locale}/products`;
-const helpHref = `/${locale}/help`;
-const orderHref = `/${locale}/account/orders/${PLACEHOLDER_ORDER_NUMBER}`;
-
-// ─── Totales (summary) ──────────────────────────────────────────────
-const subtotalCents = getCheckoutSubtotalCents();
+// ─── Totales (single source of truth en el padre).
+const subtotalCents = cartItems.reduce(
+  (total, item) => total + item.priceCents * item.quantity,
+  0
+);
 const currencyCode = cartItems[0]?.currency ?? 'USD';
 
-// Shipping cost: null hasta que el usuario lo elija (step 2).
-// Por ahora asumimos "standard" si step >= shipping, null si contact.
-const shippingCostByStep: Record<string, number | null> = {
-  contact: null,
-  shipping: SHIPPING_METHODS[0].priceCents,
-  payment: SHIPPING_METHODS[0].priceCents,
-  review: SHIPPING_METHODS[0].priceCents,
-};
-const shippingCents = isSuccessStep ? 0 : (shippingCostByStep[currentStepId] ?? null);
+// Free shipping sobre $50 (mismo umbral que cart.astro v3).
+const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
+const shippingCents: number | null =
+  subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : 400;
 
-// Pre-computar los strings para el review (placeholders).
-const defaultShippingAddress = SAVED_ADDRESSES[0];
-
-const contactSummary = IS_USER_LOGGED_IN
-  ? `maria@correo.com (${SAVED_ADDRESSES[0]?.phone ?? '+505 8888 1234'})`
-  : 'invitado@correo.com';
-
-const shippingAddressSummary = defaultShippingAddress
-  ? `${defaultShippingAddress.recipient}, ${defaultShippingAddress.address1}, ${defaultShippingAddress.municipality}, ${defaultShippingAddress.department}`
-  : '—';
-
-const shippingMethodSummary = t[`storefront.checkout.shipping.methodStandard`];
-
-const paymentMethodSummary = t[`storefront.checkout.payment.methodCard`];
-
-const summaryItems = cartItems.map((item) => ({
-  id: item.id,
-  name: item.name,
-  imageUrl: item.imageUrl,
-  priceCents: item.priceCents,
-  currency: item.currency,
-  quantity: item.quantity,
-}));
+// Tax placeholder: 15% del subtotal.
+const TAX_RATE = 0.15;
+const taxCents = Math.round(subtotalCents * TAX_RATE);
 ---
 
-<StorefrontLayout title={t['storefront.checkout.title']}>
-  <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-        {t['storefront.checkout.title']}
-      </h1>
-      <p class="mt-1 text-sm text-slate-500">{t['storefront.checkout.subtitle']}</p>
-    </header>
+<StorefrontLayout title={t['storefront.checkout.v3.title']}>
+  <main class="bg-slate-50">
+    <section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      <header class="mb-6 sm:mb-10">
+        <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+          {t['storefront.checkout.v3.title']}
+        </h1>
+      </header>
 
-    {isEmpty && (
-      <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-        <p class="text-2xl font-bold text-slate-900">{t['storefront.checkout.empty']}</p>
-        <p class="max-w-md text-sm text-slate-500">{t['storefront.checkout.emptyHint']}</p>
-        <a
-          href={catalogHref}
-          class="mt-2 inline-flex h-11 items-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-        >
-          {t['storefront.checkout.browseProducts']}
-        </a>
-      </section>
-    )}
-
-    {!isEmpty && isSuccessStep && (
-      <CheckoutSuccess
-        labels={successLabels}
-        orderNumber={PLACEHOLDER_ORDER_NUMBER}
-        catalogHref={catalogHref}
-        orderHref={orderHref}
-        helpHref={helpHref}
+      <CheckoutStepperV3
+        steps={stepperSteps}
+        currentStepId={currentStepId}
+        stepHrefBase={checkoutBaseHref}
       />
-    )}
 
-    {!isEmpty && !isSuccessStep && (
-      <>
-        <CheckoutStepper
-          steps={stepperLabels}
-          currentStepId={currentStepId}
-          stepHrefBase={checkoutBaseHref}
-        />
-
-        <div class="grid gap-8 lg:grid-cols-[1fr_380px]">
-          <div class="order-2 lg:order-1">
-            {currentStepId === 'contact' && (
-              <CheckoutContactStep
-                labels={contactLabels}
-                prefillEmail={IS_USER_LOGGED_IN ? 'maria@correo.com' : ''}
-                showExpress={true}
-                showMemberLogin={!IS_USER_LOGGED_IN}
-                shippingHref={shippingHref}
-                loginHref={loginHref}
-              />
-            )}
-            {currentStepId === 'shipping' && (
-              <CheckoutShippingStep
-                labels={shippingLabels}
-                savedAddresses={IS_USER_LOGGED_IN ? SAVED_ADDRESSES : []}
-                shippingMethods={SHIPPING_METHODS}
-                backHref={contactHref}
-                continueHref={paymentHref}
-              />
-            )}
-            {currentStepId === 'payment' && (
-              <CheckoutPaymentStep
-                labels={paymentLabels}
-                paymentMethods={PAYMENT_METHODS}
-                showNet30={false}
-                backHref={shippingHref}
-                continueHref={reviewHref}
-              />
-            )}
-            {currentStepId === 'review' && (
-              <CheckoutReviewStep
-                labels={reviewLabels}
-                termsLabels={termsLabels}
-                items={cartItems}
-                contactEditHref={contactHref}
-                shippingEditHref={shippingHref}
-                paymentEditHref={paymentHref}
-                backHref={paymentHref}
-                termsHref={termsHref}
-                contactSummary={contactSummary}
-                shippingAddressSummary={shippingAddressSummary}
-                shippingMethodSummary={shippingMethodSummary}
-                paymentMethodSummary={paymentMethodSummary}
-              />
-            )}
-          </div>
-
-          <div class="order-1 lg:order-2">
-            <CheckoutSummary
-              items={summaryItems}
-              subtotalCents={subtotalCents}
-              currencyCode={currencyCode}
-              shippingCents={shippingCents}
-              labels={summaryLabels}
-            >
-              <CheckoutTrustBadges slot="trust" labels={trustLabels} />
-            </CheckoutSummary>
-          </div>
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
+        <div class="order-2 lg:order-1">
+          <CheckoutFormV3
+            currentStepId={currentStepId}
+            stepHrefBase={checkoutBaseHref}
+            items={cartItems}
+            currencyCode={currencyCode}
+            labels={formLabels}
+          />
         </div>
-      </>
-    )}
+
+        <div class="order-1 lg:order-2">
+          <CheckoutSummaryV3
+            items={cartItems}
+            subtotalCents={subtotalCents}
+            currencyCode={currencyCode}
+            shippingCents={shippingCents}
+            taxCents={taxCents}
+            labels={summaryLabels}
+            ctaHref={`${checkoutBaseHref}?step=success`}
+          />
+        </div>
+      </div>
+    </section>
   </main>
 </StorefrontLayout>

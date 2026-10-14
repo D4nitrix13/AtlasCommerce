@@ -973,6 +973,7 @@ const es: Translations = {
   'storefront.checkout.v3.empty': 'No hay productos en el carrito.',
   'storefront.checkout.v3.qty': 'Cant.',
   'storefront.checkout.v3.edit': 'Editar',
+  'storefront.checkout.v3.termsHint': 'Al continuar aceptás los términos de compra.',
 
   // ─── storefront: layout (header/footer) ───────────────────────────
   'storefront.header.nav.home': 'Inicio',
