@@ -1,0 +1,76 @@
+---
+/**
+ * DateRangeFilterV3 — Selector de rango de fechas para el dashboard v3.
+ *
+ * Visual-only: 4 pills (7d/30d/90d/All). Click NO navega: emite la
+ * intencion al DOM via un boton forms para que — en esta entrega —
+ * solo se vea. Mismo principio honesto que DateRangeFilter anterior
+ * (F3.3): "shell UI preparada, no mentira funcional" hasta que el
+ * backend soporte `?range=` en los endpoints de metrics.
+ *
+ * Tokens:
+ *   - Pill activa: `bg-[var(--primary)] text-white`.
+ *   - Pill inactiva: `text-slate-600 hover:bg-slate-50`.
+ *   - Container: `inline-flex rounded-lg bg-slate-100 p-1`.
+ */
+type DateRange = '7d' | '30d' | '90d' | 'all';
+
+interface RangeOption {
+  value: DateRange;
+  /** Label i18n completo ("Ultimos 7 dias"). */
+  fullLabel: string;
+  /** Abreviatura visible en el pill ("7d"). */
+  shortLabel: string;
+}
+
+interface Props {
+  selected: DateRange;
+  /** i18n de cada rango (4 keys del diccionario). */
+  labels: {
+    r7d: string;
+    r30d: string;
+    r90d: string;
+    rall: string;
+  };
+  /** Listado opcional de opciones. Default: 4 ranges canonicos. */
+  ranges?: readonly RangeOption[];
+}
+
+const { selected, labels, ranges } = Astro.props;
+
+const DEFAULT_RANGES: readonly RangeOption[] = [
+  { value: '7d', fullLabel: labels.r7d, shortLabel: '7d' },
+  { value: '30d', fullLabel: labels.r30d, shortLabel: '30d' },
+  { value: '90d', fullLabel: labels.r90d, shortLabel: '90d' },
+  { value: 'all', fullLabel: labels.rall, shortLabel: 'All' },
+];
+
+const options = ranges ?? DEFAULT_RANGES;
+---
+
+<div
+  role="group"
+  aria-label="Selector de rango de fechas"
+  class="inline-flex rounded-lg bg-slate-100 p-1 text-xs"
+>
+  {
+    options.map((r) => {
+      const isSelected = r.value === selected;
+      return (
+        <button
+          type="button"
+          aria-pressed={isSelected}
+          title={r.fullLabel}
+          class:list={[
+            'rounded-md px-3 py-1.5 font-medium transition',
+            isSelected
+              ? 'bg-white text-slate-900 shadow-sm'
+              : 'text-slate-600 hover:bg-white/60',
+          ]}
+        >
+          {r.shortLabel}
+        </button>
+      );
+    })
+  }
+</div>

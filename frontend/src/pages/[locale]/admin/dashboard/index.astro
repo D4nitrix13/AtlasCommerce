@@ -1,179 +1,27 @@
 ---
 /**
- * Dashboard admin principal (F5.1 i18n refactor + F3.1/F3.2 datos reales).
+ * `/[locale]/admin/dashboard/` — Dashboard v3 (Bonfire mockup 11).
  *
- * Compone las MetricCards principales + el RevenueChart + las cards de
- * TrafficSources / MonthlyGoals / RecentOrders / RecentActivity.
+ * Wrapper del shell del dashboard v3. La composición REAL vive en
+ * `<DashboardV3Section>`, compartida con `/admin/`. Mismo dashboard,
+ * dos URLs (consolidated en esta entrega — ver `index.astro`).
  *
- * F3 — Migración de mock a data real:
- *   - Las 4 MetricCards principales obtienen sus `value` y `change`
- *     del endpoint `/api/v1/admin/metrics/sales/performance`.
- *   - El RevenueChart recibe `labels` y `values` reales del endpoint
- *     `/api/v1/admin/metrics/revenue/yearly`.
- *   - Los componentes TrafficSources / MonthlyGoals / RecentOrders /
- *     RecentActivity tienen su propio data fetching interno (no se
- *     tocan en F3 — fuera de scope del plan F3.2).
+ * Auth: el `AdminLayout` ya monta `<AuthGuard client:load />` que
+ * redirige a /account/login si el usuario no esta autenticado,
+ * y a /account si el user autenticado no es admin/staff.
  *
- * Cuando el backend devuelve 4xx/5xx, los valores caen a `—` o
- * `0%` (placeholder visual). NO se renderiza un error explícito
- * porque las cards de fallback ya tienen su propio estado empty/error
- * (AGENTS.md §11).
+ * Spec: `odd/tasks/dashboards-redesign-and-auth.md` (F3.x —
+ * consolida con el dashboard v3 Bonfire).
  *
- * **AGENTS.md §1** (400 lineas max para pagina): sigue debajo del
- * limite — composicion pura, sin logica.
+ * **AGENTS.md §1** (<400 lineas): page es composicion pura.
  */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import MetricCard from '../../../../components/admin/dashboard/MetricCard.astro';
-import RevenueChart from '../../../../components/admin/dashboard/RevenueChart.astro';
-import DateRangeFilter from '../../../../components/admin/dashboard/DateRangeFilter.astro';
-import TrafficSourcesCard from '../../../../components/admin/dashboard/TrafficSourcesCard.astro';
-import MonthlyGoalsCard from '../../../../components/admin/dashboard/MonthlyGoalsCard.astro';
-import RecentOrdersTable from '../../../../components/admin/dashboard/RecentOrdersTable.astro';
-import RecentActivityCard from '../../../../components/admin/dashboard/RecentActivityCard.astro';
+import DashboardV3Section from '../../../../components/admin/dashboard/DashboardV3Section.astro';
 import { getServerDictionary } from '../../../../i18n/server';
-import {
-  formatCentsAsCurrency,
-  getAdminDashboardData,
-} from '../../../../lib/server/admin-dashboard';
 
 const t = getServerDictionary(Astro.locals.locale);
-const locale = Astro.locals.locale ?? 'es';
-
-// SSR fetch al backend. La cookie httpOnly de Sanctum viaja en el
-// header Cookie. El admin guard (F0.5) ya bloqueó no-admins; acá
-// SIEMPRE hay sesión válida o redirect previo.
-const cookieHeader = Astro.request.headers.get('Cookie') ?? '';
-const dashboard = await getAdminDashboardData(Astro.url.origin, cookieHeader);
-
-// F3.3 — rango de fechas desde URL state `?range=`. Default '30d'
-// (el más común para SaaS dashboards). El backend NO soporta `?range=`
-// en los endpoints de metrics — el filtro es UI shell hasta que se
-// agregue soporte server-side. RecentOrdersTable sí acepta el param.
-type DateRange = '7d' | '30d' | '90d' | 'all';
-const VALID_RANGES: ReadonlySet<DateRange> = new Set(['7d', '30d', '90d', 'all']);
-const rawRange = Astro.url.searchParams.get('range');
-const selectedRange: DateRange = (
-  rawRange !== null && VALID_RANGES.has(rawRange as DateRange) ? rawRange : '30d'
-) as DateRange;
-
-// Calcular `since` ISO date para pasar a RecentOrdersTable.
-function rangeToSinceIso(range: DateRange): string | null {
-  if (range === 'all') {
-    return null;
-  }
-  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  return d.toISOString();
-}
-const sinceIso = rangeToSinceIso(selectedRange);
-
-// Formateo defensivo: si el endpoint falló, los campos vienen null
-// y caemos a "—" / "0". NO se muestra "NaN" o "undefined".
-const formatCents = (cents: number | null): string => {
-  if (cents === null) {
-    return '—';
-  }
-  return formatCentsAsCurrency(cents, 'USD', locale);
-};
-
-const formatCount = (n: number | null): string => {
-  if (n === null) {
-    return '—';
-  }
-  // K format si > 9999 (e.g. 284K, 1.2M).
-  if (n >= 1_000_000) {
-    return `${(n / 1_000_000).toFixed(1)}M`;
-  }
-  if (n >= 10_000) {
-    return `${(n / 1000).toFixed(0)}K`;
-  }
-  return n.toLocaleString(locale === 'en' ? 'en-US' : 'es-NI');
-};
-
-// Revenue chart: 12 meses current vs previous. Pasamos current al chart
-// (que muestra una sola serie); previous vive en el dataset para futuras
-// vistas de comparación (F3.3 si se implementa).
-const revenueLabels = dashboard.metrics.revenueChart?.labels ?? null;
-const revenueValues = dashboard.metrics.revenueChart?.currentValues ?? null;
-
-// Las 4 MetricCards: el backend NO expone todos los KPIs en un
-// endpoint único. Cada card toma su data del endpoint que la provee:
-//   1. Ingresos anuales  → /revenue/yearly (sum de los 12 meses current)
-//   2. Clientes activos  → /customers/segments
-//   3. Total vendido mes → /sales/performance
-//   4. Visitas           → /traffic/sources (sum)
-// Si un endpoint falló, el campo viene null y la card muestra "—".
 ---
 
-<AdminLayout title={t['admin.dashboard.layout.title']}>
-  <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight text-slate-950">{t['admin.dashboard.title']}</h1>
-
-      <p class="mt-1 text-sm text-slate-500">{t['admin.dashboard.subtitle']}</p>
-    </div>
-
-    <DateRangeFilter
-      selected={selectedRange}
-      basePath={Astro.url.pathname}
-    />
-  </div>
-
-  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    <MetricCard
-      title={t['admin.metrics.metricTitles.totalRevenue']}
-      value={formatCents(dashboard.metrics.totalRevenueCents)}
-      change="+0%"
-      icon="banknotes"
-      accent="emerald"
-      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
-    />
-
-    <MetricCard
-      title={t['admin.metrics.metricTitles.activeUsers']}
-      value={formatCount(dashboard.metrics.activeCustomers)}
-      change="+0%"
-      icon="users"
-      accent="sky"
-      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
-    />
-
-    <MetricCard
-      title={t['admin.metrics.metricTitles.totalOrders']}
-      value={formatCents(dashboard.metrics.totalSoldThisMonthCents)}
-      change="+0%"
-      icon="shopping-cart"
-      accent="rose"
-      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
-    />
-
-    <MetricCard
-      title={t['admin.metrics.metricTitles.visits']}
-      value={formatCount(dashboard.metrics.totalVisits)}
-      change="+0%"
-      icon="eye"
-      accent="amber"
-      vsPreviousLabel={t['admin.metrics.metricCard.changeVsPrevious']}
-    />
-  </section>
-
-  <section class="mt-5 grid gap-5 xl:grid-cols-3">
-    <div class="xl:col-span-2">
-      <RevenueChart labels={revenueLabels ?? undefined} values={revenueValues ?? undefined} />
-    </div>
-
-    <div class="space-y-5">
-      <TrafficSourcesCard />
-      <MonthlyGoalsCard />
-    </div>
-  </section>
-
-  <section class="mt-5 grid gap-5 xl:grid-cols-3">
-    <div class="xl:col-span-2">
-      <RecentOrdersTable />
-    </div>
-
-    <RecentActivityCard />
-  </section>
+<AdminLayout title={`${t['admin.dashboard.v3.title']} · Admin`}>
+  <DashboardV3Section t={t} />
 </AdminLayout>

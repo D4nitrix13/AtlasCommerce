@@ -1,21 +1,25 @@
 ---
 /**
- * `/[locale]/admin/` — punto de entrada del panel admin.
+ * `/[locale]/admin/` — Dashboard v3 (Bonfire mockup 11).
  *
- * Reglas:
- *   - Si el usuario está autenticado → redirige a `/admin/dashboard`.
- *   - Si NO está autenticado → redirige a `/auth/login?redirect=...`.
+ * Wrapper del shell del dashboard v3. La composición real vive en
+ * `<DashboardV3Section>` para que tanto `/admin/` como
+ * `/admin/dashboard/` la compartan sin duplicar imports/mocks/props.
  *
- * La decisión se delega a `AdminHomeRedirect` (client-side) porque el
- * estado de autenticación vive en `localStorage` (vía `stores/auth`),
- * no accesible desde el SSR de Astro. El componente es `client:only`
- * para evitar hydration mismatch y flashing del dashboard antes del
- * redirect al login.
+ * Auth: el `AdminLayout` ya monta `<AuthGuard client:load />` que
+ * redirige a /account/login si el usuario no esta autenticado,
+ * y a /account si el user autenticado no es admin/staff (defensa
+ * en profundidad — el backend ya filtra en F0.1).
  *
- * Locale awareness: el redirect preserva el `locale` actual para que
- * el language switcher del login mantenga el idioma elegido.
+ * **AGENTS.md §1** (<400 lineas): page es composicion pura.
  */
-import AdminHomeRedirect from '../../../components/admin/AdminHomeRedirect';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import DashboardV3Section from '../../../components/admin/dashboard/DashboardV3Section.astro';
+import { getServerDictionary } from '../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
 ---
 
-<AdminHomeRedirect client:only="react" />
+<AdminLayout title={`${t['admin.dashboard.v3.title']} · Admin`}>
+  <DashboardV3Section t={t} />
+</AdminLayout>
