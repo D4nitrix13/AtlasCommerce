@@ -530,6 +530,7 @@ const en: Translations = {
   'storefront.cart.increment': 'Increase quantity',
   'storefront.cart.qty': 'Quantity',
 
+<<<<<<< HEAD
   // ─── storefront: cart v3 (Bonfire mockup 08) ──────────────────────────
   'storefront.cart.v3.title': 'Your cart',
   'storefront.cart.v3.empty': 'Your cart is empty.',
@@ -542,6 +543,36 @@ const en: Translations = {
   'storefront.cart.v3.continueShopping': 'Continue shopping',
   'storefront.cart.v3.remove': 'Remove',
   'storefront.cart.v3.quantity': 'Quantity',
+=======
+  // ─── storefront: account orders v3 (Bonfire mockup 10) ─────────────
+  'storefront.account.orders.v3.title': 'My orders',
+  'storefront.account.orders.v3.subtitle': '{count} orders in total',
+  'storefront.account.orders.v3.filter.all': 'All',
+  'storefront.account.orders.v3.filter.pending': 'Pending',
+  'storefront.account.orders.v3.filter.processing': 'Processing',
+  'storefront.account.orders.v3.filter.shipped': 'Shipped',
+  'storefront.account.orders.v3.filter.delivered': 'Delivered',
+  'storefront.account.orders.v3.filter.cancelled': 'Cancelled',
+  'storefront.account.orders.v3.empty': 'You have no orders yet.',
+  'storefront.account.orders.v3.emptyCta': 'Browse catalog',
+  'storefront.account.orders.v3.expand': 'View details',
+  'storefront.account.orders.v3.collapse': 'Hide details',
+  'storefront.account.orders.v3.items': 'Items',
+  'storefront.account.orders.v3.shippingAddress': 'Shipping address',
+  'storefront.account.orders.v3.payment': 'Payment',
+  'storefront.account.orders.v3.reorder': 'Reorder',
+  'storefront.account.orders.v3.viewInvoice': 'View invoice',
+  'storefront.account.orders.v3.trackShipment': 'Track shipment',
+  'storefront.account.orders.v3.eta': 'Estimated delivery',
+  'storefront.account.orders.v3.itemsCount': '{count} items',
+  'storefront.account.orders.v3.method': 'Method',
+  'storefront.account.orders.v3.subtotal': 'Subtotal',
+  'storefront.account.orders.v3.total': 'Total',
+  'storefront.account.orders.v3.recipient': 'Recipient',
+  'storefront.account.orders.v3.phone': 'Phone',
+  'storefront.account.orders.v3.address': 'Address',
+  'storefront.account.orders.v3.country': 'Country',
+>>>>>>> 6b2f0c7f (feat(orders): agregar traducciones y composicion v3 de mis ordenes)
 
   // ─── storefront: home + product cards/grid (F1.4) ────────────────────
   'storefront.home.hero.eyebrow': 'Kitsune Store · Japanese culture',

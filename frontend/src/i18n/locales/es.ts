@@ -531,6 +531,7 @@ const es: Translations = {
   'storefront.cart.increment': 'Aumentar cantidad',
   'storefront.cart.qty': 'Cantidad',
 
+<<<<<<< HEAD
   // ─── storefront: cart v3 (Bonfire mockup 08) ──────────────────────────
   'storefront.cart.v3.title': 'Tu carrito',
   'storefront.cart.v3.empty': 'Tu carrito está vacío.',
@@ -543,6 +544,36 @@ const es: Translations = {
   'storefront.cart.v3.continueShopping': 'Continuar comprando',
   'storefront.cart.v3.remove': 'Quitar',
   'storefront.cart.v3.quantity': 'Cantidad',
+=======
+  // ─── storefront: account orders v3 (Bonfire mockup 10) ─────────────
+  'storefront.account.orders.v3.title': 'Mis órdenes',
+  'storefront.account.orders.v3.subtitle': '{count} pedidos en total',
+  'storefront.account.orders.v3.filter.all': 'Todas',
+  'storefront.account.orders.v3.filter.pending': 'Pendiente',
+  'storefront.account.orders.v3.filter.processing': 'En proceso',
+  'storefront.account.orders.v3.filter.shipped': 'Enviado',
+  'storefront.account.orders.v3.filter.delivered': 'Entregado',
+  'storefront.account.orders.v3.filter.cancelled': 'Cancelado',
+  'storefront.account.orders.v3.empty': 'No tenés órdenes todavía.',
+  'storefront.account.orders.v3.emptyCta': 'Explorar catálogo',
+  'storefront.account.orders.v3.expand': 'Ver detalle',
+  'storefront.account.orders.v3.collapse': 'Ocultar detalle',
+  'storefront.account.orders.v3.items': 'Productos',
+  'storefront.account.orders.v3.shippingAddress': 'Dirección de envío',
+  'storefront.account.orders.v3.payment': 'Pago',
+  'storefront.account.orders.v3.reorder': 'Reordenar',
+  'storefront.account.orders.v3.viewInvoice': 'Ver factura',
+  'storefront.account.orders.v3.trackShipment': 'Rastrear envío',
+  'storefront.account.orders.v3.eta': 'Entrega estimada',
+  'storefront.account.orders.v3.itemsCount': '{count} productos',
+  'storefront.account.orders.v3.method': 'Método',
+  'storefront.account.orders.v3.subtotal': 'Subtotal',
+  'storefront.account.orders.v3.total': 'Total',
+  'storefront.account.orders.v3.recipient': 'Destinatario',
+  'storefront.account.orders.v3.phone': 'Teléfono',
+  'storefront.account.orders.v3.address': 'Dirección',
+  'storefront.account.orders.v3.country': 'País',
+>>>>>>> 6b2f0c7f (feat(orders): agregar traducciones y composicion v3 de mis ordenes)
 
   // ─── storefront: home + product cards/grid (F1.4) ────────────────────
   'storefront.home.hero.eyebrow': 'Kitsune Store · Cultura japonesa',
