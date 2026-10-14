@@ -1,18 +1,24 @@
 ---
 /**
- * Página pública del carrito de compras.
+ * Página pública del carrito de compras — Bonfire mockup 08.
  *
- * Reemplaza el stub anterior (que sólo mostraba `<CouponInput>`) con
- * la composición real:
- *   - Layout storefront con header/footer.
- *   - Si hay items: lista de CartItem + CartSummary + botón checkout.
- *   - Si está vacío: empty state + CTA "Explorar productos".
+ * Composición v3:
+ *   - Header H1 con el título del carrito y el conteo de productos.
+ *   - Layout 2 columnas en lg+: lista de CartItem a la izquierda, CartSummary
+ *     sticky a la derecha. En mobile colapsa a una columna.
+ *   - Si está vacío: empty state con CTA a /products.
  *
- * TODO F1.4: cart store — hoy la página NO lee del store todavía
- * (no existe). Como placeholder para que la UI se vea completa y los
- * componentes se rendericen, mostramos 2 items demo del mock + el
- * summary. Cuando el cart store global exista, este array se reemplaza
- * por `cart.items` y los handlers de CartItem se hidratan.
+ * Decisiones Bonfire:
+ *   - `bg-slate-50` en el main + cards blancas con `rounded-2xl` +
+ *     `border-slate-200` (consistente con el resto del storefront v3).
+ *   - Resumen sticky en desktop (`lg:sticky lg:top-24`) vía prop del
+ *     CartSummary; en mobile apila debajo de la lista.
+ *   - Lista con `data-reveal-stagger` para animar cada item al entrar
+ *     al viewport (coherente con scroll-fx.css).
+ *
+ * TODO F1.4: cart store — hoy los datos son demo. Cuando el cart store
+ * global exista, `demoItems` se reemplaza por `cart.items` y los handlers
+ * de CartItem se hidratan.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import CartItem from '../../components/storefront/cart/CartItem.astro';
@@ -24,18 +30,14 @@ const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
 const checkoutHref = `/${locale}/checkout`;
+const productsHref = `/${locale}/products`;
 
 // TODO F1.4: cart store — leer de un store Zustand o endpoint backend.
-// Por ahora demo: 2 items para que la composición se renderice visible.
+// Demo: 3 items para que la composición se vea completa.
 const demoItems = [
-  {
-    productSlug: PRODUCTS[0].slug,
-    quantity: 2,
-  },
-  {
-    productSlug: PRODUCTS[2].slug,
-    quantity: 1,
-  },
+  { productSlug: PRODUCTS[0].slug, quantity: 1 }, // saber-alter-figma
+  { productSlug: PRODUCTS[2].slug, quantity: 2 }, // chainsaw-man-t1
+  { productSlug: PRODUCTS[6].slug, quantity: 1 }, // evangelion-unit-01
 ];
 
 const cartItems = demoItems
@@ -58,71 +60,100 @@ const cartItems = demoItems
 
 const isEmpty = cartItems.length === 0;
 
-const subtotalCents = cartItems.reduce((total, item) => total + item.priceCents * item.quantity, 0);
+const subtotalCents = cartItems.reduce(
+  (total, item) => total + item.priceCents * item.quantity,
+  0,
+);
 const currencyCode = cartItems[0]?.currency ?? 'USD';
+
 // Envío gratis sobre $50, sino $4 fijo (placeholder UX).
 const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
+const FLAT_SHIPPING_CENTS = 400;
 const shippingCents =
-  subtotalCents === 0 ? null : subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : 400;
+  subtotalCents === 0 ? null : subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : FLAT_SHIPPING_CENTS;
+
+// TODO F1.4: el tax real viene del backend (depende de país y catálogo).
+// Aquí calculamos 15% sobre el subtotal como placeholder visual.
+const TAX_RATE_BPS = 1500;
+const taxCents = Math.round((subtotalCents * TAX_RATE_BPS) / 10_000);
 
 const cartItemLabels = {
-  remove: t['storefront.cart.removeItem'],
+  remove: t['storefront.cart.v3.remove'],
   decrement: t['storefront.cart.decrement'],
   increment: t['storefront.cart.increment'],
-  qty: t['storefront.cart.qty'],
+  qty: t['storefront.cart.v3.quantity'],
 };
 
-const cartSummaryLabels = {
-  subtotal: t['storefront.cart.subtotal'],
+const summaryLabels = {
+  subtotal: t['storefront.cart.v3.subtotal'],
   discount: t['storefront.cart.discount'],
-  shipping: t['storefront.cart.shipping'],
+  shipping: t['storefront.cart.v3.shipping'],
   shippingFree: t['storefront.cart.shippingFree'],
-  total: t['storefront.cart.total'],
-  checkout: t['storefront.cart.checkout'],
+  tax: t['storefront.cart.v3.tax'],
+  total: t['storefront.cart.v3.total'],
+  checkout: t['storefront.cart.v3.checkout'],
 };
+
+const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 ---
 
-<StorefrontLayout title={t['storefront.cart.title']}>
-  <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-        {t['storefront.cart.title']}
-      </h1>
-      {!isEmpty && (
-        <p class="mt-1 text-sm text-slate-500">
-          {t['storefront.cart.itemsCount'].replace('{count}', String(cartItems.length))}
-        </p>
-      )}
+<StorefrontLayout title={t['storefront.cart.v3.title']}>
+  <main class="mx-auto w-full max-w-6xl bg-slate-50 px-4 py-8 sm:px-6 sm:py-12">
+    <header class="mb-8 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          {t['storefront.cart.v3.title']}
+        </h1>
+        {!isEmpty && (
+          <p class="mt-2 text-sm text-slate-500">
+            {cartItems.length} {cartItems.length === 1 ? 'producto' : 'productos'} · {totalUnits}{' '}
+            {totalUnits === 1 ? 'unidad' : 'unidades'}
+          </p>
+        )}
+      </div>
     </header>
 
     {isEmpty ? (
-      <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-        <p class="text-2xl font-bold text-slate-900">{t['storefront.cart.empty']}</p>
-        <p class="max-w-md text-sm text-slate-500">{t['storefront.cart.emptyHint']}</p>
+      <section class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-10 text-center sm:p-16">
+        <p class="text-2xl font-bold text-slate-900">
+          {t['storefront.cart.v3.empty']}
+        </p>
         <a
-          href={`/${locale}/products`}
-          class="mt-2 inline-flex h-11 items-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          href={productsHref}
+          class="mt-2 inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
         >
-          {t['storefront.cart.browseProducts']}
+          {t['storefront.cart.v3.emptyCta']}
         </a>
       </section>
     ) : (
-      <div class="grid gap-8 lg:grid-cols-[1fr_360px]">
-        <ul class="flex list-none flex-col gap-4 p-0">
-          {cartItems.map((item) => (
-            <li class="list-none">
-              <CartItem item={item} locale={locale} labels={cartItemLabels} />
-            </li>
-          ))}
-        </ul>
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div>
+          <ul data-reveal-stagger class="flex list-none flex-col gap-4 p-0">
+            {cartItems.map((item) => (
+              <li class="list-none">
+                <CartItem item={item} locale={locale} labels={cartItemLabels} />
+              </li>
+            ))}
+          </ul>
+
+          <a
+            href={productsHref}
+            class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900"
+          >
+            <span aria-hidden="true">←</span>
+            {t['storefront.cart.v3.continueShopping']}
+          </a>
+        </div>
 
         <CartSummary
           subtotalCents={subtotalCents}
           currencyCode={currencyCode}
           shippingCents={shippingCents}
+          taxCents={taxCents}
           checkoutHref={checkoutHref}
-          labels={cartSummaryLabels}
+          labels={summaryLabels}
           isEmpty={false}
+          stickyOnLg={true}
         />
       </div>
     )}
