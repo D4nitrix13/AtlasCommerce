@@ -67,21 +67,13 @@ const navLinks = links ?? defaultLinks;
 
       {/* Columna 3: contacto + locale */}
       <div class="flex flex-col gap-3 md:items-end md:text-right">
-        {brand.supportEmail && (
-          <a
-            href={`mailto:${brand.supportEmail}`}
-            class="text-sm font-medium text-slate-700 transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
-          >
-            {brand.supportEmail}
-          </a>
-        )}
         <p class="text-xs uppercase tracking-wide text-slate-500">
           {locale === 'es' ? 'Español' : 'English'}
         </p>
         <div class="flex items-center gap-2 md:justify-end" aria-label="Redes sociales">
-          <SocialIcon variant="facebook" href="https://facebook.com/pandaestampados" />
-          <SocialIcon variant="instagram" href="https://instagram.com/pandaestampados" />
-          <SocialIcon variant="tiktok" href="https://tiktok.com/@pandaestampados" />
+          <SocialIcon variant="facebook" />
+          <SocialIcon variant="instagram" />
+          <SocialIcon variant="tiktok" />
         </div>
       </div>
     </div>
