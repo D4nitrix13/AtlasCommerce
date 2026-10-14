@@ -1050,6 +1050,7 @@ const en: Translations = {
   'storefront.checkout.v3.empty': 'No products in cart.',
   'storefront.checkout.v3.qty': 'Qty',
   'storefront.checkout.v3.edit': 'Edit',
+  'storefront.checkout.v3.termsHint': 'By continuing you agree to the purchase terms.',
 
   // ─── storefront: layout (header/footer) ───────────────────────────
   'storefront.header.nav.home': 'Home',
