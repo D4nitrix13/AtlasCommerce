@@ -26,6 +26,7 @@ import ProductDetailGallery from '../../../components/storefront/products/Produc
 import ProductDetailVariants, {
   type VariantOption,
 } from '../../../components/storefront/products/ProductDetailVariants.astro';
+import ProductTrustSignals from '../../../components/storefront/products/ProductTrustSignals.astro';
 import ProductCard from '../../../components/storefront/products/ProductCard.astro';
 import { getServerDictionary } from '../../../i18n/server';
 import { findProductBySlug, CATEGORIES, PRODUCTS } from '../../../data/products';
@@ -302,56 +303,11 @@ const cardLabels = {
               </div>
 
               {/* Trust signals */}
-              <ul class="mt-2 flex flex-col gap-3 text-sm text-slate-600">
-                <li class="flex items-start gap-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>{t['storefront.products.detail.v3.shipping']}</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>{t['storefront.products.detail.v3.returns']}</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>{t['storefront.products.detail.v3.warranty']}</span>
-                </li>
-              </ul>
+              <ProductTrustSignals
+                shippingLabel={t['storefront.products.detail.v3.shipping']}
+                returnsLabel={t['storefront.products.detail.v3.returns']}
+                warrantyLabel={t['storefront.products.detail.v3.warranty']}
+              />
             </div>
           </section>
 

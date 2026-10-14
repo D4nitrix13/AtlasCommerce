@@ -1,0 +1,45 @@
+---
+/**
+ * ProductTrustSignals — lista de beneficios de compra del detalle v3.
+ *
+ * Diseño replicado del IA mock 05 (Bonfire-style product detail):
+ *  - 3 items apilados: envío gratis, devolución 30 días, garantía.
+ *  - Cada item: ícono checkmark verde (`var(--primary)`) + label.
+ *  - Visualmente visual-only — los textos son i18n pero el componente
+ *    no interactúa con URL ni cart store.
+ */
+interface Props {
+  shippingLabel: string;
+  returnsLabel: string;
+  warrantyLabel: string;
+}
+
+const { shippingLabel, returnsLabel, warrantyLabel } = Astro.props;
+
+const items: readonly { label: string }[] = [
+  { label: shippingLabel },
+  { label: returnsLabel },
+  { label: warrantyLabel },
+];
+---
+
+<ul class="flex flex-col gap-3 text-sm text-slate-600">
+  {items.map((item) => (
+    <li class="flex items-start gap-3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]"
+        aria-hidden="true"
+      >
+        <path d="M5 13l4 4L19 7" />
+      </svg>
+      <span>{item.label}</span>
+    </li>
+  ))}
+</ul>
