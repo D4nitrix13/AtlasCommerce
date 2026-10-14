@@ -1,0 +1,208 @@
+---
+/**
+ * OrderRowDetails — Cuerpo expandido de un pedido (Bonfire mockup 10).
+ *
+ * Renderiza el body que aparece cuando el `<details>` de `OrderRow`
+ * se abre: items del pedido, dirección de envío, resumen de pago, y
+ * las acciones (ver detalle, ver factura, rastrear envío, reordenar).
+ *
+ * Componente puro de presentación — no hace fetch ni maneja estado.
+ * La lógica de "qué acciones se muestran según status" vive en el
+ * padre (OrderRow) y se pasa como boolean props.
+ *
+ * Tokens (sincronizado con `design-references-bonfire.md`):
+ *  - Items list: cada item es una row de 64px con thumbnail + nombre
+ *    + qty + line total, separada por `border-slate-100`.
+ *  - Shipping / payment blocks: `dl` con `dt` en `text-xs uppercase
+ *    tracking-wider` para jerarquía.
+ *  - Action buttons: ghost (`border border-slate-200`) + primary
+ *    (`bg-[var(--primary)]`) alineado a la derecha con `ml-auto`.
+ *
+ * Accesibilidad:
+ *  - Cada sección tiene su `<h3>` con id propio, asociado a su
+ *    contenedor por `aria-labelledby` en el padre.
+ *  - Botones reales `<a>`/`<button>` (no `<div>` clickeable).
+ */
+import { formatCurrency } from '../../../lib/formatters';
+import type { OrderMock } from '../../../data/orders-mock';
+
+interface Props {
+  order: OrderMock;
+  currencyCode: string;
+  localePrefix: string;
+  itemsHeading: string;
+  shippingHeading: string;
+  paymentHeading: string;
+  recipientLabel: string;
+  phoneLabel: string;
+  addressLabel: string;
+  countryLabel: string;
+  methodLabel: string;
+  subtotalLabel: string;
+  totalLabel: string;
+  reorderLabel: string;
+  viewDetailLabel: string;
+  viewInvoiceLabel: string;
+  trackShipmentLabel: string;
+  showInvoiceButton: boolean;
+  showTrackButton: boolean;
+  trackingNumber: string | null;
+  trackingCarrier: string | null;
+  trackingUrl: string | null;
+  methodDetail: string;
+  shippingLine: string;
+}
+
+const {
+  order,
+  currencyCode,
+  localePrefix,
+  itemsHeading,
+  shippingHeading,
+  paymentHeading,
+  recipientLabel,
+  phoneLabel,
+  addressLabel,
+  countryLabel,
+  methodLabel,
+  subtotalLabel,
+  totalLabel,
+  reorderLabel,
+  viewDetailLabel,
+  viewInvoiceLabel,
+  trackShipmentLabel,
+  showInvoiceButton,
+  showTrackButton,
+  trackingNumber,
+  trackingCarrier,
+  trackingUrl,
+  methodDetail,
+  shippingLine,
+} = Astro.props;
+
+const totalFormatted = formatCurrency(order.totalCents, currencyCode);
+const detailHref = `${localePrefix}/account/orders/${order.id}`;
+---
+
+<section aria-labelledby={`items-${order.id}`} class="mb-6">
+  <h3 id={`items-${order.id}`} class="mb-3 text-sm font-semibold text-slate-700">
+    {itemsHeading}
+  </h3>
+  <ul class="flex flex-col gap-3">
+    {order.items.map((item) => {
+      const lineTotal = formatCurrency(item.unitPriceCents * item.quantity, currencyCode);
+      const unitPrice = formatCurrency(item.unitPriceCents, currencyCode);
+      return (
+        <li class="flex items-center gap-3 rounded-lg border border-slate-100 p-3 sm:gap-4">
+          <a
+            href={`${localePrefix}/products/${item.productSlug}`}
+            class="relative block h-16 w-16 shrink-0 overflow-hidden rounded-md bg-slate-50"
+            aria-label={item.productName}
+          >
+            <img
+              src={item.imageUrl}
+              alt={item.productName}
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+            />
+          </a>
+          <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <p class="truncate text-sm font-semibold text-slate-900">{item.productName}</p>
+            <p class="text-xs text-slate-500">
+              {unitPrice} <span class="text-slate-400">×</span> {item.quantity}
+            </p>
+          </div>
+          <span class="shrink-0 text-sm font-bold tabular-nums text-slate-900">
+            {lineTotal}
+          </span>
+        </li>
+      );
+    })}
+  </ul>
+</section>
+
+<div class="grid gap-6 md:grid-cols-2">
+  <section aria-labelledby={`ship-${order.id}`}>
+    <h3 id={`ship-${order.id}`} class="mb-3 text-sm font-semibold text-slate-700">
+      {shippingHeading}
+    </h3>
+    <dl class="flex flex-col gap-2 text-sm">
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{recipientLabel}</dt>
+        <dd class="mt-0.5 font-medium text-slate-900">{order.shippingAddress.recipient}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{phoneLabel}</dt>
+        <dd class="mt-0.5 text-slate-700">{order.shippingAddress.phone}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{addressLabel}</dt>
+        <dd class="mt-0.5 text-slate-700">{shippingLine}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{countryLabel}</dt>
+        <dd class="mt-0.5 text-slate-700">{order.shippingAddress.country}</dd>
+      </div>
+      {trackingNumber !== null && trackingCarrier !== null && (
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">Tracking</dt>
+          <dd class="mt-0.5 text-slate-700">{trackingCarrier} · {trackingNumber}</dd>
+        </div>
+      )}
+    </dl>
+  </section>
+
+  <section aria-labelledby={`pay-${order.id}`}>
+    <h3 id={`pay-${order.id}`} class="mb-3 text-sm font-semibold text-slate-700">
+      {paymentHeading}
+    </h3>
+    <dl class="flex flex-col gap-2 text-sm">
+      <div class="flex items-center justify-between text-slate-600">
+        <dt>{methodLabel}</dt>
+        <dd class="font-medium text-slate-900">{methodDetail}</dd>
+      </div>
+      <div class="flex items-center justify-between border-t border-slate-100 pt-2 text-slate-600">
+        <dt>{subtotalLabel}</dt>
+        <dd class="tabular-nums">{totalFormatted}</dd>
+      </div>
+      <div class="flex items-center justify-between border-t border-slate-100 pt-2 text-base font-bold text-slate-900">
+        <dt>{totalLabel}</dt>
+        <dd class="tabular-nums">{totalFormatted}</dd>
+      </div>
+    </dl>
+  </section>
+</div>
+
+<div class="mt-6 flex flex-wrap gap-2">
+  <a
+    href={detailHref}
+    class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+  >
+    {viewDetailLabel}
+  </a>
+  {showInvoiceButton && (
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+    >
+      {viewInvoiceLabel}
+    </button>
+  )}
+  {showTrackButton && trackingUrl !== null && (
+    <a
+      href={trackingUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+    >
+      {trackShipmentLabel}
+    </a>
+  )}
+  <a
+    href={detailHref}
+    class="ml-auto inline-flex h-9 items-center rounded-lg bg-[var(--primary,#7c3aed)] px-4 text-[13px] font-semibold text-white transition hover:bg-[var(--primary-hover,#6d28d9)]"
+  >
+    {reorderLabel}
+  </a>
+</div>

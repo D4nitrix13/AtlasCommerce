@@ -1,0 +1,203 @@
+---
+/**
+ * OrderRow — Card colapsable de pedido (Bonfire mockup 10 "Mis órdenes").
+ *
+ * Renderiza una fila de pedido con `<details>` nativo (sin JS) para
+ * expandir/colapsar. El header del summary muestra los datos clave
+ * (order #, product thumbnail, qty, status pill, ETA, total) y el
+ * body expandido (`OrderRowDetails`) lista items, dirección de envío
+ * y resumen de pago con acciones.
+ *
+ * Tokens (sincronizado con `docs/frontend/design-references-bonfire.md`):
+ *  - Card: `bg-white rounded-2xl border border-slate-200 shadow-sm`.
+ *  - Status pill: colores semánticos del Badge primitive.
+ *  - Hover del summary: `bg-slate-50/40` para feedback sutil.
+ *  - Chevron: rota 180° con `group-open:rotate-180` cuando el
+ *    `<details>` está abierto.
+ *
+ * Accesibilidad:
+ *  - `<details>`/`<summary>` nativos: keyboard + SR sin ARIA extra.
+ *  - El summary concentra contexto (order #, product, status, total)
+ *    para que el SR lea info clave al tabular.
+ */
+import Badge from '../../ui/Badge.astro';
+import { formatCurrency, formatDate } from '../../../lib/formatters';
+import type { OrderMock } from '../../../data/orders-mock';
+import OrderRowDetails from './OrderRowDetails.astro';
+
+interface Props {
+  order: OrderMock;
+  currencyCode: string;
+  localePrefix: string;
+  orderIdLabel: string;
+  statusLabel: string;
+  etaLabel: string;
+  itemsHeading: string;
+  shippingHeading: string;
+  paymentHeading: string;
+  recipientLabel: string;
+  phoneLabel: string;
+  addressLabel: string;
+  countryLabel: string;
+  methodLabel: string;
+  subtotalLabel: string;
+  totalLabel: string;
+  reorderLabel: string;
+  viewDetailLabel: string;
+  viewInvoiceLabel: string;
+  trackShipmentLabel: string;
+  defaultOpen?: boolean;
+}
+
+const {
+  order,
+  currencyCode,
+  localePrefix,
+  orderIdLabel,
+  statusLabel,
+  etaLabel,
+  itemsHeading,
+  shippingHeading,
+  paymentHeading,
+  recipientLabel,
+  phoneLabel,
+  addressLabel,
+  countryLabel,
+  methodLabel,
+  subtotalLabel,
+  totalLabel,
+  reorderLabel,
+  viewDetailLabel,
+  viewInvoiceLabel,
+  trackShipmentLabel,
+  defaultOpen = false,
+} = Astro.props;
+
+const orderNumber = orderIdLabel.replace('{id}', order.id);
+const totalFormatted = formatCurrency(order.totalCents, currencyCode);
+const placedOn = formatDate(order.date);
+
+const itemsTotal = order.items.reduce((sum, item) => sum + item.quantity, 0);
+const firstItem = order.items[0];
+const productSummary =
+  order.items.length === 1
+    ? firstItem?.productName ?? ''
+    : `${firstItem?.productName ?? ''} + ${order.items.length - 1}`;
+
+function resolveMethodDetail(): string {
+  switch (order.payment.method) {
+    case 'card':
+      return `•••• ${order.payment.last4 ?? '0000'}`;
+    case 'transfer':
+      return 'Transferencia';
+    case 'cash_on_delivery':
+      return 'Contra entrega';
+  }
+}
+
+const methodDetail = resolveMethodDetail();
+const shippingLine = [
+  order.shippingAddress.detailedAddress,
+  order.shippingAddress.municipality,
+  order.shippingAddress.department,
+]
+  .filter((part) => part !== null && part !== undefined && part !== '')
+  .join(', ');
+
+const showTrackButton = order.trackingNumber !== undefined && order.trackingUrl !== undefined;
+const showInvoiceButton = order.status !== 'cancelled';
+---
+
+<details
+  class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+  open={defaultOpen}
+  data-order-id={order.id}
+>
+  <summary
+    class="flex cursor-pointer list-none flex-wrap items-center gap-3 px-4 py-4 transition-colors hover:bg-slate-50/60 sm:px-5 sm:gap-4"
+  >
+    <span
+      class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-soft,#e6f7f4)] text-[var(--primary,#7c3aed)]"
+      aria-hidden="true"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-6 w-6"
+      >
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+        <path d="M3 6h18" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </svg>
+    </span>
+
+    <div class="min-w-0 flex-1 basis-40">
+      <p class="text-[15px] font-bold text-slate-900">{orderNumber}</p>
+      <p class="mt-0.5 truncate text-[13px] text-slate-500">{productSummary}</p>
+    </div>
+
+    <div class="hidden text-[13px] text-slate-500 sm:block">
+      <span class="tabular-nums">{itemsTotal}</span> und.
+    </div>
+
+    <Badge status={order.status} label={statusLabel} />
+
+    <div class="hidden flex-1 text-[13px] text-slate-500 md:block">
+      <span class="text-slate-400">{etaLabel}:</span>{' '}
+      <span class="font-medium text-slate-600">{placedOn}</span>
+      {order.trackingNumber !== undefined && (
+        <span class="ml-2 text-slate-400">· {order.trackingNumber}</span>
+      )}
+    </div>
+
+    <span class="text-[15px] font-bold tabular-nums text-slate-900">
+      {totalFormatted}
+    </span>
+
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  </summary>
+
+  <div class="border-t border-slate-100 px-4 py-5 sm:px-6">
+    <OrderRowDetails
+      order={order}
+      currencyCode={currencyCode}
+      localePrefix={localePrefix}
+      itemsHeading={itemsHeading}
+      shippingHeading={shippingHeading}
+      paymentHeading={paymentHeading}
+      recipientLabel={recipientLabel}
+      phoneLabel={phoneLabel}
+      addressLabel={addressLabel}
+      countryLabel={countryLabel}
+      methodLabel={methodLabel}
+      subtotalLabel={subtotalLabel}
+      totalLabel={totalLabel}
+      reorderLabel={reorderLabel}
+      viewDetailLabel={viewDetailLabel}
+      viewInvoiceLabel={viewInvoiceLabel}
+      trackShipmentLabel={trackShipmentLabel}
+      showInvoiceButton={showInvoiceButton}
+      showTrackButton={showTrackButton}
+      trackingNumber={order.trackingNumber ?? null}
+      trackingCarrier={order.trackingCarrier ?? null}
+      trackingUrl={order.trackingUrl ?? null}
+      methodDetail={methodDetail}
+      shippingLine={shippingLine}
+    />
+  </div>
+</details>
