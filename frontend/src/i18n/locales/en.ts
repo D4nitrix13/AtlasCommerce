@@ -484,6 +484,19 @@ const en: Translations = {
   'storefront.cart.increment': 'Increase quantity',
   'storefront.cart.qty': 'Quantity',
 
+  // ─── storefront: cart v3 (Bonfire mockup 08) ──────────────────────────
+  'storefront.cart.v3.title': 'Your cart',
+  'storefront.cart.v3.empty': 'Your cart is empty.',
+  'storefront.cart.v3.emptyCta': 'Browse products',
+  'storefront.cart.v3.subtotal': 'Subtotal',
+  'storefront.cart.v3.shipping': 'Shipping',
+  'storefront.cart.v3.tax': 'Tax',
+  'storefront.cart.v3.total': 'Total',
+  'storefront.cart.v3.checkout': 'Go to checkout',
+  'storefront.cart.v3.continueShopping': 'Continue shopping',
+  'storefront.cart.v3.remove': 'Remove',
+  'storefront.cart.v3.quantity': 'Quantity',
+
   // ─── storefront: home + product cards/grid (F1.4) ────────────────────
   'storefront.home.hero.eyebrow': 'Kitsune Store · Japanese culture',
   'storefront.home.hero.title': 'Figures, manga and otaku merch',

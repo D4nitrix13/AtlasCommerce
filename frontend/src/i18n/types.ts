@@ -1165,6 +1165,17 @@ export type TranslationKey =
   | 'storefront.cart.decrement'
   | 'storefront.cart.increment'
   | 'storefront.cart.qty'
+  | 'storefront.cart.v3.title'
+  | 'storefront.cart.v3.empty'
+  | 'storefront.cart.v3.emptyCta'
+  | 'storefront.cart.v3.subtotal'
+  | 'storefront.cart.v3.shipping'
+  | 'storefront.cart.v3.tax'
+  | 'storefront.cart.v3.total'
+  | 'storefront.cart.v3.checkout'
+  | 'storefront.cart.v3.continueShopping'
+  | 'storefront.cart.v3.remove'
+  | 'storefront.cart.v3.quantity'
 
   // ─── storefront: home + product cards/grid (F1.4) ────────────────────
   | 'storefront.home.hero.eyebrow'
