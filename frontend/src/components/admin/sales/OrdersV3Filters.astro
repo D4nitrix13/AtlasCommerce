@@ -1,0 +1,136 @@
+---
+/**
+ * OrdersV3Filters — Card con los filtros del list (search + status +
+ * date from + date to + apply/clear) para /admin/sales/orders v3.
+ *
+ * Patron Bonfire (mockup 12): una card `rounded-2xl` arriba del bulk
+ * bar con 4 inputs en grid (1 col mobile, 2 cols tablet, 4 cols desktop).
+ *
+ * Visual-only: el `<form method=get action>` dispara el submit real al
+ * back/forward del navegador (AGENTS §18). La logica de filtros vive
+ * en el page (`orders/index.astro`), no en este componente.
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - Cada input tiene `<label>` (no placeholder-only).
+ *   - El form tiene `role="search"` para AT.
+ *   - Botones submit reales (`<button type="submit">`).
+ */
+type StatusSlug = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+
+interface Props {
+  /** URL base del form (locale-prefixed). */
+  formAction: string;
+  /** Href para limpiar filtros. */
+  clearHref: string;
+  /** Estado actual de los filtros. */
+  current: {
+    query: string;
+    status: StatusSlug;
+    dateFrom: string;
+    dateTo: string;
+  };
+  /** Heading i18n del fieldset. */
+  heading: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  statusLabel: string;
+  dateFromLabel: string;
+  dateToLabel: string;
+  /** Labels i18n para cada status (6 opciones). */
+  statusOptions: Record<StatusSlug, string>;
+  applyLabel: string;
+  clearLabel: string;
+  visualOnlyHint: string;
+}
+
+const {
+  formAction,
+  clearHref,
+  current,
+  heading,
+  searchLabel,
+  searchPlaceholder,
+  statusLabel,
+  dateFromLabel,
+  dateToLabel,
+  statusOptions,
+  applyLabel,
+  clearLabel,
+  visualOnlyHint,
+} = Astro.props;
+---
+
+<form
+  method="get"
+  action={formAction}
+  class="mb-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+  role="search"
+  aria-label={heading}
+>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs font-medium text-slate-600">{searchLabel}</span>
+      <input
+        type="search"
+        name="q"
+        value={current.query}
+        placeholder={searchPlaceholder}
+        class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,0.28))]"
+      />
+    </label>
+
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs font-medium text-slate-600">{statusLabel}</span>
+      <select
+        name="status"
+        class="block w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,0.28))]"
+      >
+        {(['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'] as const).map(
+          (slug) => (
+            <option value={slug} selected={current.status === slug}>
+              {statusOptions[slug]}
+            </option>
+          )
+        )}
+      </select>
+    </label>
+
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs font-medium text-slate-600">{dateFromLabel}</span>
+      <input
+        type="date"
+        name="dateFrom"
+        value={current.dateFrom}
+        class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,0.28))]"
+      />
+    </label>
+
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs font-medium text-slate-600">{dateToLabel}</span>
+      <input
+        type="date"
+        name="dateTo"
+        value={current.dateTo}
+        class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,0.28))]"
+      />
+    </label>
+  </div>
+
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
+    <p class="text-xs text-slate-500">{visualOnlyHint}</p>
+    <div class="flex flex-wrap gap-2">
+      <a
+        href={clearHref}
+        class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2"
+      >
+        {clearLabel}
+      </a>
+      <button
+        type="submit"
+        class="inline-flex h-9 items-center rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+      >
+        {applyLabel}
+      </button>
+    </div>
+  </div>
+</form>

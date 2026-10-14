@@ -1,0 +1,75 @@
+---
+/**
+ * BulkActionsBar — Toolbar de acciones masivas para /admin/sales/orders v3.
+ *
+ * Replica el bloque "Seleccionar todo + acciones" del mockup Bonfire
+ * (vista 12). Patron Shopify Admin: aparece SOLO cuando hay ≥1 row
+ * seleccionada (`hidden` por defecto, el script en el composer
+ * `OrdersV3Section` lo destapa cuando `count > 0`).
+ *
+ * Las acciones son stubs visuales — hoy log a `console.info`. Cuando
+ * se implemente `POST /api/v1/admin/orders/bulk`, los handlers del
+ * composer llaman al endpoint pasando `selectedIds`. Mantener este
+ * componente libre de logica para que la pagina siga siendo composicion.
+ *
+ * Accesibilidad (AGENTS.md §17):
+ *   - `<div role="region" aria-label="Bulk actions">` con region landmark.
+ *   - Los botones tienen `type="button"` para no enviar forms adyacentes.
+ */
+interface Props {
+  /** Plantilla i18n con `{count}` para el contador. */
+  labelSelectedCount: string;
+  labelExportCsv: string;
+  labelMarkShipped: string;
+  labelClearSelection: string;
+}
+
+const {
+  labelSelectedCount,
+  labelExportCsv,
+  labelMarkShipped,
+  labelClearSelection,
+} = Astro.props;
+---
+
+<div
+  role="region"
+  aria-label="Bulk actions"
+  data-bulk-bar
+  hidden
+  class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm transition"
+>
+  <p
+    class="text-sm font-semibold text-slate-900"
+    data-bulk-count
+    data-template={labelSelectedCount}
+  >
+    {labelSelectedCount.replace('{count}', '0')}
+  </p>
+
+  <span class="mx-1 h-5 w-px bg-slate-200" aria-hidden="true"></span>
+
+  <button
+    type="button"
+    data-bulk-action="exportCsv"
+    class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2"
+  >
+    {labelExportCsv}
+  </button>
+
+  <button
+    type="button"
+    data-bulk-action="markShipped"
+    class="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2"
+  >
+    {labelMarkShipped}
+  </button>
+
+  <button
+    type="button"
+    data-bulk-action="clear"
+    class="ml-auto inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2"
+  >
+    {labelClearSelection}
+  </button>
+</div>
