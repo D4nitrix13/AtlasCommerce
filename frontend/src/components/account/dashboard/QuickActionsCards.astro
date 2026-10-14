@@ -1,0 +1,144 @@
+---
+/**
+ * QuickActionsCards — Grid de 4 cards de acciones rápidas (v3, Bonfire).
+ *
+ * Reemplaza al viejo `QuickActionsBar.astro` (que era 5 pills inline).
+ * El mockup 03-account-dashboard v3 pide 4 cards con icono + título
+ * + descripción, en grid 2x2 mobile / 4x1 desktop, con hover lift.
+ *
+ * Acciones (en este orden):
+ *   1. Pedir cotización → /account/rfq/new
+ *   2. Direcciones      → /account/addresses
+ *   3. Ayuda            → /account/tickets
+ *   4. Perfil           → /account/profile
+ *
+ * Tokens:
+ *   - Card: `rounded-2xl border border-slate-200 bg-white p-5`
+ *     (mismo shape que las KPIs).
+ *   - Icon container: `w-10 h-10 rounded-xl bg-[var(--primary-soft)]`
+ *     para mantener el color del tenant sin hardcodear.
+ *   - Hover: lift sutil via `card-hover` (clase global en Bonfire) +
+ *     cambio de color del título a `var(--primary)`.
+ *
+ * Accesibilidad: cada card es un `<a>` con texto descriptivo; el
+ * icono es `aria-hidden="true"`. El grid usa `data-reveal-stagger`
+ * para integrarse con el sistema de animaciones de scroll que ya
+ * usa el resto del dashboard.
+ */
+import type { TranslationKey } from '../../../i18n/types';
+
+interface ActionCard {
+  /** Slug estable para `data-testid` y la key del test. */
+  slug: 'rfq' | 'addresses' | 'help' | 'profile';
+  titleKey: TranslationKey;
+  href: string;
+  /** Path SVG 24x24 viewBox (estilo Lucide / Heroicons). */
+  iconPath: string;
+}
+
+interface Props {
+  /** Locale actual, para construir los hrefs de navegación. */
+  locale: 'es' | 'en';
+  /** Diccionario de traducciones (reusamos el mismo que la página). */
+  t: Record<TranslationKey, string>;
+}
+
+const { locale, t } = Astro.props;
+
+const localePrefix = `/${locale}`;
+
+const actions: ActionCard[] = [
+  {
+    slug: 'rfq',
+    titleKey: 'account.dashboard.quickActionsCards.rfqTitle',
+    href: `${localePrefix}/rfq/new`,
+    iconPath: 'M9 12h6m-6 4h6M7 3h10a2 2 0 0 1 2 2v16l-7-3-7 3V5a2 2 0 0 1 2-2Z',
+  },
+  {
+    slug: 'addresses',
+    titleKey: 'account.dashboard.quickActionsCards.addressesTitle',
+    href: `${localePrefix}/account/addresses`,
+    iconPath:
+      'M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z M12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z',
+  },
+  {
+    slug: 'help',
+    titleKey: 'account.dashboard.quickActionsCards.helpTitle',
+    href: `${localePrefix}/account/tickets`,
+    iconPath:
+      'M12 17h.01M12 14a2 2 0 1 0-1.5-3.3M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z',
+  },
+  {
+    slug: 'profile',
+    titleKey: 'account.dashboard.quickActionsCards.profileTitle',
+    href: `${localePrefix}/account/profile`,
+    iconPath:
+      'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+  },
+];
+
+// Descripciones se derivan del título con un sufijo .description (mismo
+// namespace que el commit previo). Si la key no existe, fallback vacío
+// para que la card no rompa el render.
+function descriptionFor(slug: ActionCard['slug']): string {
+  const suffix = {
+    rfq: 'account.dashboard.quickActionsCards.rfqDescription',
+    addresses: 'account.dashboard.quickActionsCards.addressesDescription',
+    help: 'account.dashboard.quickActionsCards.helpDescription',
+    profile: 'account.dashboard.quickActionsCards.profileDescription',
+  }[slug] as TranslationKey;
+  return t[suffix];
+}
+---
+
+<section
+  aria-labelledby="quick-actions-heading"
+  data-testid="quick-actions-cards"
+  class="flex flex-col gap-4"
+>
+  <h2
+    id="quick-actions-heading"
+    class="text-2xl font-bold tracking-tight text-slate-900"
+  >
+    {t['account.dashboard.v3.quickActions.heading']}
+  </h2>
+
+  <div
+    data-reveal-stagger
+    class="grid grid-cols-2 gap-4 lg:grid-cols-4"
+  >
+    {actions.map((action) => (
+      <a
+        href={action.href}
+        data-testid={`quick-action-${action.slug}`}
+        class="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300"
+      >
+        <span
+          aria-hidden="true"
+          class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
+          style="background:var(--primary-soft,#E6F7F4)"
+        >
+          <svg
+            class="h-5 w-5"
+            style="color:var(--primary,#2D9D8E)"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d={action.iconPath} />
+          </svg>
+        </span>
+        <h3 class="text-[15px] font-bold text-slate-900 transition group-hover:text-[var(--primary,#2D9D8E)]">
+          {t[action.titleKey]}
+        </h3>
+        <p class="mt-1 text-[13px] leading-snug text-slate-500">
+          {descriptionFor(action.slug)}
+        </p>
+      </a>
+    ))}
+  </div>
+</section>
