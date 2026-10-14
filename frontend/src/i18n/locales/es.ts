@@ -838,6 +838,31 @@ const es: Translations = {
   'account.addresses.b2b.defaultShipping': 'Dirección de envío por defecto',
   'account.addresses.b2b.save': 'Guardar dirección de empresa',
 
+  // ─── storefront: bulk order v3 (Bonfire mockup 07) ────────────────────
+  'storefront.b2b.bulk.v3.eyebrow': 'Más elegido · 100+ und.',
+  'storefront.b2b.bulk.v3.title': 'Precios por volumen',
+  'storefront.b2b.bulk.v3.intro':
+    'Ahorrá hasta 35% con nuestros tiers de volumen. Cuanto más pedís, más ahorrás en cada unidad.',
+  'storefront.b2b.bulk.v3.popularBadge': 'Más popular',
+  'storefront.b2b.bulk.v3.includes': 'Incluye',
+  'storefront.b2b.bulk.v3.perUnit': 'Precio por unidad',
+  'storefront.b2b.bulk.v3.baseBadge': 'Base',
+  'storefront.b2b.bulk.v3.calculator.heading': 'Calculadora de precios',
+  'storefront.b2b.bulk.v3.calculator.productLabel': 'Producto',
+  'storefront.b2b.bulk.v3.calculator.quantityLabel': 'Cantidad de unidades',
+  'storefront.b2b.bulk.v3.calculator.quantityHint':
+    'Mové el slider o escribí directamente. Rango: 10 a 1000 unidades.',
+  'storefront.b2b.bulk.v3.calculator.unitPriceLabel': 'Precio unitario',
+  'storefront.b2b.bulk.v3.calculator.totalLabel': 'Total estimado',
+  'storefront.b2b.bulk.v3.calculator.savingsLabel': 'Ahorrás',
+  'storefront.b2b.bulk.v3.calculator.tierLabel': 'Tier {range} · {discount}',
+  'storefront.b2b.bulk.v3.calculator.cta': 'Solicitar cotización',
+  'storefront.b2b.bulk.v3.cta': 'Iniciar cotización mayorista',
+  'storefront.b2b.bulk.v3.help.heading': '¿Necesitás algo fuera de estos tiers?',
+  'storefront.b2b.bulk.v3.help.body':
+    'Si tu pedido es muy específico (diseño propio, material especial, gran volumen), pedinos una cotización a medida.',
+  'storefront.b2b.bulk.v3.help.cta': 'Iniciar cotización mayorista',
+
   // ─── storefront: product detail expansion (F4.2) ───────────────────
   'storefront.productDetail.gallery.zoomHint': 'Pasá el cursor para hacer zoom',
   'storefront.productDetail.gallery.previousImage': 'Imagen anterior',

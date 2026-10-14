@@ -1520,6 +1520,28 @@ export type TranslationKey =
   | 'account.addresses.b2b.defaultShipping'
   | 'account.addresses.b2b.save'
 
+  // ─── storefront: bulk order v3 (Bonfire mockup 07) ────────────────────
+  | 'storefront.b2b.bulk.v3.eyebrow'
+  | 'storefront.b2b.bulk.v3.title'
+  | 'storefront.b2b.bulk.v3.intro'
+  | 'storefront.b2b.bulk.v3.popularBadge'
+  | 'storefront.b2b.bulk.v3.includes'
+  | 'storefront.b2b.bulk.v3.perUnit'
+  | 'storefront.b2b.bulk.v3.baseBadge'
+  | 'storefront.b2b.bulk.v3.calculator.heading'
+  | 'storefront.b2b.bulk.v3.calculator.productLabel'
+  | 'storefront.b2b.bulk.v3.calculator.quantityLabel'
+  | 'storefront.b2b.bulk.v3.calculator.quantityHint'
+  | 'storefront.b2b.bulk.v3.calculator.unitPriceLabel'
+  | 'storefront.b2b.bulk.v3.calculator.totalLabel'
+  | 'storefront.b2b.bulk.v3.calculator.savingsLabel'
+  | 'storefront.b2b.bulk.v3.calculator.tierLabel'
+  | 'storefront.b2b.bulk.v3.calculator.cta'
+  | 'storefront.b2b.bulk.v3.cta'
+  | 'storefront.b2b.bulk.v3.help.heading'
+  | 'storefront.b2b.bulk.v3.help.body'
+  | 'storefront.b2b.bulk.v3.help.cta'
+
   // ─── storefront: product detail expansion (F4.2) ───────────────────
   | 'storefront.productDetail.gallery.zoomHint'
   | 'storefront.productDetail.gallery.previousImage'
