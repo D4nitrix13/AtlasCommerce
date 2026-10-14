@@ -1,254 +1,81 @@
 ---
 /**
- * Dashboard del cliente (RF-CUST-040 / Baymard §6.1 / F1.3 + F2.2).
+ * Dashboard del cliente — composición Bonfire v3.
  *
- * Estructura (F2.2 task-oriented rediseño, ver
- * `docs/frontend/account-dashboard-spec.md`):
- *   1. ProfileSummary       → saludo + avatar + member-since
- *   2. OrderStatusCard ×3   → pedidos activos (hero)
- *   3. RfqSnapshot          → cotizaciones pendientes (B2B, si count>0)
- *   4. InvoiceSnapshot      → facturas pendientes (B2B, si hay)
- *   5. QuickActionsBar      → 5 acciones inline (NO grid)
- *   6. AddressesSnapshot    → dirección primaria + count
- *   7. SecuritySnapshot     → 2FA + last login (inline)
- *   8. NotificationsSnapshot→ notif inbox (si unread>0)
+ * Reemplaza el layout task-oriented de F2.2 por la composición
+ * del mockup `03-account-dashboard.html` (Bonfire v1 adaptado):
  *
- * Filosofía Baymard §2.6:
- *   - Returning users son task-oriented, no explorers.
- *   - "Few somewhat long account pages, not deep multilayer".
- *   - 81% NO usan icon-based dashboard — usamos pills inline.
+ *   1. H1 saludo (HOLA, ANA)
+ *   2. KpiGrid 4 cards (Pedidos activos / Cotizaciones / Gastado (mes) / Favoritos)
+ *   3. QuickActionsCards (4 cards: Cotizar / Direcciones / Ayuda / Perfil)
+ *   4. RecentOrdersTable (tabla 5 órdenes, 4 columnas)
  *
- * F1.1 → migración de mock a fetch real.
- * F2.2 → layout task-oriented con datos reales por sección (algunas
- *        secciones se ocultan si el endpoint no existe / devuelve
- *        vacío, per spec §7).
- *
- * Tenant:
- *   - variant panda/kitsune/neutral sale del tenant resuelto por
- *     middleware (`Astro.locals.tenant.tenantSlug`).
- *   - Las CSS vars `--primary` / `--primary-hover` ya las setea
- *     `AccountLayout.astro` en el `<body style="...">`.
+ * Decisiones locked-in (ver `odd/tasks/bonfire-visual-fidelity.md`):
+ *   - Tenant-aware: cada acento sale de `var(--primary)`. El shell
+ *     visual lo seteá `AccountLayout.astro` en el `<body style="...">`,
+ *     así que acá no toco hexes.
+ *   - Empty-safe: si una sección no tiene datos, la sección no se
+ *     renderiza (no mostramos cards vacías, Baymard §2.6 #4).
+ *   - data-reveal-stagger en cada grid para el sistema de
+ *     animaciones de scroll (scroll-fx.ts).
+ *   - No emojis, no fotos de personas, no logos reales. AvatarCircle
+ *     para user, ProductMockup si hicera falta una foto de producto.
  */
 import AccountLayout from '../../../layouts/AccountLayout.astro';
-import ProfileSummary from '../../../components/account/dashboard/ProfileSummary.astro';
-import OrderStatusCard from '../../../components/account/dashboard/OrderStatusCard.astro';
-import RfqSnapshot from '../../../components/account/dashboard/RfqSnapshot.astro';
-import InvoiceSnapshot from '../../../components/account/dashboard/InvoiceSnapshot.astro';
-import QuickActionsBar from '../../../components/account/dashboard/QuickActionsBar.astro';
-import AddressesSnapshot from '../../../components/account/dashboard/AddressesSnapshot.astro';
-import SecuritySnapshot from '../../../components/account/dashboard/SecuritySnapshot.astro';
-import NotificationsSnapshot from '../../../components/account/dashboard/NotificationsSnapshot.astro';
+import KpiGrid from '../../../components/account/dashboard/KpiGrid.astro';
+import QuickActionsCards from '../../../components/account/dashboard/QuickActionsCards.astro';
+import RecentOrdersTable from '../../../components/account/dashboard/RecentOrdersTable.astro';
 import { getServerDictionary, getServerLocale } from '../../../i18n/server';
 import { getAccountDashboardData } from '../../../lib/server/account';
-import type { OrderStatus } from '../../../data/account-mock';
+import { buildDashboardKpisV3 } from '../../../data/dashboard-kpis';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
 
-// SSR fetch al backend. La cookie httpOnly de Sanctum viaja en el
-// header Cookie. Si no hay cookie, los endpoints devuelven 401 — la
-// AccountAuthGuard del layout ya bloqueó usuarios anónimos.
 const cookieHeader = Astro.request.headers.get('Cookie') ?? '';
+// Pedimos 5 órdenes para la tabla (la sección más ancha del dashboard).
+// Otros endpoints del helper no se usan en v3 pero los seguimos trayendo
+// por si en el futuro queremos re-introducir una sección que los consuma
+// (ej: tarjetas de seguridad/notificaciones).
 const dashboard = await getAccountDashboardData(
   Astro.url.origin,
   cookieHeader,
-  { limit: 3 },
+  { limit: 5 },
 );
 
-// F1.1 fallback del nombre (per spec §4.1).
+// Saludo. Si no hay user, fallback al idioma actual.
 const fallbackFirstName = locale === 'en' ? 'Customer' : 'Cliente';
 const firstName =
   dashboard.user?.full_name?.split(' ')[0] ?? fallbackFirstName;
-
-// Variant + saludo.
-const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
-const isKitsune = tenantSlug === 'kitsune';
-const isPanda = tenantSlug === 'panda-estampados';
-
-const bannerVariant: 'kitsune' | 'panda' | 'neutral' = isKitsune
-  ? 'kitsune'
-  : isPanda
-    ? 'panda'
-    : 'neutral';
-
-const greetingTemplate = isKitsune
-  ? t['account.dashboard.greeting.kitsune']
-  : t['account.dashboard.greeting.panda'];
-const greeting = greetingTemplate.replace('{name}', firstName);
+const greeting = locale === 'en' ? `Hello, ${firstName}` : `Hola, ${firstName}`;
 
 const localePrefix = `/${locale}`;
 
-// Quick actions Panda B2B (5 inline pills — spec §4.5).
-const quickActions = [
-  {
-    label: t['account.dashboard.quickActions.rfq'],
-    href: `${localePrefix}/rfq/new`,
-    testId: 'quick-action-rfq',
-  },
-  {
-    label: t['account.dashboard.quickActions.reorder'],
-    href: `${localePrefix}/account/orders?reorder=last`,
-    testId: 'quick-action-reorder',
-  },
-  {
-    label: t['account.dashboard.quickActions.approveDesign'],
-    href: `${localePrefix}/account/orders?filter=design-pending`,
-    testId: 'quick-action-approve-design',
-  },
-  {
-    label: t['account.dashboard.quickActions.help'],
-    href: `${localePrefix}/account/tickets`,
-    testId: 'quick-action-help',
-  },
-  {
-    label: t['account.dashboard.quickActions.catalog'],
-    href: `${localePrefix}/products`,
-    testId: 'quick-action-catalog',
-  },
-];
-
-// "Hace 3 horas" — placeholder MVP. En F4+ reemplazamos por cálculo
-// real desde `auth_sessions.last_active_at`.
-const lastSignInLabel = locale === 'en' ? 'a few hours' : 'hace unas horas';
-
-// ETA "15 Oct 2026" — placeholder MVP. En F4+ sale de
-// `shipments.estimated_delivery_at` cuando esté.
-function formatEta(orderDate: string): string {
-  const d = new Date(orderDate);
-  if (Number.isNaN(d.getTime())) {
-    return '—';
-  }
-  // Sumamos 7 días como placeholder MVP.
-  d.setDate(d.getDate() + 7);
-  return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'es-NI', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-// "Pedidos activos" sólo si hay. Empty state = CTA "Hacé tu primera
-// cotización". NO mostramos cards vacías (Baymard §2.6 #4).
-const hasOrders = dashboard.orders.length > 0;
-
-// "Cotizaciones pendientes" sólo si pendingCount > 0 Y !== null.
-// null = endpoint no disponible (404) → sección oculta.
-const showRfqs = dashboard.rfqPendingCount !== null && dashboard.rfqPendingCount > 0;
-
-// "Notificaciones" sólo si unreadCount > 0 Y !== null.
-const showNotifications =
-  dashboard.notificationsUnread !== null && dashboard.notificationsUnread > 0;
-
-// "Direcciones" sólo si hay al menos 1.
-const showAddresses = dashboard.addresses.total > 0;
-
-// "Seguridad" sólo si twoFactor data está disponible (200 OK).
-const showSecurity = dashboard.twoFactor !== null;
+// KPIs v3 (Bonfire adaptation). El helper ya devuelve 4 elementos con
+// los labelKey del namespace v3.
+const kpis = buildDashboardKpisV3(dashboard, locale);
 ---
 
 <AccountLayout title={t['account.layout.title']}>
-  <div class="flex flex-col gap-8">
-    <ProfileSummary
-      user={dashboard.user}
-      variant={bannerVariant}
-      greeting={greeting}
-      locale={locale}
+  <div class="flex flex-col gap-10">
+    <header class="flex flex-col gap-2">
+      <h1
+        class="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl"
+        data-testid="dashboard-greeting"
+      >
+        {greeting}
+      </h1>
+    </header>
+
+    <KpiGrid kpis={kpis} t={t} />
+
+    <QuickActionsCards locale={locale} t={t} />
+
+    <RecentOrdersTable
+      orders={dashboard.orders}
+      localePrefix={localePrefix}
+      currencyCode={null}
       t={t}
     />
-
-    {hasOrders ? (
-      <section
-        aria-labelledby="active-orders-heading"
-        data-testid="active-orders-section"
-        class="flex flex-col gap-3"
-      >
-        <h2 id="active-orders-heading" class="text-base font-semibold text-slate-900">
-          {t['account.dashboard.orders.heading']}
-        </h2>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {dashboard.orders.map((order) => (
-            <OrderStatusCard
-              orderId={order.id}
-              status={order.status as OrderStatus}
-              etaLabel={formatEta(order.date)}
-              itemsCount={order.items}
-              totalCents={order.total}
-              currencyCode={null}
-              localePrefix={localePrefix}
-              t={t}
-            />
-          ))}
-        </div>
-        <a
-          href={`${localePrefix}/account/orders`}
-          class="self-start text-sm font-medium text-[var(--primary,#059669)] hover:underline"
-        >
-          {t['account.dashboard.orders.viewAll']} →
-        </a>
-      </section>
-    ) : (
-      <section
-        aria-labelledby="active-orders-heading"
-        data-testid="active-orders-empty"
-        class="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6"
-      >
-        <h2 id="active-orders-heading" class="text-base font-semibold text-slate-900">
-          {t['account.dashboard.orders.heading']}
-        </h2>
-        <p class="text-sm text-slate-600">
-          {t['account.dashboard.orders.empty']}
-        </p>
-        <a
-          href={`${localePrefix}/rfq/new`}
-          class="rounded-md bg-[var(--primary,#059669)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--primary-hover,#047857)]"
-        >
-          {t['account.dashboard.orders.emptyCta']}
-        </a>
-      </section>
-    )}
-
-    {showRfqs && dashboard.rfqPendingCount !== null && (
-      <RfqSnapshot
-        pendingCount={dashboard.rfqPendingCount}
-        viewAllLabel={t['account.dashboard.rfqs.viewAll']}
-        viewAllHref={`${localePrefix}/rfq`}
-        t={t}
-      />
-    )}
-
-    <QuickActionsBar
-      heading={t['account.dashboard.quickActions.heading']}
-      items={quickActions}
-      variant={bannerVariant}
-    />
-
-    {showAddresses && (
-      <AddressesSnapshot
-        addresses={dashboard.addresses.list}
-        total={dashboard.addresses.total}
-        viewAllLabel={t['account.dashboard.addresses.viewAll']}
-        viewAllHref={`${localePrefix}/account/addresses`}
-        t={t}
-      />
-    )}
-
-    {showSecurity && dashboard.twoFactor !== null && (
-      <SecuritySnapshot
-        twoFactorEnabled={dashboard.twoFactor.enabled}
-        lastSignInLabel={lastSignInLabel}
-        viewDetailLabel={t['account.dashboard.security.viewDetail']}
-        viewDetailHref={`${localePrefix}/account/security`}
-        t={t}
-      />
-    )}
-
-    {showNotifications && dashboard.notificationsUnread !== null && (
-      <NotificationsSnapshot
-        unreadCount={dashboard.notificationsUnread}
-        viewAllLabel={t['account.dashboard.notifications.viewAll']}
-        viewAllHref={`${localePrefix}/account/notifications`}
-        t={t}
-      />
-    )}
   </div>
 </AccountLayout>
