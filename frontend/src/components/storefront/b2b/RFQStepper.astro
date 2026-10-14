@@ -13,89 +13,94 @@
  *   - Esto permite que el usuario scrollee entre steps sin perder
  *     el contexto de progreso.
  *
+ * Estilo Bonfire v3 (mockup 06-rfq):
+ *   - El número de steps se deriva de `labels.length` — el componente
+ *     ya no está acoplado a un número fijo. Cada step es un círculo +
+ *     label visible a la derecha (no debajo).
+ *   - `current` / `done` → círculo filled `bg-[var(--primary)]`.
+ *   - `upcoming` → círculo blanco con borde slate-300 + texto slate-400.
+ *   - Connector horizontal entre steps; `--primary` cuando el step
+ *     anterior está completado, slate-200 cuando no.
+ *
  * Estados visuales (AGENTS §11):
- *   - current  → borde + texto del brand (`--primary`).
- *   - done     → fondo brand sólido + check visible.
+ *   - current → fondo brand sólido.
+ *   - done    → fondo brand sólido + check visible.
  *   - upcoming → gris, sin énfasis.
  *
  * Accesibilidad (AGENTS §17):
- *   - `<ol>` semántica (orden importa).
+ *   - `<nav aria-label>`.
  *   - Estado actual via `aria-current="step"`.
- *   - Step label asociado al número via `<span>` visible + texto.
+ *   - Label asociado al círculo vía flex sibling.
  *
  * Los labels llegan ya localizados como props — el componente NO
  * consulta i18n. Esto evita acoplamiento y permite reusar el stepper
  * en otros flujos B2B sin tocar este archivo.
- *
- * Nota de implementación: el JSX de cada item se inlinea dentro del
- * callback de `steps.map()` en el template body. El parser de rolldown
- * (vite 8 / astro 7) no acepta JSX de Astro devuelto desde una
- * función TypeScript regular del frontmatter — sólo lo parsea en
- * contexto de template. Por eso el renderStepItem() previo se eliminó
- * y se movió el JSX al template. Output renderizado byte-identical.
  */
 interface Props {
-  currentStep: 1 | 2 | 3 | 4;
+  currentStep: number;
   labels: readonly string[];
 }
 
 const { currentStep, labels } = Astro.props;
 
-const steps: readonly { number: 1 | 2 | 3 | 4 }[] = [
-  { number: 1 },
-  { number: 2 },
-  { number: 3 },
-  { number: 4 },
-];
+const stepNumbers: readonly number[] = labels.map((_, index) => index + 1);
 
-function isDone(stepNumber: 1 | 2 | 3 | 4, current: 1 | 2 | 3 | 4): boolean {
+function isDone(stepNumber: number, current: number): boolean {
   return stepNumber < current;
 }
 
-function stepClasses(isDone: boolean, isCurrent: boolean): string {
-  if (isDone) return 'border-[var(--primary,#059669)] bg-[var(--primary,#059669)] text-white';
-  if (isCurrent) return 'border-[var(--primary,#059669)] bg-white text-[var(--primary,#059669)]';
+function circleClasses(done: boolean, current: boolean): string {
+  if (done || current) {
+    return 'border-transparent bg-[var(--primary,#059669)] text-white';
+  }
   return 'border-slate-300 bg-white text-slate-400';
 }
 
-function labelClasses(isCurrent: boolean): string {
-  const base = 'hidden text-xs font-medium sm:block';
-  return isCurrent ? `${base} text-[var(--primary,#059669)]` : `${base} text-slate-500`;
+function labelClasses(done: boolean, current: boolean): string {
+  const base = 'hidden text-[15px] font-semibold sm:block';
+  if (done) return `${base} text-slate-700`;
+  if (current) return `${base} text-slate-900`;
+  return `${base} text-slate-500`;
 }
 
-function connectorClasses(stepNumber: 1 | 2 | 3 | 4, current: 1 | 2 | 3 | 4): string {
+function connectorClasses(stepNumber: number, current: number): string {
   return stepNumber < current
-    ? 'mx-1 h-0.5 flex-1 rounded bg-[var(--primary,#059669)] transition'
-    : 'mx-1 h-0.5 flex-1 rounded bg-slate-200 transition';
+    ? 'h-0.5 flex-1 rounded-full bg-[var(--primary,#059669)] transition'
+    : 'h-0.5 flex-1 rounded-full bg-slate-200 transition';
 }
 ---
 
-<nav aria-label="Pasos de cotización" class="mx-auto w-full max-w-4xl px-4 pt-8 sm:px-6">
-  <ol class="flex w-full items-center justify-between gap-1 sm:gap-3">
-    {steps.map((step, index) => {
-      const done = isDone(step.number, currentStep);
-      const current = step.number === currentStep;
-      const label = labels[index] ?? '';
-      const isLast = index === steps.length - 1;
-      return (
-        <li class="flex flex-1 items-center">
-          <div class="flex flex-col items-center gap-1.5">
-            <span
-              aria-current={current ? 'step' : undefined}
-              class:list={[
-                'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-semibold transition',
-                stepClasses(done, current),
-              ]}
-            >
-              {done ? '✓' : step.number}
-            </span>
-            <span class:list={[labelClasses(current)]}>{label}</span>
-          </div>
-          {!isLast && (
-            <div aria-hidden="true" class:list={[connectorClasses(step.number, currentStep)]} />
-          )}
-        </li>
-      );
-    })}
-  </ol>
+<nav
+  aria-label="Pasos de cotización"
+  class="mb-8 flex flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-6"
+  data-reveal
+>
+  {stepNumbers.map((stepNumber, index) => {
+    const done = isDone(stepNumber, currentStep);
+    const current = stepNumber === currentStep;
+    const label = labels[index] ?? '';
+    const isLast = index === stepNumbers.length - 1;
+    return (
+      <>
+        <div class="flex items-center gap-3">
+          <span
+            aria-current={current ? 'step' : undefined}
+            class:list={[
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition',
+              circleClasses(done, current),
+            ]}
+          >
+            {done ? '\u2713' : stepNumber}
+          </span>
+          <span class:list={[labelClasses(done, current)]}>{label}</span>
+        </div>
+        {!isLast && (
+          <div
+            aria-hidden="true"
+            class:list={['h-0.5 flex-1 rounded-full', connectorClasses(stepNumber, currentStep)]}
+          />
+        )}
+      </>
+    );
+  })}
 </nav>
