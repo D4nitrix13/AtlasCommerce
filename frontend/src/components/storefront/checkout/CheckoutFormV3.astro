@@ -1,0 +1,149 @@
+---
+/**
+ * CheckoutFormV3 — orquestador del form multi-step V3.
+ *
+ * V3 replica el IA mockup `09-checkout.html`:
+ *  - 3 steps renderizados dentro de `<fieldset>`/`<legend>` independientes,
+ *    con el step activo resaltado por un `ring-2 ring-[var(--primary)]`
+ *    (el padre decide cuál está visible según `currentStepId`).
+ *  - El step activo se expone, los futuros están `hidden` (no
+ *    `aria-hidden`: totalmente removidos del AT).
+ *  - Submit real NO se implementa (no hay backend): el botón
+ *    "Realizar pedido" en step 3 simplemente navega a `?step=success`,
+ *    donde la página podría mostrar un success state en el futuro.
+ *  - Navegación anterior/siguiente con links (no JS) para garantizar
+ *    deep-linkability y accesibilidad sin hidratar.
+ *
+ * Composición:
+ *  - Step 1 → CheckoutShippingStepV3
+ *  - Step 2 → CheckoutPaymentStepV3
+ *  - Step 3 → CheckoutReviewStepV3
+ */
+import CheckoutShippingStepV3, {
+  type CheckoutShippingStepV3Labels,
+} from './CheckoutShippingStepV3.astro';
+import CheckoutPaymentStepV3, {
+  type CheckoutPaymentStepV3Labels,
+} from './CheckoutPaymentStepV3.astro';
+import CheckoutReviewStepV3, {
+  type CheckoutReviewStepV3Labels,
+} from './CheckoutReviewStepV3.astro';
+import type { CheckoutSummaryV3Item } from './CheckoutSummaryV3.astro';
+
+export type CheckoutV3StepId = 'shipping' | 'payment' | 'review';
+
+export interface CheckoutFormV3Labels {
+  shippingHeading: string;
+  paymentHeading: string;
+  reviewHeading: string;
+  reviewHint: string;
+  previous: string;
+  next: string;
+  placeOrder: string;
+  shipping: CheckoutShippingStepV3Labels;
+  payment: CheckoutPaymentStepV3Labels;
+  review: CheckoutReviewStepV3Labels;
+}
+
+interface Props {
+  currentStepId: CheckoutV3StepId;
+  /** Locale-prefixed base (ej. `/${locale}/checkout`). */
+  stepHrefBase: string;
+  items: readonly CheckoutSummaryV3Item[];
+  currencyCode: string;
+  labels: CheckoutFormV3Labels;
+}
+
+const { currentStepId, stepHrefBase, items, currencyCode, labels } = Astro.props;
+
+const hrefFor = (stepId: CheckoutV3StepId): string => `${stepHrefBase}?step=${stepId}`;
+const stepOrder: CheckoutV3StepId[] = ['shipping', 'payment', 'review'];
+const currentIndex = stepOrder.indexOf(currentStepId);
+const hasPrevious = currentIndex > 0;
+const hasNext = currentIndex < stepOrder.length - 1;
+const previousStep = hasPrevious ? stepOrder[currentIndex - 1] : null;
+const nextStep = hasNext ? stepOrder[currentIndex + 1] : null;
+---
+
+<form
+  method="get"
+  action={currentStepId === 'review' ? `${stepHrefBase}?step=success` : stepHrefBase}
+  class="flex flex-col gap-5"
+  aria-label={labels.shippingHeading}
+>
+  {/* ─── Step 1: Shipping ─────────────────────────────────────────── */}
+  <fieldset
+    class:list={[
+      'flex flex-col gap-4 rounded-2xl border bg-white p-7 shadow-sm',
+      currentStepId === 'shipping' ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]' : 'border-slate-200',
+    ]}
+    hidden={currentStepId !== 'shipping'}
+    aria-labelledby="v3-step1-legend"
+  >
+    <legend id="v3-step1-legend" class="px-1 text-xl font-bold text-slate-900">
+      {labels.shippingHeading}
+    </legend>
+    <CheckoutShippingStepV3 labels={labels.shipping} />
+  </fieldset>
+
+  {/* ─── Step 2: Payment ──────────────────────────────────────────── */}
+  <fieldset
+    class:list={[
+      'flex flex-col gap-5 rounded-2xl border bg-white p-7 shadow-sm',
+      currentStepId === 'payment' ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]' : 'border-slate-200',
+    ]}
+    hidden={currentStepId !== 'payment'}
+    aria-labelledby="v3-step2-legend"
+  >
+    <legend id="v3-step2-legend" class="px-1 text-xl font-bold text-slate-900">
+      {labels.paymentHeading}
+    </legend>
+    <CheckoutPaymentStepV3 labels={labels.payment} />
+  </fieldset>
+
+  {/* ─── Step 3: Review ───────────────────────────────────────────── */}
+  <fieldset
+    class:list={[
+      'flex flex-col gap-5 rounded-2xl border bg-white p-7 shadow-sm',
+      currentStepId === 'review' ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]' : 'border-slate-200',
+    ]}
+    hidden={currentStepId !== 'review'}
+    aria-labelledby="v3-step3-legend"
+  >
+    <legend id="v3-step3-legend" class="px-1 text-xl font-bold text-slate-900">
+      {labels.reviewHeading}
+    </legend>
+    <p class="text-sm text-slate-500">{labels.reviewHint}</p>
+    <CheckoutReviewStepV3 labels={labels.review} items={items} currencyCode={currencyCode} />
+  </fieldset>
+
+  {/* ─── Step nav (Anterior / Siguiente) ─────────────────────────── */}
+  <div class="mt-2 flex items-center justify-between gap-3">
+    {hasPrevious && previousStep !== null ? (
+      <a
+        href={hrefFor(previousStep)}
+        class="inline-flex h-11 items-center rounded-lg border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2"
+      >
+        ← {labels.previous}
+      </a>
+    ) : (
+      <span aria-hidden="true"></span>
+    )}
+
+    {hasNext && nextStep !== null ? (
+      <a
+        href={hrefFor(nextStep)}
+        class="inline-flex h-11 items-center rounded-lg bg-[var(--primary,#2D9D8E)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2"
+      >
+        {labels.next} →
+      </a>
+    ) : (
+      <button
+        type="submit"
+        class="inline-flex h-11 items-center rounded-lg bg-[var(--primary,#2D9D8E)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2"
+      >
+        {labels.placeOrder}
+      </button>
+    )}
+  </div>
+</form>
