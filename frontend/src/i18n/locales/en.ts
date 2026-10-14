@@ -1063,6 +1063,16 @@ const en: Translations = {
   'account.dashboard.recentOrdersTable.column.date': 'Date',
   'account.dashboard.recentOrdersTable.column.total': 'Total',
 
+  // ─── account: dashboard v3 (alternate KPI set, Bonfire adaptation) ───
+  'account.dashboard.v3.kpi.orders': 'Active orders',
+  'account.dashboard.v3.kpi.rfqs': 'Quotes',
+  'account.dashboard.v3.kpi.spent': 'Spent (month)',
+  'account.dashboard.v3.kpi.favorites': 'Favorites',
+  'account.dashboard.v3.quickActions.heading': 'Quick actions',
+  'account.dashboard.v3.recentOrders.heading': 'Recent orders',
+  'account.dashboard.v3.recentOrders.viewAll': 'View all',
+  'account.dashboard.v3.recentOrders.empty': 'You have no orders yet.',
+
   // ─── account: dashboard order status pills ──────────────────
   'account.orderStatus.pending': 'Pending',
   'account.orderStatus.processing': 'Processing',
