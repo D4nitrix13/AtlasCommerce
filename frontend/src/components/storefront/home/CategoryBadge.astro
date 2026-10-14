@@ -1,0 +1,37 @@
+---
+/**
+ * CategoryBadge — chip decorativo para cards de categorías.
+ *
+ * Replica los badges "Popular", "New" y "Eco-friendly" que Bonfire
+ * muestra en las cards del grid "Explore our most popular custom
+ * products". Posicionado absoluto top-left de la card.
+ *
+ * Empty-safe: si `label` es undefined o vacío, el badge no se renderiza.
+ *
+ * API:
+ *   - label: texto del badge (ej. "Popular", "Nuevo", "Eco-friendly").
+ *   - tone: paleta de color — 'emerald' (verde teal) o 'slate' (gris).
+ *     El default 'emerald' emula los pills de Bonfire.
+ */
+interface Props {
+  label?: string;
+  tone?: 'emerald' | 'slate' | 'amber';
+  class?: string;
+}
+
+const { label, tone = 'emerald', class: className = '' } = Astro.props;
+
+const toneClasses: Record<NonNullable<Props['tone']>, string> = {
+  emerald: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  slate: 'border-slate-200 bg-slate-50 text-slate-700',
+  amber: 'border-amber-200 bg-amber-50 text-amber-800',
+};
+---
+
+{label && label.trim() !== '' && (
+  <span
+    class={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide shadow-sm ${toneClasses[tone]} ${className}`}
+  >
+    {label}
+  </span>
+)}

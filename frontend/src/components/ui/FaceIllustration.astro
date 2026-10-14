@@ -1,0 +1,112 @@
+---
+/**
+ * FaceIllustration — primitive SVG de persona estilo Bonfire.
+ *
+ * Replica las 4 ilustraciones de cara que Bonfire usa en la sección
+ * "Trusted by millions of happy customers, from creators to
+ * nonprofits". Esas ilustraciones son dibujos a mano (línea ~2px, trazo
+ * minimalista) de artistas, creadores, escuelas y ONGs.
+ *
+ * Por qué no copiamos las ilustraciones literales:
+ *   Las ilustraciones de Bonfire tienen copyright implícito. Replicarlas
+ *   pixel-perfect sería plagiarism visual. En vez de eso, creamos
+ *   primitivas SVG minimalistas con la misma energía (cabeza, ojos,
+ *   boca opcional, cuerpo simple) que transmiten la idea sin copiar
+ *   los rasgos. Cada variante es 100% código SVG generado en este
+ *   archivo.
+ *
+ * Cuatro variantes:
+ *   - artist: persona con cabello rizado y expresión creativa.
+ *   - creator: persona con cabello liso y expresión amigable.
+ *   - school: persona con lentes y expresión estudiosa.
+ *   - organizer: persona con cabello recogido y expresión profesional.
+ *
+ * Accesibilidad: aria-hidden porque es decorativa. No se renderiza
+ * texto ni contenido semántico. Las alternativas de Variante se
+ * exponen en el type union para que el caller use `variant="artist"`.
+ */
+export type FaceVariant = 'artist' | 'creator' | 'school' | 'organizer';
+
+interface Props {
+  variant?: FaceVariant;
+  /** Color del trazo. Default: slate-700 de Panda. */
+  color?: string;
+  /** Color de fondo del círculo de la cabeza. */
+  backgroundColor?: string;
+  /** Tamaño en píxeles. */
+  size?: number;
+  /** Rotación en grados. Default: 0. */
+  rotation?: number;
+  class?: string;
+}
+
+const {
+  variant = 'creator',
+  color = '#1F2937',
+  backgroundColor = '#F3F4F6',
+  size = 96,
+  rotation = 0,
+  class: className = '',
+} = Astro.props;
+---
+
+<svg
+  aria-hidden="true"
+  viewBox="0 0 100 100"
+  width={size}
+  height={size}
+  class={`pointer-events-none ${className}`}
+  style={`transform: rotate(${rotation}deg);`}
+  fill="none"
+  stroke={color}
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  {/* Fondo del círculo (cabeza) */}
+  <circle cx="50" cy="40" r="20" fill={backgroundColor} />
+
+  {/* Cuerpo (silueta) */}
+  {variant === 'artist' && (
+    <>
+      {/* Cabello rizado - varios bucles */}
+      <path d="M 30 35 Q 25 25 32 22 Q 38 18 40 25" />
+      <path d="M 70 35 Q 75 25 68 22 Q 62 18 60 25" />
+      <path d="M 32 30 Q 28 22 35 20" />
+      <path d="M 68 30 Q 72 22 65 20" />
+    </>
+  )}
+  {variant === 'creator' && (
+    <>
+      {/* Cabello liso */}
+      <path d="M 32 30 Q 50 22 68 30" />
+      <path d="M 30 38 L 30 45" />
+      <path d="M 70 38 L 70 45" />
+    </>
+  )}
+  {variant === 'school' && (
+    <>
+      {/* Lentes */}
+      <circle cx="43" cy="40" r="5" />
+      <circle cx="57" cy="40" r="5" />
+      <line x1="48" y1="40" x2="52" y2="40" />
+    </>
+  )}
+  {variant === 'organizer' && (
+    <>
+      {/* Cabello recogido - moño arriba */}
+      <circle cx="50" cy="22" r="3" fill={color} />
+      <path d="M 30 32 Q 50 26 70 32" />
+    </>
+  )}
+
+  {/* Ojos - siempre presentes */}
+  <circle cx="43" cy="40" r="1.5" fill={color} />
+  <circle cx="57" cy="40" r="1.5" fill={color} />
+
+  {/* Boca - sonrisa sutil */}
+  <path d="M 44 50 Q 50 53 56 50" />
+
+  {/* Cuerpo (silueta) */}
+  <path d="M 30 100 Q 30 75 50 72 Q 70 75 70 100" fill={backgroundColor} />
+</svg>

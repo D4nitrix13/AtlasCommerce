@@ -1,0 +1,97 @@
+---
+/**
+ * TrustedBy — sección "Empresas que confían" estilo Bonfire.
+ *
+ * Replica la sección "Trusted by millions of happy customers, from
+ * creators to nonprofits" del sitio Bonfire. Compone:
+ *   - H2 centrado.
+ *   - Eyebrow "Lo que dicen nuestros clientes" (opcional).
+ *   - 4 FaceIllustration en una fila horizontal con rotación.
+ *   - MarqueePills de categorías debajo.
+ *
+ * Por qué este componente existe:
+ *   Bonfire usa 4 ilustraciones de personas (artistas, creadores,
+ *   escuelas, ONGs) para humanizar el social proof. La forma más
+ *   honesta de replicar eso en Panda es usar la primitiva
+ *   FaceIllustration con 4 variantes (artist, creator, school,
+ *   organizer) que el componente ya provee. Sin caras reales
+ *   (privacidad + scope safe), con SVG originales.
+ *
+ * Accesibilidad:
+ *   - <section> + aria-labelledby al h2.
+ *   - FaceIllustration y MarqueePills son decorativos (aria-hidden
+ *     en sus primitivas).
+ *   - prefers-reduced-motion detiene el marquee via CSS.
+ */
+import FaceIllustration, { type FaceVariant } from '../ui/FaceIllustration.astro';
+import MarqueePills from './MarqueePills.astro';
+
+export interface Persona {
+  variant: FaceVariant;
+  label: string;
+  rotation?: number;
+}
+
+interface Props {
+  /** Texto del eyebrow superior. Default: "Lo que dicen nuestros clientes". */
+  eyebrow?: string;
+  /** H2 de la sección. */
+  heading: string;
+  /** Sub-heading opcional debajo del H2. */
+  subheading?: string;
+  /** 4 personas a renderizar con FaceIllustration. */
+  personas: readonly Persona[];
+  /** Pills para el marquee inferior (categorías de clientes). */
+  pills: readonly string[];
+  class?: string;
+}
+
+const {
+  eyebrow = 'Lo que dicen nuestros clientes',
+  heading,
+  subheading,
+  personas,
+  pills,
+  class: className = '',
+} = Astro.props;
+---
+
+<section
+  class={`relative overflow-hidden bg-slate-50/60 py-12 sm:py-16 lg:py-20 ${className}`}
+  data-reveal-stagger
+>
+  <div class="mx-auto max-w-5xl px-4 text-center sm:px-6">
+    <p class="mb-2 text-xs font-semibold uppercase tracking-[1.7px] text-slate-500">
+      {eyebrow}
+    </p>
+    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+      {heading}
+    </h2>
+    {subheading && (
+      <p class="mx-auto mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">
+        {subheading}
+      </p>
+    )}
+
+    <ul class="mt-10 flex items-end justify-center gap-4 sm:gap-6 lg:gap-10">
+      {personas.map((persona) => (
+        <li class="flex flex-col items-center gap-3">
+          <FaceIllustration
+            variant={persona.variant}
+            color="#1F2937"
+            backgroundColor="#F3F4F6"
+            size={96}
+            rotation={persona.rotation ?? 0}
+          />
+          <span class="text-sm font-medium text-slate-700">
+            {persona.label}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="mt-12">
+    <MarqueePills items={pills} duration={40} direction="left" />
+  </div>
+</section>
