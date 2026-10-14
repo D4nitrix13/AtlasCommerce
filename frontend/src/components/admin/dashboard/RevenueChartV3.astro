@@ -1,0 +1,166 @@
+---
+/**
+ * RevenueChartV3 — Area chart SVG inline (Bonfire mockup 11).
+ *
+ * Renderiza un line/area chart con SVG puro (sin Chart.js, sin D3).
+ * Replica el SVG del mockup:
+ *   - viewBox 0 0 680 210
+ *   - 4 horizontal grid lines
+ *   - polygon con gradiente para el area
+ *   - polyline con stroke --primary encima del area
+ *   - dots en cada endpoint (`circle` con stroke blanco)
+ *
+ * Datos:
+ *   - `points` es un array de { x, y, label } normalizado al viewBox.
+ *     El caller (composition del page) es responsable de calcular x, y
+ *     y los labels a partir de los valores crudos (e.g. 30 puntos
+ *     para los ultimos 30 dias).
+ *   - `heading` y `subtitle` vienen i18n via props.
+ *
+ * Por que SVG inline y NO Chart.js:
+ *   - IA HANDOFF.md: "Los graficos del admin son SVG inline,
+ *     no librerias". Chart.js pesa ~60KB y requiere canvas — rompe
+ *     el principio de zero-deps para admin SSR.
+ *   - El mockup de Bonfire ES SVG: replicarlo 1:1 sin reescribir
+ *     nos ahorra tiempo y mantiene fidelidad visual.
+ *
+ * Accesibilidad:
+ *   - `<svg role="img" aria-label="...">` describe el chart para
+ *     screen readers (no usamos canvas).
+ *   - Los `<text>` en los ejes SVG son legibles por defecto.
+ *   - `<title>` interno da contexto adicional.
+ */
+interface ChartPoint {
+  /** Posicion x normalizada al viewBox. */
+  x: number;
+  /** Posicion y normalizada al viewBox (eje y invertido: 0=abajo). */
+  y: number;
+  /** Label visible solo si cae en eje X (e.g. '1', '5', '10'). */
+  label?: string;
+}
+
+interface Props {
+  /** Total acumulado en el periodo, formato display (e.g. "$1,42M"). */
+  totalLabel: string;
+  /** Variacion total del periodo vs anterior (e.g. "+22,8%"). */
+  totalDelta: string;
+  /** Heading i18n del chart (e.g. "Ingresos"). */
+  heading: string;
+  /** Subtitulo i18n (e.g. "Ultimos 30 dias - USD"). */
+  subtitle: string;
+  /** Puntos a plotear en el SVG. */
+  points: readonly ChartPoint[];
+  /** IDs unicos para los gradients (evita collision si hay 2 charts). */
+  chartId: string;
+}
+
+const { totalLabel, totalDelta, heading, subtitle, points, chartId } = Astro.props;
+
+const VIEW_WIDTH = 680;
+const VIEW_HEIGHT = 210;
+const GRID_LINES: readonly number[] = [30, 80, 130, 180];
+
+// Construye los strings para el atributo 'points' del SVG.
+// Si el array viene vacio, caemos a un placeholder con una sola linea
+// horizontal centrada (fail-open visual, mejor que string vacio).
+const polylinePoints =
+  points.length === 0
+    ? `0,${VIEW_HEIGHT / 2} ${VIEW_WIDTH},${VIEW_HEIGHT / 2}`
+    : points.map((p) => `${p.x},${p.y}`).join(' ');
+
+// Polygon area: cierra el poligono pegando al eje inferior.
+// "0,210" y "WIDTH,210" cierran el area abajo.
+const polygonPoints =
+  points.length === 0
+    ? `0,${VIEW_HEIGHT} ${VIEW_WIDTH},${VIEW_HEIGHT} ${VIEW_WIDTH},${VIEW_HEIGHT / 2} 0,${VIEW_HEIGHT / 2}`
+    : `0,${VIEW_HEIGHT} 0,${points[0]?.y ?? VIEW_HEIGHT / 2} ${polylinePoints} ${VIEW_WIDTH},${points[points.length - 1]?.y ?? VIEW_HEIGHT / 2} ${VIEW_WIDTH},${VIEW_HEIGHT}`;
+
+// Tomamos 4 puntos representativos para los dots.
+// Distribuidos al inicio, ~25%, ~75% y al final.
+const DOTS_INDICES = (() => {
+  if (points.length === 0) return [] as readonly number[];
+  if (points.length < 4) return points.map((_, i) => i);
+  const last = points.length - 1;
+  return [0, Math.round(last * 0.33), Math.round(last * 0.66), last];
+})();
+---
+
+<section
+  aria-labelledby={`${chartId}-heading`}
+  class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7"
+>
+  <div class="mb-6 flex items-start justify-between gap-4">
+    <div>
+      <h2 id={`${chartId}-heading`} class="text-lg font-bold text-slate-900 sm:text-xl">
+        {heading}
+      </h2>
+      <p class="mt-1 text-[13px] text-slate-500">{subtitle}</p>
+    </div>
+
+    <div class="flex items-baseline gap-2 text-right">
+      <span class="text-xl font-bold tabular-nums text-slate-900 sm:text-2xl">
+        {totalLabel}
+      </span>
+      <span class="text-[13px] font-semibold text-[var(--primary,#2d9d8e)]">
+        {totalDelta}
+      </span>
+    </div>
+  </div>
+
+  <svg
+    viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+    class="block h-auto w-full"
+    role="img"
+    aria-label={`${heading}: ${totalLabel} ${totalDelta}`}
+  >
+    <title>{heading} — {subtitle}</title>
+
+    <defs>
+      <linearGradient id={`${chartId}-area`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.28"></stop>
+        <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+
+    {
+      GRID_LINES.map((y) => (
+        <line
+          x1="0"
+          y1={y}
+          x2={VIEW_WIDTH}
+          y2={y}
+          stroke="#e5e7eb"
+          stroke-width="1"
+        />
+      ))
+    }
+
+    <polygon points={polygonPoints} fill={`url(#${chartId}-area)`}></polygon>
+
+    <polyline
+      points={polylinePoints}
+      fill="none"
+      stroke="var(--primary)"
+      stroke-width="3"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></polyline>
+
+    {
+      DOTS_INDICES.map((i) => {
+        const p = points[i];
+        if (!p) return null;
+        return (
+          <circle
+            cx={p.x}
+            cy={p.y}
+            r="3.5"
+            fill="#ffffff"
+            stroke="var(--primary)"
+            stroke-width="2.5"
+          />
+        );
+      })
+    }
+  </svg>
+</section>
