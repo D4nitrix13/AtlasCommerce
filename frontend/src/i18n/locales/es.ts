@@ -829,6 +829,23 @@ const es: Translations = {
   'storefront.productDetail.related.heading': 'También te puede interesar',
   'storefront.productDetail.related.empty': 'Sin productos relacionados.',
 
+  // ─── storefront: product detail v3 (Bonfire mockup 05) ──────────────
+  'storefront.products.detail.v3.breadcrumb': 'Productos',
+  'storefront.products.detail.v3.rating': 'valoraciones',
+  'storefront.products.detail.v3.size': 'Talla',
+  'storefront.products.detail.v3.color': 'Color',
+  'storefront.products.detail.v3.quantity': 'Cantidad',
+  'storefront.products.detail.v3.addToCart': 'Agregar al carrito',
+  'storefront.products.detail.v3.buyNow': 'Comprar ahora',
+  'storefront.products.detail.v3.shipping': 'Envío gratis',
+  'storefront.products.detail.v3.returns': 'Devolución 30 días',
+  'storefront.products.detail.v3.warranty': 'Garantía de calidad',
+  'storefront.products.detail.v3.tab.description': 'Descripción',
+  'storefront.products.detail.v3.tab.specs': 'Especificaciones',
+  'storefront.products.detail.v3.tab.shipping': 'Envío y devoluciones',
+  'storefront.products.detail.v3.related': 'Productos relacionados',
+  'storefront.products.detail.v3.outOfStock': 'Sin stock',
+
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   'storefront.checkout.title': 'Finalizar compra',
   'storefront.checkout.subtitle': 'Completá los pasos para confirmar tu pedido.',

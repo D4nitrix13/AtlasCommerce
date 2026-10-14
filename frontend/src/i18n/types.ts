@@ -1463,6 +1463,23 @@ export type TranslationKey =
   | 'storefront.productDetail.related.heading'
   | 'storefront.productDetail.related.empty'
 
+  // ─── storefront: product detail v3 (Bonfire mockup 05) ──────────────
+  | 'storefront.products.detail.v3.breadcrumb'
+  | 'storefront.products.detail.v3.rating'
+  | 'storefront.products.detail.v3.size'
+  | 'storefront.products.detail.v3.color'
+  | 'storefront.products.detail.v3.quantity'
+  | 'storefront.products.detail.v3.addToCart'
+  | 'storefront.products.detail.v3.buyNow'
+  | 'storefront.products.detail.v3.shipping'
+  | 'storefront.products.detail.v3.returns'
+  | 'storefront.products.detail.v3.warranty'
+  | 'storefront.products.detail.v3.tab.description'
+  | 'storefront.products.detail.v3.tab.specs'
+  | 'storefront.products.detail.v3.tab.shipping'
+  | 'storefront.products.detail.v3.related'
+  | 'storefront.products.detail.v3.outOfStock'
+
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   | 'storefront.checkout.title'
   | 'storefront.checkout.subtitle'

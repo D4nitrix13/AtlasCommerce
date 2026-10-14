@@ -826,6 +826,23 @@ const en: Translations = {
   'storefront.productDetail.related.heading': 'You may also like',
   'storefront.productDetail.related.empty': 'No related products.',
 
+  // ─── storefront: product detail v3 (Bonfire mockup 05) ──────────────
+  'storefront.products.detail.v3.breadcrumb': 'Products',
+  'storefront.products.detail.v3.rating': 'reviews',
+  'storefront.products.detail.v3.size': 'Size',
+  'storefront.products.detail.v3.color': 'Color',
+  'storefront.products.detail.v3.quantity': 'Quantity',
+  'storefront.products.detail.v3.addToCart': 'Add to cart',
+  'storefront.products.detail.v3.buyNow': 'Buy now',
+  'storefront.products.detail.v3.shipping': 'Free shipping',
+  'storefront.products.detail.v3.returns': '30-day returns',
+  'storefront.products.detail.v3.warranty': 'Quality guarantee',
+  'storefront.products.detail.v3.tab.description': 'Description',
+  'storefront.products.detail.v3.tab.specs': 'Specifications',
+  'storefront.products.detail.v3.tab.shipping': 'Shipping and returns',
+  'storefront.products.detail.v3.related': 'Related products',
+  'storefront.products.detail.v3.outOfStock': 'Out of stock',
+
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   'storefront.checkout.title': 'Checkout',
   'storefront.checkout.subtitle': 'Complete the steps to confirm your order.',
