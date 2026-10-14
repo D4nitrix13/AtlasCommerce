@@ -1,0 +1,136 @@
+---
+/**
+ * CategoryDonutV3 — Donut chart SVG inline (Bonfire mockup 11).
+ *
+ * Renderiza un donut con segmentos via `stroke-dasharray` sobre SVG puro
+ * (sin Chart.js, sin D3). Replica el donut del mockup 11 con 4 segmentos
+ * (Playeras / Hoodies / Gorras / Accesorios) y leyenda lateral.
+ *
+ * Por que SVG inline y NO Chart.js:
+ *   - IA HANDOFF.md: "Los graficos del admin son SVG inline,
+ *     no librerias". Mismo razon que RevenueChartV3.
+ *   - El donut del mockup es un SVG con `stroke-dasharray` —
+ *     trivial de reproducir. Chart.js agregaria ~60KB por esto.
+ *
+ * Accesibilidad:
+ *   - `<svg role="img" aria-label="...">` describe el chart.
+ *   - La leyenda usa `<ul>/<li>` semanticos con `<dl>` interno
+ *     para termino/definicion (label / percent).
+ *   - El `<title>` interno da contexto adicional.
+ *
+ * i18n: las categorias vienen via `CategoryLabelKey` que el caller
+ * traduce antes de pasarlas al componente (mantiene al componente
+ * libre de dependencias de `getServerDictionary`).
+ */
+
+interface CategoryItem {
+  /** Valor numerico del segmento (e.g. 42 = 42%). */
+  value: number;
+  /** Color hexadecimal del segmento. */
+  color: string;
+  /** Etiqueta i18n (e.g. "Playeras"). */
+  label: string;
+}
+
+interface Props {
+  /** Heading i18n del chart (e.g. "Ventas por categoria"). */
+  heading: string;
+  /** Subtitulo i18n (e.g. "Por unidades vendidas"). */
+  subtitle: string;
+  /** Categorias con su porcentaje y color. */
+  categories: readonly CategoryItem[];
+  /** ID unico para el chart (evita colision con otros SVGs). */
+  chartId: string;
+}
+
+const { heading, subtitle, categories, chartId } = Astro.props;
+
+// Geometria del donut: radio 57, stroke-width 18, circumference = 2*PI*57.
+// Cada segmento se dibuja con stroke-dasharray="<largoSegmento> <resto>".
+const RADIUS = 57;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+// Rotacion acumulada desde 0 (la primera categoria empieza arriba
+// gracias al `transform="rotate(-90 ...)"` que aplicamos en el JSX).
+let runningOffset = 0;
+
+const segments = categories.map((cat) => {
+  const value = Math.max(0, cat.value);
+  const arcLength = (value / 100) * CIRCUMFERENCE;
+  const dashArray = `${arcLength.toFixed(2)} ${(CIRCUMFERENCE - arcLength).toFixed(2)}`;
+  // dashOffset desplaza el inicio del trazo. Negativo = corre en sentido
+  // horario (recordar: SVG y crece hacia abajo).
+  const dashOffset = -runningOffset;
+  runningOffset += arcLength;
+  return {
+    ...cat,
+    dashArray,
+    dashOffset,
+    arcLength,
+  };
+});
+
+const SVG_CENTER = 66;
+---
+
+<section
+  aria-labelledby={`${chartId}-heading`}
+  class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 sm:p-7"
+>
+  <header class="mb-4">
+    <h2 id={`${chartId}-heading`} class="text-lg font-bold text-slate-900 sm:text-xl">
+      {heading}
+    </h2>
+    <p class="mt-1 text-[13px] text-slate-500">{subtitle}</p>
+  </header>
+
+  <div class="flex flex-1 items-center gap-4 sm:gap-6">
+    <svg
+      viewBox="0 0 132 132"
+      width="132"
+      height="132"
+      class="shrink-0"
+      role="img"
+      aria-label={`${heading}: ${categories
+        .map((c) => `${c.label} ${c.value}%`)
+        .join(', ')}`}
+    >
+      <title>{heading}</title>
+
+      {
+        segments.map((seg) => (
+          <circle
+            cx={SVG_CENTER}
+            cy={SVG_CENTER}
+            r={RADIUS}
+            fill="none"
+            stroke={seg.color}
+            stroke-width="18"
+            stroke-dasharray={seg.dashArray}
+            stroke-dashoffset={seg.dashOffset}
+            transform={`rotate(-90 ${SVG_CENTER} ${SVG_CENTER})`}
+            stroke-linecap="butt"
+          />
+        ))
+      }
+    </svg>
+
+    <dl class="flex-1 space-y-3 text-sm">
+      {
+        segments.map((seg) => (
+          <div class="flex items-center justify-between gap-2">
+            <dt class="flex min-w-0 items-center gap-2">
+              <span
+                class="h-3 w-3 shrink-0 rounded-sm"
+                style={`background:${seg.color}`}
+                aria-hidden="true"
+              />
+              <span class="truncate text-slate-600">{seg.label}</span>
+            </dt>
+            <dd class="font-bold tabular-nums text-slate-900">{seg.value}%</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
