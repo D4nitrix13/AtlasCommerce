@@ -15,6 +15,7 @@
 import type { StoreBrand } from '../../../config/stores';
 import StorefrontFooterNav from './StorefrontFooterNav.astro';
 import StorefrontFooterLegal from './StorefrontFooterLegal.astro';
+import SocialIcon from './SocialIcon.astro';
 
 interface FooterLink {
   labelKey:
@@ -65,7 +66,7 @@ const navLinks = links ?? defaultLinks;
       </div>
 
       {/* Columna 3: contacto + locale */}
-      <div class="flex flex-col gap-2 md:items-end md:text-right">
+      <div class="flex flex-col gap-3 md:items-end md:text-right">
         {brand.supportEmail && (
           <a
             href={`mailto:${brand.supportEmail}`}
@@ -77,6 +78,11 @@ const navLinks = links ?? defaultLinks;
         <p class="text-xs uppercase tracking-wide text-slate-500">
           {locale === 'es' ? 'Español' : 'English'}
         </p>
+        <div class="flex items-center gap-2 md:justify-end" aria-label="Redes sociales">
+          <SocialIcon variant="facebook" href="https://facebook.com/pandaestampados" />
+          <SocialIcon variant="instagram" href="https://instagram.com/pandaestampados" />
+          <SocialIcon variant="tiktok" href="https://tiktok.com/@pandaestampados" />
+        </div>
       </div>
     </div>
 

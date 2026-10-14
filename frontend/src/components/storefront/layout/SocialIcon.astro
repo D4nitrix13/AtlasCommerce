@@ -1,0 +1,74 @@
+---
+/**
+ * SocialIcon — primitive de iconos sociales SVG inline.
+ *
+ * Replica los iconos que Bonfire muestra en su footer. Las redes
+ * cubiertas son las que el cliente (Panda Estampados) más usa:
+ * Facebook, Instagram, TikTok. SVG inline sin dependencias externas.
+ *
+ * El color del icono se controla con `currentColor` y se setea via
+ * Tailwind al `var(--primary)` del theme activo (Panda teal, Kitsune
+ * violeta, etc.). Esto hace que los iconos se integren con la paleta
+ * del tenant en lugar de usar los colores oficiales de cada red
+ * (que rompen la coherencia visual del storefront).
+ *
+ * Accesibilidad:
+ *   - aria-label en el link con la red social.
+ *   - aria-hidden en el SVG.
+ *   - focus-visible ring con var(--primary).
+ */
+export type SocialVariant = 'facebook' | 'instagram' | 'tiktok';
+
+interface Props {
+  variant: SocialVariant;
+  href: string;
+  /** Tamaño en píxeles. Default: 20. */
+  size?: number;
+  /** Etiqueta accesible. Default: nombre legible de la red. */
+  label?: string;
+  class?: string;
+}
+
+const {
+  variant,
+  href,
+  size = 20,
+  label,
+  class: className = '',
+} = Astro.props;
+
+const defaultLabels: Record<SocialVariant, string> = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+};
+
+const ariaLabel = label ?? defaultLabels[variant];
+---
+
+<a
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={ariaLabel}
+  class={`inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition hover:bg-[var(--primary,#475569)] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 ${className}`}
+>
+  <svg
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    {variant === 'facebook' && (
+      <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z" />
+    )}
+    {variant === 'instagram' && (
+      <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.82.86 1.04 1.38.9.42.9.96.55 1.06 1.06.61 1.22 1.45 1.43 2.34 1.49 3.42 1.49 7.66 1.49 7.66s0 4.24-.15 5.7c-.07.66-.25 1.1-.55 1.46-.3.36-.65.66-1.04.86-.42.2-1.06.4-1.38.55-.43.15-1.06.36-1.65.36-1.27.04-1.65.04-4.85.04s-3.58 0-4.85-.04c-.59 0-1.22-.21-1.65-.36-.32-.15-.65-.36-1.04-.86-.3-.36-.48-.8-.55-1.46C2.17 15.58 2.17 12 2.17 12s0-3.58.01-4.85c.07-1.27.25-1.9.41-2.33.22-.56.48-.96.9-1.38.42-.42.82-.82 1.38-1.04.43-.16 1.06-.36 1.65-.41 1.27-.06 1.65-.07 4.85-.07zm0 1.62c-3.15 0-3.5.01-4.74.07-1.07.05-1.65.23-2.04.43-.49.25-.86.55-1.24.93-.39.39-.68.75-.93 1.24-.2.97-.38 1.55-.43 1.24-.06 1.59-.07 4.74-.07s3.5.01 4.74.07c.96.05 1.55.23 2.04.43.38.18.75.55 1.24.93.18.18.55.55.93 1.24.2.39.23.97.38 1.55.43 1.24.06 1.59.07 4.74.07zm0 13.06c2.78 0 5.04-2.26 5.04-5.04S14.78 6.76 12 6.76 6.96 9.02 6.96 11.8 9.22 13.84zm0-8.5c-1.91 0-3.46 1.55-3.46 3.46s1.55 3.46 3.46 3.46 3.46-1.55 3.46-3.46-1.55-3.46-3.46-3.46zm5.6-3.62c0-.51-.41-.92-.92-.92s-.92.41-.92.92.41.92.92.92.92-.41.92-.92z" />
+    )}
+    {variant === 'tiktok' && (
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.1z" />
+    )}
+  </svg>
+</a>
