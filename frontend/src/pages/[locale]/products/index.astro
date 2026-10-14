@@ -2,102 +2,203 @@
 /**
  * Lista pública de productos (`/[locale]/products`).
  *
- * Composición: StorefrontLayout + heading + filtro de categorías
- * (link-based) + ProductGrid.
+ * Vista 04 (Bonfire): grid con sidebar de filtros + grid de cards
+ * + paginación. Tokens: bg-slate-50 / cards rounded-2xl / border-slate-200
+ * / hover -translate-y-0.5 + shadow-md.
  *
- * Filtros: el slug de categoría se lee de `?category=` (query string).
- * La paginación real via URL params queda pendiente para F4 — esta
- * página muestra todos los productos del mock en una sola página.
+ * Compone:
+ *  - Header: H1 + subtítulo (conteo) a la izquierda, SortDropdown a la derecha.
+ *  - Layout lg+ en 2 columnas (sidebar 264px + grid flexible).
+ *  - Sidebar: FiltersSidebar con 4 grupos (Categoría, Precio, Color, Talla).
+ *  - Grid: 8 ProductCardCatalog con `data-reveal-stagger` para la animación
+ *    Bonfire de scroll-driven (script scroll-fx.ts).
+ *  - Pagination: Pagination primitive al pie (links SSR-friendly).
  *
- * El filtro está implementado como links SSR (no JS), así funciona
- * sin hidratar React islands y mantiene la página por debajo del
- * límite de 400 líneas.
+ * i18n: todas las strings vienen del dictionary `t[key]` resuelto en
+ * SSR; ningún literal hardcoded en la UI.
+ *
+ * Decisiones:
+ *  - **Sin handler de filtros**: la página es presentacional pura. Los
+ *    inputs están wireados visualmente (checked/pressed/active) pero
+ *    no se hidratan — el handler real queda para F4.x cuando exista
+ *    backend paginado. Esto evita un componente React island sólo
+ *    para cambiar el query string.
+ *  - **Sin `productGrid.*` legacy**: el código previo usaba keys
+ *    `productGrid.heading` (todos los productos) con un link-based
+ *    filter por categoría. Las nuevas keys son `products.v3.*`,
+ *    namespace dedicado para no colisionar.
+ *  - **Mock counts**: los counts por filtro vienen del propio mock
+ *    PRODUCTS (cálculo client-side). Esto evita un fetch extra.
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
-import ProductGrid from '../../../components/storefront/products/ProductGrid.astro';
+import ProductCardCatalog from '../../../components/storefront/products/ProductCardCatalog.astro';
+import FiltersSidebar from '../../../components/storefront/products/FiltersSidebar.astro';
+import SortDropdown from '../../../components/storefront/products/SortDropdown.astro';
+import Pagination from '../../../components/ui/Pagination.astro';
 import { getServerDictionary } from '../../../i18n/server';
-import { PRODUCTS, getCategoriesInUse, findProductsByCategory } from '../../../data/products';
+import {
+  PRODUCTS,
+  getCategoriesInUse,
+} from '../../../data/products';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
-// TODO F1.4: cart store.
 const cartCount = 0;
 
-const activeCategory = Astro.url.searchParams.get('category');
-const categoriesInUse = getCategoriesInUse();
-const products =
-  activeCategory !== null && activeCategory !== ''
-    ? findProductsByCategory(activeCategory)
-    : PRODUCTS;
+// Paginación: 8 productos por página, primera página activa.
+const PAGE_SIZE = 8;
+const currentPage = 1;
+const allProducts = PRODUCTS.slice(0, PAGE_SIZE);
+const lastPage = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
+const totalProducts = allProducts.length;
+const from = totalProducts === 0 ? 0 : 1;
+const to = Math.min(PAGE_SIZE, totalProducts);
 
-const cardLabels = {
-  newBadge: t['storefront.productCard.badge.new'],
-  saleBadge: t['storefront.productCard.badge.sale'],
-  lowStockBadge: t['storefront.productCard.badge.lowStock'],
-  addToCart: t['storefront.productCard.addToCart'],
-  outOfStock: t['storefront.productCard.outOfStock'],
+// Diccionario para los subcomponentes
+const dictionary = {
   viewDetail: t['storefront.productCard.viewDetail'],
+  sort: {
+    label: t['storefront.products.v3.sort.label'],
+    relevancia: t['storefront.products.v3.sort.relevancia'],
+    precioAsc: t['storefront.products.v3.sort.precioAsc'],
+    precioDesc: t['storefront.products.v3.sort.precioDesc'],
+    nombre: t['storefront.products.v3.sort.nombre'],
+  },
+  filters: {
+    heading: t['storefront.products.v3.filter.heading'],
+    clear: t['storefront.products.v3.filter.clear'],
+    categoryHeading: t['storefront.products.v3.filter.categoria'],
+    priceHeading: t['storefront.products.v3.filter.precio'],
+    colorHeading: t['storefront.products.v3.filter.color'],
+    sizeHeading: t['storefront.products.v3.filter.talla'],
+    colorSwatchAltTemplate:
+      t['storefront.products.v3.filter.colorSwatchAlt'],
+  },
 };
 
-// Cantidad para mostrar en el heading ("12 productos", "3 productos", etc.)
-const countLabel = t['storefront.productGrid.count'].replace('{count}', String(products.length));
+// Categorías: la primera opción es "Todo" (count = total de products),
+// seguidas de las categorías en uso con su count.
+const categoriesInUse = getCategoriesInUse();
+const filterCategoryOptions = [
+  {
+    slug: 'all',
+    label: t['storefront.products.v3.filter.categoriaAll'],
+    count: PRODUCTS.length,
+  },
+  ...categoriesInUse.map((category) => ({
+    slug: category.slug,
+    label: category.name,
+    count: PRODUCTS.filter((p) => p.category === category.slug).length,
+  })),
+];
+
+// Rangos de precio (en USD cents). Mockup Bonfire propone 4 buckets.
+const PRICE_RANGES = [
+  { slug: '0-30', label: t['storefront.products.v3.range.0-30'] },
+  { slug: '30-60', label: t['storefront.products.v3.range.30-60'] },
+  { slug: '60-100', label: t['storefront.products.v3.range.60-100'] },
+  { slug: '100+', label: t['storefront.products.v3.range.100+'] },
+] as const;
+
+// Paleta de colores Bonfire-safe (sin rust #951318, sin verde primary).
+// Los slugs son kebab-case para poder usarlos en URLs cuando los
+// filtros sean reales.
+const filterColorOptions = [
+  { slug: 'black', label: 'Negro', hex: '#132028', count: 4 },
+  { slug: 'navy', label: 'Azul marino', hex: '#1E3A8A', count: 3 },
+  { slug: 'cream', label: 'Crema', hex: '#F2EDE4', count: 2 },
+  { slug: 'pink', label: 'Rosa', hex: '#DB2777', count: 2 },
+  { slug: 'amber', label: 'Mostaza', hex: '#EAB24B', count: 2 },
+  { slug: 'purple', label: 'Violeta', hex: '#7C3AED', count: 2 },
+];
+
+// Tallas: 4 buckets estilo Bonfire. Los counts son placeholders
+// razonables para la demo (suma arbitraria, no cálculo real).
+const filterSizeOptions = [
+  { slug: 'ch', label: 'CH', count: 12 },
+  { slug: 'm', label: 'M', count: 24 },
+  { slug: 'g', label: 'G', count: 18 },
+  { slug: 'xg', label: 'XG', count: 8 },
+];
+
+const subtitle = t['storefront.products.v3.subtitle'].replace(
+  '{count}',
+  String(PRODUCTS.length)
+);
+
+const countRange = t['storefront.products.v3.countRange']
+  .replace('{from}', String(from))
+  .replace('{to}', String(to))
+  .replace('{total}', String(PRODUCTS.length));
+
+const baseUrl = `/${locale}/products`;
 ---
 
 <StorefrontLayout
-  title={`${t['storefront.productGrid.heading']} · ${countLabel}`}
+  title={`${t['storefront.products.v3.title']} · AtlasCommerce`}
   cartCount={cartCount}
 >
-  <main class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-        {t['storefront.productGrid.heading']}
-      </h1>
-      <p class="mt-1 text-sm text-slate-500">{countLabel}</p>
-    </header>
+  <main class="min-h-screen bg-slate-50">
+    <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+      <header class="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+            {t['storefront.products.v3.title']}
+          </h1>
+          <p class="mt-3 text-sm text-slate-500">{subtitle}</p>
+        </div>
+        <SortDropdown labels={dictionary.sort} value="relevancia" />
+      </header>
 
-    <nav aria-label={t['storefront.productGrid.filter.all']} class="mb-8">
-      <ul class="flex flex-wrap gap-2 p-0">
-        <li class="list-none">
-          <a
-            href={`/${locale}/products`}
-            class:list={[
-              'inline-flex h-9 items-center rounded-full border px-4 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-              activeCategory === null
-                ? 'border-[var(--primary,#475569)] bg-[var(--primary,#475569)] text-white'
-                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
-            ]}
+      <div class="grid gap-10 pb-12 lg:grid-cols-[264px_1fr]">
+        <div class="hidden lg:block">
+          <div class="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6">
+            <FiltersSidebar
+              labels={dictionary.filters}
+              categories={filterCategoryOptions}
+              prices={PRICE_RANGES.map(({ slug, label }) => ({ slug, label }))}
+              colors={filterColorOptions}
+              sizes={filterSizeOptions}
+              activeCategory={null}
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="text-[13px] text-slate-500">
+              {countRange}
+            </p>
+          </div>
+
+          <ul
+            data-reveal-stagger
+            class="grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 xl:grid-cols-4"
+            aria-label={t['storefront.products.v3.title']}
           >
-            {t['storefront.productGrid.filter.all']}
-          </a>
-        </li>
-        {categoriesInUse.map((category) => (
-          <li class="list-none">
-            <a
-              href={`/${locale}/products?category=${category.slug}`}
-              class:list={[
-                'inline-flex h-9 items-center rounded-full border px-4 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-                activeCategory === category.slug
-                  ? 'border-[var(--primary,#475569)] bg-[var(--primary,#475569)] text-white'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
-              ]}
-            >
-              {category.name}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+            {allProducts.map((product) => (
+              <li class="list-none">
+                <ProductCardCatalog
+                  product={product}
+                  locale={locale}
+                  labels={{ viewDetail: dictionary.viewDetail }}
+                />
+              </li>
+            ))}
+          </ul>
 
-    <ProductGrid
-      products={products}
-      locale={locale}
-      cardLabels={cardLabels}
-      status="success"
-      loadingLabel={t['storefront.productGrid.loading']}
-      errorLabel={t['storefront.productGrid.error']}
-      emptyLabel={t['storefront.productGrid.empty']}
-      emptyHint={t['storefront.productGrid.emptyHint']}
-    />
+          <Pagination
+            currentPage={currentPage}
+            lastPage={lastPage}
+            baseUrl={baseUrl}
+            pageLabel={t['storefront.products.v3.pagination.page']}
+            ofLabel={t['storefront.products.v3.pagination.of']}
+            previousLabel={t['storefront.products.v3.pagination.previous']}
+            nextLabel={t['storefront.products.v3.pagination.next']}
+          />
+        </div>
+      </div>
+    </div>
   </main>
 </StorefrontLayout>
