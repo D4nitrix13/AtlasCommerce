@@ -1,56 +1,48 @@
 ---
 /**
- * Detalle de producto completo (`/[locale]/products/[slug]`) — F4.2.
+ * Detalle de producto B2C (`/[locale]/products/[slug]`) — v3 Bonfire.
  *
- * Composición Baymard research/product-page (gold standard):
- *  - Gallery (zoom on hover + thumbnails) a la izquierda.
- *  - Info (price, stock, variants, qty, add to cart, wishlist) a la derecha.
- *  - Tabs debajo (description / specs / shipping).
- *  - Reviews section.
- *  - Related products (3) al pie.
- *  - Share buttons (placeholders sociales).
+ * Composición replicada del IA mock 05 (Bonfire-style product detail):
+ *  - Grid 2 columnas: gallery a la izquierda, info a la derecha.
+ *  - Gallery: 1 imagen principal cuadrada + thumbnails 80×80 a la
+ *    izquierda en desktop / abajo en mobile. `data-reveal` activo.
+ *  - Info: breadcrumb categoría, h1 nombre, rating row, precio
+ *    tachado + chip descuento, fieldset talla (pills), fieldset
+ *    color (swatches), qty stepper visual, CTA principal +
+ *    secundario, trust signals (envío / devolución / garantía).
+ *  - Tabs (Descripción / Especificaciones / Envío) usando `<details>`
+ *    nativo — sin JS. `data-reveal` activo.
+ *  - Sección "Productos relacionados" — 4 ProductCard en grid.
  *
- * Variantes modeladas via query param `?attr_color=X&attr_size=Y` y
- * `?qty=N` (progressive enhancement — la página funciona sin JS).
- *
- * Si el slug no matchea, devuelve 404 explícito.
+ * Decisiones:
+ *  - Variantes estáticas (no hay backend de inventario aún) — el
+ *    padre pasa listas hardcoded. Add to cart / Buy now son visuales.
+ *  - Si el slug no matchea, devolvemos 404 (Astro convention).
+ *  - Reusamos `ProductMockup` (shirt variant) como placeholder visual
+ *    mientras no haya CDN de storefront.
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
-import ProductGallery from '../../../components/storefront/products/ProductGallery.astro';
-import ProductInfo from '../../../components/storefront/products/ProductInfo.astro';
-import ProductVariants from '../../../components/storefront/products/ProductVariants.astro';
-import ProductDescription from '../../../components/storefront/products/ProductDescription.astro';
-import ProductReviews from '../../../components/storefront/products/ProductReviews.astro';
-import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
+import ProductDetailGallery from '../../../components/storefront/products/ProductDetailGallery.astro';
+import ProductDetailVariants, {
+  type VariantOption,
+} from '../../../components/storefront/products/ProductDetailVariants.astro';
+import ProductCard from '../../../components/storefront/products/ProductCard.astro';
 import { getServerDictionary } from '../../../i18n/server';
-import { findProductBySlug, CATEGORIES } from '../../../data/products';
-import {
-  SABER_ALTER_DETAIL,
-  RELATED_PRODUCTS,
-  findVariantByAttributes,
-} from '../../../data/product-detail-mock';
+import { findProductBySlug, CATEGORIES, PRODUCTS } from '../../../data/products';
+import { SABER_ALTER_DETAIL } from '../../../data/product-detail-mock';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
-// TODO F4.2: cart store — actualmente demo (placeholder cartCount = 0).
-const cartCount = 0;
-
 const { slug } = Astro.params;
-
-// Por ahora todos los productos apuntan al detail mock "Saber Alter".
-// Cuando el endpoint real exista, el mapper backend → ProductDetailData
-// se hace acá.
 const product = slug !== undefined ? findProductBySlug(slug) : null;
 
 if (product === null) {
   Astro.response.status = 404;
 }
 
-// Variantes + reviews + related del mock. Mapeo basado en el slug:
-// si el slug matchea el producto "saber-alter-figma" del PRODUCTS[0],
-// usamos SABER_ALTER_DETAIL; si no, caemos a un subset mínimo derivado
-// del producto base.
+// Detalle: si el slug matchea el mock Saber Alter, lo usamos; si no,
+// derivamos un subset mínimo del producto base.
 const detail =
   product?.slug === SABER_ALTER_DETAIL.slug
     ? SABER_ALTER_DETAIL
@@ -70,110 +62,68 @@ const detail =
         }
       : null;
 
-// URL parsing para query params (image / tab / qty / attrs).
+// URL parsing (sólo `?image=N` se usa en v3 — variants ya no son por query param).
 const url = new URL(Astro.request.url);
 const selectedImageIndex = Number(url.searchParams.get('image') ?? '0');
-const activeTab = (url.searchParams.get('tab') ?? 'description') as
-  | 'description'
-  | 'specs'
-  | 'shipping';
-const quantityParam = Number(url.searchParams.get('qty') ?? '1');
-const selectedAttrs: Record<string, string> = {};
-for (const [key, value] of url.searchParams.entries()) {
-  if (key.startsWith('attr_')) {
-    selectedAttrs[key.slice(5)] = value;
-  }
-}
 
-// Variant matching
-const matchedVariant =
-  detail !== null ? findVariantByAttributes(detail.variants, selectedAttrs) : null;
+// Hrefs
+const catalogHref = `/${locale}/products`;
+const cartHref = `/${locale}/cart`;
 
-// Effective price/stock considerando variant.
-const effectivePriceCents = matchedVariant?.priceCents ?? detail?.priceCents ?? 0;
-const effectiveCompareAtPriceCents =
-  matchedVariant?.compareAtPriceCents ?? detail?.compareAtPriceCents;
-const effectiveStock = matchedVariant?.stock ?? detail?.stock ?? 0;
-
-// Hrefs base para query state propagation.
-const productDetailBase = `/${locale}/products/${product?.slug ?? ''}`;
-const loginHref = `/${locale}/account/login?redirect=${encodeURIComponent(productDetailBase)}`;
-
-// Category label
+// Categoría label (eyebrow sobre el h1).
 const category =
   product !== null ? (CATEGORIES.find((entry) => entry.slug === product.category) ?? null) : null;
 
-// ─── Labels ──────────────────────────────────────────────────────────
+// ─── Mock variants (estáticos hasta cart store) ──────────────────────
+const SIZE_OPTIONS: readonly VariantOption[] = [
+  { id: 's', label: 'CH' },
+  { id: 'm', label: 'M' },
+  { id: 'l', label: 'G' },
+  { id: 'xl', label: 'XG' },
+];
+
+const COLOR_OPTIONS: readonly VariantOption[] = [
+  { id: 'black', label: 'Negro', hex: '#132028' },
+  { id: 'teal', label: 'Teal', hex: '#2D9D8E' },
+  { id: 'cream', label: 'Crema', hex: '#F2EDE4' },
+  { id: 'wine', label: 'Vino', hex: '#951318' },
+];
+
+const SELECTED_SIZE = 'm';
+const SELECTED_COLOR = 'black';
+
+// ─── Etiquetas i18n ──────────────────────────────────────────────────
 const galleryLabels = {
-  zoomHint: t['storefront.productDetail.gallery.zoomHint'],
-  previousImage: t['storefront.productDetail.gallery.previousImage'],
-  nextImage: t['storefront.productDetail.gallery.nextImage'],
-  thumbAlt: t['storefront.productDetail.gallery.thumbAlt'],
+  mainAlt: product?.name ?? t['storefront.productDetail.notFound'],
+  thumbAlt: (index: number) => t['storefront.productDetail.gallery.thumbAlt'].replace('{index}', String(index)),
+  logoText: product?.name?.split(' ')[0] ?? 'Atlas',
 };
 
 const variantsLabels = {
-  colorLabel: t['storefront.productDetail.variants.colorLabel'],
-  sizeLabel: t['storefront.productDetail.variants.sizeLabel'],
-  colorSwatchAlt: t['storefront.productDetail.variants.colorSwatchAlt'],
-  selectSizeFirst: t['storefront.productDetail.variants.selectSizeFirst'],
-  outOfStockVariant: t['storefront.productDetail.variants.outOfStockVariant'],
+  sizeLegend: t['storefront.products.detail.v3.size'],
+  colorLegend: t['storefront.products.detail.v3.color'],
 };
 
-const infoLabels = {
-  inStock: t['storefront.productDetail.inStock'],
-  outOfStock: t['storefront.productDetail.outOfStock'],
-  onlyLeft: t['storefront.productDetail.onlyLeft'],
-  addToCart: t['storefront.productDetail.addToCart'],
-  addingToCart: t['storefront.productDetail.addingToCart'],
-  addToCartHint: t['storefront.productDetail.addToCartHint'],
-  category: t['storefront.productDetail.category'],
-  badgeNew: t['storefront.productCard.badge.new'],
-  badgeSale: t['storefront.productCard.badge.sale'],
-  badgeLowStock: t['storefront.productCard.badge.lowStock'],
-  quantityLabel: t['storefront.productDetail.quantity.label'],
-  quantityDecrement: t['storefront.productDetail.quantity.decrement'],
-  quantityIncrement: t['storefront.productDetail.quantity.increment'],
-  wishlistAdd: t['storefront.productDetail.wishlist.add'],
-  wishlistAdded: t['storefront.productDetail.wishlist.added'],
-  wishlistRemove: t['storefront.productDetail.wishlist.remove'],
-};
+const priceFormatted = detail ? new Intl.NumberFormat('es-NI', { style: 'currency', currency: detail.currency }).format(detail.priceCents / 100) : '';
+const compareAtFormatted =
+  detail?.compareAtPriceCents !== undefined
+    ? new Intl.NumberFormat('es-NI', { style: 'currency', currency: detail.currency }).format(detail.compareAtPriceCents / 100)
+    : null;
 
-const descriptionLabels = {
-  description: t['storefront.productDetail.tabs.description'],
-  specs: t['storefront.productDetail.tabs.specs'],
-  shipping: t['storefront.productDetail.tabs.shipping'],
-  descriptionEmpty: t['storefront.productDetail.description.empty'],
-  specsHeading: t['storefront.productDetail.specs.heading'],
-  specsSku: t['storefront.productDetail.specs.sku'],
-  specsCategory: t['storefront.productDetail.specs.category'],
-  specsStock: t['storefront.productDetail.specs.stock'],
-  specsWeight: t['storefront.productDetail.specs.weight'],
-  specsDimensions: t['storefront.productDetail.specs.dimensions'],
-  specsMaterial: t['storefront.productDetail.specs.material'],
-  shippingHeading: t['storefront.productDetail.shippingReturns.heading'],
-  shippingReturnsShipping: t['storefront.productDetail.shippingReturns.shipping'],
-  shippingReturnsShippingBody: t['storefront.productDetail.shippingReturns.shippingBody'],
-  shippingReturnsReturns: t['storefront.productDetail.shippingReturns.returns'],
-  shippingReturnsReturnsBody: t['storefront.productDetail.shippingReturns.returnsBody'],
-  shippingReturnsWarranty: t['storefront.productDetail.shippingReturns.warranty'],
-  shippingReturnsWarrantyBody: t['storefront.productDetail.shippingReturns.warrantyBody'],
-};
+const discountPercent =
+  detail?.compareAtPriceCents !== undefined && detail.compareAtPriceCents > detail.priceCents
+    ? Math.round(((detail.compareAtPriceCents - detail.priceCents) / detail.compareAtPriceCents) * 100)
+    : null;
 
-const reviewsLabels = {
-  heading: t['storefront.productDetail.reviews.heading'],
-  average: t['storefront.productDetail.reviews.average'],
-  outOf: t['storefront.productDetail.reviews.outOf'],
-  count: t['storefront.productDetail.reviews.count'],
-  write: t['storefront.productDetail.reviews.write'],
-  viewAll: t['storefront.productDetail.reviews.viewAll'],
-  empty: t['storefront.productDetail.reviews.empty'],
-  verified: t['storefront.productDetail.reviews.verified'],
-  starAlt: t['storefront.productDetail.reviews.starAlt'],
-};
+// Rating mock — en v3 son números hardcoded (no reviews).
+const RATING_AVERAGE = 4.9;
+const RATING_COUNT = 214;
+const STOCK_DISPLAY = detail?.stock ?? 0;
 
-const relatedLabels = {
-  heading: t['storefront.productDetail.related.heading'],
-  empty: t['storefront.productDetail.related.empty'],
+// Products relacionados (4 — uno por categoría presente en PRODUCTS).
+const relatedProducts = PRODUCTS.filter((entry) => entry.id !== product?.id).slice(0, 4);
+
+const cardLabels = {
   newBadge: t['storefront.productCard.badge.new'],
   saleBadge: t['storefront.productCard.badge.sale'],
   lowStockBadge: t['storefront.productCard.badge.lowStock'],
@@ -181,179 +131,324 @@ const relatedLabels = {
   outOfStock: t['storefront.productCard.outOfStock'],
   viewDetail: t['storefront.productCard.viewDetail'],
 };
-
-const catalogHref = `/${locale}/products`;
 ---
 
-<StorefrontLayout
-  title={product?.name ?? t['storefront.productDetail.notFound']}
-  cartCount={cartCount}
->
-  <main class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-    <nav aria-label="breadcrumb" class="mb-6 text-sm">
-      <a
-        href={catalogHref}
-        class="inline-flex items-center gap-1 text-slate-600 transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
-      >
-        <span aria-hidden="true">←</span>
-        {t['storefront.productDetail.breadcrumb']}
-      </a>
-    </nav>
-
-    {product === null && (
-      <section class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-        <h1 class="text-2xl font-bold text-slate-900">{t['storefront.productDetail.notFound']}</h1>
-        <p class="max-w-md text-sm text-slate-500">{t['storefront.productDetail.notFoundHint']}</p>
-        <a
-          href={catalogHref}
-          class="mt-2 inline-flex h-10 items-center rounded-lg bg-[var(--primary,#475569)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)]"
-        >
-          {t['storefront.productDetail.breadcrumb']}
+<StorefrontLayout title={product?.name ?? t['storefront.productDetail.notFound']}>
+  <main class="bg-slate-50">
+    <section class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+      {/* Breadcrumb */}
+      <nav aria-label="breadcrumb" class="mb-8 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+        <a href={catalogHref} class="transition hover:text-slate-700">
+          {t['storefront.products.detail.v3.breadcrumb']}
         </a>
-      </section>
-    )}
+        <span aria-hidden="true">/</span>
+        {category !== null && (
+          <>
+            <a
+              href={`${catalogHref}?category=${category.slug}`}
+              class="transition hover:text-slate-700"
+            >
+              {category.name}
+            </a>
+            <span aria-hidden="true">/</span>
+          </>
+        )}
+        <span class="font-medium text-slate-700">{product?.name ?? ''}</span>
+      </nav>
 
-    {product !== null && detail !== null && (
-      <article class="flex flex-col gap-10">
-        {/* Top section: gallery + info */}
-        <section class="grid gap-8 lg:grid-cols-2">
-          <ProductGallery
-            images={detail.images}
-            productName={product.name}
-            selectedIndex={selectedImageIndex}
-            labels={galleryLabels}
-          />
+      {product === null && (
+        <div class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+          <h1 class="text-2xl font-bold text-slate-900">{t['storefront.productDetail.notFound']}</h1>
+          <p class="max-w-md text-sm text-slate-500">{t['storefront.productDetail.notFoundHint']}</p>
+          <a
+            href={catalogHref}
+            class="mt-2 inline-flex h-10 items-center rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+          >
+            {t['storefront.products.detail.v3.breadcrumb']}
+          </a>
+        </div>
+      )}
 
-          <div class="flex flex-col gap-5">
-            <ProductInfo
-              labels={infoLabels}
-              name={product.name}
-              priceCents={effectivePriceCents}
-              compareAtPriceCents={effectiveCompareAtPriceCents}
-              currencyCode={detail.currency}
-              stock={effectiveStock}
-              badges={detail.badges}
-              categoryLabel={category?.name ?? undefined}
-              hrefBase={productDetailBase}
-              isInWishlist={false}
-              loginHref={loginHref}
-              quantity={quantityParam}
+      {product !== null && detail !== null && (
+        <article class="flex flex-col gap-16">
+          {/* Top section: gallery + info */}
+          <section class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:gap-16">
+            <ProductDetailGallery
+              images={detail.images}
+              productName={product.name}
+              selectedIndex={selectedImageIndex}
+              labels={galleryLabels}
             />
 
-            <ProductVariants
-              attributeGroups={detail.variantAttributes}
-              variants={detail.variants}
-              selected={selectedAttrs}
-              hrefBase={productDetailBase}
-              currencyCode={detail.currency}
-              labels={variantsLabels}
-            />
+            <div class="flex flex-col gap-6">
+              {category !== null && (
+                <p class="text-xs font-bold uppercase tracking-wider text-[var(--primary)]">
+                  {category.name}
+                </p>
+              )}
 
-            {/* Share row (placeholders sociales) */}
-            <div class="flex flex-col gap-2 border-t border-slate-100 pt-4">
-              <span class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                {t['storefront.productDetail.share.heading']}
-              </span>
-              <div class="flex items-center gap-2">
-                <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productDetailBase)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={t['storefront.productDetail.share.facebook']}
-                  class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-                >
+              <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                {product.name}
+              </h1>
+
+              {/* Rating + stock row */}
+              <div class="flex flex-wrap items-center gap-3 text-sm">
+                <span class="inline-flex items-center gap-1 font-bold text-slate-900">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
+                    viewBox="0 0 20 20"
                     fill="currentColor"
-                    class="h-4 w-4"
+                    class="h-4 w-4 text-amber-500"
                     aria-hidden="true"
                   >
-                    <path d="M22 12.073C22 6.51 17.523 2 12 2S2 6.51 2 12.073c0 5.022 3.657 9.184 8.438 9.879v-6.987h-2.54V12.07h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.888h-2.33v6.987C18.343 21.258 22 17.096 22 12.073z" />
+                    <path
+                      d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9 4.7 17.6l1-5.8L1.5 7.7l5.9-.9L10 1.5z"
+                    />
                   </svg>
-                </a>
-                <a
-                  href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(productDetailBase)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={t['storefront.productDetail.share.twitter']}
-                  class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    class="h-4 w-4"
-                    aria-hidden="true"
+                  {RATING_AVERAGE.toFixed(1)}
+                </span>
+                <span class="text-slate-500">
+                  {RATING_COUNT} {t['storefront.products.detail.v3.rating']}
+                </span>
+                <span aria-hidden="true" class="h-1 w-1 rounded-full bg-slate-300"></span>
+                <span class="text-slate-500">
+                  {t['storefront.productDetail.inStock']}: <strong class="text-slate-900">{STOCK_DISPLAY}</strong>
+                </span>
+              </div>
+
+              {/* Price row */}
+              <div class="flex items-baseline gap-3">
+                <span class="text-4xl font-bold tabular-nums text-slate-900">{priceFormatted}</span>
+                {compareAtFormatted !== null && (
+                  <span class="text-lg text-slate-400 tabular-nums line-through">
+                    {compareAtFormatted}
+                  </span>
+                )}
+                {discountPercent !== null && (
+                  <span class="rounded-full bg-[var(--primary-soft)] px-2.5 py-0.5 text-xs font-bold text-[var(--primary)]">
+                    -{discountPercent}%
+                  </span>
+                )}
+              </div>
+
+              {/* Variants */}
+              <ProductDetailVariants
+                type="size"
+                options={SIZE_OPTIONS}
+                selected={SELECTED_SIZE}
+                labels={variantsLabels}
+              />
+
+              <ProductDetailVariants
+                type="color"
+                options={COLOR_OPTIONS}
+                selected={SELECTED_COLOR}
+                labels={variantsLabels}
+              />
+
+              {/* Quantity stepper (visual) */}
+              <div class="flex flex-col gap-2">
+                <span class="text-sm font-bold text-slate-900">
+                  {t['storefront.products.detail.v3.quantity']}
+                </span>
+                <div class="flex items-center gap-4">
+                  <div
+                    class="inline-flex w-fit items-center overflow-hidden rounded-lg border border-slate-200"
+                    role="group"
+                    aria-label={t['storefront.products.detail.v3.quantity']}
                   >
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                </a>
-                <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(productDetailBase)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={t['storefront.productDetail.share.whatsapp']}
-                  class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    class="h-4 w-4"
-                    aria-hidden="true"
-                  >
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                </a>
+                    <button
+                      type="button"
+                      aria-label={t['storefront.productDetail.quantity.decrement']}
+                      class="flex h-12 w-12 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+                    >
+                      <span aria-hidden="true">−</span>
+                    </button>
+                    <span
+                      class="flex h-12 w-14 items-center justify-center border-x border-slate-200 text-base font-bold tabular-nums text-slate-900"
+                      aria-live="polite"
+                    >
+                      1
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={t['storefront.productDetail.quantity.increment']}
+                      class="flex h-12 w-12 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+                    >
+                      <span aria-hidden="true">+</span>
+                    </button>
+                  </div>
+                  <span class="text-xs leading-tight text-slate-500">
+                    Precio unitario<br />
+                    <strong class="text-slate-900">{priceFormatted}</strong>
+                  </span>
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div class="flex flex-col gap-3 sm:flex-row">
                 <button
                   type="button"
-                  disabled
-                  aria-label={t['storefront.productDetail.share.copy']}
-                  class="inline-flex h-9 items-center gap-1 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  class="inline-flex h-12 flex-1 items-center justify-center rounded-lg bg-[var(--primary)] px-6 text-base font-semibold text-white transition hover:bg-[var(--primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
+                  {t['storefront.products.detail.v3.addToCart']}
+                </button>
+                <a
+                  href={cartHref}
+                  class="inline-flex h-12 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-base font-semibold text-slate-900 transition hover:border-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+                >
+                  {t['storefront.products.detail.v3.buyNow']}
+                </a>
+              </div>
+
+              {/* Trust signals */}
+              <ul class="mt-2 flex flex-col gap-3 text-sm text-slate-600">
+                <li class="flex items-start gap-3">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="1.8"
-                    class="h-3.5 w-3.5"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]"
                     aria-hidden="true"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
-                    />
+                    <path d="M5 13l4 4L19 7" />
                   </svg>
-                  {t['storefront.productDetail.share.copy']}
-                </button>
-              </div>
+                  <span>{t['storefront.products.detail.v3.shipping']}</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{t['storefront.products.detail.v3.returns']}</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{t['storefront.products.detail.v3.warranty']}</span>
+                </li>
+              </ul>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Tabs section */}
-        <ProductDescription
-          labels={descriptionLabels}
-          activeTab={activeTab}
-          hrefBase={productDetailBase}
-          description={product.description}
-          specs={detail.specs}
-        />
+          {/* Tabs (native <details>) */}
+          <section class="rounded-2xl border border-slate-200 bg-white p-2 sm:p-4" data-reveal>
+            <details class="group" open>
+              <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-base font-bold text-slate-900">
+                {t['storefront.products.detail.v3.tab.description']}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
+                  aria-hidden="true"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </summary>
+              <div class="pb-5 text-sm leading-relaxed text-slate-600">
+                <p>{detail.description}</p>
+              </div>
+            </details>
 
-        {/* Reviews section */}
-        <ProductReviews
-          labels={reviewsLabels}
-          reviews={detail.reviews}
-          viewAllHref={`${productDetailBase}?tab=reviews`}
-          writeHref={`${productDetailBase}?tab=write`}
-        />
+            <div class="border-t border-slate-100"></div>
 
-        {/* Related products */}
-        <ProductRelated labels={relatedLabels} products={RELATED_PRODUCTS} locale={locale} />
-      </article>
-    )}
+            <details class="group">
+              <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-base font-bold text-slate-900">
+                {t['storefront.products.detail.v3.tab.specs']}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
+                  aria-hidden="true"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </summary>
+              <div class="pb-5 text-sm leading-relaxed text-slate-600">
+                <dl class="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+                  {detail.specs.map((entry) => (
+                    <div class="flex items-baseline justify-between border-b border-slate-100 py-2 last:border-b-0">
+                      <dt class="font-medium text-slate-500">{entry.label}</dt>
+                      <dd class="font-semibold text-slate-900">{entry.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </details>
+
+            <div class="border-t border-slate-100"></div>
+
+            <details class="group">
+              <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-base font-bold text-slate-900">
+                {t['storefront.products.detail.v3.tab.shipping']}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
+                  aria-hidden="true"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </summary>
+              <div class="pb-5 text-sm leading-relaxed text-slate-600">
+                <p>{t['storefront.productDetail.shippingReturns.shippingBody']}</p>
+                <p class="mt-3">{t['storefront.productDetail.shippingReturns.returnsBody']}</p>
+                <p class="mt-3">{t['storefront.productDetail.shippingReturns.warrantyBody']}</p>
+              </div>
+            </details>
+          </section>
+
+          {/* Related products */}
+          {relatedProducts.length > 0 && (
+            <section class="flex flex-col gap-6" data-reveal>
+              <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
+                {t['storefront.products.detail.v3.related']}
+              </h2>
+              <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                {relatedProducts.map((entry) => (
+                  <ProductCard product={entry} locale={locale} labels={cardLabels} />
+                ))}
+              </div>
+            </section>
+          )}
+        </article>
+      )}
+    </section>
   </main>
 </StorefrontLayout>
