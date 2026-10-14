@@ -1,0 +1,117 @@
+---
+/**
+ * ProductCardCatalog — tarjeta de producto para el grid del catálogo
+ * (vista 04 Bonfire).
+ *
+ * Diferencias con `ProductCard.astro` (que sigue siendo la tarjeta del
+ * home y otros listados):
+ *
+ *  - **Imagen = ProductMockup**: usa el primitive SVG de UI con cuatro
+ *    variantes (shirt / hoodie / mug / hat). El mockup Bonfire no
+ *    necesita fotos reales: siluetas estampadas con el color del
+ *    tenant vía `--primary`.
+ *  - **Aspect 4/5** (rectangular vertical) en vez del cuadrado 1:1 que
+ *    usa ProductCard: las cards del catálogo Bonfire son más altas,
+ *    tipo póster.
+ *  - **Hover Bonfire**: `-translate-y-0.5` + sombra media, no agresivo.
+ *    Radius `rounded-2xl` (16px) — más generoso que `rounded-xl`.
+ *  - **Sin badges / sin add-to-cart visible**: la card Bonfire sólo
+ *    muestra nombre, hint (descripción corta) y precio. El CTA vive
+ *    en la página de detalle.
+ *
+ * El componente es **presentacional puro** — recibe el `product` ya
+ * resuelto y la `labels` como prop. No conoce i18n: la página que lo
+ * monta (`index.astro`) resuelve `t[key]` y se la pasa. Esto lo hace
+ * testeable sin dictionary y reusable client-side si después se hidrata.
+ */
+import ProductMockup from '../../ui/ProductMockup.astro';
+import { formatCurrency } from '../../../lib/formatters';
+import type { Product } from '../../../types/catalog';
+
+type MockupVariant = 'shirt' | 'hoodie' | 'mug' | 'hat';
+
+export interface ProductCardCatalogLabels {
+  viewDetail: string;
+}
+
+/**
+ * Mapa `slug → variante ProductMockup` para los 12 productos mock.
+ *
+ * Decisión: mapeo explícito por slug (no por categoría) porque las
+ * categorías (figures / manga / accessories) son abstractas — un
+ * "Llavero Demon Slayer" no es una remera. Mantener un mapa permite
+ * que el diseñador ajuste el mockup por producto sin tocar el shape
+ * del backend cuando se cambie `Product.category`.
+ *
+ * Si en el futuro hay >30 productos, esto se reemplaza por un campo
+ * `mockupVariant?: MockupVariant` en `Product`. Hoy no vale la pena.
+ */
+const MOCKUP_BY_SLUG: Record<string, MockupVariant> = {
+  'saber-alter-figma': 'shirt',
+  'nendoroid-zero-two': 'shirt',
+  'chainsaw-man-t1': 'shirt',
+  'spy-x-family-t1': 'shirt',
+  'jujutsu-kaisen-hoodie': 'hoodie',
+  'totoro-plush': 'mug',
+  'evangelion-unit-01': 'shirt',
+  'demon-slayer-keychain': 'hat',
+  'one-piece-vol-1': 'shirt',
+  'attack-on-titan-cap': 'hat',
+  'kakashi-naruto-plush': 'mug',
+  'studio-ghibli-mug': 'mug',
+};
+
+const FALLBACK_VARIANT: MockupVariant = 'shirt';
+
+function resolveMockupVariant(product: Product): MockupVariant {
+  return MOCKUP_BY_SLUG[product.slug] ?? FALLBACK_VARIANT;
+}
+
+interface Props {
+  product: Product;
+  locale: string;
+  labels: ProductCardCatalogLabels;
+}
+
+const { product, locale, labels } = Astro.props;
+
+const detailHref = `/${locale}/products/${product.slug}`;
+const currencyCode = product.currency ?? 'USD';
+const priceFormatted = formatCurrency(product.priceCents, currencyCode);
+const variant = resolveMockupVariant(product);
+---
+
+<a
+  href={detailHref}
+  class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+  aria-label={`${labels.viewDetail}: ${product.name}`}
+>
+  <div
+    class="relative flex aspect-[4/5] items-center justify-center overflow-hidden"
+    style="background: var(--primary-soft, #F1F5F9);"
+  >
+    <span
+      class="block transition-transform duration-500 ease-out group-hover:scale-105"
+    >
+      <ProductMockup
+        variant={variant}
+        logoText={product.name.split(' ')[0]?.slice(0, 8) ?? ''}
+        class="h-44 w-44 sm:h-52 sm:w-52"
+      />
+    </span>
+  </div>
+
+  <div class="flex flex-1 flex-col gap-1.5 p-5">
+    <h3 class="text-[15px] font-bold leading-snug text-slate-900 transition group-hover:text-[var(--primary,#475569)]">
+      {product.name}
+    </h3>
+
+    <p class="line-clamp-1 text-[13px] text-slate-400">{product.description}</p>
+
+    <div class="mt-4 flex items-end justify-between gap-2">
+      <span class="text-lg font-bold text-slate-900">
+        {priceFormatted}
+      </span>
+    </div>
+  </div>
+</a>

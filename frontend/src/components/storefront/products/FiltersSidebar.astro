@@ -1,0 +1,234 @@
+---
+/**
+ * FiltersSidebar — barra de filtros lateral para la página de catálogo.
+ *
+ * Compone los cuatro grupos de filtro que pide el mockup Bonfire (vista
+ * 04): Categoría · Precio · Color · Talla. Es presentacional puro:
+ * recibe las opciones como props (counts, slug, label, etc.) y emite
+ * los cambios vía callbacks. NO interactúa con la URL — esa
+ * responsabilidad queda en la página (`index.astro`).
+ *
+ * Decisiones:
+ *  - **Categorías y precios**: checkboxes nativos con label a la derecha
+ *    + count a la derecha (`<label>` wrappea el input → click-anywhere).
+ *    Accesible por defecto, sin JS.
+ *  - **Colores**: swatches (botones redondos con color de fondo). El
+ *    activamiento es visual (anillo primary) — sin toggle de estado
+ *    real hasta que la página lo conecte.
+ *  - **Talla**: botones cuadrados (`w-11 h-11`) estilo chip. Aislados
+ *    con `role="group"` para lectores de pantalla.
+ *  - **Sin animaciones costosas**: el sidebar es siempre visible a
+ *    partir de `lg`. En mobile, la página debería esconderlo tras
+ *    un toggle (`<details>` o hamburger); por ahora lo dejamos en
+ *    `hidden lg:block` desde el caller para mantener este componente
+ *    agnóstico al contexto responsive.
+ *
+ * Layout: una `<aside>` con `<h2>` "Filtros" + botón "Limpiar", seguido
+ * de 4 grupos envueltos en `<section aria-labelledby="...">`.
+ */
+export interface CategoryFilterOption {
+  slug: string;
+  label: string;
+  count: number;
+}
+
+export interface PriceFilterOption {
+  slug: string;
+  label: string;
+}
+
+export interface ColorFilterOption {
+  slug: string;
+  label: string;
+  hex: string;
+  count: number;
+}
+
+export interface SizeFilterOption {
+  slug: string;
+  label: string;
+  count: number;
+}
+
+export interface FiltersSidebarLabels {
+  heading: string;
+  clear: string;
+  categoryHeading: string;
+  priceHeading: string;
+  colorHeading: string;
+  sizeHeading: string;
+  colorSwatchAltTemplate: string;
+}
+
+interface Props {
+  labels: FiltersSidebarLabels;
+  categories: readonly CategoryFilterOption[];
+  prices: readonly PriceFilterOption[];
+  colors: readonly ColorFilterOption[];
+  sizes: readonly SizeFilterOption[];
+  /** Slugs actualmente activos (categoría). */
+  activeCategory?: string | null;
+  /** Slugs actualmente activos (precio). */
+  activePrice?: string | null;
+  /** Slugs actualmente activos (color). */
+  activeColors?: readonly string[];
+  /** Slugs actualmente activos (talla). */
+  activeSizes?: readonly string[];
+}
+
+const {
+  labels,
+  categories,
+  prices,
+  colors,
+  sizes,
+  activeCategory = null,
+  activePrice = null,
+  activeColors = [],
+  activeSizes = [],
+} = Astro.props;
+
+const isCategoryActive = (slug: string): boolean => activeCategory === slug;
+const isPriceActive = (slug: string): boolean => activePrice === slug;
+const isColorActive = (slug: string): boolean => activeColors.includes(slug);
+const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
+---
+
+<aside class="flex flex-col gap-6" aria-label={labels.heading}>
+  <header class="flex items-center justify-between">
+    <h2 class="text-xl font-bold text-slate-900">{labels.heading}</h2>
+    <button
+      type="button"
+      class="text-[13px] font-semibold text-[var(--primary,#475569)] transition hover:underline focus:outline-none focus-visible:underline"
+    >
+      {labels.clear}
+    </button>
+  </header>
+
+  <section
+    aria-labelledby="filter-category-heading"
+    class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
+  >
+    <h3
+      id="filter-category-heading"
+      class="text-sm font-bold text-slate-900"
+    >
+      {labels.categoryHeading}
+    </h3>
+    <ul class="flex flex-col gap-2.5">
+      {categories.map((category) => (
+        <li>
+          <label
+            class:list={[
+              'flex cursor-pointer items-center gap-2.5 text-sm transition hover:text-slate-900',
+              isCategoryActive(category.slug)
+                ? 'font-semibold text-slate-900'
+                : 'text-slate-600',
+            ]}
+          >
+            <input
+              type="radio"
+              name="filter-category"
+              value={category.slug}
+              checked={isCategoryActive(category.slug)}
+              class="h-4 w-4 cursor-pointer accent-[var(--primary,#475569)]"
+            />
+            <span class="flex-1">{category.label}</span>
+            <span class="text-[13px] text-slate-400">{category.count}</span>
+          </label>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section
+    aria-labelledby="filter-price-heading"
+    class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
+  >
+    <h3
+      id="filter-price-heading"
+      class="text-sm font-bold text-slate-900"
+    >
+      {labels.priceHeading}
+    </h3>
+    <ul class="flex flex-col gap-2.5">
+      {prices.map((price) => (
+        <li>
+          <label
+            class:list={[
+              'flex cursor-pointer items-center gap-2.5 text-sm transition hover:text-slate-900',
+              isPriceActive(price.slug)
+                ? 'font-semibold text-slate-900'
+                : 'text-slate-600',
+            ]}
+          >
+            <input
+              type="radio"
+              name="filter-price"
+              value={price.slug}
+              checked={isPriceActive(price.slug)}
+              class="h-4 w-4 cursor-pointer accent-[var(--primary,#475569)]"
+            />
+            <span class="flex-1">{price.label}</span>
+          </label>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section
+    aria-labelledby="filter-color-heading"
+    class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
+  >
+    <h3
+      id="filter-color-heading"
+      class="text-sm font-bold text-slate-900"
+    >
+      {labels.colorHeading}
+    </h3>
+    <div role="group" aria-label={labels.colorHeading} class="flex flex-wrap gap-2">
+      {colors.map((color) => (
+        <button
+          type="button"
+          aria-label={labels.colorSwatchAltTemplate.replace('{name}', color.label)}
+          aria-pressed={isColorActive(color.slug)}
+          class:list={[
+            'h-8 w-8 rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            isColorActive(color.slug)
+              ? 'ring-2 ring-[var(--primary,#475569)] ring-offset-2'
+              : 'hover:scale-110',
+          ]}
+          style={`background:${color.hex};box-shadow:inset 0 0 0 1px rgba(0,0,0,.10);`}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section
+    aria-labelledby="filter-size-heading"
+    class="flex flex-col gap-3 pb-2"
+  >
+    <h3
+      id="filter-size-heading"
+      class="text-sm font-bold text-slate-900"
+    >
+      {labels.sizeHeading}
+    </h3>
+    <div role="group" aria-label={labels.sizeHeading} class="flex flex-wrap gap-2">
+      {sizes.map((size) => (
+        <button
+          type="button"
+          aria-pressed={isSizeActive(size.slug)}
+          class:list={[
+            'inline-flex h-11 w-11 items-center justify-center rounded-xl text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            isSizeActive(size.slug)
+              ? 'border border-[var(--primary,#475569)] bg-[var(--primary-soft,#F1F5F9)] text-[var(--primary,#475569)]'
+              : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900',
+          ]}
+        >
+          {size.label}
+        </button>
+      ))}
+    </div>
+  </section>
+</aside>
