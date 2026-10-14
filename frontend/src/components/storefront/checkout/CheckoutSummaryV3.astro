@@ -1,0 +1,181 @@
+---
+/**
+ * CheckoutSummaryV3 — sticky summary lateral estilo Bonfire.
+ *
+ * V3 replica el IA mockup `09-checkup.html`:
+ *  - Aside sticky con items (thumb + qty + precio line) + desglose
+ *    (subtotal · envío · impuestos · total) + CTA full-width.
+ *  - Single source of truth: este componente NO recalcula totales.
+ *    Recibe subtotalCents / shippingCents / taxCents pre-computados
+ *    (esperaríamos del backend cuando exista).
+ *  - Sin slot `trust` (las trust badges viven en la columna izquierda
+ *    o se omiten según el layout Bonfire). El mockup sólo tiene el
+ *    texto "Al continuar aceptás los términos de compra".
+ *  - "Envío" se muestra con `--primary` cuando es gratis (mockup usa
+ *    el color del brand para destacar el ahorro).
+ *
+ * Accesibilidad:
+ *  - `<aside aria-label>` referencia al heading del bloque.
+ *  - Items listados con `<ul role="list">` y descripción visible.
+ *  - CTA es un `<button type="button">` (no navega todavía).
+ */
+import { formatCurrency } from '../../../lib/formatters';
+
+/** Item mostrado en el resumen (espejo del CartItem). */
+export interface CheckoutSummaryV3Item {
+  id: number;
+  name: string;
+  imageUrl: string;
+  priceCents: number;
+  currency: string;
+  quantity: number;
+}
+
+/** Strings localizadas del summary. */
+export interface CheckoutSummaryV3Labels {
+  summary: string;
+  emptyItems: string;
+  subtotal: string;
+  shippingCost: string;
+  shippingFree: string;
+  tax: string;
+  total: string;
+  cta: string;
+  termsHint: string;
+}
+
+interface Props {
+  items: readonly CheckoutSummaryV3Item[];
+  subtotalCents: number;
+  currencyCode: string;
+  /** `null` = envío aún no calculado. `0` = gratis (label "Gratis"). */
+  shippingCents: number | null;
+  /** Cents. `0` se renderiza; `null` se omite la fila. */
+  taxCents: number | null;
+  labels: CheckoutSummaryV3Labels;
+  /** Href al que navega "Realizar pedido" (placeholder visual). */
+  ctaHref?: string;
+}
+
+const {
+  items,
+  subtotalCents,
+  currencyCode,
+  shippingCents,
+  taxCents,
+  labels,
+  ctaHref = '#',
+} = Astro.props;
+
+const subtotalFormatted = formatCurrency(subtotalCents, currencyCode);
+const shippingDisplay =
+  shippingCents === null
+    ? '—'
+    : shippingCents === 0
+      ? labels.shippingFree
+      : formatCurrency(shippingCents, currencyCode);
+const shippingIsFree = shippingCents === 0;
+const taxFormatted = taxCents !== null ? formatCurrency(taxCents, currencyCode) : null;
+const taxIsFree = taxCents === 0;
+
+const totalCents = Math.max(
+  0,
+  subtotalCents + (shippingCents ?? 0) + (taxCents ?? 0)
+);
+const totalFormatted = formatCurrency(totalCents, currencyCode);
+const totalMajor = totalFormatted.replace(/,[\d]{2}$/, '');
+const totalMinor = (totalFormatted.match(/,(\d{2})$/) ?? [null, ''])[1] ?? '';
+
+const hasItems = items.length > 0;
+---
+
+<aside
+  aria-label={labels.summary}
+  class="flex flex-col gap-6 self-start rounded-2xl border border-slate-200 bg-white p-7 shadow-sm lg:sticky lg:top-24"
+>
+  <h2 class="text-xl font-bold text-slate-900">{labels.summary}</h2>
+
+  {hasItems ? (
+    <ul class="flex list-none flex-col gap-4 border-b border-slate-200 pb-6" role="list">
+      {items.map((item) => {
+        const lineTotal = item.priceCents * item.quantity;
+        const lineFormatted = formatCurrency(lineTotal, currencyCode);
+        return (
+          <li class="flex items-center gap-3">
+            <span class="relative inline-flex h-14 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-slate-100">
+              <img
+                src={item.imageUrl}
+                alt={item.name}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+              <span class="absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--primary,#2D9D8E)] px-1 text-[11px] font-bold text-white">
+                {item.quantity}
+              </span>
+            </span>
+            <span class="flex-1 text-[14px] font-medium leading-snug text-slate-700">{item.name}</span>
+            <span class="text-[14px] font-bold tabular-nums text-slate-900">{lineFormatted}</span>
+          </li>
+        );
+      })}
+    </ul>
+  ) : (
+    <p class="border-b border-slate-200 pb-6 text-sm text-slate-500">{labels.emptyItems}</p>
+  )}
+
+  <dl class="flex flex-col gap-3 text-[14px]">
+    <div class="flex items-center justify-between">
+      <dt class="text-slate-500">{labels.subtotal}</dt>
+      <dd class="font-semibold tabular-nums text-slate-900">{subtotalFormatted}</dd>
+    </div>
+    <div class="flex items-center justify-between">
+      <dt class="text-slate-500">{labels.shippingCost}</dt>
+      <dd
+        class:list={[
+          'font-semibold tabular-nums',
+          shippingIsFree ? 'text-[var(--primary,#2D9D8E)]' : 'text-slate-900',
+        ]}
+      >
+        {shippingDisplay}
+      </dd>
+    </div>
+    {taxFormatted !== null && (
+      <div class="flex items-center justify-between">
+        <dt class="text-slate-500">{labels.tax}</dt>
+        <dd
+          class:list={[
+            'font-semibold tabular-nums',
+            taxIsFree ? 'text-[var(--primary,#2D9D8E)]' : 'text-slate-900',
+          ]}
+        >
+          {taxFormatted}
+        </dd>
+      </div>
+    )}
+  </dl>
+
+  <div class="my-2 h-px bg-slate-200" aria-hidden="true"></div>
+
+  <div class="flex items-baseline justify-between">
+    <span class="text-[15px] font-bold text-slate-900">{labels.total}</span>
+    <span class="text-3xl font-bold tabular-nums text-slate-900">
+      {totalMajor}
+      {totalMinor !== '' && (
+        <span class="text-base font-medium text-slate-400">,{totalMinor}</span>
+      )}
+    </span>
+  </div>
+
+  <a
+    href={ctaHref}
+    class:list={[
+      'mt-2 inline-flex h-12 w-full items-center justify-center rounded-lg px-6 py-3 text-[15px] font-semibold text-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+      'bg-[var(--primary,#2D9D8E)] hover:bg-[var(--primary-hover,#258777)] focus-visible:ring-[var(--primary,#2D9D8E)]',
+    ]}
+  >
+    {labels.cta}
+  </a>
+
+  <p class="text-center text-[12px] text-slate-400">{labels.termsHint}</p>
+</aside>

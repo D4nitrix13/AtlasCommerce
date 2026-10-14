@@ -1,0 +1,117 @@
+---
+/**
+ * CheckoutStepperV3 — stepper horizontal de 3 pasos estilo Bonfire.
+ *
+ * V3 replica el IA mockup `09-checkout.html`:
+ *  - 3 pasos: Envío, Pago, Revisión.
+ *  - Círculos numerados conectados por líneas; pendiente en slate-200,
+ *    completado con check sobre `--primary`, activo en `--primary`.
+ *  - El stepper es presentacional: el padre (`checkout.astro`) le pasa
+ *    `currentStepId` y los labels ya traducidos.
+ *  - Steps anteriores son clickeables (editables), futuros están
+ *    deshabilitados.
+ *
+ * Decisiones:
+ *  - Estructura `<ol>` + `<li>` para semántica de lista ordenada.
+ *  - `<button>` adentro del `<a>`-wrapper no es válido; usamos `<a>`
+ *    para navegar atrás y `aria-disabled` para steps futuros.
+ *  - El tamaño del círculo es `h-10 w-10` para coincidir con el mockup.
+ *  - Labels son clickeables sólo cuando el step es accesible.
+ */
+export interface CheckoutStepperV3Step {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  steps: readonly CheckoutStepperV3Step[];
+  /** ID del step activo. */
+  currentStepId: string;
+  /** Href base que se completa con `?step=<id>` (locale-prefixed). */
+  stepHrefBase: string;
+}
+
+const { steps, currentStepId, stepHrefBase } = Astro.props;
+
+const currentIndex = steps.findIndex((entry) => entry.id === currentStepId);
+const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+
+const hrefForStep = (stepId: string): string => `${stepHrefBase}?step=${stepId}`;
+---
+
+<nav aria-label="Checkout progress" class="mb-8 sm:mb-12">
+  {/* Mobile: barra compacta "Paso N de 3". */}
+  <p class="text-sm font-medium text-slate-600 sm:hidden">
+    Paso {safeIndex + 1} de {steps.length}:
+    <span class="font-semibold text-slate-900">{steps[safeIndex]?.label ?? ''}</span>
+  </p>
+
+  {/* Desktop/tablet: stepper horizontal con círculos + conectores. */}
+  <ol class="hidden list-none flex-row items-center gap-3 p-0 sm:flex sm:gap-6" role="list">
+    {steps.map((step, index) => {
+      const isCompleted = index < safeIndex;
+      const isCurrent = index === safeIndex;
+      const isFuture = index > safeIndex;
+      const isLast = index === steps.length - 1;
+      const connectorClass = isCompleted ? 'bg-[var(--primary,#2D9D8E)]' : 'bg-slate-200';
+
+      return (
+        <li class="flex flex-1 items-center gap-3 last:flex-none">
+          <a
+            href={isFuture ? undefined : hrefForStep(step.id)}
+            aria-current={isCurrent ? 'step' : undefined}
+            aria-disabled={isFuture ? 'true' : undefined}
+            class:list={[
+              'group inline-flex items-center gap-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2',
+              isFuture ? 'cursor-not-allowed' : '',
+            ]}
+          >
+            <span
+              aria-hidden="true"
+              class:list={[
+                'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold transition',
+                isCurrent
+                  ? 'bg-[var(--primary,#2D9D8E)] text-white'
+                  : isCompleted
+                    ? 'bg-[var(--primary,#2D9D8E)] text-white'
+                    : 'bg-slate-200 text-slate-500',
+              ]}
+            >
+              {isCompleted ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-5 w-5"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <span>{index + 1}</span>
+              )}
+            </span>
+            <span
+              class:list={[
+                'text-[15px] transition',
+                isCurrent
+                  ? 'font-bold text-slate-900'
+                  : isCompleted
+                    ? 'font-semibold text-slate-700'
+                    : 'font-medium text-slate-500',
+              ]}
+            >
+              {step.label}
+            </span>
+          </a>
+          {!isLast && (
+            <span aria-hidden="true" class:list={['mx-1 h-0.5 flex-1 rounded-full', connectorClass]} />
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>
