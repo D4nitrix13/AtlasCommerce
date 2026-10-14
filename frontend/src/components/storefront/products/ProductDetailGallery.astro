@@ -1,0 +1,122 @@
+---
+/**
+ * ProductDetailGallery — galería de producto estilo Bonfire (v3).
+ *
+ * Diseño replicado del IA mock 5 (Bonfire-style product detail):
+ *  - Main image cuadrada con marco `rounded-2xl border border-slate-200`.
+ *  - Thumbnails 80×80 alineados verticalmente a la izquierda en desktop
+ *    (`flex sm:flex-row-reverse`); apilados horizontalmente abajo en
+ *    mobile (`flex-col-reverse sm:flex-row`).
+ *  - Thumbnail activo = `ring-2 ring-[var(--primary)]` con fondo suave.
+ *  - Usa `ProductMockup` (SVG inline) como placeholder visual cuando
+ *    no hay asset real (no existe CDN de storefront aún).
+ *  - Sin JS: la selección de imagen se modela con `?image=N` y la
+ *    galería se renderiza en SSR; el padre pasa `selectedIndex`.
+ *
+ * Aplica `data-reveal` para que `scroll-fx.css` anime el bloque al
+ * entrar en viewport (Bonfire pattern).
+ */
+import ProductMockup from '../../ui/ProductMockup.astro';
+
+export interface ProductDetailGalleryLabels {
+  /** Alt accesible para la imagen principal. */
+  mainAlt: string;
+  /** Alt accesible para thumbnails. */
+  thumbAlt: (index: number) => string;
+  /** Marca de producto estampada en el mockup. */
+  logoText: string;
+}
+
+interface Props {
+  /** URLs reales (si hubiera). Se mantienen para futuro CDN. */
+  images: readonly string[];
+  /** Nombre del producto (alt). */
+  productName: string;
+  /** Índice de imagen seleccionada (0-based). */
+  selectedIndex?: number;
+  /** Variante del mockup SVG (shirt por default para apparel). */
+  mockupVariant?: 'shirt' | 'hoodie' | 'mug' | 'hat';
+  labels: ProductDetailGalleryLabels;
+}
+
+const {
+  images,
+  productName,
+  selectedIndex = 0,
+  mockupVariant = 'shirt',
+  labels,
+} = Astro.props;
+
+// Fallback visual: si la imagen es un data URI o no hay imagen,
+// mostramos el ProductMockup. Sólo relevante hasta que llegue el CDN.
+const hasRealImages = images.length > 0 && !images[0]?.startsWith('data:image/svg');
+const safeIndex = Math.max(0, Math.min(selectedIndex, Math.max(0, images.length - 1)));
+---
+
+<section
+  aria-label="Product gallery"
+  class="flex flex-col-reverse gap-4 sm:flex-row"
+  data-reveal
+>
+  {/* Thumbnails — columna izquierda en desktop, fila abajo en mobile */}
+  {images.length > 1 && (
+    <ul class="flex flex-row gap-3 sm:flex-col" role="list" aria-label="Image thumbnails">
+      {images.map((image, index) => {
+        const isActive = index === safeIndex;
+        const alt = labels.thumbAlt(index + 1);
+        return (
+          <li class="list-none shrink-0">
+            <a
+              href={`?image=${index}`}
+              aria-current={isActive ? 'true' : undefined}
+              aria-label={alt}
+              class:list={[
+                'flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2',
+                isActive
+                  ? 'opacity-100 ring-2 ring-[var(--primary)]'
+                  : 'opacity-70 hover:opacity-100',
+              ]}
+            >
+              {hasRealImages ? (
+                <img
+                  src={image}
+                  alt={alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="h-full w-full object-cover"
+                />
+              ) : (
+                <ProductMockup
+                  variant={mockupVariant}
+                  logoText={labels.logoText}
+                  class="h-14 w-14"
+                />
+              )}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+
+  {/* Imagen principal */}
+  <figure class="flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+    {hasRealImages ? (
+      <img
+        src={images[safeIndex]}
+        alt={labels.mainAlt}
+        loading="eager"
+        decoding="async"
+        class="aspect-square w-full object-cover"
+      />
+    ) : (
+      <div class="flex aspect-square w-full items-center justify-center p-8">
+        <ProductMockup
+          variant={mockupVariant}
+          logoText={labels.logoText}
+          class="h-56 w-56 sm:h-72 sm:w-72"
+        />
+      </div>
+    )}
+  </figure>
+</section>
