@@ -1,0 +1,228 @@
+---
+/**
+ * TierComparator — Tabla comparativa de tiers de volumen (Bonfire mockup 07).
+ *
+ * Renderiza los 5 tiers canónicos del modelo B2B estampados como
+ * cards lado a lado, con un tier marcado como "Más popular" (highlight).
+ *
+ * Tokens Bonfire:
+ *   - Card base: `bg-white rounded-2xl border border-slate-200`.
+ *   - Highlight: `border-2 border-[var(--primary)]` + badge superior.
+ *   - Discount badge: rounded-full `bg-emerald-50 text-emerald-700`.
+ *   - CTA: `bg-[var(--primary)]` con hover sobre `--primary-hover`.
+ *   - `data-reveal-stagger` aplica el rise-in escalonado del CSS global.
+ *
+ * Datos (F3.3 v3):
+ *   - 10+ unidades  → 0% (precio base).
+ *   - 25+           → -5%.
+ *   - 50+           → -12%.
+ *   - 100+          → -20% (highlight).
+ *   - 500+          → -35%.
+ *
+ * Accesibilidad (AGENTS §17):
+ *   - Cada card es `<article>` con `<h3>` de tier.
+ *   - El badge "Más popular" se anuncia antes del título del tier.
+ *   - Los beneficios son `<ul>` con `<li>` (no párrafos sueltos).
+ */
+import { formatCurrency } from '../../../lib/formatters';
+
+interface TierFeature {
+  /** Ténido un beneficio del tier, ej. "Tracking incluido". */
+  label: string;
+}
+
+interface TierData {
+  /** Cantidad mínima inclusiva del tier. */
+  minQuantity: number;
+  /** Descuento en porcentaje entero (0, 5, 12, 20, 35). */
+  discountPercent: number;
+  /** Etiqueta de cantidad, ej. "10+ unidades". */
+  quantityLabel: string;
+  /** Lista de beneficios incluidos. */
+  features: readonly TierFeature[];
+  /** Si es el tier destacado. */
+  isPopular: boolean;
+}
+
+interface Props {
+  /** Precio base de referencia para calcular el precio con descuento. */
+  basePriceCents: number;
+  /** Código de moneda ISO 4217. */
+  currency: string;
+  /** Etiqueta i18n para el badge del tier destacado. */
+  popularBadge: string;
+  /** Etiqueta i18n para "Incluye". */
+  includesLabel: string;
+  /** Etiqueta i18n del CTA de cada card. */
+  ctaLabel: string;
+  /** Etiqueta "por unidad" que aparece bajo el precio. */
+  perUnitLabel: string;
+  /** URL del CTA — usualmente /rfq con anchor al tier. */
+  ctaHref: string;
+  /** Etiqueta que aparece arriba de la grilla (eyebrow). */
+  eyebrow: string;
+  /** Tiers a renderizar. Si se omite, usa los 5 canónicos F3.3. */
+  tiers?: readonly TierData[];
+}
+
+const DEFAULT_FEATURES_BASE = [
+  { label: 'Producción estándar' },
+  { label: 'Soporte por email' },
+  { label: 'Pago contra entrega' },
+] as const;
+
+const DEFAULT_FEATURES_MID = [
+  { label: 'Producción estándar' },
+  { label: 'Soporte por email' },
+  { label: 'Muestra digital gratis' },
+] as const;
+
+const DEFAULT_FEATURES_POPULAR = [
+  { label: 'Producción prioritaria' },
+  { label: 'Asesor de cuenta dedicado' },
+  { label: 'Muestra física gratis' },
+  { label: 'Tracking de envío' },
+] as const;
+
+const DEFAULT_FEATURES_TOP = [
+  { label: 'Línea de producción dedicada' },
+  { label: 'Asesor de cuenta dedicado' },
+  { label: 'Muestra física gratis' },
+  { label: 'NET 30 disponible' },
+] as const;
+
+const DEFAULT_TIERS: readonly TierData[] = [
+  { minQuantity: 10, discountPercent: 0, quantityLabel: '10+ unidades', features: DEFAULT_FEATURES_BASE, isPopular: false },
+  { minQuantity: 25, discountPercent: 5, quantityLabel: '25+ unidades', features: DEFAULT_FEATURES_MID, isPopular: false },
+  { minQuantity: 50, discountPercent: 12, quantityLabel: '50+ unidades', features: DEFAULT_FEATURES_MID, isPopular: false },
+  { minQuantity: 100, discountPercent: 20, quantityLabel: '100+ unidades', features: DEFAULT_FEATURES_POPULAR, isPopular: true },
+  { minQuantity: 500, discountPercent: 35, quantityLabel: '500+ unidades', features: DEFAULT_FEATURES_TOP, isPopular: false },
+];
+
+const {
+  basePriceCents,
+  currency,
+  popularBadge,
+  includesLabel,
+  ctaLabel,
+  perUnitLabel,
+  ctaHref,
+  eyebrow,
+  tiers = DEFAULT_TIERS,
+} = Astro.props;
+
+const tierCount = tiers.length;
+---
+
+<section
+  aria-labelledby="tier-comparator-heading"
+  class="relative"
+>
+  <p
+    class="mx-auto mb-4 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white"
+  >
+    <span aria-hidden="true">★</span>
+    {eyebrow}
+  </p>
+
+  <h2 id="tier-comparator-heading" class="sr-only">
+    Comparativa de tiers por volumen
+  </h2>
+
+  <div
+    class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:gap-3"
+    data-reveal-stagger
+  >
+    {
+      tiers.map((tier) => {
+        const discountedCents = Math.round(basePriceCents * (1 - tier.discountPercent / 100));
+        const priceText = formatCurrency(discountedCents, currency);
+        const showDiscountBadge = tier.discountPercent > 0;
+        const discountBadgeText = `-${tier.discountPercent}%`;
+        const anchorId = `tier-${tier.minQuantity}`;
+        const cardHref = `${ctaHref}#${anchorId}`;
+        return (
+          <article
+            id={anchorId}
+            class:list={[
+              'relative flex flex-col rounded-2xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6',
+              tier.isPopular
+                ? 'border-2 border-[var(--primary,#2d9d8e)] lg:-mt-4 lg:shadow-md'
+                : 'border-slate-200',
+            ]}
+          >
+            {tier.isPopular && (
+              <span
+                class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--primary,#2d9d8e)] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm"
+                aria-label={popularBadge}
+              >
+                {popularBadge}
+              </span>
+            )}
+
+            <header class="mb-4 text-center">
+              <h3 class="text-base font-bold text-slate-900 sm:text-lg">
+                {tier.quantityLabel}
+              </h3>
+              <p class="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                {perUnitLabel}
+              </p>
+            </header>
+
+            <div class="mb-4 text-center">
+              <p class="text-3xl font-bold tabular-nums text-slate-900 sm:text-4xl">
+                {priceText}
+              </p>
+              {showDiscountBadge ? (
+                <span class="mt-2 inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                  {discountBadgeText}
+                </span>
+              ) : (
+                <span class="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                  Base
+                </span>
+              )}
+            </div>
+
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {includesLabel}
+            </p>
+            <ul class="mb-6 flex-1 space-y-2 text-sm text-slate-700">
+              {tier.features.map((feature) => (
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary,#2d9d8e)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  <span>{feature.label}</span>
+                </li>
+              ))}
+            </ul>
+
+            <a
+              href={cardHref}
+              class:list={[
+                'inline-flex h-10 w-full items-center justify-center rounded-full text-sm font-semibold transition',
+                tier.isPopular
+                  ? 'bg-[var(--primary,#2d9d8e)] text-white hover:bg-[var(--primary-hover,#258777)]'
+                  : 'border border-slate-300 bg-white text-slate-900 hover:border-slate-400 hover:bg-slate-50',
+              ]}
+            >
+              {ctaLabel}
+            </a>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <p class="sr-only">{tierCount} tiers disponibles.</p>
+</section>

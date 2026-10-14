@@ -1,0 +1,288 @@
+---
+/**
+ * PricingCalculator — Calculadora interactiva de bulk order (Bonfire 07).
+ *
+ * Componente Astro con reactividad en cliente via `<script>` que importa
+ * el controlador `pricing-calculator.client.ts`. Render inicial
+ * server-side con estado determinístico (cantidad 50) para evitar
+ * layout shift; el script sincroniza slider ↔ input sin React island.
+ *
+ * Estructura semántica (AGENTS §17):
+ *   - `<form>` envuelve todos los controles (acción visual = no submit).
+ *   - `<label for>` enlazado a cada input.
+ *   - `<output>` para los resultados computados (precio unitario, total,
+ *     ahorro) — el navegador los anuncia automáticamente al cambiar.
+ *   - `<input type="range">` para el slider + `<input type="number">`
+ *     sincronizados, ambos comparten `name="quantity"`.
+ *
+ * Cálculo (F3.3 v3):
+ *   - totalCents    = unitPrice × quantity × (1 - discount / 100)
+ *   - savingsCents  = unitPrice × quantity × (discount / 100)
+ *
+ * Tokens Bonfire:
+ *   - Card: `bg-white rounded-2xl border border-slate-200 shadow-sm`.
+ *   - Inputs: `bg-white rounded-lg border border-slate-300` con focus
+ *     sobre `--primary`.
+ *   - Highlight total: `text-slate-900 tabular-nums font-bold`.
+ *   - Savings: `text-emerald-700 font-semibold`.
+ *
+ * El componente es B2B (Panda Estampados) por diseño — no se itera
+ * fuera del scope del tenant Panda.
+ */
+import { BULK_PRODUCTS, type BulkOrderProduct } from '../../../data/b2b-mock';
+import { formatCurrency } from '../../../lib/formatters';
+
+interface TierDiscount {
+  /** Cantidad mínima inclusiva donde aplica este descuento. */
+  minQuantity: number;
+  /** Porcentaje de descuento entero. */
+  discountPercent: number;
+}
+
+interface Props {
+  /** Etiqueta i18n del heading. */
+  heading: string;
+  /** Etiqueta i18n del campo producto. */
+  productLabel: string;
+  /** Etiqueta i18n del campo cantidad. */
+  quantityLabel: string;
+  /** Etiqueta i18n del hint del slider (rango). */
+  quantityHint: string;
+  /** Etiqueta i18n del precio unitario. */
+  unitPriceLabel: string;
+  /** Etiqueta i18n del total. */
+  totalLabel: string;
+  /** Etiqueta i18n del ahorro. */
+  savingsLabel: string;
+  /** Template i18n del tier aplicado — usa {range} y {discount}. */
+  tierLabelTemplate: string;
+  /** Etiqueta i18n del CTA final. */
+  ctaLabel: string;
+  /** URL del CTA — usualmente /rfq. */
+  ctaHref: string;
+  /** Lista de descuentos. Si se omite, usa los 5 canónicos F3.3. */
+  tiers?: readonly TierDiscount[];
+  /** Cantidad inicial mostrada al cargar. */
+  initialQuantity?: number;
+}
+
+const DEFAULT_TIERS: readonly TierDiscount[] = [
+  { minQuantity: 10, discountPercent: 0 },
+  { minQuantity: 25, discountPercent: 5 },
+  { minQuantity: 50, discountPercent: 12 },
+  { minQuantity: 100, discountPercent: 20 },
+  { minQuantity: 500, discountPercent: 35 },
+];
+
+const QUANTITY_MIN = 10;
+const QUANTITY_MAX = 1000;
+const QUANTITY_STEP = 1;
+
+function resolveDiscount(quantity: number, tiers: readonly TierDiscount[]): number {
+  const matched = [...tiers]
+    .reverse()
+    .find((tier) => quantity >= tier.minQuantity);
+  return matched?.discountPercent ?? 0;
+}
+
+function tierRangeLabel(quantity: number, tiers: readonly TierDiscount[]): string {
+  const matched = [...tiers]
+    .reverse()
+    .find((tier) => quantity >= tier.minQuantity);
+  if (matched === undefined) return `${QUANTITY_MIN}+`;
+  if (matched.minQuantity === 500) return `${matched.minQuantity}+`;
+  const next = tiers.find((t) => t.minQuantity > matched.minQuantity);
+  if (next === undefined) return `${matched.minQuantity}+`;
+  return `${matched.minQuantity}\u2013${next.minQuantity - 1}`;
+}
+
+const {
+  heading,
+  productLabel,
+  quantityLabel,
+  quantityHint,
+  unitPriceLabel,
+  totalLabel,
+  savingsLabel,
+  tierLabelTemplate,
+  ctaLabel,
+  ctaHref,
+  tiers = DEFAULT_TIERS,
+  initialQuantity = 50,
+} = Astro.props;
+
+const products = BULK_PRODUCTS;
+const firstProduct: BulkOrderProduct | undefined = products[0];
+if (firstProduct === undefined) {
+  throw new Error('PricingCalculator requires at least one BULK_PRODUCTS entry.');
+}
+
+const initialProductId = String(firstProduct.id);
+const initialUnitPrice = firstProduct.basePriceCents;
+const initialDiscount = resolveDiscount(initialQuantity, tiers);
+const initialTotal = Math.round(
+  initialUnitPrice * initialQuantity * (1 - initialDiscount / 100)
+);
+const initialSavings = Math.round(
+  initialUnitPrice * initialQuantity * (initialDiscount / 100)
+);
+const initialTierText = tierRangeLabel(initialQuantity, tiers);
+const initialTierDiscountText =
+  initialDiscount === 0 ? '0%' : `-${initialDiscount}%`;
+
+const initialUnitPriceText = formatCurrency(initialUnitPrice, firstProduct.currency);
+const initialTotalText = formatCurrency(initialTotal, firstProduct.currency);
+const initialSavingsText = formatCurrency(initialSavings, firstProduct.currency);
+const initialTierBadgeText = tierLabelTemplate
+  .replace('{range}', initialTierText)
+  .replace('{discount}', initialTierDiscountText);
+---
+
+<section
+  aria-labelledby="pricing-calculator-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+>
+  <h2
+    id="pricing-calculator-heading"
+    class="text-lg font-bold text-slate-900 sm:text-xl"
+  >
+    {heading}
+  </h2>
+
+  <form
+    class="mt-5 space-y-5"
+    data-pricing-calculator
+    data-tiers={JSON.stringify(tiers)}
+    novalidate
+  >
+    <div>
+      <label
+        for="bulk-product-select"
+        class="mb-1.5 block text-sm font-semibold text-slate-900"
+      >
+        {productLabel}
+      </label>
+      <select
+        id="bulk-product-select"
+        name="product"
+        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,.28))]"
+        data-pricing-product
+      >
+        {
+          products.map((product) => (
+            <option
+              value={product.id}
+              data-base-price={product.basePriceCents}
+              data-currency={product.currency}
+              selected={product.id === firstProduct.id}
+            >
+              {product.name} — {formatCurrency(product.basePriceCents, product.currency)}
+            </option>
+          ))
+        }
+      </select>
+    </div>
+
+    <div>
+      <label
+        for="bulk-quantity-slider"
+        class="mb-1.5 block text-sm font-semibold text-slate-900"
+      >
+        {quantityLabel}
+      </label>
+      <input
+        id="bulk-quantity-slider"
+        type="range"
+        name="quantity"
+        min={QUANTITY_MIN}
+        max={QUANTITY_MAX}
+        step={QUANTITY_STEP}
+        value={initialQuantity}
+        class="w-full cursor-pointer accent-[var(--primary,#2d9d8e)]"
+        data-pricing-slider
+        aria-valuemin={QUANTITY_MIN}
+        aria-valuemax={QUANTITY_MAX}
+        aria-valuenow={initialQuantity}
+      />
+      <div
+        class="mt-1 flex items-center justify-between text-xs text-slate-500"
+        aria-hidden="true"
+      >
+        <span>{QUANTITY_MIN}</span>
+        <span>{QUANTITY_MAX}</span>
+      </div>
+      <p id="bulk-quantity-hint" class="mt-1 text-xs text-slate-500">
+        {quantityHint}
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <label for="bulk-quantity-input" class="sr-only">
+        {quantityLabel}
+      </label>
+      <input
+        id="bulk-quantity-input"
+        type="number"
+        name="quantity-text"
+        min={QUANTITY_MIN}
+        max={QUANTITY_MAX}
+        step={QUANTITY_STEP}
+        value={initialQuantity}
+        class="w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center text-sm font-semibold tabular-nums text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,.28))]"
+        data-pricing-input
+      />
+      <span
+        class="rounded-full bg-[var(--primary-soft,#e6f7f4)] px-3 py-1 text-xs font-semibold text-[var(--primary,#2d9d8e)]"
+        data-pricing-tier
+      >
+        {initialTierBadgeText}
+      </span>
+    </div>
+
+    <dl class="space-y-3 border-t border-slate-100 pt-5 text-sm">
+      <div class="flex items-center justify-between">
+        <dt class="text-slate-500">{unitPriceLabel}</dt>
+        <dd
+          class="font-semibold tabular-nums text-slate-900"
+          data-pricing-unit
+        >
+          {initialUnitPriceText}
+        </dd>
+      </div>
+      <div class="flex items-center justify-between">
+        <dt class="text-slate-500">{savingsLabel}</dt>
+        <dd
+          class="font-semibold tabular-nums text-emerald-700"
+          data-pricing-savings
+        >
+          {initialSavingsText}
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between border-t border-slate-100 pt-3">
+        <dt class="text-base font-bold text-slate-900">{totalLabel}</dt>
+        <dd
+          class="text-2xl font-bold tabular-nums text-slate-900 sm:text-3xl"
+          data-pricing-total
+        >
+          {initialTotalText}
+        </dd>
+      </div>
+    </dl>
+
+    <output class="sr-only" data-pricing-output aria-live="polite">
+      {quantityLabel}: {initialQuantity}. {unitPriceLabel}: {initialUnitPriceText}.
+      {totalLabel}: {initialTotalText}.
+    </output>
+
+    <a
+      href={ctaHref}
+      class="inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--primary,#2d9d8e)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)]"
+    >
+      {ctaLabel}
+    </a>
+  </form>
+</section>
+
+<script>
+  import '../../../scripts/pricing-calculator.client';
+</script>
