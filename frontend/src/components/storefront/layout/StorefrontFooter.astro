@@ -2,12 +2,15 @@
 /**
  * StorefrontFooter — footer principal de la tienda.
  *
- * Composición: tagline + nav secundaria + bloque legal. Es tenant-aware
- * vía `brand` (color de hover sobre links usa `--primary` del theme).
+ * Composición en grid de 3 columnas estilo Bonfire:
+ *   - Columna izquierda: brand + tagline
+ *   - Columna central: nav secundaria con los links legales / info
+ *   - Columna derecha: contacto (soporte email + locale)
  *
  * El footer es semántico (`<footer>`) y vive dentro del `<body>` para
  * que los lectores de pantalla lo identifiquen como landmark "content
- * information".
+ * information". Tenant-aware: el color de hover sobre los links usa
+ * `var(--primary)` del theme.
  */
 import type { StoreBrand } from '../../../config/stores';
 import StorefrontFooterNav from './StorefrontFooterNav.astro';
@@ -43,15 +46,41 @@ const navLinks = links ?? defaultLinks;
 ---
 
 <footer class="border-t border-slate-200 bg-slate-50">
-  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mb-8 flex flex-col gap-4">
-      <p class="text-sm font-semibold tracking-tight text-slate-900">{brand.name}</p>
-      <p class="text-sm text-slate-500">{brand.shortName} — hecho con cuidado.</p>
+  <div class="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:px-10">
+    {/* Grid 3 columnas: brand | nav | contact. En mobile stack vertical. */}
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-12">
+      {/* Columna 1: brand */}
+      <div class="flex flex-col gap-2">
+        <p class="text-base font-semibold tracking-tight text-slate-900">
+          {brand.name}
+        </p>
+        <p class="text-sm text-slate-500">
+          {brand.shortName} — hecho con cuidado.
+        </p>
+      </div>
+
+      {/* Columna 2: nav links */}
+      <div class="md:mx-auto">
+        <StorefrontFooterNav links={navLinks} locale={locale} />
+      </div>
+
+      {/* Columna 3: contacto + locale */}
+      <div class="flex flex-col gap-2 md:items-end md:text-right">
+        {brand.supportEmail && (
+          <a
+            href={`mailto:${brand.supportEmail}`}
+            class="text-sm font-medium text-slate-700 transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
+          >
+            {brand.supportEmail}
+          </a>
+        )}
+        <p class="text-xs uppercase tracking-wide text-slate-500">
+          {locale === 'es' ? 'Español' : 'English'}
+        </p>
+      </div>
     </div>
 
-    <StorefrontFooterNav links={navLinks} locale={locale} />
-
-    <div class="mt-8">
+    <div class="mt-8 border-t border-slate-200 pt-6">
       <StorefrontFooterLegal brand={brand} locale={locale} />
     </div>
   </div>
