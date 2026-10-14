@@ -531,7 +531,6 @@ const es: Translations = {
   'storefront.cart.increment': 'Aumentar cantidad',
   'storefront.cart.qty': 'Cantidad',
 
-<<<<<<< HEAD
   // ─── storefront: cart v3 (Bonfire mockup 08) ──────────────────────────
   'storefront.cart.v3.title': 'Tu carrito',
   'storefront.cart.v3.empty': 'Tu carrito está vacío.',
@@ -544,7 +543,7 @@ const es: Translations = {
   'storefront.cart.v3.continueShopping': 'Continuar comprando',
   'storefront.cart.v3.remove': 'Quitar',
   'storefront.cart.v3.quantity': 'Cantidad',
-=======
+
   // ─── storefront: account orders v3 (Bonfire mockup 10) ─────────────
   'storefront.account.orders.v3.title': 'Mis órdenes',
   'storefront.account.orders.v3.subtitle': '{count} pedidos en total',
@@ -573,7 +572,6 @@ const es: Translations = {
   'storefront.account.orders.v3.phone': 'Teléfono',
   'storefront.account.orders.v3.address': 'Dirección',
   'storefront.account.orders.v3.country': 'País',
->>>>>>> 6b2f0c7f (feat(orders): agregar traducciones y composicion v3 de mis ordenes)
 
   // ─── storefront: home + product cards/grid (F1.4) ────────────────────
   'storefront.home.hero.eyebrow': 'Kitsune Store · Cultura japonesa',
