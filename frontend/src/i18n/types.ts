@@ -518,6 +518,18 @@ export type TranslationKey =
   | 'account.dashboard.recentOrdersTable.column.date'
   | 'account.dashboard.recentOrdersTable.column.total'
 
+  // ─── account: dashboard v3 (Bonfire adaptation, alternate KPI set) ───
+  // KPI cards (different intent than v1 — task-oriented "what should
+  // I do next" rather than totals/processing). Used by `buildDashboardKpisV3`.
+  | 'account.dashboard.v3.kpi.orders'
+  | 'account.dashboard.v3.kpi.rfqs'
+  | 'account.dashboard.v3.kpi.spent'
+  | 'account.dashboard.v3.kpi.favorites'
+  | 'account.dashboard.v3.quickActions.heading'
+  | 'account.dashboard.v3.recentOrders.heading'
+  | 'account.dashboard.v3.recentOrders.viewAll'
+  | 'account.dashboard.v3.recentOrders.empty'
+
   // ─── account: dashboard order status pills (mirrors Badge status) ────
   | 'account.orderStatus.pending'
   | 'account.orderStatus.processing'
