@@ -1,34 +1,43 @@
 ---
 /**
- * `/[locale]/admin/sales/orders` — Lista de orders admin (F5.4).
+ * `/[locale]/admin/sales/orders` — Lista de orders admin (Bonfire 12).
  *
- * Patrón Shopify Admin / Stripe (design-refs §7.2):
- *  - Filtros laterales (sidebar) — aplican vía GET params para que el
- *    back/forward del navegador funcione sin hydration JS (AGENTS §18).
- *  - Tabla densa con bulk actions + status pills + link al detalle.
- *  - Paginación SSR via `?page=N` con page size fijo (10).
+ * Wrapper del shell de la pagina. La composición REAL vive en
+ * `<OrdersV3Section />`, que replica el mockup Bonfire (vista 12):
+ *  - Header (eyebrow "Ventas" + H1 + count)
+ *  - Filter card (search + status + date from + date to)
+ *  - Bulk actions bar (visible cuando count > 0)
+ *  - Tabla con checkboxes + kebab dropdown Ver/Editar/Reembolso
+ *  - Pagination numeric 1..N + anterior/sig
+ *  - Empty state con CTA "Refrescar"
  *
- * Filtros soportados:
- *  - status (OrderStatus | all)
+ * El page hace TODO el trabajo server-side: parsea query params,
+ * filtra por status/q/date, computa paginacion. La sección solo
+ * compone — misma frontera que DashboardV3Section.
+ *
+ * Filtros soportados (URL params — back/forward del navegador
+ * funciona sin hydration JS, AGENTS §18):
+ *  - status (OrderStatus | 'all')
  *  - q (búsqueda por número o nombre de cliente, case-insensitive)
  *  - dateFrom + dateTo (yyyy-mm-dd)
- *  - totalMin + totalMax (cents)
  *  - page (int, default 1)
  *
- * **AGENTS.md §1** (400 lineas max para pagina): composición pura.
+ * **AGENTS.md §1** (<400 lineas): page es composicion pura.
+ * **AGENTS.md §11**: muestra loading/empty sin necesidad — SSR puro,
+ * no loading skeleton; error lo renderiza el caller cuando proceda.
  */
 import AdminLayout from '../../../../../layouts/AdminLayout.astro';
-import OrderTable from '../../../../../components/admin/sales/OrderTable.astro';
-import BulkOrderActions from '../../../../../components/admin/sales/BulkOrderActions.astro';
+import OrdersV3Section from '../../../../../components/admin/sales/OrdersV3Section.astro';
 import { getServerDictionary, getServerLocale } from '../../../../../i18n/server';
 import { adminUrl } from '../../../../../lib/path-helpers';
-import { getAllOrdersMock } from '../../../../../data/sales-mock';
+import { getAllOrdersMock, type AdminOrderStatus } from '../../../../../data/sales-mock';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
 
 const ALL_ORDERS = getAllOrdersMock();
 const PAGE_SIZE = 10;
+const CURRENCY_CODE = 'USD';
 
 const ALL_STATUSES = ['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'] as const;
 type FilterSlug = (typeof ALL_STATUSES)[number];
@@ -42,15 +51,11 @@ const currentStatus = parseStatus(Astro.url.searchParams.get('status'));
 const currentQuery = (Astro.url.searchParams.get('q') ?? '').trim();
 const currentDateFrom = Astro.url.searchParams.get('dateFrom') ?? '';
 const currentDateTo = Astro.url.searchParams.get('dateTo') ?? '';
-const currentTotalMinRaw = Astro.url.searchParams.get('totalMin') ?? '';
-const currentTotalMaxRaw = Astro.url.searchParams.get('totalMax') ?? '';
-
-const currentTotalMin = currentTotalMinRaw === '' ? null : Number.parseInt(currentTotalMinRaw, 10);
-const currentTotalMax = currentTotalMaxRaw === '' ? null : Number.parseInt(currentTotalMaxRaw, 10);
 
 const currentPageRaw = Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10);
 const currentPage = Number.isFinite(currentPageRaw) && currentPageRaw > 0 ? currentPageRaw : 1;
 
+// ─── Filter pipeline ───────────────────────────────────────────────────
 let filtered =
   currentStatus === 'all' ? ALL_ORDERS : ALL_ORDERS.filter((o) => o.status === currentStatus);
 
@@ -68,292 +73,74 @@ if (currentDateTo !== '') {
   filtered = filtered.filter((o) => o.date <= currentDateTo);
 }
 
-if (currentTotalMin !== null && Number.isFinite(currentTotalMin)) {
-  filtered = filtered.filter((o) => o.totalCents >= currentTotalMin * 100);
-}
-if (currentTotalMax !== null && Number.isFinite(currentTotalMax)) {
-  filtered = filtered.filter((o) => o.totalCents <= currentTotalMax * 100);
-}
-
 const totalFiltered = filtered.length;
 const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 const clampedPage = Math.min(currentPage, totalPages);
 const startIdx = (clampedPage - 1) * PAGE_SIZE;
 const paginatedOrders = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+const from = totalFiltered === 0 ? 0 : startIdx + 1;
+const to = Math.min(startIdx + PAGE_SIZE, totalFiltered);
 
 const showEmpty = totalFiltered === 0;
+
+// ─── Status labels (i18n ya resuelto) ─────────────────────────────────
+const statusLabels: Record<AdminOrderStatus, string> = {
+  pending: t['admin.sales.orderStatus.pending'],
+  processing: t['admin.sales.orderStatus.processing'],
+  shipped: t['admin.sales.orderStatus.shipped'],
+  delivered: t['admin.sales.orderStatus.delivered'],
+  cancelled: t['admin.sales.orderStatus.cancelled'],
+};
+
+// ─── Href builders ─────────────────────────────────────────────────────
+const baseHref = adminUrl(locale, '/sales/orders');
+const clearFiltersHref = baseHref;
 
 function detailHrefFor(orderId: string): string {
   return adminUrl(locale, `/sales/orders/${orderId}`);
 }
 
-function pageHref(page: number): string {
+function pageHrefFor(page: number): string {
   const params = new URLSearchParams();
   if (currentStatus !== 'all') params.set('status', currentStatus);
   if (currentQuery !== '') params.set('q', currentQuery);
   if (currentDateFrom !== '') params.set('dateFrom', currentDateFrom);
   if (currentDateTo !== '') params.set('dateTo', currentDateTo);
-  if (currentTotalMin !== null && Number.isFinite(currentTotalMin)) {
-    params.set('totalMin', String(currentTotalMin));
-  }
-  if (currentTotalMax !== null && Number.isFinite(currentTotalMax)) {
-    params.set('totalMax', String(currentTotalMax));
-  }
   if (page > 1) params.set('page', String(page));
   const qs = params.toString();
-  const base = adminUrl(locale, '/sales/orders');
-  return qs.length > 0 ? `${base}?${qs}` : base;
+  return qs.length > 0 ? `${baseHref}?${qs}` : baseHref;
 }
 
-const showPagination = totalPages > 1;
-
-const BULK_FORM_NAME = 'orders-bulk-form';
+const prevHref = clampedPage > 1 ? pageHrefFor(clampedPage - 1) : null;
+const nextHref = clampedPage < totalPages ? pageHrefFor(clampedPage + 1) : null;
 ---
 
 <AdminLayout title={t['admin.sales.layout.title']}>
-  <div class="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight text-slate-950">
-        {t['admin.sales.orders.title']}
-      </h1>
-      <p class="mt-1 text-sm text-slate-500">{t['admin.sales.orders.subtitle']}</p>
-    </div>
-    <p class="text-xs font-medium text-slate-500">
-      {t['admin.sales.orders.countOf'].replace('{count}', String(totalFiltered))}
-    </p>
-  </div>
-
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
-    <aside
-      aria-label={t['admin.sales.orders.filters.status']}
-      class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-    >
-      <form method="get" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label for="filter-q" class="text-sm font-medium text-slate-700">
-            {t['admin.sales.orders.filters.search']}
-          </label>
-          <input
-            id="filter-q"
-            name="q"
-            type="search"
-            value={currentQuery}
-            placeholder={t['admin.sales.orders.filters.searchPlaceholder']}
-            class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-          />
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-          <label for="filter-status" class="text-sm font-medium text-slate-700">
-            {t['admin.sales.orders.filters.status']}
-          </label>
-          <select
-            id="filter-status"
-            name="status"
-            class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-          >
-            <option value="all" selected={currentStatus === 'all'}>
-              {t['admin.sales.orders.filters.all']}
-            </option>
-            <option value="pending" selected={currentStatus === 'pending'}>
-              {t['admin.sales.orderStatus.pending']}
-            </option>
-            <option value="processing" selected={currentStatus === 'processing'}>
-              {t['admin.sales.orderStatus.processing']}
-            </option>
-            <option value="shipped" selected={currentStatus === 'shipped'}>
-              {t['admin.sales.orderStatus.shipped']}
-            </option>
-            <option value="delivered" selected={currentStatus === 'delivered'}>
-              {t['admin.sales.orderStatus.delivered']}
-            </option>
-            <option value="cancelled" selected={currentStatus === 'cancelled'}>
-              {t['admin.sales.orderStatus.cancelled']}
-            </option>
-          </select>
-        </div>
-
-        <fieldset class="flex flex-col gap-2 border-t border-slate-100 pt-4">
-          <legend class="text-sm font-medium text-slate-700">
-            {t['admin.sales.orders.filters.dateRange']}
-          </legend>
-          <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">
-              {t['admin.sales.orders.filters.dateFrom']}
-            </span>
-            <input
-              type="date"
-              name="dateFrom"
-              value={currentDateFrom}
-              class="block w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-            />
-          </label>
-          <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">{t['admin.sales.orders.filters.dateTo']}</span>
-            <input
-              type="date"
-              name="dateTo"
-              value={currentDateTo}
-              class="block w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-            />
-          </label>
-        </fieldset>
-
-        <fieldset class="flex flex-col gap-2 border-t border-slate-100 pt-4">
-          <legend class="text-sm font-medium text-slate-700">
-            {t['admin.sales.orders.filters.totalRange']}
-          </legend>
-          <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">
-              {t['admin.sales.orders.filters.totalMin']} ($)
-            </span>
-            <input
-              type="number"
-              name="totalMin"
-              value={currentTotalMinRaw}
-              min="0"
-              step="1"
-              class="block w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-            />
-          </label>
-          <label class="flex flex-col gap-1.5 text-xs">
-            <span class="font-medium text-slate-600">
-              {t['admin.sales.orders.filters.totalMax']} ($)
-            </span>
-            <input
-              type="number"
-              name="totalMax"
-              value={currentTotalMaxRaw}
-              min="0"
-              step="1"
-              class="block w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-            />
-          </label>
-        </fieldset>
-
-        <div class="flex flex-col gap-2 border-t border-slate-100 pt-4">
-          <button
-            type="submit"
-            class="inline-flex h-9 items-center justify-center rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-          >
-            {t['admin.sales.orders.filters.apply']}
-          </button>
-          <a
-            href={adminUrl(locale, '/sales/orders')}
-            class="inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-          >
-            {t['admin.sales.orders.filters.clear']}
-          </a>
-        </div>
-      </form>
-    </aside>
-
-    <section class="flex flex-col gap-4">
-      <form
-        name={BULK_FORM_NAME}
-        id={BULK_FORM_NAME}
-        method="post"
-        action="/api/v1/admin/orders/bulk"
-      >
-        <input type="hidden" name="csrf_token" value="" />
-      </form>
-
-      <OrderTable
-        orders={paginatedOrders}
-        currencyCode="USD"
-        statusLabel={(status) => t[`admin.sales.orderStatus.${status}`]}
-        detailHrefFor={detailHrefFor}
-        viewDetailLabel={t['admin.sales.orders.viewDetail']}
-        columnOrderNumber={t['admin.sales.orders.column.orderNumber']}
-        columnCustomer={t['admin.sales.orders.column.customer']}
-        columnDate={t['admin.sales.orders.column.date']}
-        columnStatus={t['admin.sales.orders.column.status']}
-        columnItems={t['admin.sales.orders.column.items']}
-        columnTotal={t['admin.sales.orders.column.total']}
-        columnActions={t['admin.sales.orders.column.actions']}
-        showEmpty={showEmpty}
-        emptyTitle={t['admin.sales.orders.empty']}
-        emptyHint={t['admin.sales.orders.emptyHint']}
-        bulkFormName={BULK_FORM_NAME}
-      />
-
-      {showPagination && !showEmpty && (
-        <nav
-          aria-label={t['admin.sales.orders.pagination.page']}
-          class="mt-2 flex items-center justify-between gap-2"
-        >
-          <a
-            href={pageHref(Math.max(1, clampedPage - 1))}
-            aria-disabled={clampedPage === 1 ? 'true' : undefined}
-            class:list={[
-              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-              'hover:border-slate-300',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
-              clampedPage === 1 ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-            ]}
-          >
-            ← {t['admin.sales.orders.pagination.previous']}
-          </a>
-          <p class="text-xs font-medium text-slate-600">
-            {t['admin.sales.orders.pagination.page']} {clampedPage}{' '}
-            {t['admin.sales.orders.pagination.of']} {totalPages}
-          </p>
-          <a
-            href={pageHref(Math.min(totalPages, clampedPage + 1))}
-            aria-disabled={clampedPage === totalPages ? 'true' : undefined}
-            class:list={[
-              'inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition-colors',
-              'hover:border-slate-300',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
-              clampedPage === totalPages ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
-            ]}
-          >
-            {t['admin.sales.orders.pagination.next']} →
-          </a>
-        </nav>
-      )}
-    </section>
-  </div>
-
-  <BulkOrderActions
-    selectedCount={0}
-    labelSelectedCount={t['admin.sales.orders.bulk.selectedCount']}
-    labelMarkShipped={t['admin.sales.orders.bulk.markShipped']}
-    labelMarkProcessing={t['admin.sales.orders.bulk.markProcessing']}
-    labelExportCsv={t['admin.sales.orders.bulk.exportCsv']}
-    labelGenerateInvoice={t['admin.sales.orders.bulk.generateInvoice']}
+  <OrdersV3Section
+    t={t}
+    orders={paginatedOrders}
+    totalFiltered={totalFiltered}
+    currencyCode={CURRENCY_CODE}
+    detailHrefFor={detailHrefFor}
+    current={{
+      query: currentQuery,
+      status: currentStatus,
+      dateFrom: currentDateFrom,
+      dateTo: currentDateTo,
+    }}
+    clearFiltersHref={clearFiltersHref}
+    baseHref={baseHref}
+    pagination={{
+      currentPage: clampedPage,
+      totalPages,
+      total: totalFiltered,
+      from,
+      to,
+      prevHref,
+      nextHref,
+      pageHrefFor,
+    }}
+    statusLabels={statusLabels}
+    showEmpty={showEmpty}
   />
 </AdminLayout>
-
-<script>
-  /**
-   * Sincroniza la cantidad de checkboxes marcados con el toolbar
-   * `BulkOrderActions`.
-   */
-  const toolbar = document.querySelector(
-    '[role="region"][aria-label="Bulk actions"]'
-  ) as HTMLElement | null;
-  const statusEl = toolbar?.querySelector('p.text-sm.font-semibold') as HTMLElement | null;
-
-  function recount(): void {
-    const checked = document.querySelectorAll<HTMLInputElement>('[data-order-checkbox]:checked');
-    const count = checked.length;
-    if (toolbar) {
-      if (count > 0) {
-        toolbar.classList.remove('pointer-events-none', 'translate-y-4', 'opacity-0');
-        toolbar.classList.add('translate-y-0', 'opacity-100');
-      } else {
-        toolbar.classList.add('pointer-events-none', 'translate-y-4', 'opacity-0');
-        toolbar.classList.remove('translate-y-0', 'opacity-100');
-      }
-    }
-    if (statusEl) {
-      const template = statusEl.dataset.countTemplate ?? '';
-      statusEl.textContent = template.replace('{count}', String(count));
-    }
-  }
-
-  document.querySelectorAll<HTMLInputElement>('[data-order-checkbox]').forEach((cb) => {
-    cb.addEventListener('change', recount);
-  });
-</script>
