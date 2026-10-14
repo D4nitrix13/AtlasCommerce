@@ -1,0 +1,143 @@
+---
+/**
+ * CheckoutShippingStepV3 — Step 1 (Envío) del checkout V3.
+ *
+ * V3 replica el IA mockup `09-checkup.html`:
+ *  - Inputs con `border-slate-300 rounded-md px-3 py-2` y focus
+ *    `ring-2 ring-[var(--primary)]` (color del brand).
+ *  - Grid `sm:grid-cols-2` con `address1`/`address2` full-width.
+ *  - El step se renderiza dentro de un `<fieldset>`/`<legend>`
+ *    controlado por el padre (CheckoutFormV3).
+ *
+ * Decisión:
+ *  - NO usamos los primitives Input/Select porque su tema (border-slate-200,
+ *    focus gris) no matchea con el mockup. Estos inputs son específicos
+ *    del style Bonfire del checkout.
+ */
+export interface CheckoutShippingStepV3Labels {
+  shippingHeading: string;
+  name: string;
+  email: string;
+  phone: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state: string;
+  postal: string;
+  country: string;
+}
+
+interface Props {
+  labels: CheckoutShippingStepV3Labels;
+}
+
+const { labels } = Astro.props;
+---
+
+<div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-1.5 sm:col-span-2">
+    <label for="v3-name" class="text-sm font-medium text-slate-700">{labels.name}</label>
+    <input
+      id="v3-name"
+      name="name"
+      type="text"
+      autocomplete="name"
+      required
+      class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+    />
+  </div>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="flex flex-col gap-1.5">
+      <label for="v3-email" class="text-sm font-medium text-slate-700">{labels.email}</label>
+      <input
+        id="v3-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="v3-phone" class="text-sm font-medium text-slate-700">{labels.phone}</label>
+      <input
+        id="v3-phone"
+        name="phone"
+        type="tel"
+        autocomplete="tel"
+        required
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
+      <label for="v3-address1" class="text-sm font-medium text-slate-700">{labels.address1}</label>
+      <input
+        id="v3-address1"
+        name="address1"
+        type="text"
+        autocomplete="address-line1"
+        required
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
+      <label for="v3-address2" class="text-sm font-medium text-slate-700">{labels.address2}</label>
+      <input
+        id="v3-address2"
+        name="address2"
+        type="text"
+        autocomplete="address-line2"
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="v3-city" class="text-sm font-medium text-slate-700">{labels.city}</label>
+      <input
+        id="v3-city"
+        name="city"
+        type="text"
+        autocomplete="address-level2"
+        required
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="v3-state" class="text-sm font-medium text-slate-700">{labels.state}</label>
+      <input
+        id="v3-state"
+        name="state"
+        type="text"
+        autocomplete="address-level1"
+        required
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="v3-postal" class="text-sm font-medium text-slate-700">{labels.postal}</label>
+      <input
+        id="v3-postal"
+        name="postal"
+        type="text"
+        autocomplete="postal-code"
+        required
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="v3-country" class="text-sm font-medium text-slate-700">{labels.country}</label>
+      <select
+        id="v3-country"
+        name="country"
+        autocomplete="country"
+        required
+        class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
+      >
+        <option value="NI">Nicaragua</option>
+        <option value="MX">México</option>
+        <option value="ES">España</option>
+        <option value="AR">Argentina</option>
+        <option value="US">Estados Unidos</option>
+      </select>
+    </div>
+  </div>
+</div>
