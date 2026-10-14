@@ -485,6 +485,39 @@ export type TranslationKey =
   | 'account.dashboard.notifications.unread'
   | 'account.dashboard.notifications.viewAll'
 
+  // ─── account: dashboard (F5.5 Bonfire-style mockup) ─────────────────
+  // Header greeting block — eyebrow + company line + 2 CTAs.
+  | 'account.dashboard.heading.eyebrow'
+  | 'account.dashboard.heading.companyLine'
+  | 'account.dashboard.heading.actionDownloadInvoices'
+  | 'account.dashboard.heading.actionNewOrder'
+
+  // KPI cards (top row, 4 cards).
+  | 'account.dashboard.kpi.ordersTotal'
+  | 'account.dashboard.kpi.processing'
+  | 'account.dashboard.kpi.rfqApproval'
+  | 'account.dashboard.kpi.pendingBalance'
+  | 'account.dashboard.kpi.empty'
+
+  // Quick actions — 4 cards grid (replaces the 5-pill inline bar).
+  | 'account.dashboard.quickActionsCards.rfqTitle'
+  | 'account.dashboard.quickActionsCards.rfqDescription'
+  | 'account.dashboard.quickActionsCards.addressesTitle'
+  | 'account.dashboard.quickActionsCards.addressesDescription'
+  | 'account.dashboard.quickActionsCards.helpTitle'
+  | 'account.dashboard.quickActionsCards.helpDescription'
+  | 'account.dashboard.quickActionsCards.profileTitle'
+  | 'account.dashboard.quickActionsCards.profileDescription'
+
+  // Recent orders table — last 5 orders in semantic <table>.
+  | 'account.dashboard.recentOrdersTable.heading'
+  | 'account.dashboard.recentOrdersTable.empty'
+  | 'account.dashboard.recentOrdersTable.column.order'
+  | 'account.dashboard.recentOrdersTable.column.product'
+  | 'account.dashboard.recentOrdersTable.column.status'
+  | 'account.dashboard.recentOrdersTable.column.date'
+  | 'account.dashboard.recentOrdersTable.column.total'
+
   // ─── account: dashboard order status pills (mirrors Badge status) ────
   | 'account.orderStatus.pending'
   | 'account.orderStatus.processing'

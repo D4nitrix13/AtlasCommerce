@@ -1025,6 +1025,44 @@ const en: Translations = {
   'account.dashboard.notifications.unread': '{count} unread',
   'account.dashboard.notifications.viewAll': 'View all',
 
+  // ─── account: dashboard (F5.5 Bonfire-style mockup) ─────────────────
+  // Header greeting block — eyebrow + company line + 2 CTAs.
+  'account.dashboard.heading.eyebrow': 'Customer dashboard',
+  'account.dashboard.heading.companyLine':
+    'Company · {company} · {count} orders this year',
+  'account.dashboard.heading.actionDownloadInvoices': 'Download invoices',
+  'account.dashboard.heading.actionNewOrder': 'New order',
+
+  // KPI cards (top row, 4 cards).
+  'account.dashboard.kpi.ordersTotal': 'Total orders',
+  'account.dashboard.kpi.processing': 'In production',
+  'account.dashboard.kpi.rfqApproval': 'RFQ approval rate',
+  'account.dashboard.kpi.pendingBalance': 'Outstanding balance',
+  'account.dashboard.kpi.empty': '—',
+
+  // Quick actions — 4 cards grid (replaces the 5-pill inline bar).
+  'account.dashboard.quickActionsCards.rfqTitle': 'Request a quote',
+  'account.dashboard.quickActionsCards.rfqDescription':
+    'Create an RFQ and we reply within 24h',
+  'account.dashboard.quickActionsCards.addressesTitle': 'Addresses',
+  'account.dashboard.quickActionsCards.addressesDescription':
+    'Manage where we ship your orders',
+  'account.dashboard.quickActionsCards.helpTitle': 'Help',
+  'account.dashboard.quickActionsCards.helpDescription':
+    'Support center and guides',
+  'account.dashboard.quickActionsCards.profileTitle': 'Profile',
+  'account.dashboard.quickActionsCards.profileDescription':
+    'Personal data, company and billing',
+
+  // Recent orders table — last 5 orders in semantic <table>.
+  'account.dashboard.recentOrdersTable.heading': 'Recent orders',
+  'account.dashboard.recentOrdersTable.empty': 'No orders yet',
+  'account.dashboard.recentOrdersTable.column.order': 'Order',
+  'account.dashboard.recentOrdersTable.column.product': 'Product',
+  'account.dashboard.recentOrdersTable.column.status': 'Status',
+  'account.dashboard.recentOrdersTable.column.date': 'Date',
+  'account.dashboard.recentOrdersTable.column.total': 'Total',
+
   // ─── account: dashboard order status pills ──────────────────
   'account.orderStatus.pending': 'Pending',
   'account.orderStatus.processing': 'Processing',
