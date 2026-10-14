@@ -740,6 +740,30 @@ const en: Translations = {
     'If your order is highly specific (custom design, special material, large volume), ask for a tailored quote.',
   'storefront.bulk_order.customOrder.cta': 'Request custom quote',
 
+  // ─── storefront: RFQ v3 (Bonfire) ────────────────────────────────────
+  'storefront.b2b.rfq.v3.title': 'Request quote',
+  'storefront.b2b.rfq.v3.step1.label': 'Order details',
+  'storefront.b2b.rfq.v3.step1.tipoProducto': 'Product type',
+  'storefront.b2b.rfq.v3.step1.cantidad': 'Quantity',
+  'storefront.b2b.rfq.v3.step1.tecnica': 'Print technique',
+  'storefront.b2b.rfq.v3.step1.tecnica.serigrafia': 'Screen print',
+  'storefront.b2b.rfq.v3.step1.tecnica.sublimacion': 'Sublimation',
+  'storefront.b2b.rfq.v3.step1.tecnica.bordado': 'Embroidery',
+  'storefront.b2b.rfq.v3.step1.tecnica.vinilo': 'Vinyl',
+  'storefront.b2b.rfq.v3.step1.descripcion': 'Design description',
+  'storefront.b2b.rfq.v3.step1.fechaRequerida': 'Required date',
+  'storefront.b2b.rfq.v3.step2.label': 'Contact info',
+  'storefront.b2b.rfq.v3.step2.nombre': 'Name',
+  'storefront.b2b.rfq.v3.step2.email': 'Email',
+  'storefront.b2b.rfq.v3.step2.telefono': 'Phone',
+  'storefront.b2b.rfq.v3.step2.empresa': 'Company (optional)',
+  'storefront.b2b.rfq.v3.step3.label': 'Review',
+  'storefront.b2b.rfq.v3.submit': 'Submit quote',
+  'storefront.b2b.rfq.v3.summary': 'Estimated summary',
+  'storefront.b2b.rfq.v3.totalLabel': 'Estimated total',
+  'storefront.b2b.rfq.v3.b2bOnly': 'B2B only',
+  'storefront.b2b.rfq.v3.back': 'Back to start',
+
   // ─── account: addresses B2B (F3.4) ───────────────────────────────────
   'account.addresses.b2b.subtitle':
     'Manage your company addresses: HQ, warehouses, offices and events.',

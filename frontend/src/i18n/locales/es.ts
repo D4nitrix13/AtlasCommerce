@@ -743,6 +743,30 @@ const es: Translations = {
     'Si tu pedido es muy específico (diseño propio, material especial, gran volumen), pedinos una cotización a medida.',
   'storefront.bulk_order.customOrder.cta': 'Solicitar cotización custom',
 
+  // ─── storefront: RFQ v3 (Bonfire) ────────────────────────────────────
+  'storefront.b2b.rfq.v3.title': 'Solicitar cotización',
+  'storefront.b2b.rfq.v3.step1.label': 'Detalles del pedido',
+  'storefront.b2b.rfq.v3.step1.tipoProducto': 'Tipo de producto',
+  'storefront.b2b.rfq.v3.step1.cantidad': 'Cantidad',
+  'storefront.b2b.rfq.v3.step1.tecnica': 'Técnica de estampado',
+  'storefront.b2b.rfq.v3.step1.tecnica.serigrafia': 'Serigrafía',
+  'storefront.b2b.rfq.v3.step1.tecnica.sublimacion': 'Sublimación',
+  'storefront.b2b.rfq.v3.step1.tecnica.bordado': 'Bordado',
+  'storefront.b2b.rfq.v3.step1.tecnica.vinilo': 'Vinilo textil',
+  'storefront.b2b.rfq.v3.step1.descripcion': 'Descripción del diseño',
+  'storefront.b2b.rfq.v3.step1.fechaRequerida': 'Fecha requerida',
+  'storefront.b2b.rfq.v3.step2.label': 'Datos de contacto',
+  'storefront.b2b.rfq.v3.step2.nombre': 'Nombre',
+  'storefront.b2b.rfq.v3.step2.email': 'Email',
+  'storefront.b2b.rfq.v3.step2.telefono': 'Teléfono',
+  'storefront.b2b.rfq.v3.step2.empresa': 'Empresa (opcional)',
+  'storefront.b2b.rfq.v3.step3.label': 'Revisión',
+  'storefront.b2b.rfq.v3.submit': 'Enviar cotización',
+  'storefront.b2b.rfq.v3.summary': 'Resumen estimado',
+  'storefront.b2b.rfq.v3.totalLabel': 'Total estimado',
+  'storefront.b2b.rfq.v3.b2bOnly': 'Solo B2B',
+  'storefront.b2b.rfq.v3.back': 'Volver al inicio',
+
   // ─── account: addresses B2B (F3.4) ───────────────────────────────────
   'account.addresses.b2b.subtitle':
     'Gestioná las direcciones de tu empresa: sede, almacenes, oficinas y eventos.',
