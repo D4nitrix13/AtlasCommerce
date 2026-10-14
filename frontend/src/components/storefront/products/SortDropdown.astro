@@ -1,0 +1,67 @@
+---
+/**
+ * SortDropdown — selector de orden para el catálogo (vista 04).
+ *
+ * Decisión: usa el primitive UI `<Select>` ya validado (a11y +
+ * estados error/disabled + theming). Mantener un wrapper en vez de
+ * exponer el `<select>` directo deja a la página hablar en términos
+ * de dominio (`relevancia`, `precioAsc`, etc.) sin filtrar la shape
+ * del primitive.
+ *
+ * Etiqueta "Ordenar por" — sólo visible a partir de `sm` para que en
+ * mobile el selector ocupe todo el ancho sin duplicar el contexto.
+ */
+import Select from '../../ui/Select.astro';
+
+export type SortKey = 'relevancia' | 'precioAsc' | 'precioDesc' | 'nombre';
+
+export interface SortDropdownLabels {
+  label: string;
+  relevancia: string;
+  precioAsc: string;
+  precioDesc: string;
+  nombre: string;
+}
+
+interface SortOption {
+  value: SortKey;
+  label: string;
+}
+
+interface Props {
+  labels: SortDropdownLabels;
+  value?: SortKey;
+  name?: string;
+  id?: string;
+}
+
+const {
+  labels,
+  value = 'relevancia',
+  name = 'sort',
+  id = 'products-sort',
+} = Astro.props;
+
+const localizedOptions: SortOption[] = [
+  { value: 'relevancia', label: labels.relevancia },
+  { value: 'precioAsc', label: labels.precioAsc },
+  { value: 'precioDesc', label: labels.precioDesc },
+  { value: 'nombre', label: labels.nombre },
+];
+---
+
+<div class="flex items-center gap-3">
+  <label
+    for={id}
+    class="hidden text-[13px] font-medium text-slate-500 sm:block"
+  >
+    {labels.label}
+  </label>
+  <Select
+    name={name}
+    id={id}
+    options={localizedOptions}
+    value={value}
+    class="!w-auto min-w-[180px] text-sm font-medium"
+  />
+</div>
