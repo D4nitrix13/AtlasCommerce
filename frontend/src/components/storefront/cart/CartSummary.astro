@@ -22,6 +22,7 @@ export interface CartSummaryLabels {
   discount: string;
   shipping: string;
   shippingFree: string;
+  tax: string;
   total: string;
   checkout: string;
 }
@@ -31,10 +32,13 @@ interface Props {
   currencyCode?: string;
   discountCents?: number;
   shippingCents?: number | null;
+  taxCents?: number;
   checkoutHref: string;
   labels: CartSummaryLabels;
   /** Mostrar el botón deshabilitado cuando subtotal es 0 (carrito vacío). */
   isEmpty?: boolean;
+  /** Hacer que el aside sea sticky en lg+ (mockup Bonfire cart). */
+  stickyOnLg?: boolean;
 }
 
 const {
@@ -42,9 +46,11 @@ const {
   currencyCode = 'USD',
   discountCents = 0,
   shippingCents = null,
+  taxCents = 0,
   checkoutHref,
   labels,
   isEmpty = false,
+  stickyOnLg = false,
 } = Astro.props;
 
 const subtotalFormatted = formatCurrency(subtotalCents, currencyCode);
@@ -55,14 +61,18 @@ const shippingFormatted =
     : shippingCents === 0
       ? labels.shippingFree
       : formatCurrency(shippingCents, currencyCode);
-const totalCents = Math.max(0, subtotalCents - discountCents + (shippingCents ?? 0));
+const taxFormatted = taxCents > 0 ? formatCurrency(taxCents, currencyCode) : null;
+const totalCents = Math.max(0, subtotalCents - discountCents + (shippingCents ?? 0) + taxCents);
 const totalFormatted = formatCurrency(totalCents, currencyCode);
 
 const showShipping = shippingCents !== null;
 ---
 
 <aside
-  class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+  class:list={[
+    'flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6',
+    stickyOnLg && 'lg:sticky lg:top-24',
+  ]}
   aria-label={labels.total}
 >
   <h2 class="text-base font-semibold text-slate-900">{labels.total}</h2>
@@ -84,6 +94,13 @@ const showShipping = shippingCents !== null;
       <div class="flex items-center justify-between">
         <dt class="text-slate-600">{labels.shipping}</dt>
         <dd class="tabular-nums text-slate-900">{shippingFormatted}</dd>
+      </div>
+    )}
+
+    {taxFormatted !== null && (
+      <div class="flex items-center justify-between">
+        <dt class="text-slate-600">{labels.tax}</dt>
+        <dd class="tabular-nums text-slate-900">{taxFormatted}</dd>
       </div>
     )}
 
