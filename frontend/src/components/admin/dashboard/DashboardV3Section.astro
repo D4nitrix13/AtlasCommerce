@@ -4,8 +4,8 @@
  *
  * Vivir acá permite que tanto `/admin/` como `/admin/dashboard/`
  * compartan la MISMA composición. Cada page es solo un wrapper que
- * monta `<DashboardV3Section />`. Evita duplicar imports, mocks y
- * props y mantiene una single source of truth.
+ * monta `<DashboardV3Section />`. Evita duplicar imports y mantiene
+ * una single source of truth.
  *
  * Componentes:
  *   - KpiCardV3 (4 cards: Ingresos, Pedidos, Clientes, Conversion).
@@ -16,9 +16,9 @@
  *   - ActivityFeedV3 (3 alertas).
  *   - DateRangeFilterV3 (selector 7d/30d/90d/All — visual).
  *
- * Datos: mock estaticos. Cuando el backend exponga endpoints v3-friendly
- * (`/api/v1/admin/metrics/v3/summary` u opt-in flag), el caller de este
- * componente (la page) puede reemplazarlos por fetch real.
+ * Datos: viven en `admin-dashboard-mock.ts`. Cuando el backend exponga
+ * endpoints v3-friendly, el caller de este componente (la page) puede
+ * pasar su propia data con la misma forma (mismas keys, mismos tipos).
  */
 import KpiCardV3 from './KpiCardV3.astro';
 import RevenueChartV3 from './RevenueChartV3.astro';
@@ -28,6 +28,13 @@ import OrdersTableV3 from './OrdersTableV3.astro';
 import TopProductsV3 from './TopProductsV3.astro';
 import ActivityFeedV3 from './ActivityFeedV3.astro';
 import type { TranslationKey } from '../../../i18n/types';
+import {
+  buildActivityAlerts,
+  buildCategorySegments,
+  buildRecentOrdersMock,
+  buildRevenuePoints,
+  TOP_PRODUCTS_MOCK,
+} from '../../../data/admin-dashboard-mock';
 
 interface Props {
   /**
@@ -40,107 +47,27 @@ interface Props {
 
 const { t } = Astro.props;
 
-interface ChartPoint {
-  x: number;
-  y: number;
-  label?: string;
-}
-
-/**
- * Genera 30 puntos para el revenue chart, variando con un patron
- * realista (tendencia levemente creciente + ruido). Y se mapea al
- * viewBox 0-210 (eje invertido: y mas bajo = valor mas alto).
- */
-function buildRevenuePoints(): ChartPoint[] {
-  const WIDTH = 680;
-  const COUNT = 30;
-  const values = [
-    32, 38, 28, 45, 55, 48, 62, 70, 58, 65, 75, 82, 70, 78, 88, 80, 92, 95,
-    88, 95, 100, 92, 98, 105, 110, 102, 108, 115, 120, 128,
-  ];
-  const minValue = 25;
-  const maxValue = 130;
-  const yMin = 30;
-  const yMax = 180;
-
-  return values.map((value, i) => {
-    const x = (WIDTH / (COUNT - 1)) * i;
-    const ratio = (value - minValue) / (maxValue - minValue);
-    const y = yMax - ratio * (yMax - yMin);
-    return { x, y };
-  });
-}
-
 const revenuePoints = buildRevenuePoints();
-
-const topProducts = [
-  { name: 'Playera Premium', unitsLabel: '342', revenueLabel: '$6.148' },
-  { name: 'Hoodie French Terry', unitsLabel: '198', revenueLabel: '$4.752' },
-  { name: 'Gorra Bordada', unitsLabel: '142', revenueLabel: '$2.260' },
-  { name: 'Taza Personalizada', unitsLabel: '128', revenueLabel: '$1.408' },
-  { name: 'Sudadera Kitsune', unitsLabel: '89', revenueLabel: '$4.272' },
-];
-
-const recentOrders = [
-  {
-    orderNumber: '#AT-2481',
-    customer: 'Colegio San Martín',
-    total: '$1.240',
-    status: 'production' as const,
-    ago: `8 ${t['admin.dashboard.v3.recentOrders.time.minutes']}`,
-  },
-  {
-    orderNumber: '#AT-2480',
-    customer: 'Estudio Norte',
-    total: '$680',
-    status: 'paid' as const,
-    ago: `24 ${t['admin.dashboard.v3.recentOrders.time.minutes']}`,
-  },
-  {
-    orderNumber: '#AT-2479',
-    customer: 'Fundación Arco',
-    total: '$3.920',
-    status: 'shipped' as const,
-    ago: `1 ${t['admin.dashboard.v3.recentOrders.time.hour']}`,
-  },
-  {
-    orderNumber: '#AT-2478',
-    customer: 'Marta Quiroga',
-    total: '$342',
-    status: 'paid' as const,
-    ago: `3 ${t['admin.dashboard.v3.recentOrders.time.hours']}`,
-  },
-  {
-    orderNumber: '#AT-2477',
-    customer: 'Hotel Vista Hermosa',
-    total: '$2.180',
-    status: 'delivered' as const,
-    ago: `5 ${t['admin.dashboard.v3.recentOrders.time.hours']}`,
-  },
-];
-
-const categorySegments = [
-  {
-    value: 42,
-    color: 'var(--primary, #2d9d8e)',
-    label: t['admin.dashboard.v3.category.tshirts'],
-  },
-  {
-    value: 24,
-    color: '#EAB24B',
-    label: t['admin.dashboard.v3.category.hoodies'],
-  },
-  {
-    value: 16,
-    color: '#951318',
-    label: t['admin.dashboard.v3.category.caps'],
-  },
-  {
-    value: 18,
-    color: '#9FB0BC',
-    label: t['admin.dashboard.v3.category.accessories'],
-  },
-];
+const topProducts = TOP_PRODUCTS_MOCK;
+const categorySegments = buildCategorySegments({
+  tshirts: t['admin.dashboard.v3.category.tshirts'],
+  hoodies: t['admin.dashboard.v3.category.hoodies'],
+  caps: t['admin.dashboard.v3.category.caps'],
+  accessories: t['admin.dashboard.v3.category.accessories'],
+});
+const recentOrders = buildRecentOrdersMock(
+  t['admin.dashboard.v3.recentOrders.time.minutes'],
+  t['admin.dashboard.v3.recentOrders.time.hour'],
+  t['admin.dashboard.v3.recentOrders.time.hours'],
+);
+const activityAlerts = buildActivityAlerts({
+  rfqTitle: t['admin.dashboard.v3.activity.rfqTitle'],
+  rfqBody: t['admin.dashboard.v3.activity.rfqBody'],
+  lowStockTitle: t['admin.dashboard.v3.activity.lowStockTitle'],
+  lowStockBody: t['admin.dashboard.v3.activity.lowStockBody'],
+  shippingTitle: t['admin.dashboard.v3.activity.shippingTitle'],
+  shippingBody: t['admin.dashboard.v3.activity.shippingBody'],
+});
 
 const statusLabels = {
   production: t['admin.dashboard.v3.recentOrders.status.production'],
@@ -150,24 +77,6 @@ const statusLabels = {
 };
 
 const vsPrevious = t['admin.dashboard.v3.kpi.vsPrevious'];
-
-const activityAlerts = [
-  {
-    severity: 'warning' as const,
-    title: t['admin.dashboard.v3.activity.rfqTitle'],
-    body: t['admin.dashboard.v3.activity.rfqBody'],
-  },
-  {
-    severity: 'warning' as const,
-    title: t['admin.dashboard.v3.activity.lowStockTitle'],
-    body: t['admin.dashboard.v3.activity.lowStockBody'],
-  },
-  {
-    severity: 'info' as const,
-    title: t['admin.dashboard.v3.activity.shippingTitle'],
-    body: t['admin.dashboard.v3.activity.shippingBody'],
-  },
-];
 
 const chartId = `dash-revenue-${Math.random().toString(36).slice(2)}`;
 const donutId = `dash-donut-${Math.random().toString(36).slice(2)}`;
