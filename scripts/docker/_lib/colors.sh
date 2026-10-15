@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # scripts/docker/_lib/colors.sh
-# Constantes ANSI para colorear la salida. TTY-aware: si no hay
-# terminal (CI, logs redirigidos a archivo), no emitimos códigos.
+# Constantes ANSI para colorear la salida.
 #
 # Convención: cada mensaje de log usa una familia de color distinta
 # para que sea fácil de seguir en logs largos:
@@ -11,7 +10,27 @@
 #   - error → rojo (a stderr)
 #   - cmd   → dim/gris (se distingue del output del comando)
 #   - bold  → para enfatizar nombres de instancia/servicio
-if [[ -t 1 ]]; then
+#
+# IMPORTANTE: emitimos SIEMPRE códigos ANSI. Razon: el bug
+# recurrente era que `[[ -t 1 ]]` devuelve false en scripts
+# invocados via 'bash -c' o con stdout pipe'd (incluso si el
+# usuario esta en terminal interactiva). Esto causaba que las
+# constantes quedaran vacias y el output se viera plano. Las
+# terminales modernas (xterm, gnome-terminal, iTerm, vscode
+# terminal) soportan ANSI; las que no, muestran caracteres
+# raros pero el dev lo identifica rapido.
+#
+# Si necesitas NO-COLOR (por ejemplo para CI logs que se commitean
+# como texto plano), exporta ATLASCOMMERCE_NO_COLOR=1 antes de
+# invocar el script.
+if [[ "${ATLASCOMMERCE_NO_COLOR:-0}" == "1" ]]; then
+    C_RESET=""; C_BOLD=""; C_DIM=""; C_UL=""
+    C_RED=""; C_GREEN=""; C_YELLOW=""
+    C_BLUE=""; C_MAGENTA=""; C_CYAN=""
+    C_BRIGHT_RED=""; C_BRIGHT_GREEN=""; C_BRIGHT_YELLOW=""
+    C_BRIGHT_BLUE=""; C_BRIGHT_MAGENTA=""; C_BRIGHT_CYAN=""
+    C_BRIGHT_WHITE=""
+else
     # Reset y modificadores.
     C_RESET=$'\033[0m'
     C_BOLD=$'\033[1m'
@@ -35,11 +54,4 @@ if [[ -t 1 ]]; then
     C_BRIGHT_MAGENTA=$'\033[95m'
     C_BRIGHT_CYAN=$'\033[96m'
     C_BRIGHT_WHITE=$'\033[97m'
-else
-    C_RESET=""; C_BOLD=""; C_DIM=""; C_UL=""
-    C_RED=""; C_GREEN=""; C_YELLOW=""
-    C_BLUE=""; C_MAGENTA=""; C_CYAN=""
-    C_BRIGHT_RED=""; C_BRIGHT_GREEN=""; C_BRIGHT_YELLOW=""
-    C_BRIGHT_BLUE=""; C_BRIGHT_MAGENTA=""; C_BRIGHT_CYAN=""
-    C_BRIGHT_WHITE=""
 fi
