@@ -85,15 +85,18 @@ instance_compose_file() {
 }
 
 # instance_env_file <name>
-# Devuelve el flag --env-file con la ruta absoluta al .env de la
-# instancia, o string vacío si no existe (compose usará sus defaults).
-# Usado por docker_compose() para pasar variables de entorno.
+# Devuelve el flag --env-file con la ruta RELATIVA al .env de la
+# instancia (relativa al cwd del wrapper, que ya es el directorio de la
+# instancia vía `cd` en docker_compose). O string vacío si no existe
+# (compose usará sus defaults). Antes de 2026-10-15 esta era absoluta
+# (`${dir}/environment/.env`); se simplificó para evitar inundar el
+# output del orquestador con paths largas redundantes.
 instance_env_file() {
     local name="$1"
     local dir
     dir="$(instance_compose_dir "$name")"
     if [[ -f "${dir}/environment/.env" ]]; then
-        echo "--env-file ${dir}/environment/.env"
+        echo "--env-file environment/.env"
     else
         echo ""
     fi

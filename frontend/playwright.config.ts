@@ -6,7 +6,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Pre-requisito: tener corriendo en local:
  *   - Postgres + Redis (docker compose up -d en docker/dev)
  *   - Backend Laravel (php artisan serve --host=127.0.0.1 --port=8000)
- *   - Frontend Astro (pnpm run dev)
+ *   - Frontend Astro (bun run dev)
  *   - Caddy (sudo systemctl start caddy) en puerto 80
  *
  * Las URLs base usan `panda-estampados.com` que debe estar en /etc/hosts.
@@ -43,7 +43,7 @@ export default defineConfig({
   //   2. npx playwright test
   //
   // webServer: {
-  //   command: "pnpm run dev:e2e",
+  //   command: "bun run dev:e2e",
   //   url: "http://panda-estampados.com",
   //   reuseExistingServer: !process.env.CI,
   //   timeout: 60_000,

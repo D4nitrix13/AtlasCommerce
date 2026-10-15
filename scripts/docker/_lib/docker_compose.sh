@@ -33,9 +33,12 @@ docker_compose() {
     # Armar el array de tokens para `docker compose`. Separamos flags
     # (-f, --env-file) de valores posicionales para que log_cmd_block
     # los coloree distinto y los wrappee con `\` cuando aparece un flag.
+    # El --env-file es RELATIVO al cwd (que ya es $dir) para no inundar
+    # el output con la ruta absoluta del repo: ver git log del commit
+    # "simplificar output del orquestador docker-stack" (Track 1 T1.2).
     local compose_args=("${DOCKER_BIN}" "compose" "-f" "$file")
     if [[ -n "$env_file" ]]; then
-        compose_args+=("--env-file" "${dir}/environment/.env")
+        compose_args+=("--env-file" "environment/.env")
     fi
     compose_args+=("$@")
 

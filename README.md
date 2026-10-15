@@ -1,30 +1,31 @@
 # AtlasCommerce
 
-Plataforma multi-tienda para la gestión y comercialización de merchandising
-personalizado, productos de cultura japonesa, videojuegos, anime, artículos
-textiles, cerámica, vidrio, madera, aluminio y regalos corporativos. Construida
-sobre Laravel 13 + Astro 7, pensada para correr múltiples tiendas (Panda
-Estampados, Kitsune, MM Boutique, Morales Store) sobre una base de código
-compartida con resolución por dominio.
+Plataforma SaaS multi-tienda para la gestión y comercialización de merchandising
+personalizado, productos de cultura japonesa, instrumentos musicales, moda y más.
+Construida sobre Laravel 13 + Astro 7, pensada para correr múltiples tiendas
+(Panda Estampados + Kitsune multi-tenant, MM Boutique, Morales Store, La Voz
+Instrumentos) sobre una base de código compartida con resolución por dominio.
 
 ## Descripción
 
 La plataforma funciona como:
 
 - **Vitrina digital** — catálogo público de productos con precios, disponibilidad
-  e interacción por WhatsApp.
+  y conversión vía WhatsApp / checkout.
 - **Panel administrativo** — gestión de clientes, productos, categorías,
   proveedores, compras, facturas, reportes, respaldos, auditoría, logs y
   notificaciones internas.
+- **Multi-tenant SaaS** — instalado y operando en producción para **La Voz
+  Instrumentos** (`instrumentos-musicales-la-voz`) como primer cliente real.
 
 Soporta **multi-tienda** con resolución por dominio:
 
 | Tienda | Dominio | Enfoque |
 | --- | --- | --- |
-| **Panda Estampados** | `panda-estampados.com` | B2B / corporativo — estampados personalizados |
-| **Kitsune Store** | `kitsune.com` | B2C — cultura anime, manga y japonesa |
-| **MM Boutique** | `mm-boutique.com` | Single-tenant |
-| **Morales Store** | `morales-store.com` | Single-tenant |
+| **Panda Estampados** (B2B) + **Kitsune** (B2C) | `panda-estampados.com` / `kitsune.com` | Multi-tenant: estampados textiles + cultura japonesa |
+| **MM Boutique** | `mm-boutique.com` | B2C — moda, zapatos, bolsos |
+| **Morales Store** | `morales-store.com` | Retail general, abarrotes, hogar |
+| **La Voz Instrumentos** | `lavo...` (pendiente) | B2C — instrumentos musicales (Nicaragua, primer cliente) |
 
 Las 4 tiendas se ejecutan como **instancias Docker independientes** que
 comparten código y configuración, pero tienen su propia DB, sus volúmenes y
@@ -32,17 +33,26 @@ su dominio.
 
 ## Stack Tecnológico
 
-| Capa | Tecnología |
-| --- | --- |
-| Backend | PHP 8.4, Laravel 13.8, Sanctum |
-| Frontend | Astro 7, React 19, Tailwind CSS 4, TypeScript |
-| Base de datos | PostgreSQL 18 + PostGIS |
-| Cache / Colas | Redis 7 |
-| Storage | Volúmenes Docker (bind mount en dev) |
-| Reverse proxy | Caddy |
-| Infraestructura | Docker Compose v2 |
-| Package manager | Composer (PHP), pnpm (Node) |
-| Testing | PHPUnit 12 |
+| Capa | Tecnología | Versión |
+| --- | --- | --- |
+| Backend | PHP, Laravel, Sanctum | 8.4, 13.8, 13 |
+| Frontend | Astro, React, Tailwind, TypeScript | 7, 19, 4, 6 |
+| Multi-tenant themes (workspace) | Astro island + CSS vars (por tenant) | — |
+| Base de datos | PostgreSQL + PostGIS | 18 + 3.6 |
+| Cache / Colas | Redis | 7 |
+| Storage | Volúmenes Docker (bind mount en dev) | — |
+| Reverse proxy | Caddy | 2.8 |
+| Infraestructura | Docker Compose v2 | 5+ |
+| Package manager (PHP) | Composer | 2 |
+| Package manager (Node) | **bun** (migrado desde pnpm; commit 51deaddf) | 1.4 |
+| Build / bundle | Bun nativo (no webpack ni vite separado para SSR) | — |
+| Storybook (UI showcase) | Storybook + Astro framework | 10 |
+| Testing backend | PHPUnit, Pint, PHPStan | 12, latest, latest |
+| Testing frontend | Vitest (unit), Playwright (e2e + a11y), Storybook | 4, latest, 10 |
+
+> Decisiones detalladas, migraciones futuras y tradeoffs en
+> [`docs/operations/tech-stack.md`](docs/operations/tech-stack.md
+> "docs/operations/tech-stack.md").
 
 ## Estructura del Proyecto
 
@@ -89,7 +99,7 @@ AtlasCommerce/
 
 - Docker Engine 24+ con Compose v2
 - Bash 4+ (para los scripts)
-- Node.js 20+ y pnpm 9+ (solo si vas a tocar el frontend fuera de Docker)
+- **bun** 1.4+ (solo si vas a tocar el frontend fuera de Docker; dentro del container ya viene instalado vía corepack)
 - PHP 8.4+ (solo si vas a tocar el backend fuera de Docker)
 
 ## Instalación
@@ -166,13 +176,13 @@ vendor/bin/phpstan analyse
 
 ```bash
 ./scripts/docker-stack.sh exec dev frontend sh
-# ya dentro del container:
-pnpm dev
-pnpm build
-pnpm typecheck
-pnpm format
-pnpm storybook          # UI primitives + componentes (puerto 6006)
-pnpm storybook:build    # build estático para Chromatic / CI
+# ya dentro del container (bun es el package manager; ver docs/operations/tech-stack.md):
+bun run dev
+bun run build
+bun run typecheck
+bun run format
+bun run storybook          # UI primitives + componentes (puerto 6006)
+bun run storybook:build    # build estático para Chromatic / CI
 ```
 
 ## Storybook (UI primitives y showcase de componentes)
@@ -184,9 +194,9 @@ y probar componentes UI en aislamiento. Ver
 
 ```bash
 cd frontend
-pnpm storybook              # dev en http://localhost:6006
-pnpm storybook:build        # build estático en storybook-static/
-pnpm storybook:test         # smoke test del build
+bun run storybook              # dev en http://localhost:6006
+bun run storybook:build        # build estático en storybook-static/
+bun run storybook:test         # smoke test del build
 ```
 
 Las stories viven junto a cada componente (`*.stories.ts`).

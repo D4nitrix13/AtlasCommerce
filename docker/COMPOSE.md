@@ -35,7 +35,7 @@ Mapeo de binarios comunes en este repo:
 | `postgres`           | `/usr/lib/postgresql/<ver>/bin/postgres`  |
 | `redis-server`       | `/usr/local/bin/redis-server`             |
 | `vsftpd`             | `/usr/sbin/vsftpd`                        |
-| `pnpm`               | `/usr/local/bin/pnpm`                     |
+| `bun`                | `/usr/local/bin/bun`                      |
 | `node`               | `/usr/local/bin/node`                     |
 | `php`                | `/usr/local/bin/php`                      |
 | `php-fpm`            | `/usr/local/sbin/php-fpm`                 |

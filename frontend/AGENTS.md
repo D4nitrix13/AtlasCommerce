@@ -524,9 +524,9 @@ Ejecutar Storybook:
 
 ```bash
 cd frontend
-pnpm storybook              # http://localhost:6006
-pnpm storybook:build        # build estático
-pnpm storybook:test         # smoke test
+bun run storybook              # http://localhost:6006
+bun run storybook:build        # build estático
+bun run storybook:test         # smoke test
 ```
 
 Más detalle en

@@ -27,83 +27,69 @@ cmd_help() {
         return 0
     fi
 
-    # ─── Help raíz: índice compacto ──────────────────────────────────
-    /usr/bin/cat <<'SEPARATOR'
+    # ─── Help raíz: indice compacto (Track 1 T1.2 simplificacion) ─────
+    #
+    # Cambios desde la version anterior:
+    #   - Aliases, puertos dev, sub-tenants y tabla de destructivos separados
+    #     ELIMINADOS del help raiz (estan en docs/operations/ports.md y
+    #     `help <cmd>` cuando hace falta). El help raiz muestra SOLO
+    #     lo necesario para decidir que comando correr.
+    #   - Destructivos integrados en la misma tabla con marker [D][X].
+    #   - Salida ~50% mas corta (carga en pantalla mas rapido).
+    printf "${C_BOLD}scripts/docker-stack.sh${C_RESET} — orquestador de las 6 instancias Docker\n\n"
 
-SEPARATOR
-
-    printf "${C_BOLD}scripts/docker-stack.sh${C_RESET}  orquestador de las 6 instancias Docker\n"
-    printf "\n"
     printf "${C_BOLD}Uso${C_RESET}\n"
     printf "  %s ${C_BRIGHT_MAGENTA}<comando>${C_RESET} [flags] ${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BRIGHT_CYAN}<store|all>${C_RESET} [<servicio>]\n" "$0"
-    printf "  %s ${C_BRIGHT_MAGENTA}<comando>${C_RESET} ${C_DIM}--help${C_RESET}  help detallado del comando\n" "$0"
-    printf "\n"
+    printf "  %s ${C_BRIGHT_MAGENTA}<comando>${C_RESET} help   help detallado del comando\n\n" "$0"
+
     printf "${C_BOLD}Argumentos${C_RESET}\n"
-    printf "  ${C_BRIGHT_YELLOW}<stage>${C_RESET}        production | prod | development | dev\n"
-    printf "  ${C_BRIGHT_CYAN}<store|all>${C_RESET}   panda-estampados-and-kitsune | mm-boutique | morales-store | all\n"
-    printf "  [<servicio>]   (opcional) backend | frontend | postgres | redis | caddy | ...\n"
-    printf "\n"
+    printf "  ${C_BRIGHT_YELLOW}<stage>${C_RESET}       production | development\n"
+    printf "  ${C_BRIGHT_CYAN}<store>${C_RESET}       panda-estampados-and-kitsune | mm-boutique | morales-store | all\n"
+    printf "  ${C_GREEN}[<servicio>]${C_RESET}  backend | frontend | postgres | redis | caddy | ...  (opcional)\n\n"
 
-    # ─── Índice de comandos ────────────────────────────────────────
-    printf "${C_BOLD}Comandos disponibles${C_RESET}\n"
-    printf "  Para ver el detalle de un comando: %s ${C_BRIGHT_MAGENTA}<cmd>${C_RESET} ${C_DIM}--help${C_RESET}\n" "$0"
-    printf "\n"
-    _box_draw 2 \
-        "Comando"      "Descripción" \
-        "start"        "Levantar containers existentes (sin rebuild; respeta estado actual)" \
-        "stop"         "Detener containers sin eliminarlos (preserva volúmenes + containers)" \
-        "restart"      "Reiniciar containers corriendo (sin rebuild, sin reanimar detenidos)" \
-        "up"           "Build + start (recrea containers si cambió Dockerfile/.env; preserva volúmenes)" \
-        "down"         "Detener y eliminar containers (preserva volúmenes named)" \
-        "build"        "Reconstruir imágenes Docker sin arrancar; [--no-cache] fuerza rebuild full" \
-        "ps"           "Lista rápida de TODOS los containers de las 6 instancias (sin args)" \
-        "status"       "Estado por servicio via docker compose ps (1 instancia)" \
-        "info"         "Tabla detallada: instancia + servicio + estado + puertos + comando" \
-        "logs"         "Tail -f de logs (servicio REQUERIDO; con store=all hace tail paralelo prefijado)" \
-        "volumes"      "Volúmenes Docker agrupados por categoría (data/cache/log) con tamaño real" \
-        "exec"         "Ejecutar comando arbitrario dentro de un container (debugging)" \
-        "setup"        "Primera instalación: .env + up + storage:link + cache:clear + migrate + tenants:bootstrap" \
-        "bootstrap"    "Regenerar APP_KEY del backend si falta o es placeholder (idempotente)" \
-        "db-backup"    "Exportar BD a db-backups/<stage>-<store>-<ts>.sql.gz [--schema-only] [--output <path>]" \
-        "db-restore"   "Cargar dump en BD; pre-backup safety net automático (DESTRUCTIVO: pisa BD)" \
-        "seed-db"      "Migrate + (opcional --seed y/o --sql <file>); solo toca contenido de BD" \
-        "sync-assets"  "Sincronizar brand-assets/ → FTP via artisan [--dry-run] [--force]" \
-        "nuke"         "down + eliminar volúmenes (BORRA BD; pide confirmación 'yes')" \
-        "rm-volumes"   "Eliminar volúmenes sin tocar containers [-y salta confirmación]" \
-        "fresh"        "down -v + rebuild + pre-initdb + migrate + seed + tenants:bootstrap (clean slate)" \
-        "hosts"        "Imprime el bloque a pegar en /etc/hosts (sin args)" \
-        "caddy"        "Imprime docker/caddy/Caddyfile para enrutar las 6 instancias (sin args)" \
-        "help"         "Muestra este índice (o 'help <cmd>' para el detalle de un comando)"
+    printf "${C_BOLD}Comandos${C_RESET}   [D][X]=destructivo (BORRA datos, pide confirm)\n"
+    # Una sola tabla — destructivos al final en rojo con marker [D][X].
+    _box_draw 3 \
+        "Comando"      "Flags"                      "Descripcion" \
+        "start"        ""                           "Levantar containers existentes (sin rebuild)" \
+        "stop"         ""                           "Detener containers (preserva estado)" \
+        "restart"      ""                           "Reiniciar containers corriendo" \
+        "up"           ""                           "Build + start (recrea si cambiaron Dockerfile/.env)" \
+        "down"         ""                           "Detener + eliminar containers (preserva volumenes)" \
+        "build"        "--no-cache"                 "Reconstruir imagenes Docker" \
+        "ps"           ""                           "Vista global de containers de las 6 instancias" \
+        "status"       ""                           "Estado por servicio de 1 instancia" \
+        "info"         ""                           "Tabla: instancia + servicio + puertos + comando" \
+        "logs"         ""                           "Tail -f de logs (servicio REQUERIDO)" \
+        "volumes"      ""                           "Volumenes Docker agrupados con tamaño real" \
+        "exec"         ""                           "Ejecutar comando dentro de un container" \
+        "setup"        ""                           "Primera instalacion completa (.env + up + migrate)" \
+        "bootstrap"    ""                           "Regenerar APP_KEY si falta (idempotente)" \
+        "db-backup"    "--schema-only, --output"    "Exportar BD a .sql.gz" \
+        "db-restore"   "--force, --truncate"        "Cargar dump en BD (DESTRUCTIVO)" \
+        "seed-db"      "--seed, --sql <f>"          "Migrate + (--seed o --sql <archivo>)" \
+        "sync-assets"  "--dry-run, --force"         "brand-assets/ → FTP via artisan" \
+        "hosts"        ""                           "Bloque para /etc/hosts (sin args)" \
+        "caddy"        ""                           "Caddyfile para enrutar 6 instancias (sin args)" \
+        "help"         "[comando]"                  "Muestra este indice o detalle de un comando"
 
-    # ─── Destructivos (en rojo) ────────────────────────────────────
-    _BOX_CMD_COLOR="${C_BRIGHT_RED}" _box_draw 4 \
-        "Comando"      "Stage"    "Store"   "Descripción" \
-        "nuke"         "dev|prod" "all"     "down + eliminar volúmenes (BORRA BD; 'yes' para confirmar)" \
-        "rm-volumes"   "dev|prod" "all"     "Borrar volúmenes sin tocar containers (-y skip confirm)" \
-        "fresh"        "dev|prod" "<store>" "down -v + rebuild + pre-initdb + migrate + seed + tenants"
-
-    # ─── Aliases ───────────────────────────────────────────────────
-    printf "${C_BOLD}Aliases${C_RESET}\n"
-    printf "  ${C_BRIGHT_MAGENTA}b${C_RESET}=build   ${C_BRIGHT_MAGENTA}rs${C_RESET}=restart   ${C_BRIGHT_MAGENTA}ls${C_RESET}=ps   ${C_BRIGHT_MAGENTA}psv${C_RESET}=info   ${C_BRIGHT_MAGENTA}vol${C_RESET}=volumes   ${C_BRIGHT_MAGENTA}rmvol${C_RESET}=rm-volumes\n"
-    printf "\n"
-
-    # ─── Puertos dev ───────────────────────────────────────────────
-    # Resetear color de comando: la tabla de Puertos NO debe colorear
-    # la columna "Tienda" como si fuera un comando.
+    # Destructivos en rojo (la tabla no necesita _BOX_CMD_COLOR por
+    # default porque ya aplica magenta a la primera columna).
+    _BOX_CMD_COLOR="${C_BRIGHT_RED}" _box_draw 3 \
+        "Comando"      "Flags"   "Descripcion" \
+        "nuke [D][X]"  ""        "down + eliminar volumenes (BORRA BD)" \
+        "rm-volumes [D][X]" "-y"  "Eliminar volumenes sin tocar containers" \
+        "fresh [D][X]" ""        "down -v + rebuild + migrate + seed + tenants"
     unset _BOX_CMD_COLOR
-    printf "${C_BOLD}Puertos dev${C_RESET}  (shifted por instancia)\n"
-    _box_draw 10 \
-        "Tienda"                          "PG"  "Redis" "Backend" "Front" "FTP"  "PASV"         "pgAdm" "Insig" "FTPbr" \
-        "panda-estampados-and-kitsune-dev" "6432" "7379"  "9000"    "5321"  "2121" "40000-40099" "6050"  "6540"  "9080" \
-        "mm-boutique-dev"                  "7432" "8379"  "10000"   "6321"  "3121" "40100-40199" "7050"  "7540"  "10080" \
-        "morales-store-dev"                "8432" "9379"  "11000"   "7321"  "4121" "40200-40299" "8050"  "8540"  "11080"
-    printf "\n"
 
-    # ─── Sub-tenants ───────────────────────────────────────────────
-    printf "${C_BOLD}Sub-tenants${C_RESET}  (multi-tenancy: varias tiendas en una instancia)\n"
-    printf "  panda-estampados-and-kitsune-dev hospeda 2 tenants:\n"
-    printf "    pandas-estampados.com  (B2B mayorista)\n"
-    printf "    kitsune.com              (B2C minorista)\n"
+    printf "Detalle de un comando: ${C_BRIGHT_CYAN}%s ${C_BRIGHT_MAGENTA}<comando>${C_RESET} ${C_DIM}help${C_RESET}\n" "$0"
+    printf "Aliases: ${C_BRIGHT_MAGENTA}b${C_RESET}=build ${C_BRIGHT_MAGENTA}rs${C_RESET}=restart ${C_BRIGHT_MAGENTA}ls${C_RESET}=ps ${C_BRIGHT_MAGENTA}psv${C_RESET}=info ${C_BRIGHT_MAGENTA}vol${C_RESET}=volumes ${C_BRIGHT_MAGENTA}rmvol${C_RESET}=rm-volumes\n\n"
+
+    printf "${C_BOLD}Tiendas (store)${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}  hospeda ${C_BOLD}2${C_RESET} sub-tenants (pandas-estampados.com B2B + kitsune.com B2C)\n"
+    printf "  ${C_BRIGHT_CYAN}mm-boutique${C_RESET}                 B2C (moda, zapatos, bolsos)\n"
+    printf "  ${C_BRIGHT_CYAN}morales-store${C_RESET}               retail general, abarrotes, hogar\n"
+    printf "  ${C_BRIGHT_CYAN}instrumentos-musicales-la-voz${C_RESET}  instrumentos musicales (Nicaragua)\n"
 }
 
 # _cmd_specific_help muestra el detalle de UN comando.

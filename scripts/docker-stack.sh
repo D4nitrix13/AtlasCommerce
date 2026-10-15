@@ -131,68 +131,169 @@ args_contain_help() {
     return 1
 }
 
-# Imprime el bloque de USO + lista de stages + stores + ejemplos
-# cuando faltan argumentos posicionales. Usado por casi todos los
-# comandos con args requeridos.
+# Imprime el bloque de USO cuando faltan argumentos posicionales.
+# Usado por casi todos los comandos con args requeridos.
 #
-# Layout: cada ejemplo se imprime en 2 lineas — el comando solo en
-# una, y la descripcion (color dim) en la siguiente con indent de 4
-# espacios. Asi no se descuadra cuando un ejemplo tiene más chars que
-# otro (problema classico cuando se intenta alinear comentarios en
-# columna fija con anchos variables).
+# Objetivo: mensaje claro y sin ruido (pre-2026-10-15 hacia prefijar
+# cada linea con `[error]` via log_err, lo que ensuciaba el output).
+# Ahora:
+#   1. Una linea con el comando + descripcion corta de QUE hace.
+#   2. Un bloque "Te falta:" con los args que faltan.
+#   3. 1-2 ejemplos concretos copiables.
+#   4. Link a `./scripts/docker-stack.sh help <cmd>` para el detalle.
+#
+# El caller (dispatcher) ya computó que el comando es conocido, asi
+# que $cmd_canonical es uno de los listados en `is_known_cmd`.
 _print_positional_usage() {
     local cmd_canonical="$1"
     local script_path="$2"
 
-    log_err "Uso: ${C_BRIGHT_CYAN}${script_path} <cmd>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store|all>${C_RESET} ${C_GREEN}[<servicio>]${C_RESET}"
-    log_err "Stages: ${C_BRIGHT_CYAN}production|prod${C_RESET}, ${C_BRIGHT_CYAN}development|dev${C_RESET}"
-    log_err "Stores: ${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}, ${C_BRIGHT_CYAN}mm-boutique${C_RESET}, ${C_BRIGHT_CYAN}morales-store${C_RESET}, ${C_BRIGHT_CYAN}instrumentos-musicales-la-voz${C_RESET}, ${C_BRIGHT_CYAN}all${C_RESET}"
-    echo ""
+    # Descripcion corta de cada comando. Si no esta en este switch,
+    # cae al default que solo dice "uso" generico.
+    local desc="" required_args="" examples="" more_help=""
     case "$cmd_canonical" in
-        build)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} build no-cache dev panda-estampados-and-kitsune backend${C_RESET}"
-            log_err "    ${C_DIM}rebuild sin cache de 1 target${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} build dev all backend${C_RESET}"
-            log_err "    ${C_DIM}3 dev (con cache)${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} build production all${C_RESET}"
-            log_err "    ${C_DIM}3 prod (con cache)${C_RESET}"
-            log_err "Para help: ${C_BRIGHT_CYAN}${script_path} build help${C_RESET}"
-            ;;
-        rm-volumes)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes -y dev panda-estampados-and-kitsune${C_RESET}"
-            log_err "    ${C_DIM}1 store, skip confirm${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} rm-volumes dev all${C_RESET}"
-            log_err "    ${C_DIM}3 dev, pedir confirm${C_RESET}"
-            ;;
-        logs)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} logs dev panda-estampados-and-kitsune backend${C_RESET}"
-            log_err "    ${C_DIM}svc requerido (backend|frontend|postgres|...)${C_RESET}"
-            ;;
-        exec)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} exec dev panda-estampados-and-kitsune backend bash${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} exec production mm-boutique app ls /var/www${C_RESET}"
-            log_err "Para help: ${C_BRIGHT_CYAN}${script_path} exec help${C_RESET}"
-            ;;
-        setup)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} setup production all${C_RESET}"
-            log_err "    ${C_DIM}3 prod (incluye all)${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} setup development panda-estampados-and-kitsune${C_RESET}"
-            log_err "    ${C_DIM}1 dev${C_RESET}"
-            ;;
-        fresh)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh development panda-estampados-and-kitsune${C_RESET}"
-            log_err "    ${C_DIM}1 instancia (store obligatorio)${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} fresh production mm-boutique${C_RESET}"
-            log_err "    ${C_DIM}1 instancia prod${C_RESET}"
-            ;;
-        *)
-            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev panda-estampados-and-kitsune${C_RESET}"
-            log_err "    ${C_DIM}1 instancia${C_RESET}"
-            log_err "  ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev all${C_RESET}"
-            log_err "    ${C_DIM}3 dev${C_RESET}"
-            log_err "Para help: ${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} help${C_RESET}"
-            ;;
+        up)             desc="Build + start containers (recrea si cambiaron Dockerfile/.env)"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="Levantar TODOS los servicios de Panda dev:
+  ${C_BRIGHT_CYAN}${script_path} up dev panda-estampados-and-kitsune all${C_RESET}
+
+Solo el backend de Panda dev:
+  ${C_BRIGHT_CYAN}${script_path} up dev panda-estampados-and-kitsune backend${C_RESET}"
+                        ;;
+        start)          desc="Levantar containers existentes SIN rebuild"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} start dev panda-estampados-and-kitsune backend${C_RESET}"
+                        ;;
+        stop)           desc="Detener containers preservandolos (no elimina)"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} stop dev panda-estampados-and-kitsune all${C_RESET}"
+                        ;;
+        restart)        desc="Reiniciar containers corriendo (no rebuilda)"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} restart dev panda-estampados-and-kitsune backend${C_RESET}"
+                        ;;
+        down)           desc="Detener + eliminar containers (preserva volumenes)"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} down dev panda-estampados-and-kitsune all${C_RESET}"
+                        ;;
+        build)          desc="Reconstruir imagenes Docker sin arrancar"
+                        required_args="[--no-cache] <stage> <store|all> [<servicio>|all]"
+                        examples="Con cache:    ${C_BRIGHT_CYAN}${script_path} build dev all${C_RESET}
+Sin cache:    ${C_BRIGHT_CYAN}${script_path} build --no-cache production all${C_RESET}
+Por servicio: ${C_BRIGHT_CYAN}${script_path} build dev panda-estampados-and-kitsune backend${C_RESET}"
+                        ;;
+        ps)             desc="Lista rapida de TODOS los containers (sin args)"
+                        required_args="(sin args)"
+                        examples="${C_BRIGHT_CYAN}${script_path} ps${C_RESET}"
+                        ;;
+        status)         desc="Estado por servicio via docker compose ps"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} status dev panda-estampados-and-kitsune${C_RESET}"
+                        ;;
+        info)           desc="Tabla detallada: instancia + servicio + estado + puertos + comando"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} info dev panda-estampados-and-kitsune${C_RESET}"
+                        ;;
+        logs)           desc="Tail -f de logs (servicio REQUERIDO)"
+                        required_args="<stage> <store|all> <servicio>"
+                        examples="${C_BRIGHT_CYAN}${script_path} logs dev panda-estampados-and-kitsune backend${C_RESET}"
+                        ;;
+        volumes)        desc="Volumenes Docker agrupados con tamaño real"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} volumes dev all${C_RESET}"
+                        ;;
+        exec)           desc="Ejecutar comando arbitrario dentro de un container"
+                        required_args="<stage> <store> <servicio> <comando...>"
+                        examples="bash en backend:        ${C_BRIGHT_CYAN}${script_path} exec dev panda-estampados-and-kitsune backend bash${C_RESET}
+artisan tinker:          ${C_BRIGHT_CYAN}${script_path} exec dev panda-estampados-and-kitsune backend /usr/local/bin/php artisan tinker${C_RESET}"
+                        ;;
+        setup)          desc="Primera instalacion completa (.env + up + migrate + cache + tenants)"
+                        required_args="<stage> <store|all>"
+                        examples="${C_BRIGHT_CYAN}${script_path} setup dev panda-estampados-and-kitsune${C_RESET}
+  ${C_BRIGHT_CYAN}${script_path} setup dev all${C_RESET}"
+                        ;;
+        bootstrap)      desc="Regenerar APP_KEY del backend si falta (idempotente)"
+                        required_args="<stage> <store>"
+                        examples="${C_BRIGHT_CYAN}${script_path} bootstrap dev panda-estampados-and-kitsune${C_RESET}"
+                        ;;
+        db-backup)      desc="Exportar BD a db-backups/<stage>-<store>-<ts>.sql.gz"
+                        required_args="<stage> <store> [--schema-only] [--output <path>]"
+                        examples="${C_BRIGHT_CYAN}${script_path} db-backup dev panda-estampados-and-kitsune${C_RESET}
+Schema solo: ${C_BRIGHT_CYAN}${script_path} db-backup production mm-boutique --schema-only${C_RESET}"
+                        ;;
+        db-restore)     desc="Cargar dump en BD (DESTRUCTIVO: pisa BD)"
+                        required_args="<stage> <store> <archivo> [--force] [--no-pre-backup] [--skip-migrate] [--truncate]"
+                        examples="${C_BRIGHT_CYAN}${script_path} db-restore dev panda-estampados-and-kitsune \\
+  dev-panda-estampados-and-kitsune-2026-08-26-1430.sql.gz${C_RESET}"
+                        ;;
+        seed-db)        desc="Migrate + (opcional --seed y/o --sql <archivo>)"
+                        required_args="<stage> <store> [--seed] [--sql <archivo>]"
+                        examples="${C_BRIGHT_CYAN}${script_path} seed-db dev panda-estampados-and-kitsune${C_RESET}
+Con seeders: ${C_BRIGHT_CYAN}${script_path} seed-db dev panda-estampados-and-kitsune --seed${C_RESET}"
+                        ;;
+        sync-assets)    desc="brand-assets/ → FTP via artisan"
+                        required_args="<stage> <store|all> [--dry-run] [--force]"
+                        examples="${C_BRIGHT_CYAN}${script_path} sync-assets dev panda-estampados-and-kitsune${C_RESET}
+Preview:    ${C_BRIGHT_CYAN}${script_path} sync-assets dev all --dry-run${C_RESET}"
+                        ;;
+        nuke)           desc="down + eliminar volumenes (BORRA BD)"
+                        required_args="<stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} nuke dev panda-estampados-and-kitsune${C_RESET}
+Pedira confirmacion escribiendo 'yes'.
+
+Para saltar la confirmacion (CUIDADO en prod):"
+                        ;;
+        rm-volumes)     desc="Eliminar volumenes sin tocar containers [-y para skip]"
+                        required_args="[-y] <stage> <store|all> [<servicio>|all]"
+                        examples="${C_BRIGHT_CYAN}${script_path} rm-volumes -y dev panda-estampados-and-kitsune${C_RESET}"
+                        ;;
+        fresh)          desc="down -v + rebuild + pre-initdb + migrate + seed + tenants"
+                        required_args="<stage> <store>"
+                        examples="${C_BRIGHT_CYAN}${script_path} fresh dev panda-estampados-and-kitsune${C_RESET}
+${C_BRIGHT_CYAN}${script_path} fresh production mm-boutique${C_RESET}"
+                        ;;
+        hosts)          desc="Imprime el bloque a pegar en /etc/hosts (sin args)"
+                        required_args="(sin args)"
+                        examples="${C_BRIGHT_CYAN}${script_path} hosts | sudo tee -a /etc/hosts${C_RESET}"
+                        ;;
+        caddy)          desc="Imprime el Caddyfile para enrutar las 6 instancias"
+                        required_args="(sin args)"
+                        examples="${C_BRIGHT_CYAN}${script_path} caddy | sudo tee /etc/caddy/Caddyfile && \\
+  sudo systemctl restart caddy${C_RESET}"
+                        ;;
+        help)           desc="Help global o per-comando (uso: ${script_path} help [cmd])"
+                        required_args="(sin args, o [comando])"
+                        examples="${C_BRIGHT_CYAN}${script_path} help${C_RESET}
+${C_BRIGHT_CYAN}${script_path} help up${C_RESET}"
+                        ;;
+        *)              desc="Comando del orquestador docker-stack"
+                        required_args="<stage> <store|all> [<servicio>]"
+                        examples="${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev panda-estampados-and-kitsune${C_RESET}
+${C_BRIGHT_CYAN}${script_path} ${cmd_canonical} dev all${C_RESET}"
+                        ;;
     esac
+
+    # Render. Sin `[error]` prefijo — esto NO es un error fatal, es un
+    # usage para el usuario. Usamos log_info / printf directo.
+    printf "\n"
+    printf "${C_BRIGHT_MAGENTA}${cmd_canonical}${C_RESET}  ${C_DIM}—${C_RESET} %s\n" "$desc"
+    printf "\n"
+    printf "${C_BOLD}Uso${C_RESET}\n"
+    printf "  ${C_BRIGHT_CYAN}${script_path}${C_RESET} ${C_BRIGHT_MAGENTA}${cmd_canonical}${C_RESET} ${C_BRIGHT_YELLOW}%s${C_RESET}\n" "$required_args"
+    if [[ -n "$examples" ]]; then
+        printf "\n"
+        printf "${C_BOLD}Ejemplos${C_RESET}\n"
+        # Cada linea del bloque ejemplos con indent de 2 espacios.
+        while IFS= read -r line; do
+            printf "  %b\n" "$line"
+        done <<< "$examples"
+    fi
+    printf "\n"
+    printf "${C_BOLD}Etapas:${C_RESET} ${C_BRIGHT_YELLOW}production${C_RESET} | ${C_BRIGHT_YELLOW}development${C_RESET}\n"
+    printf "${C_BOLD}Tiendas:${C_RESET} ${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET} | ${C_BRIGHT_CYAN}mm-boutique${C_RESET} | ${C_BRIGHT_CYAN}morales-store${C_RESET} | ${C_BRIGHT_CYAN}instrumentos-musicales-la-voz${C_RESET} | ${C_BRIGHT_CYAN}all${C_RESET}\n"
+    printf "\n"
+    printf "${C_BOLD}Detalle:${C_RESET} ${C_BRIGHT_CYAN}${script_path} help ${cmd_canonical}${C_RESET}\n"
+    printf "\n"
 }
 
 # ─────────────────────────────────────────────────────────────

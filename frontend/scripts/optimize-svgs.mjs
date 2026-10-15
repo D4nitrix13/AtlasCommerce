@@ -8,8 +8,8 @@
  *   (sin flag): optimiza in-place todos los SVGs de public/images
  *
  * Usado por:
- *   pnpm run optimize:svgs       optimizacion real (idempotente)
- *   pnpm run optimize:svgs:report inspeccion sin tocar archivos
+ *   bun run optimize:svgs       optimizacion real (idempotente)
+ *   bun run optimize:svgs:report inspeccion sin tocar archivos
  *
  * Reemplaza el comando SVGO con multipass (definido en package.json
  * scripts.optimize:svgs) para poder dar report legible. La CLI nativa
@@ -111,7 +111,7 @@ if (REPORT_MODE) {
   }
   console.log('');
   console.log(`Total: ${fmt(totalAfter)} across ${rows.length} files (no changes; all already optimized)`);
-  console.log('Run pnpm run optimize:svgs to actually optimize (idempotent).');
+  console.log('Run bun run optimize:svgs to actually optimize (idempotent).');
 } else {
   console.log(`\nOptimized ${rows.length} SVG files:\n`);
   console.log(pad('File', 60), pad('Before', 10), pad('After', 10), pad('Saved', 10), 'Saving');

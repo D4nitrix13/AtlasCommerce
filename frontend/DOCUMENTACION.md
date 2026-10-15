@@ -163,7 +163,7 @@ frontend/
 ├── astro.config.mjs                    # Configuración de Astro
 ├── tsconfig.json                       # Configuración de TypeScript
 ├── package.json                        # Dependencias
-└── pnpm-lock.yaml                      # Lock file (pnpm)
+└── bun.lock                           # Lock file (bun)
 ```
 
 ---
@@ -507,12 +507,12 @@ const { title, accent = "emerald" } = Astro.props;
 
 ```bash
 # Desarrollo
-pnpm dev              # Servidor de desarrollo con hot reload
+bun run dev              # Servidor de desarrollo con hot reload
 
 # Build
-pnpm build            # Build estático para producción
-pnpm preview          # Previsualizar build local
+bun run build            # Build estático para producción
+bun run preview          # Previsualizar build local
 
 # Tipo checking
-pnpm astro check      # Verificar tipos TypeScript
+bun run astro check      # Verificar tipos TypeScript
 ```
