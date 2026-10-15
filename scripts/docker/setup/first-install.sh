@@ -184,20 +184,29 @@ cmd_setup() {
             "admin.${store_slug}.test"
         )
         for host_entry in "${store_hosts[@]}"; do
-            if ! /usr/bin/grep -qxE "[[:space:]]*[^#][[:space:]]+${host_entry}([[:space:]]|$)" /etc/hosts 2>/dev/null; then
+            # Detectar si la entrada YA EXISTE en /etc/hosts.
+            # grep -wqF: match whole-word, quiet, fixed-string. Esto
+            # evita falsos positivos con subdominios ('foo.test' no
+            # matchea 'foo.test.evil') y viceversa.
+            if /usr/bin/grep -wqF "$host_entry" /etc/hosts 2>/dev/null; then
+                # Ya esta. No agregar.
+                :
+            else
                 missing_hosts+=("$host_entry")
             fi
         done
     done
     if [[ ${#missing_hosts[@]} -gt 0 && $add_hosts -eq 1 ]]; then
         print_section_title "Hosts" 3 "$TOTAL_PHASES" "Agregar ${#missing_hosts[@]} entradas a /etc/hosts"
-        for entry in "${missing_hosts[@]}"; do
-            log_warn "  - ${entry}"
-        done
-        # Construir el bloque a pegar.
+        # Construir el bloque a agregar.
         local hosts_block=""
         for entry in "${missing_hosts[@]}"; do
             hosts_block+="127.0.0.1  ${entry}"$'\n'
+        done
+        # Loguear lo que se va a agregar (transparencia).
+        log_info "Entradas a agregar:"
+        for entry in "${missing_hosts[@]}"; do
+            log_info "  127.0.0.1  ${entry}"
         done
         # Intentar con sudo no-interactive primero (caso comun: ya
         # corriste 'sudo -v' antes de setup). Si funciona, silencioso.
@@ -209,14 +218,9 @@ cmd_setup() {
                 log_warn "Fallo al escribir a /etc/hosts (no critico, setup sigue)."
             fi
         else
-            # Sin cache de sudo. Mostrar bloque y EJECUTAR el comando
-            # con sudo (esto pedira password interactivamente al usuario).
-            # El usuario pidio que cuando no se especifica -skip-hosts-add,
-            # el sistema ejecute el comando (no solo lo muestre).
-            log_warn "Pegá este bloque (o confirmá con sudo cuando se pida):"
-            for entry in "${missing_hosts[@]}"; do
-                /usr/bin/printf '127.0.0.1  %s\n' "$entry"
-            done
+            # Sin cache de sudo. Mostrar y EJECUTAR el comando con sudo
+            # (esto pedira password interactivamente al usuario).
+            log_warn "Confirmá con sudo cuando se pida:"
             log_info "Ejecutando: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
             if /usr/bin/printf '%s' "$hosts_block" | /usr/bin/sudo /usr/bin/tee -a /etc/hosts >/dev/null; then
                 log_ok "Hosts agregados a /etc/hosts."
