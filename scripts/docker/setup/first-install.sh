@@ -11,15 +11,20 @@
 # Para datos de testing, correr `seed-db --seed` aparte.
 set -euo pipefail
 
-# setup_compose_quiet <inst> <args...>
+# setup_compose_quiet <inst> <timeout_secs> <args...>
 # Wrapper local de docker_compose() que suprime el bloque [cmd]
 # repetitivo (cd/env/exec) que ensucia el output del setup. Solo
 # imprime el resultado del comando (output + exit code). Los 8
 # sub-pasos del bootstrap se vuelven legibles en vez de un wall
 # de texto. Se usa SOLO en setup; el resto del orquestador sigue
 # usando docker_compose() con el [cmd] block verbose.
+#
+# Acepta un timeout en segundos (default 30) para que el setup NUNCA
+# se quede colgado si un comando artisan pide input interactivo
+# o se demora. Si timeout: exit code 124 + mensaje 'timeout reached'.
 setup_compose_quiet() {
     local name="$1"; shift
+    local timeout_secs="${1:-30}"; shift
     local dir
     dir="$(instance_compose_dir "$name")"
     local file
@@ -32,8 +37,21 @@ setup_compose_quiet() {
     local host_gid="${HOST_GID:-$(${ID_BIN} -g)}"
 
     # No [cmd] block. Solo ejecutamos y devolvemos output+exit.
-    (cd "$dir" && HOST_UID="${host_uid}" HOST_GID="${host_gid}" \
-        ${DOCKER_BIN} compose -f "$file" $env_file "$@")
+    # Timeout con gtimeout si esta disponible, sino con 'timeout'
+    # de coreutils, sino fallback a sin timeout (con -k por si se cuelga).
+    local timeout_bin=""
+    if /usr/bin/command -v timeout >/dev/null 2>&1; then
+        timeout_bin="/usr/bin/timeout"
+    fi
+
+    if [[ -n "$timeout_bin" ]]; then
+        (cd "$dir" && HOST_UID="${host_uid}" HOST_GID="${host_gid}" \
+            $timeout_bin "${timeout_secs}" ${DOCKER_BIN} compose -f "$file" $env_file "$@")
+    else
+        # Sin timeout disponible: ejecutar igual y rezar.
+        (cd "$dir" && HOST_UID="${host_uid}" HOST_GID="${host_gid}" \
+            ${DOCKER_BIN} compose -f "$file" $env_file "$@")
+    fi
 }
 
 cmd_setup() {
@@ -275,7 +293,7 @@ cmd_setup() {
         # clear cache. Make sure you have the appropriate permissions.'
         # porque no pueden crear los subdirectorios.
         log_info "  [6.2] chown + mkdir storage/framework"
-        if setup_compose_quiet "$inst" exec -u root -T backend /bin/sh -c '
+        if setup_compose_quiet "$inst" 30 exec -u root -T backend /bin/sh -c '
             chown -R 1000:1000 /var/www/html/storage &&
             mkdir -p /var/www/html/storage/framework/cache/data
                      /var/www/html/storage/framework/views
@@ -291,7 +309,7 @@ cmd_setup() {
         # 6.3. storage:link (idempotente; ignora error si ya existe).
         log_info "  [6.3] storage:link"
         local link_out
-        link_out=$(setup_compose_quiet "$inst" exec -T backend \
+        link_out=$(setup_compose_quiet "$inst" 30 exec -T backend \
             /usr/local/bin/php artisan storage:link 2>&1 || true)
         if /usr/bin/printf '%s' "$link_out" | /usr/bin/grep -q "already exists"; then
             log_info "        (storage:link ya existia, skip)"
@@ -303,20 +321,20 @@ cmd_setup() {
         # Despues del chown + mkdir, estos corren limpios.
         log_info "  [6.4] cache:clear + config:clear + view:clear"
         local cache_out
-        cache_out=$(setup_compose_quiet "$inst" exec -T backend \
+        cache_out=$(setup_compose_quiet "$inst" 30 exec -T backend \
             /usr/local/bin/php artisan cache:clear 2>&1 || true)
         if /usr/bin/printf '%s' "$cache_out" | /usr/bin/grep -q "ERROR"; then
             log_warn "        cache:clear: ${cache_out}"
         else
             log_info "        cache:clear OK"
         fi
-        if setup_compose_quiet "$inst" exec -T backend \
+        if setup_compose_quiet "$inst" 30 exec -T backend \
             /usr/local/bin/php artisan config:clear >/dev/null 2>&1; then
             log_info "        config:clear OK"
         else
             log_warn "        config:clear fallo (reintentable despues)"
         fi
-        if setup_compose_quiet "$inst" exec -T backend \
+        if setup_compose_quiet "$inst" 30 exec -T backend \
             /usr/local/bin/php artisan view:clear >/dev/null 2>&1; then
             log_info "        view:clear OK"
         else
@@ -328,7 +346,7 @@ cmd_setup() {
         # para que no quede pegado con el siguiente sub-paso.
         log_info "  [6.5] assets:sync-from-public"
         local sync_out
-        sync_out=$(setup_compose_quiet "$inst" exec -T backend \
+        sync_out=$(setup_compose_quiet "$inst" 30 exec -T backend \
             /usr/local/bin/php artisan assets:sync-from-public --force 2>&1 || true)
         # Forzar newline final si el output no lo trae.
         [[ -n "$sync_out" && "${sync_out: -1}" != $'\n' ]] && sync_out+=$'\n'
@@ -341,7 +359,7 @@ cmd_setup() {
         # 6.6. migrate --force.
         log_info "  [6.6] migrate --force"
         local mig_out
-        mig_out=$(setup_compose_quiet "$inst" exec -T backend \
+        mig_out=$(setup_compose_quiet "$inst" 30 exec -T backend \
             /usr/local/bin/php artisan migrate --force 2>&1 || true)
         [[ -n "$mig_out" && "${mig_out: -1}" != $'\n' ]] && mig_out+=$'\n'
         if /usr/bin/printf '%s' "$mig_out" | /usr/bin/grep -qE "Migrat"; then
@@ -353,21 +371,43 @@ cmd_setup() {
         fi
 
         # 6.7. tenants:bootstrap (seed de la instancia).
+        # Auto-detecta el seed file si TENANTS_SEED_FILE no esta
+        # configurado pero existe un dev-<slug>.json en seeds/.
         log_info "  [6.7] tenants:bootstrap (seed)"
-        local seed_file
+        local seed_file seed_path
         seed_file="$(/usr/bin/grep -E '^TENANTS_SEED_FILE=' "$(instance_env_path "$inst")" | /usr/bin/cut -d= -f2-)"
-        if [[ -n "$seed_file" && -f "$(instance_compose_dir "$inst")/${seed_file#/}" ]]; then
+        if [[ -z "$seed_file" ]]; then
+            # Buscar dev-<store>.json automaticamente.
+            local store_slug="${store_of_inst}"
+            local auto_seed="${store_slug}/seeds/dev-${store_slug}.json"
+            local auto_seed_abs="$(instance_compose_dir "$inst")/seeds/dev-${store_slug}.json"
+            if [[ -f "$auto_seed_abs" ]]; then
+                seed_file="$auto_seed"
+                log_info "        (auto-detect seed: $seed_file)"
+            fi
+        fi
+        seed_path=""
+        if [[ -n "$seed_file" ]]; then
+            seed_path="$(instance_compose_dir "$inst")/${seed_file#/}"
+        fi
+        if [[ -n "$seed_file" && -f "$seed_path" ]]; then
             local tenant_out
-            tenant_out=$(setup_compose_quiet "$inst" exec -T backend \
+            # 30s timeout: si artisan se cuelga pidiendo input, no
+            # bloqueamos el setup. El comando se considera fallido
+            # y el setup sigue.
+            tenant_out=$(setup_compose_quiet "$inst" 30 exec -T backend \
                 /usr/local/bin/php artisan tenants:bootstrap --force 2>&1 || true)
+            local tenant_exit=$?
             [[ -n "$tenant_out" && "${tenant_out: -1}" != $'\n' ]] && tenant_out+=$'\n'
-            if /usr/bin/printf '%s' "$tenant_out" | /usr/bin/grep -qiE "(error|exception)"; then
+            if [[ $tenant_exit -eq 124 ]]; then
+                log_warn "        timeout (30s) - artisan tardo demasiado. Re-ejecuta: ./scripts/docker-stack.sh bootstrap dev ${store_slug}"
+            elif /usr/bin/printf '%s' "$tenant_out" | /usr/bin/grep -qiE "(error|exception)"; then
                 log_warn "        fallo (verificar)"
             else
                 log_info "        OK"
             fi
         else
-            log_info "        skip (seed file no configurado: $seed_file)"
+            log_info "        skip (no hay seed file)"
         fi
 
         # 6.8. key:generate (idempotente, via cmd_bootstrap).
