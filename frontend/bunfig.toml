@@ -1,0 +1,29 @@
+# bunfig.toml — Configuracion de bun para AtlasCommerce frontend.
+#
+# Reemplaza a .npmrc (pnpm) y .pnpmrc. Bun soporta configurar la
+# instalacion desde un bunfig.toml en la raiz del workspace.
+#
+# Ver https://bun.sh/docs/runtime/configuration
+
+[install]
+# "hoisted" replica el comportamiento de npm/pnpm con node_modules
+# plano. Necesario para Storybook 10 que asume dependencias en la
+# raiz de node_modules y no resuelve workspaces symlinkeados.
+linker = "hoisted"
+
+# Confiar en scripts de paquetes conocidos. Bun bloquea por defecto
+# el ciclo de vida scripts (postinstall) por seguridad.
+# trustedDependencies lista los paquetes cuyos scripts pueden correr.
+trustedDependencies = [
+  "@tailwindcss/oxide",
+  "esbuild",
+  "sharp",
+  "@swc/core",
+  "playwright",
+  "@playwright/test",
+  "core-js",
+]
+
+# Mantener node_modules en el FS (no usar install cache de bun por
+# defecto para que los volumes Docker dev lo cacheen via named volume).
+auto = "auto"

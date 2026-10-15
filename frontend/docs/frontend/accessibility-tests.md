@@ -14,8 +14,8 @@
 
 ```bash
 cd frontend
-pnpm exec playwright install chromium     # primera vez
-pnpm test:e2e tests/e2e/accessibility.spec.ts
+bunx playwright install chromium     # primera vez
+bun run test:e2e tests/e2e/accessibility.spec.ts
 ```
 
 Pre-requisito: backend + frontend + Caddy corriendo localmente
@@ -73,7 +73,7 @@ de mejora continua.
 ## Cómo arreglar una violación
 
 ```bash
-pnpm test:e2e tests/e2e/accessibility.spec.ts
+bun run test:e2e tests/e2e/accessibility.spec.ts
 
 # Si falla, el test imprime las violaciones en JSON con:
 # - id: regla WCAG que falla.
