@@ -22,6 +22,8 @@ Pero para **La Voz Instrumentos** (B2C nicho instrumentos musicales, primer clie
 - **Nike** para hero storytelling, ATC prominent, mobile-first, sistema de tallas/colores en cards.
 - **guitargear.com.mx** para catálogo por MARCA, descripción técnica prominente, filtros laterales bien organizados.
 
+**DECISION POSTERIOR DEL USUARIO (preparacion sprint)**: Nike + guitargear se aplica a TODAS las tiendas (Panda, Kitsune, MM, Morales, La Voz) — no solo La Voz. El lenguaje Bonfire v3 queda DESCARTADO como patron del storefront cliente.
+
 ---
 
 ## 1. Tabla de equivalencias URL (lo que el usuario pidió)

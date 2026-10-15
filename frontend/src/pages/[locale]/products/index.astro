@@ -40,6 +40,7 @@ import {
   PRODUCTS,
   getCategoriesInUse,
 } from '../../../data/products';
+import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -69,12 +70,18 @@ const dictionary = {
     heading: t['storefront.products.v3.filter.heading'],
     clear: t['storefront.products.v3.filter.clear'],
     categoryHeading: t['storefront.products.v3.filter.categoria'],
+    brandHeading: t['storefront.products.v3.filter.marca'],
     priceHeading: t['storefront.products.v3.filter.precio'],
     colorHeading: t['storefront.products.v3.filter.color'],
     sizeHeading: t['storefront.products.v3.filter.talla'],
     colorSwatchAltTemplate:
       t['storefront.products.v3.filter.colorSwatchAlt'],
   },
+  breadcrumb: {
+    home: t['storefront.products.v3.breadcrumb.home'],
+    catalog: t['storefront.products.v3.breadcrumb.catalog'],
+  },
+  eyebrow: t['storefront.products.v3.eyebrow'],
 };
 
 // Categorías: la primera opción es "Todo" (count = total de products),
@@ -92,6 +99,16 @@ const filterCategoryOptions = [
     count: PRODUCTS.filter((p) => p.category === category.slug).length,
   })),
 ];
+
+// Marcas: combinamos la lista canonica de La Voz (instrumentos
+// musicales) con counts placeholder. Solo se muestra si hay al menos
+// 1 producto visible — cuando la pagina integre el data layer real
+// de cada tenant, este switch se generaliza via getBrandsForTenant.
+const filterBrandOptions = LA_VOZ_BRANDS.map((brand) => ({
+  slug: brand.slug,
+  label: brand.label,
+  count: LA_VOZ_CATEGORIES.length > 0 ? 0 : 0,
+}));
 
 // Rangos de precio (en USD cents). Mockup Bonfire propone 4 buckets.
 const PRICE_RANGES = [
@@ -141,12 +158,33 @@ const baseUrl = `/${locale}/products`;
 >
   <main class="min-h-screen bg-slate-50">
     <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+      <!-- Breadcrumb visible (patron guitargear) — el usuario lo espera
+           en cualquier pagina de catalogo. -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap items-center gap-1.5 text-[13px] text-slate-500">
+          <li>
+            <a href={`/${locale}`} class="transition hover:text-slate-900">
+              {dictionary.breadcrumb.home}
+            </a>
+          </li>
+          <li aria-hidden="true" class="text-slate-300">/</li>
+          <li>
+            <span class="font-semibold text-slate-700" aria-current="page">
+              {dictionary.breadcrumb.catalog}
+            </span>
+          </li>
+        </ol>
+      </nav>
+
       <header class="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+          <span class="inline-block rounded-full bg-[var(--primary-soft,#F1F5F9)] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--primary,#475569)]">
+            {dictionary.eyebrow}
+          </span>
+          <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
             {t['storefront.products.v3.title']}
           </h1>
-          <p class="mt-3 text-sm text-slate-500">{subtitle}</p>
+          <p class="mt-2 text-sm text-slate-500">{subtitle}</p>
         </div>
         <SortDropdown labels={dictionary.sort} value="relevancia" />
       </header>
@@ -157,6 +195,7 @@ const baseUrl = `/${locale}/products`;
             <FiltersSidebar
               labels={dictionary.filters}
               categories={filterCategoryOptions}
+              brands={filterBrandOptions}
               prices={PRICE_RANGES.map(({ slug, label }) => ({ slug, label }))}
               colors={filterColorOptions}
               sizes={filterSizeOptions}
@@ -174,7 +213,7 @@ const baseUrl = `/${locale}/products`;
 
           <ul
             data-reveal-stagger
-            class="grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 xl:grid-cols-4"
+            class="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 xl:grid-cols-4"
             aria-label={t['storefront.products.v3.title']}
           >
             {allProducts.map((product) => (

@@ -32,6 +32,12 @@ export interface CategoryFilterOption {
   count: number;
 }
 
+export interface BrandFilterOption {
+  slug: string;
+  label: string;
+  count: number;
+}
+
 export interface PriceFilterOption {
   slug: string;
   label: string;
@@ -54,6 +60,7 @@ export interface FiltersSidebarLabels {
   heading: string;
   clear: string;
   categoryHeading: string;
+  brandHeading: string;
   priceHeading: string;
   colorHeading: string;
   sizeHeading: string;
@@ -63,11 +70,14 @@ export interface FiltersSidebarLabels {
 interface Props {
   labels: FiltersSidebarLabels;
   categories: readonly CategoryFilterOption[];
+  brands?: readonly BrandFilterOption[];
   prices: readonly PriceFilterOption[];
   colors: readonly ColorFilterOption[];
   sizes: readonly SizeFilterOption[];
   /** Slugs actualmente activos (categoría). */
   activeCategory?: string | null;
+  /** Slugs actualmente activos (marca). */
+  activeBrands?: readonly string[];
   /** Slugs actualmente activos (precio). */
   activePrice?: string | null;
   /** Slugs actualmente activos (color). */
@@ -79,16 +89,19 @@ interface Props {
 const {
   labels,
   categories,
+  brands = [],
   prices,
   colors,
   sizes,
   activeCategory = null,
+  activeBrands = [],
   activePrice = null,
   activeColors = [],
   activeSizes = [],
 } = Astro.props;
 
 const isCategoryActive = (slug: string): boolean => activeCategory === slug;
+const isBrandActive = (slug: string): boolean => activeBrands.includes(slug);
 const isPriceActive = (slug: string): boolean => activePrice === slug;
 const isColorActive = (slug: string): boolean => activeColors.includes(slug);
 const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
@@ -140,6 +153,44 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
       ))}
     </ul>
   </section>
+
+  {brands.length > 0 && (
+    <section
+      aria-labelledby="filter-brand-heading"
+      class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
+    >
+      <h3
+        id="filter-brand-heading"
+        class="text-sm font-bold text-slate-900"
+      >
+        {labels.brandHeading}
+      </h3>
+      <ul class="flex flex-col gap-2.5">
+        {brands.map((brand) => (
+          <li>
+            <label
+              class:list={[
+                'flex cursor-pointer items-center gap-2.5 text-sm transition hover:text-slate-900',
+                isBrandActive(brand.slug)
+                  ? 'font-semibold text-slate-900'
+                  : 'text-slate-600',
+              ]}
+            >
+              <input
+                type="checkbox"
+                name="filter-brand"
+                value={brand.slug}
+                checked={isBrandActive(brand.slug)}
+                class="h-4 w-4 cursor-pointer rounded border-slate-300 accent-[var(--primary,#475569)]"
+              />
+              <span class="flex-1">{brand.label}</span>
+              <span class="text-[13px] text-slate-400">{brand.count}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   <section
     aria-labelledby="filter-price-heading"
