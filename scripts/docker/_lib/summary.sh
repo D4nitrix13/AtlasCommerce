@@ -58,12 +58,17 @@ validate_stage_store() {
 # minimo de 60 (para que las cajitas no se rompan en pantallas
 # pequenas) y a un maximo de 200 (para que no sean demasiado
 # largas en monitores ultra-wide).
+# Importante: inicializamos 'width' a string vacio porque el script
+# corre con 'set -u' (nounset) — acceder a una variable declarada
+# pero no asignada produce 'unbound variable'.
 _terminal_width() {
-    local width
+    local width=""
     if /usr/bin/command -v tput >/dev/null 2>&1; then
-        width=$(/usr/bin/tput cols 2>/dev/null)
+        width=$(/usr/bin/tput cols 2>/dev/null || true)
     fi
-    [[ -z "$width" || "$width" -lt 60 ]] && width=80
+    if [[ -z "$width" || ! "$width" =~ ^[0-9]+$ || "$width" -lt 60 ]]; then
+        width=80
+    fi
     [[ "$width" -gt 200 ]] && width=200
     /usr/bin/printf '%d' "$width"
 }

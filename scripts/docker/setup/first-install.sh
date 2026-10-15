@@ -14,13 +14,18 @@ set -euo pipefail
 cmd_setup() {
     local stage="$1"
     local store="${2:-all}"
-    # Flag --no-hosts: si esta presente, NO intenta agregar hosts a
-    # /etc/hosts (omite la fase 3). Por defecto los agrega automaticamente
-    # cuando sudo -n funciona, o muestra el comando manual cuando no.
+    # Flags aceptados:
+    #   --no-hosts / -no-hosts  NO intenta agregar hosts a /etc/hosts
+    #                            (omite la fase 3). Por defecto los agrega
+    #                            automaticamente cuando sudo -n funciona, o
+    #                            muestra el comando manual cuando no.
+    # Aceptamos guion simple (-no-hosts) y doble (--no-hosts) para
+    # flexibilidad con el usuario (convención del script: las flags
+    # booleanas simples usan -flag en lugar de --flag).
     local add_hosts=1
     for arg in "$@"; do
         case "$arg" in
-            --no-hosts) add_hosts=0 ;;
+            --no-hosts|-no-hosts) add_hosts=0 ;;
         esac
     done
 
