@@ -36,22 +36,23 @@ else
     C_BOLD=$'\033[1m'
     C_DIM=$'\033[2m'
     C_UL=$'\033[4m'         # underline
-    # Paleta base (30-37). Mezclada con bold parece "bright" en muchos
-    # terminales pero pierde contraste contra cyan o yellow en algunos
-    # temas. Por eso agregamos C_BRIGHT_* (90-97) como capa separada.
-    C_RED=$'\033[31m'
-    C_GREEN=$'\033[32m'
-    C_YELLOW=$'\033[33m'
-    C_BLUE=$'\033[34m'
-    C_MAGENTA=$'\033[35m'
-    C_CYAN=$'\033[36m'
-    # Variantes BRIGHT (90-97). Más legibles sobre fondos oscuros y
-    # distintas entre sí (en temas donde las básicas se parecen).
-    C_BRIGHT_RED=$'\033[91m'
-    C_BRIGHT_GREEN=$'\033[92m'
-    C_BRIGHT_YELLOW=$'\033[93m'
-    C_BRIGHT_BLUE=$'\033[94m'
-    C_BRIGHT_MAGENTA=$'\033[95m'
-    C_BRIGHT_CYAN=$'\033[96m'
-    C_BRIGHT_WHITE=$'\033[97m'
+    # Paleta base (30-37) + bold (1;) = BRIGHT BOLD. Mas visibles
+    # que solo bright (90-97) que se ven casi como blanco en
+    # terminales con temas oscuros. La combinacion bold+color
+    # resalta mejor que el color solo.
+    C_RED=$'\033[1;31m'              # bold + red
+    C_GREEN=$'\033[1;32m'            # bold + green
+    C_YELLOW=$'\033[1;33m'           # bold + yellow
+    C_BLUE=$'\033[1;34m'             # bold + blue
+    C_MAGENTA=$'\033[1;35m'          # bold + magenta
+    C_CYAN=$'\033[1;36m'             # bold + cyan
+    # Variantes BRIGHT BOLD (1;90-97). Mismo concepto, con los bright
+    # base (90-97) + bold encima.
+    C_BRIGHT_RED=$'\033[1;91m'
+    C_BRIGHT_GREEN=$'\033[1;92m'
+    C_BRIGHT_YELLOW=$'\033[1;93m'
+    C_BRIGHT_BLUE=$'\033[1;94m'
+    C_BRIGHT_MAGENTA=$'\033[1;95m'
+    C_BRIGHT_CYAN=$'\033[1;96m'
+    C_BRIGHT_WHITE=$'\033[1;97m'
 fi
