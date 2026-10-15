@@ -1,3 +1,4 @@
+---
 /**
  * ProductSpecsTable — tabla de especificaciones técnicas.
  *
@@ -18,19 +19,16 @@
  * Accesibilidad: <table> semantica con <th scope="row"> para labels.
  */
 
-export interface SpecRow {
+export type SpecRow = {
   label: string;
-  /** String plano, o HTML pre-formateado (link, badge) cuando requiere más. */
   value: string;
-}
+};
 
 interface Props {
   /** Heading opcional que se muestra arriba de la tabla. */
   heading?: string;
   /** Filas de specs. */
   rows: readonly SpecRow[];
-  /** true si la primera columna es label (default) o value (variante). */
-  /** El componente es presentacional — sin handlers. */
 }
 
 const { heading, rows } = Astro.props;
