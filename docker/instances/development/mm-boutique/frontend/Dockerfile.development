@@ -7,19 +7,15 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Activar pnpm vía corepack.
+# Activar bun via corepack, pineado por version fija.
 RUN /usr/local/bin/corepack enable \
-  && /usr/local/bin/corepack prepare pnpm@9 --activate
+  && /usr/local/bin/corepack prepare bun@1.4 --activate
 
-# Layer de cache de dependencias. `pnpm fetch` descarga deps a un
-# store local sin instalar en el FS de la app; el siguiente `pnpm
-# install --offline` las materializa. Esto desacopla el cache de deps
-# del código fuente: cualquier cambio en `frontend/src/` no invalida
-# este layer.
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
-COPY frontend/pnpm-workspace.yaml* ./
-RUN /usr/local/bin/pnpm fetch --frozen-lockfile \
-  && /usr/local/bin/pnpm install --frozen-lockfile --offline
+# Layer de cache de dependencias. bun install --frozen-lockfile lee
+# bun.lock y desacopla el cache de deps del codigo fuente: cualquier
+# cambio en `frontend/src/` no invalida este layer.
+COPY frontend/package.json frontend/bun.lock ./
+RUN /usr/local/bin/bun install --frozen-lockfile
 
 # Variables de entorno: el dev server escucha en 0.0.0.0 para ser
 # accesible desde Caddy del host o del contenedor vecino.
@@ -34,10 +30,10 @@ EXPOSE 4321
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD /usr/bin/wget -q --spider http://localhost:4321/ || exit 1
 
-# Entrypoint: arregla ownership de los volúmenes (node_modules,
-# .pnpm-store, .astro) que docker compose crea como root y que el
-# usuario `node` (UID 1000) necesita escribir. Después del chown,
-# hace setpriv para correr pnpm como node (mínimo privilegio).
+# Entrypoint: arregla ownership de los volumenes (node_modules,
+# node_modules/.bun, .astro) que docker compose crea como root y
+# que el usuario `node` (UID 1000) necesita escribir. Despues del
+# chown, hace setpriv para correr bun como node (minimo privilegio).
 COPY docker/instances/development/mm-boutique/frontend/entrypoint.development.sh /usr/local/bin/entrypoint
 RUN /bin/chmod +x /usr/local/bin/entrypoint
 

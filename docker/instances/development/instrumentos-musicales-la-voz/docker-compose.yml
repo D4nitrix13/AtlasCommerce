@@ -182,10 +182,10 @@ services:
     container_name: instrumentos-musicales-la-voz-dev-frontend
     restart: unless-stopped
     # El entrypoint del Dockerfile hace chown de los volúmenes (root) y
-    # después setpriv para correr pnpm como node (UID 1000, mismo que
+    # después setpriv para correr bun como node (UID 1000, mismo que
     # el host user). NO usar `user: HOST_UID:HOST_GID` aquí: eso
     # bypasea el chown del entrypoint y el container arranca como node
-    # con volúmenes owned by root → EACCES en /app/.pnpm-store.
+    # con volúmenes owned by root → EACCES en /app/node_modules/.bun.
     # tini: PID 1 = init, reaps zombies, forwards signals. Needed for
     # proper shutdown of astro dev and vite child processes.
     init: true
@@ -195,9 +195,9 @@ services:
       - "10321:4321"
     volumes:
       - ../../../../frontend:/app
-      - ../../../../frontend/pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ../../../../frontend/bun.lock:/app/bun.lock:ro
       - atlas_commerce_instrumentos_musicales_la_voz_dev_node_modules:/app/node_modules
-      - atlas_commerce_instrumentos_musicales_la_voz_dev_pnpm_store:/app/.pnpm-store
+      - atlas_commerce_instrumentos_musicales_la_voz_dev_bun_install:/app/node_modules/.bun
       # Named volumes shadow the bind-mount so stale .astro/ or
       # .vite/ caches from the host don't break the dev server with
       # phantom lock files. Named (vs anonymous) so they survive
@@ -307,8 +307,8 @@ volumes:
     name: atlas_commerce_instrumentos_musicales_la_voz_dev_filebrowser_db
   atlas_commerce_instrumentos_musicales_la_voz_dev_node_modules:
     name: atlas_commerce_instrumentos_musicales_la_voz_dev_node_modules
-  atlas_commerce_instrumentos_musicales_la_voz_dev_pnpm_store:
-    name: atlas_commerce_instrumentos_musicales_la_voz_dev_pnpm_store
+  atlas_commerce_instrumentos_musicales_la_voz_dev_bun_install:
+    name: atlas_commerce_instrumentos_musicales_la_voz_dev_bun_install
   atlas_commerce_instrumentos_musicales_la_voz_dev_astro_cache:
     name: atlas_commerce_instrumentos_musicales_la_voz_dev_astro_cache
   atlas_commerce_instrumentos_musicales_la_voz_dev_vite_cache:

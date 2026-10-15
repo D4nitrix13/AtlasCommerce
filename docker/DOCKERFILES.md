@@ -26,7 +26,7 @@ CMD ["node", "./dist/server/entry.mjs"]
 **Por qué importa**: dentro de un container, el `PATH` puede incluir
 directorios donde un atacante con acceso de escritura al FS (por
 ejemplo, vía una vulnerabilidad de la app) podría plantar binarios
-maliciosos. `php`, `node`, `composer`, `pnpm`, `chown`, `apk`,
+maliciosos. `php`, `node`, `composer`, `bun`, `chown`, `apk`,
 `docker-php-ext-install` — todos deben ir con ruta absoluta.
 
 Excepciones legítimas (binarios que no existen en `/usr/bin` o
@@ -36,7 +36,7 @@ time si no sabés dónde está.
 
 ## 2. Multi-stage builds para cache de layers
 
-Separar build time de runtime. El stage builder hace pnpm install +
+Separar build time de runtime. El stage builder hace bun install +
 build; el stage runtime solo copia el bundle final. Beneficios:
 
 - Imagen final 5-10x más chica (sin devDeps, sin source).
@@ -50,12 +50,12 @@ Patrón:
 # Stage 1: builder
 FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN /usr/local/bin/pnpm fetch --frozen-lockfile
-RUN /usr/local/bin/pnpm install --frozen-lockfile --offline
+COPY package.json bun.lock ./
+RUN /usr/local/bin/corepack enable \
+    && /usr/local/bin/corepack prepare bun@1.4 --activate
+RUN /usr/local/bin/bun install --frozen-lockfile
 COPY . .
-RUN /usr/local/bin/pnpm run build
-
+RUN /usr/local/bin/bun run build
 # Stage 2: runtime (mínimo)
 FROM node:22-alpine
 COPY --from=builder /app/dist ./dist
