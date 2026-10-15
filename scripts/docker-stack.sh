@@ -381,10 +381,13 @@ esac
 # cambiar la firma (escala a más flags sin tocar funciones).
 #
 # Patrón de flags:
-#   build      → no-cache    (en cualquier posición)
-#   rm-volumes → -y          (skip confirmation)
+#   build      → no-cache      (en cualquier posición)
+#   rm-volumes → -y            (skip confirmation)
+#   setup      → --install-caddy / -install-caddy
+#                              (copia Caddyfile a /etc/caddy/ y reinicia)
 HAS_NO_CACHE=0
 RM_VOLUMES_SKIP_CONFIRM=0
+SETUP_INSTALL_CADDY=0
 KNOWN_FLAGS=()
 case "$cmd_canonical" in
     build)
@@ -395,6 +398,9 @@ case "$cmd_canonical" in
         ;;
     sync-assets)
         KNOWN_FLAGS=("--dry-run" "--force")
+        ;;
+    setup)
+        KNOWN_FLAGS=("--install-caddy" "-install-caddy")
         ;;
     *)
         KNOWN_FLAGS=()
@@ -420,10 +426,12 @@ for arg in "$@"; do
         if [[ "$arg" == "$flag" ]]; then
             is_flag=1
             case "$flag" in
-                no-cache)      HAS_NO_CACHE=1 ;;
-                -y)            RM_VOLUMES_SKIP_CONFIRM=1 ;;
-                --dry-run)     SYNC_ASSETS_DRY_RUN=1 ;;
-                --force)       SYNC_ASSETS_FORCE=1 ;;
+                no-cache)         HAS_NO_CACHE=1 ;;
+                -y)               RM_VOLUMES_SKIP_CONFIRM=1 ;;
+                --dry-run)        SYNC_ASSETS_DRY_RUN=1 ;;
+                --force)          SYNC_ASSETS_FORCE=1 ;;
+                --install-caddy)  SETUP_INSTALL_CADDY=1 ;;
+                -install-caddy)   SETUP_INSTALL_CADDY=1 ;;
             esac
             break
         fi
@@ -547,6 +555,7 @@ fi
 export HAS_NO_CACHE
 export RM_VOLUMES_SKIP_CONFIRM
 export SYNC_ASSETS_DRY_RUN
+export SETUP_INSTALL_CADDY
 export SYNC_ASSETS_FORCE
 
 # Summary antes de ejecutar (con stage/store ya normalizados).

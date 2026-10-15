@@ -62,6 +62,12 @@ cmd_setup() {
     #       Omite la fase 3 (Hosts): NO intenta agregar hosts a
     #       /etc/hosts. Por defecto los agrega automaticamente cuando
     #       sudo -n funciona, o muestra el comando manual cuando no.
+    #   --install-caddy / -install-caddy
+    #       Ademas del setup, copia docker/caddy/Caddyfile a
+    #       /etc/caddy/Caddyfile (con sudo), valida y reinicia caddy.
+    #       Sin esta flag, setup NO toca el Caddyfile (lo imprime
+    #       con el comando 'caddy' aparte). El user decide si lo
+    #       quiere configurar ahora o despues.
     # Aceptamos guion simple y doble para flexibilidad con la
     # convencion del script (flags booleanas usan -flag en lugar
     # de --flag, ver -y, -h).
@@ -69,15 +75,16 @@ cmd_setup() {
     for arg in "$@"; do
         case "$arg" in
             --skip-hosts-add|-skip-hosts-add) add_hosts=0 ;;
+            --install-caddy|-install-caddy)    export SETUP_INSTALL_CADDY=1 ;;
         esac
     done
 
     log_bold "SETUP — primera instalación de las instancias"
 
-    # 6 fases visuales: cada una con su cajita ┌── [N/6] ... ──┐.
+    # 7 fases visuales: cada una con su cajita ┌── [N/7] ... ──┐.
     # 1) versions.env  2) Scope  3) Hosts  4) Credenciales
-    # 5) Containers  6) Backend bootstrap.
-    local TOTAL_PHASES=6
+    # 5) Containers  6) Caddy (opcional, --install-caddy) 7) Bootstrap.
+    local TOTAL_PHASES=7
 
     # 1. docker/versions.env (centraliza versiones de imágenes)
     print_section_title "Versions" 1 "$TOTAL_PHASES" "Centralizar versiones de imagenes"
@@ -241,6 +248,43 @@ cmd_setup() {
     done
     print_section_end
 
+    # 5. Caddy (opcional, solo si --install-caddy).
+    # Copia docker/caddy/Caddyfile a /etc/caddy/, valida, reinicia.
+    # Asi el user tiene el reverse proxy listo para resolver las
+    # tiendas por Host header en :80 (sin puerto).
+    if [[ "${SETUP_INSTALL_CADDY:-0}" == "1" ]]; then
+        print_section_title "Caddy" 6 "$TOTAL_PHASES" "Instalar Caddyfile y reiniciar caddy"
+        local caddy_src="${ROOT_DIR}/docker/caddy/Caddyfile"
+        if [[ ! -f "$caddy_src" ]]; then
+            log_err "No se encontro $caddy_src"
+            print_section_end
+        else
+            if /usr/bin/sudo -n true 2>/dev/null; then
+                log_info "Copiando Caddyfile (sudo no-interactive)..."
+                if /usr/bin/sudo /usr/bin/cp "$caddy_src" /etc/caddy/Caddyfile; then
+                    log_info "Validando config con 'caddy validate'..."
+                    if /usr/bin/sudo /usr/bin/caddy validate --config /etc/caddy/Caddyfile 2>&1 | /usr/bin/grep -q "valid configuration"; then
+                        log_info "Reiniciando caddy..."
+                        if /usr/bin/sudo /usr/bin/systemctl restart caddy; then
+                            log_ok "Caddy reiniciado con la nueva config."
+                        else
+                            log_warn "Fallo el restart de caddy (no critico, setup sigue)."
+                        fi
+                    else
+                        log_warn "Caddyfile invalido. Setup sigue sin reiniciar caddy."
+                    fi
+                else
+                    log_warn "No se pudo copiar el Caddyfile. Setup sigue."
+                fi
+            else
+                log_warn "Pegá este bloque al final de /etc/caddy/Caddyfile (con sudo):"
+                /usr/bin/cat "$caddy_src"
+                log_info "Despues: sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl restart caddy"
+            fi
+        fi
+        print_section_end
+    fi
+
     # 5. Bootstrap del backend Laravel en cada instancia levantada.
     # Secuencia: storage:link → cache:clear → config:clear → migrate →
     # tenants:bootstrap. `key:generate` lo hace `cmd_bootstrap` al final
@@ -255,7 +299,7 @@ cmd_setup() {
     # pueda seguir el progreso. Usamos 'setup_compose_quiet' (wrapper
     # local) en vez de 'docker_compose' para suprimir el bloque [cmd]
     # repetitivo — el dev solo ve el sub-paso enumerado y el resultado.
-    print_section_title "Bootstrap" 6 "$TOTAL_PHASES" "Backend Laravel de cada instancia"
+        print_section_title "Bootstrap" 7 "$TOTAL_PHASES" "Backend Laravel de cada instancia"
     for inst in "${instances_to_start[@]}"; do
         local stage_of_inst="${inst%%:*}"
         local store_of_inst="${inst#*:}"
