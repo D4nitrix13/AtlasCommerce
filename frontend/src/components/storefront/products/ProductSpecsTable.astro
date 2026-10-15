@@ -1,0 +1,63 @@
+/**
+ * ProductSpecsTable — tabla de especificaciones técnicas.
+ *
+ * Inspirado en guitargear.com.mx: el detalle de producto de instrumentos
+ * musicales pone la tabla de specs (maderas, pickups, acabado, etc.)
+ * bien PROMINENTE, no escondida en un <details>.
+ *
+ * Componente presentacional puro. Recibe `rows: SpecRow[]` y renderiza
+ * una tabla 2-columnas con label + value. Soporta filas con valor
+ * rich (HTML/JSX) para casos donde hay un link/badge.
+ *
+ * Tokens:
+ *   - `border-slate-200` para los dividers (no negro)
+ *   - `text-slate-500` para labels, `text-slate-900 font-semibold` para values
+ *   - Padding generoso (`py-3`) — guitargear usa tablas con padding amplio
+ *     porque es informativo, no decorativo.
+ *
+ * Accesibilidad: <table> semantica con <th scope="row"> para labels.
+ */
+
+export interface SpecRow {
+  label: string;
+  /** String plano, o HTML pre-formateado (link, badge) cuando requiere más. */
+  value: string;
+}
+
+interface Props {
+  /** Heading opcional que se muestra arriba de la tabla. */
+  heading?: string;
+  /** Filas de specs. */
+  rows: readonly SpecRow[];
+  /** true si la primera columna es label (default) o value (variante). */
+  /** El componente es presentacional — sin handlers. */
+}
+
+const { heading, rows } = Astro.props;
+---
+
+{heading && (
+  <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900">
+    {heading}
+  </h2>
+)}
+
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+  <table class="w-full text-sm">
+    <tbody class="divide-y divide-slate-200">
+      {rows.map((row) => (
+        <tr>
+          <th
+            scope="row"
+            class="bg-slate-50 px-5 py-3 text-left align-top text-[13px] font-semibold text-slate-500"
+          >
+            {row.label}
+          </th>
+          <td class="px-5 py-3 align-top text-slate-900">
+            <Fragment set:html={row.value} />
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
