@@ -293,17 +293,22 @@ cmd_setup() {
         # clear cache. Make sure you have the appropriate permissions.'
         # porque no pueden crear los subdirectorios.
         log_info "  [6.2] chown + mkdir storage/framework"
-        if setup_compose_quiet "$inst" 30 exec -u root -T backend /bin/sh -c '
-            chown -R 1000:1000 /var/www/html/storage &&
+        local chown_out chown_exit
+        chown_out=$(setup_compose_quiet "$inst" 30 exec -u root -T backend /bin/sh -c '
+            chown -R 1000:1000 /var/www/html/storage 2>&1 &&
             mkdir -p /var/www/html/storage/framework/cache/data
                      /var/www/html/storage/framework/views
                      /var/www/html/storage/framework/sessions
-                     /var/www/html/storage/logs &&
-            chown -R 1000:1000 /var/www/html/storage
-        ' 2>/dev/null; then
+                     /var/www/html/storage/logs 2>&1 &&
+            chown -R 1000:1000 /var/www/html/storage 2>&1
+        ')
+        chown_exit=$?
+        if [[ $chown_exit -eq 0 ]]; then
             log_info "        OK"
+        elif [[ $chown_exit -eq 124 ]]; then
+            log_warn "        timeout (30s)"
         else
-            log_warn "        fallo (no critico)"
+            log_warn "        fallo (exit $chown_exit): ${chown_out}"
         fi
 
         # 6.3. storage:link (idempotente; ignora error si ya existe).
@@ -375,20 +380,26 @@ cmd_setup() {
         # configurado pero existe un dev-<slug>.json en seeds/.
         log_info "  [6.7] tenants:bootstrap (seed)"
         local seed_file seed_path
-        seed_file="$(/usr/bin/grep -E '^TENANTS_SEED_FILE=' "$(instance_env_path "$inst")" | /usr/bin/cut -d= -f2-)"
+        # IMPORTANTE: el || true en el grep es por si set -e mata
+        # el script cuando grep no encuentra match (basta que
+        # devuelva 1 en un assignment para que bash 4.4+ aborte).
+        # El || true lo neutraliza y permite que seed_file quede
+        # vacio (que es la senial correcta para 'no hay seed file').
+        seed_file="$(/usr/bin/grep -E '^TENANTS_SEED_FILE=' "$(instance_env_path "$inst")" 2>/dev/null | /usr/bin/cut -d= -f2- || true)"
+        seed_file="${seed_file## }"  # trim leading space
         if [[ -z "$seed_file" ]]; then
             # Buscar dev-<store>.json automaticamente.
             local store_slug="${store_of_inst}"
-            local auto_seed="${store_slug}/seeds/dev-${store_slug}.json"
-            local auto_seed_abs="$(instance_compose_dir "$inst")/seeds/dev-${store_slug}.json"
+            local auto_seed_abs
+            auto_seed_abs="$(instance_compose_dir "$inst")/seeds/dev-${store_slug}.json"
             if [[ -f "$auto_seed_abs" ]]; then
-                seed_file="$auto_seed"
+                seed_file="seeds/dev-${store_slug}.json"
                 log_info "        (auto-detect seed: $seed_file)"
             fi
         fi
         seed_path=""
         if [[ -n "$seed_file" ]]; then
-            seed_path="$(instance_compose_dir "$inst")/${seed_file#/}"
+            seed_path="$(instance_compose_dir "$inst")/${seed_file}"
         fi
         if [[ -n "$seed_file" && -f "$seed_path" ]]; then
             local tenant_out
@@ -400,14 +411,19 @@ cmd_setup() {
             local tenant_exit=$?
             [[ -n "$tenant_out" && "${tenant_out: -1}" != $'\n' ]] && tenant_out+=$'\n'
             if [[ $tenant_exit -eq 124 ]]; then
-                log_warn "        timeout (30s) - artisan tardo demasiado. Re-ejecuta: ./scripts/docker-stack.sh bootstrap dev ${store_slug}"
+                log_warn "        timeout (30s) - artisan tardo demasiado. Re-ejecuta: ./scripts/docker-stack.sh bootstrap dev ${store_of_inst}"
+            elif [[ $tenant_exit -ne 0 ]]; then
+                log_warn "        fallo (exit $tenant_exit)"
+                if [[ -n "$tenant_out" ]]; then
+                    /usr/bin/printf '%s' "$tenant_out" | /usr/bin/sed 's/^/          /' | /usr/bin/head -3
+                fi
             elif /usr/bin/printf '%s' "$tenant_out" | /usr/bin/grep -qiE "(error|exception)"; then
-                log_warn "        fallo (verificar)"
+                log_warn "        fallo (output contiene 'error')"
             else
                 log_info "        OK"
             fi
         else
-            log_info "        skip (no hay seed file)"
+            log_info "        skip (no hay seed file en $seed_path)"
         fi
 
         # 6.8. key:generate (idempotente, via cmd_bootstrap).
