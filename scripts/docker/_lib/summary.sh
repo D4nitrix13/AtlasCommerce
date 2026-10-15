@@ -52,6 +52,47 @@ validate_stage_store() {
     return 0
 }
 
+# print_section_title <fase> <numero> <total> <descripcion>
+# Imprime una caja visual que delimita fases de un comando largo
+# (ej setup). El humano distingue asi entre los 5-7 bloques
+# diferentes que un setup imprime. Sin esto, el output se ve
+# pegado y es imposible saber "ya termino X, ahora arranca Y".
+#
+# Layout (72 chars de ancho total, indent de 2):
+#   ┌── [1/5] Detectando hosts ──────────────────── ──┐
+#
+# El caracter unicode '┌┐└┘│─' se renderiza bien en terminales
+# modernas. Si la terminal es muy vieja y no soporta unicode, el
+# usuario vera '?' en su lugar — no es bloqueante.
+print_section_title() {
+    local fase="${1:-Step}"
+    local num="${2:-1}"
+    local total="${3:-1}"
+    local desc="${4:-}"
+    local prefix="[${num}/${total}] ${fase}"
+    [[ -n "$desc" ]] && prefix="${prefix} — ${desc}"
+
+    # Construir el contenido entre bordes: 2 spaces de margen + prefix + ──.
+    # Ancho total deseado: 72 chars (incluyendo bordes ┌┐).
+    # Contenido interno: 70 chars.
+    local content="── ${prefix} "
+    local content_len=${#content}
+    local pad=$((70 - content_len))
+    [[ $pad -lt 0 ]] && pad=0
+    local pad_str
+    pad_str=$(/usr/bin/printf '%*s' "$pad" '' | /usr/bin/sed 's/ /─/g')
+
+    printf "\n"
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}┌%s%s┐${C_RESET}\n" "$content" "$pad_str"
+}
+
+# print_section_end
+# Cierra la caja visual abierta por print_section_title. Simetrico.
+print_section_end() {
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}└%s┘${C_RESET}\n" \
+        "$(/usr/bin/printf '%*s' 70 '' | /usr/bin/sed 's/ /─/g')"
+}
+
 show_target_summary() {
     local cmd_name="${1:-cmd}"
     local stage_raw="${2:-}"

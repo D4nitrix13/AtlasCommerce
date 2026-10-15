@@ -5,6 +5,13 @@
 
 FROM oven/bun:1-alpine
 
+# El entrypoint del dev server usa UID 1000 directamente (no
+# requiere un usuario 'node' con nombre — usa chown y su por UID).
+# En esta imagen 'oven/bun:1-alpine' no existe el user 'node' por
+# default, y busybox adduser fallo silenciosamente, asi que
+# optamos por la opcion portable: no crear user, usar UID 1000
+# en todos los comandos del entrypoint.
+
 WORKDIR /app
 
 # Layer de cache de dependencias. bun install --frozen-lockfile lee

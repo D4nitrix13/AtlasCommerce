@@ -5,6 +5,13 @@
 
 FROM oven/bun:1-alpine
 
+# 'oven/bun:1-alpine' no incluye el user 'node' por default.
+# Lo creamos via BusyBox (siempre presente en Alpine). Si
+# adduser falla por tags raros de la imagen, los scripts
+# de entrypoint hacen fallback a chown por UID 1000:1000.
+RUN /bin/busybox addgroup -g 1000 -S node 2>/dev/null || true && \
+    /bin/busybox adduser -u 1000 -S -G node -h /tmp node 2>/dev/null || true
+
 WORKDIR /app
 
 # Layer de cache de dependencias. bun install --frozen-lockfile lee

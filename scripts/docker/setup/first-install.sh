@@ -14,7 +14,12 @@ set -euo pipefail
 cmd_setup() {
     local stage="$1"
     local store="${2:-all}"
-    log_bold "Primera instalación de las instancias."
+    log_bold "SETUP — primera instalación de las instancias"
+
+    # Total de fases: 1) versions.env 2) hosts 3) credenciales
+    # 4) levantar containers 5) bootstrap backend. Lo usamos para
+    # los titulos de las cajas visuales.
+    local TOTAL_PHASES=5
 
     # 1. docker/versions.env (centraliza versiones de imágenes)
     if [[ ! -f "${ROOT_DIR}/docker/versions.env" ]]; then
@@ -40,18 +45,19 @@ cmd_setup() {
         ensure_env_file "$inst"
     done
 
-    # 3.4. Rellenar credenciales vacias con defaults razonables.
-    # El .env.example puede tener placeholders ('replace_with_...') o
-    # faltar variables que docker-compose espera (ej FTP_USERNAME,
-    # FTP_PASSWORD, POSTGRES_PASSWORD). Sin valores, docker compose
-    # emite 'Defaulting to a blank string' y los servicios fallan
-    # al autenticar. Setup rellena los defaults seguros de dev y
-    # avisa al usuario que debe cambiarlos para produccion.
+    # 3.4. Safety net: si el .env tiene placeholders 'replace_with_...'
+    # o variables vacias que docker-compose espera, las rellena con
+    # defaults de dev. El .env.example ya viene con valores por defecto
+    # (FTP_PASSWORD=devpass, POSTGRES_PASSWORD=devpass), asi que este
+    # bloque solo dispara si alguien edito el .env.example y dejo
+    # placeholders, o si es un .env heredado de antes de la fix.
+    # En dev, el relleno es silencioso. En prod, el warning SI se
+    # muestra porque alli los placeholders son peligrosos.
     local cred_defaults_set=0
     for inst in "${instances_to_start[@]}"; do
         local env_file="${INSTANCES_DIR}/$(echo "$inst" | tr ':' '/')/environment/.env"
         if [[ -f "$env_file" ]]; then
-            # FTP_USERNAME: dev-ftp (placeholder del .env.example).
+            # FTP_USERNAME: dev-ftp.
             if /usr/bin/grep -qE '^FTP_USERNAME[[:space:]]*=' "$env_file"; then
                 local current
                 current=$(/usr/bin/grep -E '^FTP_USERNAME[[:space:]]*=' "$env_file" | /usr/bin/cut -d= -f2- | /usr/bin/sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -63,7 +69,7 @@ cmd_setup() {
                 /usr/bin/printf '\nFTP_USERNAME=dev-ftp\n' >> "$env_file"
                 cred_defaults_set=1
             fi
-            # FTP_PASSWORD: 'devpass' (placeholder seguro de dev).
+            # FTP_PASSWORD: 'devpass'.
             if /usr/bin/grep -qE '^FTP_PASSWORD[[:space:]]*=' "$env_file"; then
                 local current
                 current=$(/usr/bin/grep -E '^FTP_PASSWORD[[:space:]]*=' "$env_file" | /usr/bin/cut -d= -f2- | /usr/bin/sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -75,7 +81,7 @@ cmd_setup() {
                 /usr/bin/printf 'FTP_PASSWORD=devpass\n' >> "$env_file"
                 cred_defaults_set=1
             fi
-            # POSTGRES_PASSWORD: 'devpass' si esta vacio o placeholder.
+            # POSTGRES_PASSWORD: 'devpass'.
             if /usr/bin/grep -qE '^POSTGRES_PASSWORD[[:space:]]*=' "$env_file"; then
                 local current
                 current=$(/usr/bin/grep -E '^POSTGRES_PASSWORD[[:space:]]*=' "$env_file" | /usr/bin/cut -d= -f2- | /usr/bin/sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -87,8 +93,11 @@ cmd_setup() {
         fi
     done
     if [[ $cred_defaults_set -eq 1 ]]; then
-        log_warn "Rellenamos credenciales vacias con defaults de dev (FTP_USERNAME=dev-ftp, FTP_PASSWORD=devpass, POSTGRES_PASSWORD=devpass)."
-        log_warn "Para produccion, regenera los passwords con: openssl rand -base64 32"
+        if [[ "$stage" == "development" ]]; then
+            log_info "Credenciales con placeholder rellenadas con defaults de dev (FTP_USERNAME=dev-ftp, FTP_PASSWORD=devpass, POSTGRES_PASSWORD=devpass)."
+        else
+            log_warn "Credenciales con placeholder rellenadas con defaults. Para produccion, regenera los passwords con: openssl rand -base64 32"
+        fi
     fi
 
     # 3.5. Detectar hosts faltantes y PREGUNTAR al usuario si quiere
@@ -113,9 +122,9 @@ cmd_setup() {
         done
     done
     if [[ ${#missing_hosts[@]} -gt 0 ]]; then
-        log_warn "Faltan ${#missing_hosts[@]} entradas en /etc/hosts para acceder a las tiendas:"
+        print_section_title "Hosts" 3 "$TOTAL_PHASES" "Faltan ${#missing_hosts[@]} entradas en /etc/hosts"
         for entry in "${missing_hosts[@]}"; do
-            log_info "  - ${entry}"
+            log_warn "  - ${entry}"
         done
         # Intentar agregar automaticamente con sudo -n (no-interactive).
         # Si funciona: silencioso. Si falla: mostrar comando manual.
@@ -143,14 +152,17 @@ cmd_setup() {
             log_info "Comando equivalente: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
             log_info "O setup te lo agregara automaticamente si corres 'sudo -v' antes (cachea la sesion sudo)."
         fi
+        print_section_end
     fi
 
     # 4. Levantar containers.
+    print_section_title "Containers" 4 "$TOTAL_PHASES" "Levantar ${#instances_to_start[@]} instancia(s) con docker compose"
     for inst in "${instances_to_start[@]}"; do
         log_info "Levantando ${C_BOLD}${inst}${C_RESET}…"
         docker_compose "$inst" up -d --remove-orphans
         log_ok "${inst} levantado."
     done
+    print_section_end
 
     # 5. Bootstrap del backend Laravel en cada instancia levantada.
     # Secuencia: storage:link → cache:clear → config:clear → migrate →
@@ -163,6 +175,7 @@ cmd_setup() {
     # internos del slug (que tiene varios `-`). NO usar ${var%%-*} porque
     # cortaría al primer guion y rompería el lookup en resolve_targets.
     for inst in "${instances_to_start[@]}"; do
+        log_bold ""
         log_bold "Backend bootstrap de ${inst}"
         local stage_of_inst="${inst%%:*}"
         local store_of_inst="${inst#*:}"
