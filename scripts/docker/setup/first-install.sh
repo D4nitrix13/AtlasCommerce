@@ -14,14 +14,25 @@ set -euo pipefail
 cmd_setup() {
     local stage="$1"
     local store="${2:-all}"
+    # Flag --no-hosts: si esta presente, NO intenta agregar hosts a
+    # /etc/hosts (omite la fase 3). Por defecto los agrega automaticamente
+    # cuando sudo -n funciona, o muestra el comando manual cuando no.
+    local add_hosts=1
+    for arg in "$@"; do
+        case "$arg" in
+            --no-hosts) add_hosts=0 ;;
+        esac
+    done
+
     log_bold "SETUP — primera instalación de las instancias"
 
-    # Total de fases: 1) versions.env 2) hosts 3) credenciales
-    # 4) levantar containers 5) bootstrap backend. Lo usamos para
-    # los titulos de las cajas visuales.
-    local TOTAL_PHASES=5
+    # 6 fases visuales: cada una con su cajita ┌── [N/6] ... ──┐.
+    # 1) versions.env  2) Scope  3) Hosts  4) Credenciales
+    # 5) Containers  6) Backend bootstrap.
+    local TOTAL_PHASES=6
 
     # 1. docker/versions.env (centraliza versiones de imágenes)
+    print_section_title "Versions" 1 "$TOTAL_PHASES" "Centralizar versiones de imagenes"
     if [[ ! -f "${ROOT_DIR}/docker/versions.env" ]]; then
         if [[ -f "${ROOT_DIR}/docker/versions.env.example" ]]; then
             log_info "Creando docker/versions.env desde .example (editá versiones si querés pinear)."
@@ -30,7 +41,10 @@ cmd_setup() {
             log_err "docker/versions.env.example no existe. Repo corrupto?"
             exit 1
         fi
+    else
+        log_info "docker/versions.env ya existe."
     fi
+    print_section_end
 
     # 2. Resolver qué instancias levanta este setup según (stage, store).
     # El dispatcher ya normalizó stage (prod→production, dev→development).
@@ -38,7 +52,9 @@ cmd_setup() {
     while IFS=$'\t' read -r inst _; do
         instances_to_start+=("$inst")
     done < <(resolve_targets "$stage" "$store")
-    log_info "Scope: stage=${stage} store=${store} (${#instances_to_start[@]} instancias: ${instances_to_start[*]})"
+    print_section_title "Scope" 2 "$TOTAL_PHASES" "stage=${stage} store=${store} (${#instances_to_start[@]} instancias)"
+    log_info "Instancias a levantar: ${instances_to_start[*]}"
+    print_section_end
 
     # 3. Asegurar .env de cada instancia.
     for inst in "${instances_to_start[@]}"; do
@@ -53,6 +69,7 @@ cmd_setup() {
     # placeholders, o si es un .env heredado de antes de la fix.
     # En dev, el relleno es silencioso. En prod, el warning SI se
     # muestra porque alli los placeholders son peligrosos.
+    print_section_title "Credenciales" 4 "$TOTAL_PHASES" "FTP + POSTGRES_PASSWORD con defaults de dev"
     local cred_defaults_set=0
     for inst in "${instances_to_start[@]}"; do
         local env_file="${INSTANCES_DIR}/$(echo "$inst" | tr ':' '/')/environment/.env"
@@ -98,7 +115,10 @@ cmd_setup() {
         else
             log_warn "Credenciales con placeholder rellenadas con defaults. Para produccion, regenera los passwords con: openssl rand -base64 32"
         fi
+    else
+        log_info "Credenciales OK (FTP_USERNAME, FTP_PASSWORD, POSTGRES_PASSWORD con valores)."
     fi
+    print_section_end
 
     # 3.5. Detectar hosts faltantes y PREGUNTAR al usuario si quiere
     # agregarlos a /etc/hosts automaticamente. Si no, mostrar el
@@ -121,7 +141,7 @@ cmd_setup() {
             fi
         done
     done
-    if [[ ${#missing_hosts[@]} -gt 0 ]]; then
+    if [[ ${#missing_hosts[@]} -gt 0 && $add_hosts -eq 1 ]]; then
         print_section_title "Hosts" 3 "$TOTAL_PHASES" "Faltan ${#missing_hosts[@]} entradas en /etc/hosts"
         for entry in "${missing_hosts[@]}"; do
             log_warn "  - ${entry}"
@@ -156,7 +176,7 @@ cmd_setup() {
     fi
 
     # 4. Levantar containers.
-    print_section_title "Containers" 4 "$TOTAL_PHASES" "Levantar ${#instances_to_start[@]} instancia(s) con docker compose"
+    print_section_title "Containers" 5 "$TOTAL_PHASES" "Levantar ${#instances_to_start[@]} instancia(s) con docker compose"
     for inst in "${instances_to_start[@]}"; do
         log_info "Levantando ${C_BOLD}${inst}${C_RESET}…"
         docker_compose "$inst" up -d --remove-orphans
@@ -174,9 +194,10 @@ cmd_setup() {
     # SOLO el prefijo `stage:` con ${var#*:} para preservar guiones
     # internos del slug (que tiene varios `-`). NO usar ${var%%-*} porque
     # cortaría al primer guion y rompería el lookup en resolve_targets.
+    # 5. Backend bootstrap.
+    print_section_title "Bootstrap" 6 "$TOTAL_PHASES" "Backend Laravel (storage:link + caches + migrate + tenants:bootstrap)"
     for inst in "${instances_to_start[@]}"; do
-        log_bold ""
-        log_bold "Backend bootstrap de ${inst}"
+        log_info "Backend bootstrap de ${inst}"
         local stage_of_inst="${inst%%:*}"
         local store_of_inst="${inst#*:}"
 
@@ -244,9 +265,18 @@ cmd_setup() {
         # key:generate (idempotente, via cmd_bootstrap).
         cmd_bootstrap "$stage_of_inst" "$store_of_inst"
     done
+    print_section_end
 
+    log_ok ""
     log_ok "Setup completo. Próximos pasos:"
-    echo "  1. sudo ./scripts/docker-stack.sh hosts >>/etc/hosts"
-    echo "  2. sudo cp docker/caddy/Caddyfile /etc/caddy/Caddyfile && sudo systemctl restart caddy"
-    echo "  3. Probar: curl -sI http://panda-estampados.com/api/storefront/theme"
+    if [[ ${#missing_hosts[@]} -gt 0 && $add_hosts -eq 0 ]]; then
+        # Si el user paso --no-hosts, le recordamos que tiene que
+        # agregar los hosts a mano.
+        echo "  1. (recomendado) ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
+        echo "  2. (opcional) sudo cp docker/caddy/Caddyfile /etc/caddy/Caddyfile && sudo systemctl restart caddy"
+        echo "  3. Probar: curl -sI http://<store>.test:5321/"
+    else
+        echo "  1. (opcional) sudo cp docker/caddy/Caddyfile /etc/caddy/Caddyfile && sudo systemctl restart caddy"
+        echo "  2. Probar: curl -sI http://<store>.test:5321/"
+    fi
 }

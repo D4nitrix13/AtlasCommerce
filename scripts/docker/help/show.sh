@@ -251,10 +251,11 @@ misma diferencia que entre 'docker exec psql' y un wrapper de carga."
             ;;
         setup)
             description="Primera instalación COMPLETA de una instancia (o todas del stage con store=all). Crea docker/versions.env si falta, asegura .env de cada instancia, levanta containers, rellena credenciales vacias con defaults de dev (FTP_USERNAME/FTP_PASSWORD/POSTGRES_PASSWORD), detecta hosts faltantes en /etc/hosts y los agrega automaticamente con sudo -n (o muestra el comando manual si no hay sudo), y luego corre el bootstrap del backend en orden: storage:link → cache:clear + config:clear + view:clear → assets:sync-from-public → migrate --force → tenants:bootstrap → key:generate (via cmd_bootstrap). Después de setup la instancia está lista para recibir tráfico."
-            usage_args="<stage> <store|all>"
+            usage_args="<stage> <store|all> [--no-hosts]"
             example="$0 setup dev panda-estampados-and-kitsune           # 1 instancia dev
 $0 setup dev all                                   # las 3 dev
-$0 setup production all                            # las 3 prod"
+$0 setup production all                            # las 3 prod
+$0 setup dev panda-estampados-and-kitsune --no-hosts  # NO agregar hosts a /etc/hosts"
             notes="Si sudo no esta cacheado, setup detecta hosts faltantes y muestra el bloque a pegar con 'sudo tee -a /etc/hosts'. El usuario puede correr 'sudo -v' antes de setup para que el setup agrege los hosts automaticamente (sin tener que copiarlos a mano).
 
 Despues de setup, pasos manuales para dev:
