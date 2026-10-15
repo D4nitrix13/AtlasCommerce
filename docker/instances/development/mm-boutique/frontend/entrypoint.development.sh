@@ -22,7 +22,7 @@ set -eu
 if [ "$(id -u)" = "0" ]; then
     for dir in node_modules node_modules/.bun .astro node_modules/.vite; do
         if [ -d "/app/$dir" ]; then
-            /bin/chown -R node:node "/app/$dir"
+            /bin/chown -R bun:bun "/app/$dir"
         fi
     done
 
@@ -40,7 +40,7 @@ if [ "$(id -u)" = "0" ]; then
     # Bun opera sobre node_modules/.bun; no requiere --frozen-lockfile
     # en estado inválido. En dev con TTY automático aborta. Explicit
     # CI=true desde el entrypoint garantiza el bypass.
-    exec /bin/su -s /bin/sh node -c '/usr/local/bin/bun run dev --host 0.0.0.0 --force "$@"' --
+    exec /bin/su -s /bin/sh bun -c '/usr/local/bin/bun run dev --host 0.0.0.0 --force "$@"' --
 fi
 
 # Si por alguna razon ya entramos como node, saltar el chown y correr bun directo.

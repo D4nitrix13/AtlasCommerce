@@ -5,12 +5,10 @@
 
 FROM oven/bun:1-alpine
 
-# 'oven/bun:1-alpine' no incluye el user 'node' por default.
+# Imagen base: oven/bun:1-alpine (trae user "bun" con UID/GID 1000).
 # Lo creamos via BusyBox (siempre presente en Alpine). Si
-# adduser falla por tags raros de la imagen, los scripts
-# de entrypoint hacen fallback a chown por UID 1000:1000.
-RUN /bin/busybox addgroup -g 1000 -S node 2>/dev/null || true && \
-    /bin/busybox adduser -u 1000 -S -G node -h /tmp node 2>/dev/null || true
+# El dev server corre como "bun" para escribir al bind-mount
+# de node_modules sin problemas de permisos.
 
 WORKDIR /app
 

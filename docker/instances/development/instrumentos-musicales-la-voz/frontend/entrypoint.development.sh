@@ -19,16 +19,15 @@
 
 set -eu
 
-# HOST_UID del bind-mount (por default 1000). Usamos el UID directamente
-# en vez del nombre de user 'node' porque 'oven/bun:1-alpine' no
-# incluye ese user por default. Esto es portable: el entrypoint
-# funciona con cualquier UID del host (mapea HOST_UID/HOST_GID al
-# build del compose con user: "${HOST_UID:-1000}:${HOST_GID:-1000}").
+# 'oven/bun:1-alpine' trae el user 'bun' con UID/GID 1000 pre-creado.
+# No necesitamos crear un user 'node' (que ademas colisiona con
+# bun por el UID 1000). El dev server corre como 'bun' para que
+# pueda escribir al bind-mount de node_modules.
 
 if [ "$(id -u)" = "0" ]; then
     for dir in node_modules node_modules/.bun .astro; do
         if [ -d "/app/$dir" ]; then
-            /bin/chown -R "${HOST_UID:-1000}:${HOST_GID:-1000}" "/app/$dir"
+            /bin/chown -R bun:bun "/app/$dir"
         fi
     done
 
@@ -38,7 +37,7 @@ if [ "$(id -u)" = "0" ]; then
     # resuelve los symlinks sin reconstruir la imagen.
     if [ -f /app/bun.lock ]; then
         cd /app && /usr/local/bin/bun install --frozen-lockfile 2>&1 | tail -3 || true
-        /bin/chown -R "${HOST_UID:-1000}:${HOST_GID:-1000}" /app/node_modules /app/node_modules/.bun
+        /bin/chown -R bun:bun /app/node_modules /app/node_modules/.bun
     fi
 
     # Limpiar contenidos de caches stale (no los mount points — `rm -rf`
@@ -52,10 +51,10 @@ if [ "$(id -u)" = "0" ]; then
     /usr/bin/pkill -f 'astro dev' 2>/dev/null || true
     /usr/bin/pkill -f 'vite'      2>/dev/null || true
 
-    # Drop privilegios y exec bun como el host user (UID 1000).
-    # Usamos 'su -s /bin/sh - HOST_UID' (con UID numerico) porque
-    # 'su node' falla si no existe el user 'node' en /etc/passwd.
-    exec /bin/su -s /bin/sh - "${HOST_UID:-1000}" -c '/usr/local/bin/bun run dev --host 0.0.0.0 --force "$@"' --
+    # Drop privilegios y exec bun como el user 'bun' (UID 1000).
+    # Usamos 'su -s /bin/sh - bun' (con nombre) porque 'bun' SI
+    # existe en /etc/passwd de oven/bun:1-alpine.
+    exec /bin/su -s /bin/sh bun -c '/usr/local/bin/bun run dev --host 0.0.0.0 --force "$@"' --
 fi
 
 # Si por alguna razon ya entramos como non-root, correr bun directo.

@@ -5,12 +5,12 @@
 
 FROM oven/bun:1-alpine
 
-# El entrypoint del dev server usa UID 1000 directamente (no
-# requiere un usuario 'node' con nombre — usa chown y su por UID).
-# En esta imagen 'oven/bun:1-alpine' no existe el user 'node' por
-# default, y busybox adduser fallo silenciosamente, asi que
-# optamos por la opcion portable: no crear user, usar UID 1000
-# en todos los comandos del entrypoint.
+# La imagen 'oven/bun:1-alpine' trae el user 'bun' con UID/GID 1000
+# pre-creado (no necesitamos adduser). El dev server corre como
+# 'bun' (UID 1000) para que pueda escribir al bind-mount de
+# node_modules sin chown root. Esto es portable: no dependemos
+# de un user 'node' con nombre (que en esta imagen no existe
+# y ademas colisiona con el UID/GID 1000 de 'bun').
 
 WORKDIR /app
 

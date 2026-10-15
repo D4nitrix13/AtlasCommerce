@@ -30,7 +30,7 @@ if [ "$(id -u)" = "0" ]; then
     # puede escribir a /app/.astro/types.d.ts (EACCES).
     for dir in node_modules node_modules/.bun .astro; do
         if [ -d "/app/$dir" ]; then
-            /bin/chown -R node:node "/app/$dir"
+            /bin/chown -R bun:bun "/app/$dir"
         fi
     done
 
@@ -40,7 +40,7 @@ if [ "$(id -u)" = "0" ]; then
     /usr/bin/find /app/.astro -mindepth 1 -delete 2>/dev/null || true
 
     # Drop privilegios y exec bun como node (UID 1000).
-    exec /bin/su -s /bin/sh node -c '/usr/local/bin/bun run dev --host 0.0.0.0 --force "$@"' --
+    exec /bin/su -s /bin/sh bun -c '/usr/local/bin/bun run dev --host 0.0.0.0 --force "$@"' --
 fi
 
 # Si por alguna razon ya entramos como node, saltar el chown y correr bun directo.
