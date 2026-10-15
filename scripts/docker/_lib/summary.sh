@@ -52,14 +52,37 @@ validate_stage_store() {
     return 0
 }
 
+# _terminal_width
+# Devuelve el ancho de la terminal en columnas. Usa 'tput cols' si
+# esta disponible; fallback a 80 (default ANSI) si no. Limita a un
+# minimo de 60 (para que las cajitas no se rompan en pantallas
+# pequenas) y a un maximo de 200 (para que no sean demasiado
+# largas en monitores ultra-wide).
+_terminal_width() {
+    local width
+    if /usr/bin/command -v tput >/dev/null 2>&1; then
+        width=$(/usr/bin/tput cols 2>/dev/null)
+    fi
+    [[ -z "$width" || "$width" -lt 60 ]] && width=80
+    [[ "$width" -gt 200 ]] && width=200
+    /usr/bin/printf '%d' "$width"
+}
+
+# _separator_line <ancho>
+# Imprime '─' repetido <ancho> veces. Helper reutilizable.
+_separator_line() {
+    local width="${1:-70}"
+    /usr/bin/printf '%*s' "$width" '' | /usr/bin/sed 's/ /─/g'
+}
+
 # print_section_title <fase> <numero> <total> <descripcion>
 # Imprime una caja visual que delimita fases de un comando largo
 # (ej setup). El humano distingue asi entre los 5-7 bloques
 # diferentes que un setup imprime. Sin esto, el output se ve
 # pegado y es imposible saber "ya termino X, ahora arranca Y".
 #
-# Layout (72 chars de ancho total, indent de 2):
-#   ┌── [1/5] Detectando hosts ──────────────────── ──┐
+# Layout (ancho completo de la terminal, indent de 2):
+#   ┌── [1/5] Detectando hosts ─────────── ... ──────────┐
 #
 # El caracter unicode '┌┐└┘│─' se renderiza bien en terminales
 # modernas. Si la terminal es muy vieja y no soporta unicode, el
@@ -72,15 +95,17 @@ print_section_title() {
     local prefix="[${num}/${total}] ${fase}"
     [[ -n "$desc" ]] && prefix="${prefix} — ${desc}"
 
-    # Construir el contenido entre bordes: 2 spaces de margen + prefix + ──.
-    # Ancho total deseado: 72 chars (incluyendo bordes ┌┐).
-    # Contenido interno: 70 chars.
+    # Ancho total = columnas de terminal. La caja ocupa 2 chars
+    # menos (los bordes ┌ y ┐). Padding interno de 2 + prefix.
+    local width
+    width=$(_terminal_width)
+    local inner=$((width - 2))  # 2 bordes
     local content="── ${prefix} "
     local content_len=${#content}
-    local pad=$((70 - content_len))
+    local pad=$((inner - content_len))
     [[ $pad -lt 0 ]] && pad=0
     local pad_str
-    pad_str=$(/usr/bin/printf '%*s' "$pad" '' | /usr/bin/sed 's/ /─/g')
+    pad_str=$(_separator_line "$pad")
 
     printf "\n"
     printf "  ${C_BOLD}${C_BRIGHT_CYAN}┌%s%s┐${C_RESET}\n" "$content" "$pad_str"
@@ -88,9 +113,14 @@ print_section_title() {
 
 # print_section_end
 # Cierra la caja visual abierta por print_section_title. Simetrico.
+# Ocupa todo el ancho de la terminal.
 print_section_end() {
-    printf "  ${C_BOLD}${C_BRIGHT_CYAN}└%s┘${C_RESET}\n" \
-        "$(/usr/bin/printf '%*s' 70 '' | /usr/bin/sed 's/ /─/g')"
+    local width
+    width=$(_terminal_width)
+    local inner=$((width - 2))
+    local sep
+    sep=$(_separator_line "$inner")
+    printf "  ${C_BOLD}${C_BRIGHT_CYAN}└%s┘${C_RESET}\n" "$sep"
 }
 
 show_target_summary() {
