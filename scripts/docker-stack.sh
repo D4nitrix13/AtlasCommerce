@@ -497,11 +497,13 @@ fi
 case "$cmd_canonical" in
     up|start|stop|restart|down|nuke|build)
         if [[ "$STORE" != "all" && -z "$SERVICE" ]]; then
-            log_err "'$cmd_canonical <store>' requiere servicio o 'all' (como servicio)."
+            # Cada token con su color para que el humano distinga
+            # QUE es comando, flag, valor, subcomando.
+            log_err "${C_BRIGHT_MAGENTA}${cmd_canonical}${C_RESET} ${C_DIM}<store>${C_RESET} requiere ${C_BRIGHT_GREEN}servicio${C_RESET} o ${C_BRIGHT_GREEN}'all'${C_RESET} (como servicio)."
             log_err "Si querés arrancar/detener TODOS los servicios de la instancia, usar:"
-            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE all${C_RESET}"
-            log_err "Si querés solo 1 servicio (ej backend):"
-            log_err "  ${C_BRIGHT_CYAN}$0 $cmd_canonical $STAGE $STORE backend${C_RESET}"
+            log_err "  ${C_BRIGHT_CYAN}${0}${C_RESET} ${C_BRIGHT_MAGENTA}${cmd_canonical}${C_RESET} ${C_BRIGHT_YELLOW}${STAGE}${C_RESET} ${C_BRIGHT_BLUE}${STORE}${C_RESET} ${C_BRIGHT_GREEN}all${C_RESET}"
+            log_err "Si querés solo 1 servicio (ej ${C_BRIGHT_GREEN}backend${C_RESET}):"
+            log_err "  ${C_BRIGHT_CYAN}${0}${C_RESET} ${C_BRIGHT_MAGENTA}${cmd_canonical}${C_RESET} ${C_BRIGHT_YELLOW}${STAGE}${C_RESET} ${C_BRIGHT_BLUE}${STORE}${C_RESET} ${C_BRIGHT_GREEN}backend${C_RESET}"
             exit 1
         fi
         # "all" como SERVICE = todos los servicios de esta instancia.
