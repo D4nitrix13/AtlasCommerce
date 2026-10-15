@@ -24,7 +24,7 @@ INSTANCES_DIR="${ROOT_DIR}/docker/instances"
 # desde `panda-estampados-and-kitsune` para que el nombre refleje la multi-tenancy
 # y no parezca solo el tenant Pandas.
 STAGES=(production development)
-STORES=(panda-estampados-and-kitsune mm-boutique morales-store)
+STORES=(panda-estampados-and-kitsune mm-boutique morales-store instrumentos-musicales-la-voz)
 
 # Construimos ALL_INSTANCES (y las sublistas por stage) cruzando
 # STAGES x STORES. Formato: `<stage>:<store>` — mismo formato que se

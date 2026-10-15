@@ -1,0 +1,33 @@
+{
+  "tenants": [
+    {
+      "slug": "instrumentos-musicales-la-voz",
+      "name": "Instrumentos Musicales La Voz (DEV)",
+      "currency": "USD",
+      "domains": [
+        "instrumentos-musicales-la-voz.com",
+        "www.instrumentos-musicales-la-voz.com"
+      ],
+      "admin_domains": [
+        "admin.instrumentos-musicales-la-voz.com"
+      ],
+      "theme": {
+        "short_name": "Morales DEV",
+        "logo_path": "tenants/instrumentos-musicales-la-voz/branding/logo.webp",
+        "login_logo_path": "tenants/instrumentos-musicales-la-voz/branding/logo.webp",
+        "accent_color": "#2563EB",
+        "accent_hover_color": "#1D4ED8",
+        "support_email": "support@dev.instrumentos-musicales-la-voz.test"
+      }
+    }
+  ],
+  "admin_user": {
+    "email": "admin@instrumentos-musicales-la-voz.com",
+    "password": "password"
+  },
+  "features": {
+    "wholesale_pricing": true,
+    "bulk_import": true,
+    "subscription_billing": true
+  }
+}

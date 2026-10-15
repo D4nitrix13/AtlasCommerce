@@ -10,6 +10,7 @@
  * la config desde la tabla `store_settings`.
  */
 
+import { instrumentosMusicalesLaVozTheme } from '@theme/instrumentos-musicales-la-voz';
 import { kitsuneTheme } from '@theme/kitsune';
 import { mmBoutiqueTheme } from '@theme/mm-boutique';
 import { moralesStoreTheme } from '@theme/morales-store';
@@ -99,6 +100,7 @@ export const STORE_BRANDS: Record<string, StoreBrand> = {
   kitsune: kitsuneTheme.brand,
   'mm-boutique': mmBoutiqueTheme.brand,
   'morales-store': moralesStoreTheme.brand,
+  'instrumentos-musicales-la-voz': instrumentosMusicalesLaVozTheme.brand,
 };
 
 export const DEFAULT_BRAND: StoreBrand = STORE_BRANDS['panda-estampados'] ?? {

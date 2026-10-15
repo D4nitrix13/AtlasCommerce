@@ -26,6 +26,15 @@ if [ "$(id -u)" = "0" ]; then
         fi
     done
 
+    # El named volume de node_modules shadow el bind-mount del host. Si
+    # el host agrego un theme package nuevo (ej instrumentos-musicales-la-voz)
+    # el named volume del container no lo refleja. Re-ejecutar pnpm install
+    # resuelve los symlinks sin reconstruir la imagen.
+    if [ -f "/app/pnpm-workspace.yaml" ]; then
+        cd /app && /usr/local/bin/pnpm install --prefer-offline 2>&1 | tail -3 || true
+        /bin/chown -R node:node /app/node_modules /app/.pnpm-store
+    fi
+
     # Limpiar contenidos de caches stale (no los mount points — `rm -rf`
     # sobre un mount falla con EBUSY). Borrar el .astro/dev.json force-
     # enables cold-start del dev server cuando un container anterior dejó
@@ -33,8 +42,8 @@ if [ "$(id -u)" = "0" ]; then
 /usr/bin/find /app/.astro -mindepth 1 -delete 2>/dev/null || true
 /usr/bin/find /app/node_modules/.vite -mindepth 1 -delete 2>/dev/null || true
     # Matar cualquier astro/vite stale que haya sobrevivido (defense-in-depth).
-/usr/bin/pkill -f 'astro dev' 2>/dev/null || true
-/usr/bin/pkill -f 'vite'      2>/dev/null || true
+    /usr/bin/pkill -f 'astro dev' 2>/dev/null || true
+    /usr/bin/pkill -f 'vite'      2>/dev/null || true
 
     # Drop privilegios y exec pnpm como node (UID 1000).
     exec /bin/su -s /bin/sh node -c '/usr/local/bin/pnpm run dev --host 0.0.0.0 --force "$@"' --
@@ -45,3 +54,4 @@ fi
 /usr/bin/find /app/.astro -mindepth 1 -delete 2>/dev/null || true
 /usr/bin/find /app/node_modules/.vite -mindepth 1 -delete 2>/dev/null || true
 exec /usr/local/bin/pnpm run dev --host 0.0.0.0 --force "$@"
+

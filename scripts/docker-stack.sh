@@ -41,6 +41,7 @@
 #
 # Stores:
 #   panda-estampados-and-kitsune | mm-boutique | morales-store   → 1 instancia
+#   instrumentos-musicales-la-voz                        → 1 instancia
 #   all                                            → todas las del stage
 #
 # Requiere: docker compose v2 (>= 5.x), bash 4+.
@@ -145,7 +146,7 @@ _print_positional_usage() {
 
     log_err "Uso: ${C_BRIGHT_CYAN}${script_path} <cmd>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<stage>${C_RESET} ${C_BOLD}${C_BRIGHT_YELLOW}<store|all>${C_RESET} ${C_GREEN}[<servicio>]${C_RESET}"
     log_err "Stages: ${C_BRIGHT_CYAN}production|prod${C_RESET}, ${C_BRIGHT_CYAN}development|dev${C_RESET}"
-    log_err "Stores: ${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}, ${C_BRIGHT_CYAN}mm-boutique${C_RESET}, ${C_BRIGHT_CYAN}morales-store${C_RESET}, ${C_BRIGHT_CYAN}all${C_RESET}"
+    log_err "Stores: ${C_BRIGHT_CYAN}panda-estampados-and-kitsune${C_RESET}, ${C_BRIGHT_CYAN}mm-boutique${C_RESET}, ${C_BRIGHT_CYAN}morales-store${C_RESET}, ${C_BRIGHT_CYAN}instrumentos-musicales-la-voz${C_RESET}, ${C_BRIGHT_CYAN}all${C_RESET}"
     echo ""
     case "$cmd_canonical" in
         build)
