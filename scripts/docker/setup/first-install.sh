@@ -11,6 +11,31 @@
 # Para datos de testing, correr `seed-db --seed` aparte.
 set -euo pipefail
 
+# setup_compose_quiet <inst> <args...>
+# Wrapper local de docker_compose() que suprime el bloque [cmd]
+# repetitivo (cd/env/exec) que ensucia el output del setup. Solo
+# imprime el resultado del comando (output + exit code). Los 8
+# sub-pasos del bootstrap se vuelven legibles en vez de un wall
+# de texto. Se usa SOLO en setup; el resto del orquestador sigue
+# usando docker_compose() con el [cmd] block verbose.
+setup_compose_quiet() {
+    local name="$1"; shift
+    local dir
+    dir="$(instance_compose_dir "$name")"
+    local file
+    file="$(instance_compose_file "$name")"
+    local env_file=""
+    if [[ -f "${dir}/environment/.env" ]]; then
+        env_file="--env-file environment/.env"
+    fi
+    local host_uid="${HOST_UID:-$(${ID_BIN} -u)}"
+    local host_gid="${HOST_GID:-$(${ID_BIN} -g)}"
+
+    # No [cmd] block. Solo ejecutamos y devolvemos output+exit.
+    (cd "$dir" && HOST_UID="${host_uid}" HOST_GID="${host_gid}" \
+        ${DOCKER_BIN} compose -f "$file" $env_file "$@")
+}
+
 cmd_setup() {
     local stage="$1"
     local store="${2:-all}"
@@ -200,12 +225,11 @@ cmd_setup() {
     # internos del slug (que tiene varios `-`). NO usar ${var%%-*} porque
     # cortaría al primer guion y rompería el lookup en resolve_targets.
     # 6. Backend bootstrap. Cada sub-paso se enumera para que el dev
-    # pueda seguir el progreso. Usamos 'log_info' con prefijo numerado
-    # en vez de [cmd] blocks repetitivos.
+    # pueda seguir el progreso. Usamos 'setup_compose_quiet' (wrapper
+    # local) en vez de 'docker_compose' para suprimir el bloque [cmd]
+    # repetitivo — el dev solo ve el sub-paso enumerado y el resultado.
     print_section_title "Bootstrap" 6 "$TOTAL_PHASES" "Backend Laravel de cada instancia"
     for inst in "${instances_to_start[@]}"; do
-        log_info ""
-        log_info "=== ${inst} ==="
         local stage_of_inst="${inst%%:*}"
         local store_of_inst="${inst#*:}"
         local stage_of_inst="${inst%%:*}"
@@ -237,10 +261,24 @@ cmd_setup() {
         # 6.1. Esperar Postgres healthy antes de cualquier artisan.
         # (Logica existente del setup.)
 
-        # 6.2. storage:link (idempotente; ignora error si ya existe).
-        log_info "  [6.2] storage:link"
+        # 6.2. chown storage 1000:1000 (PHP-FPM user).
+        # CRITICAL: el volumen storage/ se crea como root en el build,
+        # pero PHP-FPM corre como UID 1000. Si esto va DESPUES de
+        # cache:clear, el clear falla con 'Failed to clear cache.
+        # Make sure you have the appropriate permissions.' Por eso
+        # va PRIMERO, antes de cualquier artisan.
+        log_info "  [6.2] chown storage 1000:1000"
+        if setup_compose_quiet "$inst" exec -u root -T backend \
+            /bin/chown -R 1000:1000 /var/www/html/storage; then
+            log_info "        OK"
+        else
+            log_warn "        fallo (no critico)"
+        fi
+
+        # 6.3. storage:link (idempotente; ignora error si ya existe).
+        log_info "  [6.3] storage:link"
         local link_out
-        link_out=$(docker_compose "$inst" exec -T backend \
+        link_out=$(setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan storage:link 2>&1 || true)
         if /usr/bin/printf '%s' "$link_out" | /usr/bin/grep -q "already exists"; then
             log_info "        (storage:link ya existia, skip)"
@@ -248,36 +286,24 @@ cmd_setup() {
             log_info "        OK"
         fi
 
-        # 6.3. chown storage 1000:1000 (PHP-FPM user).
-        # CRITICAL: el volumen storage/ se crea como root en el build,
-        # pero PHP-FPM corre como UID 1000. Sin el chown, view:clear
-        # falla y el primer 404/500 rompe.
-        log_info "  [6.3] chown storage 1000:1000"
-        if docker_compose "$inst" exec -u root -T backend \
-            /bin/chown -R 1000:1000 /var/www/html/storage 2>&1 >/dev/null; then
-            log_info "        OK"
-        else
-            log_warn "        fallo (no critico)"
-        fi
-
         # 6.4. cache:clear + config:clear + view:clear.
-        # Cada uno corre y reporta OK/error por separado.
+        # Despues del chown, estos corren limpios.
         log_info "  [6.4] cache:clear + config:clear + view:clear"
         local cache_out
-        cache_out=$(docker_compose "$inst" exec -T backend \
+        cache_out=$(setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan cache:clear 2>&1 || true)
         if /usr/bin/printf '%s' "$cache_out" | /usr/bin/grep -q "ERROR"; then
             log_warn "        cache:clear: ${cache_out}"
         else
             log_info "        cache:clear OK"
         fi
-        if docker_compose "$inst" exec -T backend \
+        if setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan config:clear >/dev/null 2>&1; then
             log_info "        config:clear OK"
         else
             log_warn "        config:clear fallo (reintentable despues)"
         fi
-        if docker_compose "$inst" exec -T backend \
+        if setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan view:clear >/dev/null 2>&1; then
             log_info "        view:clear OK"
         else
@@ -287,7 +313,7 @@ cmd_setup() {
         # 6.5. assets:sync-from-public (logos + favicons al FTP).
         log_info "  [6.5] assets:sync-from-public"
         local sync_out
-        sync_out=$(docker_compose "$inst" exec -T backend \
+        sync_out=$(setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan assets:sync-from-public --force 2>&1 || true)
         if /usr/bin/printf '%s' "$sync_out" | /usr/bin/grep -qE "(Subido|Resumen)"; then
             /usr/bin/printf '%s' "$sync_out" | /usr/bin/sed 's/^/        /' | /usr/bin/head -3
@@ -298,7 +324,7 @@ cmd_setup() {
         # 6.6. migrate --force.
         log_info "  [6.6] migrate --force"
         local mig_out
-        mig_out=$(docker_compose "$inst" exec -T backend \
+        mig_out=$(setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan migrate --force 2>&1 || true)
         if /usr/bin/printf '%s' "$mig_out" | /usr/bin/grep -qE "Migrat"; then
             /usr/bin/printf '%s' "$mig_out" | /usr/bin/grep -E "Migrat" | /usr/bin/sed 's/^/        /' | /usr/bin/head -5
@@ -314,7 +340,7 @@ cmd_setup() {
         seed_file="$(/usr/bin/grep -E '^TENANTS_SEED_FILE=' "$(instance_env_path "$inst")" | /usr/bin/cut -d= -f2-)"
         if [[ -n "$seed_file" && -f "$(instance_compose_dir "$inst")/${seed_file#/}" ]]; then
             local tenant_out
-            tenant_out=$(docker_compose "$inst" exec -T backend \
+            tenant_out=$(setup_compose_quiet "$inst" exec -T backend \
                 /usr/local/bin/php artisan tenants:bootstrap --force 2>&1 || true)
             if /usr/bin/printf '%s' "$tenant_out" | /usr/bin/grep -qiE "(error|exception)"; then
                 log_warn "        fallo (verificar)"
@@ -327,7 +353,11 @@ cmd_setup() {
 
         # 6.8. key:generate (idempotente, via cmd_bootstrap).
         log_info "  [6.8] key:generate (APP_KEY)"
-        cmd_bootstrap "$stage_of_inst" "$store_of_inst" 2>&1 | /usr/bin/grep -E "(ok|generada|already)" | /usr/bin/sed 's/^/        /' || log_info "        OK"
+        if cmd_bootstrap "$stage_of_inst" "$store_of_inst" 2>&1 | /usr/bin/grep -qE "(ok|generada|already)"; then
+            log_info "        OK"
+        else
+            log_warn "        fallo"
+        fi
     done
     print_section_end
 
