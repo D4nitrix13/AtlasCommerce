@@ -1,0 +1,72 @@
+/**
+ * TrustSignalsCompact — bloque compacto de trust signals para cart/checkout.
+ *
+ * Inspirado en Nike + guitargear: ambos ponen trust signals (envío
+ * gratis, garantía, devolución segura) cerca del CTA final para reducir
+ * ansiedad del usuario.
+ *
+ * Diferencia con `ProductTrustSignals.astro` (que se usa en el detalle
+ * de producto): este es HORIZONTAL con iconos pequeños — cabe en una
+ * sola línea arriba del botón de checkout.
+ *
+ * El componente es presentacional puro — sin handlers. El caller pasa
+ * los labels ya resueltos desde i18n.
+ */
+
+interface TrustSignal {
+  iconKey: 'truck' | 'shield-check' | 'rotate-ccw' | 'lock' | 'package';
+  label: string;
+}
+
+interface Props {
+  /** Lista de 2-4 signals a mostrar. */
+  signals: readonly TrustSignal[];
+  /** Posicion compacta (1 linea, default) o vertical. */
+  variant?: 'horizontal' | 'vertical';
+}
+
+const { signals, variant = 'horizontal' } = Astro.props;
+
+/**
+ * Iconos inline SVG. Mismos paths que lucide-react en el resto del
+ * proyecto (consistencia visual). No usamos <Icon /> aquí porque
+ * queremos 0 hydration (cart/checkout son estáticos).
+ */
+const ICONS: Record<TrustSignal['iconKey'], string> = {
+  'truck':
+    '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+  'shield-check':
+    '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  'rotate-ccw':
+    '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  'lock':
+    '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  'package':
+    '<path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/>',
+};
+---
+
+<ul
+  class:list={[
+    'flex items-center gap-x-5 gap-y-2 text-xs text-slate-600',
+    variant === 'horizontal' ? 'flex-wrap' : 'flex-col items-start gap-y-2.5',
+  ]}
+  aria-label="Garantías del envío"
+>
+  {signals.map((signal) => (
+    <li class="flex items-center gap-1.5">
+      <svg
+        class="h-4 w-4 shrink-0 text-[var(--primary,#475569)]"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        set:html={ICONS[signal.iconKey]}
+      />
+      <span>{signal.label}</span>
+    </li>
+  ))}
+</ul>

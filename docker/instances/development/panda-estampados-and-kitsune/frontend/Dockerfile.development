@@ -3,18 +3,15 @@
 # desde el host para iterar sin rebuild. Se usa desde
 # `docker/dev/docker-compose.dev.yml`.
 
-FROM node:22-alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
-
-# Activar bun via corepack, pineado por version fija.
-RUN /usr/local/bin/corepack enable \
-  && /usr/local/bin/corepack prepare bun@1.4 --activate
 
 # Layer de cache de dependencias. bun install --frozen-lockfile lee
 # bun.lock y desacopla el cache de deps del codigo fuente: cualquier
 # cambio en `frontend/src/` no invalida este layer.
 COPY frontend/package.json frontend/bun.lock ./
+COPY frontend/packages/themes/ ./packages/themes/
 RUN /usr/local/bin/bun install --frozen-lockfile
 
 # Variables de entorno: el dev server escucha en 0.0.0.0 para ser
