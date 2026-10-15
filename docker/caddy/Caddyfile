@@ -186,6 +186,26 @@ http:// {
 	}
 
 	# -----------------------------------------------------------
+	# La Voz Instrumentos (primer cliente real SaaS) — DEV
+	# -----------------------------------------------------------
+	# Solo dev por ahora. Prod se agregara cuando se asigne dominio
+	# publico (actualmente .test para no publicar DNS).
+	# Puerto dev: FRONTEND_PORT=10321 (10321->4321), BACKEND_PORT=14000.
+	@lavoz_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@lavoz host admin.instrumentos-musicales-la-voz.test www.instrumentos-musicales-la-voz.test instrumentos-musicales-la-voz.test
+	handle @lavoz_api {
+		reverse_proxy localhost:14000 {
+			health_uri /up
+			health_interval 30s
+			health_timeout 5s
+			health_status 2xx
+		}
+	}
+	handle @lavoz {
+		reverse_proxy localhost:10321
+	}
+
+	# -----------------------------------------------------------
 	# PRODUCCIÓN — IPs fijas en redes Docker bridge
 	# -----------------------------------------------------------
 
@@ -260,6 +280,9 @@ http:// {
 #   127.0.0.1  morales-store.com
 #   127.0.0.1  www.morales-store.com
 #   127.0.0.1  admin.morales-store.com
+#   127.0.0.1  instrumentos-musicales-la-voz.test
+#   127.0.0.1  www.instrumentos-musicales-la-voz.test
+#   127.0.0.1  admin.instrumentos-musicales-la-voz.test
 #
 # Después:
 #   sudo caddy validate --config /etc/caddy/Caddyfile
