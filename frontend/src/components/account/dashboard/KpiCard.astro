@@ -1,0 +1,69 @@
+---
+/**
+ * KpiCard — Sección top row del dashboard (F5.5).
+ *
+ * Una sola KPI: label (eyebrow), value (número grande), y opcionalmente
+ * delta (subrayado verde/amber) o hint (gris). Replica el patrón del
+ * mockup Bonfire `odd/tasks/atlascommerce-design-prompt-v1.md` vista 03.
+ *
+ * Tokens:
+ *   - Background: `bg-white border border-slate-200` (mockup usa
+ *     `box-shadow:inset 0 0 0 1px` que mapeamos a Tailwind border).
+ *   - Acento: delta positivo en `var(--primary)`, warning en amber,
+ *     neutral en slate.
+ *   - Padding: `p-6` para spacing cómodo (mockup usa `p-6`).
+ *
+ * Accesibilidad:
+ *   - El card es un `<div>` (no link) — el "drill-down" a la métrica
+ *     vive en el título de la sección, no aquí.
+ *   - Label y value en jerarquía semántica con `<p>` (no `<h3>`) porque
+ *     el dashboard ya tiene un H1.
+ */
+import type { DashboardKpi, DashboardKpiTone } from '../../../types/dashboard-kpis';
+import type { TranslationKey } from '../../../i18n/types';
+
+interface Props {
+  /** KPI ya calculada por `buildDashboardKpis`. */
+  kpi: DashboardKpi;
+  /** Diccionario de traducciones (reusamos el mismo que la página). */
+  t: Record<TranslationKey, string>;
+  /** ID opcional para `data-testid`. Default `kpi-{labelKey}`. */
+  testId?: string;
+}
+
+const { kpi, t, testId } = Astro.props;
+
+const label = t[kpi.labelKey];
+
+// Color del delta/hint por tone (sincronizado con mockup).
+const TONE_COLOR: Record<DashboardKpiTone, string> = {
+  positive: 'text-[var(--primary,#059669)]',
+  neutral: 'text-slate-400',
+  warning: 'text-amber-600',
+};
+
+// Stable test id derivado del labelKey.
+const dataTestId = testId ?? `kpi-${kpi.labelKey.replace(/\./g, '-')}`;
+---
+
+<article
+  data-testid={dataTestId}
+  class="rounded-2xl border border-slate-200 bg-white p-6"
+>
+  <p class="text-[13px] font-medium text-slate-500">
+    {label}
+  </p>
+  <p class="mt-2 text-4xl font-bold tracking-tight text-slate-900">
+    {kpi.value}
+  </p>
+  {kpi.delta !== null && (
+    <p class:list={['mt-2 text-[13px] font-semibold', TONE_COLOR[kpi.tone]]}>
+      {kpi.delta}
+    </p>
+  )}
+  {kpi.delta === null && kpi.hint !== null && (
+    <p class:list={['mt-2 text-[13px]', TONE_COLOR[kpi.tone]]}>
+      {kpi.hint}
+    </p>
+  )}
+</article>

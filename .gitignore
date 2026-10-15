@@ -50,3 +50,12 @@ backend/backend/
 # Generated artifacts (no commit)
 .archify/
 docs/uml/build/
+
+# Node modules (bun manages workspaces, root + frontend)
+node_modules/
+**/node_modules/
+
+# Bun binary lockfile (we keep the JSON-text bun.lock tracked; the
+# binary bun.lockb is for tooling cache and is regenerable).
+bun.lockb
+**/bun.lockb
