@@ -4,17 +4,15 @@
 # ===========================================================================
 # Stage 1: builder. Compila el bundle SSR.
 # ===========================================================================
-FROM node:22-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
-# Habilitar bun vía corepack, pineado por version fija.
-RUN /usr/local/bin/corepack enable \
-    && /usr/local/bin/corepack prepare bun@1.4 --activate
-
 # Layer de cache de dependencias: package.json + lockfile primero.
+# Usamos 'oven/bun:1-alpine' como base (bun pre-instalado, no corepack).
 # bun lee bun.lock directamente; no requiere `fetch` separado.
 COPY frontend/package.json frontend/bun.lock ./
+COPY frontend/packages/themes/ ./packages/themes/
 RUN /usr/local/bin/bun install --frozen-lockfile
 
 # Build del bundle SSR. Solo después de instalar deps copiamos el
@@ -38,7 +36,7 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Solo el bundle compilado + node_modules con deps de producción.
+# Solo el bundle compilado + node_modules con deps de produccion.
 # Sin devDependencies (testing, linters, types), sin código fuente
 # completo, sin .git.
 COPY --from=builder /app/dist ./dist
