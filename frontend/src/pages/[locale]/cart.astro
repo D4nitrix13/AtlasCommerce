@@ -23,6 +23,7 @@
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import CartItem from '../../components/storefront/cart/CartItem.astro';
 import CartSummary from '../../components/storefront/cart/CartSummary.astro';
+import TrustSignalsCompact from '../../components/storefront/cart/TrustSignalsCompact.astro';
 import { getServerDictionary } from '../../i18n/server';
 import { PRODUCTS, findProductBySlug } from '../../data/products';
 
@@ -145,16 +146,31 @@ const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
           </a>
         </div>
 
-        <CartSummary
-          subtotalCents={subtotalCents}
-          currencyCode={currencyCode}
-          shippingCents={shippingCents}
-          taxCents={taxCents}
-          checkoutHref={checkoutHref}
-          labels={summaryLabels}
-          isEmpty={false}
-          stickyOnLg={true}
-        />
+        <div class="flex flex-col gap-5">
+          <CartSummary
+            subtotalCents={subtotalCents}
+            currencyCode={currencyCode}
+            shippingCents={shippingCents}
+            taxCents={taxCents}
+            checkoutHref={checkoutHref}
+            labels={summaryLabels}
+            isEmpty={false}
+            stickyOnLg={true}
+          />
+
+          {/* Trust signals COMPACTOS (patron Nike + guitargear): cerca del
+              CTA del CartSummary para reducir la ansiedad del usuario
+              sobre envio, devolucion y pago seguro. Horizontal en
+              desktop, wrap en mobile. */}
+          <TrustSignalsCompact
+            signals={[
+              { iconKey: 'truck',         label: 'Envio gratis sobre $50' },
+              { iconKey: 'shield-check',  label: 'Garantia oficial' },
+              { iconKey: 'rotate-ccw',    label: 'Devolucion 30 dias' },
+              { iconKey: 'lock',          label: 'Pago 100% seguro' },
+            ]}
+          />
+        </div>
       </div>
     )}
   </main>

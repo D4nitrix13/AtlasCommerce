@@ -85,7 +85,7 @@ const ordersToRender = showEmpty ? [] : [...ALL_ORDERS];
     aria-labelledby="my-orders-heading"
     class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
   >
-    <header class="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+    <header class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1
           id="my-orders-heading"
@@ -95,6 +95,19 @@ const ordersToRender = showEmpty ? [] : [...ALL_ORDERS];
         </h1>
         <p class="mt-1 text-sm text-slate-500">{subtitle}</p>
       </div>
+
+      {/* CTA prominent estilo Nike: 'Volver a pedir' (re-order) como
+          accion principal del header. El re-order button en cada row
+          individual sigue presente (visible al expandir la card).
+          Aca lo exponemos a nivel de pagina para los clientes que
+          repiten compras (nike.com member/orders tiene este mismo
+          patron). */}
+      <a
+        href={`${localePrefix}/products`}
+        class="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--primary,#7c3aed)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#6d28d9)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+      >
+        {t['storefront.account.orders.v3.reorder']}
+      </a>
     </header>
 
     <div class="mb-5">

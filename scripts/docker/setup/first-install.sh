@@ -40,6 +40,41 @@ cmd_setup() {
         ensure_env_file "$inst"
     done
 
+    # 3.5. Avisar si los hosts de las instancias a levantar NO estan
+    # en /etc/hosts. Sin esta entrada, las URLs tipo
+    # 'http://instrumentos-musicales-la-voz.test:10321' no resuelven
+    # en el browser aunque el stack este arriba. No podemos escribir
+    # a /etc/hosts sin sudo, asi que el usuario tiene que correr el
+    # bloque manualmente (con sudo). Mostrar el bloque completo al
+    # inicio de setup para que el usuario lo tenga a mano.
+    local missing_hosts=()
+    local inst store_slug store_hosts entry
+    local host_entry
+    for inst in "${instances_to_start[@]}"; do
+        store_slug="${inst#*:}"
+        store_hosts=(
+            "${store_slug}.test"
+            "www.${store_slug}.test"
+            "admin.${store_slug}.test"
+        )
+        for host_entry in "${store_hosts[@]}"; do
+            if ! /usr/bin/grep -qxE "[[:space:]]*[^#][[:space:]]+${host_entry}([[:space:]]|$)" /etc/hosts 2>/dev/null; then
+                missing_hosts+=("$host_entry")
+            fi
+        done
+    done
+    if [[ ${#missing_hosts[@]} -gt 0 ]]; then
+        log_warn "Faltan ${#missing_hosts[@]} entradas en /etc/hosts para acceder a las tiendas:"
+        for entry in "${missing_hosts[@]}"; do
+            log_info "  - ${entry}"
+        done
+        log_warn "Pegá este bloque al final de /etc/hosts (con sudo):"
+        for entry in "${missing_hosts[@]}"; do
+            /usr/bin/printf '127.0.0.1  %s\n' "$entry"
+        done
+        log_info "Sugerencia: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
+    fi
+
     # 4. Levantar containers.
     for inst in "${instances_to_start[@]}"; do
         log_info "Levantando ${C_BOLD}${inst}${C_RESET}…"

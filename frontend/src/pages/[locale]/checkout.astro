@@ -26,6 +26,7 @@
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import CheckoutStepperV3 from '../../components/storefront/checkout/CheckoutStepperV3.astro';
 import CheckoutSummaryV3 from '../../components/storefront/checkout/CheckoutSummaryV3.astro';
+import TrustSignalsCompact from '../../components/storefront/cart/TrustSignalsCompact.astro';
 import CheckoutFormV3, {
   type CheckoutV3StepId,
 } from '../../components/storefront/checkout/CheckoutFormV3.astro';
@@ -178,15 +179,31 @@ const taxCents = Math.round(subtotalCents * TAX_RATE);
         </div>
 
         <div class="order-1 lg:order-2">
-          <CheckoutSummaryV3
-            items={cartItems}
-            subtotalCents={subtotalCents}
-            currencyCode={currencyCode}
-            shippingCents={shippingCents}
-            taxCents={taxCents}
-            labels={summaryLabels}
-            ctaHref={`${checkoutBaseHref}?step=success`}
-          />
+          <div class="flex flex-col gap-5">
+            <CheckoutSummaryV3
+              items={cartItems}
+              subtotalCents={subtotalCents}
+              currencyCode={currencyCode}
+              shippingCents={shippingCents}
+              taxCents={taxCents}
+              labels={summaryLabels}
+              ctaHref={`${checkoutBaseHref}?step=success`}
+            />
+
+            {/* Trust signals compactos (patron Nike + guitargear). El
+                resumen del checkout esta sticky a la derecha; debajo
+                suyo, los trust signals confirman al usuario que el
+                paso final (pago) es seguro. Variante horizontal en
+                desktop, wrap a multi-linea en mobile. */}
+            <TrustSignalsCompact
+              signals={[
+                { iconKey: 'lock',          label: 'Pago 100% seguro' },
+                { iconKey: 'shield-check',  label: 'Garantia oficial' },
+                { iconKey: 'rotate-ccw',    label: 'Devolucion 30 dias' },
+                { iconKey: 'truck',         label: 'Envio gratis sobre $50' },
+              ]}
+            />
+          </div>
         </div>
       </div>
     </section>
