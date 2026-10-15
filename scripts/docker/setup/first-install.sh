@@ -40,17 +40,17 @@ cmd_setup() {
     local stage="$1"
     local store="${2:-all}"
     # Flags aceptados:
-    #   --no-hosts / -no-hosts  NO intenta agregar hosts a /etc/hosts
-    #                            (omite la fase 3). Por defecto los agrega
-    #                            automaticamente cuando sudo -n funciona, o
-    #                            muestra el comando manual cuando no.
-    # Aceptamos guion simple (-no-hosts) y doble (--no-hosts) para
-    # flexibilidad con el usuario (convención del script: las flags
-    # booleanas simples usan -flag en lugar de --flag).
+    #   --skip-hosts-add / -skip-hosts-add
+    #       Omite la fase 3 (Hosts): NO intenta agregar hosts a
+    #       /etc/hosts. Por defecto los agrega automaticamente cuando
+    #       sudo -n funciona, o muestra el comando manual cuando no.
+    # Aceptamos guion simple y doble para flexibilidad con la
+    # convencion del script (flags booleanas usan -flag en lugar
+    # de --flag, ver -y, -h).
     local add_hosts=1
     for arg in "$@"; do
         case "$arg" in
-            --no-hosts|-no-hosts) add_hosts=0 ;;
+            --skip-hosts-add|-skip-hosts-add) add_hosts=0 ;;
         esac
     done
 
@@ -261,15 +261,23 @@ cmd_setup() {
         # 6.1. Esperar Postgres healthy antes de cualquier artisan.
         # (Logica existente del setup.)
 
-        # 6.2. chown storage 1000:1000 (PHP-FPM user).
+        # 6.2. chown + mkdir storage/framework/{cache,views,sessions}.
         # CRITICAL: el volumen storage/ se crea como root en el build,
-        # pero PHP-FPM corre como UID 1000. Si esto va DESPUES de
-        # cache:clear, el clear falla con 'Failed to clear cache.
-        # Make sure you have the appropriate permissions.' Por eso
-        # va PRIMERO, antes de cualquier artisan.
-        log_info "  [6.2] chown storage 1000:1000"
-        if setup_compose_quiet "$inst" exec -u root -T backend \
-            /bin/chown -R 1000:1000 /var/www/html/storage; then
+        # pero PHP-FPM corre como UID 1000. Ademas, los subdirectorios
+        # de storage/framework/ (cache/data, views, sessions) NO
+        # existen hasta el primer cache write. Sin el mkdir -p, los
+        # artisan cache:clear y view:clear fallan con 'Failed to
+        # clear cache. Make sure you have the appropriate permissions.'
+        # porque no pueden crear los subdirectorios.
+        log_info "  [6.2] chown + mkdir storage/framework"
+        if setup_compose_quiet "$inst" exec -u root -T backend /bin/sh -c '
+            chown -R 1000:1000 /var/www/html/storage &&
+            mkdir -p /var/www/html/storage/framework/cache/data
+                     /var/www/html/storage/framework/views
+                     /var/www/html/storage/framework/sessions
+                     /var/www/html/storage/logs &&
+            chown -R 1000:1000 /var/www/html/storage
+        ' 2>/dev/null; then
             log_info "        OK"
         else
             log_warn "        fallo (no critico)"
@@ -287,7 +295,7 @@ cmd_setup() {
         fi
 
         # 6.4. cache:clear + config:clear + view:clear.
-        # Despues del chown, estos corren limpios.
+        # Despues del chown + mkdir, estos corren limpios.
         log_info "  [6.4] cache:clear + config:clear + view:clear"
         local cache_out
         cache_out=$(setup_compose_quiet "$inst" exec -T backend \
@@ -311,10 +319,14 @@ cmd_setup() {
         fi
 
         # 6.5. assets:sync-from-public (logos + favicons al FTP).
+        # Capturamos output y nos aseguramos de que termine con newline
+        # para que no quede pegado con el siguiente sub-paso.
         log_info "  [6.5] assets:sync-from-public"
         local sync_out
         sync_out=$(setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan assets:sync-from-public --force 2>&1 || true)
+        # Forzar newline final si el output no lo trae.
+        [[ -n "$sync_out" && "${sync_out: -1}" != $'\n' ]] && sync_out+=$'\n'
         if /usr/bin/printf '%s' "$sync_out" | /usr/bin/grep -qE "(Subido|Resumen)"; then
             /usr/bin/printf '%s' "$sync_out" | /usr/bin/sed 's/^/        /' | /usr/bin/head -3
         else
@@ -326,6 +338,7 @@ cmd_setup() {
         local mig_out
         mig_out=$(setup_compose_quiet "$inst" exec -T backend \
             /usr/local/bin/php artisan migrate --force 2>&1 || true)
+        [[ -n "$mig_out" && "${mig_out: -1}" != $'\n' ]] && mig_out+=$'\n'
         if /usr/bin/printf '%s' "$mig_out" | /usr/bin/grep -qE "Migrat"; then
             /usr/bin/printf '%s' "$mig_out" | /usr/bin/grep -E "Migrat" | /usr/bin/sed 's/^/        /' | /usr/bin/head -5
         elif /usr/bin/printf '%s' "$mig_out" | /usr/bin/grep -q "Nothing"; then
@@ -342,6 +355,7 @@ cmd_setup() {
             local tenant_out
             tenant_out=$(setup_compose_quiet "$inst" exec -T backend \
                 /usr/local/bin/php artisan tenants:bootstrap --force 2>&1 || true)
+            [[ -n "$tenant_out" && "${tenant_out: -1}" != $'\n' ]] && tenant_out+=$'\n'
             if /usr/bin/printf '%s' "$tenant_out" | /usr/bin/grep -qiE "(error|exception)"; then
                 log_warn "        fallo (verificar)"
             else

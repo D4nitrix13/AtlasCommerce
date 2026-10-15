@@ -255,7 +255,7 @@ misma diferencia que entre 'docker exec psql' y un wrapper de carga."
             example="$0 setup dev panda-estampados-and-kitsune           # 1 instancia dev
 $0 setup dev all                                   # las 3 dev
 $0 setup production all                            # las 3 prod
-$0 setup dev panda-estampados-and-kitsune --no-hosts  # NO agregar hosts a /etc/hosts"
+$0 setup dev panda-estampados-and-kitsune --skip-hosts-add  # NO agregar hosts a /etc/hosts"
             notes="Si sudo no esta cacheado, setup detecta hosts faltantes y muestra el bloque a pegar con 'sudo tee -a /etc/hosts'. El usuario puede correr 'sudo -v' antes de setup para que el setup agrege los hosts automaticamente (sin tener que copiarlos a mano).
 
 Despues de setup, pasos manuales para dev:
