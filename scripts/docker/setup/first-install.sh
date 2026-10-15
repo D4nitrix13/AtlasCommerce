@@ -172,35 +172,40 @@ cmd_setup() {
         done
     done
     if [[ ${#missing_hosts[@]} -gt 0 && $add_hosts -eq 1 ]]; then
-        print_section_title "Hosts" 3 "$TOTAL_PHASES" "Faltan ${#missing_hosts[@]} entradas en /etc/hosts"
+        print_section_title "Hosts" 3 "$TOTAL_PHASES" "Agregar ${#missing_hosts[@]} entradas a /etc/hosts"
         for entry in "${missing_hosts[@]}"; do
             log_warn "  - ${entry}"
         done
-        # Intentar agregar automaticamente con sudo -n (no-interactive).
-        # Si funciona: silencioso. Si falla: mostrar comando manual.
+        # Construir el bloque a pegar.
+        local hosts_block=""
+        for entry in "${missing_hosts[@]}"; do
+            hosts_block+="127.0.0.1  ${entry}"$'\n'
+        done
+        # Intentar con sudo no-interactive primero (caso comun: ya
+        # corriste 'sudo -v' antes de setup). Si funciona, silencioso.
         if /usr/bin/sudo -n true 2>/dev/null; then
-            log_info "Agregando entradas a /etc/hosts con sudo (no-interactive)..."
-            local block=""
-            for entry in "${missing_hosts[@]}"; do
-                block+="127.0.0.1  ${entry}"$'\n'
-            done
-            if /usr/bin/printf '%s' "$block" | /usr/bin/sudo /usr/bin/tee -a /etc/hosts >/dev/null; then
+            log_info "Agregando entradas a /etc/hosts (sudo no-interactive)..."
+            if /usr/bin/printf '%s' "$hosts_block" | /usr/bin/sudo /usr/bin/tee -a /etc/hosts >/dev/null; then
                 log_ok "Hosts agregados a /etc/hosts."
             else
-                log_warn "Fallo al escribir a /etc/hosts. Pegá este bloque manualmente (con sudo):"
-                for entry in "${missing_hosts[@]}"; do
-                    /usr/bin/printf '127.0.0.1  %s\n' "$entry"
-                done
+                log_warn "Fallo al escribir a /etc/hosts (no critico, setup sigue)."
             fi
         else
-            # Sin sudo no-interactive. Mostrar el comando exacto y un fallback
-            # automatico via sudo (que pedira password interactivamente).
-            log_warn "Para que el browser resuelva los hostnames, pegá este bloque al final de /etc/hosts (con sudo):"
+            # Sin cache de sudo. Mostrar bloque y EJECUTAR el comando
+            # con sudo (esto pedira password interactivamente al usuario).
+            # El usuario pidio que cuando no se especifica -skip-hosts-add,
+            # el sistema ejecute el comando (no solo lo muestre).
+            log_warn "Pegá este bloque (o confirmá con sudo cuando se pida):"
             for entry in "${missing_hosts[@]}"; do
                 /usr/bin/printf '127.0.0.1  %s\n' "$entry"
             done
-            log_info "Comando equivalente: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
-            log_info "O setup te lo agregara automaticamente si corres 'sudo -v' antes (cachea la sesion sudo)."
+            log_info "Ejecutando: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
+            if /usr/bin/printf '%s' "$hosts_block" | /usr/bin/sudo /usr/bin/tee -a /etc/hosts >/dev/null; then
+                log_ok "Hosts agregados a /etc/hosts."
+            else
+                log_warn "sudo fallo (password incorrecto o cancelado). Setup sigue."
+                log_info "Recordatorio: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
+            fi
         fi
         print_section_end
     fi
