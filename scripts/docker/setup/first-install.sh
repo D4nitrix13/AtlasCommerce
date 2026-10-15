@@ -40,13 +40,62 @@ cmd_setup() {
         ensure_env_file "$inst"
     done
 
-    # 3.5. Avisar si los hosts de las instancias a levantar NO estan
-    # en /etc/hosts. Sin esta entrada, las URLs tipo
-    # 'http://instrumentos-musicales-la-voz.test:10321' no resuelven
-    # en el browser aunque el stack este arriba. No podemos escribir
-    # a /etc/hosts sin sudo, asi que el usuario tiene que correr el
-    # bloque manualmente (con sudo). Mostrar el bloque completo al
-    # inicio de setup para que el usuario lo tenga a mano.
+    # 3.4. Rellenar credenciales vacias con defaults razonables.
+    # El .env.example puede tener placeholders ('replace_with_...') o
+    # faltar variables que docker-compose espera (ej FTP_USERNAME,
+    # FTP_PASSWORD, POSTGRES_PASSWORD). Sin valores, docker compose
+    # emite 'Defaulting to a blank string' y los servicios fallan
+    # al autenticar. Setup rellena los defaults seguros de dev y
+    # avisa al usuario que debe cambiarlos para produccion.
+    local cred_defaults_set=0
+    for inst in "${instances_to_start[@]}"; do
+        local env_file="${INSTANCES_DIR}/$(echo "$inst" | tr ':' '/')/environment/.env"
+        if [[ -f "$env_file" ]]; then
+            # FTP_USERNAME: dev-ftp (placeholder del .env.example).
+            if /usr/bin/grep -qE '^FTP_USERNAME[[:space:]]*=' "$env_file"; then
+                local current
+                current=$(/usr/bin/grep -E '^FTP_USERNAME[[:space:]]*=' "$env_file" | /usr/bin/cut -d= -f2- | /usr/bin/sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                if [[ -z "$current" || "$current" == *"replace_with"* ]]; then
+                    /usr/bin/sed -i.bak 's|^FTP_USERNAME=.*|FTP_USERNAME=dev-ftp|' "$env_file" && /usr/bin/rm -f "$env_file.bak"
+                    cred_defaults_set=1
+                fi
+            else
+                /usr/bin/printf '\nFTP_USERNAME=dev-ftp\n' >> "$env_file"
+                cred_defaults_set=1
+            fi
+            # FTP_PASSWORD: 'devpass' (placeholder seguro de dev).
+            if /usr/bin/grep -qE '^FTP_PASSWORD[[:space:]]*=' "$env_file"; then
+                local current
+                current=$(/usr/bin/grep -E '^FTP_PASSWORD[[:space:]]*=' "$env_file" | /usr/bin/cut -d= -f2- | /usr/bin/sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                if [[ -z "$current" || "$current" == *"replace_with"* ]]; then
+                    /usr/bin/sed -i.bak 's|^FTP_PASSWORD=.*|FTP_PASSWORD=devpass|' "$env_file" && /usr/bin/rm -f "$env_file.bak"
+                    cred_defaults_set=1
+                fi
+            else
+                /usr/bin/printf 'FTP_PASSWORD=devpass\n' >> "$env_file"
+                cred_defaults_set=1
+            fi
+            # POSTGRES_PASSWORD: 'devpass' si esta vacio o placeholder.
+            if /usr/bin/grep -qE '^POSTGRES_PASSWORD[[:space:]]*=' "$env_file"; then
+                local current
+                current=$(/usr/bin/grep -E '^POSTGRES_PASSWORD[[:space:]]*=' "$env_file" | /usr/bin/cut -d= -f2- | /usr/bin/sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                if [[ -z "$current" || "$current" == *"replace_with"* ]]; then
+                    /usr/bin/sed -i.bak 's|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=devpass|' "$env_file" && /usr/bin/rm -f "$env_file.bak"
+                    cred_defaults_set=1
+                fi
+            fi
+        fi
+    done
+    if [[ $cred_defaults_set -eq 1 ]]; then
+        log_warn "Rellenamos credenciales vacias con defaults de dev (FTP_USERNAME=dev-ftp, FTP_PASSWORD=devpass, POSTGRES_PASSWORD=devpass)."
+        log_warn "Para produccion, regenera los passwords con: openssl rand -base64 32"
+    fi
+
+    # 3.5. Detectar hosts faltantes y PREGUNTAR al usuario si quiere
+    # agregarlos a /etc/hosts automaticamente. Si no, mostrar el
+    # comando manual exacto. Por defecto, intentamos agregarlos
+    # (cuando el usuario no especifica, no preguntamos y agregamos
+    # solo si tenemos sudo sin password; en otro caso, mostramos).
     local missing_hosts=()
     local inst store_slug store_hosts entry
     local host_entry
@@ -68,11 +117,32 @@ cmd_setup() {
         for entry in "${missing_hosts[@]}"; do
             log_info "  - ${entry}"
         done
-        log_warn "Pegá este bloque al final de /etc/hosts (con sudo):"
-        for entry in "${missing_hosts[@]}"; do
-            /usr/bin/printf '127.0.0.1  %s\n' "$entry"
-        done
-        log_info "Sugerencia: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
+        # Intentar agregar automaticamente con sudo -n (no-interactive).
+        # Si funciona: silencioso. Si falla: mostrar comando manual.
+        if /usr/bin/sudo -n true 2>/dev/null; then
+            log_info "Agregando entradas a /etc/hosts con sudo (no-interactive)..."
+            local block=""
+            for entry in "${missing_hosts[@]}"; do
+                block+="127.0.0.1  ${entry}"$'\n'
+            done
+            if /usr/bin/printf '%s' "$block" | /usr/bin/sudo /usr/bin/tee -a /etc/hosts >/dev/null; then
+                log_ok "Hosts agregados a /etc/hosts."
+            else
+                log_warn "Fallo al escribir a /etc/hosts. Pegá este bloque manualmente (con sudo):"
+                for entry in "${missing_hosts[@]}"; do
+                    /usr/bin/printf '127.0.0.1  %s\n' "$entry"
+                done
+            fi
+        else
+            # Sin sudo no-interactive. Mostrar el comando exacto y un fallback
+            # automatico via sudo (que pedira password interactivamente).
+            log_warn "Para que el browser resuelva los hostnames, pegá este bloque al final de /etc/hosts (con sudo):"
+            for entry in "${missing_hosts[@]}"; do
+                /usr/bin/printf '127.0.0.1  %s\n' "$entry"
+            done
+            log_info "Comando equivalente: ./scripts/docker-stack.sh hosts | sudo tee -a /etc/hosts"
+            log_info "O setup te lo agregara automaticamente si corres 'sudo -v' antes (cachea la sesion sudo)."
+        fi
     fi
 
     # 4. Levantar containers.
