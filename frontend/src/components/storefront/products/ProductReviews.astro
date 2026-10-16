@@ -56,6 +56,15 @@ interface Props {
   loginHref?: string;
   /** Base URL del backend. Default `/api/v1`. */
   apiBaseUrl?: string;
+  /** Mostrar filter chips de rating. Default true. La vista dedicada
+   *  `/[locale]/products/[slug]/reviews` los oculta (es la vista "all"). */
+  showFilterChips?: boolean;
+  /** Mostrar botón "Cargar más"/"Ver menos". Default true. La vista
+   *  dedicada lo oculta — server-renderiza todas las reseñas. */
+  showLoadMore?: boolean;
+  /** Mostrar link "Ver todas las reseñas". Default true. La vista
+   *  dedicada lo oculta (ya estamos en esa vista). */
+  showViewAll?: boolean;
 }
 
 const {
@@ -66,6 +75,9 @@ const {
   initialCount = 3,
   loginHref,
   apiBaseUrl = '/api/v1',
+  showFilterChips = true,
+  showLoadMore = true,
+  showViewAll = true,
 } = Astro.props;
 
 // Labels de like con fallback hardcoded. T10 los levantará a i18n
@@ -156,7 +168,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
   </header>
 
   {/* Filter chips por rating */}
-  {hasReviews && (
+  {showFilterChips && hasReviews && (
     <div class="flex flex-wrap items-center gap-2" role="group" aria-label={labels.filterByRating}>
       <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">
         {labels.filterByRating}:
@@ -291,7 +303,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
   )}
 
   {/* Cargar más / Ver menos */}
-  {hasReviews && reviews.length > initialCount && (
+  {showLoadMore && hasReviews && reviews.length > initialCount && (
     <div class="flex items-center justify-center border-t border-slate-100 pt-4">
       <button
         type="button"
@@ -316,7 +328,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
     </div>
   )}
 
-  {hasReviews && reviews.length > 5 && (
+  {showViewAll && hasReviews && reviews.length > 5 && (
     <div class="border-t border-slate-100 pt-4">
       <a
         href={viewAllHref}
@@ -491,7 +503,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
           const hintElForLogin = btn.parentElement?.querySelector<HTMLElement>(
             '[data-review-like-hint]'
           );
-          if (hintElForLogin !== null && hintElForLogin !== null) {
+          if (hintElForLogin !== null) {
             const redirect = encodeURIComponent(window.location.pathname);
             const originalText = hintElForLogin.textContent ?? '';
             const link = document.createElement('a');

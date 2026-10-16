@@ -1,0 +1,203 @@
+---
+/**
+ * Vista dedicada de reseñas — T19.
+ *
+ * Server-render de TODAS las reseñas del producto sin colapso, sin filtros.
+ * Esta vista existe para resolver el link "Ver todas las reseñas" del PDP,
+ * que apuntaba a `/${locale}/products/${slug}/reviews` pero la ruta no
+ * existía (404). El componente principal ProductReviews sigue mostrando las
+ * primeras reseñas + filtros en el PDP; el link "Ver todas" ahora lleva
+ * acá.
+ *
+ * Coherencia con el PDP principal:
+ *   - Mismo shell StorefrontLayout + breadcrumb Productos / [Producto].
+ *   - Mismo ProductHeader (eyebrow de categoría + título + rating row).
+ *   - Mismo ProductReviews pero SIN filter chips, SIN load-more,
+ *     SIN view-all link (showFilterChips=false / showLoadMore=false /
+ *     showViewAll=false — props nuevas añadidas en T20).
+ *
+ * Paginación:
+ *   - 20 reseñas por página si el producto tiene >20.
+ *   - Implementada como links `<a href="?page=N">` server-side.
+ *   - Por ahora pasa `REVIEWS` (todas) al componente — la paginación es
+ *     cosmetic-only porque los mocks tienen <20 reseñas por producto.
+ *     Cuando lleguen productos con >20 reseñas vía backend, pasar
+ *     `paginatedReviews` en lugar de `REVIEWS` para que la paginación
+ *     corte efectivamente.
+ */
+import StorefrontLayout from '../../../../layouts/StorefrontLayout.astro';
+import ProductHeader from '../../../../components/storefront/products/ProductHeader.astro';
+import ProductReviews from '../../../../components/storefront/products/ProductReviews.astro';
+import { findProductBySlug, CATEGORIES } from '../../../../data/products';
+import {
+  SABER_ALTER_DETAIL,
+  FENDER_PLAYER_FUSION_BASS_DETAIL,
+  getAverageRating,
+} from '../../../../data/product-detail-mock';
+import { getServerDictionary } from '../../../../i18n/server';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+
+const { slug } = Astro.params;
+const product = slug !== undefined ? findProductBySlug(slug) : null;
+
+if (product === null) {
+  Astro.response.status = 404;
+}
+
+// Detalle enriquecido: si el slug matchea uno de nuestros mocks
+// enriquecidos (Saber Alter, Fender), lo usamos directamente. Si no,
+// derivamos un subset mínimo del producto base (misma lógica que
+// `[slug].astro` para mantener consistencia entre vistas).
+const detail =
+  product?.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
+    ? FENDER_PLAYER_FUSION_BASS_DETAIL
+    : product?.slug === SABER_ALTER_DETAIL.slug
+      ? SABER_ALTER_DETAIL
+      : product !== null
+        ? {
+            ...SABER_ALTER_DETAIL,
+            id: product.id,
+            slug: product.slug,
+            name: product.name,
+            description: product.description,
+            priceCents: product.priceCents,
+            compareAtPriceCents: product.compareAtPriceCents,
+            currency: product.currency ?? 'USD',
+            category: product.category,
+            stock: product.stock,
+            badges: product.badges ?? [],
+          }
+        : null;
+
+const REVIEWS = detail?.reviews ?? [];
+
+const REVIEWS_PER_PAGE = 20;
+const rawPage = Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10);
+const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+const totalPages = Math.max(1, Math.ceil(REVIEWS.length / REVIEWS_PER_PAGE));
+
+const category =
+  product !== null
+    ? (CATEGORIES.find((entry) => entry.slug === product.category) ?? null)
+    : null;
+
+const catalogHref = `/${locale}/products`;
+const productHref = `/${locale}/products/${product?.slug ?? ''}`;
+const writeReviewHref = `${productHref}/reviews/new`;
+
+const averageRating = REVIEWS.length > 0 ? getAverageRating(REVIEWS) : 0;
+const reviewCount = REVIEWS.length;
+const highlyRated = reviewCount >= 5;
+const highlyRatedLabel = highlyRated
+  ? t['storefront.products.detail.v4.highlyRated']
+  : undefined;
+
+// Labels i18n para reseñas — mismo set que el componente principal
+// (slug.astro líneas 247-264). Las props vacías son intencionales: la
+// vista dedicada no muestra filter chips / load-more / view-all, pero
+// el componente las requiere en el tipo.
+const reviewsLabels = {
+  heading: t['storefront.productDetail.reviews.heading'],
+  average: t['storefront.productDetail.reviews.average'],
+  outOf: t['storefront.productDetail.reviews.outOf'],
+  count: t['storefront.productDetail.reviews.count'].replace(
+    '{count}',
+    String(reviewCount),
+  ),
+  write: t['storefront.products.detail.v4.writeReview'],
+  viewAll: t['storefront.productDetail.reviews.viewAll'],
+  empty: t['storefront.productDetail.reviews.empty'],
+  verified: t['storefront.productDetail.reviews.verified'],
+  starAlt: t['storefront.productDetail.reviews.starAlt'],
+  loadMore: '',
+  showLess: '',
+  filterAll: '',
+  filterByRating: '',
+  like: t['storefront.products.detail.v4.reviews.like'],
+  unlike: t['storefront.products.detail.v4.reviews.unlike'],
+  loginRequired: t['storefront.products.detail.v4.reviews.loginRequired'],
+};
+---
+
+<StorefrontLayout title={`${t['storefront.productDetail.reviews.heading']} — ${product?.name ?? ''}`}>
+  <main class="bg-slate-50">
+    <section class="mx-auto w-full max-w-[900px] px-4 py-6 sm:px-6 sm:py-8">
+      {/* Breadcrumb: Productos / [Producto] / Reseñas */}
+      <nav aria-label="breadcrumb" class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+        <a href={catalogHref} class="transition hover:text-slate-700">
+          {t['storefront.products.detail.v3.breadcrumb']}
+        </a>
+        <span aria-hidden="true">/</span>
+        {product !== null && (
+          <>
+            <a href={productHref} class="transition hover:text-slate-700">
+              {product.name}
+            </a>
+            <span aria-hidden="true">/</span>
+          </>
+        )}
+        <span class="font-medium text-slate-700">
+          {t['storefront.productDetail.reviews.heading']}
+        </span>
+      </nav>
+
+      {product === null && (
+        <div class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+          <h1 class="text-2xl font-bold text-slate-900">
+            {t['storefront.productDetail.notFound']}
+          </h1>
+        </div>
+      )}
+
+      {product !== null && (
+        <div class="flex flex-col gap-6">
+          <ProductHeader
+            eyebrow={category?.name}
+            title={product.name}
+            rating={{ average: averageRating, count: reviewCount }}
+            highlyRated={highlyRated}
+            highlyRatedLabel={highlyRatedLabel}
+          />
+
+          {/* Pasamos REVIEWS (todas) + showFilterChips/LoadMore/ViewAll=false.
+              Sin filter chips, sin colapsar/desplegar, sin link "ver todas"
+              (ya estamos en esa vista). */}
+          <ProductReviews
+            labels={reviewsLabels}
+            reviews={REVIEWS}
+            viewAllHref={productHref}
+            writeHref={writeReviewHref}
+            apiBaseUrl="/api/v1"
+            loginHref={`/${locale}/login`}
+            showFilterChips={false}
+            showLoadMore={false}
+            showViewAll={false}
+          />
+
+          {/* Paginación server-side si >20 reseñas. Cosmetic-only por ahora
+              (REVIEWS pasa todas al componente); ver nota en frontmatter. */}
+          {totalPages > 1 && (
+            <nav aria-label="Paginación de reseñas" class="flex items-center justify-center gap-2 pt-4">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <a
+                  href={`${productHref}/reviews?page=${p}`}
+                  aria-current={p === currentPage ? 'page' : undefined}
+                  class:list={[
+                    'inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-semibold transition',
+                    p === currentPage
+                      ? 'bg-slate-900 text-white'
+                      : 'border border-slate-200 bg-white text-slate-900 hover:bg-slate-50',
+                  ]}
+                >
+                  {p}
+                </a>
+              ))}
+            </nav>
+          )}
+        </div>
+      )}
+    </section>
+  </main>
+</StorefrontLayout>
