@@ -56,6 +56,11 @@ export interface ProductReview {
   title: string;
   body: string;
   verified: boolean;
+  /** Total de likes (server-authoritative). */
+  likesCount: number;
+  /** Si el customer actual ya dio like. SSR: siempre false (server no
+   *  conoce la sesión); el cliente lo actualiza tras el primer fetch. */
+  likedByCurrentUser: boolean;
 }
 
 /** Producto expandido para la página de detalle. */
@@ -248,6 +253,8 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
       title: '¡Hermosa figura!',
       body: 'Llegó en perfecto estado y la calidad de los acabados es increíble. Las articulaciones son firmes y el detalle del pelo es impresionante.',
       verified: true,
+      likesCount: 15,
+      likedByCurrentUser: false,
     },
     {
       id: 2,
@@ -257,6 +264,8 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
       title: 'Buena compra',
       body: 'Muy contenta con la figura. La base es estable y los hands intercambiables son un plus. Le bajo una estrella porque el envío tardó más de lo esperado.',
       verified: true,
+      likesCount: 10,
+      likedByCurrentUser: false,
     },
     {
       id: 3,
@@ -266,6 +275,8 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
       title: 'Perfecta para mi colección',
       body: 'Ya tenía otras figuras de Saber y esta es de las mejores. El color violeta en persona es aún más bonito que en las fotos.',
       verified: true,
+      likesCount: 8,
+      likedByCurrentUser: false,
     },
     {
       id: 4,
@@ -275,6 +286,8 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
       title: 'Esperaba más',
       body: 'La figura está bien pero esperaba más accesorios. Por el precio, podría incluir una mano extra o efecto de Excalibur.',
       verified: false,
+      likesCount: 12,
+      likedByCurrentUser: false,
     },
     {
       id: 5,
@@ -284,6 +297,8 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
       title: 'Calidad premium',
       body: 'La caja viene bien protegida y la figura no tiene defectos de pintura. Recomendado 100%.',
       verified: true,
+      likesCount: 5,
+      likedByCurrentUser: false,
     },
   ],
 };
@@ -484,6 +499,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Mástil increíble',
       body: 'El mástil es rápido y cómodo. Le quito una estrella porque el peso se siente al tocar de pie.',
       verified: true,
+      likesCount: 12,
+      likedByCurrentUser: false,
     },
     {
       id: 2,
@@ -493,6 +510,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Acabado precioso',
       body: 'El Halo Metallic en persona es espectacular. Vale cada centavo.',
       verified: true,
+      likesCount: 18,
+      likedByCurrentUser: false,
     },
     {
       id: 3,
@@ -502,6 +521,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Sonido brutal',
       body: 'Las pastillas Custombucker suenan increíbles. Mucho más cálidas que las de fábrica del heavy\'ed anterior que tenía.',
       verified: true,
+      likesCount: 22,
+      likedByCurrentUser: false,
     },
     {
       id: 4,
@@ -511,6 +532,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Pastillas hand-wound',
       body: 'Las Custombucker son exactamente lo que esperaba del custom shop. El pickup del mástil tiene un growl increíble.',
       verified: true,
+      likesCount: 15,
+      likedByCurrentUser: false,
     },
     {
       id: 5,
@@ -520,6 +543,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Ultra Heavy Aged',
       body: 'El relic es perfecto. Se ve tocado pero sin abuso. Los herrajes envejecidos lucen naturales.',
       verified: true,
+      likesCount: 14,
+      likedByCurrentUser: false,
     },
     {
       id: 6,
@@ -529,6 +554,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Setup impecable',
       body: 'Llegó con acción baja y cejilla bien cortada. Solo ajusté un poco la curvatura del mástil.',
       verified: true,
+      likesCount: 8,
+      likedByCurrentUser: false,
     },
     {
       id: 7,
@@ -538,6 +565,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Peso considerable',
       body: 'Es un bajo pesado (4.1 kg se siente). El sonido lo compensa pero requiere correa gruesa.',
       verified: true,
+      likesCount: 6,
+      likedByCurrentUser: false,
     },
     {
       id: 8,
@@ -547,6 +576,8 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       title: 'Estuche de lujo',
       body: 'El estuche rígido incluido vale la pena. Forro interior aterciopelado, cerraduras de metal.',
       verified: true,
+      likesCount: 10,
+      likedByCurrentUser: false,
     },
   ],
 };

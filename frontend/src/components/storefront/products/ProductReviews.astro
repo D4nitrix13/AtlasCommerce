@@ -35,6 +35,12 @@ export interface ProductReviewsLabels {
   showLess: string;
   filterAll: string;
   filterByRating: string;
+  /** Texto del botón like en estado no-liked. */
+  like?: string;
+  /** Texto del botón like en estado liked (click para quitar). */
+  unlike?: string;
+  /** Texto del prompt cuando el usuario no está autenticado. */
+  loginRequired?: string;
 }
 
 interface Props {
@@ -46,6 +52,10 @@ interface Props {
   writeHref: string;
   /** Cuántas reseñas mostrar antes de "Cargar más". Default 3. */
   initialCount?: number;
+  /** Href de login (locale-prefixed). Default `/${locale}/login`. */
+  loginHref?: string;
+  /** Base URL del backend. Default `/api/v1`. */
+  apiBaseUrl?: string;
 }
 
 const {
@@ -54,7 +64,20 @@ const {
   viewAllHref,
   writeHref,
   initialCount = 3,
+  loginHref,
+  apiBaseUrl = '/api/v1',
 } = Astro.props;
+
+// Labels de like con fallback hardcoded. T10 los levantará a i18n
+// (es.json / en.json) cuando se haga la internacionalización.
+const likeText = labels.like ?? 'Me gusta';
+const unlikeText = labels.unlike ?? 'Quitar me gusta';
+const loginRequiredText = labels.loginRequired ?? 'Inicia sesión para dar me gusta';
+
+// Locale para construir el loginHref por defecto si el padre no lo pasa.
+// Sigue el mismo patrón que slug.astro (Astro.locals.locale ?? 'es').
+const locale = Astro.locals.locale ?? 'es';
+const resolvedLoginHref = loginHref ?? `/${locale}/login`;
 
 const hasReviews = reviews.length > 0;
 const average = hasReviews ? getAverageRating(reviews) : 0;
@@ -72,6 +95,8 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
   aria-labelledby="reviews-heading"
   class="flex flex-col gap-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
   data-reviews
+  data-api-base-url={apiBaseUrl}
+  data-login-href={resolvedLoginHref}
 >
   <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex flex-col gap-2">
@@ -229,6 +254,35 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
             ))}
           </div>
           <h3 class="text-sm font-semibold text-slate-900">{review.title}</h3>
+          <div class="flex items-center gap-3 text-xs text-slate-500">
+            <button
+              type="button"
+              data-review-like={review.id}
+              data-liked={review.likedByCurrentUser ? 'true' : 'false'}
+              data-label-like={likeText}
+              data-label-unlike={unlikeText}
+              data-label-login-required={loginRequiredText}
+              aria-pressed={review.likedByCurrentUser ? 'true' : 'false'}
+              aria-label={review.likedByCurrentUser ? unlikeText : likeText}
+              class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 data-[liked=true]:border-pink-300 data-[liked=true]:bg-pink-50 data-[liked=true]:text-pink-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={review.likedByCurrentUser ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                stroke-width="2"
+                class="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+              <span data-review-like-count>{review.likesCount}</span>
+            </button>
+            <span class="opacity-70" data-review-like-hint>
+              {review.likedByCurrentUser ? unlikeText : likeText}
+            </span>
+          </div>
           <p class="text-sm leading-relaxed text-slate-700">{review.body}</p>
         </li>
       ))}
@@ -379,4 +433,132 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
   document
     .querySelectorAll<HTMLElement>('[data-reviews]')
     .forEach(setupReviewsFilter);
+</script>
+
+<script>
+  /**
+   * ProductReviews — botón "like" por reseña.
+   *
+   * Comportamiento:
+   *   1. Click → auth gate (localStorage 'auth_token' o cookie 'sanctum_token').
+   *      Si no hay auth → redirect a login con `?redirect=<current>`.
+   *   2. Auth OK → optimistic UI: actualiza botón + contador inmediatamente.
+   *   3. POST/DELETE /storefront/reviews/{id}/like según el estado anterior.
+   *   4. Respuesta OK → reconcilia el contador con `data.count` (server-authoritative).
+   *   5. Respuesta falla → rollback UI + console.error.
+   *
+   * Notas:
+   *   - El auth gate es best-effort: Sanctum usa cookies httpOnly, así que
+   *     `document.cookie.includes('sanctum_token')` NO funciona. La
+   *     verdadera validación la hace el backend (T8 → auth:sanctum → 401).
+   *     Cuando exista un store de auth en el cliente, sustituir este gate
+   *     por `customerAuthStore.getSnapshot().isAuthenticated`.
+   *   - El server-rendered `likedByCurrentUser` siempre es false porque
+   *     SSR no conoce la sesión. Tras el primer GET al endpoint, se
+   *     reconcilia con el estado real.
+   */
+  function setupReviewLikes(root: HTMLElement): void {
+    const buttons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[data-review-like]')
+    );
+    const apiBase = root.dataset.apiBaseUrl ?? '/api/v1';
+    const loginHref = root.dataset.loginHref ?? '/login';
+
+    buttons.forEach((btn) => {
+      const labelLike = btn.dataset.labelLike ?? 'Me gusta';
+      const labelUnlike = btn.dataset.labelUnlike ?? 'Quitar me gusta';
+
+      btn.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        const reviewId = btn.dataset.reviewLike;
+        if (reviewId === undefined || reviewId === '') return;
+
+        const wasLiked = btn.dataset.liked === 'true';
+
+        // Auth gate best-effort. Sanctum stateful guarda el token en
+        // cookie httpOnly → invisible al JS. Mientras no haya auth store
+        // en el cliente, redirigimos siempre a login (UX seguro: el 401
+        // del backend rechazaría igual). Cuando exista
+        // `customerAuthStore.getSnapshot().isAuthenticated`, sustituir
+        // por esa fuente única de verdad.
+        const hasAuth =
+          document.cookie.includes('sanctum_token') ||
+          localStorage.getItem('auth_token') !== null;
+
+        if (!hasAuth) {
+          const redirect = encodeURIComponent(window.location.pathname);
+          window.location.href = `${loginHref}?redirect=${redirect}`;
+          return;
+        }
+
+        // El hint vive como sibling del botón (no dentro), para mantener
+        // la jerarquía accesible del botón (no se anuncia el hint como
+        // parte del nombre accesible). Buscamos desde el padre.
+        const hintEl = btn.parentElement?.querySelector<HTMLElement>(
+          '[data-review-like-hint]'
+        ) ?? null;
+        const countEl = btn.querySelector<HTMLElement>('[data-review-like-count]');
+        if (countEl === null) return;
+
+        // ── Optimistic UI ────────────────────────────────────────────
+        const newLiked = !wasLiked;
+        btn.dataset.liked = String(newLiked);
+        btn.setAttribute('aria-pressed', String(newLiked));
+        const newAriaLabel = newLiked ? labelUnlike : labelLike;
+        btn.setAttribute('aria-label', newAriaLabel);
+        const previousCount = Number.parseInt(countEl.textContent ?? '0', 10);
+        countEl.textContent = String(previousCount + (wasLiked ? -1 : 1));
+        if (hintEl !== null) hintEl.textContent = newAriaLabel;
+
+        try {
+          const response = await fetch(
+            `${apiBase}/storefront/reviews/${reviewId}/like`,
+            {
+              method: wasLiked ? 'DELETE' : 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
+              },
+              credentials: 'same-origin',
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          // El backend devuelve `{ liked, count }`. Reconciliamos con
+          // la verdad del servidor.
+          const data = (await response.json()) as { liked?: boolean; count?: number };
+          if (typeof data.count === 'number') {
+            countEl.textContent = String(data.count);
+          }
+          if (typeof data.liked === 'boolean') {
+            btn.dataset.liked = String(data.liked);
+            btn.setAttribute('aria-pressed', String(data.liked));
+            const finalLabel = data.liked ? labelUnlike : labelLike;
+            btn.setAttribute('aria-label', finalLabel);
+            if (hintEl !== null) hintEl.textContent = finalLabel;
+          }
+        } catch (error) {
+          // ── Rollback ───────────────────────────────────────────────
+          btn.dataset.liked = String(wasLiked);
+          btn.setAttribute('aria-pressed', String(wasLiked));
+          const revertedLabel = wasLiked ? labelUnlike : labelLike;
+          btn.setAttribute('aria-label', revertedLabel);
+          countEl.textContent = String(
+            Number.parseInt(countEl.textContent ?? '0', 10) + (wasLiked ? 1 : -1)
+          );
+          if (hintEl !== null) hintEl.textContent = revertedLabel;
+          console.error('Like failed:', error);
+        }
+      });
+    });
+  }
+
+  document
+    .querySelectorAll<HTMLElement>('[data-reviews]')
+    .forEach(setupReviewLikes);
 </script>
