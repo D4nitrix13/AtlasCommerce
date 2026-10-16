@@ -56,7 +56,7 @@ const showThumbs = images.length > 1;
 
 <section
   aria-label="Product gallery"
-  class="flex flex-col gap-4"
+  class="relative flex flex-col gap-4"
   data-reveal
 >
   <div
@@ -75,7 +75,10 @@ const showThumbs = images.length > 1;
       return (
         <figure
           data-gallery-slide={index}
-          class="relative shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+          class:list={[
+            'relative shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-200 bg-slate-50',
+            hasRealImages && 'cursor-zoom-in',
+          ]}
           style="flex-basis: 100%;"
         >
           {hasRealImages ? (
@@ -153,6 +156,15 @@ const showThumbs = images.length > 1;
         );
       })}
     </ul>
+  )}
+
+  {hasRealImages && (
+    <div
+      class="zoom-lens"
+      aria-hidden="true"
+      hidden
+      data-zoom-lens
+    ></div>
   )}
 </section>
 
@@ -250,6 +262,59 @@ const showThumbs = images.length > 1;
     requestAnimationFrame(() => {
       slides.forEach((slide) => observer.observe(slide));
     });
+
+    // Magnifier lens: desktop-only y solo si hay imágenes reales. La presencia
+    // del lens en el DOM es la fuente de verdad de "hasRealImages" (no se
+    // renderiza con el fallback de ProductMockup). matchMedia filtra touch.
+    const lens = section.querySelector<HTMLElement>('[data-zoom-lens]');
+    if (lens && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      const ZOOM_FACTOR = 2.5;
+      const LENS_HALF_PX = 100;
+
+      slides.forEach((slide) => {
+        const img = slide.querySelector('img');
+        if (!img) return;
+
+        const onEnter = () => {
+          // Usamos clientWidth/Height (no naturalWidth/Height) para que la
+          // magnificación visual sea consistente: 2.5x respecto al tamaño
+          // RENDERIZADO del <img>, no respecto al archivo fuente. Si la fuente
+          // es 4000×1818 pero se renderiza a 800×365, naturalWidth×2.5 daría
+          // un zoom efectivo de 12.5x (inconsistente entre productos).
+          const w = img.clientWidth;
+          const h = img.clientHeight;
+          if (w === 0 || h === 0) return;
+          const src = img.currentSrc || img.src;
+          lens.style.backgroundImage = `url("${src}")`;
+          lens.style.backgroundSize = `${w * ZOOM_FACTOR}px ${h * ZOOM_FACTOR}px`;
+          lens.hidden = false;
+          lens.dataset.active = 'true';
+        };
+
+        const onMove = (event: MouseEvent) => {
+          // event.currentTarget = slide, no event.target (puede ser el <img> hijo).
+          const slideRect = slide.getBoundingClientRect();
+          const sectionRect = section.getBoundingClientRect();
+          const cursorX = event.clientX - slideRect.left;
+          const cursorY = event.clientY - slideRect.top;
+          lens.style.left = `${slideRect.left - sectionRect.left + cursorX}px`;
+          lens.style.top = `${slideRect.top - sectionRect.top + cursorY}px`;
+          // Centrar la región bajo el cursor en el lens (lensWidth/2 = 100).
+          const bgX = -(cursorX * ZOOM_FACTOR - LENS_HALF_PX);
+          const bgY = -(cursorY * ZOOM_FACTOR - LENS_HALF_PX);
+          lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+        };
+
+        const onLeave = () => {
+          lens.hidden = true;
+          lens.dataset.active = '';
+        };
+
+        slide.addEventListener('mouseenter', onEnter);
+        slide.addEventListener('mousemove', onMove);
+        slide.addEventListener('mouseleave', onLeave);
+      });
+    }
   }
 
   document
@@ -265,5 +330,30 @@ const showThumbs = images.length > 1;
   }
   .gallery-scroller {
     scrollbar-width: none;
+  }
+
+  /* Magnifier lens: sigue al cursor y muestra la imagen ampliada 2.5x via
+   * background-image. pointer-events:none para no interceptar el mousemove
+   * del slide; transform:translate(-50%,-50%) para centrar en el cursor. */
+  .zoom-lens {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border: 2px solid theme(colors.slate.900);
+    border-radius: 9999px;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+    transform: translate(-50%, -50%);
+  }
+  .zoom-lens[data-active] {
+    display: block;
+  }
+  /* Touch devices: el script ya filtra con matchMedia, esto es belt-and-suspenders. */
+  @media (hover: none), (pointer: coarse) {
+    .zoom-lens {
+      display: none !important;
+    }
   }
 </style>
