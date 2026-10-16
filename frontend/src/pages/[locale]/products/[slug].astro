@@ -415,19 +415,23 @@ const galleryLabels = {
                 {t['storefront.products.detail.v4.shippingInline']}
               </p>
 
-              <ProductFitSelector
-                legend={t['storefront.products.detail.v4.condition.legend']}
-                options={CONDITION_OPTIONS}
-                selected={SELECTED_CONDITION}
-                name="condition"
-              />
+              {detail.hasCondition === true && (
+                <ProductFitSelector
+                  legend={t['storefront.products.detail.v4.condition.legend']}
+                  options={CONDITION_OPTIONS}
+                  selected={SELECTED_CONDITION}
+                  name="condition"
+                />
+              )}
 
-              <ProductSizeGrid
-                legend={t['storefront.products.detail.v4.size.legend']}
-                options={SIZE_OPTIONS}
-                selected={SELECTED_SIZE}
-                name="size"
-              />
+              {detail.hasSizes === true && (
+                <ProductSizeGrid
+                  legend={t['storefront.products.detail.v4.size.legend']}
+                  options={SIZE_OPTIONS}
+                  selected={SELECTED_SIZE}
+                  name="size"
+                />
+              )}
 
               {/* El picker de variantes vive arriba en el dl "Acabado" (con thumbnails
                   reales via ?color=). No duplicamos el fieldset acá. */}

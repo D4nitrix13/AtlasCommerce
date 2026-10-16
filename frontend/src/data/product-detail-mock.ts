@@ -71,6 +71,18 @@ export interface ProductDetailData {
   category: string;
   stock: number;
   badges: ('new' | 'sale' | 'low_stock')[];
+  /**
+   * Si el producto expone el selector "Nuevo / Usado" en la PDP.
+   * Default false (los mocks existentes asumen false). Productos
+   * refurbished, ropa vintage, autos, antigüedades: true.
+   */
+  hasCondition?: boolean;
+  /**
+   * Si el producto expone el grid de tallas (S/M/L, 4/4/3/4, etc.)
+   * en la PDP. Default false. Ropa, zapatos, instrumentos con
+   * tamaños distintos: true.
+   */
+  hasSizes?: boolean;
   /** Galería: 4 imágenes mínimo (Baymard). */
   images: string[];
   /** Variantes estructuradas. */
@@ -120,6 +132,10 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
   category: PRODUCTS[0].category,
   stock: PRODUCTS[0].stock,
   badges: PRODUCTS[0].badges ?? [],
+  // Saber Alter: figura coleccionable. Tiene tallas (S/M/L) pero no
+  // condición nueva/usada (las figuras son nuevas por default).
+  hasCondition: false,
+  hasSizes: true,
   // 4 imágenes placeholder — gallery Baymard requiere ≥3.
   images: [PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE],
   // Atributos: color × size.
@@ -349,6 +365,12 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
   category: 'bajo-electrico',
   stock: 12,
   badges: ['new'],
+  // Bajo Fender: La Voz vende mayoria nuevos (hasCondition: true) pero
+  // un bajo eléctrico adulto SIEMPRE es full-size (hasSizes: false).
+  // Coincide con los flags del seeder backend
+  // `FenderPlayerFusionBassSeeder::ensureProduct()`.
+  hasCondition: true,
+  hasSizes: false,
   images: [
     ...['01', '02', '03', '04', '05'].map((idx) => fenderImageUrl('ebony-black', idx, '1600x730')),
     ...['01', '02', '03', '04', '05'].map((idx) => fenderImageUrl('halo-metallic', idx, '1600x730')),
