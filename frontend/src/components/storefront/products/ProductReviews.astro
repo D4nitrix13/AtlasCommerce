@@ -140,9 +140,12 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
         type="button"
         data-reviews-filter="all"
         aria-pressed="true"
-        class="inline-flex items-center gap-1.5 rounded-full border border-[var(--primary,#475569)] bg-[var(--primary,#475569)] px-3 py-1 text-xs font-semibold text-white transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+        class:list={[
+          'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+          'data-[active=true]:border-[var(--primary,#475569)] data-[active=true]:bg-[var(--primary,#475569)]/5 data-[active=true]:text-[var(--primary,#475569)]',
+        ]}
       >
-        {labels.filterAll} <span class="opacity-80">({reviewCount})</span>
+        {labels.filterAll} <span class="opacity-70">({reviewCount})</span>
       </button>
       {ratingCounts.map(({ stars, count }) => (
         <button
