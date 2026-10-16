@@ -39,12 +39,10 @@ import ProductSizeGrid from '../../../components/storefront/products/ProductSize
 import ProductCTAs from '../../../components/storefront/products/ProductCTAs.astro';
 import ProductShippingAccordion from '../../../components/storefront/products/ProductShippingAccordion.astro';
 import ProductDetailsBlock from '../../../components/storefront/products/ProductDetailsBlock.astro';
-import ProductFeaturesCarousel, {
-  type ProductFeatureItem,
-} from '../../../components/storefront/products/ProductFeaturesCarousel.astro';
 import ProductReviews from '../../../components/storefront/products/ProductReviews.astro';
 import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
 import ProductHighlights from '../../../components/storefront/products/ProductHighlights.astro';
+
 import ProductSpecificationsByCategory from '../../../components/storefront/products/ProductSpecificationsByCategory.astro';
 import { getServerDictionary } from '../../../i18n/server';
 import { findProductBySlug, CATEGORIES } from '../../../data/products';
@@ -83,20 +81,20 @@ const detail =
     : product?.slug === SABER_ALTER_DETAIL.slug
       ? SABER_ALTER_DETAIL
       : product !== null
-      ? {
-          ...SABER_ALTER_DETAIL,
-          id: product.id,
-          slug: product.slug,
-          name: product.name,
-          description: product.description,
-          priceCents: product.priceCents,
-          compareAtPriceCents: product.compareAtPriceCents,
-          currency: product.currency ?? 'USD',
-          category: product.category,
-          stock: product.stock,
-          badges: product.badges ?? [],
-        }
-      : null;
+        ? {
+            ...SABER_ALTER_DETAIL,
+            id: product.id,
+            slug: product.slug,
+            name: product.name,
+            description: product.description,
+            priceCents: product.priceCents,
+            compareAtPriceCents: product.compareAtPriceCents,
+            currency: product.currency ?? 'USD',
+            category: product.category,
+            stock: product.stock,
+            badges: product.badges ?? [],
+          }
+        : null;
 
 // Estado inicial del accordion de specs: leído de la cookie SSR
 // (`pdp-specs-expanded-<slug>`) para evitar el flash visual que se
@@ -166,7 +164,8 @@ const SELECTED_COLOR =
   COLOR_OPTIONS.find((option) => option.id === selectedFinishFromUrl)?.id ??
   COLOR_OPTIONS[0]?.id ??
   'sunburst';
-const selectedFinish = COLOR_OPTIONS.find((option) => option.id === SELECTED_COLOR) ?? COLOR_OPTIONS[0];
+const selectedFinish =
+  COLOR_OPTIONS.find((option) => option.id === SELECTED_COLOR) ?? COLOR_OPTIONS[0];
 
 // Imágenes filtradas por el color seleccionado. Convención: la URL de
 // la imagen contiene el slug del variant (ej. "ebony-black"). Si el
@@ -175,9 +174,7 @@ const selectedFinish = COLOR_OPTIONS.find((option) => option.id === SELECTED_COL
 const VARIANT_SLUG_PATTERN = SELECTED_COLOR.toLowerCase();
 const displayedImages = (() => {
   const all = detail?.images ?? [];
-  const filtered = all.filter((url) =>
-    url.toLowerCase().includes(VARIANT_SLUG_PATTERN)
-  );
+  const filtered = all.filter((url) => url.toLowerCase().includes(VARIANT_SLUG_PATTERN));
   return filtered.length > 0 ? filtered : all;
 })();
 
@@ -188,8 +185,7 @@ if (detail !== null) {
   for (const option of COLOR_OPTIONS) {
     const slug = option.id.toLowerCase();
     variantFirstImage[option.id] =
-      detail.images.find((url) => url.toLowerCase().includes(slug)) ??
-      detail.images[0];
+      detail.images.find((url) => url.toLowerCase().includes(slug)) ?? detail.images[0];
   }
 }
 
@@ -199,8 +195,7 @@ const AVG_RATING = detail !== null ? getAverageRating(detail.reviews) : 0;
 const RATING_COUNT = detail !== null ? detail.reviews.length : 0;
 
 // Precio formateado para el dl 2-col (single source of truth: formatCurrency).
-const precioFormatted =
-  detail !== null ? formatCurrency(detail.priceCents, detail.currency) : '';
+const precioFormatted = detail !== null ? formatCurrency(detail.priceCents, detail.currency) : '';
 
 const HIGHLY_RATED_LABEL = HIGHLY_RATED
   ? t['storefront.products.detail.v4.highlyRated']
@@ -224,20 +219,6 @@ const INCLUSION_ACCORDIONS: readonly { label: string; content: string }[] = [
   },
 ];
 
-// Features: 3 imágenes lifestyle para carrusel (mock con SVG inline).
-const FEATURE_IMAGE =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"><rect width="400" height="500" fill="#e2e8f0"/><circle cx="200" cy="220" r="80" fill="#cbd5e1"/></svg>`
-  );
-const FEATURE_ITEMS: readonly ProductFeatureItem[] = detail !== null
-  ? [
-      { image: FEATURE_IMAGE, alt: `${detail.name} — pastilla`, caption: 'Pastillas hand-wound calibradas a mano.' },
-      { image: FEATURE_IMAGE, alt: `${detail.name} — puente`, caption: 'Puente de 2 puntos con selletas de acero.' },
-      { image: FEATURE_IMAGE, alt: `${detail.name} — cuerpo`, caption: 'Cuerpo de aliso con acabado gloss urethane.' },
-    ]
-  : [];
-
 // Reviews (extraídos del detail si existe, mock vacío si no).
 const REVIEWS: readonly ProductReview[] = detail?.reviews ?? [];
 const VIEW_ALL_HREF = `/${locale}/products/${product?.slug ?? ''}/reviews`;
@@ -258,6 +239,8 @@ const reviewsLabels = {
   showLess: t['storefront.products.detail.v4.reviews.showLess'],
   filterAll: t['storefront.products.detail.v4.reviews.filterAll'],
   filterByRating: t['storefront.products.detail.v4.reviews.filterByRating'],
+  collapse: t['storefront.products.detail.v4.reviews.collapse'],
+  expand: t['storefront.products.detail.v4.reviews.expand'],
   like: t['storefront.products.detail.v4.reviews.like'],
   unlike: t['storefront.products.detail.v4.reviews.unlike'],
   loginRequired: t['storefront.products.detail.v4.reviews.loginRequired'],
@@ -265,30 +248,34 @@ const reviewsLabels = {
 
 /** Metadata mínima del producto actual — expuesta a window.__PRODUCT_META__
  *  para que ProductRecentlyViewed pueda trackear este producto via localStorage. */
-const FENDER_PRODUCT = product !== null
-  ? {
-      slug: product.slug,
-      name: product.name,
-      imageUrl: product.imageUrl,
-      priceCents: product.priceCents,
-      currency: product.currency ?? 'USD',
-    }
-  : { slug: 'unknown', name: '', imageUrl: '', priceCents: 0, currency: 'USD' };
+const FENDER_PRODUCT =
+  product !== null
+    ? {
+        slug: product.slug,
+        name: product.name,
+        imageUrl: product.imageUrl,
+        priceCents: product.priceCents,
+        currency: product.currency ?? 'USD',
+      }
+    : { slug: 'unknown', name: '', imageUrl: '', priceCents: 0, currency: 'USD' };
+
+const galleryLabels = {
+  mainAlt: product?.name ?? t['storefront.productDetail.notFound'],
+  logoText: product?.name?.split(' ')[0] ?? 'Atlas',
+};
 
 const cardLabels = {
   heading: t['storefront.productDetail.related.heading'],
   empty: t['storefront.productDetail.related.empty'],
+  prevLabel: t['storefront.productDetail.related.prev'],
+  nextLabel: t['storefront.productDetail.related.next'],
+  variantsLabel: t['storefront.productDetail.related.variantsLabel'],
   newBadge: t['storefront.productCard.badge.new'],
   saleBadge: t['storefront.productCard.badge.sale'],
   lowStockBadge: t['storefront.productCard.badge.lowStock'],
   addToCart: t['storefront.productCard.addToCart'],
   outOfStock: t['storefront.productCard.outOfStock'],
   viewDetail: t['storefront.productCard.viewDetail'],
-};
-
-const galleryLabels = {
-  mainAlt: product?.name ?? t['storefront.productDetail.notFound'],
-  logoText: product?.name?.split(' ')[0] ?? 'Atlas',
 };
 ---
 
@@ -334,14 +321,14 @@ const galleryLabels = {
               const parsed = Number.parseInt(ss, 10);
               if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
             }
-          } catch { /* sessionStorage no disponible */ }
+          } catch {
+            /* sessionStorage no disponible */
+          }
         }
 
         // Cookie fallback.
         if (savedY === null) {
-          const cookieMatch = document.cookie.match(
-            new RegExp(`(?:^|;\\s*)${COOKIE_KEY}=([^;]*)`),
-          );
+          const cookieMatch = document.cookie.match(new RegExp(`(?:^|;\\s*)${COOKIE_KEY}=([^;]*)`));
           if (cookieMatch !== null && cookieMatch[1] !== undefined) {
             const parsed = Number.parseInt(decodeURIComponent(cookieMatch[1]), 10);
             if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
@@ -356,7 +343,10 @@ const galleryLabels = {
     </script>
     <section class="mx-auto w-full max-w-[1160px] px-4 py-4 sm:px-6 sm:py-6">
       {/* Breadcrumb */}
-      <nav aria-label="breadcrumb" class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+      <nav
+        aria-label="breadcrumb"
+        class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500"
+      >
         <a href={catalogHref} class="transition hover:text-slate-700">
           {t['storefront.products.detail.v3.breadcrumb']}
         </a>
@@ -377,8 +367,12 @@ const galleryLabels = {
 
       {product === null && (
         <div class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
-          <h1 class="text-2xl font-bold text-slate-900">{t['storefront.productDetail.notFound']}</h1>
-          <p class="max-w-md text-sm text-slate-500">{t['storefront.productDetail.notFoundHint']}</p>
+          <h1 class="text-2xl font-bold text-slate-900">
+            {t['storefront.productDetail.notFound']}
+          </h1>
+          <p class="max-w-md text-sm text-slate-500">
+            {t['storefront.productDetail.notFoundHint']}
+          </p>
           <a
             href={catalogHref}
             class="mt-2 inline-flex h-10 items-center rounded-lg bg-[var(--primary,#475569)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)]"
@@ -428,7 +422,11 @@ const galleryLabels = {
                         Cada swatch es un <a> con ?finish=<id> que filtra la galería
                         via query param (sin JS). Thumbnails uniformes ~48×48
                         con object-cover para mantener el aspect ratio. */}
-                    <ul class="flex flex-wrap items-center gap-1.5" role="list" aria-label="Selector de acabado">
+                    <ul
+                      class="flex flex-wrap items-center gap-1.5"
+                      role="list"
+                      aria-label="Selector de acabado"
+                    >
                       {COLOR_OPTIONS.map((option) => {
                         const isActive = option.id === SELECTED_COLOR;
                         const thumbSrc = variantFirstImage[option.id];
@@ -470,7 +468,12 @@ const galleryLabels = {
                 </div>
               </dl>
 
-              <ProductDetailsBlock variant="inline" intro={detail.description} moreLabel={t['storefront.products.detail.v4.details.more']} lessLabel={t['storefront.products.detail.v4.details.less']} />
+              <ProductDetailsBlock
+                variant="inline"
+                intro={detail.description}
+                moreLabel={t['storefront.products.detail.v4.details.more']}
+                lessLabel={t['storefront.products.detail.v4.details.less']}
+              />
 
               <p class="text-xs text-slate-500">
                 {t['storefront.products.detail.v4.shippingInline']}
@@ -506,7 +509,13 @@ const galleryLabels = {
                 loginHref={`/${locale}/login`}
               />
 
-              {detail.financing !== undefined && <ProductDetailFinancingBlock syncLine={t['storefront.products.detail.v4.financing.syncLine']} shopPayLine={t['storefront.products.detail.v4.financing.shopPay']} learnMoreLabel={t['storefront.products.detail.v4.financing.learnMore']} />}
+              {detail.financing !== undefined && (
+                <ProductDetailFinancingBlock
+                  syncLine={t['storefront.products.detail.v4.financing.syncLine']}
+                  shopPayLine={t['storefront.products.detail.v4.financing.shopPay']}
+                  learnMoreLabel={t['storefront.products.detail.v4.financing.learnMore']}
+                />
+              )}
 
               <div class="flex flex-col gap-2">
                 {INCLUSION_ACCORDIONS.map((entry) => (
@@ -539,7 +548,6 @@ const galleryLabels = {
               se renderizan aparte en `<ProductSpecificationsByCategory>`. */}
           {detail.description.length > 0 && (
             <ProductDetailsBlock
-              introLabel={t['storefront.products.detail.v4.details.introLabel']}
               heading={
                 detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
                   ? FENDER_PLAYER_FUSION_BASS_HEADING
@@ -556,7 +564,10 @@ const galleryLabels = {
           )}
 
           {detail.featuredArticle !== undefined && (
-            <ProductFeaturedArticle {...detail.featuredArticle} ctaLabel={t['storefront.products.detail.v4.featuredArticle.cta']} />
+            <ProductFeaturedArticle
+              {...detail.featuredArticle}
+              ctaLabel={t['storefront.products.detail.v4.featuredArticle.cta']}
+            />
           )}
 
           {/* Highlights — sólo si el mock los provee */}
@@ -588,20 +599,14 @@ const galleryLabels = {
             />
           )}
 
-          {/* Features carousel */}
-          {FEATURE_ITEMS.length > 0 && (
-            <ProductFeaturesCarousel
-              heading={t['storefront.products.detail.v4.features.heading']}
-              items={FEATURE_ITEMS}
-            />
-          )}
+          {/* Features carousel — removido: sección redundante con Highlights. */}
 
-          {/* Related products */}
+          {/* Related products — "You May Also Like" */}
           {RELATED_PRODUCTS.length > 0 && (
             <ProductRelated labels={cardLabels} products={RELATED_PRODUCTS} locale={locale} />
           )}
 
-          {/* Frequently bought together (bundle bass + accesorios) */}
+          {/* Frequently bought together — bundle bass + accesorios */}
           {detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug && (
             <ProductFrequentlyBoughtTogether
               heading="Comprados juntos frecuentemente"
@@ -621,10 +626,25 @@ const galleryLabels = {
       )}
     </section>
   </main>
-  <script is:inline define:vars={{ productSlug: product?.slug ?? 'unknown', productName: product?.name ?? '', productImage: FENDER_PRODUCT.imageUrl, productPriceCents: FENDER_PRODUCT.priceCents, productCurrency: FENDER_PRODUCT.currency ?? 'USD' }}>
+  <script
+    is:inline
+    define:vars={{
+      productSlug: product?.slug ?? 'unknown',
+      productName: product?.name ?? '',
+      productImage: FENDER_PRODUCT.imageUrl,
+      productPriceCents: FENDER_PRODUCT.priceCents,
+      productCurrency: FENDER_PRODUCT.currency ?? 'USD',
+    }}
+  >
     // Inyecta la metadata del producto actual para que ProductRecentlyViewed
     // pueda trackearlo via localStorage en el cliente.
-    window.__PRODUCT_META__ = { slug: productSlug, name: productName, imageUrl: productImage, priceCents: productPriceCents, currency: productCurrency };
+    window.__PRODUCT_META__ = {
+      slug: productSlug,
+      name: productName,
+      imageUrl: productImage,
+      priceCents: productPriceCents,
+      currency: productCurrency,
+    };
   </script>
   <script is:inline>
     // Scroll restoration: al recargar la página, permanecemos en la sección
@@ -654,28 +674,36 @@ const galleryLabels = {
         if (document.querySelector(href) === null) return;
         try {
           sessionStorage.setItem(SS_KEY + ':anchor', href.slice(1));
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       });
 
       // (b) Capturar scrollY en cada cambio (debounced via rAF).
       let scrollYScheduled = false;
-      window.addEventListener('scroll', () => {
-        if (scrollYScheduled) return;
-        scrollYScheduled = true;
-        requestAnimationFrame(() => {
-          scrollYScheduled = false;
-          try {
-            sessionStorage.setItem(SS_KEY, String(window.scrollY));
-            document.cookie = `${COOKIE_KEY}=${window.scrollY}; ${COOKIE_ATTRS}`;
-            // URL backup: ?scrollY=N (limpiada en load).
-            const url = new URL(window.location.href);
-            if (url.searchParams.get('scrollY') !== String(window.scrollY)) {
-              url.searchParams.set('scrollY', String(window.scrollY));
-              window.history.replaceState(null, '', url.toString());
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (scrollYScheduled) return;
+          scrollYScheduled = true;
+          requestAnimationFrame(() => {
+            scrollYScheduled = false;
+            try {
+              sessionStorage.setItem(SS_KEY, String(window.scrollY));
+              document.cookie = `${COOKIE_KEY}=${window.scrollY}; ${COOKIE_ATTRS}`;
+              // URL backup: ?scrollY=N (limpiada en load).
+              const url = new URL(window.location.href);
+              if (url.searchParams.get('scrollY') !== String(window.scrollY)) {
+                url.searchParams.set('scrollY', String(window.scrollY));
+                window.history.replaceState(null, '', url.toString());
+              }
+            } catch {
+              /* ignore */
             }
-          } catch { /* ignore */ }
-        });
-      }, { passive: true });
+          });
+        },
+        { passive: true }
+      );
     })();
   </script>
 </StorefrontLayout>

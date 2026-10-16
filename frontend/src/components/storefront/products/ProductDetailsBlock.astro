@@ -38,8 +38,6 @@
 interface Props {
   /** Variante del layout. `full` (default) = card con eyebrow/heading. `inline` = fila compacta sin wrapper. */
   variant?: 'inline' | 'full';
-  /** Eyebrow sobre el heading. Sólo se renderiza en variant='full'. */
-  introLabel?: string;
   /** Heading principal del bloque. Sólo se renderiza en variant='full'. */
   heading?: string;
   /** Párrafo introductorio (HTML, soporta links). */
@@ -52,7 +50,6 @@ interface Props {
 
 const {
   variant = 'full',
-  introLabel = 'Detalles del instrumento',
   heading = 'Detalles del instrumento',
   intro,
   moreLabel = 'Leer más',
@@ -72,18 +69,15 @@ const canCollapse = plainText.length > threshold;
     class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
     data-reveal
   >
-    <p class="text-xs font-bold uppercase tracking-wider text-[var(--primary,#475569)]">
-      {introLabel}
-    </p>
     <h2
       id="product-details-heading"
-      class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
     >
       {heading}
     </h2>
 
     <div
-      class="mt-4 prose prose-slate max-w-none text-slate-700"
+      class="mt-4 max-w-none text-slate-700 [&_p]:mb-3 [&_p]:leading-relaxed"
       data-collapsed-description
       data-mode="full"
     >
@@ -116,8 +110,13 @@ const canCollapse = plainText.length > threshold;
     >
       {canCollapse && (
         <>
-          <span data-short class="block">{`${plainText.slice(0, COLLAPSE_THRESHOLD_INLINE).trimEnd()}…`}</span>
-          <span data-full class="hidden"><Fragment set:html={intro} /></span>
+          <span
+            data-short
+            class="block"
+          >{`${plainText.slice(0, COLLAPSE_THRESHOLD_INLINE).trimEnd()}…`}</span>
+          <span data-full class="hidden">
+            <Fragment set:html={intro} />
+          </span>
         </>
       )}
       {!canCollapse && <Fragment set:html={intro} />}
@@ -147,7 +146,9 @@ const canCollapse = plainText.length > threshold;
         btn.parentElement?.querySelector<HTMLElement>('[data-collapsed-description]');
       if (!target) return;
       const expanded = target.classList.toggle('is-expanded');
-      btn.textContent = expanded ? btn.dataset.labelLess ?? 'menos' : btn.dataset.labelMore ?? 'más';
+      btn.textContent = expanded
+        ? (btn.dataset.labelLess ?? 'menos')
+        : (btn.dataset.labelMore ?? 'más');
     });
   });
 </script>

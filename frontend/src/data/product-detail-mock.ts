@@ -116,7 +116,42 @@ export interface RelatedProduct {
   compareAtPriceCents?: number;
   currency: string;
   imageUrl: string;
+  /**
+   * Imagen alternativa para hover-swap (e.g., vista trasera/lateral del
+   * producto). Si no está definida, la card se queda con la imagen
+   * única sin swap.
+   */
+  imageUrlSecondary?: string;
   badges?: ('new' | 'sale' | 'low_stock')[];
+  /** Marca/vendor del producto (línea 1 del subtítulo tipo Gibson). */
+  vendor?: string;
+  /** Acabado/color/variante principal (línea 2 del subtítulo). */
+  finish?: string;
+  /** Cantidad de variantes disponibles (mostrado como "5 acabados"). */
+  variantsCount?: number;
+/**
+   * Si `true`, la imagen se rota -90° para mostrar el instrumento en
+   * vertical (body arriba, pala abajo). Pensado para productos como
+   * guitarras/bajos cuyas fotos fuente son landscape pero el sujeto es
+   * vertical — en una card cuadrada se verían con mucho padding.
+   *
+   * NO aplicar a placeholders, figuras, ni productos cuyo sujeto NO
+   * sea vertical. Default: false (no se rota).
+   */
+  rotateImage?: boolean;
+  /**
+   * Variantes del producto (mostradas como swatches/bolitas de color).
+   *
+   * Si cada variante tiene `imageUrl`, hover sobre su swatch hace
+   * preview de esa variante (muestra la foto del producto en ese
+   * color). Si falta `imageUrl`, el swatch es decorativo.
+   */
+  variants?: ReadonlyArray<{
+    id: string;
+    label: string;
+    hex: string;
+    imageUrl?: string;
+  }>;
 }
 
 /**
@@ -316,7 +351,34 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: PRODUCTS[1].priceCents,
     currency: PRODUCTS[1].currency ?? 'USD',
     imageUrl: PRODUCTS[1].imageUrl,
+    // Segunda imagen para hover-swap (vista alternativa del producto).
+    // En este mock usamos otra toma de la galería como "back/alternate".
+    imageUrlSecondary:
+      '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-400x183-02.webp',
+    // El bajo es vertical pero la foto fuente es landscape — rotamos
+    // la card para que el instrumento se vea parado (body arriba, pala
+    // abajo) sin padding lateral excesivo.
+    rotateImage: true,
     badges: PRODUCTS[1].badges,
+    vendor: 'Fender',
+    finish: 'Ultra Heavy Aged',
+    variantsCount: 2,
+    variants: [
+      {
+        id: 'ebony-black',
+        label: 'Ebony Black',
+        hex: '#0F0F0F',
+        // 400×183 thumbnail — suficiente para card cuadrada, ahorra bytes
+        // vs la 1600×730 default.
+        imageUrl: fenderImageUrl('ebony-black', '01', '400x183'),
+      },
+      {
+        id: 'halo-metallic',
+        label: 'Halo Metallic',
+        hex: '#B8B5A8',
+        imageUrl: fenderImageUrl('halo-metallic', '01', '400x183'),
+      },
+    ],
   },
   {
     id: PRODUCTS[6].id,
@@ -327,6 +389,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     currency: PRODUCTS[6].currency ?? 'USD',
     imageUrl: PRODUCTS[6].imageUrl,
     badges: PRODUCTS[6].badges,
+    vendor: 'Studio Ghibli',
+    finish: '30 cm',
+    variantsCount: 1,
   },
   {
     id: PRODUCTS[2].id,
@@ -336,6 +401,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     currency: PRODUCTS[2].currency ?? 'USD',
     imageUrl: PRODUCTS[2].imageUrl,
     badges: PRODUCTS[2].badges,
+    vendor: 'Good Smile Company',
+    finish: '10 cm',
+    variantsCount: 1,
   },
 ];
 
@@ -356,7 +424,7 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
 function fenderImageUrl(
   variant: 'ebony-black' | 'halo-metallic',
   index: string,
-  size: '1600x730' | '1200x547' | '800x365' | '400x183' = '1600x730',
+  size: '1600x730' | '1200x547' | '800x365' | '400x183' = '1600x730'
 ): string {
   return `/images/products/fender-player-fusion-bass-hh/${variant}/fender-player-fusion-bass-hh-${variant}-${size}-${index}.webp`;
 }
@@ -388,7 +456,9 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
   hasSizes: false,
   images: [
     ...['01', '02', '03', '04', '05'].map((idx) => fenderImageUrl('ebony-black', idx, '1600x730')),
-    ...['01', '02', '03', '04', '05'].map((idx) => fenderImageUrl('halo-metallic', idx, '1600x730')),
+    ...['01', '02', '03', '04', '05'].map((idx) =>
+      fenderImageUrl('halo-metallic', idx, '1600x730')
+    ),
   ],
   variantAttributes: [
     [
@@ -519,7 +589,7 @@ export const FENDER_PLAYER_FUSION_BASS_DETAIL: ProductDetailData = {
       createdAt: '2026-09-10',
       rating: 5,
       title: 'Sonido brutal',
-      body: 'Las pastillas Custombucker suenan increíbles. Mucho más cálidas que las de fábrica del heavy\'ed anterior que tenía.',
+      body: "Las pastillas Custombucker suenan increíbles. Mucho más cálidas que las de fábrica del heavy'ed anterior que tenía.",
       verified: true,
       likesCount: 22,
       likedByCurrentUser: false,
@@ -613,7 +683,8 @@ export const FENDER_BUNDLE_ITEMS = [
   {
     product: {
       ...FENDER_PLAYER_FUSION_BASS_DETAIL,
-      imageUrl: '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
+      imageUrl:
+        '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
     } as ProductDetailData,
     position: 1,
   },
@@ -637,7 +708,7 @@ export const FENDER_BUNDLE_ITEMS = [
     product: {
       id: 9102,
       slug: 'fender-monster-cable-18-6',
-      name: 'Fender Monster Cable 18.6\'',
+      name: "Fender Monster Cable 18.6'",
       description: 'Cable profesional para instrumentos de 6 metros.',
       priceCents: 4900,
       compareAtPriceCents: undefined,

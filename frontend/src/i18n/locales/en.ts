@@ -458,8 +458,7 @@ const en: Translations = {
   'admin.sales.orders.v3.filters.dateToLabel': 'To',
   'admin.sales.orders.v3.filters.apply': 'Apply filters',
   'admin.sales.orders.v3.filters.clear': 'Clear',
-  'admin.sales.orders.v3.filters.visualOnlyHint':
-    'Filters apply on page reload.',
+  'admin.sales.orders.v3.filters.visualOnlyHint': 'Filters apply on page reload.',
   'admin.sales.orders.v3.bulk.selected': '{count} selected',
   'admin.sales.orders.v3.bulk.export': 'Export CSV',
   'admin.sales.orders.v3.bulk.markShipped': 'Mark as shipped',
@@ -477,8 +476,7 @@ const en: Translations = {
   'admin.sales.orders.v3.edit': 'Edit',
   'admin.sales.orders.v3.refund': 'Refund',
   'admin.sales.orders.v3.empty': 'No orders match your filters.',
-  'admin.sales.orders.v3.emptyHint':
-    'Try clearing filters or adjusting the date range.',
+  'admin.sales.orders.v3.emptyHint': 'Try clearing filters or adjusting the date range.',
   'admin.sales.orders.v3.refresh': 'Refresh',
   'admin.sales.orders.v3.pagination.label': 'Orders pagination',
   'admin.sales.orders.v3.pagination.previous': 'Previous',
@@ -687,7 +685,8 @@ const en: Translations = {
   // B2B Panda — Bonfire gap: TrustedBy (new section)
   'storefront.b2b.home.trustedBy.eyebrow': 'Trusted by our customers',
   'storefront.b2b.home.trustedBy.heading': 'Brands that print with us',
-  'storefront.b2b.home.trustedBy.subheading': 'Shops, schools, teams, and NGOs that trust Panda Estampados',
+  'storefront.b2b.home.trustedBy.subheading':
+    'Shops, schools, teams, and NGOs that trust Panda Estampados',
   'storefront.b2b.home.trustedBy.persona.comercios': 'Shops',
   'storefront.b2b.home.trustedBy.persona.escuelas': 'Schools',
   'storefront.b2b.home.trustedBy.persona.equipos': 'Teams',
@@ -708,8 +707,7 @@ const en: Translations = {
 
   // B2B Panda — Bonfire gap: ProcessSteps
   'storefront.b2b.home.process.heading': 'How it works',
-  'storefront.b2b.home.process.subheading':
-    'From the initial quote to delivery, in four steps',
+  'storefront.b2b.home.process.subheading': 'From the initial quote to delivery, in four steps',
   'storefront.b2b.home.process.step1.title': 'Get a quote',
   'storefront.b2b.home.process.step1.description':
     'Send us your design or idea and we will respond in under 24 hours with a detailed quote.',
@@ -730,8 +728,7 @@ const en: Translations = {
 
   // B2B Panda — Bonfire gap: CustomerStories
   'storefront.b2b.home.stories.heading': 'What our clients say',
-  'storefront.b2b.home.stories.subheading':
-    'Real B2B print stories with verifiable numbers',
+  'storefront.b2b.home.stories.subheading': 'Real B2B print stories with verifiable numbers',
 
   // B2B Panda — Bonfire gap: FaqAccordion
   'storefront.b2b.home.faq.heading': 'Frequently asked questions',
@@ -757,8 +754,7 @@ const en: Translations = {
   'storefront.b2b.home.materials.body':
     'We work with certified textiles and eco-friendly inks. Every order ships with a technical sheet covering material origin and certifications.',
   'storefront.b2b.home.materials.feature1.label': 'Organic cotton',
-  'storefront.b2b.home.materials.feature1.description':
-    'GOTS certified, pesticide free.',
+  'storefront.b2b.home.materials.feature1.description': 'GOTS certified, pesticide free.',
   'storefront.b2b.home.materials.feature2.label': 'Eco-friendly inks',
   'storefront.b2b.home.materials.feature2.description':
     'Water-based, no phthalates or heavy metals.',
@@ -989,6 +985,9 @@ const en: Translations = {
   'storefront.productDetail.reviews.starAlt': '{count} stars',
   'storefront.productDetail.related.heading': 'You may also like',
   'storefront.productDetail.related.empty': 'No related products.',
+  'storefront.productDetail.related.prev': 'Previous',
+  'storefront.productDetail.related.next': 'Next',
+  'storefront.productDetail.related.variantsLabel': '{count} finishes',
 
   // ─── storefront: product detail v3 (Bonfire mockup 05) ──────────────
   'storefront.products.detail.v3.breadcrumb': 'Products',
@@ -1017,7 +1016,6 @@ const en: Translations = {
   'storefront.products.detail.v4.shipping.heading': 'Shipping & Returns',
   'storefront.products.detail.v4.details.introLabel': 'Tech & specs',
   'storefront.products.detail.v4.details.specsHeading': 'Tech specs',
-  'storefront.products.detail.v4.features.heading': 'Features',
   'storefront.products.detail.v4.highlights.heading': 'Highlights',
   'storefront.products.detail.v4.specsByCategory.heading': 'Specifications',
   'storefront.products.detail.v4.inclusions.tuning': 'Free setup included',
@@ -1036,6 +1034,8 @@ const en: Translations = {
   'storefront.products.detail.v4.reviews.showLess': 'Show less',
   'storefront.products.detail.v4.reviews.filterAll': 'All',
   'storefront.products.detail.v4.reviews.filterByRating': 'Filter by',
+  'storefront.products.detail.v4.reviews.collapse': 'Collapse reviews',
+  'storefront.products.detail.v4.reviews.expand': 'Expand reviews',
   'storefront.products.detail.v4.reviews.like': 'Like',
   'storefront.products.detail.v4.reviews.unlike': 'Unlike',
   'storefront.products.detail.v4.reviews.loginRequired': 'Log in to like this review',
@@ -1047,8 +1047,7 @@ const en: Translations = {
     'Official manufacturer lifetime warranty on every Custom Shop instrument.',
   'storefront.products.detail.v4.financing.syncLine':
     'Interest-free. $223/mo with 36-month financing. Learn how',
-  'storefront.products.detail.v4.financing.shopPay':
-    'From $721.98/mo with Shop Pay. ?',
+  'storefront.products.detail.v4.financing.shopPay': 'From $721.98/mo with Shop Pay. ?',
   'storefront.products.detail.v4.financing.learnMore': 'Learn how',
   'storefront.products.detail.v4.featuredArticle.cta': 'Read article',
 
@@ -1296,8 +1295,7 @@ const en: Translations = {
   // ─── account: dashboard (F5.5 Bonfire-style mockup) ─────────────────
   // Header greeting block — eyebrow + company line + 2 CTAs.
   'account.dashboard.heading.eyebrow': 'Customer dashboard',
-  'account.dashboard.heading.companyLine':
-    'Company · {company} · {count} orders this year',
+  'account.dashboard.heading.companyLine': 'Company · {company} · {count} orders this year',
   'account.dashboard.heading.actionDownloadInvoices': 'Download invoices',
   'account.dashboard.heading.actionNewOrder': 'New order',
 
@@ -1310,17 +1308,13 @@ const en: Translations = {
 
   // Quick actions — 4 cards grid (replaces the 5-pill inline bar).
   'account.dashboard.quickActionsCards.rfqTitle': 'Request a quote',
-  'account.dashboard.quickActionsCards.rfqDescription':
-    'Create an RFQ and we reply within 24h',
+  'account.dashboard.quickActionsCards.rfqDescription': 'Create an RFQ and we reply within 24h',
   'account.dashboard.quickActionsCards.addressesTitle': 'Addresses',
-  'account.dashboard.quickActionsCards.addressesDescription':
-    'Manage where we ship your orders',
+  'account.dashboard.quickActionsCards.addressesDescription': 'Manage where we ship your orders',
   'account.dashboard.quickActionsCards.helpTitle': 'Help',
-  'account.dashboard.quickActionsCards.helpDescription':
-    'Support center and guides',
+  'account.dashboard.quickActionsCards.helpDescription': 'Support center and guides',
   'account.dashboard.quickActionsCards.profileTitle': 'Profile',
-  'account.dashboard.quickActionsCards.profileDescription':
-    'Personal data, company and billing',
+  'account.dashboard.quickActionsCards.profileDescription': 'Personal data, company and billing',
 
   // Recent orders table — last 5 orders in semantic <table>.
   'account.dashboard.recentOrdersTable.heading': 'Recent orders',

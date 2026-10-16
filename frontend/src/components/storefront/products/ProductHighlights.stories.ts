@@ -24,21 +24,21 @@ const SAMPLE_ITEMS = [
 
 export const Default: Story = {
   args: {
-    heading: 'Highlights',
+    heading: 'Características destacadas',
     items: SAMPLE_ITEMS,
   },
 };
 
 export const Single: Story = {
   args: {
-    heading: 'Highlights',
+    heading: 'Características destacadas',
     items: [SAMPLE_ITEMS[0]],
   },
 };
 
 export const Empty: Story = {
   args: {
-    heading: 'Highlights',
+    heading: 'Características destacadas',
     items: [],
   },
 };

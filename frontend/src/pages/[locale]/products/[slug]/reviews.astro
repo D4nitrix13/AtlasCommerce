@@ -79,9 +79,7 @@ const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
 const totalPages = Math.max(1, Math.ceil(REVIEWS.length / REVIEWS_PER_PAGE));
 
 const category =
-  product !== null
-    ? (CATEGORIES.find((entry) => entry.slug === product.category) ?? null)
-    : null;
+  product !== null ? (CATEGORIES.find((entry) => entry.slug === product.category) ?? null) : null;
 
 const catalogHref = `/${locale}/products`;
 const productHref = `/${locale}/products/${product?.slug ?? ''}`;
@@ -90,9 +88,7 @@ const writeReviewHref = `${productHref}/reviews/new`;
 const averageRating = REVIEWS.length > 0 ? getAverageRating(REVIEWS) : 0;
 const reviewCount = REVIEWS.length;
 const highlyRated = reviewCount >= 5;
-const highlyRatedLabel = highlyRated
-  ? t['storefront.products.detail.v4.highlyRated']
-  : undefined;
+const highlyRatedLabel = highlyRated ? t['storefront.products.detail.v4.highlyRated'] : undefined;
 
 // Labels i18n para reseñas — mismo set que el componente principal
 // (slug.astro líneas 247-264). Las props vacías son intencionales: la
@@ -102,10 +98,7 @@ const reviewsLabels = {
   heading: t['storefront.productDetail.reviews.heading'],
   average: t['storefront.productDetail.reviews.average'],
   outOf: t['storefront.productDetail.reviews.outOf'],
-  count: t['storefront.productDetail.reviews.count'].replace(
-    '{count}',
-    String(reviewCount),
-  ),
+  count: t['storefront.productDetail.reviews.count'].replace('{count}', String(reviewCount)),
   write: t['storefront.products.detail.v4.writeReview'],
   viewAll: t['storefront.productDetail.reviews.viewAll'],
   empty: t['storefront.productDetail.reviews.empty'],
@@ -115,17 +108,24 @@ const reviewsLabels = {
   showLess: '',
   filterAll: '',
   filterByRating: '',
+  collapse: t['storefront.products.detail.v4.reviews.collapse'],
+  expand: t['storefront.products.detail.v4.reviews.expand'],
   like: t['storefront.products.detail.v4.reviews.like'],
   unlike: t['storefront.products.detail.v4.reviews.unlike'],
   loginRequired: t['storefront.products.detail.v4.reviews.loginRequired'],
 };
 ---
 
-<StorefrontLayout title={`${t['storefront.productDetail.reviews.heading']} — ${product?.name ?? ''}`}>
-  <main class="bg-slate-50">
+<StorefrontLayout
+  title={`${t['storefront.productDetail.reviews.heading']} — ${product?.name ?? ''}`}
+>
+  <main class="bg-slate-50" data-product-slug={product?.slug ?? 'unknown'}>
     <section class="mx-auto w-full max-w-[900px] px-4 py-6 sm:px-6 sm:py-8">
       {/* Breadcrumb: Productos / [Producto] / Reseñas */}
-      <nav aria-label="breadcrumb" class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+      <nav
+        aria-label="breadcrumb"
+        class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500"
+      >
         <a href={catalogHref} class="transition hover:text-slate-700">
           {t['storefront.products.detail.v3.breadcrumb']}
         </a>
@@ -179,7 +179,10 @@ const reviewsLabels = {
           {/* Paginación server-side si >20 reseñas. Cosmetic-only por ahora
               (REVIEWS pasa todas al componente); ver nota en frontmatter. */}
           {totalPages > 1 && (
-            <nav aria-label="Paginación de reseñas" class="flex items-center justify-center gap-2 pt-4">
+            <nav
+              aria-label="Paginación de reseñas"
+              class="flex items-center justify-center gap-2 pt-4"
+            >
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                 <a
                   href={`${productHref}/reviews?page=${p}`}

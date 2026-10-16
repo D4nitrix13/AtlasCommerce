@@ -35,6 +35,10 @@ export interface ProductReviewsLabels {
   showLess: string;
   filterAll: string;
   filterByRating: string;
+  /** Aria-label del botón toggle cuando las reseñas están expandidas (i18n). */
+  collapse: string;
+  /** Aria-label del botón toggle cuando las reseñas están colapsadas (i18n). */
+  expand: string;
   /** Texto del botón like en estado no-liked. */
   like?: string;
   /** Texto del botón like en estado liked (click para quitar). */
@@ -159,196 +163,260 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
         <p class="text-sm text-slate-500">{labels.empty}</p>
       )}
     </div>
-    <a
-      href={writeHref}
-      class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-    >
-      {labels.write}
-    </a>
-  </header>
-
-  {/* Filter chips por rating */}
-  {showFilterChips && hasReviews && (
-    <div class="flex flex-wrap items-center gap-2" role="group" aria-label={labels.filterByRating}>
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">
-        {labels.filterByRating}:
-      </span>
-      <button
-        type="button"
-        data-reviews-filter="all"
-        aria-pressed="true"
-        data-active="true"
-        class:list={[
-          'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-          'data-[active=true]:border-[var(--primary,#475569)] data-[active=true]:bg-[var(--primary,#475569)]/5 data-[active=true]:text-[var(--primary,#475569)]',
-        ]}
-      >
-        {labels.filterAll} <span class="opacity-70">({reviewCount})</span>
-      </button>
-      {ratingCounts.map(({ stars, count }) => (
+    <div class="flex items-center gap-2">
+      {hasReviews && (
         <button
           type="button"
-          data-reviews-filter={stars}
-          aria-pressed="false"
-          disabled={count === 0}
+          data-reviews-collapse-toggle
+          data-label-collapse={labels.collapse}
+          data-label-expand={labels.expand}
+          aria-expanded="true"
+          aria-controls="reviews-body"
+          aria-label={labels.collapse}
+          title={labels.collapse}
+          class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-4 w-4 transition-transform duration-200"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+      )}
+      <a
+        href={writeHref}
+        class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+      >
+        {labels.write}
+      </a>
+    </div>
+  </header>
+
+  <div id="reviews-body" data-reviews-body class="flex flex-col gap-6">
+    {/*
+      Hidratación inicial sin flash: si el usuario colapsó las reseñas
+      antes en este tab, aplicamos el estado collapsed ANTES del primer
+      paint. `is:inline` garantiza que el script se ejecute sincronamente
+      al ser parseado (no se bundlea como module).
+
+      El script module posterior (`setupReviewsCollapse`) re-aplica el
+      estado al mismo valor desde sessionStorage — idempotente.
+    */}
+    <script is:inline>
+      (function () {
+        try {
+          var slug =
+            document.querySelector('[data-product-slug]')?.getAttribute('data-product-slug') ??
+            'default';
+          if (sessionStorage.getItem('pdp-reviews-collapsed-' + slug) !== '1') return;
+          var body = document.querySelector('[data-reviews-body]');
+          var btn = document.querySelector('[data-reviews-collapse-toggle]');
+          if (body !== null) body.classList.add('hidden');
+          if (btn !== null) {
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-label', btn.dataset.labelExpand ?? 'Expandir reseñas');
+            btn.setAttribute('title', btn.dataset.labelExpand ?? 'Expandir reseñas');
+          }
+        } catch (_) {
+          /* sessionStorage inaccesible (modo privado, quota) */
+        }
+      })();
+    </script>
+    {/* Filter chips por rating */}
+    {showFilterChips && hasReviews && (
+      <div
+        class="flex flex-wrap items-center gap-2"
+        role="group"
+        aria-label={labels.filterByRating}
+      >
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          {labels.filterByRating}:
+        </span>
+        <button
+          type="button"
+          data-reviews-filter="all"
+          aria-pressed="true"
+          data-active="true"
           class:list={[
             'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
             'data-[active=true]:border-[var(--primary,#475569)] data-[active=true]:bg-[var(--primary,#475569)]/5 data-[active=true]:text-[var(--primary,#475569)]',
-            count === 0 && 'cursor-not-allowed opacity-50',
           ]}
         >
-          {stars}★ <span class="opacity-70">({count})</span>
+          {labels.filterAll} <span class="opacity-70">({reviewCount})</span>
         </button>
-      ))}
-    </div>
-  )}
-
-  {hasReviews && (
-    <ul
-      class="flex list-none flex-col gap-4 p-0"
-      role="list"
-      data-reviews-list
-    >
-      {reviews.map((review) => (
-        <li
-          class="flex flex-col gap-2 border-t border-slate-100 pt-4 first:border-t-0 first:pt-0"
-          data-review-rating={Math.floor(review.rating)}
-          data-review-index={reviews.indexOf(review)}
-        >
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-semibold text-slate-900">{review.authorName}</span>
-              {review.verified && (
-                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    class="h-3 w-3"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M4.5 12.75l6 6 9-13.5"
-                    />
-                  </svg>
-                  {labels.verified}
-                </span>
-              )}
-            </div>
-            <time class="text-xs text-slate-500" datetime={review.createdAt}>
-              {new Date(review.createdAt).toLocaleDateString('es-NI', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })}
-            </time>
-          </div>
-          <div
-            class="flex items-center gap-1"
-            role="img"
-            aria-label={labels.starAlt.replace('{count}', String(review.rating))}
+        {ratingCounts.map(({ stars, count }) => (
+          <button
+            type="button"
+            data-reviews-filter={stars}
+            aria-pressed="false"
+            disabled={count === 0}
+            class:list={[
+              'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+              'data-[active=true]:border-[var(--primary,#475569)] data-[active=true]:bg-[var(--primary,#475569)]/5 data-[active=true]:text-[var(--primary,#475569)]',
+              count === 0 && 'cursor-not-allowed opacity-50',
+            ]}
           >
-            {Array.from({ length: 5 }, (_, i) => (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill={i < review.rating ? '#facc15' : '#e2e8f0'}
-                stroke="currentColor"
-                stroke-width="0"
-                class="h-4 w-4 text-amber-400"
-                aria-hidden="true"
-              >
-                <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
-              </svg>
-            ))}
-          </div>
-          <h3 class="text-sm font-semibold text-slate-900">{review.title}</h3>
-          <div class="flex items-center gap-3 text-xs text-slate-500">
-            <button
-              type="button"
-              data-review-like={review.id}
-              data-liked={review.likedByCurrentUser ? 'true' : 'false'}
-              data-label-like={likeText}
-              data-label-unlike={unlikeText}
-              data-label-login-required={loginRequiredText}
-              aria-pressed={review.likedByCurrentUser ? 'true' : 'false'}
-              aria-label={review.likedByCurrentUser ? unlikeText : likeText}
-              class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 data-[liked=true]:border-pink-300 data-[liked=true]:bg-pink-50 data-[liked=true]:text-pink-700"
+            {stars}★ <span class="opacity-70">({count})</span>
+          </button>
+        ))}
+      </div>
+    )}
+
+    {hasReviews && (
+      <ul class="flex list-none flex-col gap-4 p-0" role="list" data-reviews-list>
+        {reviews.map((review) => (
+          <li
+            class="flex flex-col gap-2 border-t border-slate-100 pt-4 first:border-t-0 first:pt-0"
+            data-review-rating={Math.floor(review.rating)}
+            data-review-index={reviews.indexOf(review)}
+          >
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-slate-900">{review.authorName}</span>
+                {review.verified && (
+                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      class="h-3 w-3"
+                      aria-hidden="true"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M4.5 12.75l6 6 9-13.5"
+                      />
+                    </svg>
+                    {labels.verified}
+                  </span>
+                )}
+              </div>
+              <time class="text-xs text-slate-500" datetime={review.createdAt}>
+                {new Date(review.createdAt).toLocaleDateString('es-NI', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </time>
+            </div>
+            <div
+              class="flex items-center gap-1"
+              role="img"
+              aria-label={labels.starAlt.replace('{count}', String(review.rating))}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill={review.likedByCurrentUser ? 'currentColor' : 'none'}
-                stroke="currentColor"
-                stroke-width="2"
-                class="h-4 w-4"
-                aria-hidden="true"
+              {Array.from({ length: 5 }, (_, i) => (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill={i < review.rating ? '#facc15' : '#e2e8f0'}
+                  stroke="currentColor"
+                  stroke-width="0"
+                  class="h-4 w-4 text-amber-400"
+                  aria-hidden="true"
+                >
+                  <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
+                </svg>
+              ))}
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900">{review.title}</h3>
+            <div class="flex items-center gap-3 text-xs text-slate-500">
+              <button
+                type="button"
+                data-review-like={review.id}
+                data-liked={review.likedByCurrentUser ? 'true' : 'false'}
+                data-label-like={likeText}
+                data-label-unlike={unlikeText}
+                data-label-login-required={loginRequiredText}
+                aria-pressed={review.likedByCurrentUser ? 'true' : 'false'}
+                aria-label={review.likedByCurrentUser ? unlikeText : likeText}
+                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 data-[liked=true]:border-pink-300 data-[liked=true]:bg-pink-50 data-[liked=true]:text-pink-700"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-              </svg>
-              <span data-review-like-count>{review.likesCount}</span>
-            </button>
-            <span class="opacity-70" data-review-like-hint>
-              {review.likedByCurrentUser ? unlikeText : likeText}
-            </span>
-          </div>
-          <p class="text-sm leading-relaxed text-slate-700">{review.body}</p>
-        </li>
-      ))}
-    </ul>
-  )}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill={review.likedByCurrentUser ? 'currentColor' : 'none'}
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                  />
+                </svg>
+                <span data-review-like-count>{review.likesCount}</span>
+              </button>
+              <span class="opacity-70" data-review-like-hint>
+                {review.likedByCurrentUser ? unlikeText : likeText}
+              </span>
+            </div>
+            <p class="text-sm leading-relaxed text-slate-700">{review.body}</p>
+          </li>
+        ))}
+      </ul>
+    )}
 
-  {/* Cargar más / Ver menos */}
-  {showLoadMore && hasReviews && reviews.length > initialCount && (
-    <div class="flex items-center justify-center border-t border-slate-100 pt-4">
-      <button
-        type="button"
-        data-reviews-toggle
-        data-initial-count={initialCount}
-        class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-      >
-        <span data-reviews-label-show>{labels.loadMore}</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          class="h-4 w-4 transition-transform duration-200 group-aria-expanded:rotate-180"
-          aria-hidden="true"
+    {/* Cargar más / Ver menos */}
+    {showLoadMore && hasReviews && reviews.length > initialCount && (
+      <div class="flex items-center justify-center border-t border-slate-100 pt-4">
+        <button
+          type="button"
+          data-reviews-toggle
+          data-initial-count={initialCount}
+          class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
         >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-      </button>
-    </div>
-  )}
+          <span data-reviews-label-show>{labels.loadMore}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            class="h-4 w-4 transition-transform duration-200 group-aria-expanded:rotate-180"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+      </div>
+    )}
 
-  {showViewAll && hasReviews && reviews.length > 5 && (
-    <div class="border-t border-slate-100 pt-4">
-      <a
-        href={viewAllHref}
-        class="inline-flex items-center gap-1 text-sm font-semibold text-[var(--primary,#475569)] hover:underline"
-      >
-        {labels.viewAll}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          class="h-4 w-4"
-          aria-hidden="true"
+    {showViewAll && hasReviews && reviews.length > 5 && (
+      <div class="border-t border-slate-100 pt-4">
+        <a
+          href={viewAllHref}
+          class="inline-flex items-center gap-1 text-sm font-semibold text-[var(--primary,#475569)] hover:underline"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
-      </a>
-    </div>
-  )}
+          {labels.viewAll}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="h-4 w-4"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </a>
+      </div>
+    )}
+  </div>
 </section>
 
 <script>
@@ -361,9 +429,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
     const filterButtons = Array.from(
       root.querySelectorAll<HTMLButtonElement>('[data-reviews-filter]')
     );
-    const reviewItems = Array.from(
-      root.querySelectorAll<HTMLElement>('[data-review-rating]')
-    );
+    const reviewItems = Array.from(root.querySelectorAll<HTMLElement>('[data-review-rating]'));
     const toggleBtn = root.querySelector<HTMLButtonElement>('[data-reviews-toggle]');
 
     if (filterButtons.length === 0) return;
@@ -380,9 +446,12 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
         // Límite por "cargar más": solo aplica cuando NO está expandido
         const withinLimit = filter === 'all' || index < initialCount;
         // Cuando el filtro está activo (no 'all'), mostramos todas las que coincidan
-        const visible = filter === 'all'
-          ? (withinLimit ? !item.hidden : true) // all: depende del toggle
-          : matchesRating; // filtrado: solo las del rating
+        const visible =
+          filter === 'all'
+            ? withinLimit
+              ? !item.hidden
+              : true // all: depende del toggle
+            : matchesRating; // filtrado: solo las del rating
 
         if (filter === 'all') {
           // Restaurar comportamiento del toggle
@@ -427,7 +496,9 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
           const index = Number(item.dataset.reviewIndex ?? '-1');
           const isVisible = expanded || index < initialCount;
           // Solo aplicar si NO hay un filter activo
-          const activeFilterBtn = filterButtons.find((b) => b.getAttribute('aria-pressed') === 'true');
+          const activeFilterBtn = filterButtons.find(
+            (b) => b.getAttribute('aria-pressed') === 'true'
+          );
           if (activeFilterBtn?.dataset.reviewsFilter === 'all') {
             item.classList.toggle('hidden', !isVisible);
           }
@@ -443,9 +514,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
     }
   }
 
-  document
-    .querySelectorAll<HTMLElement>('[data-reviews]')
-    .forEach(setupReviewsFilter);
+  document.querySelectorAll<HTMLElement>('[data-reviews]').forEach(setupReviewsFilter);
 </script>
 
 <script>
@@ -471,9 +540,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
    *     reconcilia con el estado real.
    */
   function setupReviewLikes(root: HTMLElement): void {
-    const buttons = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('[data-review-like]')
-    );
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-review-like]'));
     const apiBase = root.dataset.apiBaseUrl ?? '/api/v1';
     const loginHref = root.dataset.loginHref ?? '/login';
 
@@ -496,13 +563,11 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
         // Cuando exista `customerAuthStore.getSnapshot().isAuthenticated`,
         // sustituir por esa fuente única de verdad.
         const hasAuth =
-          document.cookie.includes('sanctum_token') ||
-          localStorage.getItem('auth_token') !== null;
+          document.cookie.includes('sanctum_token') || localStorage.getItem('auth_token') !== null;
 
         if (!hasAuth) {
-          const hintElForLogin = btn.parentElement?.querySelector<HTMLElement>(
-            '[data-review-like-hint]'
-          );
+          const hintElForLogin =
+            btn.parentElement?.querySelector<HTMLElement>('[data-review-like-hint]');
           if (hintElForLogin !== null) {
             const redirect = encodeURIComponent(window.location.pathname);
             const originalText = hintElForLogin.textContent ?? '';
@@ -521,9 +586,8 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
         // El hint vive como sibling del botón (no dentro), para mantener
         // la jerarquía accesible del botón (no se anuncia el hint como
         // parte del nombre accesible). Buscamos desde el padre.
-        const hintEl = btn.parentElement?.querySelector<HTMLElement>(
-          '[data-review-like-hint]'
-        ) ?? null;
+        const hintEl =
+          btn.parentElement?.querySelector<HTMLElement>('[data-review-like-hint]') ?? null;
         const countEl = btn.querySelector<HTMLElement>('[data-review-like-count]');
         if (countEl === null) return;
 
@@ -538,18 +602,15 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
         if (hintEl !== null) hintEl.textContent = newAriaLabel;
 
         try {
-          const response = await fetch(
-            `${apiBase}/storefront/reviews/${reviewId}/like`,
-            {
-              method: wasLiked ? 'DELETE' : 'POST',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
-              },
-              credentials: 'same-origin',
-            }
-          );
+          const response = await fetch(`${apiBase}/storefront/reviews/${reviewId}/like`, {
+            method: wasLiked ? 'DELETE' : 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
+            },
+            credentials: 'same-origin',
+          });
 
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -584,7 +645,89 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
     });
   }
 
-  document
-    .querySelectorAll<HTMLElement>('[data-reviews]')
-    .forEach(setupReviewLikes);
+  document.querySelectorAll<HTMLElement>('[data-reviews]').forEach(setupReviewLikes);
+</script>
+
+<script>
+  /**
+   * ProductReviews — botón colapsable que muestra/oculta el cuerpo de la
+   * sección (filtros + lista + "Cargar más" + "Ver todas").
+   *
+   * Estado inicial: expandido (definido por el `aria-expanded="true"` que
+   * renderea Astro en el server). El JS sincroniza el aria-label y rota
+   * el chevron al togglear.
+   *
+   * Persistencia: sessionStorage por slug de producto. Mismo patrón que
+   * `ProductSpecificationsByCategory` (session-scoped, no persistente
+   * entre visitas). El colapsar reseñas es un toggle efímero de UI — no
+   * tiene sentido recordarlo después de cerrar la pestaña.
+   *
+   * Limitación conocida: hay un flash de re-paint en el primer load
+   * cuando el usuario había colapsado antes (server renderea expandido,
+   * JS lo oculta). Aceptable para esta iteración; eliminarlo requeriría
+   * leer el storage en SSR (Astro.cookies) o un inline-script bloqueante
+   * en el head. Decidí no hacerlo para mantener el cambio contenido.
+   *
+   * Decisión: el wrapper usa `class="hidden"` (display:none) — sin
+   * animación. KISS. Si el usuario pide transición suave en una iteración
+   * futura, cambiar a CSS grid trick o max-height.
+   */
+  function setupReviewsCollapse(root: HTMLElement): void {
+    const toggleBtn = root.querySelector<HTMLButtonElement>('[data-reviews-collapse-toggle]');
+    const body = root.querySelector<HTMLElement>('[data-reviews-body]');
+    if (toggleBtn === null || body === null) return;
+
+    const labelCollapse = toggleBtn.dataset.labelCollapse ?? 'Colapsar reseñas';
+    const labelExpand = toggleBtn.dataset.labelExpand ?? 'Expandir reseñas';
+    const chevron = toggleBtn.querySelector<SVGElement>('svg');
+
+    // Slug del producto vía atributo del <main> que pone slug.astro.
+    // Mismo patrón que `ProductSpecificationsByCategory`.
+    const slug =
+      document.querySelector('[data-product-slug]')?.getAttribute('data-product-slug') ?? 'default';
+    const STORAGE_KEY = `pdp-reviews-collapsed-${slug}`;
+
+    const readPersisted = (): boolean => {
+      try {
+        return sessionStorage.getItem(STORAGE_KEY) === '1';
+      } catch {
+        return false;
+      }
+    };
+
+    const persistState = (collapsed: boolean): void => {
+      try {
+        if (collapsed) {
+          sessionStorage.setItem(STORAGE_KEY, '1');
+        } else {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+      } catch {
+        /* sessionStorage inaccesible (modo privado, quota) */
+      }
+    };
+
+    const applyState = (expanded: boolean, persist: boolean): void => {
+      toggleBtn.setAttribute('aria-expanded', String(expanded));
+      toggleBtn.setAttribute('aria-label', expanded ? labelCollapse : labelExpand);
+      toggleBtn.setAttribute('title', expanded ? labelCollapse : labelExpand);
+      body.classList.toggle('hidden', !expanded);
+      if (chevron !== null) {
+        chevron.classList.toggle('rotate-180', expanded);
+      }
+      if (persist) persistState(!expanded);
+    };
+
+    // Estado inicial: expandido por default, salvo que sessionStorage
+    // diga que el usuario lo colapsó antes en este tab.
+    const storedCollapsed = readPersisted();
+    applyState(!storedCollapsed, false);
+
+    toggleBtn.addEventListener('click', () => {
+      const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      applyState(!isExpanded, true);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-reviews]').forEach(setupReviewsCollapse);
 </script>

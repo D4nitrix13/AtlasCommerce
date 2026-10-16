@@ -1716,6 +1716,9 @@ export type TranslationKey =
   | 'storefront.productDetail.reviews.starAlt'
   | 'storefront.productDetail.related.heading'
   | 'storefront.productDetail.related.empty'
+  | 'storefront.productDetail.related.prev'
+  | 'storefront.productDetail.related.next'
+  | 'storefront.productDetail.related.variantsLabel'
 
   // ─── storefront: product detail v3 (Bonfire mockup 05) ──────────────
   | 'storefront.products.detail.v3.breadcrumb'
@@ -1744,7 +1747,6 @@ export type TranslationKey =
   | 'storefront.products.detail.v4.shipping.heading'
   | 'storefront.products.detail.v4.details.introLabel'
   | 'storefront.products.detail.v4.details.specsHeading'
-  | 'storefront.products.detail.v4.features.heading'
   | 'storefront.products.detail.v4.highlights.heading'
   | 'storefront.products.detail.v4.specsByCategory.heading'
   | 'storefront.products.detail.v4.inclusions.tuning'
@@ -1763,6 +1765,8 @@ export type TranslationKey =
   | 'storefront.products.detail.v4.reviews.showLess'
   | 'storefront.products.detail.v4.reviews.filterAll'
   | 'storefront.products.detail.v4.reviews.filterByRating'
+  | 'storefront.products.detail.v4.reviews.collapse'
+  | 'storefront.products.detail.v4.reviews.expand'
   | 'storefront.products.detail.v4.reviews.like'
   | 'storefront.products.detail.v4.reviews.unlike'
   | 'storefront.products.detail.v4.reviews.loginRequired'

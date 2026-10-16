@@ -459,8 +459,7 @@ const es: Translations = {
   'admin.sales.orders.v3.filters.dateToLabel': 'Hasta',
   'admin.sales.orders.v3.filters.apply': 'Aplicar filtros',
   'admin.sales.orders.v3.filters.clear': 'Limpiar',
-  'admin.sales.orders.v3.filters.visualOnlyHint':
-    'Los filtros se aplican al recargar la página.',
+  'admin.sales.orders.v3.filters.visualOnlyHint': 'Los filtros se aplican al recargar la página.',
   'admin.sales.orders.v3.bulk.selected': '{count} seleccionados',
   'admin.sales.orders.v3.bulk.export': 'Exportar CSV',
   'admin.sales.orders.v3.bulk.markShipped': 'Marcar como enviado',
@@ -478,8 +477,7 @@ const es: Translations = {
   'admin.sales.orders.v3.edit': 'Editar',
   'admin.sales.orders.v3.refund': 'Reembolso',
   'admin.sales.orders.v3.empty': 'No hay órdenes que coincidan con los filtros.',
-  'admin.sales.orders.v3.emptyHint':
-    'Probá limpiar los filtros o modificar el rango de fechas.',
+  'admin.sales.orders.v3.emptyHint': 'Probá limpiar los filtros o modificar el rango de fechas.',
   'admin.sales.orders.v3.refresh': 'Refrescar',
   'admin.sales.orders.v3.pagination.label': 'Paginación de órdenes',
   'admin.sales.orders.v3.pagination.previous': 'Anterior',
@@ -689,7 +687,8 @@ const es: Translations = {
   // B2B Panda — Bonfire gap: TrustedBy (sección nueva)
   'storefront.b2b.home.trustedBy.eyebrow': 'Lo que dicen nuestros clientes',
   'storefront.b2b.home.trustedBy.heading': 'Marcas que estampan con nosotros',
-  'storefront.b2b.home.trustedBy.subheading': 'Comercios, escuelas, equipos y ONGs que confían en Panda Estampados',
+  'storefront.b2b.home.trustedBy.subheading':
+    'Comercios, escuelas, equipos y ONGs que confían en Panda Estampados',
   'storefront.b2b.home.trustedBy.persona.comercios': 'Comercios',
   'storefront.b2b.home.trustedBy.persona.escuelas': 'Escuelas',
   'storefront.b2b.home.trustedBy.persona.equipos': 'Equipos',
@@ -759,8 +758,7 @@ const es: Translations = {
   'storefront.b2b.home.materials.body':
     'Trabajamos con textiles certificados y tintas ecológicas. Cada pedido incluye ficha técnica con origen de materiales y certificaciones.',
   'storefront.b2b.home.materials.feature1.label': 'Algodón orgánico',
-  'storefront.b2b.home.materials.feature1.description':
-    'Certificado GOTS, libre de pesticidas.',
+  'storefront.b2b.home.materials.feature1.description': 'Certificado GOTS, libre de pesticidas.',
   'storefront.b2b.home.materials.feature2.label': 'Tintas eco-friendly',
   'storefront.b2b.home.materials.feature2.description':
     'Base agua, sin ftalatos ni metales pesados.',
@@ -992,6 +990,9 @@ const es: Translations = {
   'storefront.productDetail.reviews.starAlt': '{count} estrellas',
   'storefront.productDetail.related.heading': 'También te puede interesar',
   'storefront.productDetail.related.empty': 'Sin productos relacionados.',
+  'storefront.productDetail.related.prev': 'Anterior',
+  'storefront.productDetail.related.next': 'Siguiente',
+  'storefront.productDetail.related.variantsLabel': '{count} acabados',
 
   // ─── storefront: product detail v3 (Bonfire mockup 05) ──────────────
   'storefront.products.detail.v3.breadcrumb': 'Productos',
@@ -1020,8 +1021,7 @@ const es: Translations = {
   'storefront.products.detail.v4.shipping.heading': 'Envío y devoluciones',
   'storefront.products.detail.v4.details.introLabel': 'Tecnología y especificaciones',
   'storefront.products.detail.v4.details.specsHeading': 'Ficha técnica',
-  'storefront.products.detail.v4.features.heading': 'Características',
-  'storefront.products.detail.v4.highlights.heading': 'Highlights',
+  'storefront.products.detail.v4.highlights.heading': 'Características destacadas',
   'storefront.products.detail.v4.specsByCategory.heading': 'Especificaciones',
   'storefront.products.detail.v4.inclusions.tuning': 'Ajuste incluido',
   'storefront.products.detail.v4.inclusions.case': 'Estuche incluido',
@@ -1040,6 +1040,8 @@ const es: Translations = {
   'storefront.products.detail.v4.reviews.showLess': 'Ver menos',
   'storefront.products.detail.v4.reviews.filterAll': 'Todas',
   'storefront.products.detail.v4.reviews.filterByRating': 'Filtrar por',
+  'storefront.products.detail.v4.reviews.collapse': 'Colapsar reseñas',
+  'storefront.products.detail.v4.reviews.expand': 'Expandir reseñas',
   'storefront.products.detail.v4.reviews.like': 'Me gusta',
   'storefront.products.detail.v4.reviews.unlike': 'Quitar me gusta',
   'storefront.products.detail.v4.reviews.loginRequired': 'Inicia sesión para dar me gusta',
@@ -1051,8 +1053,7 @@ const es: Translations = {
     'Garantía oficial del fabricante de por vida en todos los instrumentos Custom Shop.',
   'storefront.products.detail.v4.financing.syncLine':
     'Sin intereses. $223/mes con financiamiento a 36 meses. Saber más',
-  'storefront.products.detail.v4.financing.shopPay':
-    'Desde $721.98/mes con Shop Pay. ?',
+  'storefront.products.detail.v4.financing.shopPay': 'Desde $721.98/mes con Shop Pay. ?',
   'storefront.products.detail.v4.financing.learnMore': 'Saber más',
   'storefront.products.detail.v4.featuredArticle.cta': 'Leer artículo',
 
@@ -1301,8 +1302,7 @@ const es: Translations = {
   // ─── account: dashboard (F5.5 Bonfire-style mockup) ─────────────────
   // Header greeting block — eyebrow + company line + 2 CTAs.
   'account.dashboard.heading.eyebrow': 'Panel de cliente',
-  'account.dashboard.heading.companyLine':
-    'Empresa · {company} · {count} pedidos este año',
+  'account.dashboard.heading.companyLine': 'Empresa · {company} · {count} pedidos este año',
   'account.dashboard.heading.actionDownloadInvoices': 'Descargar facturas',
   'account.dashboard.heading.actionNewOrder': 'Nuevo pedido',
 
@@ -1315,17 +1315,13 @@ const es: Translations = {
 
   // Quick actions — 4 cards grid (replaces the 5-pill inline bar).
   'account.dashboard.quickActionsCards.rfqTitle': 'Pedir cotización',
-  'account.dashboard.quickActionsCards.rfqDescription':
-    'Crea un RFQ y te respondemos en 24h',
+  'account.dashboard.quickActionsCards.rfqDescription': 'Crea un RFQ y te respondemos en 24h',
   'account.dashboard.quickActionsCards.addressesTitle': 'Direcciones',
-  'account.dashboard.quickActionsCards.addressesDescription':
-    'Gestioná dónde enviamos tus pedidos',
+  'account.dashboard.quickActionsCards.addressesDescription': 'Gestioná dónde enviamos tus pedidos',
   'account.dashboard.quickActionsCards.helpTitle': 'Ayuda',
-  'account.dashboard.quickActionsCards.helpDescription':
-    'Centro de soporte y guías',
+  'account.dashboard.quickActionsCards.helpDescription': 'Centro de soporte y guías',
   'account.dashboard.quickActionsCards.profileTitle': 'Perfil',
-  'account.dashboard.quickActionsCards.profileDescription':
-    'Datos, empresa y facturación',
+  'account.dashboard.quickActionsCards.profileDescription': 'Datos, empresa y facturación',
 
   // Recent orders table — last 5 orders in semantic <table>.
   'account.dashboard.recentOrdersTable.heading': 'Últimas órdenes',

@@ -26,7 +26,6 @@ const SAMPLE_INTRO = `<p>Construida en Corona (California), la Stratocaster Amer
 
 export const Default: Story = {
   args: {
-    introLabel: 'Tecnología y especificaciones',
     intro: SAMPLE_INTRO,
     specs: SAMPLE_SPECS,
     specsHeading: 'Ficha técnica',
@@ -35,7 +34,6 @@ export const Default: Story = {
 
 export const Loading: Story = {
   args: {
-    introLabel: 'Cargando…',
     intro: '<p>Cargando detalles del instrumento.</p>',
     specs: [],
   },
@@ -43,7 +41,6 @@ export const Loading: Story = {
 
 export const Empty: Story = {
   args: {
-    introLabel: 'Tecnología y especificaciones',
     intro: '<p>El fabricante no publicó descripción extendida para este instrumento.</p>',
     specs: [],
   },
