@@ -155,7 +155,6 @@ const items: RenderableItem[] = products.map((product) => ({
                 decoding="async"
                 class:list={[
                   'card__img card__img--default absolute inset-0 h-full w-full object-contain',
-                  product.rotateImage === true && 'card__img--rotated',
                 ]}
               />
 
@@ -173,10 +172,7 @@ const items: RenderableItem[] = products.map((product) => ({
                     decoding="async"
                     aria-hidden="true"
                     data-variant-id={variant.id}
-                    class:list={[
-                      'card__img card__img--variant absolute inset-0 h-full w-full object-contain',
-                      product.rotateImage === true && 'card__img--rotated',
-                    ]}
+                    class="card__img card__img--variant absolute inset-0 h-full w-full object-contain"
                   />
                 ) : null
               )}
@@ -260,35 +256,20 @@ const items: RenderableItem[] = products.map((product) => ({
 
 <style>
   /**
-   * Crossfade entre las dos imágenes de la card al hacer hover sobre
-   * el `<article>`. La imagen default (back/alternate) está visible al
-   * cargar; la imagen secundaria (front) hace fade in en hover.
-   *
-   * Por qué :hover (no JS):
-   *   - Sin estado a sincronizar con React/Store.
-   *   - Transición GPU-friendly (sólo opacity, no transform).
-   *   - Funciona con teclado (focus-within) y mouse por igual.
-   *
-   * Por qué focus-within además de :hover:
-   *   - Cuando un screen reader o teclado tabula al `<a>` del card,
-   *     la imagen debe hacer fade in también (no sólo mouse hover).
-   *
-   * Rotación 90°:
-   *   - Las imágenes fuente son landscape (1600×730 = 2.19:1).
-   *   - Sin rotación, una guitarra se ve horizontal — el contenedor
-   *     cuadrado deja mucho padding arriba/abajo.
-   *   - `rotate(90deg)` (clockwise) la pone vertical con la pala
-   *     (clavijero) ARRIBA y el body abajo — orientación canónica
-   *     de un instrumento sostenido en pie.
-   *   - Aplicamos a AMBAS imágenes (default + hover) para que el
-   *     crossfade no muestre una rotación intermedia en la transición.
-   *   - `object-fit: cover` recorta lo que sobra de la imagen rotada
-   *     (que ahora es más alta que ancha en el contenedor cuadrado).
-   */
-  .card__img--rotated {
-    transform: rotate(90deg);
-    transform-origin: center center;
-  }
+     * Crossfade de imágenes de la card:
+     *   - Default (`imageUrl`): siempre opacity:1 al cargar.
+     *   - Variantes (`variants[].imageUrl`): una imagen por color, todas
+     *     opacity:0. Cuando el JS recibe hover de un swatch, setea
+     *     `data-active-variant` en el `<article>` con el id de la
+     *     variante — la CSS hace match con [data-variant-id] y muestra
+     *     SÓLO esa variante, ocultando default + las otras variantes.
+     *
+     * Sin rotación: las imágenes reales de Gibson/Fender ya vienen
+     * correctamente orientadas (square 1:1 Gibson, landscape
+     * 3:1 Fender AmPro). El componente usa `object-contain` en
+     * su contenedor `aspect-square`, así que cualquier aspect encaja
+     * sin hacks de CSS.
+     */
   .card__img--default {
     opacity: 1;
     transition: opacity 250ms ease;
@@ -301,8 +282,8 @@ const items: RenderableItem[] = products.map((product) => ({
   }
 
   /* Cuando hay variante activa: oculta default + todas las variantes.
-     Las reglas "show this variant X" se generan dinámicamente
-     por variante abajo (ver comentario en el JSX del loop). */
+       Las reglas "show this variant X" se generan dinámicamente
+       por variante abajo (ver comentario en el JSX del loop). */
   article[data-active-variant] .card__img--default {
     opacity: 0;
   }

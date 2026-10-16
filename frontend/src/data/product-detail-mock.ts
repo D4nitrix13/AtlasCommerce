@@ -129,16 +129,6 @@ export interface RelatedProduct {
   finish?: string;
   /** Cantidad de variantes disponibles (mostrado como "5 acabados"). */
   variantsCount?: number;
-/**
-   * Si `true`, la imagen se rota -90° para mostrar el instrumento en
-   * vertical (body arriba, pala abajo). Pensado para productos como
-   * guitarras/bajos cuyas fotos fuente son landscape pero el sujeto es
-   * vertical — en una card cuadrada se verían con mucho padding.
-   *
-   * NO aplicar a placeholders, figuras, ni productos cuyo sujeto NO
-   * sea vertical. Default: false (no se rota).
-   */
-  rotateImage?: boolean;
   /**
    * Variantes del producto (mostradas como swatches/bolitas de color).
    *
@@ -351,14 +341,8 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: PRODUCTS[1].priceCents,
     currency: PRODUCTS[1].currency ?? 'USD',
     imageUrl: PRODUCTS[1].imageUrl,
-    // Segunda imagen para hover-swap (vista alternativa del producto).
-    // En este mock usamos otra toma de la galería como "back/alternate".
-    imageUrlSecondary:
-      '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-400x183-02.webp',
-    // El bajo es vertical pero la foto fuente es landscape — rotamos
-    // la card para que el instrumento se vea parado (body arriba, pala
-    // abajo) sin padding lateral excesivo.
-    rotateImage: true,
+    // Otra toma de la galería (_02) — preview en hover.
+    imageUrlSecondary: fenderImageUrl('ebony-black', '02', '400x183'),
     badges: PRODUCTS[1].badges,
     vendor: 'Fender',
     finish: 'Ultra Heavy Aged',
@@ -368,8 +352,6 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
         id: 'ebony-black',
         label: 'Ebony Black',
         hex: '#0F0F0F',
-        // 400×183 thumbnail — suficiente para card cuadrada, ahorra bytes
-        // vs la 1600×730 default.
         imageUrl: fenderImageUrl('ebony-black', '01', '400x183'),
       },
       {
@@ -379,6 +361,39 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
         imageUrl: fenderImageUrl('halo-metallic', '01', '400x183'),
       },
     ],
+  },
+  {
+    id: 9101,
+    slug: 'gibson-les-paul-supreme-blueberry-burst',
+    name: 'Gibson Les Paul Supreme, Blueberry Burst, Exclusive',
+    priceCents: 399900,
+    currency: 'USD',
+    // Gibson es SQUARE (1600×1600). Usamos la toma `03_Front.png`
+    // (guitarra COMPLETA de frente, no la hero 01 que es más close-up
+    // del body). Las copias WebP viven en public/images/products/.
+    imageUrl:
+      '/images/products/gibson-les-paul-supreme-blueberry-burst/blueberry-burst/gibson-les-paul-supreme-blueberry-burst-blueberry-burst-1600x1600-03.webp',
+    vendor: 'Gibson',
+    finish: 'Blueberry Burst',
+    badges: ['new'],
+  },
+  {
+    id: 9102,
+    slug: 'fender-american-professional-telecaster-3-color-sunburst',
+    name: 'Fender American Professional Telecaster, 3-Color Sunburst',
+    priceCents: 169900,
+    currency: 'USD',
+    // Fender AmPro Telecaster: aspect LANDSCAPE 1600×525 (3.05:1).
+    // Variaciones por color identificadas por últimos 3 dígitos del SKU
+    // (00700=3-Color Sunburst, 00706=Black, 00721=Natural, etc.).
+    imageUrl:
+      '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-01.webp',
+    // Segunda toma (back) para hover swap
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-02.webp',
+    vendor: 'Fender',
+    finish: '3-Color Sunburst',
+    badges: ['new'],
   },
   {
     id: PRODUCTS[6].id,
