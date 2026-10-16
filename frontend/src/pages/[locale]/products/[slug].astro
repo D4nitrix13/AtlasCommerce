@@ -30,7 +30,6 @@ import ProductDetailVariants, {
 // ProductDetailColorSwatches ya no se usa — el picker ahora vive inline
 // en el dl "Acabado" usando thumbnails reales de cada variante.
 import ProductDetailRatingRow from '../../../components/storefront/products/ProductDetailRatingRow.astro';
-import ProductDetailDescription from '../../../components/storefront/products/ProductDetailDescription.astro';
 import ProductDetailColorSwatches from '../../../components/storefront/products/ProductDetailColorSwatches.astro';
 import ProductDetailFinancingBlock from '../../../components/storefront/products/ProductDetailFinancingBlock.astro';
 import ProductFeaturedArticle from '../../../components/storefront/products/ProductFeaturedArticle.astro';
@@ -411,7 +410,7 @@ const galleryLabels = {
                 </div>
               </dl>
 
-              <ProductDetailDescription description={detail.description} moreLabel={t['storefront.products.detail.v4.details.more']} lessLabel={t['storefront.products.detail.v4.details.less']} label={t['storefront.products.detail.v4.details.label']} id={`details-row-${product.id}`} />
+              <ProductDetailsBlock variant="inline" intro={detail.description} moreLabel={t['storefront.products.detail.v4.details.more']} lessLabel={t['storefront.products.detail.v4.details.less']} />
 
               <p class="text-xs text-slate-500">
                 {t['storefront.products.detail.v4.shippingInline']}
