@@ -54,19 +54,19 @@ export interface LaVozProduct {
 
 export const LA_VOZ_CATEGORIES = [
   { slug: 'guitarras-electricas', label: 'Guitarras eléctricas', count: 0 },
-  { slug: 'bajos',               label: 'Bajos',                count: 0 },
-  { slug: 'amplificadores',      label: 'Amplificadores',       count: 0 },
-  { slug: 'audio',               label: 'Audio profesional',    count: 0 },
-  { slug: 'accesorios',          label: 'Accesorios',           count: 0 },
+  { slug: 'bajos', label: 'Bajos', count: 0 },
+  { slug: 'amplificadores', label: 'Amplificadores', count: 0 },
+  { slug: 'audio', label: 'Audio profesional', count: 0 },
+  { slug: 'accesorios', label: 'Accesorios', count: 0 },
 ] as const;
 
 export const LA_VOZ_BRANDS = [
-  { slug: 'fender',  label: 'Fender',  count: 0 },
-  { slug: 'gibson',  label: 'Gibson',  count: 0 },
-  { slug: 'yamaha',  label: 'Yamaha',  count: 0 },
-  { slug: 'marshall',label: 'Marshall',count: 0 },
-  { slug: 'boss',    label: 'Boss',    count: 0 },
-  { slug: 'shure',   label: 'Shure',   count: 0 },
+  { slug: 'fender', label: 'Fender', count: 0 },
+  { slug: 'gibson', label: 'Gibson', count: 0 },
+  { slug: 'yamaha', label: 'Yamaha', count: 0 },
+  { slug: 'marshall', label: 'Marshall', count: 0 },
+  { slug: 'boss', label: 'Boss', count: 0 },
+  { slug: 'shure', label: 'Shure', count: 0 },
 ] as const;
 
 export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
@@ -86,18 +86,18 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'fender',
       specs: [
-        { label: 'Cuerpo',     value: 'Aliso (Alder)' },
-        { label: 'Mástil',     value: 'Arce (Maple), perfil Modern C' },
-        { label: 'Diapasón',   value: 'Palo de rosa (Rosewood), 9.5" radius' },
-        { label: 'Trastes',    value: '22, Medium Jumbo' },
-        { label: 'Pastillas',  value: '3x Single-Coil Player Series Alnico 5' },
-        { label: 'Puente',     value: 'Trémolo sincronizado de 2 puntos' },
-        { label: 'Acabado',    value: '3-Color Sunburst, poliuretano' },
+        { label: 'Cuerpo', value: 'Aliso (Alder)' },
+        { label: 'Mástil', value: 'Arce (Maple), perfil Modern C' },
+        { label: 'Diapasón', value: 'Palo de rosa (Rosewood), 9.5" radius' },
+        { label: 'Trastes', value: '22, Medium Jumbo' },
+        { label: 'Pastillas', value: '3x Single-Coil Player Series Alnico 5' },
+        { label: 'Puente', value: 'Trémolo sincronizado de 2 puntos' },
+        { label: 'Acabado', value: '3-Color Sunburst, poliuretano' },
       ],
     },
     variants: [
       { id: 'sunburst', label: 'Sunburst', hex: '#C8954B', inStock: true },
-      { id: 'black',    label: 'Black',    hex: '#1A1A1A', inStock: true },
+      { id: 'black', label: 'Black', hex: '#1A1A1A', inStock: true },
       { id: 'tidepool', label: 'Tidepool', hex: '#3B7080', inStock: false },
     ],
     inStock: true,
@@ -118,17 +118,17 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'gibson',
       specs: [
-        { label: 'Cuerpo',     value: 'Mástil mahogany con tapa de maple' },
-        { label: 'Mástil',     value: 'Mahogany, perfil años 50 rounded' },
-        { label: 'Diapasón',   value: 'Rosewood, 12" radius' },
-        { label: 'Trastes',    value: '22, Medium Jumbo' },
-        { label: 'Pastillas',  value: 'BurstBucker 1 (mástil) + BurstBucker 2 (puente)' },
-        { label: 'Acabado',    value: 'Goldtop, nitrocelulosa' },
+        { label: 'Cuerpo', value: 'Mástil mahogany con tapa de maple' },
+        { label: 'Mástil', value: 'Mahogany, perfil años 50 rounded' },
+        { label: 'Diapasón', value: 'Rosewood, 12" radius' },
+        { label: 'Trastes', value: '22, Medium Jumbo' },
+        { label: 'Pastillas', value: 'BurstBucker 1 (mástil) + BurstBucker 2 (puente)' },
+        { label: 'Acabado', value: 'Goldtop, nitrocelulosa' },
       ],
     },
     variants: [
-      { id: 'goldtop',    label: 'Goldtop',    hex: '#C9A14D', inStock: true },
-      { id: 'cherry',     label: 'Cherry',     hex: '#7A1F1F', inStock: false },
+      { id: 'goldtop', label: 'Goldtop', hex: '#C9A14D', inStock: true },
+      { id: 'cherry', label: 'Cherry', hex: '#7A1F1F', inStock: false },
     ],
     inStock: true,
   },
@@ -148,16 +148,16 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'fender',
       specs: [
-        { label: 'Cuerpo',    value: 'Aliso (Alder)' },
-        { label: 'Mástil',    value: 'Arce (Maple), perfil Modern C' },
-        { label: 'Diapasón',  value: 'Palo de rosa (Rosewood)' },
-        { label: 'Trastes',   value: '20, Medium Jumbo' },
+        { label: 'Cuerpo', value: 'Aliso (Alder)' },
+        { label: 'Mástil', value: 'Arce (Maple), perfil Modern C' },
+        { label: 'Diapasón', value: 'Palo de rosa (Rosewood)' },
+        { label: 'Trastes', value: '20, Medium Jumbo' },
         { label: 'Pastillas', value: '2x Single-Coil Jazz Bass' },
       ],
     },
     variants: [
       { id: '3ts', label: '3-Color Sunburst', hex: '#7A4E1F', inStock: true },
-      { id: 'blk', label: 'Black',            hex: '#1A1A1A', inStock: true },
+      { id: 'blk', label: 'Black', hex: '#1A1A1A', inStock: true },
     ],
     inStock: true,
   },
@@ -177,10 +177,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'marshall',
       specs: [
-        { label: 'Potencia',  value: '100W (conmutable a 50W)' },
-        { label: 'Canales',   value: '4 (Clean, Crunch, OD1, OD2)' },
+        { label: 'Potencia', value: '100W (conmutable a 50W)' },
+        { label: 'Canales', value: '4 (Clean, Crunch, OD1, OD2)' },
         { label: 'Parlantes', value: '4x Celestion G12T-100 (12")' },
-        { label: 'Efectos',   value: 'Reverb digital + loop de efectos' },
+        { label: 'Efectos', value: 'Reverb digital + loop de efectos' },
       ],
     },
     variants: [],
@@ -202,9 +202,9 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'yamaha',
       specs: [
-        { label: 'Potencia',   value: '680W peak / 340W RMS' },
-        { label: 'Parlantes',  value: '2x 10" + driver de compresión 1.4"' },
-        { label: 'Canales',    value: '10 (4 mono + 3 estéreo + Bluetooth)' },
+        { label: 'Potencia', value: '680W peak / 340W RMS' },
+        { label: 'Parlantes', value: '2x 10" + driver de compresión 1.4"' },
+        { label: 'Canales', value: '10 (4 mono + 3 estéreo + Bluetooth)' },
         { label: 'Conectividad', value: 'Bluetooth 5.0, XLR, TRS, RCA' },
       ],
     },
@@ -227,10 +227,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'shure',
       specs: [
-        { label: 'Tipo',       value: 'Dinámico cardioide' },
-        { label: 'Respuesta',  value: '50 Hz – 15 kHz' },
+        { label: 'Tipo', value: 'Dinámico cardioide' },
+        { label: 'Respuesta', value: '50 Hz – 15 kHz' },
         { label: 'Impedancia', value: '300 Ω' },
-        { label: 'Conector',   value: 'XLR-3M' },
+        { label: 'Conector', value: 'XLR-3M' },
       ],
     },
     variants: [],
@@ -252,9 +252,9 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'boss',
       specs: [
-        { label: 'Potencia',  value: '100W' },
-        { label: 'Parlante',  value: '12" custom' },
-        { label: 'Efectos',   value: '60+ efectos digitales' },
+        { label: 'Potencia', value: '100W' },
+        { label: 'Parlante', value: '12" custom' },
+        { label: 'Efectos', value: '60+ efectos digitales' },
         { label: 'Conectividad', value: 'Bluetooth, USB-C, MIDI, AUX' },
       ],
     },
@@ -277,16 +277,16 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     attributes: {
       brand: 'gibson',
       specs: [
-        { label: 'Cuerpo',     value: 'Mahogany' },
-        { label: 'Mástil',     value: 'Mahogany, perfil SlimTaper' },
-        { label: 'Diapasón',   value: 'Rosewood, 12" radius' },
-        { label: 'Trastes',    value: '22, Cryogenically Treated' },
-        { label: 'Pastillas',  value: '490R (mástil) + 490T (puente)' },
+        { label: 'Cuerpo', value: 'Mahogany' },
+        { label: 'Mástil', value: 'Mahogany, perfil SlimTaper' },
+        { label: 'Diapasón', value: 'Rosewood, 12" radius' },
+        { label: 'Trastes', value: '22, Cryogenically Treated' },
+        { label: 'Pastillas', value: '490R (mástil) + 490T (puente)' },
       ],
     },
     variants: [
       { id: 'cherry', label: 'Cherry', hex: '#7A1F1F', inStock: true },
-      { id: 'ebony', label: 'Ebony',  hex: '#0A0A0A', inStock: false },
+      { id: 'ebony', label: 'Ebony', hex: '#0A0A0A', inStock: false },
     ],
     inStock: true,
   },
@@ -298,9 +298,14 @@ export function findProductBySlug(slug: string): LaVozProduct | null {
 }
 
 export function getFeaturedLaVozProducts(limit: number): readonly LaVozProduct[] {
-  return LA_VOZ_PRODUCTS.filter((p) => p.badges.includes('new') || p.badges.includes('sale')).slice(0, limit);
+  return LA_VOZ_PRODUCTS.filter((p) => p.badges.includes('new') || p.badges.includes('sale')).slice(
+    0,
+    limit
+  );
 }
 
-export function getLaVozProductsByCategory(category: LaVozProduct['category']): readonly LaVozProduct[] {
+export function getLaVozProductsByCategory(
+  category: LaVozProduct['category']
+): readonly LaVozProduct[] {
   return LA_VOZ_PRODUCTS.filter((product) => product.category === category);
 }

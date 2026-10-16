@@ -23,11 +23,7 @@
 import type { OrderStatus } from './account-mock';
 
 export type OrderMilestoneKey =
-  | 'received'
-  | 'preparing'
-  | 'shipped'
-  | 'outForDelivery'
-  | 'delivered';
+  'received' | 'preparing' | 'shipped' | 'outForDelivery' | 'delivered';
 
 export interface OrderMilestoneMock {
   key: OrderMilestoneKey;

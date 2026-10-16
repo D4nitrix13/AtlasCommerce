@@ -30,11 +30,7 @@
 import type { TranslationKey } from '../i18n/types';
 
 /** Slugs de tenants soportados por el storefront. */
-export type TenantSlug =
-  | 'panda-estampados'
-  | 'kitsune'
-  | 'mm-boutique'
-  | 'morales-store';
+export type TenantSlug = 'panda-estampados' | 'kitsune' | 'mm-boutique' | 'morales-store';
 
 /**
  * Use case "localizable": el caller traduce `labelKey` con su
@@ -169,7 +165,7 @@ export const TENANT_USE_CASES: Record<TenantSlug, readonly LocalizableUseCase[]>
  * caller tenga que hacer un guard.
  */
 export function getUseCasesForTenant(
-  slug: string | null | undefined,
+  slug: string | null | undefined
 ): readonly LocalizableUseCase[] {
   if (!slug) return [];
   if (slug in TENANT_USE_CASES) {

@@ -68,12 +68,13 @@ const FALLBACK_ROTATIONS: readonly number[] = [-8, 0, 10, -5];
 ---
 
 {cases.length > 0 && (
-  <section aria-label={heading} class="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+  <section
+    aria-label={heading}
+    class="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+  >
     <div class="mb-8 text-center">
       <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{heading}</h2>
-      {subheading && (
-        <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
-      )}
+      {subheading && <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>}
     </div>
 
     <Squiggle
@@ -91,14 +92,8 @@ const FALLBACK_ROTATIONS: readonly number[] = [-8, 0, 10, -5];
               href={useCase.href}
               class="group flex flex-col items-center gap-3 rounded-xl p-4 text-center transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
             >
-              <AvatarCircle
-                name={useCase.label}
-                size="lg"
-                rotation={rotation}
-              />
-              <span class="text-sm font-semibold text-slate-800 sm:text-base">
-                {useCase.label}
-              </span>
+              <AvatarCircle name={useCase.label} size="lg" rotation={rotation} />
+              <span class="text-sm font-semibold text-slate-800 sm:text-base">{useCase.label}</span>
             </a>
           </li>
         );

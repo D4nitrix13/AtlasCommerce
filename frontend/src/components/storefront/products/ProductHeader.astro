@@ -54,9 +54,7 @@ const ratingText = rating !== undefined ? rating.average.toFixed(1) : '0.0';
   )}
 
   <div class="flex flex-wrap items-start justify-between gap-3">
-    <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-      {title}
-    </h1>
+    <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{title}</h1>
     {highlyRated && highlyRatedLabel !== undefined && (
       <Badge
         variant="primary"
@@ -81,7 +79,8 @@ const ratingText = rating !== undefined ? rating.average.toFixed(1) : '0.0';
         <span aria-hidden="true">{ratingText}</span>
       </span>
       <span class="text-slate-500">
-        {rating?.count} {rating !== undefined ? rating.count === 1 ? 'valoración' : 'valoraciones' : ''}
+        {rating?.count}{' '}
+        {rating !== undefined ? (rating.count === 1 ? 'valoración' : 'valoraciones') : ''}
       </span>
     </div>
   )}

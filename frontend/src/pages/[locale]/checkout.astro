@@ -43,10 +43,9 @@ const cartHref = `/${locale}/cart`;
 const VALID_STEPS: readonly CheckoutV3StepId[] = ['shipping', 'payment', 'review'];
 const url = new URL(Astro.request.url);
 const rawStep = url.searchParams.get('step') ?? 'shipping';
-const currentStepId: CheckoutV3StepId =
-  (VALID_STEPS as readonly string[]).includes(rawStep)
-    ? (rawStep as CheckoutV3StepId)
-    : 'shipping';
+const currentStepId: CheckoutV3StepId = (VALID_STEPS as readonly string[]).includes(rawStep)
+  ? (rawStep as CheckoutV3StepId)
+  : 'shipping';
 
 // ─── Mock cart: 2 items demo (mismas elecciones que cart.astro v3).
 const demoCart = [
@@ -136,16 +135,12 @@ const summaryLabels = {
 };
 
 // ─── Totales (single source of truth en el padre).
-const subtotalCents = cartItems.reduce(
-  (total, item) => total + item.priceCents * item.quantity,
-  0
-);
+const subtotalCents = cartItems.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 const currencyCode = cartItems[0]?.currency ?? 'USD';
 
 // Free shipping sobre $50 (mismo umbral que cart.astro v3).
 const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
-const shippingCents: number | null =
-  subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : 400;
+const shippingCents: number | null = subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : 400;
 
 // Tax placeholder: 15% del subtotal.
 const TAX_RATE = 0.15;
@@ -197,10 +192,10 @@ const taxCents = Math.round(subtotalCents * TAX_RATE);
                 desktop, wrap a multi-linea en mobile. */}
             <TrustSignalsCompact
               signals={[
-                { iconKey: 'lock',          label: 'Pago 100% seguro' },
-                { iconKey: 'shield-check',  label: 'Garantia oficial' },
-                { iconKey: 'rotate-ccw',    label: 'Devolucion 30 dias' },
-                { iconKey: 'truck',         label: 'Envio gratis sobre $50' },
+                { iconKey: 'lock', label: 'Pago 100% seguro' },
+                { iconKey: 'shield-check', label: 'Garantia oficial' },
+                { iconKey: 'rotate-ccw', label: 'Devolucion 30 dias' },
+                { iconKey: 'truck', label: 'Envio gratis sobre $50' },
               ]}
             />
           </div>

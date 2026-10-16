@@ -56,6 +56,6 @@ export const Loading: Story = {
 export const Empty: Story = {
   args: {
     eyebrow: 'Accesorios',
-    title: 'Cuerdas D\'Addario NYXL .010–.046',
+    title: "Cuerdas D'Addario NYXL .010–.046",
   },
 };

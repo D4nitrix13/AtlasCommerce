@@ -34,11 +34,7 @@ interface Props {
 const { heading, rows } = Astro.props;
 ---
 
-{heading && (
-  <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900">
-    {heading}
-  </h2>
-)}
+{heading && <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900">{heading}</h2>}
 
 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
   <table class="w-full text-sm">

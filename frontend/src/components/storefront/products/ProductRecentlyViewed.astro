@@ -23,8 +23,6 @@
  */
 ---
 
-**Placeholder SSR**: el contenido se renderiza client-side tras hidratar.
-
 <section
   aria-labelledby="recently-viewed-heading"
   class="hidden flex flex-col gap-4"
@@ -46,9 +44,15 @@
     data-recently-viewed-list
   ></ul>
 </section>
-
 <script>
-  type RecentEntry = { slug: string; name: string; imageUrl: string; priceCents: number; currency: string; viewedAt: number };
+  type RecentEntry = {
+    slug: string;
+    name: string;
+    imageUrl: string;
+    priceCents: number;
+    currency: string;
+    viewedAt: number;
+  };
 
   const STORAGE_KEY = 'pdp-recently-viewed';
   const MAX_ENTRIES = 8;
@@ -65,7 +69,7 @@
           typeof entry === 'object' &&
           entry !== null &&
           typeof (entry as RecentEntry).slug === 'string' &&
-          typeof (entry as RecentEntry).viewedAt === 'number',
+          typeof (entry as RecentEntry).viewedAt === 'number'
       );
     } catch {
       return [];
@@ -139,7 +143,7 @@
             <span class="text-sm font-bold tabular-nums text-slate-900">${new Intl.NumberFormat('es-NI', { style: 'currency', currency: entry.currency }).format(entry.priceCents / 100)}</span>
           </a>
         </li>
-      `,
+      `
       )
       .join('');
   }

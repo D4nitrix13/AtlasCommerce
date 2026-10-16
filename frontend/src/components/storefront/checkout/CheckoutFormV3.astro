@@ -75,7 +75,9 @@ const nextStep = hasNext ? stepOrder[currentIndex + 1] : null;
   <fieldset
     class:list={[
       'flex flex-col gap-4 rounded-2xl border bg-white p-7 shadow-sm',
-      currentStepId === 'shipping' ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]' : 'border-slate-200',
+      currentStepId === 'shipping'
+        ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]'
+        : 'border-slate-200',
     ]}
     hidden={currentStepId !== 'shipping'}
     aria-labelledby="v3-step1-legend"
@@ -90,7 +92,9 @@ const nextStep = hasNext ? stepOrder[currentIndex + 1] : null;
   <fieldset
     class:list={[
       'flex flex-col gap-5 rounded-2xl border bg-white p-7 shadow-sm',
-      currentStepId === 'payment' ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]' : 'border-slate-200',
+      currentStepId === 'payment'
+        ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]'
+        : 'border-slate-200',
     ]}
     hidden={currentStepId !== 'payment'}
     aria-labelledby="v3-step2-legend"
@@ -105,7 +109,9 @@ const nextStep = hasNext ? stepOrder[currentIndex + 1] : null;
   <fieldset
     class:list={[
       'flex flex-col gap-5 rounded-2xl border bg-white p-7 shadow-sm',
-      currentStepId === 'review' ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]' : 'border-slate-200',
+      currentStepId === 'review'
+        ? 'border-slate-200 ring-2 ring-[var(--primary,#2D9D8E)]'
+        : 'border-slate-200',
     ]}
     hidden={currentStepId !== 'review'}
     aria-labelledby="v3-step3-legend"

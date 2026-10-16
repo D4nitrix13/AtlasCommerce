@@ -41,13 +41,7 @@ interface Props {
   labels: ProductDetailGalleryLabels;
 }
 
-const {
-  images,
-  productName,
-  mockupVariant = 'shirt',
-  highlyRatedLabel,
-  labels,
-} = Astro.props;
+const { images, productName, mockupVariant = 'shirt', highlyRatedLabel, labels } = Astro.props;
 
 const hasRealImages = images.length > 0 && !images[0]?.startsWith('data:image/svg');
 const showBadge = highlyRatedLabel !== undefined && highlyRatedLabel !== '' && images.length > 0;
@@ -64,15 +58,13 @@ const SIZES_W = ['400', '800', '1200', '1600'] as const;
 const SIZES_H = ['183', '365', '547', '730'] as const;
 
 function imageSrcset(url: string): string {
-  return SIZES_W.map((w, i) => `${url.replace('-1600x730-', `-${w}x${SIZES_H[i]}-`)} ${w}w`).join(', ');
+  return SIZES_W.map((w, i) => `${url.replace('-1600x730-', `-${w}x${SIZES_H[i]}-`)} ${w}w`).join(
+    ', '
+  );
 }
 ---
 
-<section
-  aria-label="Product gallery"
-  class="relative flex flex-col gap-4"
-  data-reveal
->
+<section aria-label="Product gallery" class="relative flex flex-col gap-4" data-reveal>
   <div
     class:list={[
       'flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:gap-4',
@@ -177,14 +169,7 @@ function imageSrcset(url: string): string {
     </ul>
   )}
 
-  {hasRealImages && (
-    <div
-      class="zoom-lens"
-      aria-hidden="true"
-      hidden
-      data-zoom-lens
-    ></div>
-  )}
+  {hasRealImages && <div class="zoom-lens" aria-hidden="true" hidden data-zoom-lens></div>}
 </section>
 
 <script>
@@ -218,8 +203,7 @@ function imageSrcset(url: string): string {
     // Default = 0 (primera imagen); el usuario al clickear guarda la elección.
     const STORAGE_PREFIX = 'pdp-gallery-slide:';
     const productSlug =
-      document.querySelector('[data-product-slug]')?.getAttribute('data-product-slug') ??
-      'default';
+      document.querySelector('[data-product-slug]')?.getAttribute('data-product-slug') ?? 'default';
     const storageKey = STORAGE_PREFIX + productSlug;
     let savedIndex = 0;
     try {
@@ -345,11 +329,9 @@ function imageSrcset(url: string): string {
     }
   }
 
-  document
-    .querySelectorAll<HTMLElement>('[data-reveal]')
-    .forEach((el) => {
-      if (el.querySelector('[data-gallery-scroller]')) setupGallery(el);
-    });
+  document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+    if (el.querySelector('[data-gallery-scroller]')) setupGallery(el);
+  });
 </script>
 
 <style>

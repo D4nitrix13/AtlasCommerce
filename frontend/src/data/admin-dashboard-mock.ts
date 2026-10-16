@@ -61,8 +61,8 @@ export function buildRevenuePoints(): readonly RevenueChartPoint[] {
   const WIDTH = 680;
   const COUNT = 30;
   const values = [
-    32, 38, 28, 45, 55, 48, 62, 70, 58, 65, 75, 82, 70, 78, 88, 80, 92, 95,
-    88, 95, 100, 92, 98, 105, 110, 102, 108, 115, 120, 128,
+    32, 38, 28, 45, 55, 48, 62, 70, 58, 65, 75, 82, 70, 78, 88, 80, 92, 95, 88, 95, 100, 92, 98,
+    105, 110, 102, 108, 115, 120, 128,
   ];
   const minValue = 25;
   const maxValue = 130;
@@ -93,7 +93,7 @@ export const TOP_PRODUCTS_MOCK: readonly TopProductRow[] = [
 export function buildRecentOrdersMock(
   minSuffix: string,
   hourSingularSuffix: string,
-  hourPluralSuffix: string,
+  hourPluralSuffix: string
 ): readonly RecentOrderRow[] {
   return [
     {

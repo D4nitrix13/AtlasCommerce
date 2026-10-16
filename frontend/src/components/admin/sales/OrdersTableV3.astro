@@ -54,15 +54,8 @@ interface Props {
   };
 }
 
-const {
-  orders,
-  currencyCode,
-  columns,
-  columnSelect,
-  detailHrefFor,
-  statusLabels,
-  actionLabels,
-} = Astro.props;
+const { orders, currencyCode, columns, columnSelect, detailHrefFor, statusLabels, actionLabels } =
+  Astro.props;
 
 function countItems(order: AdminOrderMock): number {
   return order.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -112,10 +105,7 @@ function countItems(order: AdminOrderMock): number {
           const total = formatCentsAsDecimal(order.totalCents, currencyCode);
           const actionsFor = actionLabels.actionsFor.replace('{order}', order.number);
           return (
-            <tr
-              class="group transition-colors hover:bg-slate-50/60"
-              data-order-row={order.id}
-            >
+            <tr class="group transition-colors hover:bg-slate-50/60" data-order-row={order.id}>
               <td class="px-3 py-3 align-middle">
                 <input
                   type="checkbox"
@@ -156,7 +146,9 @@ function countItems(order: AdminOrderMock): number {
                     class="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2"
                     aria-label={actionsFor}
                   >
-                    <span aria-hidden="true" class="text-lg leading-none">⋮</span>
+                    <span aria-hidden="true" class="text-lg leading-none">
+                      ⋮
+                    </span>
                   </summary>
                   <div
                     class="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"

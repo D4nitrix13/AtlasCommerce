@@ -108,7 +108,10 @@ const hrefForStep = (stepId: string): string => `${stepHrefBase}?step=${stepId}`
             </span>
           </a>
           {!isLast && (
-            <span aria-hidden="true" class:list={['mx-1 h-0.5 flex-1 rounded-full', connectorClass]} />
+            <span
+              aria-hidden="true"
+              class:list={['mx-1 h-0.5 flex-1 rounded-full', connectorClass]}
+            />
           )}
         </li>
       );

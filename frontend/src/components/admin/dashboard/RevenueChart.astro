@@ -40,7 +40,20 @@ const t = getServerDictionary(Astro.locals.locale);
 
 const chartId = `revenue-chart-${Math.random().toString(36).slice(2)}`;
 
-const defaultLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const defaultLabels = [
+  'Ene',
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+];
 const labels = inputLabels ?? defaultLabels;
 const values = inputValues ?? new Array(12).fill(0);
 ---

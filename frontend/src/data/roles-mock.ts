@@ -23,14 +23,7 @@
 export type RoleStatus = 'active' | 'inactive';
 
 export type PermissionModule =
-  | 'catalog'
-  | 'inventory'
-  | 'sales'
-  | 'marketing'
-  | 'support'
-  | 'stores'
-  | 'reports'
-  | 'system';
+  'catalog' | 'inventory' | 'sales' | 'marketing' | 'support' | 'stores' | 'reports' | 'system';
 
 export interface AdminRole {
   readonly id: number;

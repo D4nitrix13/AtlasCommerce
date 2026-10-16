@@ -35,12 +35,7 @@ interface Props {
   id?: string;
 }
 
-const {
-  labels,
-  value = 'relevancia',
-  name = 'sort',
-  id = 'products-sort',
-} = Astro.props;
+const { labels, value = 'relevancia', name = 'sort', id = 'products-sort' } = Astro.props;
 
 const localizedOptions: SortOption[] = [
   { value: 'relevancia', label: labels.relevancia },
@@ -51,10 +46,7 @@ const localizedOptions: SortOption[] = [
 ---
 
 <div class="flex items-center gap-3">
-  <label
-    for={id}
-    class="hidden text-[13px] font-medium text-slate-500 sm:block"
-  >
+  <label for={id} class="hidden text-[13px] font-medium text-slate-500 sm:block">
     {labels.label}
   </label>
   <Select

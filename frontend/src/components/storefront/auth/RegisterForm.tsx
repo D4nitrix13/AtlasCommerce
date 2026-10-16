@@ -112,12 +112,8 @@ export default function RegisterForm({
         errors?: Record<string, string[]>;
       };
       const fieldErrors = apiError.errors;
-      const firstFieldError = fieldErrors
-        ? Object.values(fieldErrors).flat()[0]
-        : undefined;
-      setErrorMessage(
-        firstFieldError ?? apiError.message ?? t('auth.passwordReset.error.generic'),
-      );
+      const firstFieldError = fieldErrors ? Object.values(fieldErrors).flat()[0] : undefined;
+      setErrorMessage(firstFieldError ?? apiError.message ?? t('auth.passwordReset.error.generic'));
       setIsSubmitting(false);
     }
   };
@@ -306,7 +302,10 @@ export default function RegisterForm({
       {/* CA.5 — password_confirmation (validation cliente-side antes de
           mandar al backend, que también lo valida via same:password). */}
       <div>
-        <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label
+          htmlFor="passwordConfirmation"
+          className="block text-sm font-medium text-slate-700 mb-1.5"
+        >
           {t('auth.signup.shell.passwordConfirmationLabel')}
         </label>
         <div className="relative">

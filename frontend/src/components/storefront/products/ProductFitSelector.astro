@@ -41,6 +41,7 @@ interface Props {
 
 const { legend, options, selected, name } = Astro.props;
 ---
+
 <fieldset class="flex flex-col gap-3">
   <legend class="text-sm font-bold text-slate-900">{legend}</legend>
 
@@ -59,9 +60,7 @@ const { legend, options, selected, name } = Astro.props;
           data-fit-option={option.id}
           class:list={[
             'inline-flex h-11 items-center justify-center rounded-full px-6 text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-            isActive
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900',
+            isActive ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900',
           ]}
         >
           {option.label}

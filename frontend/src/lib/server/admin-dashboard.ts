@@ -162,7 +162,7 @@ function parseKpiValue(raw: string, expectCents: boolean): number | null {
  */
 export async function getAdminDashboardData(
   origin: string,
-  cookie: string,
+  cookie: string
 ): Promise<AdminDashboardData> {
   // F0.x follow-up: `Origin` requerido por Sanctum stateful (CR2).
   // Ver getAccountDashboardData en lib/server/account.ts para el
@@ -206,7 +206,7 @@ export async function getAdminDashboardData(
     };
     totalRevenueCents = body.data.current_year_values.reduce(
       (sum: number, v: number): number => sum + v,
-      0,
+      0
     );
   }
 
@@ -315,15 +315,12 @@ export async function getAdminDashboardData(
 export function formatCentsAsCurrency(
   cents: number,
   currencyCode: string = 'USD',
-  locale: string = 'en',
+  locale: string = 'en'
 ): string {
-  const formatter = new Intl.NumberFormat(
-    locale === 'es' ? 'es-NI' : 'en-US',
-    {
-      style: 'currency',
-      currency: currencyCode,
-      maximumFractionDigits: 0,
-    },
-  );
+  const formatter = new Intl.NumberFormat(locale === 'es' ? 'es-NI' : 'en-US', {
+    style: 'currency',
+    currency: currencyCode,
+    maximumFractionDigits: 0,
+  });
   return formatter.format(cents / 100);
 }

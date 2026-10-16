@@ -24,10 +24,7 @@ interface Props {
 const { kpis, t } = Astro.props;
 ---
 
-<section
-  aria-label="Resumen del cliente"
-  class="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4"
->
+<section aria-label="Resumen del cliente" class="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
   {kpis.map((kpi) => (
     <div data-reveal-stagger class="contents">
       <KpiCard kpi={kpi} t={t} />

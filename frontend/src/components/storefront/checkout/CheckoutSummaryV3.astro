@@ -78,10 +78,7 @@ const shippingIsFree = shippingCents === 0;
 const taxFormatted = taxCents !== null ? formatCurrency(taxCents, currencyCode) : null;
 const taxIsFree = taxCents === 0;
 
-const totalCents = Math.max(
-  0,
-  subtotalCents + (shippingCents ?? 0) + (taxCents ?? 0)
-);
+const totalCents = Math.max(0, subtotalCents + (shippingCents ?? 0) + (taxCents ?? 0));
 const totalFormatted = formatCurrency(totalCents, currencyCode);
 const totalMajor = totalFormatted.replace(/,[\d]{2}$/, '');
 const totalMinor = (totalFormatted.match(/,(\d{2})$/) ?? [null, ''])[1] ?? '';
@@ -114,7 +111,9 @@ const hasItems = items.length > 0;
                 {item.quantity}
               </span>
             </span>
-            <span class="flex-1 text-[14px] font-medium leading-snug text-slate-700">{item.name}</span>
+            <span class="flex-1 text-[14px] font-medium leading-snug text-slate-700">
+              {item.name}
+            </span>
             <span class="text-[14px] font-bold tabular-nums text-slate-900">{lineFormatted}</span>
           </li>
         );
@@ -161,9 +160,7 @@ const hasItems = items.length > 0;
     <span class="text-[15px] font-bold text-slate-900">{labels.total}</span>
     <span class="text-3xl font-bold tabular-nums text-slate-900">
       {totalMajor}
-      {totalMinor !== '' && (
-        <span class="text-base font-medium text-slate-400">,{totalMinor}</span>
-      )}
+      {totalMinor !== '' && <span class="text-base font-medium text-slate-400">,{totalMinor}</span>}
     </span>
   </div>
 

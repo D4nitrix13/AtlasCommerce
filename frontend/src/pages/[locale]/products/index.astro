@@ -36,10 +36,7 @@ import FiltersSidebar from '../../../components/storefront/products/FiltersSideb
 import SortDropdown from '../../../components/storefront/products/SortDropdown.astro';
 import Pagination from '../../../components/ui/Pagination.astro';
 import { getServerDictionary } from '../../../i18n/server';
-import {
-  PRODUCTS,
-  getCategoriesInUse,
-} from '../../../data/products';
+import { PRODUCTS, getCategoriesInUse } from '../../../data/products';
 import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
 
 const locale = Astro.locals.locale ?? 'es';
@@ -74,8 +71,7 @@ const dictionary = {
     priceHeading: t['storefront.products.v3.filter.precio'],
     colorHeading: t['storefront.products.v3.filter.color'],
     sizeHeading: t['storefront.products.v3.filter.talla'],
-    colorSwatchAltTemplate:
-      t['storefront.products.v3.filter.colorSwatchAlt'],
+    colorSwatchAltTemplate: t['storefront.products.v3.filter.colorSwatchAlt'],
   },
   breadcrumb: {
     home: t['storefront.products.v3.breadcrumb.home'],
@@ -139,10 +135,7 @@ const filterSizeOptions = [
   { slug: 'xg', label: 'XG', count: 8 },
 ];
 
-const subtitle = t['storefront.products.v3.subtitle'].replace(
-  '{count}',
-  String(PRODUCTS.length)
-);
+const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(PRODUCTS.length));
 
 const countRange = t['storefront.products.v3.countRange']
   .replace('{from}', String(from))
@@ -167,7 +160,9 @@ const baseUrl = `/${locale}/products`;
               {dictionary.breadcrumb.home}
             </a>
           </li>
-          <li aria-hidden="true" class="text-slate-300">/</li>
+          <li aria-hidden="true" class="text-slate-300">
+            /
+          </li>
           <li>
             <span class="font-semibold text-slate-700" aria-current="page">
               {dictionary.breadcrumb.catalog}
@@ -206,9 +201,7 @@ const baseUrl = `/${locale}/products`;
 
         <div class="flex flex-col gap-6">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="text-[13px] text-slate-500">
-              {countRange}
-            </p>
+            <p class="text-[13px] text-slate-500">{countRange}</p>
           </div>
 
           <ul

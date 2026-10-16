@@ -36,22 +36,15 @@ const countText = t['account.dashboard.addresses.count'].replace('{count}', Stri
       {t['account.dashboard.addresses.heading']}
       <span class="ml-1 text-sm font-normal text-slate-500">({countText})</span>
     </h2>
-    <a
-      href={viewAllHref}
-      class="text-sm font-medium text-[var(--primary,#059669)] hover:underline"
-    >
+    <a href={viewAllHref} class="text-sm font-medium text-[var(--primary,#059669)] hover:underline">
       {viewAllLabel} →
     </a>
   </header>
 
   {primary !== null && (
     <div class="mt-3 flex items-center gap-2">
-      <span class="font-mono text-xs text-slate-500 uppercase">
-        {primary.addressType}
-      </span>
-      <span class="text-sm text-slate-800">
-        {primary.label}
-      </span>
+      <span class="font-mono text-xs text-slate-500 uppercase">{primary.addressType}</span>
+      <span class="text-sm text-slate-800">{primary.label}</span>
       {primary.isPrimary && (
         <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
           {t['account.dashboard.addresses.default']}

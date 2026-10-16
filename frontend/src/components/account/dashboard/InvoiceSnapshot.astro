@@ -20,15 +20,8 @@ interface Props {
   t: Record<TranslationKey, string>;
 }
 
-const {
-  invoiceNumber,
-  totalCents,
-  currencyCode,
-  daysUntilDue,
-  viewAllLabel,
-  viewAllHref,
-  t,
-} = Astro.props;
+const { invoiceNumber, totalCents, currencyCode, daysUntilDue, viewAllLabel, viewAllHref, t } =
+  Astro.props;
 
 const formatter = new Intl.NumberFormat(currencyCode === 'NIO' ? 'es-NI' : 'en-US', {
   style: 'currency',
@@ -50,24 +43,14 @@ const dueLabel = t['account.dashboard.invoices.dueLabel'].replace('{days}', Stri
   </h2>
   <div class="mt-2 flex flex-wrap items-baseline justify-between gap-3">
     <div>
-      <p class="font-mono text-xs font-medium text-slate-600">
-        {invoiceNumber}
-      </p>
-      <p class="mt-1 text-2xl font-bold text-slate-900">
-        {totalFormatted}
-      </p>
+      <p class="font-mono text-xs font-medium text-slate-600">{invoiceNumber}</p>
+      <p class="mt-1 text-2xl font-bold text-slate-900">{totalFormatted}</p>
     </div>
-    <p class:list={[
-      'text-sm font-medium',
-      daysUntilDue <= 3 ? 'text-red-700' : 'text-amber-700',
-    ]}>
+    <p class:list={['text-sm font-medium', daysUntilDue <= 3 ? 'text-red-700' : 'text-amber-700']}>
       {dueLabel}
     </p>
   </div>
-  <a
-    href={viewAllHref}
-    class="mt-3 inline-flex text-sm font-medium text-red-800 hover:underline"
-  >
+  <a href={viewAllHref} class="mt-3 inline-flex text-sm font-medium text-red-800 hover:underline">
     {viewAllLabel} →
   </a>
 </section>

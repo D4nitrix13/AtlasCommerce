@@ -37,16 +37,11 @@ const cookieHeader = Astro.request.headers.get('Cookie') ?? '';
 // Otros endpoints del helper no se usan en v3 pero los seguimos trayendo
 // por si en el futuro queremos re-introducir una sección que los consuma
 // (ej: tarjetas de seguridad/notificaciones).
-const dashboard = await getAccountDashboardData(
-  Astro.url.origin,
-  cookieHeader,
-  { limit: 5 },
-);
+const dashboard = await getAccountDashboardData(Astro.url.origin, cookieHeader, { limit: 5 });
 
 // Saludo. Si no hay user, fallback al idioma actual.
 const fallbackFirstName = locale === 'en' ? 'Customer' : 'Cliente';
-const firstName =
-  dashboard.user?.full_name?.split(' ')[0] ?? fallbackFirstName;
+const firstName = dashboard.user?.full_name?.split(' ')[0] ?? fallbackFirstName;
 const greeting = locale === 'en' ? `Hello, ${firstName}` : `Hola, ${firstName}`;
 
 const localePrefix = `/${locale}`;

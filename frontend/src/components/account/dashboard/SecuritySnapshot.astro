@@ -17,13 +17,7 @@ interface Props {
   t: Record<TranslationKey, string>;
 }
 
-const {
-  twoFactorEnabled,
-  lastSignInLabel,
-  viewDetailLabel,
-  viewDetailHref,
-  t,
-} = Astro.props;
+const { twoFactorEnabled, lastSignInLabel, viewDetailLabel, viewDetailHref, t } = Astro.props;
 ---
 
 <section
@@ -39,9 +33,7 @@ const {
     data-testid="twofa-badge"
     class:list={[
       'rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
-      twoFactorEnabled
-        ? 'bg-emerald-100 text-emerald-800'
-        : 'bg-amber-100 text-amber-800',
+      twoFactorEnabled ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800',
     ]}
   >
     {twoFactorEnabled

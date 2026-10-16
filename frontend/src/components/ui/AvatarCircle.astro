@@ -68,14 +68,7 @@ function buildInitials(fullName: string): string {
   return (a + b).toUpperCase();
 }
 
-const {
-  name,
-  role,
-  accentColor,
-  rotation = 0,
-  size = 'md',
-  class: className = '',
-} = Astro.props;
+const { name, role, accentColor, rotation = 0, size = 'md', class: className = '' } = Astro.props;
 
 const initials = buildInitials(name);
 const sizeClass = SIZE_CLASSES[size];
@@ -94,7 +87,5 @@ const transform = rotation === 0 ? undefined : `transform: rotate(${rotation}deg
   >
     {initials}
   </span>
-  {role !== undefined && (
-    <span class="mt-2 text-xs text-slate-500 sm:text-sm">{role}</span>
-  )}
+  {role !== undefined && <span class="mt-2 text-xs text-slate-500 sm:text-sm">{role}</span>}
 </div>

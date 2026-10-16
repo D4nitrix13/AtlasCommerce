@@ -58,7 +58,7 @@ const categorySegments = buildCategorySegments({
 const recentOrders = buildRecentOrdersMock(
   t['admin.dashboard.v3.recentOrders.time.minutes'],
   t['admin.dashboard.v3.recentOrders.time.hour'],
-  t['admin.dashboard.v3.recentOrders.time.hours'],
+  t['admin.dashboard.v3.recentOrders.time.hours']
 );
 const activityAlerts = buildActivityAlerts({
   rfqTitle: t['admin.dashboard.v3.activity.rfqTitle'],
@@ -179,7 +179,4 @@ const donutId = `dash-donut-${Math.random().toString(36).slice(2)}`;
   />
 </section>
 
-<ActivityFeedV3
-  heading={t['admin.dashboard.v3.activity.heading']}
-  alerts={activityAlerts}
-/>
+<ActivityFeedV3 heading={t['admin.dashboard.v3.activity.heading']} alerts={activityAlerts} />

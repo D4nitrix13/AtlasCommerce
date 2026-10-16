@@ -43,10 +43,12 @@ import type { DashboardKpi, DashboardKpiTone } from '../types/dashboard-kpis';
  */
 export function buildDashboardKpis(
   data: AccountDashboardData,
-  locale: 'es' | 'en' = 'es',
+  locale: 'es' | 'en' = 'es'
 ): DashboardKpi[] {
   const ordersTotal = data.orders.length;
-  const processingOrders = data.orders.filter((o) => o.status === 'processing' || o.status === 'pending');
+  const processingOrders = data.orders.filter(
+    (o) => o.status === 'processing' || o.status === 'pending'
+  );
   const processingCount = processingOrders.length;
 
   // KPI 1 — Pedidos totales.
@@ -64,21 +66,25 @@ export function buildDashboardKpis(
   };
 
   // KPI 2 — En producción (count orders status in [processing, pending]).
-  const processingKpi: DashboardKpi = processingCount === 0
-    ? {
-        labelKey: 'account.dashboard.kpi.processing',
-        value: '—',
-        delta: null,
-        tone: 'neutral',
-        hint: null,
-      }
-    : {
-        labelKey: 'account.dashboard.kpi.processing',
-        value: String(processingCount),
-        delta: processingCount > 1 ? `${String(processingCount)} ${locale === 'en' ? 'orders' : 'pedidos'}` : null,
-        tone: 'neutral',
-        hint: null,
-      };
+  const processingKpi: DashboardKpi =
+    processingCount === 0
+      ? {
+          labelKey: 'account.dashboard.kpi.processing',
+          value: '—',
+          delta: null,
+          tone: 'neutral',
+          hint: null,
+        }
+      : {
+          labelKey: 'account.dashboard.kpi.processing',
+          value: String(processingCount),
+          delta:
+            processingCount > 1
+              ? `${String(processingCount)} ${locale === 'en' ? 'orders' : 'pedidos'}`
+              : null,
+          tone: 'neutral',
+          hint: null,
+        };
 
   // KPI 3 — Tasa de aprobación RFQ.
   // El endpoint actual devuelve solo `rfqPendingCount` (cuántas están
@@ -86,40 +92,42 @@ export function buildDashboardKpis(
   // asumimos: si hay pendientes, mostramos el porcentaje implícito
   // (sin datos históricos = null → mostramos "—"). Cuando el backend
   // exponga `rfqApprovalRate`, cambiamos acá.
-  const rfqKpi: DashboardKpi = data.rfqPendingCount === null
-    ? {
-        labelKey: 'account.dashboard.kpi.rfqApproval',
-        value: '—',
-        delta: null,
-        tone: 'neutral',
-        hint: null,
-      }
-    : {
-        labelKey: 'account.dashboard.kpi.rfqApproval',
-        value: `${String(data.rfqPendingCount)}%`,
-        delta: null,
-        tone: 'positive' as DashboardKpiTone,
-        hint: null,
-      };
+  const rfqKpi: DashboardKpi =
+    data.rfqPendingCount === null
+      ? {
+          labelKey: 'account.dashboard.kpi.rfqApproval',
+          value: '—',
+          delta: null,
+          tone: 'neutral',
+          hint: null,
+        }
+      : {
+          labelKey: 'account.dashboard.kpi.rfqApproval',
+          value: `${String(data.rfqPendingCount)}%`,
+          delta: null,
+          tone: 'positive' as DashboardKpiTone,
+          hint: null,
+        };
 
   // KPI 4 — Saldo pendiente (suma de órdenes activas en pending/processing).
   // Si no hay órdenes activas, mostramos "—".
   const pendingCents = processingOrders.reduce((sum: number, o): number => sum + o.total, 0);
-  const pendingKpi: DashboardKpi = pendingCents === 0
-    ? {
-        labelKey: 'account.dashboard.kpi.pendingBalance',
-        value: '—',
-        delta: null,
-        tone: 'neutral',
-        hint: null,
-      }
-    : {
-        labelKey: 'account.dashboard.kpi.pendingBalance',
-        value: formatCurrency(pendingCents, null),
-        delta: null,
-        tone: 'warning',
-        hint: `${String(processingOrders.length)} ${locale === 'en' ? 'pending' : 'por vencer'}`,
-      };
+  const pendingKpi: DashboardKpi =
+    pendingCents === 0
+      ? {
+          labelKey: 'account.dashboard.kpi.pendingBalance',
+          value: '—',
+          delta: null,
+          tone: 'neutral',
+          hint: null,
+        }
+      : {
+          labelKey: 'account.dashboard.kpi.pendingBalance',
+          value: formatCurrency(pendingCents, null),
+          delta: null,
+          tone: 'warning',
+          hint: `${String(processingOrders.length)} ${locale === 'en' ? 'pending' : 'por vencer'}`,
+        };
 
   return [ordersKpi, processingKpi, rfqKpi, pendingKpi];
 }
@@ -151,10 +159,10 @@ export function buildDashboardKpis(
  */
 export function buildDashboardKpisV3(
   data: AccountDashboardData,
-  locale: 'es' | 'en' = 'es',
+  locale: 'es' | 'en' = 'es'
 ): DashboardKpi[] {
   const activeOrders = data.orders.filter(
-    (o) => o.status === 'pending' || o.status === 'processing' || o.status === 'shipped',
+    (o) => o.status === 'pending' || o.status === 'processing' || o.status === 'shipped'
   );
 
   // Mock values used until the backend exposes the underlying counts.
@@ -173,21 +181,22 @@ export function buildDashboardKpisV3(
     hint: null,
   };
 
-  const rfqsKpi: DashboardKpi = data.rfqPendingCount === null
-    ? {
-        labelKey: 'account.dashboard.v3.kpi.rfqs',
-        value: '—',
-        delta: null,
-        tone: 'neutral',
-        hint: null,
-      }
-    : {
-        labelKey: 'account.dashboard.v3.kpi.rfqs',
-        value: String(data.rfqPendingCount),
-        delta: null,
-        tone: 'warning',
-        hint: null,
-      };
+  const rfqsKpi: DashboardKpi =
+    data.rfqPendingCount === null
+      ? {
+          labelKey: 'account.dashboard.v3.kpi.rfqs',
+          value: '—',
+          delta: null,
+          tone: 'neutral',
+          hint: null,
+        }
+      : {
+          labelKey: 'account.dashboard.v3.kpi.rfqs',
+          value: String(data.rfqPendingCount),
+          delta: null,
+          tone: 'warning',
+          hint: null,
+        };
 
   const spentKpi: DashboardKpi = {
     labelKey: 'account.dashboard.v3.kpi.spent',

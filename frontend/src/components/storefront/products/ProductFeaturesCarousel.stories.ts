@@ -20,8 +20,16 @@ const PLACEHOLDER =
   );
 
 const SAMPLE_ITEMS = [
-  { image: PLACEHOLDER, alt: 'Pastillas V-Mod II', caption: 'Pastillas V-Mod II con calibrado premium.' },
-  { image: PLACEHOLDER, alt: 'Puente tremolo', caption: 'Puente Pop-In de 2 puntos con selletas de acero.' },
+  {
+    image: PLACEHOLDER,
+    alt: 'Pastillas V-Mod II',
+    caption: 'Pastillas V-Mod II con calibrado premium.',
+  },
+  {
+    image: PLACEHOLDER,
+    alt: 'Puente tremolo',
+    caption: 'Puente Pop-In de 2 puntos con selletas de acero.',
+  },
   { image: PLACEHOLDER, alt: 'Brazo de arce', caption: 'Brazo de arce con perfil Modern Deep C.' },
 ];
 

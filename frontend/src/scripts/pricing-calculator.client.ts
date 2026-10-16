@@ -33,16 +33,12 @@ function formatCents(cents: number, currency: string): string {
 }
 
 function resolveDiscount(quantity: number, tiers: readonly TierDiscount[]): number {
-  const matched = [...tiers]
-    .reverse()
-    .find((tier) => quantity >= tier.minQuantity);
+  const matched = [...tiers].reverse().find((tier) => quantity >= tier.minQuantity);
   return matched?.discountPercent ?? 0;
 }
 
 function tierRangeLabel(quantity: number, tiers: readonly TierDiscount[]): string {
-  const matched = [...tiers]
-    .reverse()
-    .find((tier) => quantity >= tier.minQuantity);
+  const matched = [...tiers].reverse().find((tier) => quantity >= tier.minQuantity);
   if (matched === undefined) return '10+';
   if (matched.minQuantity === 500) return `${matched.minQuantity}+`;
   const next = tiers.find((t) => t.minQuantity > matched.minQuantity);
@@ -94,8 +90,7 @@ function initPricingCalculator(form: HTMLFormElement): void {
   const tierLabelTemplate = tierBadge.textContent ?? '';
   const quantityLabelText =
     numberInput.parentElement?.previousElementSibling?.textContent?.trim() ?? 'Cantidad';
-  const unitLabelText =
-    unitNode.previousElementSibling?.textContent?.trim() ?? 'Precio unitario';
+  const unitLabelText = unitNode.previousElementSibling?.textContent?.trim() ?? 'Precio unitario';
   const totalLabelText =
     totalNode.parentElement?.previousElementSibling?.textContent?.trim() ?? 'Total';
 
@@ -108,19 +103,12 @@ function initPricingCalculator(form: HTMLFormElement): void {
       : quantity;
 
     const selectedOption = productSelect.selectedOptions[0];
-    const basePriceCents = Number.parseInt(
-      selectedOption?.dataset.basePrice ?? '0',
-      10
-    );
+    const basePriceCents = Number.parseInt(selectedOption?.dataset.basePrice ?? '0', 10);
     const currency = selectedOption?.dataset.currency ?? 'USD';
 
     const discount = resolveDiscount(safeQuantity, tiers);
-    const totalCents = Math.round(
-      basePriceCents * safeQuantity * (1 - discount / 100)
-    );
-    const savingsCents = Math.round(
-      basePriceCents * safeQuantity * (discount / 100)
-    );
+    const totalCents = Math.round(basePriceCents * safeQuantity * (1 - discount / 100));
+    const savingsCents = Math.round(basePriceCents * safeQuantity * (discount / 100));
     const rangeLabel = tierRangeLabel(safeQuantity, tiers);
     const discountLabel = discount === 0 ? '0%' : `-${discount}%`;
 

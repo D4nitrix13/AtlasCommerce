@@ -257,10 +257,7 @@ const b2bFaqItems = [
         ]}
       />
 
-      <StatsBar
-        heading={t['storefront.b2b.home.stats.heading']}
-        stats={b2bStats}
-      />
+      <StatsBar heading={t['storefront.b2b.home.stats.heading']} stats={b2bStats} />
 
       <FeaturedCategories
         categories={B2B_CATEGORIES}
@@ -268,9 +265,14 @@ const b2bFaqItems = [
         viewAllLabel={t['storefront.b2b.home.featuredCategories.viewAll']}
         viewAllHref={productsHref}
         badges={{
-          'estampados-personalizados': { label: t['storefront.b2b.home.featuredCategories.badge.popular'] },
+          'estampados-personalizados': {
+            label: t['storefront.b2b.home.featuredCategories.badge.popular'],
+          },
           'regalos-corporativos': { label: t['storefront.b2b.home.featuredCategories.badge.new'] },
-          'sublimacion': { label: t['storefront.b2b.home.featuredCategories.badge.eco'], tone: 'emerald' },
+          sublimacion: {
+            label: t['storefront.b2b.home.featuredCategories.badge.eco'],
+            tone: 'emerald',
+          },
         }}
       />
 
@@ -307,10 +309,7 @@ const b2bFaqItems = [
         stories={b2bCustomerStories}
       />
 
-      <FaqAccordion
-        heading={t['storefront.b2b.home.faq.heading']}
-        items={b2bFaqItems}
-      />
+      <FaqAccordion heading={t['storefront.b2b.home.faq.heading']} items={b2bFaqItems} />
 
       <CtaFinal
         heading={t['storefront.b2b.home.ctaFinal.heading']}

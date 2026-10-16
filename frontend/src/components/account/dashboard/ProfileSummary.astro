@@ -22,16 +22,18 @@ interface Props {
 const { user, variant, greeting, locale, t } = Astro.props;
 
 // Iniciales para el avatar. Si no hay user, "—".
-const initials = user !== null
-  ? `${(user.full_name?.[0] ?? '?').toUpperCase()}${(user.full_name?.split(' ')[1]?.[0] ?? '').toUpperCase()}`
-  : '—';
+const initials =
+  user !== null
+    ? `${(user.full_name?.[0] ?? '?').toUpperCase()}${(user.full_name?.split(' ')[1]?.[0] ?? '').toUpperCase()}`
+    : '—';
 
 // Color del border del avatar según variant.
-const borderColor = variant === 'panda'
-  ? 'border-emerald-600'
-  : variant === 'kitsune'
-    ? 'border-violet-600'
-    : 'border-slate-300';
+const borderColor =
+  variant === 'panda'
+    ? 'border-emerald-600'
+    : variant === 'kitsune'
+      ? 'border-violet-600'
+      : 'border-slate-300';
 
 // "Cliente desde Sep 2025" — formateamos la fecha del user si la BD
 // la expone. En el MVP no la tenemos; usamos el locale para elegir
@@ -52,9 +54,7 @@ const companyLabel = t['account.dashboard.profile.companyLabel'];
   </div>
 
   <div class="min-w-0 flex-1">
-    <h1 class="text-2xl font-bold text-slate-900">
-      {greeting}
-    </h1>
+    <h1 class="text-2xl font-bold text-slate-900">{greeting}</h1>
     {user !== null && (
       <p class="mt-1 text-sm text-slate-500">
         <span class="truncate">{user.email}</span>

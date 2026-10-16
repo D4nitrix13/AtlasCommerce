@@ -98,7 +98,8 @@ export const PRODUCTS: readonly Product[] = [
       'Bajo eléctrico Precision Bass edición limitada con doble humbucker, mástil de maple y acabado Ultra Heavy Aged. Disponible en Ebony Black o Halo Metallic.',
     priceCents: 179900,
     compareAtPriceCents: 199900,
-    imageUrl: '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
+    imageUrl:
+      '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
     category: 'bajo-electrico',
     stock: 12,
     badges: ['new'],

@@ -79,16 +79,12 @@ const QUANTITY_MAX = 1000;
 const QUANTITY_STEP = 1;
 
 function resolveDiscount(quantity: number, tiers: readonly TierDiscount[]): number {
-  const matched = [...tiers]
-    .reverse()
-    .find((tier) => quantity >= tier.minQuantity);
+  const matched = [...tiers].reverse().find((tier) => quantity >= tier.minQuantity);
   return matched?.discountPercent ?? 0;
 }
 
 function tierRangeLabel(quantity: number, tiers: readonly TierDiscount[]): string {
-  const matched = [...tiers]
-    .reverse()
-    .find((tier) => quantity >= tier.minQuantity);
+  const matched = [...tiers].reverse().find((tier) => quantity >= tier.minQuantity);
   if (matched === undefined) return `${QUANTITY_MIN}+`;
   if (matched.minQuantity === 500) return `${matched.minQuantity}+`;
   const next = tiers.find((t) => t.minQuantity > matched.minQuantity);
@@ -119,15 +115,10 @@ if (firstProduct === undefined) {
 
 const initialUnitPrice = firstProduct.basePriceCents;
 const initialDiscount = resolveDiscount(initialQuantity, tiers);
-const initialTotal = Math.round(
-  initialUnitPrice * initialQuantity * (1 - initialDiscount / 100)
-);
-const initialSavings = Math.round(
-  initialUnitPrice * initialQuantity * (initialDiscount / 100)
-);
+const initialTotal = Math.round(initialUnitPrice * initialQuantity * (1 - initialDiscount / 100));
+const initialSavings = Math.round(initialUnitPrice * initialQuantity * (initialDiscount / 100));
 const initialTierText = tierRangeLabel(initialQuantity, tiers);
-const initialTierDiscountText =
-  initialDiscount === 0 ? '0%' : `-${initialDiscount}%`;
+const initialTierDiscountText = initialDiscount === 0 ? '0%' : `-${initialDiscount}%`;
 
 const initialUnitPriceText = formatCurrency(initialUnitPrice, firstProduct.currency);
 const initialTotalText = formatCurrency(initialTotal, firstProduct.currency);
@@ -141,10 +132,7 @@ const initialTierBadgeText = tierLabelTemplate
   aria-labelledby="pricing-calculator-heading"
   class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
 >
-  <h2
-    id="pricing-calculator-heading"
-    class="text-lg font-bold text-slate-900 sm:text-xl"
-  >
+  <h2 id="pricing-calculator-heading" class="text-lg font-bold text-slate-900 sm:text-xl">
     {heading}
   </h2>
 
@@ -155,10 +143,7 @@ const initialTierBadgeText = tierLabelTemplate
     novalidate
   >
     <div>
-      <label
-        for="bulk-product-select"
-        class="mb-1.5 block text-sm font-semibold text-slate-900"
-      >
+      <label for="bulk-product-select" class="mb-1.5 block text-sm font-semibold text-slate-900">
         {productLabel}
       </label>
       <select
@@ -167,26 +152,21 @@ const initialTierBadgeText = tierLabelTemplate
         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,.28))]"
         data-pricing-product
       >
-        {
-          products.map((product) => (
-            <option
-              value={product.id}
-              data-base-price={product.basePriceCents}
-              data-currency={product.currency}
-              selected={product.id === firstProduct.id}
-            >
-              {product.name} — {formatCurrency(product.basePriceCents, product.currency)}
-            </option>
-          ))
-        }
+        {products.map((product) => (
+          <option
+            value={product.id}
+            data-base-price={product.basePriceCents}
+            data-currency={product.currency}
+            selected={product.id === firstProduct.id}
+          >
+            {product.name} — {formatCurrency(product.basePriceCents, product.currency)}
+          </option>
+        ))}
       </select>
     </div>
 
     <div>
-      <label
-        for="bulk-quantity-slider"
-        class="mb-1.5 block text-sm font-semibold text-slate-900"
-      >
+      <label for="bulk-quantity-slider" class="mb-1.5 block text-sm font-semibold text-slate-900">
         {quantityLabel}
       </label>
       <input
@@ -203,10 +183,7 @@ const initialTierBadgeText = tierLabelTemplate
         aria-valuemax={QUANTITY_MAX}
         aria-valuenow={initialQuantity}
       />
-      <div
-        class="mt-1 flex items-center justify-between text-xs text-slate-500"
-        aria-hidden="true"
-      >
+      <div class="mt-1 flex items-center justify-between text-xs text-slate-500" aria-hidden="true">
         <span>{QUANTITY_MIN}</span>
         <span>{QUANTITY_MAX}</span>
       </div>
@@ -241,36 +218,27 @@ const initialTierBadgeText = tierLabelTemplate
     <dl class="space-y-3 border-t border-slate-100 pt-5 text-sm">
       <div class="flex items-center justify-between">
         <dt class="text-slate-500">{unitPriceLabel}</dt>
-        <dd
-          class="font-semibold tabular-nums text-slate-900"
-          data-pricing-unit
-        >
+        <dd class="font-semibold tabular-nums text-slate-900" data-pricing-unit>
           {initialUnitPriceText}
         </dd>
       </div>
       <div class="flex items-center justify-between">
         <dt class="text-slate-500">{savingsLabel}</dt>
-        <dd
-          class="font-semibold tabular-nums text-emerald-700"
-          data-pricing-savings
-        >
+        <dd class="font-semibold tabular-nums text-emerald-700" data-pricing-savings>
           {initialSavingsText}
         </dd>
       </div>
       <div class="flex items-baseline justify-between border-t border-slate-100 pt-3">
         <dt class="text-base font-bold text-slate-900">{totalLabel}</dt>
-        <dd
-          class="text-2xl font-bold tabular-nums text-slate-900 sm:text-3xl"
-          data-pricing-total
-        >
+        <dd class="text-2xl font-bold tabular-nums text-slate-900 sm:text-3xl" data-pricing-total>
           {initialTotalText}
         </dd>
       </div>
     </dl>
 
     <output class="sr-only" data-pricing-output aria-live="polite">
-      {quantityLabel}: {initialQuantity}. {unitPriceLabel}: {initialUnitPriceText}.
-      {totalLabel}: {initialTotalText}.
+      {quantityLabel}: {initialQuantity}. {unitPriceLabel}: {initialUnitPriceText}.{totalLabel}:{' '}
+      {initialTotalText}.
     </output>
 
     <a

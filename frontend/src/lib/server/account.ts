@@ -154,7 +154,7 @@ function normalizeOrderStatus(rawStatus: string): OrderStatus {
 function toRecentOrderMock(order: BackendOrder): RecentOrderMock {
   const itemsCount = order.items.reduce(
     (sum: number, item: BackendOrderItem): number => sum + item.quantity,
-    0,
+    0
   );
 
   return {
@@ -189,7 +189,7 @@ function toAddressSnapshotItem(addr: BackendAddressResource): AddressSnapshotIte
 export async function getAccountDashboardData(
   origin: string,
   cookie: string,
-  options: { limit?: number } = {},
+  options: { limit?: number } = {}
 ): Promise<AccountDashboardData> {
   const limit = options.limit ?? 3;
   // F0.x follow-up: `Origin` es REQUERIDO por Sanctum stateful
@@ -206,21 +206,15 @@ export async function getAccountDashboardData(
     headers.Cookie = cookie;
   }
 
-  const [
-    meResult,
-    ordersResult,
-    twoFactorResult,
-    addressesResult,
-    rfqResult,
-    notificationsResult,
-  ] = await Promise.allSettled([
-    fetch(new URL('/api/v1/auth/me', origin), { headers }),
-    fetch(new URL(`/api/v1/orders?limit=${String(limit)}`, origin), { headers }),
-    fetch(new URL('/api/v1/auth/2fa/totp/status', origin), { headers }),
-    fetch(new URL('/api/v1/account/addresses', origin), { headers }),
-    fetch(new URL('/api/v1/storefront/rfq', origin), { headers }),
-    fetch(new URL('/api/v1/account/notifications/unread', origin), { headers }),
-  ]);
+  const [meResult, ordersResult, twoFactorResult, addressesResult, rfqResult, notificationsResult] =
+    await Promise.allSettled([
+      fetch(new URL('/api/v1/auth/me', origin), { headers }),
+      fetch(new URL(`/api/v1/orders?limit=${String(limit)}`, origin), { headers }),
+      fetch(new URL('/api/v1/auth/2fa/totp/status', origin), { headers }),
+      fetch(new URL('/api/v1/account/addresses', origin), { headers }),
+      fetch(new URL('/api/v1/storefront/rfq', origin), { headers }),
+      fetch(new URL('/api/v1/account/notifications/unread', origin), { headers }),
+    ]);
 
   let user: User | null = null;
   let meError = false;
@@ -293,7 +287,8 @@ export async function getAccountDashboardData(
         rfqPendingCount = metaCount;
       } else if (Array.isArray(body.data)) {
         rfqPendingCount = body.data.filter(
-          (r: BackendRfqResource): boolean => r.status === 'pending' || r.status === 'awaiting_approval',
+          (r: BackendRfqResource): boolean =>
+            r.status === 'pending' || r.status === 'awaiting_approval'
         ).length;
       } else {
         rfqPendingCount = 0;

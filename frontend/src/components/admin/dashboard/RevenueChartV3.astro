@@ -98,12 +98,8 @@ const DOTS_INDICES = (() => {
     </div>
 
     <div class="flex items-baseline gap-2 text-right">
-      <span class="text-xl font-bold tabular-nums text-slate-900 sm:text-2xl">
-        {totalLabel}
-      </span>
-      <span class="text-[13px] font-semibold text-[var(--primary,#2d9d8e)]">
-        {totalDelta}
-      </span>
+      <span class="text-xl font-bold tabular-nums text-slate-900 sm:text-2xl">{totalLabel}</span>
+      <span class="text-[13px] font-semibold text-[var(--primary,#2d9d8e)]">{totalDelta}</span>
     </div>
   </div>
 
@@ -122,18 +118,9 @@ const DOTS_INDICES = (() => {
       </linearGradient>
     </defs>
 
-    {
-      GRID_LINES.map((y) => (
-        <line
-          x1="0"
-          y1={y}
-          x2={VIEW_WIDTH}
-          y2={y}
-          stroke="#e5e7eb"
-          stroke-width="1"
-        />
-      ))
-    }
+    {GRID_LINES.map((y) => (
+      <line x1="0" y1={y} x2={VIEW_WIDTH} y2={y} stroke="#e5e7eb" stroke-width="1" />
+    ))}
 
     <polygon points={polygonPoints} fill={`url(#${chartId}-area)`}></polygon>
 
@@ -146,21 +133,19 @@ const DOTS_INDICES = (() => {
       stroke-linejoin="round"
     ></polyline>
 
-    {
-      DOTS_INDICES.map((i) => {
-        const p = points[i];
-        if (!p) return null;
-        return (
-          <circle
-            cx={p.x}
-            cy={p.y}
-            r="3.5"
-            fill="#ffffff"
-            stroke="var(--primary)"
-            stroke-width="2.5"
-          />
-        );
-      })
-    }
+    {DOTS_INDICES.map((i) => {
+      const p = points[i];
+      if (!p) return null;
+      return (
+        <circle
+          cx={p.x}
+          cy={p.y}
+          r="3.5"
+          fill="#ffffff"
+          stroke="var(--primary)"
+          stroke-width="2.5"
+        />
+      );
+    })}
   </svg>
 </section>

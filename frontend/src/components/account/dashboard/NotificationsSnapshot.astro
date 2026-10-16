@@ -18,7 +18,10 @@ interface Props {
 
 const { unreadCount, viewAllLabel, viewAllHref, t } = Astro.props;
 
-const unreadText = t['account.dashboard.notifications.unread'].replace('{count}', String(unreadCount));
+const unreadText = t['account.dashboard.notifications.unread'].replace(
+  '{count}',
+  String(unreadCount)
+);
 ---
 
 <section
@@ -33,10 +36,7 @@ const unreadText = t['account.dashboard.notifications.unread'].replace('{count}'
         {unreadText}
       </span>
     </h2>
-    <a
-      href={viewAllHref}
-      class="text-sm font-medium text-[var(--primary,#059669)] hover:underline"
-    >
+    <a href={viewAllHref} class="text-sm font-medium text-[var(--primary,#059669)] hover:underline">
       {viewAllLabel} →
     </a>
   </header>

@@ -45,11 +45,7 @@ const SIZE_CLASSES: Record<BlobSize, string> = {
   lg: 'h-96 w-96',
 };
 
-const {
-  color = 'peach',
-  size = 'md',
-  class: className = '',
-} = Astro.props;
+const { color = 'peach', size = 'md', class: className = '' } = Astro.props;
 
 const fill = COLOR_HEX[color];
 const sizeClass = SIZE_CLASSES[size];

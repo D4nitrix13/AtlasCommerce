@@ -90,9 +90,7 @@ const variant = resolveMockupVariant(product);
     class="relative flex aspect-[4/5] items-center justify-center overflow-hidden"
     style="background: var(--primary-soft, #F1F5F9);"
   >
-    <span
-      class="block transition-transform duration-500 ease-out group-hover:scale-105"
-    >
+    <span class="block transition-transform duration-500 ease-out group-hover:scale-105">
       <ProductMockup
         variant={variant}
         logoText={product.name.split(' ')[0]?.slice(0, 8) ?? ''}
@@ -109,9 +107,7 @@ const variant = resolveMockupVariant(product);
     <p class="line-clamp-1 text-[13px] text-slate-400">{product.description}</p>
 
     <div class="mt-4 flex items-end justify-between gap-2">
-      <span class="text-lg font-bold text-slate-900">
-        {priceFormatted}
-      </span>
+      <span class="text-lg font-bold text-slate-900">{priceFormatted}</span>
     </div>
   </div>
 </a>

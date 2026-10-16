@@ -51,7 +51,7 @@ const init = (): void => {
         }
       }
     },
-    { threshold: 0.15, rootMargin: '0px 0px -10% 0px' },
+    { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
   );
 
   document
@@ -62,7 +62,7 @@ const init = (): void => {
   // transform translateY segun la posicion del scroll. Menos porcentaje
   // = mas sutil. Usar requestAnimationFrame para suavidad.
   const parallaxTargets = Array.from(
-    document.querySelectorAll<HTMLElement>('[data-parallax-slow], [data-parallax-fast]'),
+    document.querySelectorAll<HTMLElement>('[data-parallax-slow], [data-parallax-fast]')
   );
   if (parallaxTargets.length === 0) return;
 

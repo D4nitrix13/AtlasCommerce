@@ -48,10 +48,7 @@ const totalLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD
   data-reveal
 >
   <header class="mb-6 flex flex-col gap-1">
-    <h2
-      id="bundle-heading"
-      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
-    >
+    <h2 id="bundle-heading" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
       {heading}
     </h2>
     <p class="text-sm text-slate-600">
@@ -88,7 +85,10 @@ const totalLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD
           </a>
         </li>
         {idx < items.length - 1 && (
-          <li aria-hidden="true" class="flex h-12 w-8 items-center justify-center text-2xl font-light text-slate-400">
+          <li
+            aria-hidden="true"
+            class="flex h-12 w-8 items-center justify-center text-2xl font-light text-slate-400"
+          >
             +
           </li>
         )}

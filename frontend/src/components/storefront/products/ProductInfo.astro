@@ -139,7 +139,9 @@ const wishlistLabels = {
       hrefBase={hrefBase}
     />
     <ProductCTAs
-      addToCartLabel={isOutOfStock ? labels.outOfStock : isAddingToCart ? labels.addingToCart : labels.addToCart}
+      addToCartLabel={
+        isOutOfStock ? labels.outOfStock : isAddingToCart ? labels.addingToCart : labels.addToCart
+      }
       favoriteLabel={isInWishlist ? labels.wishlistAdded : labels.wishlistAdd}
       inStock={!isOutOfStock}
       isFavorite={isInWishlist}

@@ -61,17 +61,18 @@ const cartItems = demoItems
 
 const isEmpty = cartItems.length === 0;
 
-const subtotalCents = cartItems.reduce(
-  (total, item) => total + item.priceCents * item.quantity,
-  0,
-);
+const subtotalCents = cartItems.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 const currencyCode = cartItems[0]?.currency ?? 'USD';
 
 // Envío gratis sobre $50, sino $4 fijo (placeholder UX).
 const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
 const FLAT_SHIPPING_CENTS = 400;
 const shippingCents =
-  subtotalCents === 0 ? null : subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : FLAT_SHIPPING_CENTS;
+  subtotalCents === 0
+    ? null
+    : subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS
+      ? 0
+      : FLAT_SHIPPING_CENTS;
 
 // TODO F1.4: el tax real viene del backend (depende de país y catálogo).
 // Aquí calculamos 15% sobre el subtotal como placeholder visual.
@@ -116,9 +117,7 @@ const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     {isEmpty ? (
       <section class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-10 text-center sm:p-16">
-        <p class="text-2xl font-bold text-slate-900">
-          {t['storefront.cart.v3.empty']}
-        </p>
+        <p class="text-2xl font-bold text-slate-900">{t['storefront.cart.v3.empty']}</p>
         <a
           href={productsHref}
           class="mt-2 inline-flex h-11 items-center justify-center rounded-lg bg-[var(--primary,#475569)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
@@ -164,10 +163,10 @@ const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
               desktop, wrap en mobile. */}
           <TrustSignalsCompact
             signals={[
-              { iconKey: 'truck',         label: 'Envio gratis sobre $50' },
-              { iconKey: 'shield-check',  label: 'Garantia oficial' },
-              { iconKey: 'rotate-ccw',    label: 'Devolucion 30 dias' },
-              { iconKey: 'lock',          label: 'Pago 100% seguro' },
+              { iconKey: 'truck', label: 'Envio gratis sobre $50' },
+              { iconKey: 'shield-check', label: 'Garantia oficial' },
+              { iconKey: 'rotate-ccw', label: 'Devolucion 30 dias' },
+              { iconKey: 'lock', label: 'Pago 100% seguro' },
             ]}
           />
         </div>

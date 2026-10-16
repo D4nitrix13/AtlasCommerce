@@ -20,7 +20,8 @@ interface Props {
   t: Record<TranslationKey, string>;
 }
 
-const { orderId, status, etaLabel, itemsCount, totalCents, currencyCode, localePrefix, t } = Astro.props;
+const { orderId, status, etaLabel, itemsCount, totalCents, currencyCode, localePrefix, t } =
+  Astro.props;
 
 const orderHref = `${localePrefix}/account/orders/${orderId}`;
 
@@ -58,7 +59,12 @@ const totalFormatted = formatter.format(totalCents / 100);
     <span class="font-mono text-xs font-medium text-slate-500">
       {t['account.dashboard.recentOrders.orderId'].replace('{id}', orderId)}
     </span>
-    <span class:list={['rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide', statusColor[status]]}>
+    <span
+      class:list={[
+        'rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide',
+        statusColor[status],
+      ]}
+    >
       {t[statusLabelKey[status]]}
     </span>
   </header>
@@ -69,18 +75,15 @@ const totalFormatted = formatter.format(totalCents / 100);
       <span class="font-medium text-slate-800">{etaLabel}</span>
     </p>
     <p class="text-sm text-slate-600">
-      <span class="text-slate-500">{t['account.dashboard.recentOrders.itemsCount'].replace('{count}', String(itemsCount))}</span>
+      <span class="text-slate-500">
+        {t['account.dashboard.recentOrders.itemsCount'].replace('{count}', String(itemsCount))}
+      </span>
     </p>
   </div>
 
   <footer class="flex items-end justify-between gap-2 border-t border-slate-100 pt-3">
-    <span class="text-lg font-bold text-slate-900">
-      {totalFormatted}
-    </span>
-    <a
-      href={orderHref}
-      class="text-sm font-medium text-[var(--primary,#059669)] hover:underline"
-    >
+    <span class="text-lg font-bold text-slate-900">{totalFormatted}</span>
+    <a href={orderHref} class="text-sm font-medium text-[var(--primary,#059669)] hover:underline">
       {t['account.dashboard.recentOrders.viewDetail']} →
     </a>
   </footer>

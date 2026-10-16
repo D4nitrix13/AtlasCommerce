@@ -41,14 +41,8 @@ interface Props {
   pagination: PaginationProps;
 }
 
-const {
-  navLabel,
-  previousLabel,
-  nextLabel,
-  showingTemplate,
-  pageOfTemplate,
-  pagination,
-} = Astro.props;
+const { navLabel, previousLabel, nextLabel, showingTemplate, pageOfTemplate, pagination } =
+  Astro.props;
 
 const numericPages: number[] = [];
 for (let p = 1; p <= pagination.totalPages; p += 1) {
@@ -74,9 +68,7 @@ for (let p = 1; p <= pagination.totalPages; p += 1) {
       class:list={[
         'inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2',
-        pagination.prevHref === null
-          ? 'pointer-events-none cursor-not-allowed opacity-40'
-          : '',
+        pagination.prevHref === null ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
       ]}
     >
       {previousLabel}
@@ -110,9 +102,7 @@ for (let p = 1; p <= pagination.totalPages; p += 1) {
       class:list={[
         'inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2',
-        pagination.nextHref === null
-          ? 'pointer-events-none cursor-not-allowed opacity-40'
-          : '',
+        pagination.nextHref === null ? 'pointer-events-none cursor-not-allowed opacity-40' : '',
       ]}
     >
       {nextLabel}

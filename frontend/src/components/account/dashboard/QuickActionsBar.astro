@@ -29,11 +29,12 @@ interface Props {
 
 const { heading, items, variant } = Astro.props;
 
-const pillClass = variant === 'panda'
-  ? 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-  : variant === 'kitsune'
-    ? 'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100'
-    : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100';
+const pillClass =
+  variant === 'panda'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+    : variant === 'kitsune'
+      ? 'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100'
+      : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100';
 ---
 
 <section
@@ -49,10 +50,7 @@ const pillClass = variant === 'panda'
       <a
         href={item.href}
         data-testid={item.testId}
-        class:list={[
-          'rounded-full border px-4 py-2 text-sm font-medium transition',
-          pillClass,
-        ]}
+        class:list={['rounded-full border px-4 py-2 text-sm font-medium transition', pillClass]}
       >
         {item.label}
       </a>

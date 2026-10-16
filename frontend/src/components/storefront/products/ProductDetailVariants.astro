@@ -42,18 +42,10 @@ interface Props {
 const { options, selected, legend, hideLegend = false } = Astro.props;
 ---
 
-<fieldset
-  class="flex flex-col gap-3"
-  data-reveal
-  data-variant-type="color"
->
+<fieldset class="flex flex-col gap-3" data-reveal data-variant-type="color">
   {!hideLegend && <legend class="text-sm font-bold text-slate-900">{legend}</legend>}
 
-  <div
-    class="flex flex-wrap gap-3"
-    role="radiogroup"
-    aria-label={legend}
-  >
+  <div class="flex flex-wrap gap-3" role="radiogroup" aria-label={legend}>
     {options.map((option) => {
       const isActive = option.id === selected;
       return (
@@ -65,12 +57,13 @@ const { options, selected, legend, hideLegend = false } = Astro.props;
           data-variant-id={option.id}
           class:list={[
             'relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-            isActive ? 'scale-110 ring-2 ring-[var(--primary,#475569)] ring-offset-2' : 'hover:scale-105',
+            isActive
+              ? 'scale-110 ring-2 ring-[var(--primary,#475569)] ring-offset-2'
+              : 'hover:scale-105',
           ]}
           style={option.hex !== undefined ? `background-color: ${option.hex};` : undefined}
           title={option.label}
-        >
-        </button>
+        ></button>
       );
     })}
   </div>

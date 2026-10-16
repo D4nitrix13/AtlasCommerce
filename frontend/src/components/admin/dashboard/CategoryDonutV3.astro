@@ -91,46 +91,40 @@ const SVG_CENTER = 66;
       height="132"
       class="shrink-0"
       role="img"
-      aria-label={`${heading}: ${categories
-        .map((c) => `${c.label} ${c.value}%`)
-        .join(', ')}`}
+      aria-label={`${heading}: ${categories.map((c) => `${c.label} ${c.value}%`).join(', ')}`}
     >
       <title>{heading}</title>
 
-      {
-        segments.map((seg) => (
-          <circle
-            cx={SVG_CENTER}
-            cy={SVG_CENTER}
-            r={RADIUS}
-            fill="none"
-            stroke={seg.color}
-            stroke-width="18"
-            stroke-dasharray={seg.dashArray}
-            stroke-dashoffset={seg.dashOffset}
-            transform={`rotate(-90 ${SVG_CENTER} ${SVG_CENTER})`}
-            stroke-linecap="butt"
-          />
-        ))
-      }
+      {segments.map((seg) => (
+        <circle
+          cx={SVG_CENTER}
+          cy={SVG_CENTER}
+          r={RADIUS}
+          fill="none"
+          stroke={seg.color}
+          stroke-width="18"
+          stroke-dasharray={seg.dashArray}
+          stroke-dashoffset={seg.dashOffset}
+          transform={`rotate(-90 ${SVG_CENTER} ${SVG_CENTER})`}
+          stroke-linecap="butt"
+        />
+      ))}
     </svg>
 
     <dl class="flex-1 space-y-3 text-sm">
-      {
-        segments.map((seg) => (
-          <div class="flex items-center justify-between gap-2">
-            <dt class="flex min-w-0 items-center gap-2">
-              <span
-                class="h-3 w-3 shrink-0 rounded-sm"
-                style={`background:${seg.color}`}
-                aria-hidden="true"
-              />
-              <span class="truncate text-slate-600">{seg.label}</span>
-            </dt>
-            <dd class="font-bold tabular-nums text-slate-900">{seg.value}%</dd>
-          </div>
-        ))
-      }
+      {segments.map((seg) => (
+        <div class="flex items-center justify-between gap-2">
+          <dt class="flex min-w-0 items-center gap-2">
+            <span
+              class="h-3 w-3 shrink-0 rounded-sm"
+              style={`background:${seg.color}`}
+              aria-hidden="true"
+            />
+            <span class="truncate text-slate-600">{seg.label}</span>
+          </dt>
+          <dd class="font-bold tabular-nums text-slate-900">{seg.value}%</dd>
+        </div>
+      ))}
     </dl>
   </div>
 </section>

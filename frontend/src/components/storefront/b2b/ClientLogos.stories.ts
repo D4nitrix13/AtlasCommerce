@@ -18,8 +18,7 @@ const meta: Meta<typeof ClientLogos> = {
   },
   args: {
     heading: 'Quiénes estampan con Panda',
-    subheading:
-      'Empresas, escuelas, ONGs, restaurantes y equipos deportivos en todo el país',
+    subheading: 'Empresas, escuelas, ONGs, restaurantes y equipos deportivos en todo el país',
     logos: [
       { iconKey: 'building-office', label: 'Restaurante La Esquina' },
       { iconKey: 'users', label: 'Escuela Pública Central' },
@@ -47,11 +46,19 @@ export const WithLinks: Story = {
     heading: 'Verticales que atendemos',
     subheading: 'Cada vertical con descuento por volumen a medida',
     logos: [
-      { iconKey: 'building-office', label: 'Restaurante La Esquina', href: '/products?vertical=restaurantes' },
+      {
+        iconKey: 'building-office',
+        label: 'Restaurante La Esquina',
+        href: '/products?vertical=restaurantes',
+      },
       { iconKey: 'users', label: 'Escuela Pública Central', href: '/products?vertical=escuelas' },
       { iconKey: 'star', label: 'Festival Verano', href: '/products?vertical=eventos' },
       { iconKey: 'gift', label: 'ONG Manos Solidarias', href: '/products?vertical=ongs' },
-      { iconKey: 'shopping-cart', label: 'Club Deportivo Norte', href: '/products?vertical=deportes' },
+      {
+        iconKey: 'shopping-cart',
+        label: 'Club Deportivo Norte',
+        href: '/products?vertical=deportes',
+      },
       { iconKey: 'tag', label: 'Hotel Boutique Sur', href: '/products?vertical=hoteles' },
     ],
   },

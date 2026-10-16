@@ -111,9 +111,7 @@ const FALLBACK_ROTATIONS: readonly number[] = [0, -8, 10];
       >
         {heading}
       </h2>
-      {subheading && (
-        <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
-      )}
+      {subheading && <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>}
     </header>
 
     <ul class="relative grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
@@ -126,11 +124,7 @@ const FALLBACK_ROTATIONS: readonly number[] = [0, -8, 10];
               style="box-shadow: 1px 1px 4px 0 rgba(204,219,240,.2), 2px 2px 8px 0 rgba(204,219,240,.2), 4px 4px 16px 0 rgba(204,219,240,.2), inset 0 0 0 1px rgb(189,202,216);"
             >
               <div class="flex items-start gap-4">
-                <AvatarCircle
-                  name={story.customerName}
-                  size="lg"
-                  rotation={rotation}
-                />
+                <AvatarCircle name={story.customerName} size="lg" rotation={rotation} />
                 <div class="flex flex-1 flex-col gap-1">
                   <p class="text-sm font-semibold text-slate-900">{story.customerName}</p>
                   <p class="text-xs text-slate-600 sm:text-sm">{story.customerRole}</p>
@@ -138,9 +132,13 @@ const FALLBACK_ROTATIONS: readonly number[] = [0, -8, 10];
               </div>
 
               <blockquote class="flex-1 border-l-4 border-slate-200 pl-4 text-sm leading-relaxed text-slate-700 sm:text-base">
-                <span aria-hidden="true" class="select-none">“</span>
+                <span aria-hidden="true" class="select-none">
+                  “
+                </span>
                 {story.quote}
-                <span aria-hidden="true" class="select-none">”</span>
+                <span aria-hidden="true" class="select-none">
+                  ”
+                </span>
               </blockquote>
 
               <div class="mt-auto flex items-baseline justify-between gap-3 border-t border-slate-100 pt-4">

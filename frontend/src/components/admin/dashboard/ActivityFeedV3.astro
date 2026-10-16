@@ -34,11 +34,16 @@ interface IconDefinition {
 }
 
 const ALERT_ICONS: Record<Severity, IconDefinition> = {
-  warning: { path: 'M12 9v4m0 4h.01M10.3 3.9 2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z' },
+  warning: {
+    path: 'M12 9v4m0 4h.01M10.3 3.9 2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z',
+  },
   info: { path: 'M20 6 9 17l-5-5' },
 };
 
-const SEVERITY_STYLE: Record<Severity, { card: string; iconWrap: string; iconColor: string; ring: string }> = {
+const SEVERITY_STYLE: Record<
+  Severity,
+  { card: string; iconWrap: string; iconColor: string; ring: string }
+> = {
   warning: {
     card: '',
     iconWrap: 'bg-amber-50',
@@ -60,63 +65,58 @@ interface Props {
 
 const { heading, alerts } = Astro.props;
 
-const dangerCardStyle = 'shadow-[0_1px_2px_rgba(160,180,200,0.10),_0_4px_12px_rgba(160,180,200,0.12),_inset_0_0_0_1px_#fde68a]';
+const dangerCardStyle =
+  'shadow-[0_1px_2px_rgba(160,180,200,0.10),_0_4px_12px_rgba(160,180,200,0.12),_inset_0_0_0_1px_#fde68a]';
 
 const infoCardStyle = 'border border-slate-200';
 const infoIconWrap = 'bg-[var(--primary-soft,#e6f7f4)]';
 const infoIconColor = 'text-[var(--primary,#2d9d8e)]';
 ---
 
-<section
-  aria-labelledby="activity-feed-v3-heading"
-  class="mt-6"
->
-  <h2 id="activity-feed-v3-heading" class="sr-only">{heading}</h2>
+<section aria-labelledby="activity-feed-v3-heading" class="mt-6">
+  <h2 id="activity-feed-v3-heading" class="sr-only">
+    {heading}
+  </h2>
 
   <ul class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-    {
-      alerts.map((alert) => {
-        const icon = ALERT_ICONS[alert.severity];
-        const isInfo = alert.severity === 'info';
-        return (
-          <li>
-            <article
+    {alerts.map((alert) => {
+      const icon = ALERT_ICONS[alert.severity];
+      const isInfo = alert.severity === 'info';
+      return (
+        <li>
+          <article
+            class:list={[
+              'flex gap-4 rounded-2xl bg-white p-5',
+              isInfo ? infoCardStyle : dangerCardStyle,
+            ]}
+          >
+            <span
               class:list={[
-                'flex gap-4 rounded-2xl bg-white p-5',
-                isInfo ? infoCardStyle : dangerCardStyle,
+                'grid h-9 w-9 shrink-0 place-items-center rounded-xl',
+                isInfo ? infoIconWrap : SEVERITY_STYLE.warning.iconWrap,
               ]}
+              aria-hidden="true"
             >
-              <span
-                class:list={[
-                  'grid h-9 w-9 shrink-0 place-items-center rounded-xl',
-                  isInfo ? infoIconWrap : SEVERITY_STYLE.warning.iconWrap,
-                ]}
-                aria-hidden="true"
+              <svg
+                class:list={['h-5 w-5', isInfo ? infoIconColor : SEVERITY_STYLE.warning.iconColor]}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               >
-                <svg
-                  class:list={[
-                    'h-5 w-5',
-                    isInfo ? infoIconColor : SEVERITY_STYLE.warning.iconColor,
-                  ]}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d={icon.path} />
-                  {icon.path2 && <path d={icon.path2} />}
-                </svg>
-              </span>
-              <div class="min-w-0">
-                <h3 class="truncate text-[14px] font-bold text-slate-900">{alert.title}</h3>
-                <p class="mt-0.5 text-[13px] text-slate-500">{alert.body}</p>
-              </div>
-            </article>
-          </li>
-        );
-      })
-    }
+                <path d={icon.path} />
+                {icon.path2 && <path d={icon.path2} />}
+              </svg>
+            </span>
+            <div class="min-w-0">
+              <h3 class="truncate text-[14px] font-bold text-slate-900">{alert.title}</h3>
+              <p class="mt-0.5 text-[13px] text-slate-500">{alert.body}</p>
+            </div>
+          </article>
+        </li>
+      );
+    })}
   </ul>
 </section>

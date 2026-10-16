@@ -82,9 +82,7 @@ const numberGradient =
       >
         {heading}
       </h2>
-      {subheading && (
-        <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
-      )}
+      {subheading && <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>}
     </header>
 
     <ol class="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-4">
@@ -106,9 +104,7 @@ const numberGradient =
               >
                 <Icon name={step.iconKey} class="h-5 w-5" />
               </span>
-              <h3 class="text-base font-semibold text-slate-900 sm:text-lg">
-                {step.title}
-              </h3>
+              <h3 class="text-base font-semibold text-slate-900 sm:text-lg">{step.title}</h3>
               <p class="text-sm text-slate-600 sm:text-base">{step.description}</p>
             </div>
           </div>

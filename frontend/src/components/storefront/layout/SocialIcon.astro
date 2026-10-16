@@ -37,13 +37,7 @@ interface Props {
   class?: string;
 }
 
-const {
-  variant,
-  href,
-  size = 20,
-  label,
-  class: className = '',
-} = Astro.props;
+const { variant, href, size = 20, label, class: className = '' } = Astro.props;
 
 const defaultLabels: Record<SocialVariant, string> = {
   facebook: 'Facebook',

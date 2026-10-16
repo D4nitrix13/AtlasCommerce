@@ -50,10 +50,7 @@ const stepperLabels = [
 ];
 ---
 
-<StorefrontLayout
-  title={`${t['storefront.b2b.rfq.v3.title']} | AtlasCommerce`}
-  cartCount={0}
->
+<StorefrontLayout title={`${t['storefront.b2b.rfq.v3.title']} | AtlasCommerce`} cartCount={0}>
   <main class="min-h-screen bg-slate-50">
     <section class="relative mx-auto w-full max-w-6xl px-4 pb-20 pt-12 sm:px-6">
       <header class="relative mb-10 max-w-3xl">
@@ -79,13 +76,7 @@ const stepperLabels = [
         >
           <RFQStepper currentStep={1} labels={stepperLabels} />
 
-          <form
-            id="rfq-form"
-            class="space-y-8"
-            novalidate
-            data-testid="rfq-form"
-            data-reveal
-          >
+          <form id="rfq-form" class="space-y-8" novalidate data-testid="rfq-form" data-reveal>
             <!-- Paso 1: detalles del pedido -->
             <fieldset class="space-y-4">
               <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
@@ -132,9 +123,15 @@ const stepperLabels = [
                   class="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
                   data-testid="rfq-tecnica"
                 >
-                  <option value="serigrafia">{t['storefront.b2b.rfq.v3.step1.tecnica.serigrafia']}</option>
-                  <option value="sublimacion">{t['storefront.b2b.rfq.v3.step1.tecnica.sublimacion']}</option>
-                  <option value="bordado">{t['storefront.b2b.rfq.v3.step1.tecnica.bordado']}</option>
+                  <option value="serigrafia">
+                    {t['storefront.b2b.rfq.v3.step1.tecnica.serigrafia']}
+                  </option>
+                  <option value="sublimacion">
+                    {t['storefront.b2b.rfq.v3.step1.tecnica.sublimacion']}
+                  </option>
+                  <option value="bordado">
+                    {t['storefront.b2b.rfq.v3.step1.tecnica.bordado']}
+                  </option>
                   <option value="vinilo">{t['storefront.b2b.rfq.v3.step1.tecnica.vinilo']}</option>
                 </select>
               </label>
@@ -235,14 +232,10 @@ const stepperLabels = [
               <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
                 {t['storefront.b2b.rfq.v3.step3.label']}
               </legend>
-              <p class="text-sm text-slate-500">
-                {t['storefront.rfq.responseTime']}
-              </p>
+              <p class="text-sm text-slate-500">{t['storefront.rfq.responseTime']}</p>
             </fieldset>
 
-            <div
-              class="flex flex-col-reverse items-stretch gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between"
-            >
+            <div class="flex flex-col-reverse items-stretch gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
               <a
                 href={homeHref}
                 class="text-sm font-medium text-slate-600 transition hover:text-slate-900 hover:underline"
@@ -266,39 +259,39 @@ const stepperLabels = [
           class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md lg:sticky lg:top-24"
           data-testid="rfq-summary"
         >
-          <h2 class="text-lg font-bold text-slate-900">
-            {t['storefront.b2b.rfq.v3.summary']}
-          </h2>
+          <h2 class="text-lg font-bold text-slate-900">{t['storefront.b2b.rfq.v3.summary']}</h2>
 
           <dl class="space-y-3 text-sm">
             <div class="flex items-center justify-between gap-2">
               <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.cantidad']}</dt>
-              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-cantidad">—</dd>
+              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-cantidad">
+                —
+              </dd>
             </div>
             <div class="flex items-center justify-between gap-2">
               <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.tecnica']}</dt>
-              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-tecnica">—</dd>
+              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-tecnica">
+                —
+              </dd>
             </div>
             <div class="flex items-center justify-between gap-2">
               <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.tipoProducto']}</dt>
-              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-producto">—</dd>
+              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-producto">
+                —
+              </dd>
             </div>
           </dl>
 
           <div class="border-t border-slate-200"></div>
 
           <div class="flex items-baseline justify-between gap-2">
-            <span class="text-sm text-slate-500">
-              {t['storefront.b2b.rfq.v3.totalLabel']}
-            </span>
+            <span class="text-sm text-slate-500">{t['storefront.b2b.rfq.v3.totalLabel']}</span>
             <span class="text-2xl font-bold text-slate-900" data-testid="rfq-summary-total">
               —
             </span>
           </div>
 
-          <p class="text-xs leading-relaxed text-slate-400">
-            {t['storefront.rfq.responseTime']}
-          </p>
+          <p class="text-xs leading-relaxed text-slate-400">{t['storefront.rfq.responseTime']}</p>
         </aside>
       </div>
 
@@ -326,20 +319,17 @@ const stepperLabels = [
    * real con manejo de errores.
    */
   const form = document.getElementById('rfq-form') as HTMLFormElement | null;
-  const summaryProducto = document.querySelector(
-    '[data-testid="rfq-summary-producto"]'
-  );
-  const summaryCantidad = document.querySelector(
-    '[data-testid="rfq-summary-cantidad"]'
-  );
-  const summaryTecnica = document.querySelector(
-    '[data-testid="rfq-summary-tecnica"]'
-  );
+  const summaryProducto = document.querySelector('[data-testid="rfq-summary-producto"]');
+  const summaryCantidad = document.querySelector('[data-testid="rfq-summary-cantidad"]');
+  const summaryTecnica = document.querySelector('[data-testid="rfq-summary-tecnica"]');
 
   function readValue(form: HTMLFormElement, name: string): string {
     const element = form.elements.namedItem(name);
-    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement ||
-      element instanceof HTMLSelectElement) {
+    if (
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLTextAreaElement ||
+      element instanceof HTMLSelectElement
+    ) {
       return element.value;
     }
     return '';

@@ -22,8 +22,7 @@ const meta: Meta<typeof HomeHero> = {
   args: {
     eyebrow: 'Edición limitada · Drops semanales',
     title: 'Diseña estampados que la gente quiere ponerse',
-    subtitle:
-      'Calidad premium, sin mínimos y entrega en menos de 7 días. Tu marca, tus diseños.',
+    subtitle: 'Calidad premium, sin mínimos y entrega en menos de 7 días. Tu marca, tus diseños.',
     primaryCta: { label: 'Empezar a diseñar', href: '/products' },
     secondaryCta: { label: 'Ver catálogo', href: '/products?filter=new' },
     trustBadges: [
@@ -62,9 +61,7 @@ export const SingleCta: Story = {
     subtitle: 'Solo este fin de semana. Stock limitado por unidad.',
     primaryCta: { label: 'Comprar ahora', href: '/products?sale=1' },
     secondaryCta: undefined,
-    trustBadges: [
-      { iconKey: 'shield-check', label: 'Garantía oficial' },
-    ],
+    trustBadges: [{ iconKey: 'shield-check', label: 'Garantía oficial' }],
   },
 };
 
@@ -72,8 +69,7 @@ export const Panda: Story = {
   args: {
     eyebrow: 'Panda Estampados · B2C estampados',
     title: 'Vende tu marca sin manejar inventario',
-    subtitle:
-      'Estampados personalizados con tu logo. NET 30 disponible para clientes calificados.',
+    subtitle: 'Estampados personalizados con tu logo. NET 30 disponible para clientes calificados.',
     primaryCta: { label: 'Cotizar mi diseño', href: '/rfq' },
     secondaryCta: { label: 'Ver precios', href: '/products' },
     trustBadges: [
@@ -135,8 +131,7 @@ export const MoralesStore: Story = {
 export const LongTitle: Story = {
   args: {
     eyebrow: 'Edición coleccionista',
-    title:
-      'Evangelion Unit-01 escala 1/6 con luz LED y base articulada premium',
+    title: 'Evangelion Unit-01 escala 1/6 con luz LED y base articulada premium',
     subtitle:
       'Una pieza de museo para los coleccionistas más exigentes. Stock limitado a 200 unidades worldwide.',
     primaryCta: { label: 'Reservar ahora', href: '/products/evangelion-unit-01' },

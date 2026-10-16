@@ -53,24 +53,20 @@ const options = ranges ?? DEFAULT_RANGES;
   aria-label="Selector de rango de fechas"
   class="inline-flex rounded-lg bg-slate-100 p-1 text-xs"
 >
-  {
-    options.map((r) => {
-      const isSelected = r.value === selected;
-      return (
-        <button
-          type="button"
-          aria-pressed={isSelected}
-          title={r.fullLabel}
-          class:list={[
-            'rounded-md px-3 py-1.5 font-medium transition',
-            isSelected
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-600 hover:bg-white/60',
-          ]}
-        >
-          {r.shortLabel}
-        </button>
-      );
-    })
-  }
+  {options.map((r) => {
+    const isSelected = r.value === selected;
+    return (
+      <button
+        type="button"
+        aria-pressed={isSelected}
+        title={r.fullLabel}
+        class:list={[
+          'rounded-md px-3 py-1.5 font-medium transition',
+          isSelected ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:bg-white/60',
+        ]}
+      >
+        {r.shortLabel}
+      </button>
+    );
+  })}
 </div>

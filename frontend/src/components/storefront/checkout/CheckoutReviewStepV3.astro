@@ -47,7 +47,9 @@ const subtotalFormatted = formatCurrency(subtotalCents, currencyCode);
           </span>
           <div class="flex flex-1 flex-col gap-0.5">
             <span class="text-[14px] font-semibold text-slate-900">{item.name}</span>
-            <span class="text-[12px] text-slate-500">{labels.qty}: {item.quantity}</span>
+            <span class="text-[12px] text-slate-500">
+              {labels.qty}: {item.quantity}
+            </span>
           </div>
           <div class="flex items-center gap-2">
             <div class="inline-flex items-center rounded-md border border-slate-300 bg-white">

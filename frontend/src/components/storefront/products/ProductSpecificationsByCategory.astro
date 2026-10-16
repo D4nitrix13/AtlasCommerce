@@ -25,9 +25,7 @@
  *    re-paint. El script inline solo persiste los toggles del
  *    usuario en esa misma cookie.
  */
-import type {
-  ProductSpecificationsByCategoryGroup,
-} from './ProductSpecificationsByCategory.types';
+import type { ProductSpecificationsByCategoryGroup } from './ProductSpecificationsByCategory.types';
 
 interface Props {
   /** Heading del bloque (i18n). */
@@ -49,46 +47,43 @@ const hasGroups = groups.length > 0;
 const headingId = 'product-specs-by-category-heading';
 ---
 
-{
-  hasGroups && (
-    <section
-      aria-labelledby={headingId}
-      class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
-    >
-      <h2
-        id={headingId}
-        class="mb-5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
-      >
-        {heading}
-      </h2>
+{hasGroups && (
+  <section
+    aria-labelledby={headingId}
+    class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
+  >
+    <h2 id={headingId} class="mb-5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+      {heading}
+    </h2>
 
-      <div class="flex flex-col gap-4">
-        {groups.map((group) => {
-          const specId = group.category.toLowerCase().replace(/\s+/g, '-');
-          return (
-            <details
-              id={`spec-${specId}`}
-              class="group overflow-hidden rounded-2xl border border-slate-200 bg-white"
-              data-spec-id={specId}
-              open={expanded.includes(specId) ? '' : undefined}
-            >
-              <summary class="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-bold text-slate-900 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
-                <span>{group.category}</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
-                  aria-hidden="true"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </summary>
+    <div class="flex flex-col gap-4">
+      {groups.map((group) => {
+        const specId = group.category.toLowerCase().replace(/\s+/g, '-');
+        return (
+          <details
+            id={`spec-${specId}`}
+            class="group overflow-hidden rounded-2xl border border-slate-200 bg-white"
+            data-spec-id={specId}
+            open={expanded.includes(specId) ? '' : undefined}
+          >
+            <summary class="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-bold text-slate-900 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+              <span>{group.category}</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </summary>
 
-              {group.items.length > 0 && (() => {
+            {group.items.length > 0 &&
+              (() => {
                 // Agrupa items en filas de a 2 pares (4-col grid).
                 // Si quedan items impares, la última fila tiene 1 solo par.
                 const rows: { items: typeof group.items }[] = [];
@@ -136,13 +131,12 @@ const headingId = 'product-specs-by-category-heading';
                   </dl>
                 );
               })()}
-            </details>
-          );
-        })}
-      </div>
-    </section>
-  )
-}
+          </details>
+        );
+      })}
+    </div>
+  </section>
+)}
 
 <script is:inline>
   /**
@@ -178,18 +172,13 @@ const headingId = 'product-specs-by-category-heading';
    */
   (() => {
     const slug =
-      document
-        .querySelector('[data-product-slug]')
-        ?.getAttribute('data-product-slug') ?? 'default';
+      document.querySelector('[data-product-slug]')?.getAttribute('data-product-slug') ?? 'default';
     const COOKIE_NAME = `pdp-specs-expanded-${slug}`;
     const COOKIE_ATTRS = 'path=/; max-age=31536000; samesite=lax';
 
     // Regex escapada para tolerar slugs con caracteres especiales.
-    const escapeRegex = (s) =>
-      s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const cookieRegex = new RegExp(
-      `(?:^|;\\s*)${escapeRegex(COOKIE_NAME)}=([^;]*)`
-    );
+    const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const cookieRegex = new RegExp(`(?:^|;\\s*)${escapeRegex(COOKIE_NAME)}=([^;]*)`);
 
     // Parsea un string JSON a string[], tolerando basura. Devuelve []
     // si la entrada es null/undefined o si JSON.parse falla.
@@ -227,9 +216,7 @@ const headingId = 'product-specs-by-category-heading';
     const readPersisted = () => {
       const match = document.cookie.match(cookieRegex);
       const fromCookie =
-        match !== null && match[1] !== undefined
-          ? parseSet(decodeURIComponent(match[1]))
-          : [];
+        match !== null && match[1] !== undefined ? parseSet(decodeURIComponent(match[1])) : [];
       if (fromCookie.length > 0) return fromCookie;
       try {
         const ss = sessionStorage.getItem(COOKIE_NAME);
@@ -256,8 +243,7 @@ const headingId = 'product-specs-by-category-heading';
         /* quota excedida o storage inaccesible */
       }
       try {
-        const hash =
-          state.length > 0 ? `${HASH_PREFIX}${state.join(',')}` : '';
+        const hash = state.length > 0 ? `${HASH_PREFIX}${state.join(',')}` : '';
         const current = window.location.hash;
         if (hash !== current) {
           const url =
@@ -301,11 +287,7 @@ const headingId = 'product-specs-by-category-heading';
       (event) => {
         const target = event.target;
         if (target === null) return;
-        if (
-          !(target instanceof HTMLDetailsElement) ||
-          !target.hasAttribute('data-spec-id')
-        )
-          return;
+        if (!(target instanceof HTMLDetailsElement) || !target.hasAttribute('data-spec-id')) return;
         const id = target.getAttribute('data-spec-id');
         if (id === null) return;
         const current = new Set(expanded);

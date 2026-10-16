@@ -113,9 +113,7 @@ const detailHref = `${localePrefix}/account/orders/${order.id}`;
               {unitPrice} <span class="text-slate-400">×</span> {item.quantity}
             </p>
           </div>
-          <span class="shrink-0 text-sm font-bold tabular-nums text-slate-900">
-            {lineTotal}
-          </span>
+          <span class="shrink-0 text-sm font-bold tabular-nums text-slate-900">{lineTotal}</span>
         </li>
       );
     })}
@@ -129,7 +127,9 @@ const detailHref = `${localePrefix}/account/orders/${order.id}`;
     </h3>
     <dl class="flex flex-col gap-2 text-sm">
       <div>
-        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">{recipientLabel}</dt>
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">
+          {recipientLabel}
+        </dt>
         <dd class="mt-0.5 font-medium text-slate-900">{order.shippingAddress.recipient}</dd>
       </div>
       <div>
@@ -147,7 +147,9 @@ const detailHref = `${localePrefix}/account/orders/${order.id}`;
       {trackingNumber !== null && trackingCarrier !== null && (
         <div>
           <dt class="text-xs font-medium uppercase tracking-wider text-slate-500">Tracking</dt>
-          <dd class="mt-0.5 text-slate-700">{trackingCarrier} · {trackingNumber}</dd>
+          <dd class="mt-0.5 text-slate-700">
+            {trackingCarrier} · {trackingNumber}
+          </dd>
         </div>
       )}
     </dl>

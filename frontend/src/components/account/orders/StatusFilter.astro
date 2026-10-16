@@ -21,7 +21,8 @@
  *  - Estado actual expuesto via `data-status` en el contenedor
  *    padre para que un script de filtering pueda leerlo.
  */
-export type OrderStatusFilterValue = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatusFilterValue =
+  'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 interface StatusFilterOption {
   value: OrderStatusFilterValue;

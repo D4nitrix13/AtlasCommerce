@@ -145,12 +145,8 @@ const statusOptions = {
       >
         ⌕
       </div>
-      <p class="text-base font-semibold text-slate-900">
-        {t['admin.sales.orders.v3.empty']}
-      </p>
-      <p class="max-w-md text-sm text-slate-500">
-        {t['admin.sales.orders.v3.emptyHint']}
-      </p>
+      <p class="text-base font-semibold text-slate-900">{t['admin.sales.orders.v3.empty']}</p>
+      <p class="max-w-md text-sm text-slate-500">{t['admin.sales.orders.v3.emptyHint']}</p>
       <a
         href={clearFiltersHref}
         class="mt-2 inline-flex h-9 items-center rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
@@ -195,9 +191,7 @@ const statusOptions = {
   type BulkAction = 'exportCsv' | 'markShipped' | 'clear';
 
   function syncBulkBar(): void {
-    const checked = document.querySelectorAll<HTMLInputElement>(
-      '[data-order-checkbox]:checked'
-    );
+    const checked = document.querySelectorAll<HTMLInputElement>('[data-order-checkbox]:checked');
     const count = checked.length;
     const bar = document.querySelector<HTMLElement>('[data-bulk-bar]');
     if (!bar) return;
@@ -221,9 +215,7 @@ const statusOptions = {
   });
 
   document.addEventListener('click', (event) => {
-    const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(
-      '[data-bulk-action]'
-    );
+    const target = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-bulk-action]');
     if (!target) return;
     const action = (target.dataset.bulkAction ?? '') as BulkAction;
     if (action === 'clear') {

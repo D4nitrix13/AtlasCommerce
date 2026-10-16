@@ -54,10 +54,7 @@ const { heading, subheading, logos } = Astro.props;
 ---
 
 {logos.length > 0 && (
-  <section
-    aria-labelledby="b2b-clients-heading"
-    class="border-y border-slate-200 bg-white"
-  >
+  <section aria-labelledby="b2b-clients-heading" class="border-y border-slate-200 bg-white">
     <div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
       <header class="mb-8 text-center sm:mb-10">
         <h2
@@ -66,9 +63,7 @@ const { heading, subheading, logos } = Astro.props;
         >
           {heading}
         </h2>
-        {subheading && (
-          <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>
-        )}
+        {subheading && <p class="mt-2 text-base text-slate-600 sm:text-lg">{subheading}</p>}
       </header>
 
       <ul class="grid list-none grid-cols-2 gap-5 p-0 sm:grid-cols-3 lg:grid-cols-6">
