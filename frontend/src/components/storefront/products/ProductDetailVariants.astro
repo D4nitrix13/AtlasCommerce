@@ -1,68 +1,58 @@
 ---
 /**
- * ProductDetailVariants — selector de variantes estilo Bonfire (v3).
+ * ProductDetailVariants — selector de COLOR (swatches) del detail v4.
  *
- * Diseño replicado del IA mock 5 (Bonfire-style product detail):
- *  - Tallas como pills (`rounded-full`), activas = `bg-[var(--primary)]
- *    text-white`, inactivas = borde slate + texto slate.
- *  - Colores como swatches redondos (44×44), activos = scale 110% +
- *    ring `[var(--primary)]`, inactivos = `hover:scale-105`.
- *  - Sin lógica de inventario (Trello card `v3`): las opciones son
- *    estáticas, hardcoded como `{ id, label, hex? }`. Cuando exista
- *    backend real, este componente recibe la lista del padre.
- *  - Renderiza un `<fieldset>` + `<legend>` por grupo (size / color)
- *    para mantener el agrupamiento semántico + accesibilidad.
- *  - Es un componente visual puro: no interactúa con URL ni form. El
- *    padre pasa el `selected` por prop y maneja los cambios cuando
- *    llegue el cart store. Mientras tanto, los clicks son no-op.
+ * Decisiones de scope:
+ *  - Este componente ahora SOLO renderiza variantes de color. El slot
+ *    de tamaño se movió a `ProductSizeGrid` (grid 2-col estilo Nike)
+ *    y el slot de condición a `ProductFitSelector` (segmented pill).
+ *    Mantener `ProductDetailVariants` como swatches preserva la
+ *    responsabilidad SRP y reduce la complejidad condicional.
  *
- * `data-reveal` se aplica al wrapper raíz para coherencia con gallery.
+ * Diseño:
+ *  - Colores como swatches redondos (44×44).
+ *  - Activos = `scale-110 ring-[var(--primary)] ring-offset-2`.
+ *  - Inactivos = `hover:scale-105` + border sutil.
+ *  - Sin lógica de URL/form: el padre pasa `selected` y maneja
+ *    cambios cuando llegue el cart store.
+ *  - `<fieldset>` + `<legend>` para agrupamiento semántico + a11y.
+ *  - `data-reveal` aplicado al wrapper raíz para coherencia con gallery.
  */
 
 export interface VariantOption {
   /** ID estable para tracking. */
   id: string;
-  /** Label localizado (ej. "S", "Negro"). */
+  /** Label localizado (ej. "Negro"). */
   label: string;
-  /** Hex para swatches de color. */
+  /** Hex para el swatch. */
   hex?: string;
 }
 
-export interface ProductDetailVariantsLabels {
-  sizeLegend: string;
-  colorLegend: string;
-}
-
 interface Props {
-  /** Tipo de variantes que renderiza este bloque (size / color). */
-  type: 'size' | 'color';
-  /** Opciones disponibles. */
+  /** Opciones de color disponibles. */
   options: readonly VariantOption[];
   /** ID seleccionado actualmente. */
   selected?: string;
-  /** Labels i18n. */
-  labels: ProductDetailVariantsLabels;
+  /** Label accesible del grupo. */
+  legend: string;
+  /** Ocultar el legend visible (mantiene aria-label para a11y). */
+  hideLegend?: boolean;
 }
 
-const { type, options, selected, labels } = Astro.props;
-const isColor = type === 'color';
-const legendLabel = isColor ? labels.colorLegend : labels.sizeLegend;
+const { options, selected, legend, hideLegend = false } = Astro.props;
 ---
 
 <fieldset
   class="flex flex-col gap-3"
   data-reveal
-  data-variant-type={type}
+  data-variant-type="color"
 >
-  <legend class="text-sm font-bold text-slate-900">{legendLabel}</legend>
+  {!hideLegend && <legend class="text-sm font-bold text-slate-900">{legend}</legend>}
 
   <div
-    class:list={[
-      'flex flex-wrap gap-2.5',
-      isColor && 'gap-3',
-    ]}
-    role={isColor ? 'radiogroup' : 'radiogroup'}
-    aria-label={legendLabel}
+    class="flex flex-wrap gap-3"
+    role="radiogroup"
+    aria-label={legend}
   >
     {options.map((option) => {
       const isActive = option.id === selected;
@@ -71,22 +61,15 @@ const legendLabel = isColor ? labels.colorLegend : labels.sizeLegend;
           type="button"
           role="radio"
           aria-checked={isActive}
-          aria-label={isColor ? option.label : undefined}
+          aria-label={option.label}
           data-variant-id={option.id}
           class:list={[
-            'relative inline-flex items-center justify-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2',
-            isColor
-              ? 'h-11 w-11 rounded-full border border-black/10'
-              : 'h-12 rounded-full border-2 px-5 text-sm font-semibold',
-            !isColor && isActive && 'border-[var(--primary)] bg-[var(--primary)] text-white',
-            !isColor && !isActive && 'border-slate-200 bg-white text-slate-700 hover:text-slate-900',
-            isColor && isActive && 'scale-110 ring-2 ring-[var(--primary)] ring-offset-2',
-            isColor && !isActive && 'hover:scale-105',
+            'relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            isActive ? 'scale-110 ring-2 ring-[var(--primary,#475569)] ring-offset-2' : 'hover:scale-105',
           ]}
-          style={isColor && option.hex !== undefined ? `background-color: ${option.hex};` : undefined}
+          style={option.hex !== undefined ? `background-color: ${option.hex};` : undefined}
           title={option.label}
         >
-          {!isColor && <span>{option.label}</span>}
         </button>
       );
     })}

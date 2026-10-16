@@ -1,22 +1,26 @@
 ---
 /**
- * ProductInfo — bloque de info del producto: name, price, stock, badges,
- * Add to cart button, WishlistButton.
+ * ProductInfo — composición B2C estándar (badge + título + rating + precio).
  *
- * Layout B2C standard (Baymard research/product-page):
- *  - Categoría (eyebrow).
- *  - Name (h1).
- *  - Price + compare-at (si discount) + discount %.
- *  - Stock badge (out / low / in stock).
- *  - Badges marketing (Nuevo/Oferta/etc.) arriba del title.
- *  - Add to cart button (primary) + Wishlist button (secondary icon).
- *  - Hint de "el carrito se habilita en próxima fase" placeholder.
+ * Wrapper que delega a los componentes específicos (`ProductHeader`,
+ * `ProductPrice`, `ProductCTAs`). Mantener este wrapper permite que
+ * páginas existentes (card detail, /[locale]/products/[slug]) sigan
+ * consumiendo un solo componente sin acoplarse al detalle de cada
+ * sub-pieza.
+ *
+ * Decisiones:
+ *  - Rate moved out — el padre lo computa y lo pasa.
+ *  - Stock check collapsed: el padre decide `inStock`.
+ *  - Quantity selector y wishlist siguen siendo piezas separadas
+ *    ya que no siempre se renderizan juntos (e.g. cards en grids).
  */
+
+import ProductHeader from './ProductHeader.astro';
+import ProductPrice from './ProductPrice.astro';
+import ProductCTAs from './ProductCTAs.astro';
 import Badge from '../../ui/Badge.astro';
-import Button from '../../ui/Button.astro';
-import WishlistButton from './WishlistButton.astro';
 import ProductQuantitySelector from './ProductQuantitySelector.astro';
-import { formatCurrency } from '../../../lib/formatters';
+import WishlistButton from './WishlistButton.astro';
 import type { ProductBadge } from '../../../types/catalog';
 
 export interface ProductInfoLabels {
@@ -25,7 +29,6 @@ export interface ProductInfoLabels {
   onlyLeft: string;
   addToCart: string;
   addingToCart: string;
-  addToCartHint: string;
   category: string;
   badgeNew: string;
   badgeSale: string;
@@ -36,6 +39,7 @@ export interface ProductInfoLabels {
   wishlistAdd: string;
   wishlistAdded: string;
   wishlistRemove: string;
+  highlyRated: string;
 }
 
 interface Props {
@@ -47,15 +51,12 @@ interface Props {
   stock: number;
   badges: readonly ProductBadge[];
   categoryLabel?: string;
-  /** Locale-prefixed href al detail (referencia para back link). */
   hrefBase: string;
-  /** Estado actual del wishlist (placeholder). */
+  rating?: { average: number; count: number };
+  highlyRated?: boolean;
   isInWishlist?: boolean;
-  /** Locale-prefixed href al login. */
   loginHref?: string;
-  /** Cantidad actual seleccionada. */
   quantity?: number;
-  /** Mostrar estado loading del Add to Cart (placeholder). */
   isAddingToCart?: boolean;
 }
 
@@ -68,6 +69,8 @@ const {
   stock,
   badges,
   categoryLabel,
+  rating,
+  highlyRated = false,
   hrefBase,
   isInWishlist = false,
   loginHref,
@@ -76,20 +79,11 @@ const {
 } = Astro.props;
 
 const isOutOfStock = stock <= 0;
-const isLowStock = !isOutOfStock && stock <= 5;
-const discountPercent =
-  compareAtPriceCents !== undefined && compareAtPriceCents > priceCents
-    ? Math.round(((compareAtPriceCents - priceCents) / compareAtPriceCents) * 100)
-    : null;
 
-const priceFormatted = formatCurrency(priceCents, currencyCode);
-const compareAtFormatted =
-  compareAtPriceCents !== undefined ? formatCurrency(compareAtPriceCents, currencyCode) : null;
-
-const wishlistLabels = {
-  add: labels.wishlistAdd,
-  added: labels.wishlistAdded,
-  remove: labels.wishlistRemove,
+const badgeToLabel: Record<ProductBadge, keyof ProductInfoLabels> = {
+  new: 'badgeNew',
+  sale: 'badgeSale',
+  low_stock: 'badgeLowStock',
 };
 
 const qtyLabels = {
@@ -97,63 +91,46 @@ const qtyLabels = {
   decrement: labels.quantityDecrement,
   increment: labels.quantityIncrement,
 };
+
+const wishlistLabels = {
+  add: labels.wishlistAdd,
+  added: labels.wishlistAdded,
+  remove: labels.wishlistRemove,
+};
 ---
 
 <header class="flex flex-col gap-4">
-  {/* Category eyebrow */}
-  {categoryLabel !== undefined && (
-    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-      {labels.category}: <span class="text-slate-700">{categoryLabel}</span>
-    </p>
-  )}
+  <ProductHeader
+    eyebrow={categoryLabel}
+    title={name}
+    rating={rating}
+    highlyRated={highlyRated}
+    highlyRatedLabel={labels.highlyRated}
+  />
 
-  {/* Title */}
-  <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{name}</h1>
-
-  {/* Badges marketing */}
   {badges.length > 0 && (
     <div class="flex flex-wrap gap-2">
-      {badges.map((badge) => {
-        if (badge === 'new') {
-          return <Badge variant="primary" label={labels.badgeNew} />;
-        }
-        if (badge === 'sale') {
-          return <Badge status="processing" label={labels.badgeSale} />;
-        }
-        if (badge === 'low_stock') {
-          return <Badge status="shipped" label={labels.badgeLowStock} />;
-        }
-        return null;
-      })}
+      {badges.map((badge) => (
+        <Badge variant="neutral" label={labels[badgeToLabel[badge]]} />
+      ))}
     </div>
   )}
 
-  {/* Price block */}
-  <div class="flex items-end gap-3">
-    <span class="text-3xl font-bold tabular-nums text-slate-900">{priceFormatted}</span>
-    {compareAtFormatted !== null && (
-      <span class="text-base text-slate-400 tabular-nums line-through">{compareAtFormatted}</span>
-    )}
-    {discountPercent !== null && (
-      <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
-        −{discountPercent}%
-      </span>
-    )}
-  </div>
+  <ProductPrice
+    currentCents={priceCents}
+    compareAtCents={compareAtPriceCents}
+    currency={currencyCode}
+  />
 
-  {/* Stock badge */}
-  <div class="flex flex-wrap items-center gap-2">
+  <div class="flex items-center gap-2">
     {isOutOfStock ? (
-      <Badge status="cancelled" label={labels.outOfStock} />
-    ) : isLowStock ? (
-      <Badge status="shipped" label={labels.onlyLeft.replace('{count}', String(stock))} />
+      <Badge variant="neutral" label={labels.outOfStock} />
     ) : (
       <Badge status="delivered" label={labels.inStock} />
     )}
   </div>
 
-  {/* Qty + Add to cart + Wishlist */}
-  <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
+  <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end">
     <ProductQuantitySelector
       labels={qtyLabels}
       quantity={quantity}
@@ -161,25 +138,12 @@ const qtyLabels = {
       max={Math.max(1, stock)}
       hrefBase={hrefBase}
     />
-
-    <div class="flex flex-1 flex-col gap-2">
-      <div class="flex items-center gap-2">
-        <Button
-          variant="primary"
-          size="lg"
-          disabled={isOutOfStock}
-          loading={isAddingToCart}
-          fullWidth={true}
-        >
-          {isOutOfStock
-            ? labels.outOfStock
-            : isAddingToCart
-              ? labels.addingToCart
-              : labels.addToCart}
-        </Button>
-        <WishlistButton labels={wishlistLabels} isInWishlist={isInWishlist} loginHref={loginHref} />
-      </div>
-      <p class="text-xs text-slate-500">{labels.addToCartHint}</p>
-    </div>
+    <ProductCTAs
+      addToCartLabel={isOutOfStock ? labels.outOfStock : isAddingToCart ? labels.addingToCart : labels.addToCart}
+      favoriteLabel={isInWishlist ? labels.wishlistAdded : labels.wishlistAdd}
+      inStock={!isOutOfStock}
+      isFavorite={isInWishlist}
+    />
+    <WishlistButton labels={wishlistLabels} isInWishlist={isInWishlist} loginHref={loginHref} />
   </div>
 </header>

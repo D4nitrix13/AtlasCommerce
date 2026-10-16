@@ -1,81 +1,135 @@
 ---
 /**
- * ProductDetailGallery — galería de producto estilo Bonfire (v3).
+ * ProductDetailGallery — galería de producto v10 (carousel + thumbnails).
  *
- * Diseño replicado del IA mock 5 (Bonfire-style product detail):
- *  - Main image cuadrada con marco `rounded-2xl border border-slate-200`.
- *  - Thumbnails 80×80 alineados verticalmente a la izquierda en desktop
- *    (`flex sm:flex-row-reverse`); apilados horizontalmente abajo en
- *    mobile (`flex-col-reverse sm:flex-row`).
- *  - Thumbnail activo = `ring-2 ring-[var(--primary)]` con fondo suave.
- *  - Usa `ProductMockup` (SVG inline) como placeholder visual cuando
- *    no hay asset real (no existe CDN de storefront aún).
- *  - Sin JS: la selección de imagen se modela con `?image=N` y la
- *    galería se renderiza en SSR; el padre pasa `selectedIndex`.
+ * Layout (patrón Gibson):
+ *   - Carousel horizontal con scroll-snap (sin flechas prev/next —
+ *     el usuario hace scroll o click en un thumbnail abajo para saltar).
+ *   - Thumbnail strip DEBAJO del carousel: 5 miniaturas ~80×80px, el
+ *     activo tiene borde primary. Click → scrollIntoView a la imagen.
+ *   - Sincronización del thumb activo vía `IntersectionObserver`.
  *
- * Aplica `data-reveal` para que `scroll-fx.css` anime el bloque al
- * entrar en viewport (Bonfire pattern).
+ * Decisiones:
+ *   - Container flex horizontal con `overflow-x-auto` + `snap-x snap-mandatory`.
+ *   - Cada celda con `aspect-[22/10]` (landscape, ~1600:730 = 2.19:1)
+ *     para imágenes de productos que vienen en formato horizontal.
+ *   - Sin framework JS: un `<script>` inline compartido (Astro dedupe)
+ *     lee todos los `[data-gallery-scroller]` y conecta:
+ *       1. thumbnails (click → scrollIntoView)
+ *       2. observer (intersection → toggle `data-active` en thumb)
+ *   - Si las imágenes son SVG inline, fallback visual con `ProductMockup`.
+ *   - Oculta scrollbar del carousel con `<style>` scoped.
  */
 import ProductMockup from '../../ui/ProductMockup.astro';
 
 export interface ProductDetailGalleryLabels {
-  /** Alt accesible para la imagen principal. */
+  /** Alt accesible para cada celda. */
   mainAlt: string;
-  /** Alt accesible para thumbnails. */
-  thumbAlt: (index: number) => string;
-  /** Marca de producto estampada en el mockup. */
+  /** Marca de producto estampada en el mockup fallback. */
   logoText: string;
 }
 
 interface Props {
-  /** URLs reales (si hubiera). Se mantienen para futuro CDN. */
+  /** URLs de imágenes del variant activo. */
   images: readonly string[];
   /** Nombre del producto (alt). */
   productName: string;
-  /** Índice de imagen seleccionada (0-based). */
-  selectedIndex?: number;
-  /** Variante del mockup SVG (shirt por default para apparel). */
+  /** Variante del mockup SVG (default: shirt). */
   mockupVariant?: 'shirt' | 'hoodie' | 'mug' | 'hat';
+  /** Etiqueta del badge "Highly Rated" / "Limitado" (si se muestra en la 1ª celda). */
+  highlyRatedLabel?: string;
   labels: ProductDetailGalleryLabels;
 }
 
 const {
   images,
   productName,
-  selectedIndex = 0,
   mockupVariant = 'shirt',
+  highlyRatedLabel,
   labels,
 } = Astro.props;
 
-// Fallback visual: si la imagen es un data URI o no hay imagen,
-// mostramos el ProductMockup. Sólo relevante hasta que llegue el CDN.
 const hasRealImages = images.length > 0 && !images[0]?.startsWith('data:image/svg');
-const safeIndex = Math.max(0, Math.min(selectedIndex, Math.max(0, images.length - 1)));
+const showBadge = highlyRatedLabel !== undefined && highlyRatedLabel !== '' && images.length > 0;
+const showThumbs = images.length > 1;
 ---
 
 <section
   aria-label="Product gallery"
-  class="flex flex-col-reverse gap-4 sm:flex-row"
+  class="flex flex-col gap-4"
   data-reveal
 >
-  {/* Thumbnails — columna izquierda en desktop, fila abajo en mobile */}
-  {images.length > 1 && (
-    <ul class="flex flex-row gap-3 sm:flex-col" role="list" aria-label="Image thumbnails">
+  <div
+    class:list={[
+      'flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:gap-4',
+      'gallery-scroller',
+    ]}
+    data-gallery-scroller
+    tabindex="0"
+    role="region"
+    aria-label="Galería de imágenes del producto"
+  >
+    {images.map((image, index) => {
+      const isFirst = index === 0;
+      const alt = `${labels.mainAlt} — vista ${index + 1}`;
+      return (
+        <figure
+          data-gallery-slide={index}
+          class="relative shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+          style="flex-basis: 100%;"
+        >
+          {hasRealImages ? (
+            <img
+              src={image}
+              alt={alt}
+              loading={isFirst ? 'eager' : 'lazy'}
+              decoding="async"
+              class="aspect-[22/10] h-full w-full object-cover"
+            />
+          ) : (
+            <div class="flex aspect-[22/10] h-full w-full items-center justify-center p-6 sm:p-10">
+              <ProductMockup
+                variant={mockupVariant}
+                logoText={labels.logoText}
+                class="h-2/3 w-2/3"
+              />
+            </div>
+          )}
+
+          {isFirst && showBadge && (
+            <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[var(--primary,#475569)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm">
+              {highlyRatedLabel}
+            </span>
+          )}
+        </figure>
+      );
+    })}
+  </div>
+
+  {showThumbs && (
+    <ul
+      class="flex justify-center gap-2 sm:gap-3"
+      role="tablist"
+      aria-label="Selector de imagen"
+      data-gallery-thumbs
+    >
       {images.map((image, index) => {
-        const isActive = index === safeIndex;
-        const alt = labels.thumbAlt(index + 1);
+        const isFirst = index === 0;
+        const alt = `${labels.mainAlt} — miniatura ${index + 1}`;
         return (
-          <li class="list-none shrink-0">
-            <a
-              href={`?image=${index}`}
-              aria-current={isActive ? 'true' : undefined}
-              aria-label={alt}
+          <li>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isFirst ? 'true' : 'false'}
+              aria-label={`Ir a imagen ${index + 1}`}
+              data-gallery-thumb={index}
               class:list={[
-                'flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2',
-                isActive
-                  ? 'opacity-100 ring-2 ring-[var(--primary)]'
-                  : 'opacity-70 hover:opacity-100',
+                'block overflow-hidden rounded-lg border-2 border-slate-200 bg-slate-50 p-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                'data-[active=true]:border-[var(--primary,#475569)] data-[active=true]:opacity-100',
+                'opacity-70 hover:opacity-100',
               ]}
+              data-active={isFirst ? 'true' : 'false'}
             >
               {hasRealImages ? (
                 <img
@@ -83,40 +137,124 @@ const safeIndex = Math.max(0, Math.min(selectedIndex, Math.max(0, images.length 
                   alt={alt}
                   loading="lazy"
                   decoding="async"
-                  class="h-full w-full object-cover"
+                  class="h-16 w-16 object-cover sm:h-[72px] sm:w-[72px]"
                 />
               ) : (
-                <ProductMockup
-                  variant={mockupVariant}
-                  logoText={labels.logoText}
-                  class="h-14 w-14"
-                />
+                <div class="flex h-16 w-16 items-center justify-center sm:h-[72px] sm:w-[72px]">
+                  <ProductMockup
+                    variant={mockupVariant}
+                    logoText={labels.logoText}
+                    class="h-10 w-10"
+                  />
+                </div>
               )}
-            </a>
+            </button>
           </li>
         );
       })}
     </ul>
   )}
-
-  {/* Imagen principal */}
-  <figure class="flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-    {hasRealImages ? (
-      <img
-        src={images[safeIndex]}
-        alt={labels.mainAlt}
-        loading="eager"
-        decoding="async"
-        class="aspect-square w-full object-cover"
-      />
-    ) : (
-      <div class="flex aspect-square w-full items-center justify-center p-8">
-        <ProductMockup
-          variant={mockupVariant}
-          logoText={labels.logoText}
-          class="h-56 w-56 sm:h-72 sm:w-72"
-        />
-      </div>
-    )}
-  </figure>
 </section>
+
+<script>
+  type GalleryBindings = {
+    section: HTMLElement;
+    scroller: HTMLElement;
+    thumbs: HTMLElement[];
+  };
+
+  function setupGallery(root: HTMLElement): void {
+    const section = root.closest('section');
+    if (!section) return;
+    const scroller = section.querySelector<HTMLElement>('[data-gallery-scroller]');
+    if (!scroller) return;
+    const thumbButtons = Array.from(
+      section.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]')
+    );
+    const slides = Array.from(scroller.querySelectorAll<HTMLElement>('[data-gallery-slide]'));
+    if (slides.length === 0) return;
+    const bindings: GalleryBindings = { section, scroller, thumbs: thumbButtons };
+
+    const setActive = (index: number) => {
+      bindings.thumbs.forEach((btn, i) => {
+        const active = i === index;
+        btn.dataset.active = active ? 'true' : 'false';
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+    };
+
+    // Persistencia del slide seleccionado en localStorage, por producto.
+    // Default = 0 (primera imagen); el usuario al clickear guarda la elección.
+    const STORAGE_PREFIX = 'pdp-gallery-slide:';
+    const productSlug =
+      document.querySelector('[data-product-slug]')?.getAttribute('data-product-slug') ??
+      'default';
+    const storageKey = STORAGE_PREFIX + productSlug;
+    let savedIndex = 0;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored !== null) {
+        const parsed = Number.parseInt(stored, 10);
+        if (Number.isFinite(parsed) && parsed >= 0 && parsed < slides.length) savedIndex = parsed;
+      }
+    } catch {
+      /* ignorar */
+    }
+    setActive(savedIndex);
+    // Restaurar la imagen guardada via scrollIntoView (instantáneo).
+    slides[savedIndex]?.scrollIntoView({ behavior: 'auto', inline: 'start', block: 'nearest' });
+
+    bindings.thumbs.forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        const target = slides[index];
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+        setActive(index);
+        try {
+          localStorage.setItem(storageKey, String(index));
+        } catch {
+          /* ignorar */
+        }
+      });
+    });
+
+    // IntersectionObserver: actualiza el thumb activo cuando el usuario
+    // hace scroll manual del carousel (sin click en thumb).
+    const observer = new IntersectionObserver(
+      () => {
+        const viewportCenter = scroller.scrollLeft + scroller.clientWidth / 2;
+        let bestIndex = 0;
+        let bestDistance = Number.POSITIVE_INFINITY;
+        slides.forEach((slide, i) => {
+          const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+          const distance = Math.abs(slideCenter - viewportCenter);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestIndex = i;
+          }
+        });
+        setActive(bestIndex);
+      },
+      {
+        root: scroller,
+        threshold: [0.25, 0.5, 0.75],
+      }
+    );
+    slides.forEach((slide) => observer.observe(slide));
+  }
+
+  document
+    .querySelectorAll<HTMLElement>('[data-reveal]')
+    .forEach((el) => {
+      if (el.querySelector('[data-gallery-scroller]')) setupGallery(el);
+    });
+</script>
+
+<style>
+  .gallery-scroller::-webkit-scrollbar {
+    display: none;
+  }
+  .gallery-scroller {
+    scrollbar-width: none;
+  }
+</style>
