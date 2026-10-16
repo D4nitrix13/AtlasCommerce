@@ -201,8 +201,13 @@ const showThumbs = images.length > 1;
       /* ignorar */
     }
     setActive(savedIndex);
-    // Restaurar la imagen guardada via scrollIntoView (instantáneo).
-    slides[savedIndex]?.scrollIntoView({ behavior: 'auto', inline: 'start', block: 'nearest' });
+    // Restaurar la imagen guardada con scrollIntoView en modo 'instant'
+    // (sin animación nativa). Diferimos la suscripción del observer al
+    // siguiente frame: si la hacemos antes, el observer dispara un
+    // callback por cada slide intermedio durante el scrollIntoView y
+    // el thumb activo "viaja" visualmente por cada imagen hasta llegar
+    // a la guardada (reportado como bug).
+    slides[savedIndex]?.scrollIntoView({ behavior: 'instant', inline: 'start', block: 'nearest' });
 
     bindings.thumbs.forEach((btn, index) => {
       btn.addEventListener('click', () => {
@@ -240,7 +245,11 @@ const showThumbs = images.length > 1;
         threshold: [0.25, 0.5, 0.75],
       }
     );
-    slides.forEach((slide) => observer.observe(slide));
+    // Suscribir después del frame siguiente para no capturar el scroll
+    // programático de arriba (ver comentario del scrollIntoView).
+    requestAnimationFrame(() => {
+      slides.forEach((slide) => observer.observe(slide));
+    });
   }
 
   document
