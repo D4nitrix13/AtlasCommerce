@@ -420,6 +420,147 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     finish: '10 cm',
     variantsCount: 1,
   },
+  // === Gibson Mod™ Collection / Custom — 10 productos (recon batch) ===
+  {
+    id: 9103,
+    slug: 'gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle',
+    name: 'Custom 1968 Les Paul Custom Reissue, Gloss, White Sparkle',
+    priceCents: 449900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Gloss, White Sparkle',
+    badges: ['new'],
+  },
+  {
+    id: 9104,
+    slug: 'gibson-mod-collection-es-335-smooth-sepia',
+    name: 'Mod™ Collection ES-335, Smooth Sepia',
+    priceCents: 299900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Smooth Sepia',
+    badges: ['new'],
+  },
+  {
+    id: 9105,
+    slug: 'gibson-mod-collection-sg-standard-holy-shift',
+    name: 'Mod™ Collection SG Standard, Holy Shift',
+    priceCents: 189900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Holy Shift',
+    badges: ['new'],
+  },
+  {
+    id: 9106,
+    slug: 'gibson-mod-collection-les-paul-standard-60s-hornet-burst',
+    name: 'Mod™ Collection Les Paul Standard 60s, Hornet Burst',
+    priceCents: 269900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Hornet Burst',
+    badges: ['new'],
+  },
+  {
+    id: 9107,
+    slug: 'gibson-mod-collection-sg-modern-tenacity-blue',
+    name: 'Mod™ Collection SG Modern, Tenacity Blue',
+    priceCents: 229900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Tenacity Blue',
+    badges: ['new'],
+  },
+  {
+    id: 9108,
+    slug: 'gibson-mod-collection-es-339-green-meme',
+    name: 'Mod™ Collection ES-339, Green Meme',
+    priceCents: 279900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Green Meme',
+    badges: ['new'],
+  },
+  {
+    id: 9109,
+    slug: 'gibson-mod-collection-flying-v-80s-boisterous-blue',
+    name: 'Mod™ Collection Flying V 80s, Boisterous Blue',
+    priceCents: 219900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Boisterous Blue',
+    badges: ['new'],
+  },
+  {
+    id: 9110,
+    slug: 'gibson-mod-collection-les-paul-junior-tropicalia',
+    name: 'Mod™ Collection Les Paul Junior, Tropicalia',
+    priceCents: 159900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Tropicalia',
+    badges: ['new'],
+  },
+  {
+    id: 9111,
+    slug: 'gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite',
+    name: 'Mod™ Collection Les Paul Custom 70s, Nighty-Nite Graphite',
+    priceCents: 329900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Nighty-Nite Graphite',
+    badges: ['new'],
+  },
+  {
+    id: 9112,
+    slug: 'gibson-mod-collection-flying-v-80s-flame-job-hot-rod',
+    name: 'Mod™ Collection Flying V 80s, Flame Job Hot Rod',
+    priceCents: 249900,
+    currency: 'USD',
+    imageUrl:
+      '/images/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-front-1600x1600-03.webp',
+    imageUrlSecondary:
+      '/images/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-back-1600x1600-04.webp',
+    vendor: 'Gibson',
+    finish: 'Flame Job Hot Rod',
+    badges: ['new'],
+  },
 ];
 
 /**
