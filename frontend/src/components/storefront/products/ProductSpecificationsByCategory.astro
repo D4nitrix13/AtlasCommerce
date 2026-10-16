@@ -67,6 +67,7 @@ const headingId = 'product-specs-by-category-heading';
           const specId = group.category.toLowerCase().replace(/\s+/g, '-');
           return (
             <details
+              id={`spec-${specId}`}
               class="group overflow-hidden rounded-2xl border border-slate-200 bg-white"
               data-spec-id={specId}
               open={expanded.includes(specId) ? '' : undefined}
@@ -203,10 +204,26 @@ const headingId = 'product-specs-by-category-heading';
       }
     };
 
-    // Lee el set persistido. Cookie es la fuente primaria; si no
-    // existe (o falla), cae a sessionStorage. Esto cubre reloads
-    // donde la cookie se perdió (bloqueo, política, etc.) pero el
-    // tab aún conserva el state en su storage de sesión.
+    // Lee el set persistido. Triple redundancia:
+    //   1. Cookie (SSR-renderable, persiste cross-tab, max-age 1 año)
+    //   2. sessionStorage (client-only, scoped al tab)
+    //   3. URL hash #spec=cuerpo,mástil (sobrevive incluso si las 2 fallan)
+    //
+    // Prioridad: cookie > sessionStorage > hash > [] (default vacío).
+    const HASH_PREFIX = '#spec=';
+    const readHash = () => {
+      try {
+        const hash = window.location.hash;
+        if (!hash.startsWith(HASH_PREFIX)) return [];
+        return hash
+          .slice(HASH_PREFIX.length)
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+      } catch {
+        return [];
+      }
+    };
     const readPersisted = () => {
       const match = document.cookie.match(cookieRegex);
       const fromCookie =
@@ -220,12 +237,12 @@ const headingId = 'product-specs-by-category-heading';
       } catch {
         /* sessionStorage inaccesible (modo privado, quota) */
       }
-      return [];
+      return readHash();
     };
 
-    // Escribe el set a AMBAS fuentes. Cada fuente es try/catch'd
-    // independiente: si cookie falla (bloqueada, quota) sessionStorage
-    // sigue; si sessionStorage falla (quota, inaccesible) cookie sigue.
+    // Escribe el set a las 3 fuentes. Cada fuente es try/catch'd
+    // independiente: si una falla, las otras siguen. Hash via
+    // history.replaceState (sin scroll jump, sin disparar navegación).
     const persistState = (state) => {
       const encoded = encodeURIComponent(JSON.stringify(state));
       try {
@@ -237,6 +254,20 @@ const headingId = 'product-specs-by-category-heading';
         sessionStorage.setItem(COOKIE_NAME, JSON.stringify(state));
       } catch {
         /* quota excedida o storage inaccesible */
+      }
+      try {
+        const hash =
+          state.length > 0 ? `${HASH_PREFIX}${state.join(',')}` : '';
+        const current = window.location.hash;
+        if (hash !== current) {
+          const url =
+            hash === ''
+              ? window.location.pathname + window.location.search
+              : window.location.pathname + window.location.search + hash;
+          window.history.replaceState(null, '', url);
+        }
+      } catch {
+        /* history API no disponible */
       }
     };
 
