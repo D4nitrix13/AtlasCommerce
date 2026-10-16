@@ -306,33 +306,44 @@ const galleryLabels = {
         // Si la URL trae #anchor, dejar que el browser haga scroll al anchor.
         if (window.location.hash !== '' && window.location.hash !== '#') return;
 
-        // (2) Leer posición guardada. Prioridad: sessionStorage > cookie > URL.
+        // (2) Leer posición guardada. Prioridad CORREGIDA:
+        //   URL search (?scrollY=N) PRIMARIO — lo que el user EXPLÍCITAMENTE
+        //     pone o comparte en el URL gana sobre todo lo demás.
+        //   sessionStorage (persist entre reloads del mismo tab).
+        //   cookie (persist cross-tab, pero SameSite puede fallar cross-domain).
+        //
+        // Antes sessionStorage era primario y eso hacía que el URL fuera
+        // ignorado cuando sessionStorage tenía un valor stale (caso real del
+        // user: sessionStorage=1600, URL=?scrollY=560 → iba a 1600, no a 560).
         const SS_KEY = 'pdp-scroll-y';
         const COOKIE_KEY = 'pdp-scroll-y';
         let savedY = null;
 
-        try {
-          const ss = sessionStorage.getItem(SS_KEY);
-          if (ss !== null) {
-            const parsed = Number.parseInt(ss, 10);
-            if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
-          }
-        } catch { /* sessionStorage no disponible */ }
+        // URL search PRIMARIO.
+        const urlMatch = window.location.search.match(/[?&]scrollY=(\d+)/);
+        if (urlMatch !== null && urlMatch[1] !== undefined) {
+          const parsed = Number.parseInt(urlMatch[1], 10);
+          if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
+        }
 
+        // sessionStorage fallback.
+        if (savedY === null) {
+          try {
+            const ss = sessionStorage.getItem(SS_KEY);
+            if (ss !== null) {
+              const parsed = Number.parseInt(ss, 10);
+              if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
+            }
+          } catch { /* sessionStorage no disponible */ }
+        }
+
+        // Cookie fallback.
         if (savedY === null) {
           const cookieMatch = document.cookie.match(
             new RegExp(`(?:^|;\\s*)${COOKIE_KEY}=([^;]*)`),
           );
           if (cookieMatch !== null && cookieMatch[1] !== undefined) {
             const parsed = Number.parseInt(decodeURIComponent(cookieMatch[1]), 10);
-            if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
-          }
-        }
-
-        if (savedY === null) {
-          const urlMatch = window.location.search.match(/[?&]scrollY=(\d+)/);
-          if (urlMatch !== null && urlMatch[1] !== undefined) {
-            const parsed = Number.parseInt(urlMatch[1], 10);
             if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
           }
         }
