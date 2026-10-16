@@ -55,6 +55,8 @@ class Product extends Model
         'base_price_cents',
         'cost_cents',
         'is_active',
+        'has_condition',
+        'has_sizes',
         'published_at',
     ];
 
@@ -62,6 +64,8 @@ class Product extends Model
         'base_price_cents' => 'integer',
         'cost_cents' => 'integer',
         'is_active' => 'boolean',
+        'has_condition' => 'boolean',
+        'has_sizes' => 'boolean',
         'published_at' => 'datetime',
     ];
 
