@@ -143,7 +143,7 @@ const headingId = 'product-specs-by-category-heading';
   )
 }
 
-<script>
+<script is:inline>
   /**
    * Persistencia del estado abierto/cerrado de las especificaciones
    * en una cookie (`pdp-specs-expanded-<slug>`). El render inicial
@@ -159,6 +159,11 @@ const headingId = 'product-specs-by-category-heading';
    *
    * La clave es por-producto (slug) para que distintos productos
    * no compartan estado de specs.
+   *
+   * `is:inline` para que el script se ejecute INMEDIATAMENTE al
+   * ser parseado (no se bundlea como module). Si el script se carga
+   * tarde, un click rápido del usuario antes del primer toggle
+   * disparado quedaría sin persistir.
    */
   (() => {
     const slug =
@@ -169,19 +174,19 @@ const headingId = 'product-specs-by-category-heading';
     const COOKIE_ATTRS = 'path=/; max-age=31536000; samesite=lax';
 
     // Regex escapada para tolerar slugs con caracteres especiales.
-    const escapeRegex = (s: string): string =>
+    const escapeRegex = (s) =>
       s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const cookieRegex = new RegExp(
       `(?:^|;\\s*)${escapeRegex(COOKIE_NAME)}=([^;]*)`
     );
 
-    const readCookie = (): string[] => {
+    const readCookie = () => {
       const match = document.cookie.match(cookieRegex);
       if (match === null || match[1] === undefined) return [];
       try {
-        const parsed: unknown = JSON.parse(decodeURIComponent(match[1]));
+        const parsed = JSON.parse(decodeURIComponent(match[1]));
         if (!Array.isArray(parsed)) return [];
-        return parsed.filter((v): v is string => typeof v === 'string');
+        return parsed.filter((v) => typeof v === 'string');
       } catch {
         return [];
       }
@@ -189,27 +194,41 @@ const headingId = 'product-specs-by-category-heading';
 
     let expanded = readCookie();
 
+    // Sincronización defensiva: si el servidor aplicó `open` en SSR
+    // (cookie presente), la cookie ya tiene esos IDs. Si por algún
+    // motivo el server NO tuvo la cookie (cookie stale, race, etc.)
+    // pero el HTML tiene `<details open>`, agregamos esos IDs al set
+    // y los persistimos. Garantiza que cualquier toggle visible se
+    // refleje en la cookie.
+    document.querySelectorAll('details[data-spec-id]').forEach((el) => {
+      if (el.hasAttribute('open')) {
+        const id = el.getAttribute('data-spec-id');
+        if (id !== null && !expanded.includes(id)) {
+          expanded.push(id);
+        }
+      }
+    });
+
     // Persistir cada toggle (delegado en document para aguantar re-renders).
     document.addEventListener(
       'toggle',
       (event) => {
-        const target = event.target as HTMLElement | null;
+        const target = event.target;
         if (target === null) return;
         if (
           !(target instanceof HTMLDetailsElement) ||
           !target.hasAttribute('data-spec-id')
         )
           return;
-        const id = target.dataset.specId;
-        if (id === undefined) return;
-        const current = new Set<string>(expanded);
+        const id = target.getAttribute('data-spec-id');
+        if (id === null) return;
+        const current = new Set(expanded);
         if (target.open) current.add(id);
         else current.delete(id);
         expanded = Array.from(current);
         try {
-          document.cookie = `${COOKIE_NAME}=${encodeURIComponent(
-            JSON.stringify(expanded)
-          )}; ${COOKIE_ATTRS}`;
+          document.cookie =
+            `${COOKIE_NAME}=${encodeURIComponent(JSON.stringify(expanded))}; ${COOKIE_ATTRS}`;
         } catch {
           /* cookies deshabilitadas o quota — ignorar */
         }
