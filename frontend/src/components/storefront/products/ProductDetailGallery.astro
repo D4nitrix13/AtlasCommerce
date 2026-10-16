@@ -339,7 +339,9 @@ const showThumbs = images.length > 1;
     position: absolute;
     width: 200px;
     height: 200px;
-    border: 2px solid theme(colors.slate.900);
+    /* slate-900 = #0f172a (valor hex directo). Tailwind 4 no resuelve
+     * theme(colors.slate.900) en CSS scoped — ver docs de migración. */
+    border: 2px solid #0f172a;
     border-radius: 9999px;
     background-repeat: no-repeat;
     pointer-events: none;
