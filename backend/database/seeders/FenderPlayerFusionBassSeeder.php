@@ -141,6 +141,11 @@ final class FenderPlayerFusionBassSeeder extends Seeder
                 'base_price_cents' => self::BASE_PRICE_CENTS,
                 'cost_cents' => (int) (self::BASE_PRICE_CENTS * 0.5),
                 'is_active' => true,
+                // La Voz Instrumentos vende mayoria nuevos (true) pero los
+                // bajos Fender NO tienen tallas relevantes (4/4, 3/4, etc.
+                // son irrelevantes para instrumentos eléctricos adultos).
+                'has_condition' => true,
+                'has_sizes' => false,
                 'published_at' => now(),
             ],
         );
