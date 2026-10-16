@@ -57,18 +57,103 @@ const cardLabels = {
 };
 ---
 
-<section aria-labelledby="related-heading" class="flex flex-col gap-4">
-  <h2 id="related-heading" class="text-xl font-bold text-slate-900 sm:text-2xl">
-    {labels.heading}
-  </h2>
+<section aria-labelledby="related-heading" class="flex flex-col gap-5">
+  <header class="flex items-center justify-between">
+    <h2 id="related-heading" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+      {labels.heading}
+    </h2>
+    {hasProducts && products.length > 3 && (
+      <div class="hidden items-center gap-2 sm:flex">
+        <button
+          type="button"
+          aria-label="Anterior"
+          data-related-prev
+          class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            class="h-4 w-4"
+            aria-hidden="true"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          aria-label="Siguiente"
+          data-related-next
+          class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            class="h-4 w-4"
+            aria-hidden="true"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+    )}
+  </header>
 
   {hasProducts ? (
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ul
+      class="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      role="list"
+      data-related-scroller
+    >
       {cardProducts.map((product) => (
-        <ProductCard product={product} locale={locale} labels={cardLabels} />
+        <li class="w-[228px] shrink-0 snap-start sm:w-[260px]">
+          <ProductCard product={product} locale={locale} labels={cardLabels} />
+        </li>
       ))}
-    </div>
+    </ul>
   ) : (
     <p class="text-sm italic text-slate-500">{labels.empty}</p>
   )}
 </section>
+
+<script>
+  // Scroll horizontal controlado por los botones prev/next.
+  function setupRelated(scroller: HTMLElement | null) {
+    if (scroller === null) return;
+    const section = scroller.closest('section');
+    const prev = section?.querySelector<HTMLButtonElement>('[data-related-prev]');
+    const next = section?.querySelector<HTMLButtonElement>('[data-related-next]');
+
+    const updateDisabled = () => {
+      if (prev === null || prev === undefined) return;
+      if (next === null || next === undefined) return;
+      prev.disabled = scroller.scrollLeft <= 4;
+      next.disabled = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 4;
+    };
+
+    if (prev !== null && prev !== undefined) {
+      prev.addEventListener('click', () => {
+        scroller.scrollBy({ left: -scroller.clientWidth * 0.8, behavior: 'smooth' });
+      });
+    }
+    if (next !== null && next !== undefined) {
+      next.addEventListener('click', () => {
+        scroller.scrollBy({ left: scroller.clientWidth * 0.8, behavior: 'smooth' });
+      });
+    }
+
+    scroller.addEventListener('scroll', updateDisabled, { passive: true });
+    updateDisabled();
+  }
+
+  document
+    .querySelectorAll<HTMLElement>('[data-related-scroller]')
+    .forEach((el) => setupRelated(el));
+</script>
