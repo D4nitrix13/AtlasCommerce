@@ -1036,6 +1036,9 @@ const en: Translations = {
   'storefront.products.detail.v4.reviews.showLess': 'Show less',
   'storefront.products.detail.v4.reviews.filterAll': 'All',
   'storefront.products.detail.v4.reviews.filterByRating': 'Filter by',
+  'storefront.products.detail.v4.reviews.like': 'Like',
+  'storefront.products.detail.v4.reviews.unlike': 'Unlike',
+  'storefront.products.detail.v4.reviews.loginRequired': 'Log in to like this review',
   'storefront.products.detail.v4.inclusions.tuningContent':
     'Our artisan technicians perform a thorough final inspection and set up every instrument before it is packed and shipped.',
   'storefront.products.detail.v4.inclusions.caseContent':

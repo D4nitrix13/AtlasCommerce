@@ -1040,6 +1040,9 @@ const es: Translations = {
   'storefront.products.detail.v4.reviews.showLess': 'Ver menos',
   'storefront.products.detail.v4.reviews.filterAll': 'Todas',
   'storefront.products.detail.v4.reviews.filterByRating': 'Filtrar por',
+  'storefront.products.detail.v4.reviews.like': 'Me gusta',
+  'storefront.products.detail.v4.reviews.unlike': 'Quitar me gusta',
+  'storefront.products.detail.v4.reviews.loginRequired': 'Inicia sesión para dar me gusta',
   'storefront.products.detail.v4.inclusions.tuningContent':
     'Nuestros técnicos artesanos llevan a cabo una pormenorizada inspección final y configuran los instrumentos antes de que se embalen y envíen.',
   'storefront.products.detail.v4.inclusions.caseContent':
