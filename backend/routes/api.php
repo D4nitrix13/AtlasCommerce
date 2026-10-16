@@ -51,6 +51,7 @@ use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetContro
 use App\Http\Controllers\Api\Storefront\Auth\StorefrontAuthController;
 use App\Http\Controllers\Api\Storefront\Checkout\CheckoutController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
+use App\Http\Controllers\Api\Storefront\ProductReviewLikeController;
 use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
 use App\Http\Controllers\Api\Storefront\RfqController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
@@ -1082,6 +1083,23 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('account/reviews', [ProductReviewController::class, 'indexForCustomer'])
         ->name('account.reviews.index');
 
+    /*
+    |--------------------------------------------------------------------------
+    | ProductReviewLike (T8) — like/unlike de reseñas
+    |--------------------------------------------------------------------------
+    |
+    | Toggle de "me gusta" sobre una reseña de producto. POST es
+    | idempotente (firstOrCreate), DELETE también (delete sobre
+    | resultado vacío no falla). Ver ProductReviewLikeController.
+    |
+    */
+
+    Route::post('storefront/reviews/{review}/like', [ProductReviewLikeController::class, 'store'])
+        ->name('storefront.reviews.like.store');
+
+    Route::delete('storefront/reviews/{review}/like', [ProductReviewLikeController::class, 'destroy'])
+        ->name('storefront.reviews.like.destroy');
+
     // RF-SUP-162: cliente autenticado hace pregunta sobre producto.
     Route::post('products/{product}/questions', [ProductQuestionController::class, 'store'])
         ->name('products.questions.store');
@@ -1225,4 +1243,11 @@ Route::middleware(['store.domain', 'store.maintenance'])->prefix('storefront')->
     // RFQ (F3): solicitud de cotización pública. No requiere auth.
     Route::post('/rfq', RfqController::class)
         ->name('storefront.rfq.store');
+
+    // T8 PDP reseñas — consulta pública de count + liked-by-current
+    // para que el storefront hidrate el botón antes de que el cliente
+    // se autentique. La mutación (POST/DELETE) vive en el grupo
+    // auth:sanctum más arriba.
+    Route::get('reviews/{review}/like', [ProductReviewLikeController::class, 'show'])
+        ->name('storefront.reviews.like.show');
 });
