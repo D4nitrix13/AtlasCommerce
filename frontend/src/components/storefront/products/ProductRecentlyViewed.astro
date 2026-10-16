@@ -1,0 +1,163 @@
+---
+/**
+ * ProductRecentlyViewed — grilla de productos vistos recientemente por el
+ * usuario, persistida en localStorage.
+ *
+ * Tracking:
+ *   - En cada visita al PDP, agregamos el slug del producto a la cola
+ *     en localStorage (max 8 productos únicos, más reciente al frente).
+ *   - Esta grilla lee esa cola y renderiza hasta N items en una grilla
+ *     responsive (excluyendo el producto actual).
+ *
+ * SSR fallback:
+ *   - Como en SSR no hay productos vistos todavía, la sección se
+ *     renderiza vacía u oculta hasta que el cliente hidrate y lea
+ *     localStorage.
+ *   - Marcamos `<section data-recently-viewed>` con `hidden` por
+ *     default; el script lo muestra tras hidratar.
+ *
+ * Decisiones:
+ *   - Sin JS framework: `<script>` inline conecta todo.
+ *   - Solo HTML-friendly: el tracking es no-bloqueante.
+ *   - Cada card usa la shape de `Product` (compatible con `ProductCard`).
+ */
+---
+
+**Placeholder SSR**: el contenido se renderiza client-side tras hidratar.
+
+<section
+  aria-labelledby="recently-viewed-heading"
+  class="hidden flex flex-col gap-4"
+  data-recently-viewed
+  data-product-slug=""
+>
+  <header class="flex items-center justify-between">
+    <h2
+      id="recently-viewed-heading"
+      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+    >
+      Visto recientemente
+    </h2>
+  </header>
+  <ul
+    class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+    role="list"
+    aria-label="Productos vistos recientemente"
+    data-recently-viewed-list
+  ></ul>
+</section>
+
+<script>
+  type RecentEntry = { slug: string; name: string; imageUrl: string; priceCents: number; currency: string; viewedAt: number };
+
+  const STORAGE_KEY = 'pdp-recently-viewed';
+  const MAX_ENTRIES = 8;
+  const MAX_DISPLAY = 5;
+
+  function readRecent(): RecentEntry[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw === null) return [];
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter(
+        (entry): entry is RecentEntry =>
+          typeof entry === 'object' &&
+          entry !== null &&
+          typeof (entry as RecentEntry).slug === 'string' &&
+          typeof (entry as RecentEntry).viewedAt === 'number',
+      );
+    } catch {
+      return [];
+    }
+  }
+
+  function writeRecent(list: RecentEntry[]): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, MAX_ENTRIES)));
+    } catch {
+      /* ignorar */
+    }
+  }
+
+  /**
+   * Llamar al cargar el PDP para registrar el producto actual.
+   * Usa `data-product-slug` (que slug.astro debe setear) + el nombre y
+   * precio que se pasan via window.__PRODUCT_META__ (inyectado por slug.astro).
+   *
+   * Si la meta no está disponible, registramos solo el slug (el componente
+   * intentará resolver el nombre/imagen vía API en una iteración futura).
+   */
+  function trackCurrentProduct(): void {
+    const section = document.querySelector<HTMLElement>('[data-recently-viewed]');
+    if (section === null) return;
+    const slug = section.dataset.productSlug;
+    if (slug === undefined || slug === '') return;
+
+    type ProductMeta = { name: string; imageUrl: string; priceCents: number; currency: string };
+    const meta = (window as unknown as { __PRODUCT_META__?: ProductMeta }).__PRODUCT_META__;
+    if (meta === undefined) return;
+
+    const list = readRecent().filter((entry) => entry.slug !== slug);
+    list.unshift({
+      slug,
+      name: meta.name,
+      imageUrl: meta.imageUrl,
+      priceCents: meta.priceCents,
+      currency: meta.currency,
+      viewedAt: Date.now(),
+    });
+    writeRecent(list);
+  }
+
+  function renderRecent(currentSlug: string): void {
+    const section = document.querySelector<HTMLElement>('[data-recently-viewed]');
+    if (section === null) return;
+    const listEl = section.querySelector<HTMLUListElement>('[data-recently-viewed-list]');
+    if (listEl === null) return;
+
+    const entries = readRecent()
+      .filter((entry) => entry.slug !== currentSlug)
+      .slice(0, MAX_DISPLAY);
+
+    if (entries.length === 0) {
+      // Mantener oculto si no hay productos vistos.
+      section.classList.add('hidden');
+      return;
+    }
+
+    section.classList.remove('hidden');
+    listEl.innerHTML = entries
+      .map(
+        (entry) => `
+        <li class="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-[var(--primary,#475569)] hover:shadow-sm">
+          <a href="/es/products/${entry.slug}" class="flex flex-col gap-2">
+            <span class="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-slate-50">
+              <img src="${entry.imageUrl}" alt="${entry.name}" loading="lazy" class="h-full w-full object-cover" />
+            </span>
+            <span class="text-xs font-medium text-slate-900 line-clamp-2">${entry.name}</span>
+            <span class="text-sm font-bold tabular-nums text-slate-900">${new Intl.NumberFormat('es-NI', { style: 'currency', currency: entry.currency }).format(entry.priceCents / 100)}</span>
+          </a>
+        </li>
+      `,
+      )
+      .join('');
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    trackCurrentProduct();
+    const section = document.querySelector<HTMLElement>('[data-recently-viewed]');
+    const slug = section?.dataset.productSlug ?? '';
+    if (slug !== '') renderRecent(slug);
+  });
+
+  // Fallback si astro:page-load no existe (DOMContentLoaded)
+  if (!document.body.hasAttribute('data-astro-page')) {
+    document.addEventListener('DOMContentLoaded', () => {
+      trackCurrentProduct();
+      const section = document.querySelector<HTMLElement>('[data-recently-viewed]');
+      const slug = section?.dataset.productSlug ?? '';
+      if (slug !== '') renderRecent(slug);
+    });
+  }
+</script>

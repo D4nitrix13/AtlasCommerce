@@ -1,12 +1,22 @@
 ---
 /**
- * ProductReviews — resumen de rating + lista mini de reviews.
+ * ProductReviews — resumen de rating + lista de reseñas con filtro y
+ * paginación interna (cargar más).
  *
- * Baymard research/product-page (gold standard):
- *  - Header con rating promedio grande + count + breakdown visual.
- *  - Lista mini (5 más recientes) + link "ver todas".
- *  - Estrellas renderizadas con SVG (accesible, no emoji).
- *  - "Verified purchase" badge para reseñas de buyers reales.
+ * UI/UX conventions (Amazon, Apple, Gibson, Nike):
+ *   - Header con rating promedio grande + count + breakdown por estrella.
+ *   - Filter chips por rating (Todos, 5★, 4★, etc.) con counts.
+ *   - Lista de reseñas: por defecto muestra 3, con botón "Cargar más"
+ *     si hay más. "Ver menos" para colapsar.
+ *   - Estrellas renderizadas con SVG (accesible, no emoji).
+ *   - "Compra verificada" badge para reseñas de buyers reales.
+ *
+ * Implementación:
+ *   - SSR renderiza las primeras N reseñas y los filtros.
+ *   - `<script>` inline lee `<details reviews-filter>` y `<details reviews-list>`
+ *     y conecta los chips de filtro + el botón "Cargar más".
+ *   - Filtro: oculta reseñas que no coincidan con el rating seleccionado.
+ *   - "Cargar más": expande el `<details>` para mostrar todas.
  */
 import type { ProductReview } from '../../../data/product-detail-mock';
 import { getAverageRating } from '../../../data/product-detail-mock';
@@ -21,6 +31,10 @@ export interface ProductReviewsLabels {
   empty: string;
   verified: string;
   starAlt: string;
+  loadMore: string;
+  showLess: string;
+  filterAll: string;
+  filterByRating: string;
 }
 
 interface Props {
@@ -30,20 +44,34 @@ interface Props {
   viewAllHref: string;
   /** Locale-prefixed href a escribir reseña. */
   writeHref: string;
+  /** Cuántas reseñas mostrar antes de "Cargar más". Default 3. */
+  initialCount?: number;
 }
 
-const { labels, reviews, viewAllHref, writeHref } = Astro.props;
+const {
+  labels,
+  reviews,
+  viewAllHref,
+  writeHref,
+  initialCount = 3,
+} = Astro.props;
 
 const hasReviews = reviews.length > 0;
 const average = hasReviews ? getAverageRating(reviews) : 0;
 const reviewCount = reviews.length;
 const countLabel = labels.count.replace('{count}', String(reviewCount));
-const visibleReviews = reviews.slice(0, 5);
+
+// Cuenta de reseñas por rating (para los filter chips).
+const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
+  stars,
+  count: reviews.filter((r) => Math.floor(r.rating) === stars).length,
+}));
 ---
 
 <section
   aria-labelledby="reviews-heading"
   class="flex flex-col gap-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+  data-reviews
 >
   <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex flex-col gap-2">
@@ -102,10 +130,50 @@ const visibleReviews = reviews.slice(0, 5);
     </a>
   </header>
 
+  {/* Filter chips por rating */}
   {hasReviews && (
-    <ul class="flex list-none flex-col gap-4 p-0" role="list">
-      {visibleReviews.map((review) => (
-        <li class="flex flex-col gap-2 border-t border-slate-100 pt-4 first:border-t-0 first:pt-0">
+    <div class="flex flex-wrap items-center gap-2" role="group" aria-label={labels.filterByRating}>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        {labels.filterByRating}:
+      </span>
+      <button
+        type="button"
+        data-reviews-filter="all"
+        aria-pressed="true"
+        class="inline-flex items-center gap-1.5 rounded-full border border-[var(--primary,#475569)] bg-[var(--primary,#475569)] px-3 py-1 text-xs font-semibold text-white transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+      >
+        {labels.filterAll} <span class="opacity-80">({reviewCount})</span>
+      </button>
+      {ratingCounts.map(({ stars, count }) => (
+        <button
+          type="button"
+          data-reviews-filter={stars}
+          aria-pressed="false"
+          disabled={count === 0}
+          class:list={[
+            'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            'data-[active=true]:border-[var(--primary,#475569)] data-[active=true]:bg-[var(--primary,#475569)]/5 data-[active=true]:text-[var(--primary,#475569)]',
+            count === 0 && 'cursor-not-allowed opacity-50',
+          ]}
+        >
+          {stars}★ <span class="opacity-70">({count})</span>
+        </button>
+      ))}
+    </div>
+  )}
+
+  {hasReviews && (
+    <ul
+      class="flex list-none flex-col gap-4 p-0"
+      role="list"
+      data-reviews-list
+    >
+      {reviews.map((review) => (
+        <li
+          class="flex flex-col gap-2 border-t border-slate-100 pt-4 first:border-t-0 first:pt-0"
+          data-review-rating={Math.floor(review.rating)}
+          data-review-index={reviews.indexOf(review)}
+        >
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="text-sm font-semibold text-slate-900">{review.authorName}</span>
@@ -164,6 +232,32 @@ const visibleReviews = reviews.slice(0, 5);
     </ul>
   )}
 
+  {/* Cargar más / Ver menos */}
+  {hasReviews && reviews.length > initialCount && (
+    <div class="flex items-center justify-center border-t border-slate-100 pt-4">
+      <button
+        type="button"
+        data-reviews-toggle
+        data-initial-count={initialCount}
+        class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+      >
+        <span data-reviews-label-show>{labels.loadMore}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          class="h-4 w-4 transition-transform duration-200 group-aria-expanded:rotate-180"
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+    </div>
+  )}
+
   {hasReviews && reviews.length > 5 && (
     <div class="border-t border-slate-100 pt-4">
       <a
@@ -186,3 +280,100 @@ const visibleReviews = reviews.slice(0, 5);
     </div>
   )}
 </section>
+
+<script>
+  /**
+   * ProductReviews — interactividad:
+   *   1. Filter chips por rating: ocultan reseñas que no coincidan.
+   *   2. Botón "Cargar más": muestra todas las reseñas (oculta las extras inicialmente).
+   */
+  function setupReviewsFilter(root: HTMLElement): void {
+    const filterButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[data-reviews-filter]')
+    );
+    const reviewItems = Array.from(
+      root.querySelectorAll<HTMLElement>('[data-review-rating]')
+    );
+    const toggleBtn = root.querySelector<HTMLButtonElement>('[data-reviews-toggle]');
+
+    if (filterButtons.length === 0) return;
+
+    // 1. Filter por rating
+    const applyFilter = (filter: string) => {
+      reviewItems.forEach((item) => {
+        const rating = Number(item.dataset.reviewRating ?? '0');
+        const index = Number(item.dataset.reviewIndex ?? '-1');
+        const initialCount = Number(toggleBtn?.dataset.initialCount ?? '3');
+
+        // Filter por rating
+        const matchesRating = filter === 'all' || rating === Number(filter);
+        // Límite por "cargar más": solo aplica cuando NO está expandido
+        const withinLimit = filter === 'all' || index < initialCount;
+        // Cuando el filtro está activo (no 'all'), mostramos todas las que coincidan
+        const visible = filter === 'all'
+          ? (withinLimit ? !item.hidden : true) // all: depende del toggle
+          : matchesRating; // filtrado: solo las del rating
+
+        if (filter === 'all') {
+          // Restaurar comportamiento del toggle
+          const isExpanded = toggleBtn?.getAttribute('aria-expanded') === 'true';
+          if (isExpanded || withinLimit) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        } else {
+          item.classList.toggle('hidden', !visible);
+        }
+      });
+
+      // Update aria-pressed en filter buttons
+      filterButtons.forEach((btn) => {
+        const isActive = btn.dataset.reviewsFilter === filter;
+        btn.setAttribute('aria-pressed', String(isActive));
+        btn.dataset.active = String(isActive);
+      });
+    };
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.reviewsFilter ?? 'all';
+        applyFilter(filter);
+      });
+    });
+
+    // 2. Toggle "Cargar más" / "Ver menos"
+    if (toggleBtn !== null) {
+      const labelEl = toggleBtn.querySelector<HTMLElement>('[data-reviews-label-show]');
+      const labelShow = labelEl?.textContent ?? '';
+      const labelHide = toggleBtn.dataset.reviewsLabelHide ?? labelShow;
+      const initialCount = Number(toggleBtn.dataset.initialCount ?? '3');
+
+      // Inicial: ocultar las reseñas extras
+      const applyToggleState = (expanded: boolean) => {
+        toggleBtn.setAttribute('aria-expanded', String(expanded));
+        if (labelEl !== null) labelEl.textContent = expanded ? labelHide : labelShow;
+        reviewItems.forEach((item) => {
+          const index = Number(item.dataset.reviewIndex ?? '-1');
+          const isVisible = expanded || index < initialCount;
+          // Solo aplicar si NO hay un filter activo
+          const activeFilterBtn = filterButtons.find((b) => b.getAttribute('aria-pressed') === 'true');
+          if (activeFilterBtn?.dataset.reviewsFilter === 'all') {
+            item.classList.toggle('hidden', !isVisible);
+          }
+        });
+      };
+
+      applyToggleState(false);
+
+      toggleBtn.addEventListener('click', () => {
+        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        applyToggleState(!expanded);
+      });
+    }
+  }
+
+  document
+    .querySelectorAll<HTMLElement>('[data-reviews]')
+    .forEach(setupReviewsFilter);
+</script>

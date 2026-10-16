@@ -1010,6 +1010,49 @@ const es: Translations = {
   'storefront.products.detail.v3.related': 'Productos relacionados',
   'storefront.products.detail.v3.outOfStock': 'Sin stock',
 
+  // ─── storefront: product detail v4 (La Voz Instrumentos layout) ──────
+  'storefront.products.detail.v4.favorite': 'Favorito',
+  'storefront.products.detail.v4.highlyRated': 'Muy bien valorado',
+  'storefront.products.detail.v4.condition.legend': 'Condición',
+  'storefront.products.detail.v4.condition.new': 'Nuevo',
+  'storefront.products.detail.v4.condition.used': 'Usado',
+  'storefront.products.detail.v4.size.legend': 'Tamaño',
+  'storefront.products.detail.v4.shipping.heading': 'Envío y devoluciones',
+  'storefront.products.detail.v4.details.introLabel': 'Tecnología y especificaciones',
+  'storefront.products.detail.v4.details.specsHeading': 'Ficha técnica',
+  'storefront.products.detail.v4.features.heading': 'Características',
+  'storefront.products.detail.v4.highlights.heading': 'Highlights',
+  'storefront.products.detail.v4.specsByCategory.heading': 'Especificaciones',
+  'storefront.products.detail.v4.inclusions.tuning': 'Ajuste incluido',
+  'storefront.products.detail.v4.inclusions.case': 'Estuche incluido',
+  'storefront.products.detail.v4.inclusions.warranty': 'Garantía de por vida',
+  'storefront.products.detail.v4.findStore': 'Buscar una tienda',
+  'storefront.products.detail.v4.limited': 'Limitado',
+  'storefront.products.detail.v4.shippingInline':
+    'Envío gratis a todo el país en pedidos mayores a $50',
+  'storefront.products.detail.v4.ratingCount': '{count} valoraciones',
+  'storefront.products.detail.v4.reviewCount': '{count} reseñas',
+  'storefront.products.detail.v4.writeReview': 'Escribir reseña',
+  'storefront.products.detail.v4.details.label': 'Detalles',
+  'storefront.products.detail.v4.details.more': 'Leer más',
+  'storefront.products.detail.v4.details.less': 'Leer menos',
+  'storefront.products.detail.v4.reviews.loadMore': 'Cargar más reseñas',
+  'storefront.products.detail.v4.reviews.showLess': 'Ver menos',
+  'storefront.products.detail.v4.reviews.filterAll': 'Todas',
+  'storefront.products.detail.v4.reviews.filterByRating': 'Filtrar por',
+  'storefront.products.detail.v4.inclusions.tuningContent':
+    'Nuestros técnicos artesanos llevan a cabo una pormenorizada inspección final y configuran los instrumentos antes de que se embalen y envíen.',
+  'storefront.products.detail.v4.inclusions.caseContent':
+    'Tu instrumento incluye un estuche rígido o blando de fábrica para guardarlo y transportarlo con seguridad.',
+  'storefront.products.detail.v4.inclusions.warrantyContent':
+    'Garantía oficial del fabricante de por vida en todos los instrumentos Custom Shop.',
+  'storefront.products.detail.v4.financing.syncLine':
+    'Sin intereses. $223/mes con financiamiento a 36 meses. Saber más',
+  'storefront.products.detail.v4.financing.shopPay':
+    'Desde $721.98/mes con Shop Pay. ?',
+  'storefront.products.detail.v4.financing.learnMore': 'Saber más',
+  'storefront.products.detail.v4.featuredArticle.cta': 'Leer artículo',
+
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   'storefront.checkout.title': 'Finalizar compra',
   'storefront.checkout.subtitle': 'Completá los pasos para confirmar tu pedido.',

@@ -1,0 +1,111 @@
+---
+/**
+ * ProductFrequentlyBoughtTogether — bundle bass + accesorios relacionados
+ * (patrón Fender/Gibson para e-commerce de instrumentos).
+ *
+ * Renderiza una grilla horizontal con:
+ *   - El producto principal (el bajo)
+ *   - 2-4 accesorios frecuentemente comprados juntos (amp, strap, case, etc.)
+ *   - Botón "Agregar todo al carrito" con precio total
+ *
+ * Decisiones:
+ *   - Sin JS: es puramente visual + link a la página del bundle.
+ *   - "+" visual entre items indica que se suman al bundle.
+ *   - Cada item es un mini-card vertical con imagen, nombre y precio.
+ */
+import type { Product } from '../../../types/catalog';
+
+interface BundleItem {
+  product: Product;
+  /** Posición en el bundle (1-based). Usado para aria-label. */
+  position: number;
+}
+
+interface Props {
+  /** Heading del bundle. */
+  heading: string;
+  /** Items del bundle — incluye el producto principal + accesorios. */
+  items: readonly BundleItem[];
+  /** URL para agregar todo al carrito (o ir al bundle). */
+  addAllHref: string;
+  /** Label del botón "Agregar todo". */
+  addAllLabel: string;
+  /** Locale para formatear precios. */
+  locale: string;
+}
+
+const { heading, items, addAllHref, addAllLabel, locale } = Astro.props;
+
+import { formatCurrency } from '../../../lib/formatters';
+
+const totalCents = items.reduce((sum, item) => sum + item.product.priceCents, 0);
+const totalLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD');
+---
+
+<section
+  aria-labelledby="bundle-heading"
+  class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
+  data-reveal
+>
+  <header class="mb-6 flex flex-col gap-1">
+    <h2
+      id="bundle-heading"
+      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+    >
+      {heading}
+    </h2>
+    <p class="text-sm text-slate-600">
+      Clientes que compraron este bajo también agregaron estos artículos a su carrito.
+    </p>
+  </header>
+
+  <ul
+    class="flex flex-wrap items-center justify-center gap-4 sm:gap-6"
+    role="list"
+    aria-label="Artículos frecuentemente comprados juntos"
+  >
+    {items.map((item, idx) => (
+      <Fragment>
+        <li class="flex w-32 flex-col items-center gap-2 sm:w-40">
+          <a
+            href={`/${locale}/products/${item.product.slug}`}
+            class="group flex w-full flex-col items-center gap-2 text-center"
+            aria-label={`${item.product.name} — posición ${item.position} del bundle`}
+          >
+            <span class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition group-hover:border-[var(--primary,#475569)]">
+              <img
+                src={item.product.imageUrl}
+                alt={item.product.name}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+            </span>
+            <span class="text-xs font-medium text-slate-900 sm:text-sm">{item.product.name}</span>
+            <span class="text-xs font-bold tabular-nums text-slate-900">
+              {formatCurrency(item.product.priceCents, item.product.currency ?? 'USD')}
+            </span>
+          </a>
+        </li>
+        {idx < items.length - 1 && (
+          <li aria-hidden="true" class="flex h-12 w-8 items-center justify-center text-2xl font-light text-slate-400">
+            +
+          </li>
+        )}
+      </Fragment>
+    ))}
+  </ul>
+
+  <footer class="mt-6 flex flex-col items-center gap-4 border-t border-slate-100 pt-6 sm:flex-row sm:justify-between">
+    <div class="flex flex-col gap-1 text-center sm:text-left">
+      <span class="text-xs uppercase tracking-wider text-slate-500">Total del bundle</span>
+      <span class="text-2xl font-bold tabular-nums text-slate-900">{totalLabel}</span>
+    </div>
+    <a
+      href={addAllHref}
+      class="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary,#475569)] px-6 text-sm font-bold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+    >
+      {addAllLabel}
+    </a>
+  </footer>
+</section>
