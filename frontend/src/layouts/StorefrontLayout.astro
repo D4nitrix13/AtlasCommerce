@@ -65,16 +65,25 @@ const tenantFavicon = tenantSlug
       rel="stylesheet"
     />
     <title>{title}</title>
-    {/* Scroll restoration: desactiva el scroll restoration automático del
-        browser LO ANTES POSIBLE (en el <head>, antes del primer paint).
-        Sin esta línea, el browser restaura scroll automáticamente a su
-        posición guardada en history ANTES de que mi script al inicio del
-        <main> pueda ejecutar scrollTo(). Con esta línea, mi scrollTo()
-        es la fuente de verdad. */}
+    {/* Scroll restoration robusto: setea manual ANTES del primer paint Y
+        hace scrollTo en 3 momentos (head, main, load) para que NADA
+        pueda sobrescribir la posición. Sin esto, el browser hace scroll
+        restoration automática a su historial y deja al user en el top. */}
     <script is:inline>
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
+      const restoreScroll = () => {
+        const urlMatch = window.location.search.match(/[?&]scrollY=(\d+)/);
+        if (urlMatch === null || urlMatch[1] === undefined) return;
+        const y = Number.parseInt(urlMatch[1], 10);
+        if (Number.isFinite(y) && y > 0) {
+          window.scrollTo({ top: y, left: 0, behavior: 'auto' });
+        }
+      };
+      restoreScroll();
+      document.addEventListener('DOMContentLoaded', restoreScroll);
+      window.addEventListener('load', restoreScroll);
     </script>
   </head>
 
