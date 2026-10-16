@@ -146,16 +146,26 @@ const headingId = 'product-specs-by-category-heading';
 <script is:inline>
   /**
    * Persistencia del estado abierto/cerrado de las especificaciones
-   * en una cookie (`pdp-specs-expanded-<slug>`). El render inicial
-   * ya viene con el atributo `open` aplicado en SSR desde esa
-   * misma cookie (la página padre la lee con `Astro.cookies.get()`);
-   * este script solo mantiene la cookie sincronizada con los
-   * toggles del usuario, sin tocar el DOM.
+   * en una cookie (`pdp-specs-expanded-<slug>`) con `sessionStorage`
+   * como redundancia. El render inicial ya viene con el atributo
+   * `open` aplicado en SSR desde esa cookie (la página padre la lee
+   * con `Astro.cookies.get()`); este script solo mantiene el set
+   * sincronizado con los toggles del usuario, sin tocar el DOM.
    *
-   * Cookie en lugar de localStorage para evitar el flash de
-   * re-paint: localStorage sólo se puede leer en cliente, después
-   * del primer paint, así que el `<details>` se renderizaba
-   * cerrado y el JS lo abría después.
+   * Por qué cookie PRIMARIO y sessionStorage BACKUP:
+   *   - Cookie: la única fuente que el server (Astro SSR) puede leer
+   *     y aplicar `open` en el HTML inicial → sin flash de re-paint.
+   *   - sessionStorage: NO es legible desde SSR (es API de cliente),
+   *     pero cubre el caso donde la cookie falla en el cliente
+   *     (SameSite=Lax + cross-domain en dev con `.test`, browser
+   *     con cookies deshabilitadas, third-party blocking, cookies
+   *     expiradas o limpiadas entre reloads). Cada toggle se escribe
+   *     a AMBAS; si la cookie falla, sessionStorage mantiene el set.
+   *
+   * Por qué sessionStorage y no localStorage: el estado de
+   * "qué acordeón dejé abierto" es por-sesión de navegación, no
+   * persistente entre visitas. sessionStorage se limpia al cerrar
+   * la pestaña, lo que casa con el modelo mental del usuario.
    *
    * La clave es por-producto (slug) para que distintos productos
    * no compartan estado de specs.
@@ -180,11 +190,12 @@ const headingId = 'product-specs-by-category-heading';
       `(?:^|;\\s*)${escapeRegex(COOKIE_NAME)}=([^;]*)`
     );
 
-    const readCookie = () => {
-      const match = document.cookie.match(cookieRegex);
-      if (match === null || match[1] === undefined) return [];
+    // Parsea un string JSON a string[], tolerando basura. Devuelve []
+    // si la entrada es null/undefined o si JSON.parse falla.
+    const parseSet = (raw) => {
+      if (typeof raw !== 'string' || raw.length === 0) return [];
       try {
-        const parsed = JSON.parse(decodeURIComponent(match[1]));
+        const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [];
         return parsed.filter((v) => typeof v === 'string');
       } catch {
@@ -192,14 +203,56 @@ const headingId = 'product-specs-by-category-heading';
       }
     };
 
-    let expanded = readCookie();
+    // Lee el set persistido. Cookie es la fuente primaria; si no
+    // existe (o falla), cae a sessionStorage. Esto cubre reloads
+    // donde la cookie se perdió (bloqueo, política, etc.) pero el
+    // tab aún conserva el state en su storage de sesión.
+    const readPersisted = () => {
+      const match = document.cookie.match(cookieRegex);
+      const fromCookie =
+        match !== null && match[1] !== undefined
+          ? parseSet(decodeURIComponent(match[1]))
+          : [];
+      if (fromCookie.length > 0) return fromCookie;
+      try {
+        const ss = sessionStorage.getItem(COOKIE_NAME);
+        if (ss !== null) return parseSet(ss);
+      } catch {
+        /* sessionStorage inaccesible (modo privado, quota) */
+      }
+      return [];
+    };
+
+    // Escribe el set a AMBAS fuentes. Cada fuente es try/catch'd
+    // independiente: si cookie falla (bloqueada, quota) sessionStorage
+    // sigue; si sessionStorage falla (quota, inaccesible) cookie sigue.
+    const persistState = (state) => {
+      const encoded = encodeURIComponent(JSON.stringify(state));
+      try {
+        document.cookie = `${COOKIE_NAME}=${encoded}; ${COOKIE_ATTRS}`;
+      } catch {
+        /* cookies deshabilitadas o quota */
+      }
+      try {
+        sessionStorage.setItem(COOKIE_NAME, JSON.stringify(state));
+      } catch {
+        /* quota excedida o storage inaccesible */
+      }
+    };
+
+    let expanded = readPersisted();
 
     // Sincronización defensiva: si el servidor aplicó `open` en SSR
-    // (cookie presente), la cookie ya tiene esos IDs. Si por algún
+    // (cookie presente), el set ya tiene esos IDs. Si por algún
     // motivo el server NO tuvo la cookie (cookie stale, race, etc.)
     // pero el HTML tiene `<details open>`, agregamos esos IDs al set
-    // y los persistimos. Garantiza que cualquier toggle visible se
-    // refleje en la cookie.
+    // y los persistimos inmediatamente a cookie + sessionStorage.
+    // Esto garantiza que:
+    //   1. Cualquier toggle visible quede en el set en memoria.
+    //   2. sessionStorage tenga el state desde el primer load
+    //      (no solo después del primer toggle), así un reload
+    //      inmediato tras el primer click persiste aún si cookie
+    //      está bloqueada.
     document.querySelectorAll('details[data-spec-id]').forEach((el) => {
       if (el.hasAttribute('open')) {
         const id = el.getAttribute('data-spec-id');
@@ -208,6 +261,7 @@ const headingId = 'product-specs-by-category-heading';
         }
       }
     });
+    if (expanded.length > 0) persistState(expanded);
 
     // Persistir cada toggle (delegado en document para aguantar re-renders).
     document.addEventListener(
@@ -226,12 +280,7 @@ const headingId = 'product-specs-by-category-heading';
         if (target.open) current.add(id);
         else current.delete(id);
         expanded = Array.from(current);
-        try {
-          document.cookie =
-            `${COOKIE_NAME}=${encodeURIComponent(JSON.stringify(expanded))}; ${COOKIE_ATTRS}`;
-        } catch {
-          /* cookies deshabilitadas o quota — ignorar */
-        }
+        persistState(expanded);
       },
       true
     );
