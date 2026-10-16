@@ -52,6 +52,20 @@ const {
 const hasRealImages = images.length > 0 && !images[0]?.startsWith('data:image/svg');
 const showBadge = highlyRatedLabel !== undefined && highlyRatedLabel !== '' && images.length > 0;
 const showThumbs = images.length > 1;
+
+/**
+ * Genera el srcset para los 4 tamaños WebP commiteados en f2ba9a59.
+ * Naming algorithm (ver scripts/convert-product-images.sh):
+ *   {slug}-{variant}-{WxH}-{NN}.webp
+ * El archivo base (1600x730) viene del caller; derivamos los otros
+ * 3 reemplazos exactos del token de tamaño en el filename.
+ */
+const SIZES_W = ['400', '800', '1200', '1600'] as const;
+const SIZES_H = ['183', '365', '547', '730'] as const;
+
+function imageSrcset(url: string): string {
+  return SIZES_W.map((w, i) => `${url.replace('-1600x730-', `-${w}x${SIZES_H[i]}-`)} ${w}w`).join(', ');
+}
 ---
 
 <section
@@ -84,9 +98,12 @@ const showThumbs = images.length > 1;
           {hasRealImages ? (
             <img
               src={image}
+              srcset={imageSrcset(image)}
+              sizes="(min-width: 1024px) 1160px, 100vw"
               alt={alt}
               loading={isFirst ? 'eager' : 'lazy'}
-              decoding="async"
+              decoding={isFirst ? 'sync' : 'async'}
+              fetchpriority={isFirst ? 'high' : undefined}
               class="aspect-[22/10] h-full w-full object-cover"
             />
           ) : (
@@ -137,6 +154,8 @@ const showThumbs = images.length > 1;
               {hasRealImages ? (
                 <img
                   src={image}
+                  srcset={imageSrcset(image)}
+                  sizes="(min-width: 640px) 72px, 64px"
                   alt={alt}
                   loading="lazy"
                   decoding="async"
