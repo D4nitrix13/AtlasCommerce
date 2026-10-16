@@ -53,6 +53,12 @@ class DatabaseSeeder extends Seeder
         // hacer login como cliente (customer-auth sprint, commit 5
         // de 5). Ver docs/getting-started/credentials.md.
         $this->call(class: CustomerTestSeeder::class);
+
+        // Catálogo demo — Fender Player Fusion Precision Bass HH con 2 variantes
+        // (Ebony Black + Halo Metallic) y 10 imágenes WebP responsive.
+        // Útil para validar la PDP con imágenes reales en lugar de SVG placeholder.
+        // Las imágenes deben estar en frontend/public/images/products/...
+        $this->call(class: FenderPlayerFusionBassSeeder::class);
     }
 
     /**
