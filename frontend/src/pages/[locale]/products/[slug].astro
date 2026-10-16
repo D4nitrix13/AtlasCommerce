@@ -556,4 +556,79 @@ const galleryLabels = {
     // pueda trackearlo via localStorage en el cliente.
     window.__PRODUCT_META__ = { slug: productSlug, name: productName, imageUrl: productImage, priceCents: productPriceCents, currency: productCurrency };
   </script>
+  <script is:inline>
+    // Scroll restoration: al recargar la página, permanecemos en la sección
+    // que el usuario estaba leyendo (Reseñas, Specs, etc.). El estado vive
+    // en sessionStorage (scoped al tab, muere al cerrar) y se rehidrata al
+    // cargar. Tres señales: (a) click en anchor con #id, (b) beforeunload,
+    // (c) restore al cargar.
+    //
+    // Si la URL ya trae un hash, el browser hace scroll al anchor por sí
+    // mismo — no interferimos (el hash gana sobre el sessionStorage).
+    (() => {
+      const STORAGE_KEY = 'pdp-scroll-state';
+
+      if (window.location.hash !== '' && window.location.hash !== '#') return;
+
+      // (a) Capturar sección clickeada vía anchor links (event delegation).
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const anchor = target.closest('a[href^="#"]');
+        if (anchor === null) return;
+        const href = anchor.getAttribute('href');
+        if (href === null || href === '' || href === '#') return;
+        if (document.querySelector(href) === null) return;
+        try {
+          sessionStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ type: 'anchor', id: href.slice(1) }),
+          );
+        } catch {
+          /* sessionStorage no disponible — ignorar */
+        }
+      });
+
+      // (b) Capturar scrollY antes de que la página se descargue (reload, navegación).
+      window.addEventListener('beforeunload', () => {
+        try {
+          sessionStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ type: 'position', y: window.scrollY }),
+          );
+        } catch {
+          /* sessionStorage no disponible — ignorar */
+        }
+      });
+
+      // (c) Restaurar al cargar (DOMContentLoaded para tener el DOM estable).
+      const restore = () => {
+        let saved;
+        try {
+          const raw = sessionStorage.getItem(STORAGE_KEY);
+          if (raw === null) return;
+          saved = JSON.parse(raw);
+        } catch {
+          return;
+        }
+        if (saved === null || typeof saved !== 'object') return;
+        if (saved.type === 'anchor' && typeof saved.id === 'string') {
+          const el = document.getElementById(saved.id);
+          if (el !== null) {
+            el.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }
+          return;
+        }
+        if (saved.type === 'position' && typeof saved.y === 'number') {
+          window.scrollTo({ top: saved.y, behavior: 'auto' });
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', restore);
+      } else {
+        restore();
+      }
+    })();
+  </script>
 </StorefrontLayout>
