@@ -479,17 +479,30 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
 
         // Auth gate best-effort. Sanctum stateful guarda el token en
         // cookie httpOnly → invisible al JS. Mientras no haya auth store
-        // en el cliente, redirigimos siempre a login (UX seguro: el 401
-        // del backend rechazaría igual). Cuando exista
-        // `customerAuthStore.getSnapshot().isAuthenticated`, sustituir
-        // por esa fuente única de verdad.
+        // en el cliente, mostramos un prompt inline con link a login en
+        // vez de redirigir (UX no disruptivo: el user decide).
+        // Cuando exista `customerAuthStore.getSnapshot().isAuthenticated`,
+        // sustituir por esa fuente única de verdad.
         const hasAuth =
           document.cookie.includes('sanctum_token') ||
           localStorage.getItem('auth_token') !== null;
 
         if (!hasAuth) {
-          const redirect = encodeURIComponent(window.location.pathname);
-          window.location.href = `${loginHref}?redirect=${redirect}`;
+          const hintElForLogin = btn.parentElement?.querySelector<HTMLElement>(
+            '[data-review-like-hint]'
+          );
+          if (hintElForLogin !== null && hintElForLogin !== null) {
+            const redirect = encodeURIComponent(window.location.pathname);
+            const originalText = hintElForLogin.textContent ?? '';
+            const link = document.createElement('a');
+            link.href = `${loginHref}?redirect=${redirect}`;
+            link.className = 'font-semibold text-[var(--primary,#475569)] hover:underline';
+            link.textContent = btn.dataset.labelLoginRequired ?? 'Inicia sesión para dar me gusta';
+            hintElForLogin.replaceChildren(link);
+            window.setTimeout(() => {
+              hintElForLogin.textContent = originalText;
+            }, 4000);
+          }
           return;
         }
 
