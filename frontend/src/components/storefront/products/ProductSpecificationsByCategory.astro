@@ -273,23 +273,24 @@ const headingId = 'product-specs-by-category-heading';
 
     let expanded = readPersisted();
 
-    // Sincronización defensiva: si el servidor aplicó `open` en SSR
-    // (cookie presente), el set ya tiene esos IDs. Si por algún
-    // motivo el server NO tuvo la cookie (cookie stale, race, etc.)
-    // pero el HTML tiene `<details open>`, agregamos esos IDs al set
-    // y los persistimos inmediatamente a cookie + sessionStorage.
-    // Esto garantiza que:
-    //   1. Cualquier toggle visible quede en el set en memoria.
-    //   2. sessionStorage tenga el state desde el primer load
-    //      (no solo después del primer toggle), así un reload
-    //      inmediato tras el primer click persiste aún si cookie
-    //      está bloqueada.
+    // Sincronización bidireccional DOM ↔ set:
+    //   - Si el DOM tiene `open` y el set NO → agregar al set
+    //     (caso normal: server rindió con open, leemos lo que el server aplicó).
+    //   - Si el set tiene el ID y el DOM NO tiene `open` → ABRIR el detail
+    //     (caso bug fixed: server NO pudo leer la cookie SameSite, renderizó
+    //     todo cerrado, pero el set tiene el state del URL hash/sessionStorage.
+    //     Sin esta rama, el detail quedaba cerrado al recargar).
+    //   - Si ambos coinciden → no hacer nada.
+    // Sin esta lógica, el server RENDIZA sin open (cookie SameSite cross-domain
+    // falla) y el script no podía abrir los details que el usuario tenía
+    // abiertos antes del reload.
     document.querySelectorAll('details[data-spec-id]').forEach((el) => {
+      const id = el.getAttribute('data-spec-id');
+      if (id === null) return;
       if (el.hasAttribute('open')) {
-        const id = el.getAttribute('data-spec-id');
-        if (id !== null && !expanded.includes(id)) {
-          expanded.push(id);
-        }
+        if (!expanded.includes(id)) expanded.push(id);
+      } else if (expanded.includes(id)) {
+        el.setAttribute('open', '');
       }
     });
     if (expanded.length > 0) persistState(expanded);
