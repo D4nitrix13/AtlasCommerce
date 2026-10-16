@@ -1,0 +1,88 @@
+---
+/**
+ * ProductHeader — cabecera del panel de info del producto.
+ *
+ * Adaptado del layout Nike: eyebrow (categoría arriba), h1, rating
+ * con estrella + promedio + count. Recibe el rating de un ProductRating
+ * separado o inline. Aquí decidimos mantener el rating row dentro del
+ * header para reducir props (single source of truth en el padre).
+ *
+ * El badge "Highly Rated" / "Muy bien valorado" se renderiza cerca del
+ * título cuando `highlyRated` es true — es un anclaje visual rápido
+ * para compradores. Se decidió NO usar el primitive Badge aquí
+ * porque queremos tamaño/typography distinto del Badge genérico.
+ *
+ * Tokens (todos los tamaños subidos un nivel para no verse apretado):
+ *   - Eyebrow: `text-sm font-bold uppercase tracking-wider` (categoría).
+ *   - h1: `text-4xl font-bold tracking-tight sm:text-5xl`.
+ *   - Rating row: `text-base flex items-center gap-3`.
+ *   - Badge "Highly Rated": `text-sm px-3 py-1 font-bold` (override vía class).
+ */
+import Badge from '../../ui/Badge.astro';
+
+export interface ProductHeaderRating {
+  /** Promedio (0–5, puede tener decimales). */
+  average: number;
+  /** Cantidad de valoraciones. */
+  count: number;
+}
+
+interface Props {
+  /** Eyebrow sobre el h1 — típicamente el nombre de la categoría. */
+  eyebrow?: string;
+  /** h1 — nombre del producto. */
+  title: string;
+  /** Rating. Si falta, no renderiza la fila. */
+  rating?: ProductHeaderRating;
+  /** Mostrar badge "Highly Rated" cerca del título. */
+  highlyRated?: boolean;
+  /** Texto del badge Highly Rated (i18n). */
+  highlyRatedLabel?: string;
+}
+
+const { eyebrow, title, rating, highlyRated = false, highlyRatedLabel } = Astro.props;
+
+const hasRating = rating !== undefined && rating.count > 0;
+const ratingText = rating !== undefined ? rating.average.toFixed(1) : '0.0';
+---
+
+<header class="flex flex-col gap-5">
+  {eyebrow !== undefined && eyebrow !== '' && (
+    <p class="text-sm font-bold uppercase tracking-wider text-[var(--primary,#475569)]">
+      {eyebrow}
+    </p>
+  )}
+
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+      {title}
+    </h1>
+    {highlyRated && highlyRatedLabel !== undefined && (
+      <Badge
+        variant="primary"
+        label={highlyRatedLabel}
+        class="gap-1 px-3 py-1 text-sm font-bold uppercase tracking-wide"
+      />
+    )}
+  </div>
+
+  {hasRating && (
+    <div class="flex items-center gap-3 text-base" data-testid="product-header-rating">
+      <span class="flex items-center gap-1 font-bold text-slate-900">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          class="h-5 w-5 text-amber-500"
+          aria-hidden="true"
+        >
+          <path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9 4.7 17.6l1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
+        </svg>
+        <span aria-hidden="true">{ratingText}</span>
+      </span>
+      <span class="text-slate-500">
+        {rating?.count} {rating !== undefined ? rating.count === 1 ? 'valoración' : 'valoraciones' : ''}
+      </span>
+    </div>
+  )}
+</header>

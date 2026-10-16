@@ -1,0 +1,66 @@
+---
+/**
+ * ProductFeaturedArticle — bloque de artículo/video destacado estilo Gibson.
+ *
+ * Layout: imagen 16/9 que ocupa todo el bloque, con overlay oscuro en
+ * el borde inferior para legibilidad del texto blanco encima. Eyebrow
+ * pequeño + título + CTA con flecha.
+ *
+ * Decisiones:
+ *  - `<a>` wrapping todo el bloque para que toda la imagen sea clickeable
+ *    (mejor área de tap mobile).
+ *  - `group` + `group-hover:scale-105` en la imagen para zoom sutil al
+ *    hover (sin JS, solo CSS).
+ *  - Sin dependencias externas: el arrow es SVG inline.
+ *  - Sin story separada para tipos — vive en `*.types.ts`.
+ */
+import type { ProductFeaturedArticleProps } from './ProductFeaturedArticle.types';
+
+type Props = ProductFeaturedArticleProps;
+
+const { eyebrow, title, imageUrl, imageAlt, href, ctaLabel } = Astro.props;
+const altText = imageAlt ?? title;
+const ctaText = ctaLabel ?? '';
+---
+
+<a
+  href={href}
+  class="group relative block overflow-hidden rounded-2xl border border-slate-200 bg-slate-900"
+  aria-label={title}
+>
+  <img
+    src={imageUrl}
+    alt={altText}
+    loading="lazy"
+    decoding="async"
+    class="aspect-[16/9] w-full object-cover transition duration-300 group-hover:scale-105"
+  />
+
+  <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" aria-hidden="true" />
+
+  <span class="absolute bottom-0 left-0 flex flex-col gap-1 p-6 text-white sm:p-8">
+    <span class="text-xs font-bold uppercase tracking-wider text-white/80">
+      {eyebrow}
+    </span>
+    <span class="text-2xl font-bold tracking-tight sm:text-3xl">
+      {title}
+    </span>
+    {ctaText !== '' && (
+      <span class="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white">
+        {ctaText}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          class="h-4 w-4 transition group-hover:translate-x-0.5"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </span>
+    )}
+  </span>
+</a>

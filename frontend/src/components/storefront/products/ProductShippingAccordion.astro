@@ -1,0 +1,47 @@
+---
+/**
+ * ProductShippingAccordion — accordion inline de "Shipping & Returns".
+ *
+ * Decisiones:
+ *   - Implementado con `<details>` / `<summary>` nativos — sin JS,
+ *     accesible con teclado por default (Space / Enter para toggle).
+ *   - El padre pasa el HTML del body; el componente renderiza un
+ *     contenedor con typography prose para texto largo.
+ *   - Un único accordion por bloque; si la página necesita más
+ *     accordions, el padre wrappea varias instancias.
+ *
+ * Tokens:
+ *   - Wrapper: `rounded-2xl border border-slate-200 bg-slate-50 px-4`.
+ *   - Summary: `flex cursor-pointer list-none items-center justify-between py-4 text-sm font-semibold`.
+ *   - Body: `prose prose-sm max-w-none text-slate-600`.
+ */
+interface Props {
+  /** Título del accordion (ej. "Envío y devoluciones"). */
+  label: string;
+  /** Contenido del panel (HTML/JSX). */
+  content: string;
+}
+
+const { label, content } = Astro.props;
+---
+
+<details class="group rounded-2xl border border-slate-200 bg-slate-50 px-4">
+  <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-sm font-bold text-slate-900 [&::-webkit-details-marker]:hidden">
+    <span>{label}</span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
+      aria-hidden="true"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  </summary>
+  <div class="prose prose-sm max-w-none pb-4 text-slate-600">
+    <Fragment set:html={content} />
+  </div>
+</details>

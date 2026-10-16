@@ -1,0 +1,77 @@
+---
+/**
+ * ProductSizeGrid — grid 2 columnas de botones de tamaño.
+ *
+ * Slots: rejilla responsive estilo Nike — full-width por botón,
+ * label centrado, botón activo = negro con texto blanco. En
+ * guitarras/bajos el "tamaño" suele ser el cuerpo (4/4, 3/4, 1/2)
+ * o el calibre de cuerdas; el componente es genérico y sólo pide
+ * `id` + `label` por opción.
+ *
+ * Decisiones:
+ *   - Grid 2 columnas por default (mobile-first) — la grid desktop
+ *     se ajusta según `options.length` (caller lo override si quiere).
+ *   - Botones `<button>` semánticos con `aria-pressed` para selección.
+ *   - Disabled state si la opción no aplica (`disabledIds`).
+ *   - Hidden input con el valor seleccionado para que el form lo lea.
+ *
+ * Tokens (todo más espacioso):
+ *   - Grid: `grid grid-cols-2 gap-2.5 sm:grid-cols-3`.
+ *   - Botón inactivo: `border border-slate-200 bg-white text-slate-900 hover:border-slate-400`.
+ *   - Botón activo: `bg-slate-900 text-white border-slate-900`.
+ *   - Botón disabled: `opacity-40 cursor-not-allowed`.
+ *   - Height botón: `h-14` (más alto que `h-12` para mejor legibilidad).
+ *   - Typography: `text-base font-semibold`.
+ */
+
+export interface SizeGridOption {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  /** Label accesible del grupo. */
+  legend: string;
+  /** Opciones del grid (típicamente 4-8). */
+  options: readonly SizeGridOption[];
+  /** ID de la opción seleccionada. */
+  selected?: string;
+  /** Name para el `<input>` que el form leerá. */
+  name: string;
+  /** IDs que NO están disponibles (se renderizan deshabilitados). */
+  disabledIds?: readonly string[];
+}
+
+const { legend, options, selected, name, disabledIds = [] } = Astro.props;
+
+const disabledSet = new Set(disabledIds);
+---
+
+<fieldset class="flex flex-col gap-3">
+  <legend class="text-sm font-bold text-slate-900">{legend}</legend>
+  <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3" role="radiogroup" aria-label={legend}>
+    {options.map((option) => {
+      const isActive = option.id === selected;
+      const isDisabled = disabledSet.has(option.id);
+      return (
+        <button
+          type="button"
+          role="radio"
+          aria-checked={isActive}
+          disabled={isDisabled}
+          data-size-option={option.id}
+          class:list={[
+            'inline-flex h-14 items-center justify-center rounded-lg border text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            isActive
+              ? 'border-slate-900 bg-slate-900 text-white'
+              : 'border-slate-200 bg-white text-slate-900 hover:border-slate-400',
+            isDisabled && 'cursor-not-allowed opacity-40',
+          ]}
+        >
+          {option.label}
+        </button>
+      );
+    })}
+  </div>
+  {selected !== undefined && <input type="hidden" name={name} value={selected} />}
+</fieldset>

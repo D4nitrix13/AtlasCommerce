@@ -1,0 +1,74 @@
+---
+/**
+ * ProductFitSelector — pill segmentado controlado.
+ *
+ * Slots: tabs segmentados estilo Nike ("Regular | Wide") adaptados a
+ * la realidad del dominio: condición del instrumento ("Nuevo | Usado"),
+ * tipo de cuerdas ("Acústico | Eléctrico"), etc.
+ *
+ * Decisiones:
+ *   - Usa role="tablist" / role="tab" con aria-selected por accesibilidad.
+ *   - El padre pasa `name` para emitir `<input type="hidden">` que el
+ *     form pueda consumir (single source of truth del selected).
+ *   - El padre pasa `selected` por prop; los clicks son no-op visuales
+ *     hasta que exista el cart store / form controller. El padre
+ *     puede manejar el cambio vía un cliente script externo.
+ *   - El componente marca `aria-controls` al `id` del form si se le
+ *     pasa `controls` — pero por ahora no hay paneles condicionales.
+ *
+ * Tokens (todo más espacioso):
+ *   - Wrapper: `rounded-full border border-slate-200 bg-slate-50 p-1`.
+ *   - Tab inactivo: `text-slate-600 hover:text-slate-900`.
+ *   - Tab activo: `bg-white text-slate-900 shadow-sm`.
+ *   - Typography: `text-base font-semibold`.
+ *   - Height: `h-11` (más alto que antes para dar más presencia).
+ */
+export interface FitSelectorOption {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  /** Label accesible del grupo (legend). */
+  legend: string;
+  /** Opciones del segmented control. */
+  options: readonly FitSelectorOption[];
+  /** ID de la opción seleccionada actualmente. */
+  selected: string;
+  /** Name para el `<input>` que el form leerá. */
+  name: string;
+}
+
+const { legend, options, selected, name } = Astro.props;
+---
+<fieldset class="flex flex-col gap-3">
+  <legend class="text-sm font-bold text-slate-900">{legend}</legend>
+
+  <div
+    role="tablist"
+    aria-label={legend}
+    class="inline-flex w-fit items-center rounded-full border border-slate-200 bg-slate-50 p-1"
+  >
+    {options.map((option) => {
+      const isActive = option.id === selected;
+      return (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={isActive}
+          data-fit-option={option.id}
+          class:list={[
+            'inline-flex h-11 items-center justify-center rounded-full px-6 text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            isActive
+              ? 'bg-white text-slate-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900',
+          ]}
+        >
+          {option.label}
+        </button>
+      );
+    })}
+  </div>
+  {/* Hidden input — el padre form lo lee. */}
+  <input type="hidden" name={name} value={selected} />
+</fieldset>

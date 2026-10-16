@@ -1,0 +1,66 @@
+---
+/**
+ * ProductDetailFinancingBlock — opciones de financiamiento debajo del CTA.
+ *
+ * Renderiza 2 filas apiladas (Synchrony + Shop Pay) con un avatar-logo
+ * de 32×32 (círculo coloreado con iniciales) + texto descriptivo + link
+ * "Learn how"/"?" al final.
+ *
+ * Decisiones:
+ *  - Sin imágenes reales: los logos son placeholders coloreados
+ *    (Synchrony = amber, Shop Pay = indigo). Cuando exista CDN de
+ *    storefront, reemplazar por `<img>` real.
+ *  - `<a>` envuelve sólo el link "Learn how" — no toda la fila,
+ *    porque las filas son informativas, no interactivas.
+ *  - Sin JS, sin estado — las props vienen del padre.
+ */
+interface Props {
+  /** Línea completa Synchrony (i18n). */
+  syncLine: string;
+  /** Línea completa Shop Pay (i18n). */
+  shopPayLine: string;
+  /** Label del link "Learn how" / "Saber más" (i18n). */
+  learnMoreLabel: string;
+}
+
+const { syncLine, shopPayLine, learnMoreLabel } = Astro.props;
+---
+
+<div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+  <div class="flex items-start gap-3">
+    <span
+      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[11px] font-bold text-amber-700"
+      aria-hidden="true"
+    >
+      S
+    </span>
+    <p class="text-xs leading-relaxed text-slate-700">
+      {syncLine}{' '}
+      <a
+        href="#"
+        class="font-semibold text-[var(--primary,#475569)] hover:underline"
+      >
+        {learnMoreLabel}
+      </a>
+    </p>
+  </div>
+
+  <div class="flex items-start gap-3">
+    <span
+      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700"
+      aria-hidden="true"
+    >
+      Pay
+    </span>
+    <p class="text-xs leading-relaxed text-slate-700">
+      {shopPayLine}{' '}
+      <a
+        href="#"
+        class="font-semibold text-[var(--primary,#475569)] hover:underline"
+        aria-label="¿Qué es Shop Pay?"
+      >
+        ?
+      </a>
+    </p>
+  </div>
+</div>

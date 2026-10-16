@@ -1,0 +1,82 @@
+---
+/**
+ * ProductFeaturesCarousel — grid 3 imágenes (1-col mobile, 3-col desktop).
+ *
+ * Adaptado del layout Nike donde cada producto tiene 3 "features"
+ * visuales (highlights con fotografía lifestyle). Aquí se usan
+ * imágenes estáticas con `loading="lazy"` salvo la primera (eager).
+ *
+ * Decisiones:
+ *   - Layout 1-col en mobile (full-width), 3-col en `sm:`.
+ *   - Cada item puede ser `<a>` (si `href` se pasa) o `<div>` (read-only).
+ *   - Alt viene como prop; el componente no hace fallback para forzar
+ *     al padre a ser explícito con la accesibilidad (AGENTS §17).
+ *   - data-reveal en el wrapper para animar al entrar al viewport.
+ *
+ * Tokens:
+ *   - Grid: `grid grid-cols-1 gap-4 sm:grid-cols-3`.
+ *   - Card: `rounded-2xl overflow-hidden bg-slate-100 aspect-[4/5]`.
+ *   - Typography del heading: `text-2xl font-bold tracking-tight sm:text-3xl`.
+ */
+export interface ProductFeatureItem {
+  image: string;
+  alt: string;
+  href?: string;
+  caption?: string;
+}
+
+interface Props {
+  heading?: string;
+  items: readonly ProductFeatureItem[];
+}
+
+const { heading, items } = Astro.props;
+const hasItems = items.length > 0;
+---
+
+<section
+  aria-labelledby={heading !== undefined ? 'product-features-heading' : undefined}
+  class="flex flex-col gap-6"
+  data-reveal
+>
+  {heading !== undefined && (
+    <h2
+      id="product-features-heading"
+      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+    >
+      {heading}
+    </h2>
+  )}
+
+  {hasItems ? (
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {items.map((item, index) => {
+        const isFirst = index === 0;
+        const isLink = item.href !== undefined && item.href !== '';
+        const Wrapper = isLink ? 'a' : 'div';
+        const wrapperProps = isLink ? { href: item.href } : {};
+        return (
+          <Wrapper
+            class="group flex flex-col gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+            {...wrapperProps}
+          >
+            <figure class="relative overflow-hidden rounded-2xl bg-slate-100 aspect-[4/5]">
+              <img
+                src={item.image}
+                alt={item.alt}
+                loading={isFirst ? 'eager' : 'lazy'}
+                decoding="async"
+                class="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              />
+            </figure>
+            {item.caption !== undefined && item.caption !== '' && (
+              <p class="text-sm text-slate-600">{item.caption}</p>
+            )}
+          </Wrapper>
+        );
+      })}
+    </div>
+  ) : (
+    <p class="text-sm italic text-slate-500">Sin características destacadas todavía.</p>
+  )}
+</section>

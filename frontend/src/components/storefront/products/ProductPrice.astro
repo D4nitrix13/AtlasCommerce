@@ -1,0 +1,54 @@
+---
+/**
+ * ProductPrice — bloque de precio del producto (estilo Nike).
+ *
+ * Slots:
+ *   - Precio actual (grande, bold, tabular-nums).
+ *   - Precio anterior tachado (opcional, sólo si hay descuento).
+ *   - Chip descuento % (estilo emerald/redondo, opcional).
+ *
+ * El formateo se delega a `formatCurrency()` — single source of
+ * truth para currency locale-aware. NO reinventamos Intl aquí.
+ *
+ * Tokens (todos los tamaños subidos un nivel):
+ *   - Precio actual: `text-4xl font-bold tabular-nums`.
+ *   - Compare-at: `text-base text-slate-400 line-through`.
+ *   - Chip descuento: rounded `bg-emerald-100 px-2 py-0.5 text-sm font-bold`.
+ */
+import { formatCurrency } from '../../../lib/formatters';
+
+interface Props {
+  /** Precio actual en cents. */
+  currentCents: number;
+  /** Precio anterior en cents (opcional — sólo si hay descuento). */
+  compareAtCents?: number;
+  /** Currency code ISO 4217 (default: USD vía formatCurrency). */
+  currency: string;
+}
+
+const { currentCents, compareAtCents, currency } = Astro.props;
+
+const hasDiscount =
+  compareAtCents !== undefined && compareAtCents > currentCents && currentCents > 0;
+
+const currentFormatted = formatCurrency(currentCents, currency);
+const compareAtFormatted =
+  hasDiscount && compareAtCents !== undefined ? formatCurrency(compareAtCents, currency) : null;
+
+const discountPercent =
+  hasDiscount && compareAtCents !== undefined
+    ? Math.round(((compareAtCents - currentCents) / compareAtCents) * 100)
+    : null;
+---
+
+<div class="flex items-baseline gap-4" data-testid="product-price">
+  <span class="text-4xl font-bold tabular-nums text-slate-900">{currentFormatted}</span>
+  {compareAtFormatted !== null && (
+    <span class="text-base text-slate-400 tabular-nums line-through">{compareAtFormatted}</span>
+  )}
+  {discountPercent !== null && (
+    <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-sm font-bold text-emerald-700">
+      −{discountPercent}%
+    </span>
+  )}
+</div>

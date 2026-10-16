@@ -1,0 +1,43 @@
+---
+/**
+ * ProductDetailRatingRow — fila compacta de rating estilo Gibson PDP.
+ *
+ * Render: `★ 4.8 (186)` inline. Usado encima del título en la página
+ * de detalle (above the title). Pensado para ser pequeño y no robar
+ * atención del H1.
+ *
+ * Decisiones:
+ *  - Sin props de i18n — el rating es numérico (no se traduce).
+ *  - La estrella es SVG inline (estrella de 5 puntas) en `text-amber-500`,
+ *    tamaño `h-3.5 w-3.5` ≈ 14px.
+ *  - El conteo va entre paréntesis en `text-slate-500` para que se
+ *    sienta secundario sin separarse visualmente del rating.
+ */
+interface Props {
+  /** Promedio redondeado a 1 decimal (ej. 4.8). */
+  rating: number;
+  /** Cantidad de reviews que respaldan el promedio. */
+  count: number;
+}
+
+const { rating, count } = Astro.props;
+const hasReviews = count > 0;
+---
+
+{
+  hasReviews && (
+    <div class="flex items-center gap-1 text-sm text-slate-700">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        class="h-3.5 w-3.5 text-amber-500"
+        aria-hidden="true"
+      >
+        <path d="M12 3.5l2.6 5.4 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.8l5.9-.9L12 3.5z" />
+      </svg>
+      <span class="font-bold tabular-nums">{rating.toFixed(1)}</span>
+      <span class="text-slate-500">({count})</span>
+    </div>
+  )
+}
