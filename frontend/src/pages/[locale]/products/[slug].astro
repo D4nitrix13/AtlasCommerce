@@ -100,6 +100,26 @@ const detail =
         }
       : null;
 
+// Estado inicial del accordion de specs: leído de la cookie SSR
+// (`pdp-specs-expanded-<slug>`) para evitar el flash visual que se
+// produciría si el cliente abriera los `<details>` después del
+// primer paint. Defensivo: si la cookie no existe, está mal
+// formada, no es array o el producto es null, arrancamos con
+// todas las specs cerradas.
+const cookieName = product !== null ? `pdp-specs-expanded-${product.slug}` : null;
+const expandedSpecs: readonly string[] = (() => {
+  if (cookieName === null) return [];
+  const raw = Astro.cookies.get(cookieName)?.value;
+  if (raw === undefined) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((v): v is string => typeof v === 'string');
+  } catch {
+    return [];
+  }
+})();
+
 const catalogHref = `/${locale}/products`;
 const category =
   product !== null ? (CATEGORIES.find((entry) => entry.slug === product.category) ?? null) : null;
@@ -486,6 +506,7 @@ const galleryLabels = {
             <ProductSpecificationsByCategory
               heading={t['storefront.products.detail.v4.specsByCategory.heading']}
               groups={detail.groupedSpecs}
+              expanded={expandedSpecs}
             />
           )}
 

@@ -1,0 +1,220 @@
+---
+/**
+ * ProductSpecificationsByCategory — specs agrupadas por categoría
+ * (estilo Gibson).
+ *
+ * Renderiza un `<details>` colapsable por categoría con sus filas
+ * label/value dentro. Pensado para instrumentos donde las specs se
+ * agrupan naturalmente (Cuerpo, Mástil, Electrónica, Hardware, etc.).
+ *
+ * Layout del body (patrón Gibson):
+ *   - Cada fila muestra DOS pares label/value lado a lado (grid 4-col).
+ *   - Si el grupo tiene items impares, la última fila muestra 1 solo par.
+ *   - Filas separadas por border-b slate-100 sutiles.
+ *
+ * Decisiones:
+ *  - Todos los `<details>` nacen colapsados por defecto — el comprador
+ *    de instrumentos sabe qué sección abrir; no saturamos con todas
+ *    abiertas a la vez.
+ *  - Reutiliza el patrón chevron (`group-open:rotate-45`) del
+ *    `ProductShippingAccordion` para coherencia visual.
+ *  - El estado abierto/cerrado se hidrata en SSR desde la cookie
+ *    `pdp-specs-expanded-<slug>` (la página padre la lee con
+ *    `Astro.cookies.get()` y pasa los IDs por prop). El atributo
+ *    `open` llega renderizado en el HTML inicial → sin flash de
+ *    re-paint. El script inline solo persiste los toggles del
+ *    usuario en esa misma cookie.
+ */
+import type {
+  ProductSpecificationsByCategoryGroup,
+} from './ProductSpecificationsByCategory.types';
+
+interface Props {
+  /** Heading del bloque (i18n). */
+  heading: string;
+  /** Grupos por categoría, cada uno con sus items label/value. */
+  groups: readonly ProductSpecificationsByCategoryGroup[];
+  /**
+   * Spec IDs que deben renderizarse abiertos en el HTML inicial.
+   * Leídos por la página padre desde la cookie
+   * `pdp-specs-expanded-<slug>` para evitar el flash visual que se
+   * produce si el cliente abre los `<details>` después del primer
+   * paint. Default `[]` = todas las categorías cerradas.
+   */
+  expanded?: readonly string[];
+}
+
+const { heading, groups, expanded = [] } = Astro.props;
+const hasGroups = groups.length > 0;
+const headingId = 'product-specs-by-category-heading';
+---
+
+{
+  hasGroups && (
+    <section
+      aria-labelledby={headingId}
+      class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
+    >
+      <h2
+        id={headingId}
+        class="mb-5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+      >
+        {heading}
+      </h2>
+
+      <div class="flex flex-col gap-4">
+        {groups.map((group) => {
+          const specId = group.category.toLowerCase().replace(/\s+/g, '-');
+          return (
+            <details
+              class="group overflow-hidden rounded-2xl border border-slate-200 bg-white"
+              data-spec-id={specId}
+              open={expanded.includes(specId) ? '' : undefined}
+            >
+              <summary class="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-bold text-slate-900 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+                <span>{group.category}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
+                  aria-hidden="true"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </summary>
+
+              {group.items.length > 0 && (() => {
+                // Agrupa items en filas de a 2 pares (4-col grid).
+                // Si quedan items impares, la última fila tiene 1 solo par.
+                const rows: { items: typeof group.items }[] = [];
+                for (let i = 0; i < group.items.length; i += 2) {
+                  rows.push({ items: group.items.slice(i, i + 2) });
+                }
+                return (
+                  <dl class="grid grid-cols-[1fr_1.5fr_1fr_1.5fr] border-t border-slate-100 text-sm">
+                    {rows.map((row, rowIdx) => {
+                      const isLast = rowIdx === rows.length - 1;
+                      const isOdd = row.items.length === 1;
+                      return (
+                        <Fragment>
+                          {/* Fila completa (full-bleed via col-span-4 con borde) */}
+                          <div
+                            class:list={[
+                              'col-span-4 grid grid-cols-subgrid border-b border-slate-100 px-5',
+                              isLast && 'pb-4',
+                            ]}
+                          >
+                            {row.items.map((item, idx) => (
+                              <Fragment>
+                                <dt class="py-2 pr-3 font-medium text-slate-500">{item.label}</dt>
+                                <dd
+                                  class:list={[
+                                    'py-2 text-slate-900',
+                                    isOdd && idx === 0 && 'col-span-1',
+                                  ]}
+                                >
+                                  {item.value}
+                                </dd>
+                                {/* Si la fila está incompleta, deja el último par visualmente emparejado */}
+                                {isOdd && idx === 0 && (
+                                  <>
+                                    <dt class="hidden py-2 md:block"></dt>
+                                    <dd class="hidden py-2 md:block"></dd>
+                                  </>
+                                )}
+                              </Fragment>
+                            ))}
+                          </div>
+                        </Fragment>
+                      );
+                    })}
+                  </dl>
+                );
+              })()}
+            </details>
+          );
+        })}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  /**
+   * Persistencia del estado abierto/cerrado de las especificaciones
+   * en una cookie (`pdp-specs-expanded-<slug>`). El render inicial
+   * ya viene con el atributo `open` aplicado en SSR desde esa
+   * misma cookie (la página padre la lee con `Astro.cookies.get()`);
+   * este script solo mantiene la cookie sincronizada con los
+   * toggles del usuario, sin tocar el DOM.
+   *
+   * Cookie en lugar de localStorage para evitar el flash de
+   * re-paint: localStorage sólo se puede leer en cliente, después
+   * del primer paint, así que el `<details>` se renderizaba
+   * cerrado y el JS lo abría después.
+   *
+   * La clave es por-producto (slug) para que distintos productos
+   * no compartan estado de specs.
+   */
+  (() => {
+    const slug =
+      document
+        .querySelector('[data-product-slug]')
+        ?.getAttribute('data-product-slug') ?? 'default';
+    const COOKIE_NAME = `pdp-specs-expanded-${slug}`;
+    const COOKIE_ATTRS = 'path=/; max-age=31536000; samesite=lax';
+
+    // Regex escapada para tolerar slugs con caracteres especiales.
+    const escapeRegex = (s: string): string =>
+      s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const cookieRegex = new RegExp(
+      `(?:^|;\\s*)${escapeRegex(COOKIE_NAME)}=([^;]*)`
+    );
+
+    const readCookie = (): string[] => {
+      const match = document.cookie.match(cookieRegex);
+      if (match === null || match[1] === undefined) return [];
+      try {
+        const parsed: unknown = JSON.parse(decodeURIComponent(match[1]));
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter((v): v is string => typeof v === 'string');
+      } catch {
+        return [];
+      }
+    };
+
+    let expanded = readCookie();
+
+    // Persistir cada toggle (delegado en document para aguantar re-renders).
+    document.addEventListener(
+      'toggle',
+      (event) => {
+        const target = event.target as HTMLElement | null;
+        if (target === null) return;
+        if (
+          !(target instanceof HTMLDetailsElement) ||
+          !target.hasAttribute('data-spec-id')
+        )
+          return;
+        const id = target.dataset.specId;
+        if (id === undefined) return;
+        const current = new Set<string>(expanded);
+        if (target.open) current.add(id);
+        else current.delete(id);
+        expanded = Array.from(current);
+        try {
+          document.cookie = `${COOKIE_NAME}=${encodeURIComponent(
+            JSON.stringify(expanded)
+          )}; ${COOKIE_ATTRS}`;
+        } catch {
+          /* cookies deshabilitadas o quota — ignorar */
+        }
+      },
+      true
+    );
+  })();
+</script>
