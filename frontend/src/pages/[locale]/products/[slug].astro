@@ -1,37 +1,67 @@
 ---
 /**
- * Detalle de producto B2C (`/[locale]/products/[slug]`) — v3 Bonfire.
+ * Detalle de producto v5 — layout La Voz Instrumentos (estilo Gibson).
  *
- * Composición replicada del IA mock 05 (Bonfire-style product detail):
- *  - Grid 2 columnas: gallery a la izquierda, info a la derecha.
- *  - Gallery: 1 imagen principal cuadrada + thumbnails 80×80 a la
- *    izquierda en desktop / abajo en mobile. `data-reveal` activo.
- *  - Info: breadcrumb categoría, h1 nombre, rating row, precio
- *    tachado + chip descuento, fieldset talla (pills), fieldset
- *    color (swatches), qty stepper visual, CTA principal +
- *    secundario, trust signals (envío / devolución / garantía).
- *  - Tabs (Descripción / Especificaciones / Envío) usando `<details>`
- *    nativo — sin JS. `data-reveal` activo.
- *  - Sección "Productos relacionados" — 4 ProductCard en grid.
+ * Composición:
+ *   - Top: grid 2-col con gallery uniforme (2-col image grid) +
+ *     aside pegajoso de info (sticky top-20). Aside acomoda título,
+ *     tag "Limitado" condicional, dl 2-col Precio/Acabado, shipping
+ *     inline, selectores (condición, tamaño, acabado), CTA grande,
+ *     3 accordions de inclusión y link "Buscar una tienda".
+ *   - Debajo: reseñas full-width → ficha técnica (ProductDetailsBlock)
+ *     → highlights (ProductHighlights) → specs por categoría
+ *     (ProductSpecificationsByCategory) → features carousel →
+ *     productos relacionados.
  *
  * Decisiones:
- *  - Variantes estáticas (no hay backend de inventario aún) — el
- *    padre pasa listas hardcoded. Add to cart / Buy now son visuales.
- *  - Si el slug no matchea, devolvemos 404 (Astro convention).
- *  - Reusamos `ProductMockup` (shirt variant) como placeholder visual
- *    mientras no haya CDN de storefront.
+ *  - Variants estáticas hasta cart store: conditionOptions y
+ *    sizeOptions vienen del padre mock (data/products.ts + mock).
+ *  - Si el slug no matchea, devolvemos 404.
+ *  - Mock placeholder visual hasta que exista CDN de storefront.
+ *  - Las nuevas secciones (highlights, specsByCategory) sólo se
+ *    renderizan si el mock las provee — no rompen el render del
+ *    mock actual (Saber Alter Figma).
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import ProductDetailGallery from '../../../components/storefront/products/ProductDetailGallery.astro';
 import ProductDetailVariants, {
   type VariantOption,
 } from '../../../components/storefront/products/ProductDetailVariants.astro';
-import ProductSpecsTable from '../../../components/storefront/products/ProductSpecsTable.astro';
-import ProductTrustSignals from '../../../components/storefront/products/ProductTrustSignals.astro';
-import ProductCard from '../../../components/storefront/products/ProductCard.astro';
+// ProductDetailColorSwatches ya no se usa — el picker ahora vive inline
+// en el dl "Acabado" usando thumbnails reales de cada variante.
+import ProductDetailRatingRow from '../../../components/storefront/products/ProductDetailRatingRow.astro';
+import ProductDetailDescription from '../../../components/storefront/products/ProductDetailDescription.astro';
+import ProductDetailColorSwatches from '../../../components/storefront/products/ProductDetailColorSwatches.astro';
+import ProductDetailFinancingBlock from '../../../components/storefront/products/ProductDetailFinancingBlock.astro';
+import ProductFeaturedArticle from '../../../components/storefront/products/ProductFeaturedArticle.astro';
+import ProductFrequentlyBoughtTogether from '../../../components/storefront/products/ProductFrequentlyBoughtTogether.astro';
+import ProductRecentlyViewed from '../../../components/storefront/products/ProductRecentlyViewed.astro';
+import ProductFitSelector from '../../../components/storefront/products/ProductFitSelector.astro';
+import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
+import ProductCTAs from '../../../components/storefront/products/ProductCTAs.astro';
+import ProductShippingAccordion from '../../../components/storefront/products/ProductShippingAccordion.astro';
+import ProductDetailsBlock from '../../../components/storefront/products/ProductDetailsBlock.astro';
+import ProductFeaturesCarousel, {
+  type ProductFeatureItem,
+} from '../../../components/storefront/products/ProductFeaturesCarousel.astro';
+import ProductReviews from '../../../components/storefront/products/ProductReviews.astro';
+import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
+import ProductHighlights from '../../../components/storefront/products/ProductHighlights.astro';
+import ProductSpecificationsByCategory from '../../../components/storefront/products/ProductSpecificationsByCategory.astro';
 import { getServerDictionary } from '../../../i18n/server';
-import { findProductBySlug, CATEGORIES, PRODUCTS } from '../../../data/products';
-import { SABER_ALTER_DETAIL } from '../../../data/product-detail-mock';
+import { findProductBySlug, CATEGORIES } from '../../../data/products';
+import { formatCurrency } from '../../../lib/formatters';
+import {
+  SABER_ALTER_DETAIL,
+  FENDER_PLAYER_FUSION_BASS_DETAIL,
+  FENDER_PLAYER_FUSION_BASS_INTRO_HTML,
+  FENDER_PLAYER_FUSION_BASS_HEADING,
+  FENDER_BUNDLE_ITEMS,
+  RELATED_PRODUCTS,
+  type ProductReview,
+  getAverageRating,
+} from '../../../data/product-detail-mock';
+import type { Product } from '../../../types/catalog';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -39,16 +69,22 @@ const t = getServerDictionary(locale);
 const { slug } = Astro.params;
 const product = slug !== undefined ? findProductBySlug(slug) : null;
 
+// URL actual — para query params (`?color=`, `?image=`).
+const url = new URL(Astro.request.url);
+
 if (product === null) {
   Astro.response.status = 404;
 }
 
-// Detalle: si el slug matchea el mock Saber Alter, lo usamos; si no,
-// derivamos un subset mínimo del producto base.
+// Detalle enriquecido: si el slug matchea uno de nuestros mocks
+// enriquecidos (Saber Alter, Fender), lo usamos directamente.
+// Si no, derivamos un subset mínimo del producto base.
 const detail =
-  product?.slug === SABER_ALTER_DETAIL.slug
-    ? SABER_ALTER_DETAIL
-    : product !== null
+  product?.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
+    ? FENDER_PLAYER_FUSION_BASS_DETAIL
+    : product?.slug === SABER_ALTER_DETAIL.slug
+      ? SABER_ALTER_DETAIL
+      : product !== null
       ? {
           ...SABER_ALTER_DETAIL,
           id: product.id,
@@ -64,68 +100,163 @@ const detail =
         }
       : null;
 
-// URL parsing (sólo `?image=N` se usa en v3 — variants ya no son por query param).
-const url = new URL(Astro.request.url);
-const selectedImageIndex = Number(url.searchParams.get('image') ?? '0');
-
-// Hrefs
 const catalogHref = `/${locale}/products`;
-const cartHref = `/${locale}/cart`;
-
-// Categoría label (eyebrow sobre el h1).
 const category =
   product !== null ? (CATEGORIES.find((entry) => entry.slug === product.category) ?? null) : null;
 
-// ─── Mock variants (estáticos hasta cart store) ──────────────────────
+// ─── Variants mocks (estáticos hasta cart store) ──────────────────────
+const CONDITION_OPTIONS = [
+  { id: 'new', label: t['storefront.products.detail.v4.condition.new'] },
+  { id: 'used', label: t['storefront.products.detail.v4.condition.used'] },
+];
+
 const SIZE_OPTIONS: readonly VariantOption[] = [
-  { id: 's', label: 'CH' },
-  { id: 'm', label: 'M' },
-  { id: 'l', label: 'G' },
-  { id: 'xl', label: 'XG' },
+  { id: '44', label: '4/4' },
+  { id: '34', label: '3/4' },
+  { id: '12', label: '1/2' },
+  { id: '14', label: '1/4' },
 ];
 
-const COLOR_OPTIONS: readonly VariantOption[] = [
-  { id: 'black', label: 'Negro', hex: '#132028' },
-  { id: 'teal', label: 'Teal', hex: '#2D9D8E' },
-  { id: 'cream', label: 'Crema', hex: '#F2EDE4' },
-  { id: 'wine', label: 'Vino', hex: '#951318' },
+// Color (swatches) — fuente data-driven: detail.variantAttributes[0].
+// Fallback al set hardcoded de Saber Alter si el mock no trae colores
+// (mantiene compatibilidad con productos sin variantAttributes poblado).
+const COLOR_OPTIONS: readonly VariantOption[] = (() => {
+  const colorAttrs = detail?.variantAttributes?.find((group) => group[0]?.type === 'color');
+  if (colorAttrs !== undefined && colorAttrs.length > 0) {
+    return colorAttrs.map((attr) => ({
+      id: attr.id,
+      label: attr.label,
+      hex: attr.hex,
+    }));
+  }
+  return [
+    { id: 'sunburst', label: 'Sunburst', hex: '#7C3A1A' },
+    { id: 'black', label: 'Negro', hex: '#132028' },
+    { id: 'vintage-white', label: 'Vintage White', hex: '#EDE7D7' },
+  ];
+})();
+
+const SELECTED_CONDITION = 'new';
+const SELECTED_SIZE = '44';
+
+// Acabado seleccionado: viene por query param `?finish=<variant-slug>`
+// (English + descriptive por convención del resto de la app — ver
+// `2fa.astro`/`admin/sales/*` que usan `token`/`status`/`dateFrom`).
+// Default = primera variante. Esto permite cambiar el acabado via SSR sin JS.
+const selectedFinishFromUrl = url.searchParams.get('finish');
+const SELECTED_COLOR =
+  COLOR_OPTIONS.find((option) => option.id === selectedFinishFromUrl)?.id ??
+  COLOR_OPTIONS[0]?.id ??
+  'sunburst';
+const selectedFinish = COLOR_OPTIONS.find((option) => option.id === SELECTED_COLOR) ?? COLOR_OPTIONS[0];
+
+// Imágenes filtradas por el color seleccionado. Convención: la URL de
+// la imagen contiene el slug del variant (ej. "ebony-black"). Si el
+// mock no sigue esta convención (Saber Alter usa placeholder), caemos
+// al set completo.
+const VARIANT_SLUG_PATTERN = SELECTED_COLOR.toLowerCase();
+const displayedImages = (() => {
+  const all = detail?.images ?? [];
+  const filtered = all.filter((url) =>
+    url.toLowerCase().includes(VARIANT_SLUG_PATTERN)
+  );
+  return filtered.length > 0 ? filtered : all;
+})();
+
+// Para cada variante, exponemos la PRIMERA imagen (thumbnail del picker).
+// Si no hay imágenes suficientes, caemos al hex como fallback visual.
+const variantFirstImage: Record<string, string | undefined> = {};
+if (detail !== null) {
+  for (const option of COLOR_OPTIONS) {
+    const slug = option.id.toLowerCase();
+    variantFirstImage[option.id] =
+      detail.images.find((url) => url.toLowerCase().includes(slug)) ??
+      detail.images[0];
+  }
+}
+
+const HIGHLY_RATED = detail !== null && detail.reviews.length >= 5;
+const IN_STOCK = detail !== null && detail.stock > 0;
+const AVG_RATING = detail !== null ? getAverageRating(detail.reviews) : 0;
+const RATING_COUNT = detail !== null ? detail.reviews.length : 0;
+
+// Precio formateado para el dl 2-col (single source of truth: formatCurrency).
+const precioFormatted =
+  detail !== null ? formatCurrency(detail.priceCents, detail.currency) : '';
+
+const HIGHLY_RATED_LABEL = HIGHLY_RATED
+  ? t['storefront.products.detail.v4.highlyRated']
+  : undefined;
+
+// ─── Inclusions (3 accordions debajo del CTA) ─────────────────────────
+// Labels + body copy vienen de i18n; orden sigue el patrón Gibson PDP
+// (Garantía primero, luego Estuche, luego Ajuste).
+const INCLUSION_ACCORDIONS: readonly { label: string; content: string }[] = [
+  {
+    label: t['storefront.products.detail.v4.inclusions.warranty'],
+    content: `<p>${t['storefront.products.detail.v4.inclusions.warrantyContent']}</p>`,
+  },
+  {
+    label: t['storefront.products.detail.v4.inclusions.case'],
+    content: `<p>${t['storefront.products.detail.v4.inclusions.caseContent']}</p>`,
+  },
+  {
+    label: t['storefront.products.detail.v4.inclusions.tuning'],
+    content: `<p>${t['storefront.products.detail.v4.inclusions.tuningContent']}</p>`,
+  },
 ];
 
-const SELECTED_SIZE = 'm';
-const SELECTED_COLOR = 'black';
+// Features: 3 imágenes lifestyle para carrusel (mock con SVG inline).
+const FEATURE_IMAGE =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"><rect width="400" height="500" fill="#e2e8f0"/><circle cx="200" cy="220" r="80" fill="#cbd5e1"/></svg>`
+  );
+const FEATURE_ITEMS: readonly ProductFeatureItem[] = detail !== null
+  ? [
+      { image: FEATURE_IMAGE, alt: `${detail.name} — pastilla`, caption: 'Pastillas hand-wound calibradas a mano.' },
+      { image: FEATURE_IMAGE, alt: `${detail.name} — puente`, caption: 'Puente de 2 puntos con selletas de acero.' },
+      { image: FEATURE_IMAGE, alt: `${detail.name} — cuerpo`, caption: 'Cuerpo de aliso con acabado gloss urethane.' },
+    ]
+  : [];
 
-// ─── Etiquetas i18n ──────────────────────────────────────────────────
-const galleryLabels = {
-  mainAlt: product?.name ?? t['storefront.productDetail.notFound'],
-  thumbAlt: (index: number) => t['storefront.productDetail.gallery.thumbAlt'].replace('{index}', String(index)),
-  logoText: product?.name?.split(' ')[0] ?? 'Atlas',
+// Reviews (extraídos del detail si existe, mock vacío si no).
+const REVIEWS: readonly ProductReview[] = detail?.reviews ?? [];
+const VIEW_ALL_HREF = `/${locale}/products/${product?.slug ?? ''}/reviews`;
+const WRITE_REVIEW_HREF = `/${locale}/products/${product?.slug ?? ''}/reviews/new`;
+const FIND_STORE_HREF = `/${locale}/stores`;
+
+const reviewsLabels = {
+  heading: 'Reseñas',
+  average: 'Promedio',
+  outOf: 'de 5',
+  count: t['storefront.productDetail.reviews.count'].replace('{count}', String(REVIEWS.length)),
+  write: t['storefront.products.detail.v4.writeReview'],
+  viewAll: 'Ver todas las reseñas',
+  empty: 'Este producto todavía no tiene reseñas.',
+  verified: t['storefront.productDetail.reviews.verified'],
+  starAlt: t['storefront.productDetail.reviews.starAlt'],
+  loadMore: t['storefront.products.detail.v4.reviews.loadMore'],
+  showLess: t['storefront.products.detail.v4.reviews.showLess'],
+  filterAll: t['storefront.products.detail.v4.reviews.filterAll'],
+  filterByRating: t['storefront.products.detail.v4.reviews.filterByRating'],
 };
 
-const variantsLabels = {
-  sizeLegend: t['storefront.products.detail.v3.size'],
-  colorLegend: t['storefront.products.detail.v3.color'],
-};
-
-const priceFormatted = detail ? new Intl.NumberFormat('es-NI', { style: 'currency', currency: detail.currency }).format(detail.priceCents / 100) : '';
-const compareAtFormatted =
-  detail?.compareAtPriceCents !== undefined
-    ? new Intl.NumberFormat('es-NI', { style: 'currency', currency: detail.currency }).format(detail.compareAtPriceCents / 100)
-    : null;
-
-const discountPercent =
-  detail?.compareAtPriceCents !== undefined && detail.compareAtPriceCents > detail.priceCents
-    ? Math.round(((detail.compareAtPriceCents - detail.priceCents) / detail.compareAtPriceCents) * 100)
-    : null;
-
-// Rating mock — en v3 son números hardcoded (no reviews).
-const RATING_AVERAGE = 4.9;
-const RATING_COUNT = 214;
-const STOCK_DISPLAY = detail?.stock ?? 0;
-
-// Products relacionados (4 — uno por categoría presente en PRODUCTS).
-const relatedProducts = PRODUCTS.filter((entry) => entry.id !== product?.id).slice(0, 4);
+/** Metadata mínima del producto actual — expuesta a window.__PRODUCT_META__
+ *  para que ProductRecentlyViewed pueda trackear este producto via localStorage. */
+const FENDER_PRODUCT = product !== null
+  ? {
+      slug: product.slug,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      priceCents: product.priceCents,
+      currency: product.currency ?? 'USD',
+    }
+  : { slug: 'unknown', name: '', imageUrl: '', priceCents: 0, currency: 'USD' };
 
 const cardLabels = {
+  heading: t['storefront.productDetail.related.heading'],
+  empty: t['storefront.productDetail.related.empty'],
   newBadge: t['storefront.productCard.badge.new'],
   saleBadge: t['storefront.productCard.badge.sale'],
   lowStockBadge: t['storefront.productCard.badge.lowStock'],
@@ -133,13 +264,18 @@ const cardLabels = {
   outOfStock: t['storefront.productCard.outOfStock'],
   viewDetail: t['storefront.productCard.viewDetail'],
 };
+
+const galleryLabels = {
+  mainAlt: product?.name ?? t['storefront.productDetail.notFound'],
+  logoText: product?.name?.split(' ')[0] ?? 'Atlas',
+};
 ---
 
 <StorefrontLayout title={product?.name ?? t['storefront.productDetail.notFound']}>
-  <main class="bg-slate-50">
-    <section class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+  <main class="bg-slate-50" data-product-slug={product?.slug ?? 'unknown'}>
+    <section class="mx-auto w-full max-w-[1160px] px-4 py-4 sm:px-6 sm:py-6">
       {/* Breadcrumb */}
-      <nav aria-label="breadcrumb" class="mb-8 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+      <nav aria-label="breadcrumb" class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
         <a href={catalogHref} class="transition hover:text-slate-700">
           {t['storefront.products.detail.v3.breadcrumb']}
         </a>
@@ -164,7 +300,7 @@ const cardLabels = {
           <p class="max-w-md text-sm text-slate-500">{t['storefront.productDetail.notFoundHint']}</p>
           <a
             href={catalogHref}
-            class="mt-2 inline-flex h-10 items-center rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+            class="mt-2 inline-flex h-10 items-center rounded-lg bg-[var(--primary,#475569)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#334155)]"
           >
             {t['storefront.products.detail.v3.breadcrumb']}
           </a>
@@ -173,253 +309,241 @@ const cardLabels = {
 
       {product !== null && detail !== null && (
         <article class="flex flex-col gap-16">
-          {/* Top section: gallery + info */}
-          <section class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:gap-16">
+          {/* Top: gallery uniforme + aside pegajoso */}
+          <section class="grid gap-6 lg:grid-cols-[1.8fr_minmax(0,420px)] lg:gap-8">
             <ProductDetailGallery
-              images={detail.images}
+              images={displayedImages}
               productName={product.name}
-              selectedIndex={selectedImageIndex}
               labels={galleryLabels}
+              highlyRatedLabel={HIGHLY_RATED_LABEL}
             />
 
-            <div class="flex flex-col gap-6">
-              {category !== null && (
-                <p class="text-xs font-bold uppercase tracking-wider text-[var(--primary)]">
-                  {category.name}
-                </p>
-              )}
+            <aside class="flex flex-col gap-5 lg:sticky lg:top-20 lg:self-start">
+              <ProductDetailRatingRow rating={AVG_RATING} count={RATING_COUNT} />
 
-              <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 {product.name}
               </h1>
 
-              {/* Rating + stock row */}
-              <div class="flex flex-wrap items-center gap-3 text-sm">
-                <span class="inline-flex items-center gap-1 font-bold text-slate-900">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    class="h-4 w-4 text-amber-500"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9 4.7 17.6l1-5.8L1.5 7.7l5.9-.9L10 1.5z"
-                    />
-                  </svg>
-                  {RATING_AVERAGE.toFixed(1)}
-                </span>
-                <span class="text-slate-500">
-                  {RATING_COUNT} {t['storefront.products.detail.v3.rating']}
-                </span>
-                <span aria-hidden="true" class="h-1 w-1 rounded-full bg-slate-300"></span>
-                <span class="text-slate-500">
-                  {t['storefront.productDetail.inStock']}: <strong class="text-slate-900">{STOCK_DISPLAY}</strong>
-                </span>
-              </div>
+              {HIGHLY_RATED_LABEL !== undefined && (
+                <a
+                  href="#"
+                  class="self-start text-xs font-bold uppercase tracking-wider text-[var(--primary,#475569)] underline"
+                >
+                  {t['storefront.products.detail.v4.limited']}
+                </a>
+              )}
 
-              {/* Price row */}
-              <div class="flex items-baseline gap-3">
-                <span class="text-4xl font-bold tabular-nums text-slate-900">{priceFormatted}</span>
-                {compareAtFormatted !== null && (
-                  <span class="text-lg text-slate-400 tabular-nums line-through">
-                    {compareAtFormatted}
-                  </span>
-                )}
-                {discountPercent !== null && (
-                  <span class="rounded-full bg-[var(--primary-soft)] px-2.5 py-0.5 text-xs font-bold text-[var(--primary)]">
-                    -{discountPercent}%
-                  </span>
-                )}
-              </div>
+              <dl class="grid grid-cols-2 gap-4 border-b border-slate-200 pb-4">
+                <div class="flex flex-col gap-1">
+                  <dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Precio</dt>
+                  <dd class="text-xl font-bold tabular-nums text-slate-900">{precioFormatted}</dd>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Acabado</dt>
+                  <dd class="flex flex-col gap-3 text-sm font-medium text-slate-900">
+                    <span class="inline-flex items-center gap-2">
+                      <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
+                      {selectedFinish?.hex !== undefined && (
+                        <span
+                          aria-hidden="true"
+                          class="inline-block h-3 w-3 rounded-full border border-slate-200"
+                          style={`background-color: ${selectedFinish.hex};`}
+                        />
+                      )}
+                    </span>
+                    {/* Picker de variantes con thumbnails reales (pattern Gibson).
+                        SSR: cada swatch es un <a> con ?finish=<id> que filtra la galería
+                        via query param (sin JS). */}
+                    <ul class="flex flex-wrap items-center gap-2" role="list" aria-label="Selector de acabado">
+                      {COLOR_OPTIONS.map((option) => {
+                        const isActive = option.id === SELECTED_COLOR;
+                        const thumbSrc = variantFirstImage[option.id];
+                        return (
+                          <li>
+                            <a
+                              href={`?finish=${option.id}`}
+                              title={option.label}
+                              aria-label={`Cambiar a ${option.label}`}
+                              aria-current={isActive ? 'true' : undefined}
+                              class:list={[
+                                'block h-10 w-10 rounded-md border bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                                isActive
+                                  ? 'border-[var(--primary,#475569)] ring-2 ring-[var(--primary,#475569)] ring-offset-1'
+                                  : 'border-slate-200 opacity-70 hover:opacity-100',
+                              ]}
+                            >
+                              {thumbSrc !== undefined && (
+                                <img
+                                  src={thumbSrc}
+                                  alt=""
+                                  loading="lazy"
+                                  decoding="async"
+                                  class="h-full w-full rounded-md object-cover"
+                                />
+                              )}
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </dd>
+                </div>
+              </dl>
 
-              {/* Variants */}
-              <ProductDetailVariants
-                type="size"
+              <ProductDetailDescription description={detail.description} moreLabel={t['storefront.products.detail.v4.details.more']} lessLabel={t['storefront.products.detail.v4.details.less']} label={t['storefront.products.detail.v4.details.label']} id={`details-row-${product.id}`} />
+
+              <p class="text-xs text-slate-500">
+                {t['storefront.products.detail.v4.shippingInline']}
+              </p>
+
+              <ProductFitSelector
+                legend={t['storefront.products.detail.v4.condition.legend']}
+                options={CONDITION_OPTIONS}
+                selected={SELECTED_CONDITION}
+                name="condition"
+              />
+
+              <ProductSizeGrid
+                legend={t['storefront.products.detail.v4.size.legend']}
                 options={SIZE_OPTIONS}
                 selected={SELECTED_SIZE}
-                labels={variantsLabels}
+                name="size"
               />
 
-              <ProductDetailVariants
-                type="color"
-                options={COLOR_OPTIONS}
-                selected={SELECTED_COLOR}
-                labels={variantsLabels}
+              {/* El picker de variantes vive arriba en el dl "Acabado" (con thumbnails
+                  reales via ?color=). No duplicamos el fieldset acá. */}
+
+              <ProductCTAs
+                addToCartLabel={t['storefront.productDetail.addToCart']}
+                favoriteLabel={t['storefront.products.detail.v4.favorite']}
+                inStock={IN_STOCK}
               />
 
-              {/* Quantity stepper (visual) */}
+              {detail.financing !== undefined && <ProductDetailFinancingBlock syncLine={t['storefront.products.detail.v4.financing.syncLine']} shopPayLine={t['storefront.products.detail.v4.financing.shopPay']} learnMoreLabel={t['storefront.products.detail.v4.financing.learnMore']} />}
+
               <div class="flex flex-col gap-2">
-                <span class="text-sm font-bold text-slate-900">
-                  {t['storefront.products.detail.v3.quantity']}
-                </span>
-                <div class="flex items-center gap-4">
-                  <div
-                    class="inline-flex w-fit items-center overflow-hidden rounded-lg border border-slate-200"
-                    role="group"
-                    aria-label={t['storefront.products.detail.v3.quantity']}
-                  >
-                    <button
-                      type="button"
-                      aria-label={t['storefront.productDetail.quantity.decrement']}
-                      class="flex h-12 w-12 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
-                    >
-                      <span aria-hidden="true">−</span>
-                    </button>
-                    <span
-                      class="flex h-12 w-14 items-center justify-center border-x border-slate-200 text-base font-bold tabular-nums text-slate-900"
-                      aria-live="polite"
-                    >
-                      1
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={t['storefront.productDetail.quantity.increment']}
-                      class="flex h-12 w-12 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
-                    >
-                      <span aria-hidden="true">+</span>
-                    </button>
-                  </div>
-                  <span class="text-xs leading-tight text-slate-500">
-                    Precio unitario<br />
-                    <strong class="text-slate-900">{priceFormatted}</strong>
-                  </span>
-                </div>
-              </div>
-
-              {/* CTAs */}
-              <div class="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  class="inline-flex h-12 flex-1 items-center justify-center rounded-lg bg-[var(--primary)] px-6 text-base font-semibold text-white transition hover:bg-[var(--primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
-                >
-                  {t['storefront.products.detail.v3.addToCart']}
-                </button>
-                <a
-                  href={cartHref}
-                  class="inline-flex h-12 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-base font-semibold text-slate-900 transition hover:border-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
-                >
-                  {t['storefront.products.detail.v3.buyNow']}
-                </a>
-              </div>
-
-              {/* Trust signals */}
-              <ProductTrustSignals
-                shippingLabel={t['storefront.products.detail.v3.shipping']}
-                returnsLabel={t['storefront.products.detail.v3.returns']}
-                warrantyLabel={t['storefront.products.detail.v3.warranty']}
-              />
-            </div>
-          </section>
-
-          {/* Specs table PROMINENTE (patron guitargear.com.mx).
-              Es la primera seccion despues de la gallery, no escondida
-              en un details — el detalle de producto de instrumentos
-              musicales muestra specs tecnicas prominentemente para que
-              el comprador evalue el producto sin clicks adicionales. */}
-          {detail.specs.length > 0 && (
-            <section class="mt-8" data-reveal>
-              <ProductSpecsTable
-                rows={detail.specs}
-                heading="Especificaciones tecnicas"
-              />
-            </section>
-          )}
-
-          {/* Tabs (native <details>) */}
-          <section class="rounded-2xl border border-slate-200 bg-white p-2 sm:p-4" data-reveal>
-            <details class="group" open>
-              <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-base font-bold text-slate-900">
-                {t['storefront.products.detail.v3.tab.description']}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
-                  aria-hidden="true"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </summary>
-              <div class="pb-5 text-sm leading-relaxed text-slate-600">
-                <p>{detail.description}</p>
-              </div>
-            </details>
-
-            <div class="border-t border-slate-100"></div>
-
-            <details class="group">
-              <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-base font-bold text-slate-900">
-                {t['storefront.products.detail.v3.tab.specs']}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
-                  aria-hidden="true"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </summary>
-              <div class="pb-5 text-sm leading-relaxed text-slate-600">
-                <dl class="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-                  {detail.specs.map((entry) => (
-                    <div class="flex items-baseline justify-between border-b border-slate-100 py-2 last:border-b-0">
-                      <dt class="font-medium text-slate-500">{entry.label}</dt>
-                      <dd class="font-semibold text-slate-900">{entry.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            </details>
-
-            <div class="border-t border-slate-100"></div>
-
-            <details class="group">
-              <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-base font-bold text-slate-900">
-                {t['storefront.products.detail.v3.tab.shipping']}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  class="h-4 w-4 text-slate-400 transition group-open:rotate-45"
-                  aria-hidden="true"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </summary>
-              <div class="pb-5 text-sm leading-relaxed text-slate-600">
-                <p>{t['storefront.productDetail.shippingReturns.shippingBody']}</p>
-                <p class="mt-3">{t['storefront.productDetail.shippingReturns.returnsBody']}</p>
-                <p class="mt-3">{t['storefront.productDetail.shippingReturns.warrantyBody']}</p>
-              </div>
-            </details>
-          </section>
-
-          {/* Related products */}
-          {relatedProducts.length > 0 && (
-            <section class="flex flex-col gap-6" data-reveal>
-              <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
-                {t['storefront.products.detail.v3.related']}
-              </h2>
-              <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                {relatedProducts.map((entry) => (
-                  <ProductCard product={entry} locale={locale} labels={cardLabels} />
+                {INCLUSION_ACCORDIONS.map((entry) => (
+                  <ProductShippingAccordion label={entry.label} content={entry.content} />
                 ))}
               </div>
-            </section>
+
+              <a
+                href={FIND_STORE_HREF}
+                class="inline-flex items-center gap-1 self-start text-sm font-semibold text-[var(--primary,#475569)] hover:underline"
+              >
+                {t['storefront.products.detail.v4.findStore']}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                >
+                  <path d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </a>
+            </aside>
+          </section>
+
+          {/* Description block (card + Lee más toggle). Las specs por categoría
+              se renderizan aparte en `<ProductSpecificationsByCategory>`. */}
+          {detail.description.length > 0 && (
+            <ProductDetailsBlock
+              introLabel={t['storefront.products.detail.v4.details.introLabel']}
+              heading={
+                detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
+                  ? FENDER_PLAYER_FUSION_BASS_HEADING
+                  : undefined
+              }
+              intro={
+                detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
+                  ? FENDER_PLAYER_FUSION_BASS_INTRO_HTML
+                  : detail.description
+              }
+              moreLabel={t['storefront.products.detail.v4.details.more']}
+              lessLabel={t['storefront.products.detail.v4.details.less']}
+            />
           )}
+
+          {detail.featuredArticle !== undefined && (
+            <ProductFeaturedArticle {...detail.featuredArticle} ctaLabel={t['storefront.products.detail.v4.featuredArticle.cta']} />
+          )}
+
+          {/* Highlights — sólo si el mock los provee */}
+          {detail.highlights !== undefined && detail.highlights.length > 0 && (
+            <ProductHighlights
+              heading={t['storefront.products.detail.v4.highlights.heading']}
+              items={detail.highlights}
+            />
+          )}
+
+          {/* Especificaciones por categoría — sólo si el mock las provee */}
+          {detail.groupedSpecs !== undefined && detail.groupedSpecs.length > 0 && (
+            <ProductSpecificationsByCategory
+              heading={t['storefront.products.detail.v4.specsByCategory.heading']}
+              groups={detail.groupedSpecs}
+            />
+          )}
+
+          {/* Reseñas — full-width después de specs (convención e-commerce: specs → reviews → related) */}
+          {REVIEWS.length > 0 && (
+            <ProductReviews
+              labels={reviewsLabels}
+              reviews={REVIEWS}
+              viewAllHref={VIEW_ALL_HREF}
+              writeHref={WRITE_REVIEW_HREF}
+            />
+          )}
+
+          {/* Features carousel */}
+          {FEATURE_ITEMS.length > 0 && (
+            <ProductFeaturesCarousel
+              heading={t['storefront.products.detail.v4.features.heading']}
+              items={FEATURE_ITEMS}
+            />
+          )}
+
+          {/* Related products */}
+          {RELATED_PRODUCTS.length > 0 && (
+            <ProductRelated labels={cardLabels} products={RELATED_PRODUCTS} locale={locale} />
+          )}
+
+          {/* Frequently bought together (bundle bass + accesorios) */}
+          {detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug && (
+            <ProductFrequentlyBoughtTogether
+              heading="Comprados juntos frecuentemente"
+              items={FENDER_BUNDLE_ITEMS.map((item) => ({
+                product: item.product as Product,
+                position: item.position,
+              }))}
+              addAllHref={`/${locale}/cart?bundle=fender-fusion`}
+              addAllLabel="Agregar todo al carrito"
+              locale={locale}
+            />
+          )}
+
+          {/* Recently viewed (client-side via localStorage) */}
+          <ProductRecentlyViewed />
         </article>
       )}
     </section>
   </main>
+  <script is:inline define:vars={{ productSlug: product?.slug ?? 'unknown', productName: product?.name ?? '', productImage: FENDER_PRODUCT.imageUrl, productPriceCents: FENDER_PRODUCT.priceCents, productCurrency: FENDER_PRODUCT.currency ?? 'USD' }}>
+    // Inyecta la metadata del producto actual para que ProductRecentlyViewed
+    // pueda trackearlo via localStorage en el cliente.
+    window.__PRODUCT_META__ = { slug: productSlug, name: productName, imageUrl: productImage, priceCents: productPriceCents, currency: productCurrency };
+  </script>
+  <script is:inline>
+    document.querySelectorAll('[data-toggle-details]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = document.querySelector(btn.dataset.toggleDetails);
+        if (target) target.classList.toggle('is-expanded');
+        btn.textContent = target?.classList.contains('is-expanded') ? btn.dataset.labelLess : btn.dataset.labelMore;
+      });
+    });
+  </script>
 </StorefrontLayout>
