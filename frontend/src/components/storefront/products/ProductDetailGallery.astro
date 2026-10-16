@@ -285,27 +285,34 @@ function imageSrcset(url: string): string {
     // Magnifier lens: desktop-only y solo si hay imágenes reales. La presencia
     // del lens en el DOM es la fuente de verdad de "hasRealImages" (no se
     // renderiza con el fallback de ProductMockup). matchMedia filtra touch.
+    //
+    // ZOOM visual = ratio naturalWidth / clientWidth (≈2.26× en desktop
+    // con webp 1600×730 y slide ~708×321). Usamos naturalWidth para el
+    // background-size en vez de clientWidth×factor — esto evita upscale
+    // del browser y la pixelación resultante. Sin ZOOM_FACTOR: el zoom
+    // efectivo viene del ratio entre tamaño fuente y tamaño renderizado.
     const lens = section.querySelector<HTMLElement>('[data-zoom-lens]');
     if (lens && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      const ZOOM_FACTOR = 2.5;
       const LENS_HALF_PX = 100;
 
       slides.forEach((slide) => {
         const img = slide.querySelector('img');
         if (!img) return;
 
+        // Tamaño fuente del webp (naturalWidth/naturalHeight) — sin upscale,
+        // el background-image matchea la resolución del archivo. El zoom
+        // efectivo es ratio naturalWidth/clientWidth ≈ 2.26× en desktop.
+        // Si la imagen aún no cargó, fallback a clientWidth/Height (no upscale).
+        const sourceW = img.naturalWidth || img.clientWidth;
+        const sourceH = img.naturalHeight || img.clientHeight;
+        const renderW = img.clientWidth;
+        const renderH = img.clientHeight;
+
         const onEnter = () => {
-          // Usamos clientWidth/Height (no naturalWidth/Height) para que la
-          // magnificación visual sea consistente: 2.5x respecto al tamaño
-          // RENDERIZADO del <img>, no respecto al archivo fuente. Si la fuente
-          // es 4000×1818 pero se renderiza a 800×365, naturalWidth×2.5 daría
-          // un zoom efectivo de 12.5x (inconsistente entre productos).
-          const w = img.clientWidth;
-          const h = img.clientHeight;
-          if (w === 0 || h === 0) return;
+          if (sourceW === 0 || sourceH === 0) return;
           const src = img.currentSrc || img.src;
           lens.style.backgroundImage = `url("${src}")`;
-          lens.style.backgroundSize = `${w * ZOOM_FACTOR}px ${h * ZOOM_FACTOR}px`;
+          lens.style.backgroundSize = `${sourceW}px ${sourceH}px`;
           lens.hidden = false;
           lens.dataset.active = 'true';
         };
@@ -319,8 +326,10 @@ function imageSrcset(url: string): string {
           lens.style.left = `${slideRect.left - sectionRect.left + cursorX}px`;
           lens.style.top = `${slideRect.top - sectionRect.top + cursorY}px`;
           // Centrar la región bajo el cursor en el lens (lensWidth/2 = 100).
-          const bgX = -(cursorX * ZOOM_FACTOR - LENS_HALF_PX);
-          const bgY = -(cursorY * ZOOM_FACTOR - LENS_HALF_PX);
+          // Multiplicamos por source/render para que el background-position
+          // se mueva al ritmo correcto del zoom natural.
+          const bgX = -(cursorX * (sourceW / renderW) - LENS_HALF_PX);
+          const bgY = -(cursorY * (sourceH / renderH) - LENS_HALF_PX);
           lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
         };
 
