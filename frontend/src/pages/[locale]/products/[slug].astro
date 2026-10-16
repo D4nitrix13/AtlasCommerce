@@ -294,6 +294,55 @@ const galleryLabels = {
 
 <StorefrontLayout title={product?.name ?? t['storefront.productDetail.notFound']}>
   <main class="bg-slate-50" data-product-slug={product?.slug ?? 'unknown'}>
+    {/* Script de scroll restoration al INICIO del <main>, antes del
+        primer paint del contenido. <script is:inline> bloquea el
+        parsing hasta ejecutar, así que corre antes del primer paint. */}
+    <script is:inline>
+      (() => {
+        // (1) Desactivar scroll restoration automático del browser.
+        if ('scrollRestoration' in history) {
+          history.scrollRestoration = 'manual';
+        }
+        // Si la URL trae #anchor, dejar que el browser haga scroll al anchor.
+        if (window.location.hash !== '' && window.location.hash !== '#') return;
+
+        // (2) Leer posición guardada. Prioridad: sessionStorage > cookie > URL.
+        const SS_KEY = 'pdp-scroll-y';
+        const COOKIE_KEY = 'pdp-scroll-y';
+        let savedY = null;
+
+        try {
+          const ss = sessionStorage.getItem(SS_KEY);
+          if (ss !== null) {
+            const parsed = Number.parseInt(ss, 10);
+            if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
+          }
+        } catch { /* sessionStorage no disponible */ }
+
+        if (savedY === null) {
+          const cookieMatch = document.cookie.match(
+            new RegExp(`(?:^|;\\s*)${COOKIE_KEY}=([^;]*)`),
+          );
+          if (cookieMatch !== null && cookieMatch[1] !== undefined) {
+            const parsed = Number.parseInt(decodeURIComponent(cookieMatch[1]), 10);
+            if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
+          }
+        }
+
+        if (savedY === null) {
+          const urlMatch = window.location.search.match(/[?&]scrollY=(\d+)/);
+          if (urlMatch !== null && urlMatch[1] !== undefined) {
+            const parsed = Number.parseInt(urlMatch[1], 10);
+            if (Number.isFinite(parsed) && parsed >= 0) savedY = parsed;
+          }
+        }
+
+        // (3) Restaurar ANTES del primer paint.
+        if (savedY !== null && savedY > 0) {
+          window.scrollTo({ top: savedY, left: 0, behavior: 'auto' });
+        }
+      })();
+    </script>
     <section class="mx-auto w-full max-w-[1160px] px-4 py-4 sm:px-6 sm:py-6">
       {/* Breadcrumb */}
       <nav aria-label="breadcrumb" class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
@@ -393,6 +442,12 @@ const galleryLabels = {
                                   loading="lazy"
                                   decoding="async"
                                   class="h-full w-full rounded-md object-cover"
+                                />
+                              ) : (
+                                <span
+                                  aria-hidden="true"
+                                  class="block h-full w-full rounded-md"
+                                  style={`background-color: ${option.hex ?? '#e2e8f0'};`}
                                 />
                               )}
                             </a>
@@ -567,14 +622,17 @@ const galleryLabels = {
     // cargar. Tres señales: (a) click en anchor con #id, (b) beforeunload,
     // (c) restore al cargar.
     //
-    // Si la URL ya trae un hash, el browser hace scroll al anchor por sí
-    // mismo — no interferimos (el hash gana sobre el sessionStorage).
+    // Persistencia del scroll position. La restauración YA se hizo en el
+    // script al inicio del body (antes del primer paint). Acá solo
+    // capturamos el scroll position cuando el usuario navega o recarga,
+    // y guardamos en sessionStorage + cookie (triple redundancia con URL
+    // search como backup, manejada en el script del inicio).
     (() => {
-      const STORAGE_KEY = 'pdp-scroll-state';
+      const SS_KEY = 'pdp-scroll-y';
+      const COOKIE_KEY = 'pdp-scroll-y';
+      const COOKIE_ATTRS = 'path=/; max-age=86400; samesite=lax';
 
-      if (window.location.hash !== '' && window.location.hash !== '#') return;
-
-      // (a) Capturar sección clickeada vía anchor links (event delegation).
+      // (a) Click en anchor con #id → guardar anchor (overrides position).
       document.addEventListener('click', (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
@@ -584,55 +642,29 @@ const galleryLabels = {
         if (href === null || href === '' || href === '#') return;
         if (document.querySelector(href) === null) return;
         try {
-          sessionStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify({ type: 'anchor', id: href.slice(1) }),
-          );
-        } catch {
-          /* sessionStorage no disponible — ignorar */
-        }
+          sessionStorage.setItem(SS_KEY + ':anchor', href.slice(1));
+        } catch { /* ignore */ }
       });
 
-      // (b) Capturar scrollY antes de que la página se descargue (reload, navegación).
-      window.addEventListener('beforeunload', () => {
-        try {
-          sessionStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify({ type: 'position', y: window.scrollY }),
-          );
-        } catch {
-          /* sessionStorage no disponible — ignorar */
-        }
-      });
-
-      // (c) Restaurar al cargar (DOMContentLoaded para tener el DOM estable).
-      const restore = () => {
-        let saved;
-        try {
-          const raw = sessionStorage.getItem(STORAGE_KEY);
-          if (raw === null) return;
-          saved = JSON.parse(raw);
-        } catch {
-          return;
-        }
-        if (saved === null || typeof saved !== 'object') return;
-        if (saved.type === 'anchor' && typeof saved.id === 'string') {
-          const el = document.getElementById(saved.id);
-          if (el !== null) {
-            el.scrollIntoView({ behavior: 'auto', block: 'start' });
-          }
-          return;
-        }
-        if (saved.type === 'position' && typeof saved.y === 'number') {
-          window.scrollTo({ top: saved.y, behavior: 'auto' });
-        }
-      };
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', restore);
-      } else {
-        restore();
-      }
+      // (b) Capturar scrollY en cada cambio (debounced via rAF).
+      let scrollYScheduled = false;
+      window.addEventListener('scroll', () => {
+        if (scrollYScheduled) return;
+        scrollYScheduled = true;
+        requestAnimationFrame(() => {
+          scrollYScheduled = false;
+          try {
+            sessionStorage.setItem(SS_KEY, String(window.scrollY));
+            document.cookie = `${COOKIE_KEY}=${window.scrollY}; ${COOKIE_ATTRS}`;
+            // URL backup: ?scrollY=N (limpiada en load).
+            const url = new URL(window.location.href);
+            if (url.searchParams.get('scrollY') !== String(window.scrollY)) {
+              url.searchParams.set('scrollY', String(window.scrollY));
+              window.history.replaceState(null, '', url.toString());
+            }
+          } catch { /* ignore */ }
+        });
+      }, { passive: true });
     })();
   </script>
 </StorefrontLayout>
