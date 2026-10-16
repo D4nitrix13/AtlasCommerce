@@ -364,10 +364,11 @@ const galleryLabels = {
                   <dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Acabado</dt>
                   <dd class="flex flex-col gap-3 text-sm font-medium text-slate-900">
                     <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
-                    {/* Picker de variantes con thumbnails reales (pattern Gibson).
-                        SSR: cada swatch es un <a> con ?finish=<id> que filtra la galería
-                        via query param (sin JS). */}
-                    <ul class="flex flex-wrap items-center gap-2" role="list" aria-label="Selector de acabado">
+                    {/* Picker de variantes con thumbnails reales (estilo Nike).
+                        Cada swatch es un <a> con ?finish=<id> que filtra la galería
+                        via query param (sin JS). Thumbnails uniformes ~48×48
+                        con object-cover para mantener el aspect ratio. */}
+                    <ul class="flex flex-wrap items-center gap-1.5" role="list" aria-label="Selector de acabado">
                       {COLOR_OPTIONS.map((option) => {
                         const isActive = option.id === SELECTED_COLOR;
                         const thumbSrc = variantFirstImage[option.id];
@@ -379,13 +380,13 @@ const galleryLabels = {
                               aria-label={`Cambiar a ${option.label}`}
                               aria-current={isActive ? 'true' : undefined}
                               class:list={[
-                                'block h-10 w-10 rounded-md border bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
+                                'block h-12 w-12 overflow-hidden rounded-md border-2 bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
                                 isActive
-                                  ? 'border-slate-900 ring-2 ring-slate-900 ring-offset-1'
+                                  ? 'border-slate-900'
                                   : 'border-slate-200 opacity-70 hover:opacity-100',
                               ]}
                             >
-                              {thumbSrc !== undefined && (
+                              {thumbSrc !== undefined ? (
                                 <img
                                   src={thumbSrc}
                                   alt=""
@@ -434,6 +435,9 @@ const galleryLabels = {
                 addToCartLabel={t['storefront.productDetail.addToCart']}
                 favoriteLabel={t['storefront.products.detail.v4.favorite']}
                 inStock={IN_STOCK}
+                productId={product.id}
+                apiBaseUrl="/api/v1"
+                loginHref={`/${locale}/login`}
               />
 
               {detail.financing !== undefined && <ProductDetailFinancingBlock syncLine={t['storefront.products.detail.v4.financing.syncLine']} shopPayLine={t['storefront.products.detail.v4.financing.shopPay']} learnMoreLabel={t['storefront.products.detail.v4.financing.learnMore']} />}
