@@ -27,10 +27,9 @@ import ProductDetailGallery from '../../../components/storefront/products/Produc
 import ProductDetailVariants, {
   type VariantOption,
 } from '../../../components/storefront/products/ProductDetailVariants.astro';
-// ProductDetailColorSwatches ya no se usa — el picker ahora vive inline
+// ProductDetailColorSwatches eliminado en T5 — el picker ahora vive inline
 // en el dl "Acabado" usando thumbnails reales de cada variante.
 import ProductDetailRatingRow from '../../../components/storefront/products/ProductDetailRatingRow.astro';
-import ProductDetailColorSwatches from '../../../components/storefront/products/ProductDetailColorSwatches.astro';
 import ProductDetailFinancingBlock from '../../../components/storefront/products/ProductDetailFinancingBlock.astro';
 import ProductFeaturedArticle from '../../../components/storefront/products/ProductFeaturedArticle.astro';
 import ProductFrequentlyBoughtTogether from '../../../components/storefront/products/ProductFrequentlyBoughtTogether.astro';
@@ -556,14 +555,5 @@ const galleryLabels = {
     // Inyecta la metadata del producto actual para que ProductRecentlyViewed
     // pueda trackearlo via localStorage en el cliente.
     window.__PRODUCT_META__ = { slug: productSlug, name: productName, imageUrl: productImage, priceCents: productPriceCents, currency: productCurrency };
-  </script>
-  <script is:inline>
-    document.querySelectorAll('[data-toggle-details]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const target = document.querySelector(btn.dataset.toggleDetails);
-        if (target) target.classList.toggle('is-expanded');
-        btn.textContent = target?.classList.contains('is-expanded') ? btn.dataset.labelLess : btn.dataset.labelMore;
-      });
-    });
   </script>
 </StorefrontLayout>
