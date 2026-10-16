@@ -14,6 +14,11 @@
  *   - Favorite es un `<button>` separado con aria-pressed. El icono
  *     es SVG inline (no dependemos de la librería de iconos para
  *     algo tan simple).
+ *   - T14b: el botón Favorite ahora tiene handler JS — POST/DELETE
+ *     a /storefront/products/{product}/wishlist con auth gate
+ *     best-effort y optimistic UI + rollback. Hidratación inicial
+ *     via GET público tras la carga (no en SSR — Sanctum usa
+ *     cookie httpOnly invisible al server-render).
  *
  * Tokens (todo más prominente):
  *   - Add to Bag: `bg-slate-900 hover:bg-slate-800 text-white font-bold h-16 text-lg px-8`.
@@ -29,8 +34,16 @@ interface Props {
   inStock: boolean;
   /** Mostrar botón Favorite (true por default). */
   showFavorite?: boolean;
-  /** Estado actual del Favorite (visual). */
+  /** Estado inicial del Favorite (visual). */
   isFavorite?: boolean;
+  /** ID numérico del producto — usado por el handler wishlist (T14b).
+   *  Opcional: si no se provee, el botón se renderiza pero sin handler
+   *  JS (caso del `ProductInfo` que usa `WishlistButton` separado). */
+  productId?: number;
+  /** Base URL del backend para los endpoints de wishlist. Default `/api/v1`. */
+  apiBaseUrl?: string;
+  /** Href de login (locale-prefixed). Default `/${locale}/login`. */
+  loginHref?: string;
 }
 
 const {
@@ -39,10 +52,24 @@ const {
   inStock,
   showFavorite = true,
   isFavorite = false,
+  productId,
+  apiBaseUrl = '/api/v1',
+  loginHref,
 } = Astro.props;
+
+// Locale-prefixed loginHref por defecto. Sigue el patrón de slug.astro
+// y ProductReviews (Astro.locals.locale ?? 'es').
+const locale = Astro.locals.locale ?? 'es';
+const resolvedLoginHref = loginHref ?? `/${locale}/login`;
 ---
 
-<div class="flex flex-col gap-3 sm:flex-row sm:items-stretch" data-testid="product-ctas">
+<div
+  class="flex flex-col gap-3 sm:flex-row sm:items-stretch"
+  data-testid="product-ctas"
+  data-product-ctas
+  data-api-base-url={apiBaseUrl}
+  data-login-href={resolvedLoginHref}
+>
   <button
     type="submit"
     disabled={!inStock}
@@ -74,32 +101,207 @@ const {
   </button>
 
   {showFavorite && (
-    <button
-      type="button"
-      aria-pressed={isFavorite}
-      aria-label={favoriteLabel}
-      class:list={[
-        'inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-        isFavorite
-          ? 'border-slate-900 bg-slate-900 text-white'
-          : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50',
-      ]}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill={isFavorite ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        stroke-width="2"
-        class="h-5 w-5"
-        aria-hidden="true"
+    <div class="flex flex-col items-center gap-1">
+      <button
+        type="button"
+        data-wishlist-toggle
+        data-product-id={productId}
+        data-in-wishlist={isFavorite ? 'true' : 'false'}
+        data-label-login-required="Inicia sesión para guardar favoritos"
+        aria-pressed={isFavorite ? 'true' : 'false'}
+        aria-label={favoriteLabel}
+        class:list={[
+          'inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+          isFavorite
+            ? 'border-slate-900 bg-slate-900 text-white'
+            : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50',
+        ]}
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-        />
-      </svg>
-    </button>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill={isFavorite ? 'currentColor' : 'none'}
+          stroke="currentColor"
+          stroke-width="2"
+          class="h-5 w-5"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+          />
+        </svg>
+      </button>
+      {/* Hint inline para el auth gate — patrón de T14a (review likes).
+          Lo mostramos persistentemente para que el user sepa que tiene
+          que loguearse. Cuando existe auth store en el cliente, este
+          texto se oculta via auth state. */}
+      <span class="hidden text-xs text-slate-500" data-wishlist-hint>
+        {favoriteLabel}
+      </span>
+    </div>
   )}
 </div>
+
+<script>
+  /**
+   * ProductCTAs — handler del toggle "favorito" del PDP (T14b).
+   *
+   * Comportamiento:
+   *   1. Hidratación post-carga: GET /storefront/products/{id}/wishlist
+   *      para reflejar el estado real si el cliente está autenticado.
+   *      SSR no puede leer la cookie httpOnly de Sanctum, así que el
+   *      render inicial siempre muestra "no favorito".
+   *   2. Click → auth gate best-effort (cookie httpOnly + localStorage
+   *      fallback, mismo patrón que review likes en T14a).
+   *      Si no hay auth → prompt inline con link a login, NO redirigir
+   *      (UX no disruptivo).
+   *   3. Auth OK → optimistic UI: toggle visual antes del fetch.
+   *   4. POST/DELETE /storefront/products/{id}/wishlist según el
+   *      estado anterior.
+   *   5. Respuesta OK → reconcilia con la verdad del servidor
+   *      (`in_wishlist`).
+   *   6. Respuesta falla → rollback UI + console.error.
+   *
+   * El auth gate es best-effort: Sanctum stateful guarda el token en
+   * cookie httpOnly → invisible al JS. Mientras no haya auth store
+   * en el cliente, mostramos un prompt inline con link a login en vez
+   * de redirigir. Cuando exista `customerAuthStore`, sustituir este
+   * gate por esa fuente única de verdad.
+   */
+  function setupWishlistToggle(root: HTMLElement): void {
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-wishlist-toggle]'));
+    const apiBase = root.dataset.apiBaseUrl ?? '/api/v1';
+    const loginHref = root.dataset.loginHref ?? '/login';
+
+    buttons.forEach((btn) => {
+      const productId = btn.dataset.productId;
+      if (productId === undefined || productId === '') return;
+
+      const hintEl = btn.parentElement?.querySelector<HTMLElement>('[data-wishlist-hint]') ?? null;
+
+      btn.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        // Auth gate best-effort. Sanctum usa cookies httpOnly (ver
+        // comentario del módulo). Fallback a localStorage para
+        // implementaciones que emitan token Bearer explícito.
+        const hasAuth =
+          document.cookie.includes('sanctum_token') || localStorage.getItem('auth_token') !== null;
+
+        if (!hasAuth) {
+          if (hintEl !== null) {
+            const redirect = encodeURIComponent(window.location.pathname);
+            const originalText = hintEl.textContent ?? '';
+            const link = document.createElement('a');
+            link.href = `${loginHref}?redirect=${redirect}`;
+            link.className = 'font-semibold text-[var(--primary,#475569)] hover:underline';
+            link.textContent =
+              btn.dataset.labelLoginRequired ?? 'Inicia sesión para guardar favoritos';
+            hintEl.classList.remove('hidden');
+            hintEl.replaceChildren(link);
+            window.setTimeout(() => {
+              hintEl.textContent = originalText;
+            }, 4000);
+          }
+          return;
+        }
+
+        // ── Optimistic UI ────────────────────────────────────────────
+        const wasInWishlist = btn.dataset.inWishlist === 'true';
+        const newInWishlist = !wasInWishlist;
+        applyState(btn, hintEl, newInWishlist);
+
+        try {
+          const response = await fetch(`${apiBase}/storefront/products/${productId}/wishlist`, {
+            method: wasInWishlist ? 'DELETE' : 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
+            },
+            credentials: 'same-origin',
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          // El backend devuelve `{ in_wishlist: bool }`. Reconciliamos
+          // con la verdad del servidor. Usamos una const local para
+          // preservar el narrowing a través del closure de la response.
+          const payload = (await response.json()) as { in_wishlist?: boolean };
+          if (typeof payload.in_wishlist === 'boolean') {
+            applyState(btn, hintEl, payload.in_wishlist);
+          }
+        } catch (error) {
+          // ── Rollback ───────────────────────────────────────────────
+          applyState(btn, hintEl, wasInWishlist);
+          console.error('Wishlist toggle failed:', error);
+        }
+      });
+    });
+
+    // Hidratación post-carga: si el cliente ya tenía el producto en
+    // su wishlist, lo reflejamos visualmente. El endpoint es público
+    // — sin auth devuelve in_wishlist=false, con auth devuelve el
+    // estado real. Sólo corre una vez por página (DOMContentLoaded
+    // ya ocurrió cuando Astro hidrata este script).
+    const firstButton = buttons[0];
+    const productId = firstButton?.dataset.productId;
+    if (productId === undefined || productId === '') return;
+
+    void (async () => {
+      try {
+        const response = await fetch(`${apiBase}/storefront/products/${productId}/wishlist`, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          credentials: 'same-origin',
+        });
+        if (!response.ok) return;
+        const payload = (await response.json()) as { in_wishlist?: boolean };
+        const inWishlistFromServer = payload.in_wishlist;
+        if (typeof inWishlistFromServer !== 'boolean') return;
+        buttons.forEach((btn) => {
+          // No sobreescribimos si el user ya clickeó antes de que
+          // llegara la respuesta del GET (data-in-wishlist cambió).
+          if (btn.dataset.inWishlist === 'false') {
+            applyState(btn, hintFor(btn), inWishlistFromServer);
+          }
+        });
+      } catch {
+        /* silencioso: si falla el GET, el botón queda en su estado SSR (no favorito) */
+      }
+    })();
+  }
+
+  function hintFor(btn: HTMLButtonElement): HTMLElement | null {
+    return btn.parentElement?.querySelector<HTMLElement>('[data-wishlist-hint]') ?? null;
+  }
+
+  function applyState(
+    btn: HTMLButtonElement,
+    hintEl: HTMLElement | null,
+    inWishlist: boolean
+  ): void {
+    btn.dataset.inWishlist = String(inWishlist);
+    btn.setAttribute('aria-pressed', String(inWishlist));
+    const svg = btn.querySelector('svg');
+    if (svg !== null) {
+      svg.setAttribute('fill', inWishlist ? 'currentColor' : 'none');
+    }
+    btn.classList.toggle('border-slate-900', inWishlist);
+    btn.classList.toggle('bg-slate-900', inWishlist);
+    btn.classList.toggle('text-white', inWishlist);
+    btn.classList.toggle('border-slate-200', !inWishlist);
+    btn.classList.toggle('bg-white', !inWishlist);
+    btn.classList.toggle('text-slate-900', !inWishlist);
+    btn.classList.toggle('hover:bg-slate-50', !inWishlist);
+    if (hintEl !== null && !hintEl.querySelector('a')) {
+      hintEl.textContent = inWishlist ? 'Quitar de favoritos' : 'Guardar en favoritos';
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-product-ctas]').forEach(setupWishlistToggle);
+</script>

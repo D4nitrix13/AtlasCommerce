@@ -52,6 +52,7 @@ use App\Http\Controllers\Api\Storefront\Auth\StorefrontAuthController;
 use App\Http\Controllers\Api\Storefront\Checkout\CheckoutController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\Api\Storefront\ProductReviewLikeController;
+use App\Http\Controllers\Api\Storefront\ProductWishlistController;
 use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
 use App\Http\Controllers\Api\Storefront\RfqController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
@@ -1100,6 +1101,24 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('storefront/reviews/{review}/like', [ProductReviewLikeController::class, 'destroy'])
         ->name('storefront.reviews.like.destroy');
 
+    /*
+    |--------------------------------------------------------------------------
+    | ProductWishlist (T14b) — toggle "favorito" sobre un producto
+    |--------------------------------------------------------------------------
+    |
+    | POST agrega el producto al wishlist default del cliente (creándolo
+    | automáticamente si no existe). DELETE lo quita. GET (público, fuera
+    | de este grupo) devuelve el estado actual para hidratar el botón.
+    | Ver ProductWishlistController.
+    |
+    */
+
+    Route::post('storefront/products/{product}/wishlist', [ProductWishlistController::class, 'store'])
+        ->name('storefront.products.wishlist.store');
+
+    Route::delete('storefront/products/{product}/wishlist', [ProductWishlistController::class, 'destroy'])
+        ->name('storefront.products.wishlist.destroy');
+
     // RF-SUP-162: cliente autenticado hace pregunta sobre producto.
     Route::post('products/{product}/questions', [ProductQuestionController::class, 'store'])
         ->name('products.questions.store');
@@ -1250,4 +1269,11 @@ Route::middleware(['store.domain', 'store.maintenance'])->prefix('storefront')->
     // auth:sanctum más arriba.
     Route::get('reviews/{review}/like', [ProductReviewLikeController::class, 'show'])
         ->name('storefront.reviews.like.show');
+
+    // T14b PDP wishlist — consulta pública del estado actual del
+    // producto en el wishlist default del cliente autenticado. Sin
+    // auth devuelve false. La mutación (POST/DELETE) vive en el grupo
+    // auth:sanctum más arriba.
+    Route::get('products/{product}/wishlist', [ProductWishlistController::class, 'show'])
+        ->name('storefront.products.wishlist.show');
 });
