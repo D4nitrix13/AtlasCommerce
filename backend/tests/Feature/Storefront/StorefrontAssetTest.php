@@ -8,6 +8,7 @@ use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -190,5 +191,71 @@ final class StorefrontAssetTest extends TestCase
         // Despues del request: cache existe.
         $this->assertTrue(\Illuminate\Support\Facades\Cache::store(name: 'redis')->has($cacheKey));
         $this->assertSame('cached-content', \Illuminate\Support\Facades\Cache::store(name: 'redis')->get($cacheKey));
+    }
+
+    #[Test]
+    public function it_logs_warning_when_path_does_not_match_naming_convention_in_soft_mode(): void
+    {
+        // Path valido a nivel de tenant (no 403) pero malformado a nivel de
+        // convencion (no tiene el `{hash}.{ext}` final). En soft mode (default)
+        // la peticion no se rechaza: se sirve el binario y se emite un log
+        // estructurado que sirve de señal para priorizar el backfill de Fase 5.
+        $contents = 'soft-mode-warning-content';
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/soft-mode-warning.webp',
+            contents: $contents,
+        );
+
+        Log::spy();
+
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/soft-mode-warning.webp');
+
+        $response->assertOk();
+
+        Log::shouldHaveReceived(method: 'warning')
+            ->withArgs(function (string $message, array $context): bool {
+                return $message === 'asset.path.malformed'
+                    && $context['tenant_slug'] === 'panda-estampados'
+                    && $context['strict_mode'] === false
+                    && is_string($context['hash']);
+            })
+            ->once();
+    }
+
+    #[Test]
+    public function it_rejects_with_403_in_strict_mode_when_path_malformed(): void
+    {
+        // Strict mode activado via config. Un path que matchea el tenant prefix
+        // pero NO la convención debe abortar con 403 sin tocar el FTP disk.
+        config()->set(key: 'assets.path_validation.strict', value: true);
+
+        $contents = 'strict-mode-test-content';
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/strict-mode-reject.webp',
+            contents: $contents,
+        );
+
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/strict-mode-reject.webp');
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_serves_correctly_in_soft_mode_when_path_malformed(): void
+    {
+        // Soft mode (default) sigue entregando el binario aunque el path no
+        // matchee la convención. La Fase 5 backfill migrara los paths
+        // legacy al formato canónico; Fase 6 flipeara a strict una vez
+        // el rate de warnings caiga a ~0.
+        $contents = 'soft-mode-serve-content';
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/soft-mode-serve.webp',
+            contents: $contents,
+        );
+
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/soft-mode-serve.webp');
+
+        $response->assertOk();
+        $this->assertSame(expected: $contents, actual: $response->getContent());
     }
 }
