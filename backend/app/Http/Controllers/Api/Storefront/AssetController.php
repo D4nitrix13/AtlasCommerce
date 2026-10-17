@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Storefront;
 
 use App\Http\Controllers\Controller;
+use App\Services\Assets\StorageKeyDeriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -48,6 +49,10 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class AssetController extends Controller
 {
+    public function __construct(
+        public StorageKeyDeriver $storageKeyDeriver,
+    ) {}
+
     /**
      * Servir un asset del FTP al browser.
      *
@@ -78,6 +83,22 @@ class AssetController extends Controller
         //   - shared/...           (assets de marca compartida, fallback)
         if (! $this->pathBelongsToTenant(path: $normalizedPath, tenantSlug: $tenantSlug)) {
             return response(content: 'Forbidden', status: 403);
+        }
+
+        // Soft-mode path validation. Si strict=true (post Fase 5 backfill),
+        // rechaza con 403. Si strict=false (default Fase 2), loguea warning
+        // estructurado y sigue sirviendo — el log es la señal para
+        // priorizar el backfill de Fase 5.
+        if (! $this->storageKeyDeriver->validate(path: $normalizedPath)) {
+            if (config(key: 'assets.path_validation.strict') === true) {
+                abort(code: 403, message: 'Malformed asset path.');
+            }
+
+            logger()->warning(message: 'asset.path.malformed', context: [
+                'hash' => hash(algo: 'sha256', data: $normalizedPath),
+                'tenant_slug' => $tenantSlug,
+                'strict_mode' => false,
+            ]);
         }
 
         $disk = Storage::disk(name: 'ftp');
