@@ -76,17 +76,32 @@ final class FenderPlayerFusionBassSeeder extends Seeder
             $category = $this->ensureCategory('Bajo eléctrico', 'bajo-electrico');
             $currency = $this->ensureCurrency('USD');
 
-            $product = $this->ensureProduct(
-                brandId: $brand->id,
-                categoryId: $category->id,
-                currencyId: $currency->id,
-            );
-
+            // Cada color = 1 product entry (mismo approach que usamos
+            // para Gibson colors y para AmPro Tele/Strat). Antes era 1
+            // product con 2 variants; refactor a 2 products para alinear
+            // con el resto del recon pipeline.
             foreach (self::VARIANT_IMAGES as $variantSlug => $imageIndexes) {
-                $variant = $this->ensureVariant(
+                $productSlug = sprintf('%s-%s', self::PRODUCT_SLUG, $variantSlug);
+                $productName = sprintf(
+                    '%s — %s',
+                    self::PRODUCT_NAME,
+                    ucwords(str_replace('-', ' ', $variantSlug))
+                );
+                $sku = sprintf('FND-LPFB4-HH-%s', strtoupper(str_replace('-', '', $variantSlug)));
+
+                $product = $this->ensureProduct(
+                    slug: $productSlug,
+                    sku: $sku,
+                    brandId: $brand->id,
+                    categoryId: $category->id,
+                    currencyId: $currency->id,
+                    productName: $productName,
+                );
+
+                $this->ensureVariant(
                     productId: $product->id,
-                    sku: sprintf('FND-LPFB4-HH-%s', strtoupper(str_replace('-', '', $variantSlug))),
-                    name: sprintf('Player Fusion Precision Bass HH — %s', ucwords(str_replace('-', ' ', $variantSlug))),
+                    sku: $sku,
+                    name: $productName,
                     priceCents: self::BASE_PRICE_CENTS,
                 );
 
@@ -95,12 +110,34 @@ final class FenderPlayerFusionBassSeeder extends Seeder
                     variantSlug: $variantSlug,
                     imageIndexes: $imageIndexes,
                 );
+
+                $this->syncStoreFrontImages(
+                    productId: $product->id,
+                    variantSlug: $variantSlug,
+                    imageIndexes: $imageIndexes,
+                );
             }
 
-            $this->syncStoreFrontImages(
-                productId: $product->id,
-            );
+            // Limpiamos el product "viejo" que tenía el slug genérico
+            // (pre-refactor: 1 product con 2 variants). Si se re-ejecuta
+            // el seeder después del refactor, evitamos que quede un product
+            // huérfano con el slug legacy.
+            $this->removeLegacyProduct();
         });
+    }
+
+    private function removeLegacyProduct(): void
+    {
+        // El refactor pasó de 1 product con slug `fender-player-fusion-bass-hh`
+        // (y 2 variants) a 2 products separados por color. Borramos el
+        // legacy si existe, para idempotencia del refactor.
+        $legacy = Product::query()
+            ->where(column: 'slug', operator: '=', value: self::PRODUCT_SLUG)
+            ->first();
+        if ($legacy !== null) {
+            $legacy->variants()->delete();
+            $legacy->delete();
+        }
     }
 
     private function ensureBrand(string $name, string $slug): Brand
@@ -127,13 +164,19 @@ final class FenderPlayerFusionBassSeeder extends Seeder
         );
     }
 
-    private function ensureProduct(int $brandId, int $categoryId, int $currencyId): Product
-    {
+    private function ensureProduct(
+        string $slug,
+        string $sku,
+        string $productName,
+        int $brandId,
+        int $categoryId,
+        int $currencyId,
+    ): Product {
         return Product::query()->updateOrCreate(
-            ['slug' => self::PRODUCT_SLUG],
-            [
-                'name' => self::PRODUCT_NAME,
-                'sku' => self::PRODUCT_SKU,
+            attributes: ['slug' => $slug],
+            values: [
+                'name' => $productName,
+                'sku' => $sku,
                 'description' => self::PRODUCT_DESCRIPTION,
                 'brand_id' => $brandId,
                 'category_id' => $categoryId,
@@ -141,9 +184,6 @@ final class FenderPlayerFusionBassSeeder extends Seeder
                 'base_price_cents' => self::BASE_PRICE_CENTS,
                 'cost_cents' => (int) (self::BASE_PRICE_CENTS * 0.5),
                 'is_active' => true,
-                // La Voz Instrumentos vende mayoria nuevos (true) pero los
-                // bajos Fender NO tienen tallas relevantes (4/4, 3/4, etc.
-                // son irrelevantes para instrumentos eléctricos adultos).
                 'has_condition' => true,
                 'has_sizes' => false,
                 'published_at' => now(),
@@ -196,28 +236,30 @@ final class FenderPlayerFusionBassSeeder extends Seeder
 
     /**
      * Sincroniza product_store_images para todas las tiendas donde
-     * este producto está publicado. Mismas imágenes que product_images,
+     * este product está publicado. Mismas imágenes que product_images,
      * apuntando al CDN/frontend público del tenant.
      */
-    private function syncStoreFrontImages(int $productId): void
+    private function syncStoreFrontImages(int $productId, string $variantSlug, array $imageIndexes): void
     {
-        $productStores = ProductStore::query()->where('product_id', $productId)->get();
+        $productStores = ProductStore::query()
+            ->where(column: 'product_id', operator: '=', value: $productId)
+            ->get();
+
         foreach ($productStores as $productStore) {
             // Borra imágenes previas del store para este product.
-            ProductStoreImage::query()->where('product_store_id', $productStore->id)->delete();
+            ProductStoreImage::query()
+                ->where(column: 'product_store_id', operator: '=', value: $productStore->id)
+                ->delete();
 
-            // Re-crea las imágenes para cada variante.
-            foreach (self::VARIANT_IMAGES as $variantSlug => $imageIndexes) {
-                foreach ($imageIndexes as $idx => $nn) {
-                    $imageUrl = $this->imageUrl($variantSlug, '1600x730', $nn);
-                    ProductStoreImage::query()->create([
-                        'product_store_id' => $productStore->id,
-                        'image_url' => $imageUrl,
-                        'alt_text' => sprintf('%s — vista %s', $variantSlug, $nn),
-                        'is_primary' => $idx === 0,
-                        'sort_order' => $idx,
-                    ]);
-                }
+            foreach ($imageIndexes as $idx => $nn) {
+                $imageUrl = $this->imageUrl($variantSlug, '1600x730', $nn);
+                ProductStoreImage::query()->create(attributes: [
+                    'product_store_id' => $productStore->id,
+                    'image_url' => $imageUrl,
+                    'alt_text' => sprintf('%s — vista %s', $variantSlug, $nn),
+                    'is_primary' => $idx === 0,
+                    'sort_order' => $idx,
+                ]);
             }
         }
     }

@@ -335,18 +335,20 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
  */
 export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
   {
-    id: PRODUCTS[1].id,
-    slug: PRODUCTS[1].slug,
-    name: PRODUCTS[1].name,
-    priceCents: PRODUCTS[1].priceCents,
-    currency: PRODUCTS[1].currency ?? 'USD',
-    imageUrl: PRODUCTS[1].imageUrl,
-    // Otra toma de la galería (_02) — preview en hover.
+    id: 9091,
+    slug: 'fender-limited-edition-player-fusion-precision-bass-hh-ebony-black',
+    name: 'Fender Limited Edition Player Fusion Precision Bass HH, Ebony Black',
+    priceCents: 179900,
+    currency: 'USD',
+    // Variante Ebony Black del LP Bass HH. Antes era 1 product con
+    // 2 variants; refactor Oct 2026 a 2 products separados (uno por
+    // color) para alinear con el resto del recon pipeline (Strat/Tele).
+    imageUrl: fenderImageUrl('ebony-black', '01', '400x183'),
     imageUrlSecondary: fenderImageUrl('ebony-black', '02', '400x183'),
-    badges: PRODUCTS[1].badges,
+    badges: ['new'],
     vendor: 'Fender',
     finish: 'Ultra Heavy Aged',
-    variantsCount: 2,
+    variantsCount: 1,
     variants: [
       {
         id: 'ebony-black',
@@ -354,6 +356,23 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
         hex: '#0F0F0F',
         imageUrl: fenderImageUrl('ebony-black', '01', '400x183'),
       },
+    ],
+  },
+  {
+    id: 9092,
+    slug: 'fender-limited-edition-player-fusion-precision-bass-hh-halo-metallic',
+    name: 'Fender Limited Edition Player Fusion Precision Bass HH, Halo Metallic',
+    priceCents: 179900,
+    currency: 'USD',
+    // Variante Halo Metallic del LP Bass HH. Ver entrada 9091
+    // para contexto del refactor.
+    imageUrl: fenderImageUrl('halo-metallic', '01', '400x183'),
+    imageUrlSecondary: fenderImageUrl('halo-metallic', '02', '400x183'),
+    badges: ['new'],
+    vendor: 'Fender',
+    finish: 'Ultra Heavy Aged',
+    variantsCount: 1,
+    variants: [
       {
         id: 'halo-metallic',
         label: 'Halo Metallic',
@@ -392,7 +411,113 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     imageUrlSecondary:
       '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-02.webp',
     vendor: 'Fender',
+    finish: 'Black',
+    badges: ['new'],
+  },
+  {
+    id: 9130,
+    slug: 'fender-american-professional-stratocaster-3-color-sunburst',
+    name: 'Fender American Professional Stratocaster, 3-Color Sunburst',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111110700. Aspect LANDSCAPE 1600×523. Back compartido con
+    // todas las variants (0111110700_fen_ins_bck_1_rl.png?v=1788979193).
+    imageUrl:
+      '/images/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x521-02.webp',
+    vendor: 'Fender',
     finish: '3-Color Sunburst',
+    badges: ['new'],
+  },
+  {
+    id: 9131,
+    slug: 'fender-american-professional-stratocaster-olympic-white',
+    name: 'Fender American Professional Stratocaster, Olympic White',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111110705. Acabado Olympic White clásico.
+    imageUrl:
+      '/images/products/fender-american-professional-stratocaster/olympic-white/fender-american-professional-stratocaster-olympic-white-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-stratocaster/olympic-white/fender-american-professional-stratocaster-olympic-white-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Olympic White',
+    badges: ['new'],
+  },
+  {
+    id: 9132,
+    slug: 'fender-american-professional-stratocaster-black',
+    name: 'Fender American Professional Stratocaster, Black',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111110706. Acabado Black con pickguard tortoiseshell.
+    imageUrl:
+      '/images/products/fender-american-professional-stratocaster/black/fender-american-professional-stratocaster-black-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-stratocaster/black/fender-american-professional-stratocaster-black-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Black',
+    badges: ['new'],
+  },
+  {
+    id: 9133,
+    slug: 'fender-american-professional-stratocaster-oxblood',
+    name: 'Fender American Professional Stratocaster, Oxblood',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111110730. Acabado Oxblood (vintage red), pickguard black.
+    imageUrl:
+      '/images/products/fender-american-professional-stratocaster/oxblood/fender-american-professional-stratocaster-oxblood-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-stratocaster/oxblood/fender-american-professional-stratocaster-oxblood-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Oxblood',
+    badges: ['new'],
+  },
+  {
+    id: 9134,
+    slug: 'fender-american-professional-stratocaster-dark-night',
+    name: 'Fender American Professional Stratocaster, Dark Night',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111110761. Acabado Dark Night (azul muy oscuro), pickguard + knobs negros.
+    imageUrl:
+      '/images/products/fender-american-professional-stratocaster/dark-night/fender-american-professional-stratocaster-dark-night-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-stratocaster/dark-night/fender-american-professional-stratocaster-dark-night-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Dark Night',
+    badges: ['new'],
+  },
+  {
+    id: 9135,
+    slug: 'fender-american-professional-stratocaster-3-color-sunburst-maple',
+    name: 'Fender American Professional Stratocaster, 3-Color Sunburst, Maple Fingerboard',
+    priceCents: 179900,
+    currency: 'USD',
+    // SKU 0111112700. Maple FB (en vez de Rosewood), acabado 3-CS.
+    imageUrl:
+      '/images/products/fender-american-professional-stratocaster/3-color-sunburst-maple/fender-american-professional-stratocaster-3-color-sunburst-maple-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-stratocaster/3-color-sunburst-maple/fender-american-professional-stratocaster-3-color-sunburst-maple-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: '3-Color Sunburst (Maple)',
+    badges: ['new'],
+  },
+  {
+    id: 9136,
+    slug: 'fender-american-professional-stratocaster-olympic-white-maple',
+    name: 'Fender American Professional Stratocaster, Olympic White, Maple Fingerboard',
+    priceCents: 179900,
+    currency: 'USD',
+    // SKU 0111112705. Maple FB + Olympic White.
+    imageUrl:
+      '/images/products/fender-american-professional-stratocaster/olympic-white-maple/fender-american-professional-stratocaster-olympic-white-maple-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-stratocaster/olympic-white-maple/fender-american-professional-stratocaster-olympic-white-maple-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Olympic White (Maple)',
     badges: ['new'],
   },
   {

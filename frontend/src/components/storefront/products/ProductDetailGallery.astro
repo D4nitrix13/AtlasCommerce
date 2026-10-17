@@ -17,10 +17,11 @@
  *     lee todos los `[data-gallery-scroller]` y conecta:
  *       1. thumbnails (click → scrollIntoView)
  *       2. observer (intersection → toggle `data-active` en thumb)
- *   - Si las imágenes son SVG inline, fallback visual con `ProductMockup`.
- *   - Oculta scrollbar del carousel con `<style>` scoped.
+ *  - Si las imágenes son SVG inline, fallback visual con `ProductMockup`.
+ *  - Oculta scrollbar del carousel con `<style>` scoped.
  */
 import ProductMockup from '../../ui/ProductMockup.astro';
+import { imageSrcset } from '../../../lib/product-image';
 
 export interface ProductDetailGalleryLabels {
   /** Alt accesible para cada celda. */
@@ -66,28 +67,6 @@ const showThumbs = images.length > 1;
  * Si la URL no matchea el patrón esperado, devolvemos un set vacío
  * (`srcset` vacío → browser usa `src` solamente, sin upscale).
  */
-const SIZES_W = [400, 800, 1200, 1600] as const;
-const SIZE_TOKEN_RE = /-(\d{3,4})x(\d{2,4})-/;
-
-function parseSizeToken(url: string): { w: number; h: number } | null {
-  const m = url.match(SIZE_TOKEN_RE);
-  if (m === null) return null;
-  const w = Number.parseInt(m[1] ?? '0', 10);
-  const h = Number.parseInt(m[2] ?? '0', 10);
-  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return null;
-  return { w, h };
-}
-
-function imageSrcset(url: string): string {
-  const base = parseSizeToken(url);
-  if (base === null) return '';
-  // aspect = h / w (e.g., 525/1600 = 0.3281 para Fender AmPro)
-  const aspect = base.h / base.w;
-  return SIZES_W.map((w) => {
-    const h = Math.round(w * aspect);
-    return `${url.replace(SIZE_TOKEN_RE, `-${w}x${h}-`)} ${w}w`;
-  }).join(', ');
-}
 ---
 
 <section aria-label="Product gallery" class="relative flex flex-col gap-4" data-reveal>

@@ -72,10 +72,20 @@ class DatabaseSeeder extends Seeder
         // landscape 1600x525; back image compartido por fingerboard.
         $this->call(class: FenderAmericanProfessionalTelecasterSeeder::class);
 
+        // Catálogo recon round 1 (Oct 2026) — Fender American Professional
+        // Stratocaster, 7 variantes (3-CS, Olympic White, Black, Oxblood,
+        // Dark Night, 3-CS Maple, Olympic White Maple). Misma línea de
+        // productos que el Tele, distinto body shape.
+        $this->call(class: FenderAmericanProfessionalStratocasterSeeder::class);
+
         // Catálogo recon round 1 (Oct 2026) — Fender American Vintage II
         // 1957 Stratocaster Black. Front específico del SKU, back compartido
         // entre colores del modelo.
         $this->call(class: FenderAmericanVintageII1957StratocasterSeeder::class);
+
+        // Catálogo recon round 1 (Oct 2026) — Gibson Les Paul Supreme
+        // Blueberry Burst (exclusive). Square 1600x1600.
+        $this->call(class: GibsonLesPaulSupremeBlueberryBurstSeeder::class);
     }
 
     /**
