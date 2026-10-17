@@ -379,299 +379,212 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
   },
   {
     id: 9102,
-    slug: 'fender-american-professional-telecaster-3-color-sunburst',
-    name: 'Fender American Professional Telecaster, 3-Color Sunburst',
+    slug: 'fender-american-professional-telecaster',
+    name: 'Fender American Professional Telecaster',
     priceCents: 169900,
     currency: 'USD',
-    // Fender AmPro Telecaster: aspect LANDSCAPE 1600×525 (3.05:1).
-    // Variaciones por color identificadas por últimos 3 dígitos del SKU
-    // (00700=3-Color Sunburst, 00706=Black, 00721=Natural, etc.).
+    // Misma guitarra y pickup config (V-Mod III single-coil Tele);
+    // cambia el body color. 7 variants Rosewood FB (3-CS, Olympic White,
+    // Black, Natural, Oxblood, Dark Night, Aged Cherry Burst) y 2 Maple FB
+    // (3-CS, Butterscotch Blonde) = 9 total. El nombre NO incluye el
+    // color en el modelo (los cards muestran "Player Fusion Tele, COLOR").
     imageUrl:
       '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-01.webp',
-    // Segunda toma (back) para hover swap
     imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-02.webp',
+      '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x521-02.webp',
     vendor: 'Fender',
-    finish: 'Black',
+    finish: '3-Color Sunburst',
+    variantsCount: 9,
     badges: ['new'],
+    variants: [
+      {
+        id: '3-color-sunburst',
+        label: '3-Color Sunburst',
+        hex: '#3B2410',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst.webp',
+      },
+      {
+        id: 'olympic-white',
+        label: 'Olympic White',
+        hex: '#F4F0E6',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-olympic-white.webp',
+      },
+      {
+        id: 'black',
+        label: 'Black',
+        hex: '#0A0A0A',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-black.webp',
+      },
+      {
+        id: 'natural',
+        label: 'Natural',
+        hex: '#C7A66B',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-natural.webp',
+      },
+      {
+        id: 'oxblood',
+        label: 'Oxblood',
+        hex: '#5C1F22',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-oxblood.webp',
+      },
+      {
+        id: 'dark-night',
+        label: 'Dark Night',
+        hex: '#1B2533',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-dark-night.webp',
+      },
+      {
+        id: 'aged-cherry-burst',
+        label: 'Aged Cherry Burst',
+        hex: '#7C2A26',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-aged-cherry-burst.webp',
+      },
+      {
+        id: '3-color-sunburst-maple',
+        label: '3-Color Sunburst (Maple)',
+        hex: '#3B2410',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst-maple.webp',
+      },
+      {
+        id: 'butterscotch-blonde-maple',
+        label: 'Butterscotch Blonde (Maple)',
+        hex: '#D4A557',
+        imageUrl:
+          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-butterscotch-blonde-maple.webp',
+      },
+    ],
   },
   {
     id: 9130,
-    slug: 'fender-american-professional-stratocaster-3-color-sunburst',
-    name: 'Fender American Professional Stratocaster, 3-Color Sunburst',
+    slug: 'fender-american-professional-stratocaster',
+    name: 'Fender American Professional Stratocaster',
     priceCents: 169900,
     currency: 'USD',
-    // SKU 0111110700. Aspect LANDSCAPE 1600×523. Back compartido con
-    // todas las variants (0111110700_fen_ins_bck_1_rl.png?v=1788979193).
+    // 7 variants: 5 Rosewood FB (3-CS, Olympic White, Black, Oxblood,
+    // Dark Night) + 2 Maple FB (3-CS, Olympic White). 3 single-coil V-Mod III
+    // + trémolo 2-point.
     imageUrl:
       '/images/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x523-01.webp',
     imageUrlSecondary:
       '/images/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x521-02.webp',
     vendor: 'Fender',
     finish: '3-Color Sunburst',
+    variantsCount: 7,
     badges: ['new'],
-  },
-  {
-    id: 9131,
-    slug: 'fender-american-professional-stratocaster-olympic-white',
-    name: 'Fender American Professional Stratocaster, Olympic White',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111110705. Acabado Olympic White clásico.
-    imageUrl:
-      '/images/products/fender-american-professional-stratocaster/olympic-white/fender-american-professional-stratocaster-olympic-white-1600x523-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-stratocaster/olympic-white/fender-american-professional-stratocaster-olympic-white-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Olympic White',
-    badges: ['new'],
-  },
-  {
-    id: 9132,
-    slug: 'fender-american-professional-stratocaster-black',
-    name: 'Fender American Professional Stratocaster, Black',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111110706. Acabado Black con pickguard tortoiseshell.
-    imageUrl:
-      '/images/products/fender-american-professional-stratocaster/black/fender-american-professional-stratocaster-black-1600x523-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-stratocaster/black/fender-american-professional-stratocaster-black-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Black',
-    badges: ['new'],
-  },
-  {
-    id: 9133,
-    slug: 'fender-american-professional-stratocaster-oxblood',
-    name: 'Fender American Professional Stratocaster, Oxblood',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111110730. Acabado Oxblood (vintage red), pickguard black.
-    imageUrl:
-      '/images/products/fender-american-professional-stratocaster/oxblood/fender-american-professional-stratocaster-oxblood-1600x523-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-stratocaster/oxblood/fender-american-professional-stratocaster-oxblood-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Oxblood',
-    badges: ['new'],
-  },
-  {
-    id: 9134,
-    slug: 'fender-american-professional-stratocaster-dark-night',
-    name: 'Fender American Professional Stratocaster, Dark Night',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111110761. Acabado Dark Night (azul muy oscuro), pickguard + knobs negros.
-    imageUrl:
-      '/images/products/fender-american-professional-stratocaster/dark-night/fender-american-professional-stratocaster-dark-night-1600x523-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-stratocaster/dark-night/fender-american-professional-stratocaster-dark-night-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Dark Night',
-    badges: ['new'],
-  },
-  {
-    id: 9135,
-    slug: 'fender-american-professional-stratocaster-3-color-sunburst-maple',
-    name: 'Fender American Professional Stratocaster, 3-Color Sunburst, Maple Fingerboard',
-    priceCents: 179900,
-    currency: 'USD',
-    // SKU 0111112700. Maple FB (en vez de Rosewood), acabado 3-CS.
-    imageUrl:
-      '/images/products/fender-american-professional-stratocaster/3-color-sunburst-maple/fender-american-professional-stratocaster-3-color-sunburst-maple-1600x523-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-stratocaster/3-color-sunburst-maple/fender-american-professional-stratocaster-3-color-sunburst-maple-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: '3-Color Sunburst (Maple)',
-    badges: ['new'],
-  },
-  {
-    id: 9136,
-    slug: 'fender-american-professional-stratocaster-olympic-white-maple',
-    name: 'Fender American Professional Stratocaster, Olympic White, Maple Fingerboard',
-    priceCents: 179900,
-    currency: 'USD',
-    // SKU 0111112705. Maple FB + Olympic White.
-    imageUrl:
-      '/images/products/fender-american-professional-stratocaster/olympic-white-maple/fender-american-professional-stratocaster-olympic-white-maple-1600x523-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-stratocaster/olympic-white-maple/fender-american-professional-stratocaster-olympic-white-maple-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Olympic White (Maple)',
-    badges: ['new'],
+    variants: [
+      {
+        id: '3-color-sunburst',
+        label: '3-Color Sunburst',
+        hex: '#3B2410',
+        imageUrl:
+          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst.webp',
+      },
+      {
+        id: 'olympic-white',
+        label: 'Olympic White',
+        hex: '#F4F0E6',
+        imageUrl:
+          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white.webp',
+      },
+      {
+        id: 'black',
+        label: 'Black',
+        hex: '#0A0A0A',
+        imageUrl:
+          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-black.webp',
+      },
+      {
+        id: 'oxblood',
+        label: 'Oxblood',
+        hex: '#5C1F22',
+        imageUrl:
+          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-oxblood.webp',
+      },
+      {
+        id: 'dark-night',
+        label: 'Dark Night',
+        hex: '#1B2533',
+        imageUrl:
+          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-dark-night.webp',
+      },
+      {
+        id: '3-color-sunburst-maple',
+        label: '3-Color Sunburst (Maple)',
+        hex: '#3B2410',
+        imageUrl:
+          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst-maple.webp',
+      },
+      {
+        id: 'olympic-white-maple',
+        label: 'Olympic White (Maple)',
+        hex: '#F4F0E6',
+        imageUrl:
+          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white-maple.webp',
+      },
+    ],
   },
   {
     id: 9140,
-    slug: 'fender-american-professional-jaguar-3-color-sunburst',
-    name: 'Fender American Professional Jaguar, 3-Color Sunburst',
+    slug: 'fender-american-professional-jaguar',
+    name: 'Fender American Professional Jaguar',
     priceCents: 189900,
     currency: 'USD',
-    // SKU 0111820700. Distinto del Jazzmaster: body shape Jaguar,
-    // scale 24" corto, 2 humbuckers (en realidad 1 humbucker + 1 SC).
+    // 5 variants Rosewood FB (3-CS, Olympic White, Black, Oxblood,
+    // Dark Night). Scale 24" corto + 1 humbucker + 1 SC + trémolo
+    // Panorama. (Distinto del Jazzmaster — el user confirmó Jaguar.)
     imageUrl:
       '/images/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x545-01.webp',
     imageUrlSecondary:
       '/images/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x543-02.webp',
     vendor: 'Fender',
     finish: '3-Color Sunburst',
+    variantsCount: 5,
     badges: ['new'],
-  },
-  {
-    id: 9141,
-    slug: 'fender-american-professional-jaguar-olympic-white',
-    name: 'Fender American Professional Jaguar, Olympic White',
-    priceCents: 189900,
-    currency: 'USD',
-    // SKU 0111820705. Olympic White con pickguard tortoiseshell 4-ply.
-    imageUrl:
-      '/images/products/fender-american-professional-jaguar/olympic-white/fender-american-professional-jaguar-olympic-white-1600x545-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-jaguar/olympic-white/fender-american-professional-jaguar-olympic-white-1600x543-02.webp',
-    vendor: 'Fender',
-    finish: 'Olympic White',
-    badges: ['new'],
-  },
-  {
-    id: 9142,
-    slug: 'fender-american-professional-jaguar-black',
-    name: 'Fender American Professional Jaguar, Black',
-    priceCents: 189900,
-    currency: 'USD',
-    // SKU 0111820706. Black con pickguard 4-ply tortoise.
-    imageUrl:
-      '/images/products/fender-american-professional-jaguar/black/fender-american-professional-jaguar-black-1600x545-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-jaguar/black/fender-american-professional-jaguar-black-1600x543-02.webp',
-    vendor: 'Fender',
-    finish: 'Black',
-    badges: ['new'],
-  },
-  {
-    id: 9143,
-    slug: 'fender-american-professional-jaguar-oxblood',
-    name: 'Fender American Professional Jaguar, Oxblood',
-    priceCents: 189900,
-    currency: 'USD',
-    // SKU 0111820730. Oxblood con pickguard 3-ply black.
-    imageUrl:
-      '/images/products/fender-american-professional-jaguar/oxblood/fender-american-professional-jaguar-oxblood-1600x545-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-jaguar/oxblood/fender-american-professional-jaguar-oxblood-1600x543-02.webp',
-    vendor: 'Fender',
-    finish: 'Oxblood',
-    badges: ['new'],
-  },
-  {
-    id: 9144,
-    slug: 'fender-american-professional-jaguar-dark-night',
-    name: 'Fender American Professional Jaguar, Dark Night',
-    priceCents: 189900,
-    currency: 'USD',
-    // SKU 0111820761. Dark Night con pickguard 3-ply black + knobs negros.
-    imageUrl:
-      '/images/products/fender-american-professional-jaguar/dark-night/fender-american-professional-jaguar-dark-night-1600x545-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-jaguar/dark-night/fender-american-professional-jaguar-dark-night-1600x543-02.webp',
-    vendor: 'Fender',
-    finish: 'Dark Night',
-    badges: ['new'],
-  },
-  {
-    id: 9121,
-    slug: 'fender-american-professional-telecaster-black',
-    name: 'Fender American Professional Telecaster, Black',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111140706 (Black variant). Misma guitarra y pickup config
-    // que 3-CS, sólo cambia el body color. Back image COMPARTIDA con
-    // 3-CS (mismo upload batch en el CDN de Fender, segundos de
-    // diferencia en el v= param).
-    imageUrl:
-      '/images/products/fender-american-professional-telecaster/black/fender-american-professional-telecaster-black-1600x523-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/black/fender-american-professional-telecaster-black-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Black',
-    badges: ['new'],
-  },
-  {
-    id: 9122,
-    slug: 'fender-american-professional-telecaster-natural',
-    name: 'Fender American Professional Telecaster, Natural',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111140721. Mismo set de specs que 3-CS — body color es
-    // Natural (acabado wood grain visible), fingerboard Rosewood.
-    imageUrl:
-      '/images/products/fender-american-professional-telecaster/natural/fender-american-professional-telecaster-natural-1600x525-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/natural/fender-american-professional-telecaster-natural-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Natural',
-    badges: ['new'],
-  },
-  {
-    id: 9123,
-    slug: 'fender-american-professional-telecaster-oxblood',
-    name: 'Fender American Professional Telecaster, Oxblood',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111140730. Acabado Oxblood (vintage red), fingerboard Rosewood.
-    imageUrl:
-      '/images/products/fender-american-professional-telecaster/oxblood/fender-american-professional-telecaster-oxblood-1600x525-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/oxblood/fender-american-professional-telecaster-oxblood-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Oxblood',
-    badges: ['new'],
-  },
-  {
-    id: 9124,
-    slug: 'fender-american-professional-telecaster-dark-night',
-    name: 'Fender American Professional Telecaster, Dark Night',
-    priceCents: 169900,
-    currency: 'USD',
-    // SKU 0111140761. Acabado Dark Night (azul oscuro), fingerboard Rosewood.
-    imageUrl:
-      '/images/products/fender-american-professional-telecaster/dark-night/fender-american-professional-telecaster-dark-night-1600x525-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/dark-night/fender-american-professional-telecaster-dark-night-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Dark Night',
-    badges: ['new'],
-  },
-  {
-    id: 9125,
-    slug: 'fender-american-professional-telecaster-aged-cherry-burst',
-    name: 'Fender American Professional Telecaster, Aged Cherry Burst, Maple Fingerboard',
-    priceCents: 179900,
-    currency: 'USD',
-    // SKU 0111142731. Fingerboard Maple en vez de Rosewood (versión
-    // más brillante). Aged Cherry Burst = sunburst rojizo vintage.
-    imageUrl:
-      '/images/products/fender-american-professional-telecaster/aged-cherry-burst-maple/fender-american-professional-telecaster-aged-cherry-burst-maple-1600x525-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/aged-cherry-burst-maple/fender-american-professional-telecaster-aged-cherry-burst-maple-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Aged Cherry Burst',
-    badges: ['new'],
-  },
-  {
-    id: 9126,
-    slug: 'fender-american-professional-telecaster-butterscotch-blonde',
-    name: 'Fender American Professional Telecaster, Butterscotch Blonde, Maple Fingerboard',
-    priceCents: 179900,
-    currency: 'USD',
-    // SKU 0111142750. Fingerboard Maple, acabado Butterscotch Blonde
-    // (amarillo vintage tipo '50s).
-    imageUrl:
-      '/images/products/fender-american-professional-telecaster/butterscotch-blonde-maple/fender-american-professional-telecaster-butterscotch-blonde-maple-1600x525-01.webp',
-    imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/butterscotch-blonde-maple/fender-american-professional-telecaster-butterscotch-blonde-maple-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: 'Butterscotch Blonde',
-    badges: ['new'],
+    variants: [
+      {
+        id: '3-color-sunburst',
+        label: '3-Color Sunburst',
+        hex: '#3B2410',
+        imageUrl:
+          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-3-color-sunburst.webp',
+      },
+      {
+        id: 'olympic-white',
+        label: 'Olympic White',
+        hex: '#F4F0E6',
+        imageUrl:
+          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-olympic-white.webp',
+      },
+      {
+        id: 'black',
+        label: 'Black',
+        hex: '#0A0A0A',
+        imageUrl:
+          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-black.webp',
+      },
+      {
+        id: 'oxblood',
+        label: 'Oxblood',
+        hex: '#5C1F22',
+        imageUrl:
+          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-oxblood.webp',
+      },
+      {
+        id: 'dark-night',
+        label: 'Dark Night',
+        hex: '#1B2533',
+        imageUrl:
+          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-dark-night.webp',
+      },
+    ],
   },
   {
     id: 9120,
@@ -875,11 +788,13 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
  * para servir el tamaño correcto según viewport.
  */
 function fenderImageUrl(
-  variant: 'ebony-black' | 'halo-metallic',
+  productSlug: string,
+  variant: string,
   index: string,
   size: '1600x730' | '1200x547' | '800x365' | '400x183' = '1600x730'
 ): string {
-  return `/images/products/fender-player-fusion-bass-hh/${variant}/fender-player-fusion-bass-hh-${variant}-${size}-${index}.webp`;
+  // Path convention: /images/products/{productSlug}/{variant}/{productSlug}-{variant}-{size}-{index}.webp
+  return `/images/products/${productSlug}/${variant}/${productSlug}-${variant}-${size}-${index}.webp`;
 }
 
 /**
