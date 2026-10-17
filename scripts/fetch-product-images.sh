@@ -77,8 +77,7 @@ echo "$PRODUCTS" | while read -r product; do
 
   TMP_DIR=$(mktemp -d)
   for view in front back; do
-    URL_VAR="${view}_url"
-    URL="${!URL_VAR}"
+    URL=$(echo "$product" | jq -r ".${view}_url // empty")
     if [ -z "$URL" ]; then continue; fi
 
     IN_PNG="$TMP_DIR/${view}.png"

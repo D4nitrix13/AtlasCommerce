@@ -396,6 +396,102 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     badges: ['new'],
   },
   {
+    id: 9121,
+    slug: 'fender-american-professional-telecaster-black',
+    name: 'Fender American Professional Telecaster, Black',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111140706 (Black variant). Misma guitarra y pickup config
+    // que 3-CS, sólo cambia el body color. Back image COMPARTIDA con
+    // 3-CS (mismo upload batch en el CDN de Fender, segundos de
+    // diferencia en el v= param).
+    imageUrl:
+      '/images/products/fender-american-professional-telecaster/black/fender-american-professional-telecaster-black-1600x523-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-telecaster/black/fender-american-professional-telecaster-black-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Black',
+    badges: ['new'],
+  },
+  {
+    id: 9122,
+    slug: 'fender-american-professional-telecaster-natural',
+    name: 'Fender American Professional Telecaster, Natural',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111140721. Mismo set de specs que 3-CS — body color es
+    // Natural (acabado wood grain visible), fingerboard Rosewood.
+    imageUrl:
+      '/images/products/fender-american-professional-telecaster/natural/fender-american-professional-telecaster-natural-1600x525-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-telecaster/natural/fender-american-professional-telecaster-natural-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Natural',
+    badges: ['new'],
+  },
+  {
+    id: 9123,
+    slug: 'fender-american-professional-telecaster-oxblood',
+    name: 'Fender American Professional Telecaster, Oxblood',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111140730. Acabado Oxblood (vintage red), fingerboard Rosewood.
+    imageUrl:
+      '/images/products/fender-american-professional-telecaster/oxblood/fender-american-professional-telecaster-oxblood-1600x525-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-telecaster/oxblood/fender-american-professional-telecaster-oxblood-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Oxblood',
+    badges: ['new'],
+  },
+  {
+    id: 9124,
+    slug: 'fender-american-professional-telecaster-dark-night',
+    name: 'Fender American Professional Telecaster, Dark Night',
+    priceCents: 169900,
+    currency: 'USD',
+    // SKU 0111140761. Acabado Dark Night (azul oscuro), fingerboard Rosewood.
+    imageUrl:
+      '/images/products/fender-american-professional-telecaster/dark-night/fender-american-professional-telecaster-dark-night-1600x525-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-telecaster/dark-night/fender-american-professional-telecaster-dark-night-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Dark Night',
+    badges: ['new'],
+  },
+  {
+    id: 9125,
+    slug: 'fender-american-professional-telecaster-aged-cherry-burst',
+    name: 'Fender American Professional Telecaster, Aged Cherry Burst, Maple Fingerboard',
+    priceCents: 179900,
+    currency: 'USD',
+    // SKU 0111142731. Fingerboard Maple en vez de Rosewood (versión
+    // más brillante). Aged Cherry Burst = sunburst rojizo vintage.
+    imageUrl:
+      '/images/products/fender-american-professional-telecaster/aged-cherry-burst-maple/fender-american-professional-telecaster-aged-cherry-burst-maple-1600x525-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-telecaster/aged-cherry-burst-maple/fender-american-professional-telecaster-aged-cherry-burst-maple-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Aged Cherry Burst',
+    badges: ['new'],
+  },
+  {
+    id: 9126,
+    slug: 'fender-american-professional-telecaster-butterscotch-blonde',
+    name: 'Fender American Professional Telecaster, Butterscotch Blonde, Maple Fingerboard',
+    priceCents: 179900,
+    currency: 'USD',
+    // SKU 0111142750. Fingerboard Maple, acabado Butterscotch Blonde
+    // (amarillo vintage tipo '50s).
+    imageUrl:
+      '/images/products/fender-american-professional-telecaster/butterscotch-blonde-maple/fender-american-professional-telecaster-butterscotch-blonde-maple-1600x525-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-telecaster/butterscotch-blonde-maple/fender-american-professional-telecaster-butterscotch-blonde-maple-1600x521-02.webp',
+    vendor: 'Fender',
+    finish: 'Butterscotch Blonde',
+    badges: ['new'],
+  },
+  {
     id: 9120,
     slug: 'fender-american-vintage-ii-1957-stratocaster',
     name: 'Fender American Vintage II 1957 Stratocaster, Black',

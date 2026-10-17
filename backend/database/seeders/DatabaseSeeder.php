@@ -67,8 +67,9 @@ class DatabaseSeeder extends Seeder
         $this->call(class: GibsonModCollectionSeeder::class);
 
         // Catálogo recon round 1 (Oct 2026) — Fender American Professional
-        // Telecaster 3-Color Sunburst con imágenes landscape 1600x525.
-        // Ver backend/database/seeders/FenderAmericanProfessionalTelecasterSeeder.php
+        // Telecaster, todas las 7 variantes (3-CS, Black, Natural, Oxblood,
+        // Dark Night, Aged Cherry Burst, Butterscotch Blonde). Imágenes
+        // landscape 1600x525; back image compartido por fingerboard.
         $this->call(class: FenderAmericanProfessionalTelecasterSeeder::class);
 
         // Catálogo recon round 1 (Oct 2026) — Fender American Vintage II
