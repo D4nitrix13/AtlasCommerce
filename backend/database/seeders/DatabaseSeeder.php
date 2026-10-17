@@ -70,6 +70,11 @@ class DatabaseSeeder extends Seeder
         // Telecaster 3-Color Sunburst con imágenes landscape 1600x525.
         // Ver backend/database/seeders/FenderAmericanProfessionalTelecasterSeeder.php
         $this->call(class: FenderAmericanProfessionalTelecasterSeeder::class);
+
+        // Catálogo recon round 1 (Oct 2026) — Fender American Vintage II
+        // 1957 Stratocaster Black. Front específico del SKU, back compartido
+        // entre colores del modelo.
+        $this->call(class: FenderAmericanVintageII1957StratocasterSeeder::class);
     }
 
     /**

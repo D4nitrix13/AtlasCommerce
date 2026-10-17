@@ -396,6 +396,25 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     badges: ['new'],
   },
   {
+    id: 9120,
+    slug: 'fender-american-vintage-ii-1957-stratocaster',
+    name: 'Fender American Vintage II 1957 Stratocaster, Black',
+    priceCents: 239900,
+    currency: 'USD',
+    // Fender AmVintage II 1957 Strat: aspect LANDSCAPE 1600×525.
+    // Front específico del SKU Black (0110232806); back es compartido
+    // entre variants del modelo (la 2-Color Sunburst SKU tiene el mismo
+    // back). Las imágenes del recon round 1 (Oct 2026) — recon vía webfetch
+    // porque /products.json está bloqueado por Cloudflare.
+    imageUrl:
+      '/images/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x518-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x523-02.webp',
+    vendor: 'Fender',
+    finish: 'Black',
+    badges: ['new'],
+  },
+  {
     id: PRODUCTS[6].id,
     slug: PRODUCTS[6].slug,
     name: PRODUCTS[6].name,
