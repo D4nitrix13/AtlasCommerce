@@ -16,20 +16,13 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Seeder — Fender American Professional Jaguar (5 variants).
+ * Seeder — Fender American Professional Jaguar (1 product, 5 variants).
  *
- * Mismo approach que FenderAmericanProfessionalTelecasterSeeder:
- * 1 product con N variants (color = variant), 1 card por variant en
- * la galería RELATED del PDP.
+ * Mismo pattern que Tele y Strat: 1 product con N variants. Distinto
+ * del Jazzmaster (user confirmó Jaguar, SKUs 01118207XX).
  *
- * Model: Jaguar (offset 24" scale, 1 humbucker + 1 single-coil,
- * Panorama tremolo). SKU prefix 01118207XX (Rosewood FB).
- *
- * Imágenes del recon round 1 (Oct 2026) — Jaguar NO Jazzmaster.
- * URL pattern: 01118207{XX}_fen_ins_frt_1_rr.png?v=1788979{15X}
- *
- * Idempotente. Uso:
- *   php artisan db:seed --class=FenderAmericanProfessionalJaguarSeeder
+ * Scale 24" corto, 1 humbucker + 1 single-coil, trémolo Panorama.
+ * 5 variants Rosewood FB.
  */
 final class FenderAmericanProfessionalJaguarSeeder extends Seeder
 {
@@ -37,19 +30,15 @@ final class FenderAmericanProfessionalJaguarSeeder extends Seeder
 
     private const PRODUCT_SERIES = 'American Professional';
 
-    private const PRODUCT_DESCRIPTION_BASE = 'La American Professional Jaguar combina el scale 24" único de la Jaguar con pickups V-Mod III Jaguar single-coil, trémolo Panorama, y el perfil de mástil Deep "C" con bordes rolled.';
+    private const PRODUCT_DESCRIPTION_BASE = 'La American Professional Jaguar combina el scale 24" único de la Jaguar con pickups V-Mod III Jaguar single-coil, trémolo Panorama, y perfil de mástil Deep "C" con bordes rolled.';
 
     private const BASE_PRICE_CENTS = 189900;
-
-    private const SIZE_1600 = '1600x545';
 
     private const FRONT_INDEX = '01';
 
     private const BACK_INDEX = '02';
 
-    /**
-     * @param  array{0:string,1:string,2:string}  $row  [slug, displayName, sku]
-     */
+    /** @param array{0:string,1:string,2:string} $row [slug, displayName, sku] */
     private const VARIANTS = [
         ['3-color-sunburst', '3-Color Sunburst', 'FEND-AMPRO-JAG-0700'],
         ['olympic-white', 'Olympic White', 'FEND-AMPRO-JAG-0705'],
@@ -65,19 +54,21 @@ final class FenderAmericanProfessionalJaguarSeeder extends Seeder
             $category = $this->ensureCategory('Guitarra eléctrica', 'guitarra-electrica');
             $currency = $this->ensureCurrency('USD');
 
-            foreach (self::VARIANTS as [$slug, $displayName, $sku]) {
-                $productSlug = sprintf('%s-%s', self::PRODUCT_HANDLE, $slug);
-                $productName = sprintf('Fender %s, %s Jaguar', self::PRODUCT_SERIES, $displayName);
-                $variantName = sprintf('%s — %s', $productName, $displayName);
+            $productSku = 'FEND-AMPRO-JAG-0700';
+            $productSlug = self::PRODUCT_HANDLE;
+            $productName = 'Fender American Professional Jaguar';
 
-                $product = $this->ensureProduct(
-                    sku: $sku,
-                    slug: $productSlug,
-                    name: $productName,
-                    categoryId: $category->id,
-                    brandId: $brand->id,
-                    currencyId: $currency->id,
-                );
+            $product = $this->ensureProduct(
+                sku: $productSku,
+                slug: $productSlug,
+                name: $productName,
+                categoryId: $category->id,
+                brandId: $brand->id,
+                currencyId: $currencyId,
+            );
+
+            foreach (self::VARIANTS as [$slug, $displayName, $sku]) {
+                $variantName = sprintf('%s — %s', $productName, $displayName);
 
                 $this->ensureVariant(
                     productId: $product->id,
@@ -85,16 +76,15 @@ final class FenderAmericanProfessionalJaguarSeeder extends Seeder
                     name: $variantName,
                 );
 
-                $this->syncProductImages(
-                    productId: $product->id,
-                    variantSlug: $slug,
-                );
-
-                $this->syncStoreFrontImages(
+                $this->syncVariantImages(
                     productId: $product->id,
                     variantSlug: $slug,
                 );
             }
+
+            $this->syncStoreFrontImages(
+                productId: $product->id,
+            );
         });
     }
 
@@ -165,34 +155,46 @@ final class FenderAmericanProfessionalJaguarSeeder extends Seeder
         );
     }
 
-    private function syncProductImages(int $productId, string $variantSlug): void
+    private function syncVariantImages(int $productId, string $variantSlug): void
     {
         ProductImage::query()
             ->where(column: 'product_id', operator: '=', value: $productId)
+            ->where(column: 'alt_text', operator: 'like', value: $variantSlug.' — %')
             ->delete();
 
-        $images = [
-            ['index' => self::FRONT_INDEX, 'is_primary' => true],
-            ['index' => self::BACK_INDEX, 'is_primary' => false],
-        ];
+        $frontUrl = sprintf(
+            '/images/products/%s/%s/%s-%s-1600x545-%s.webp',
+            self::PRODUCT_HANDLE,
+            $variantSlug,
+            self::PRODUCT_HANDLE,
+            $variantSlug,
+            self::FRONT_INDEX,
+        );
+        // Back image compartido: 0111820700 (3-CS Rosewood Jaguar).
+        $backUrl = sprintf(
+            '/images/products/%s/%s/0111820700-0111820700-1600x543-%s.webp',
+            self::PRODUCT_HANDLE,
+            $variantSlug,
+            self::BACK_INDEX,
+        );
 
-        foreach ($images as $idx => $img) {
-            $imageUrl = $this->imageUrl(
-                variantSlug: $variantSlug,
-                size: self::SIZE_1600,
-                index: $img['index'],
-            );
-            ProductImage::query()->create(attributes: [
-                'product_id' => $productId,
-                'image_url' => $imageUrl,
-                'alt_text' => sprintf('%s — vista %s', $variantSlug, $img['index']),
-                'is_primary' => $img['is_primary'],
-                'sort_order' => $idx,
-            ]);
-        }
+        ProductImage::query()->create(attributes: [
+            'product_id' => $productId,
+            'image_url' => $frontUrl,
+            'alt_text' => sprintf('%s — vista %s', $variantSlug, self::FRONT_INDEX),
+            'is_primary' => true,
+            'sort_order' => 0,
+        ]);
+        ProductImage::query()->create(attributes: [
+            'product_id' => $productId,
+            'image_url' => $backUrl,
+            'alt_text' => sprintf('%s — vista %s', $variantSlug, self::BACK_INDEX),
+            'is_primary' => false,
+            'sort_order' => 1,
+        ]);
     }
 
-    private function syncStoreFrontImages(int $productId, string $variantSlug): void
+    private function syncStoreFrontImages(int $productId): void
     {
         $productStores = ProductStore::query()
             ->where(column: 'product_id', operator: '=', value: $productId)
@@ -203,38 +205,36 @@ final class FenderAmericanProfessionalJaguarSeeder extends Seeder
                 ->where(column: 'product_store_id', operator: '=', value: $productStore->id)
                 ->delete();
 
-            $images = [
-                ['index' => self::FRONT_INDEX, 'is_primary' => true],
-                ['index' => self::BACK_INDEX, 'is_primary' => false],
-            ];
-
-            foreach ($images as $idx => $img) {
-                $imageUrl = $this->imageUrl(
-                    variantSlug: $variantSlug,
-                    size: self::SIZE_1600,
-                    index: $img['index'],
+            foreach (self::VARIANTS as [$slug, $displayName, $sku]) {
+                $frontUrl = sprintf(
+                    '/images/products/%s/%s/%s-%s-1600x545-%s.webp',
+                    self::PRODUCT_HANDLE,
+                    $slug,
+                    self::PRODUCT_HANDLE,
+                    $slug,
+                    self::FRONT_INDEX,
+                );
+                $backUrl = sprintf(
+                    '/images/products/%s/%s/0111820700-0111820700-1600x543-%s.webp',
+                    self::PRODUCT_HANDLE,
+                    $slug,
+                    self::BACK_INDEX,
                 );
                 ProductStoreImage::query()->create(attributes: [
                     'product_store_id' => $productStore->id,
-                    'image_url' => $imageUrl,
-                    'alt_text' => sprintf('%s — vista %s', $variantSlug, $img['index']),
-                    'is_primary' => $img['is_primary'],
-                    'sort_order' => $idx,
+                    'image_url' => $frontUrl,
+                    'alt_text' => sprintf('%s — vista %s', $slug, self::FRONT_INDEX),
+                    'is_primary' => true,
+                    'sort_order' => 0,
+                ]);
+                ProductStoreImage::query()->create(attributes: [
+                    'product_store_id' => $productStore->id,
+                    'image_url' => $backUrl,
+                    'alt_text' => sprintf('%s — vista %s', $slug, self::BACK_INDEX),
+                    'is_primary' => false,
+                    'sort_order' => 1,
                 ]);
             }
         }
-    }
-
-    private function imageUrl(string $variantSlug, string $size, string $index): string
-    {
-        return sprintf(
-            '/images/products/%s/%s/%s-%s-%s-%s.webp',
-            self::PRODUCT_HANDLE,
-            $variantSlug,
-            self::PRODUCT_HANDLE,
-            $variantSlug,
-            $size,
-            $index,
-        );
     }
 }

@@ -16,25 +16,16 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Seeder — Fender American Professional Stratocaster (7 variants).
+ * Seeder — Fender American Professional Stratocaster (1 product, 7 variants).
  *
- * Variantes del modelo AmPro Strat (modelo hermano del AmPro Tele
- * que cubre `FenderAmericanProfessionalTelecasterSeeder`). Mismas
- * specs, distinta pastilla (3 single-coil V-Mod III vs 2 single-coil
- * del Tele) y distinto body shape (Stratocaster vs Telecaster).
+ * Regla (Oct 2026): "son el mismo modelo lo que cambia es el acabado".
+ * 1 product con N variants en product_variants table.
  *
- * Imágenes del recon round 1 (Oct 2026). URLs del CDN de Fender:
- *   - Front: 0111110{XXX}_fen_ins_frt_1_rr.png?v=17889791{YY}
- *   - Back:  0111110700_fen_ins_bck_1_rl.png?v=1788979193 (SHARED
- *     entre TODAS las 12 variants Rosewood y Maple)
- *
- * Estructura de archivos en disco (sigue convención del proyecto):
- *   frontend/public/images/products/fender-american-professional-stratocaster/{variant}/
- *     fender-american-professional-stratocaster-{variant}-1600x525-01.webp  (front)
- *     fender-american-professional-stratocaster-{variant}-1600x521-02.webp  (back, 3-CS SKU)
- *
- * Idempotente. Uso:
- *   php artisan db:seed --class=FenderAmericanProfessionalStratocasterSeeder
+ * Mismo seeder pattern que FenderAmericanProfessionalTelecasterSeeder:
+ * - 1 product row
+ * - 1 variant row por color
+ * - 2 product_images por product (front 3-CS + back 3-CS compartido)
+ * - 2 product_store_images por variant para cada store
  */
 final class FenderAmericanProfessionalStratocasterSeeder extends Seeder
 {
@@ -46,30 +37,21 @@ final class FenderAmericanProfessionalStratocasterSeeder extends Seeder
 
     private const BASE_PRICE_CENTS = 169900;
 
-    private const SIZE_1600 = '1600x525';
-
     private const FRONT_INDEX = '01';
 
     private const BACK_INDEX = '02';
 
-    /**
-     * Variantes con SKUs reales de Shopify (7 últimos dígitos = 01111107XX).
-     * `front_v` = timestamp del CDN para front image.
-     * Back: SHARED — todas las variants usan `0111110700_fen_ins_bck_1_rl.png?v=1788979193`.
-     *
-     * @param  array{0:string,1:string,2:string,3:string,4:string}  $row
-     *                                                                    [slug, displayName, sku, fingerboard, front_v]
-     */
+    /** @param array{0:string,1:string,2:string,3:string} $row [slug, displayName, sku, fingerboard] */
     private const VARIANTS = [
         // Rosewood FB
-        ['3-color-sunburst', '3-Color Sunburst', 'FEND-AMPRO-STR-0700', 'rosewood', '1788979191'],
-        ['olympic-white', 'Olympic White', 'FEND-AMPRO-STR-0705', 'rosewood', '1788979192'],
-        ['black', 'Black', 'FEND-AMPRO-STR-0706', 'rosewood', '1788979191'],
-        ['oxblood', 'Oxblood', 'FEND-AMPRO-STR-0730', 'rosewood', '1788979191'],
-        ['dark-night', 'Dark Night', 'FEND-AMPRO-STR-0761', 'rosewood', '1788979191'],
+        ['3-color-sunburst', '3-Color Sunburst', 'FEND-AMPRO-STR-0700', 'rosewood'],
+        ['olympic-white', 'Olympic White', 'FEND-AMPRO-STR-0705', 'rosewood'],
+        ['black', 'Black', 'FEND-AMPRO-STR-0706', 'rosewood'],
+        ['oxblood', 'Oxblood', 'FEND-AMPRO-STR-0730', 'rosewood'],
+        ['dark-night', 'Dark Night', 'FEND-AMPRO-STR-0761', 'rosewood'],
         // Maple FB
-        ['3-color-sunburst-maple', '3-Color Sunburst', 'FEND-AMPRO-STR-2700', 'maple', '1788979190'],
-        ['olympic-white-maple', 'Olympic White', 'FEND-AMPRO-STR-2705', 'maple', '1788979191'],
+        ['3-color-sunburst-maple', '3-Color Sunburst (Maple)', 'FEND-AMPRO-STR-2700', 'maple'],
+        ['olympic-white-maple', 'Olympic White (Maple)', 'FEND-AMPRO-STR-2705', 'maple'],
     ];
 
     public function run(): void
@@ -79,18 +61,25 @@ final class FenderAmericanProfessionalStratocasterSeeder extends Seeder
             $category = $this->ensureCategory('Guitarra eléctrica', 'guitarra-electrica');
             $currency = $this->ensureCurrency('USD');
 
-            foreach (self::VARIANTS as [$slug, $displayName, $sku, $fingerboard, $frontV]) {
-                $productSlug = sprintf('%s-%s', self::PRODUCT_HANDLE, $slug);
-                $productName = sprintf('Fender %s, %s Stratocaster, %s', self::PRODUCT_SERIES, $displayName, $fingerboard === 'rosewood' ? 'Rosewood Fingerboard' : 'Maple Fingerboard');
-                $variantName = sprintf('%s — %s', $productName, $displayName);
+            $productSku = 'FEND-AMPRO-STR-0700';
+            $productSlug = self::PRODUCT_HANDLE;
+            $productName = 'Fender American Professional Stratocaster';
 
-                $product = $this->ensureProduct(
-                    sku: $sku,
-                    slug: $productSlug,
-                    name: $productName,
-                    categoryId: $category->id,
-                    brandId: $brand->id,
-                    currencyId: $currency->id,
+            $product = $this->ensureProduct(
+                sku: $productSku,
+                slug: $productSlug,
+                name: $productName,
+                categoryId: $category->id,
+                brandId: $brand->id,
+                currencyId: $currencyId,
+            );
+
+            foreach (self::VARIANTS as [$slug, $displayName, $sku, $fingerboard]) {
+                $variantName = sprintf(
+                    '%s — %s (%s)',
+                    $productName,
+                    $displayName,
+                    $fingerboard === 'rosewood' ? 'Rosewood FB' : 'Maple FB'
                 );
 
                 $this->ensureVariant(
@@ -99,16 +88,15 @@ final class FenderAmericanProfessionalStratocasterSeeder extends Seeder
                     name: $variantName,
                 );
 
-                $this->syncProductImages(
-                    productId: $product->id,
-                    variantSlug: $slug,
-                );
-
-                $this->syncStoreFrontImages(
+                $this->syncVariantImages(
                     productId: $product->id,
                     variantSlug: $slug,
                 );
             }
+
+            $this->syncStoreFrontImages(
+                productId: $product->id,
+            );
         });
     }
 
@@ -179,34 +167,50 @@ final class FenderAmericanProfessionalStratocasterSeeder extends Seeder
         );
     }
 
-    private function syncProductImages(int $productId, string $variantSlug): void
+    private function syncVariantImages(int $productId, string $variantSlug): void
     {
         ProductImage::query()
             ->where(column: 'product_id', operator: '=', value: $productId)
+            ->where(column: 'alt_text', operator: 'like', value: $variantSlug.' — %')
             ->delete();
 
-        $images = [
-            ['index' => self::FRONT_INDEX, 'is_primary' => true],
-            ['index' => self::BACK_INDEX, 'is_primary' => false],
-        ];
+        $frontUrl = sprintf(
+            '/images/products/%s/%s/%s-%s-1600x523-%s.webp',
+            self::PRODUCT_HANDLE,
+            $variantSlug,
+            self::PRODUCT_HANDLE,
+            $variantSlug,
+            self::FRONT_INDEX,
+        );
+        // Back image compartido: 0111110700 (3-CS Rosewood) o 0111112700
+        // (3-CS Maple) según la variant.
+        $backSku = str_contains($variantSlug, 'maple') ? '0111112700' : '0111110700';
+        $backUrl = sprintf(
+            '/images/products/%s/%s/%s-%s-1600x521-%s.webp',
+            self::PRODUCT_HANDLE,
+            $variantSlug,
+            $backSku,
+            $backSku,
+            self::BACK_INDEX,
+        );
 
-        foreach ($images as $idx => $img) {
-            $imageUrl = $this->imageUrl(
-                variantSlug: $variantSlug,
-                size: self::SIZE_1600,
-                index: $img['index'],
-            );
-            ProductImage::query()->create(attributes: [
-                'product_id' => $productId,
-                'image_url' => $imageUrl,
-                'alt_text' => sprintf('%s — vista %s', $variantSlug, $img['index']),
-                'is_primary' => $img['is_primary'],
-                'sort_order' => $idx,
-            ]);
-        }
+        ProductImage::query()->create(attributes: [
+            'product_id' => $productId,
+            'image_url' => $frontUrl,
+            'alt_text' => sprintf('%s — vista %s', $variantSlug, self::FRONT_INDEX),
+            'is_primary' => true,
+            'sort_order' => 0,
+        ]);
+        ProductImage::query()->create(attributes: [
+            'product_id' => $productId,
+            'image_url' => $backUrl,
+            'alt_text' => sprintf('%s — vista %s', $variantSlug, self::BACK_INDEX),
+            'is_primary' => false,
+            'sort_order' => 1,
+        ]);
     }
 
-    private function syncStoreFrontImages(int $productId, string $variantSlug): void
+    private function syncStoreFrontImages(int $productId): void
     {
         $productStores = ProductStore::query()
             ->where(column: 'product_id', operator: '=', value: $productId)
@@ -217,38 +221,39 @@ final class FenderAmericanProfessionalStratocasterSeeder extends Seeder
                 ->where(column: 'product_store_id', operator: '=', value: $productStore->id)
                 ->delete();
 
-            $images = [
-                ['index' => self::FRONT_INDEX, 'is_primary' => true],
-                ['index' => self::BACK_INDEX, 'is_primary' => false],
-            ];
-
-            foreach ($images as $idx => $img) {
-                $imageUrl = $this->imageUrl(
-                    variantSlug: $variantSlug,
-                    size: self::SIZE_1600,
-                    index: $img['index'],
+            foreach (self::VARIANTS as [$slug, $displayName, $sku, $fingerboard]) {
+                $frontUrl = sprintf(
+                    '/images/products/%s/%s/%s-%s-1600x523-%s.webp',
+                    self::PRODUCT_HANDLE,
+                    $slug,
+                    self::PRODUCT_HANDLE,
+                    $slug,
+                    self::FRONT_INDEX,
+                );
+                $backSku = str_contains($slug, 'maple') ? '0111112700' : '0111110700';
+                $backUrl = sprintf(
+                    '/images/products/%s/%s/%s-%s-1600x521-%s.webp',
+                    self::PRODUCT_HANDLE,
+                    $slug,
+                    $backSku,
+                    $backSku,
+                    self::BACK_INDEX,
                 );
                 ProductStoreImage::query()->create(attributes: [
                     'product_store_id' => $productStore->id,
-                    'image_url' => $imageUrl,
-                    'alt_text' => sprintf('%s — vista %s', $variantSlug, $img['index']),
-                    'is_primary' => $img['is_primary'],
-                    'sort_order' => $idx,
+                    'image_url' => $frontUrl,
+                    'alt_text' => sprintf('%s — vista %s', $slug, self::FRONT_INDEX),
+                    'is_primary' => true,
+                    'sort_order' => 0,
+                ]);
+                ProductStoreImage::query()->create(attributes: [
+                    'product_store_id' => $productStore->id,
+                    'image_url' => $backUrl,
+                    'alt_text' => sprintf('%s — vista %s', $slug, self::BACK_INDEX),
+                    'is_primary' => false,
+                    'sort_order' => 1,
                 ]);
             }
         }
-    }
-
-    private function imageUrl(string $variantSlug, string $size, string $index): string
-    {
-        return sprintf(
-            '/images/products/%s/%s/%s-%s-%s-%s.webp',
-            self::PRODUCT_HANDLE,
-            $variantSlug,
-            self::PRODUCT_HANDLE,
-            $variantSlug,
-            $size,
-            $index,
-        );
     }
 }
