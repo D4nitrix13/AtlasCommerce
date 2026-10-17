@@ -48,19 +48,45 @@ const showBadge = highlyRatedLabel !== undefined && highlyRatedLabel !== '' && i
 const showThumbs = images.length > 1;
 
 /**
- * Genera el srcset para los 4 tamaños WebP commiteados en f2ba9a59.
+ * Genera el srcset para los 4 tamaños WebP.
  * Naming algorithm (ver scripts/convert-product-images.sh):
  *   {slug}-{variant}-{WxH}-{NN}.webp
- * El archivo base (1600x730) viene del caller; derivamos los otros
- * 3 reemplazos exactos del token de tamaño en el filename.
+ *
+ * El aspect ratio se DERIVA del nombre del archivo base que viene del
+ * caller (`{W}x{H}` en la URL). Esto habilita que Gibson SQUARE
+ * (1600×1600) y Fender landscape (1600×730, 1600×525) coexistan en
+ * el mismo gallery sin configuración por producto.
+ *
+ * Estrategia:
+ *   1. Parsear `WxH` del URL base (e.g., '1600x1600' o '1600x525').
+ *   2. Derivar aspect = H / W.
+ *   3. Para cada width objetivo (1600/1200/800/400), calcular
+ *      height = round(width * aspect).
+ *
+ * Si la URL no matchea el patrón esperado, devolvemos un set vacío
+ * (`srcset` vacío → browser usa `src` solamente, sin upscale).
  */
-const SIZES_W = ['400', '800', '1200', '1600'] as const;
-const SIZES_H = ['183', '365', '547', '730'] as const;
+const SIZES_W = [400, 800, 1200, 1600] as const;
+const SIZE_TOKEN_RE = /-(\d{3,4})x(\d{2,4})-/;
+
+function parseSizeToken(url: string): { w: number; h: number } | null {
+  const m = url.match(SIZE_TOKEN_RE);
+  if (m === null) return null;
+  const w = Number.parseInt(m[1] ?? '0', 10);
+  const h = Number.parseInt(m[2] ?? '0', 10);
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return null;
+  return { w, h };
+}
 
 function imageSrcset(url: string): string {
-  return SIZES_W.map((w, i) => `${url.replace('-1600x730-', `-${w}x${SIZES_H[i]}-`)} ${w}w`).join(
-    ', '
-  );
+  const base = parseSizeToken(url);
+  if (base === null) return '';
+  // aspect = h / w (e.g., 525/1600 = 0.3281 para Fender AmPro)
+  const aspect = base.h / base.w;
+  return SIZES_W.map((w) => {
+    const h = Math.round(w * aspect);
+    return `${url.replace(SIZE_TOKEN_RE, `-${w}x${h}-`)} ${w}w`;
+  }).join(', ');
 }
 ---
 

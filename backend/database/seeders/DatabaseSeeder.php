@@ -59,6 +59,17 @@ class DatabaseSeeder extends Seeder
         // Útil para validar la PDP con imágenes reales en lugar de SVG placeholder.
         // Las imágenes deben estar en frontend/public/images/products/...
         $this->call(class: FenderPlayerFusionBassSeeder::class);
+
+        // Catálogo recon round 1 (Oct 2026) — 10 guitarras Gibson Mod™
+        // Collection + Custom Select con imágenes square 1600x1600 reales.
+        // Ver backend/database/seeders/GibsonModCollectionSeeder.php y
+        // frontend/public/images/products/gibson-mod-collection-*/
+        $this->call(class: GibsonModCollectionSeeder::class);
+
+        // Catálogo recon round 1 (Oct 2026) — Fender American Professional
+        // Telecaster 3-Color Sunburst con imágenes landscape 1600x525.
+        // Ver backend/database/seeders/FenderAmericanProfessionalTelecasterSeeder.php
+        $this->call(class: FenderAmericanProfessionalTelecasterSeeder::class);
     }
 
     /**
