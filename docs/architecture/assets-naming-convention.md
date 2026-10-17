@@ -231,7 +231,58 @@ $logo = $storeTheme->logo_path
 
 ---
 
-## 6. Anti-patrones explícitos
+## 6. Phased rollout
+
+El subsystem de assets no entra completo el día uno: se introduce por
+fases para minimizar el riesgo de romper la PDP con paths legacy. Esta
+sección documenta qué fase cubre qué y cuál es el source-of-truth mientras
+convivan el código nuevo y el viejo.
+
+### 6.1. Tabla de fases
+
+| Fase | Scope | Estado |
+| --- | --- | --- |
+| 2 (NOW) | `StorageKeyDeriver` + soft-mode validation en `AssetController` | en ejecución |
+| 3 | Wire `validate()` strict (post-backfill) + HMAC signed URLs + cache config-driven con fallback + 404 enumeration logging | pendiente |
+| 4 | Pattern de migrations (universal + extension table) | pendiente |
+| 5 | Backfill de imágenes existentes al nuevo formato | pendiente |
+| 6 | Flip soft → strict + cleanup legacy `fenderImageUrl()` | pendiente |
+
+### 6.2. Drift conocido entre doc y código
+
+Estos puntos divergen del doc y se cierran en la fase indicada. Mientras
+tanto, el **código es la fuente de verdad**.
+
+- **`FTP_ROOT`**: este doc dice `/srv/ftp/images` (§2.4, línea 109), pero
+  `backend/config/filesystems.php:76` default es `/` (raíz del HOME del
+  FTP user). La razón del cambio es que el command `assets:sync-from-public`
+  crea automáticamente los subdirectorios `tenants/{slug}/...` y `shared/...`
+  bajo el root que defina el host, y `/srv/ftp/images` solo era válido en
+  la deploy inicial. Corregido en Fase 3.
+- **`ETag`**: este doc dice "basado en mtime+size" (§2.5, línea 138), pero
+  `backend/app/Http/Controllers/Api/Storefront/AssetController.php:126`
+  usa `md5($contents)`. La razón del cambio es que `md5(content)` es
+  invariante a rotación de archivos en el FTP (un `mv` mantiene el mtime
+  accidentalmente), mientras que el contenido garantiza invalidación real.
+  Corregido en Fase 3.
+
+### 6.3. Soft mode en Fase 2 — qué esperar
+
+Mientras `config('assets.path_validation.strict') === false` (default,
+override por env `ASSETS_PATH_VALIDATION_STRICT`):
+
+- Paths que **no matchean** el regex de `StorageKeyDeriver::validate()`
+  se sirven igual (la PDP no se rompe con un path legacy).
+- Cada uno emite un log `asset.path.malformed` con contexto
+  estructurado (`hash` SHA-256 del path + `tenant_slug` + flag
+  `strict_mode: false`) — el log es la **métrica de progreso** del
+  backfill de Fase 5.
+- Cuando el rate de warnings caiga a ~0, estamos listos para flipear a
+  strict en Fase 6 (`config('assets.path_validation.strict') === true`).
+
+---
+
+## 7. Anti-patrones explícitos
 
 Estas cosas **NO se hacen** en este proyecto:
 
@@ -252,7 +303,7 @@ Estas cosas **NO se hacen** en este proyecto:
 
 ---
 
-## 7. Referencias
+## 8. Referencias
 
 - `backend/config/filesystems.php` — definición de los 4 disks
   (`local`, `public`, `s3`, `ftp`).
