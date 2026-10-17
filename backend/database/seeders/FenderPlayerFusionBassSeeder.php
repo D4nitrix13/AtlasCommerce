@@ -164,19 +164,13 @@ final class FenderPlayerFusionBassSeeder extends Seeder
         );
     }
 
-    private function ensureProduct(
-        string $slug,
-        string $sku,
-        string $productName,
-        int $brandId,
-        int $categoryId,
-        int $currencyId,
-    ): Product {
+    private function ensureProduct(int $brandId, int $categoryId, int $currencyId): Product
+    {
         return Product::query()->updateOrCreate(
-            attributes: ['slug' => $slug],
-            values: [
-                'name' => $productName,
-                'sku' => $sku,
+            ['slug' => self::PRODUCT_SLUG],
+            [
+                'name' => self::PRODUCT_NAME,
+                'sku' => self::PRODUCT_SKU,
                 'description' => self::PRODUCT_DESCRIPTION,
                 'brand_id' => $brandId,
                 'category_id' => $categoryId,

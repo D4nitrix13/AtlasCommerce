@@ -335,20 +335,18 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
  */
 export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
   {
-    id: 9091,
-    slug: 'fender-limited-edition-player-fusion-precision-bass-hh-ebony-black',
-    name: 'Fender Limited Edition Player Fusion Precision Bass HH, Ebony Black',
-    priceCents: 179900,
-    currency: 'USD',
-    // Variante Ebony Black del LP Bass HH. Antes era 1 product con
-    // 2 variants; refactor Oct 2026 a 2 products separados (uno por
-    // color) para alinear con el resto del recon pipeline (Strat/Tele).
-    imageUrl: fenderImageUrl('ebony-black', '01', '400x183'),
+    id: PRODUCTS[1].id,
+    slug: PRODUCTS[1].slug,
+    name: PRODUCTS[1].name,
+    priceCents: PRODUCTS[1].priceCents,
+    currency: PRODUCTS[1].currency ?? 'USD',
+    imageUrl: PRODUCTS[1].imageUrl,
+    // Segunda toma (_02) — preview en hover.
     imageUrlSecondary: fenderImageUrl('ebony-black', '02', '400x183'),
-    badges: ['new'],
+    badges: PRODUCTS[1].badges,
     vendor: 'Fender',
     finish: 'Ultra Heavy Aged',
-    variantsCount: 1,
+    variantsCount: 2,
     variants: [
       {
         id: 'ebony-black',
@@ -356,23 +354,6 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
         hex: '#0F0F0F',
         imageUrl: fenderImageUrl('ebony-black', '01', '400x183'),
       },
-    ],
-  },
-  {
-    id: 9092,
-    slug: 'fender-limited-edition-player-fusion-precision-bass-hh-halo-metallic',
-    name: 'Fender Limited Edition Player Fusion Precision Bass HH, Halo Metallic',
-    priceCents: 179900,
-    currency: 'USD',
-    // Variante Halo Metallic del LP Bass HH. Ver entrada 9091
-    // para contexto del refactor.
-    imageUrl: fenderImageUrl('halo-metallic', '01', '400x183'),
-    imageUrlSecondary: fenderImageUrl('halo-metallic', '02', '400x183'),
-    badges: ['new'],
-    vendor: 'Fender',
-    finish: 'Ultra Heavy Aged',
-    variantsCount: 1,
-    variants: [
       {
         id: 'halo-metallic',
         label: 'Halo Metallic',
@@ -518,6 +499,82 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
       '/images/products/fender-american-professional-stratocaster/olympic-white-maple/fender-american-professional-stratocaster-olympic-white-maple-1600x521-02.webp',
     vendor: 'Fender',
     finish: 'Olympic White (Maple)',
+    badges: ['new'],
+  },
+  {
+    id: 9140,
+    slug: 'fender-american-professional-jaguar-3-color-sunburst',
+    name: 'Fender American Professional Jaguar, 3-Color Sunburst',
+    priceCents: 189900,
+    currency: 'USD',
+    // SKU 0111820700. Distinto del Jazzmaster: body shape Jaguar,
+    // scale 24" corto, 2 humbuckers (en realidad 1 humbucker + 1 SC).
+    imageUrl:
+      '/images/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x545-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x543-02.webp',
+    vendor: 'Fender',
+    finish: '3-Color Sunburst',
+    badges: ['new'],
+  },
+  {
+    id: 9141,
+    slug: 'fender-american-professional-jaguar-olympic-white',
+    name: 'Fender American Professional Jaguar, Olympic White',
+    priceCents: 189900,
+    currency: 'USD',
+    // SKU 0111820705. Olympic White con pickguard tortoiseshell 4-ply.
+    imageUrl:
+      '/images/products/fender-american-professional-jaguar/olympic-white/fender-american-professional-jaguar-olympic-white-1600x545-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-jaguar/olympic-white/fender-american-professional-jaguar-olympic-white-1600x543-02.webp',
+    vendor: 'Fender',
+    finish: 'Olympic White',
+    badges: ['new'],
+  },
+  {
+    id: 9142,
+    slug: 'fender-american-professional-jaguar-black',
+    name: 'Fender American Professional Jaguar, Black',
+    priceCents: 189900,
+    currency: 'USD',
+    // SKU 0111820706. Black con pickguard 4-ply tortoise.
+    imageUrl:
+      '/images/products/fender-american-professional-jaguar/black/fender-american-professional-jaguar-black-1600x545-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-jaguar/black/fender-american-professional-jaguar-black-1600x543-02.webp',
+    vendor: 'Fender',
+    finish: 'Black',
+    badges: ['new'],
+  },
+  {
+    id: 9143,
+    slug: 'fender-american-professional-jaguar-oxblood',
+    name: 'Fender American Professional Jaguar, Oxblood',
+    priceCents: 189900,
+    currency: 'USD',
+    // SKU 0111820730. Oxblood con pickguard 3-ply black.
+    imageUrl:
+      '/images/products/fender-american-professional-jaguar/oxblood/fender-american-professional-jaguar-oxblood-1600x545-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-jaguar/oxblood/fender-american-professional-jaguar-oxblood-1600x543-02.webp',
+    vendor: 'Fender',
+    finish: 'Oxblood',
+    badges: ['new'],
+  },
+  {
+    id: 9144,
+    slug: 'fender-american-professional-jaguar-dark-night',
+    name: 'Fender American Professional Jaguar, Dark Night',
+    priceCents: 189900,
+    currency: 'USD',
+    // SKU 0111820761. Dark Night con pickguard 3-ply black + knobs negros.
+    imageUrl:
+      '/images/products/fender-american-professional-jaguar/dark-night/fender-american-professional-jaguar-dark-night-1600x545-01.webp',
+    imageUrlSecondary:
+      '/images/products/fender-american-professional-jaguar/dark-night/fender-american-professional-jaguar-dark-night-1600x543-02.webp',
+    vendor: 'Fender',
+    finish: 'Dark Night',
     badges: ['new'],
   },
   {

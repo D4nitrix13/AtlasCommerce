@@ -78,6 +78,13 @@ class DatabaseSeeder extends Seeder
         // productos que el Tele, distinto body shape.
         $this->call(class: FenderAmericanProfessionalStratocasterSeeder::class);
 
+        // Catálogo recon round 1 (Oct 2026) — Fender American Professional
+        // Jaguar, 5 variants (3-CS, Olympic White, Black, Oxblood, Dark
+        // Night). Distinto del Jazzmaster (el user confirmó Jaguar como
+        // intención de las URLs). Scale 24" único + pickup Jaguar
+        // single-coil + trémolo Panorama.
+        $this->call(class: FenderAmericanProfessionalJaguarSeeder::class);
+
         // Catálogo recon round 1 (Oct 2026) — Fender American Vintage II
         // 1957 Stratocaster Black. Front específico del SKU, back compartido
         // entre colores del modelo.

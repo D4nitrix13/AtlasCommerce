@@ -70,18 +70,61 @@ function formatVariantsLabel(product: RelatedProduct, template: string): string 
 }
 
 /**
- * Pre-computamos el variantsText para cada producto. Mantenemos la
- * shape original del product (no lo mutamos) — sólo añadimos el string
- * ya formateado para que el JSX sea declarativo.
+ * Pre-computamos las cards a renderizar.
+ *
+ * Regla: 1 product con N variants → N cards (1 por variant).
+ * Si el product no tiene variants, 1 card con la image default.
+ *
+ * El usuario confirmó (Oct 2026) que "son el mismo modelo lo que cambia
+ * es el acabado" — un model con varios finishes se renderiza como
+ * varias cards side-by-side, NO como 1 card con swatches adentro.
+ *
+ * Para products con 1 sola variant (caso típico como el LP Bass con
+ * 2 finishes), renderizamos 1 card por variant. Para products con
+ * 7+ variants (como el AmPro Tele/Strat), renderizamos 7 cards — sí,
+ * puede haber muchas en el carousel, pero el usuario puede navegar
+ * con las flechas prev/next.
  */
 interface RenderableItem {
   product: RelatedProduct;
+  imageUrl: string;
+  variantLabel: string | null;
+  variantHex: string | null;
+  variantKey: string; // 'default' o el variant.id (para los data-attributes)
   variantsText: string | null;
 }
-const items: RenderableItem[] = products.map((product) => ({
-  product,
-  variantsText: formatVariantsLabel(product, labels.variantsLabel),
-}));
+
+const items: RenderableItem[] = [];
+for (const product of products) {
+  const variantsText = formatVariantsLabel(product, labels.variantsLabel);
+  const hasVariants = product.variants !== undefined && product.variants.length > 0;
+
+  if (!hasVariants) {
+    // Sin variants: 1 card con la image default del product
+    items.push({
+      product,
+      imageUrl: product.imageUrl,
+      variantLabel: null,
+      variantHex: null,
+      variantKey: 'default',
+      variantsText,
+    });
+    continue;
+  }
+
+  // Con variants: 1 card por variant
+  for (const variant of product.variants ?? []) {
+    if (variant.imageUrl === undefined) continue;
+    items.push({
+      product,
+      imageUrl: variant.imageUrl,
+      variantLabel: variant.label,
+      variantHex: variant.hex,
+      variantKey: variant.id,
+      variantsText,
+    });
+  }
+}
 ---
 
 <section aria-labelledby="related-heading" class="flex flex-col gap-5">
@@ -139,181 +182,132 @@ const items: RenderableItem[] = products.map((product) => ({
       role="list"
       data-related-scroller
     >
-      {items.map(({ product, variantsText }) => (
-        <li class="w-[260px] shrink-0 snap-start sm:w-[300px]">
-          <article class="group flex flex-col rounded-2xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md">
-            <a
-              href={`/${locale}/products/${product.slug}`}
-              class="relative block aspect-square overflow-hidden rounded-xl bg-slate-50"
-              aria-label={product.name}
+      {items.map((item) => {
+        const { product, imageUrl, variantLabel, variantKey, variantsText } = item;
+        const cardName = variantLabel !== null ? `${product.name}, ${variantLabel}` : product.name;
+        const cardFinish = variantLabel ?? product.finish;
+        return (
+          <li class="w-[260px] shrink-0 snap-start sm:w-[300px]">
+            <article
+              data-product-id={product.id}
+              data-variant-key={variantKey}
+              class="group flex flex-col rounded-2xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md"
             >
-              {/* Imagen principal (default — la "base" del producto). */}
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                loading="lazy"
-                decoding="async"
-                class:list={[
-                  'card__img card__img--default absolute inset-0 h-full w-full object-contain',
-                ]}
-              />
-
-              {/* Imagen por variante (hover sobre swatch las muestra,
-                  una a la vez). Se renderizan TODAS las variantes con
-                  imageUrl para que el JS las tenga disponibles; la
-                  default las oculta por CSS hasta que el swatch
-                  correspondiente se active. */}
-              {product.variants?.map((variant) =>
-                variant.imageUrl !== undefined ? (
-                  <img
-                    src={variant.imageUrl}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    aria-hidden="true"
-                    data-variant-id={variant.id}
-                    class="card__img card__img--variant absolute inset-0 h-full w-full object-contain"
-                  />
-                ) : null
-              )}
-            </a>
-
-            {/* Swatches: bolitas de color por variante (estilo Fender
-                "YOU MAY ALSO LIKE"). Hover sobre cada swatch hace
-                preview del producto en ESE color (cambia la imagen
-                del card). Al salir del swatch, vuelve a la imagen
-                default. */}
-            {product.variants !== undefined && product.variants.length > 0 && (
-              <div
-                class="mt-3 flex flex-wrap items-center gap-1.5"
-                role="group"
-                aria-label={`Variantes disponibles (${product.variants.length})`}
+              <a
+                href={`/${locale}/products/${product.slug}`}
+                class="relative block aspect-square overflow-hidden rounded-xl bg-slate-50"
+                aria-label={cardName}
               >
-                {product.variants.map((variant) => (
-                  <span
-                    data-variant-swatch={variant.id}
-                    title={variant.label}
-                    aria-label={variant.label}
-                    class="card__swatch inline-block h-6 w-6 rounded-full border-2 border-white shadow ring-1 ring-slate-300 transition-all duration-150 hover:scale-110 hover:ring-[var(--primary,#475569)] focus-visible:scale-110 focus-visible:ring-[var(--primary,#475569)]"
-                    style={`background-color: ${variant.hex};`}
-                  />
-                ))}
-              </div>
-            )}
+                <img
+                  src={imageUrl}
+                  alt={cardName}
+                  loading="lazy"
+                  decoding="async"
+                  class="absolute inset-0 h-full w-full object-contain"
+                />
+              </a>
 
-            <div class="flex flex-1 flex-col gap-1.5 pt-3">
-              {product.badges !== undefined && product.badges.length > 0 && (
+              {/* Swatches: cuando hay variants, se muestran las OTRAS
+                  variants como swatches. Hover cambia la imagen al
+                  color correspondiente. Si la card YA muestra 1 variant
+                  (1 por finish), los swatches listan las demás colors
+                  para que el user pueda cambiar entre ellas. */}
+              {(product.variants?.length ?? 0) > 1 && (
                 <div
-                  class="flex flex-wrap items-center gap-x-2 text-[11px] font-bold uppercase tracking-wider text-slate-700"
-                  aria-label="Etiquetas del producto"
+                  class="mt-3 flex flex-wrap items-center gap-1.5"
+                  role="group"
+                  aria-label={`Variantes disponibles (${product.variants?.length})`}
                 >
-                  {product.badges.map((badge, idx) => (
-                    <>
-                      {idx > 0 && (
-                        <span aria-hidden="true" class="text-slate-300">
-                          |
-                        </span>
-                      )}
-                      <span>{BADGE_LABEL[badge]}</span>
-                    </>
+                  {(product.variants ?? []).map((variant) => (
+                    <span
+                      data-variant-swatch={variant.id}
+                      title={variant.label}
+                      aria-label={variant.label}
+                      class="card__swatch inline-block h-6 w-6 rounded-full border-2 border-white shadow ring-1 ring-slate-300"
+                      style={`background-color: ${variant.hex};`}
+                    />
                   ))}
                 </div>
               )}
 
-              <h3 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">
-                <a
-                  href={`/${locale}/products/${product.slug}`}
-                  class="transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
-                >
-                  {product.name}
-                </a>
-              </h3>
-
-              {(product.vendor !== undefined || product.finish !== undefined) && (
-                <div class="flex flex-col gap-0.5 text-xs leading-snug text-slate-500">
-                  {product.vendor !== undefined && <span>{product.vendor}</span>}
-                  {product.finish !== undefined && <span>{product.finish}</span>}
-                </div>
-              )}
-
-              <div class="mt-auto flex items-end justify-between gap-2 pt-2">
-                <span class="text-base font-bold tabular-nums text-slate-900">
-                  {formatCurrency(product.priceCents, product.currency ?? 'USD')}
-                </span>
-                {variantsText !== null && (
-                  <span class="text-xs tabular-nums text-slate-500">{variantsText}</span>
+              <div class="flex flex-1 flex-col gap-1.5 pt-3">
+                {product.badges !== undefined && product.badges.length > 0 && (
+                  <div
+                    class="flex flex-wrap items-center gap-x-2 text-[11px] font-bold uppercase tracking-wider text-slate-700"
+                    aria-label="Etiquetas del producto"
+                  >
+                    {product.badges.map((badge, idx) => (
+                      <>
+                        {idx > 0 && (
+                          <span aria-hidden="true" class="text-slate-300">
+                            |
+                          </span>
+                        )}
+                        <span>{BADGE_LABEL[badge]}</span>
+                      </>
+                    ))}
+                  </div>
                 )}
+
+                <h3 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">
+                  <a
+                    href={`/${locale}/products/${product.slug}`}
+                    class="transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
+                  >
+                    {cardName}
+                  </a>
+                </h3>
+
+                {product.vendor !== undefined && (
+                  <div class="flex flex-col gap-0.5 text-xs leading-snug text-slate-500">
+                    <span>{product.vendor}</span>
+                    {cardFinish !== undefined && <span>{cardFinish}</span>}
+                  </div>
+                )}
+
+                <div class="mt-auto flex items-end justify-between gap-2 pt-2">
+                  <span class="text-base font-bold tabular-nums text-slate-900">
+                    {formatCurrency(product.priceCents, product.currency ?? 'USD')}
+                  </span>
+                  {variantsText !== null && (
+                    <span class="text-xs tabular-nums text-slate-500">{variantsText}</span>
+                  )}
+                </div>
               </div>
-            </div>
-          </article>
-        </li>
-      ))}
+            </article>
+          </li>
+        );
+      })}
     </ul>
   ) : (
     <p class="text-sm italic text-slate-500">{labels.empty}</p>
   )}
 </section>
-
 <style>
-  /**
-     * Crossfade de imágenes de la card:
-     *   - Default (`imageUrl`): siempre opacity:1 al cargar.
-     *   - Variantes (`variants[].imageUrl`): una imagen por color, todas
-     *     opacity:0. Cuando el JS recibe hover de un swatch, setea
-     *     `data-active-variant` en el `<article>` con el id de la
-     *     variante — la CSS hace match con [data-variant-id] y muestra
-     *     SÓLO esa variante, ocultando default + las otras variantes.
-     *
-     * Sin rotación: las imágenes reales de Gibson/Fender ya vienen
-     * correctamente orientadas (square 1:1 Gibson, landscape
-     * 3:1 Fender AmPro). El componente usa `object-contain` en
-     * su contenedor `aspect-square`, así que cualquier aspect encaja
-     * sin hacks de CSS.
-     */
-  .card__img--default {
-    opacity: 1;
-    transition: opacity 250ms ease;
+  /* El scroll horizontal usa las mismas reglas que ya teníamos:
+     ocultar scrollbar en Webkit y Firefox. */
+  .gallery-scroller::-webkit-scrollbar {
+    display: none;
   }
-
-  /* Variantes: ocultas por default, transición suave al activar */
-  .card__img--variant {
-    opacity: 0;
-    transition: opacity 250ms ease;
-  }
-
-  /* Cuando hay variante activa: oculta default + todas las variantes.
-       Las reglas "show this variant X" se generan dinámicamente
-       por variante abajo (ver comentario en el JSX del loop). */
-  article[data-active-variant] .card__img--default {
-    opacity: 0;
-  }
-  article[data-active-variant] .card__img--variant {
-    opacity: 0;
+  .gallery-scroller {
+    scrollbar-width: none;
   }
 </style>
 
-{/*
-  Reglas CSS por variante — generadas dinámicamente para mostrar la
-  imagen correcta cuando el JS setea [data-active-variant]. Usamos
-  is:global + set:html para inyectar CSS crudo (Astro procesaría
-  los selectores por atributo si fuera scoped y rompería el match).
-*/}
-{items.flatMap(({ product }) =>
-  (product.variants ?? [])
-    .filter((v) => v.imageUrl !== undefined)
-    .map((variant) => (
-      <style
-        is:global
-        set:html={`article[data-active-variant="${variant.id}"] .card__img--variant[data-variant-id="${variant.id}"] { opacity: 1; }`}
-      />
-    ))
-)}
-
 <script>
   /**
-   * Scroll horizontal controlado por los botones prev/next.
-   * Misma lógica que la versión anterior; extraída para que la
-   * estructura JSX no tenga que duplicar este patrón.
+   * Scroll horizontal controlado por los botones prev/next. Misma
+   * lógica que la versión anterior; extraída para que la estructura
+   * JSX no tenga que duplicar este patrón.
+   *
+   * IMPORTANTE: ya NO hay variant-preview JS. Cada card muestra 1
+   * imagen fija (la variant del model que la card representa). Los
+   * swatches dentro de cada card son DECORATIVOS — indican qué
+   * colores existen para el model, pero no cambian la imagen de la
+   * card (eso requeriría lógica cross-card que sobrecomplica el
+   * carousel para el caso de uso actual). Para ver otro color del
+   * mismo model, el user scrollea horizontalmente a la card de al
+   * lado (cada card = 1 variant).
    */
   function setupRelated(scroller: HTMLElement | null) {
     if (scroller === null) return;
@@ -346,55 +340,4 @@ const items: RenderableItem[] = products.map((product) => ({
   document
     .querySelectorAll<HTMLElement>('[data-related-scroller]')
     .forEach((el) => setupRelated(el));
-</script>
-
-<script>
-  /**
-   * Variant preview — hover sobre un swatch cambia la imagen del card
-   * a la foto de ESA variante de color (ebony-black, halo-metallic, etc).
-   *
-   * Implementación:
-   *   - Cada swatch tiene `data-variant-swatch="<id>"`.
-   *   - Cada imagen de variante tiene `data-variant-id="<id>"`.
-   *   - En hover/focus del swatch, seteamos `data-active-variant="<id>"`
-   *     en el `<article>` — atributo único por card, fuente única
-   *     de verdad ("qué variante está activa").
-   *   - Las reglas CSS generadas arriba hacen match entre
-   *     `article[data-active-variant="X"]` e
-   *     `img[data-variant-id="X"]` para mostrar esa imagen.
-   *   - En mouse leave / blur, removemos el atributo → vuelve la
-   *     imagen default.
-   *
-   * Por qué atributo data (no clase):
-   *   - Single source of truth — múltiples reglas CSS reaccionan al
-   *     mismo atributo sin duplicar lógica.
-   *   - Reset trivial (delete article.dataset.activeVariant).
-   */
-  function setupVariantPreview(swatch: HTMLElement): void {
-    const article = swatch.closest('article');
-    if (article === null) return;
-    const variantId = swatch.dataset.variantSwatch;
-    if (variantId === undefined || variantId === '') return;
-
-    const activate = (): void => {
-      article.dataset.activeVariant = variantId;
-    };
-    const deactivate = (): void => {
-      // Solo limpiar si ESTE swatch es el que activó la variante.
-      // Evita que un mouseleave de un swatch borre el estado activo
-      // puesto por otro swatch (en race conditions raras).
-      if (article.dataset.activeVariant === variantId) {
-        delete article.dataset.activeVariant;
-      }
-    };
-
-    swatch.addEventListener('mouseenter', activate);
-    swatch.addEventListener('mouseleave', deactivate);
-    swatch.addEventListener('focus', activate);
-    swatch.addEventListener('blur', deactivate);
-  }
-
-  document
-    .querySelectorAll<HTMLElement>('[data-variant-swatch]')
-    .forEach((swatch) => setupVariantPreview(swatch));
 </script>
