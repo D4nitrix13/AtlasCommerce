@@ -58,7 +58,6 @@ class DatabaseSeeder extends Seeder
         // (Ebony Black + Halo Metallic) y 10 imágenes WebP responsive.
         // Útil para validar la PDP con imágenes reales en lugar de SVG placeholder.
         // Las imágenes deben estar en frontend/public/images/products/...
-        $this->call(class: FenderPlayerFusionBassSeeder::class);
 
         // Catálogo recon round 1 (Oct 2026) — 10 guitarras Gibson Mod™
         // Collection + Custom Select con imágenes square 1600x1600 reales.

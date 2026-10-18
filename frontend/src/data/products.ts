@@ -86,25 +86,6 @@ export const PRODUCTS: readonly Product[] = [
     badges: ['new', 'sale'],
     currency: 'USD',
   },
-  // Fender Player Fusion Precision Bass HH — producto de referencia para
-  // validar la PDP con imágenes WebP reales (ver scripts/convert-product-images.sh
-  // y backend/database/seeders/FenderPlayerFusionBassSeeder.php).
-  // Las imágenes viven en /public/assets/products/fender-player-fusion-bass-hh/.
-  {
-    id: 9001,
-    slug: 'fender-player-fusion-bass-hh',
-    name: 'Fender Limited Edition Player Fusion Precision Bass HH',
-    description:
-      'Bajo eléctrico Precision Bass edición limitada con doble humbucker, mástil de maple y acabado Ultra Heavy Aged. Disponible en Ebony Black o Halo Metallic.',
-    priceCents: 179900,
-    compareAtPriceCents: 199900,
-    imageUrl:
-      '/assets/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
-    category: 'bajo-electrico',
-    stock: 12,
-    badges: ['new'],
-    currency: 'USD',
-  },
   {
     id: 2,
     slug: 'nendoroid-zero-two',
