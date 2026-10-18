@@ -288,8 +288,12 @@ const PUBLIC_PATHS = [
   '/_actions/',
   '/_image',
   '/build/',
+  '/assets/',
+  '/images/',
+  '/fonts/',
   '/favicon.ico',
   '/robots.txt',
+  '/sitemap.xml',
 ];
 
 function isPublicPath(pathname: string): boolean {

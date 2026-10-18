@@ -1,0 +1,354 @@
+/**
+ * product-mock-factory — genera mocks de productos brand-agnostic.
+ *
+ * Los mocks del storefront público se derivan de `ProductMockSpec`,
+ * una shape que coincide con `backend/database/seeds/products.json`
+ * (los seeders producen datos equivalentes a este spec). Cuando el
+ * endpoint `/api/storefront/products` exista, este factory se reemplaza
+ * por fetch + hidratación — la shape se conserva.
+ *
+ * Helpers:
+ *   - `createProductMock(spec)`         → `Product` (card de catálogo)
+ *   - `createProductDetailMock(spec)`   → `ProductDetailData` (PDP)
+ *   - `createVariantMock(spec, v)`      → `ProductVariant` (galería PDP)
+ *   - `createRelatedProduct(spec, v?)`  → `RelatedProduct` (cards "relacionados")
+ *
+ * Las URLs siguen la misma convención que el `ProductSeeder` del backend:
+ *   - "indexed" naming: `{slug}-{variant}-{WxH}-{idx}.webp`
+ *   - "keyword" naming: `{slug}-{variant}-{variant}-{front|back}-{WxH}.webp`
+ *
+ * Path base: `/assets/products/` — coincide con los archivos reales en
+ * `frontend/public/assets → ../../assets` (symlink creado en Fase 6
+ * del image architecture plan).
+ */
+
+import type { Product, ProductBadge } from '../types/catalog';
+import type { ProductHighlightsItem } from '../components/storefront/products/ProductHighlights.types';
+import type {
+  ProductDetailData,
+  ProductVariant,
+  ProductVariantAttribute,
+  RelatedProduct,
+} from '../data/product-detail-mock';
+
+/** Spec declarativo de un producto. Compatible con `products.json`. */
+export interface ProductMockSpec {
+  /** Slug/handle del producto (e.g. 'american-professional-telecaster'). */
+  readonly slug: string;
+  /** Nombre completo (e.g. 'Fender American Professional Telecaster'). */
+  readonly name: string;
+  /** Marca legible (e.g. 'Fender'). */
+  readonly brand: string;
+  /** Slug de la marca (e.g. 'fender'). */
+  readonly brandSlug: string;
+  /** Nombre legible de la categoría (e.g. 'Guitarra eléctrica'). */
+  readonly category: string;
+  /** Slug de la categoría (e.g. 'guitarra-electrica'). */
+  readonly categorySlug: string;
+  /** Descripción detallada. */
+  readonly description: string;
+  /** Precio base en cents. */
+  readonly priceCents: number;
+  /** Precio comparativo en cents (opcional). */
+  readonly compareAtPriceCents?: number;
+  /** Currency code (default 'USD'). */
+  readonly currency?: string;
+  /** Variantes. */
+  readonly variants: ReadonlyArray<ProductMockVariantSpec>;
+  /** PDP expone selector "Nuevo / Usado". */
+  readonly hasCondition?: boolean;
+  /** PDP expone grid de tallas. */
+  readonly hasSizes?: boolean;
+  /** Stock base (default: variantes * 1). */
+  readonly stock?: number;
+  /** Badges opcionales. */
+  readonly badges?: ReadonlyArray<ProductBadge>;
+  /** Patrón de naming de archivos de imagen. */
+  readonly imagePattern: ProductImagePatternSpec;
+  /** Path base para URLs (default '/assets/products'). */
+  readonly imageBasePath?: string;
+}
+
+export interface ProductMockVariantSpec {
+  /** Slug de la variant (e.g. '3-color-sunburst'). */
+  readonly slug: string;
+  /** Display name legible (e.g. '3-Color Sunburst'). */
+  readonly displayName: string;
+  /** SKU de la variant. */
+  readonly sku: string;
+  /** Fingerboard opcional (e.g. 'rosewood' | 'maple'). */
+  readonly fingerboard?: 'rosewood' | 'maple';
+  /** Back SKU opcional para imágenes compartidas por fingerboard. */
+  readonly backSku?: string;
+  /** Si esta variant es la default para mostrar. */
+  readonly isDefault?: boolean;
+  /** Hex color para swatch (e.g. '#3B241C'). */
+  readonly hex?: string;
+  /** Stock de la variant (default: 5). */
+  readonly stock?: number;
+}
+
+export type ProductImagePatternSpec =
+  | {
+      readonly naming: 'indexed';
+      readonly frontSize: string;
+      readonly backSize: string;
+      readonly frontIndex: string;
+      readonly backIndex: string;
+    }
+  | {
+      readonly naming: 'keyword';
+      readonly frontSize: string;
+      readonly backSize: string;
+      readonly frontKeyword: string;
+      readonly backKeyword: string;
+    };
+
+const DEFAULT_BASE_PATH = '/assets/products';
+const DEFAULT_STOCK = 5;
+const DEFAULT_VARIANT_STOCK = 5;
+
+/**
+ * Resuelve la variant "default" para mostrar (la marcada con
+ * `is_default: true` o la primera del array).
+ */
+function defaultVariant<T extends ProductMockVariantSpec>(
+  variants: ReadonlyArray<T>,
+): T {
+  return variants.find((variant) => variant.isDefault === true) ?? variants[0]!;
+}
+
+/**
+ * Genera la URL pública de una imagen según el patrón del producto.
+ */
+export function buildImageUrl(
+  spec: ProductMockSpec,
+  variantSlug: string,
+  role: 'front' | 'back',
+  backSku?: string,
+): string {
+  const basePath = spec.imageBasePath ?? DEFAULT_BASE_PATH;
+  const pattern = spec.imagePattern;
+
+  if (pattern.naming === 'indexed') {
+    const size = role === 'front' ? pattern.frontSize : pattern.backSize;
+    const index = role === 'front' ? pattern.frontIndex : pattern.backIndex;
+    const useBackSku = role === 'back' && backSku !== undefined;
+
+    const filename = useBackSku
+      ? `${backSku}-${backSku}-${size}-${index}`
+      : `${spec.slug.startsWith(spec.brandSlug) ? '' : `${spec.brandSlug}-`}${spec.slug}-${variantSlug}-${size}-${index}`;
+
+    return `${basePath}/${spec.slug}/${variantSlug}/${filename}.webp`;
+  }
+
+  // naming === 'keyword' (Gibson Mod Collection). El handle ya
+  // termina con el variant en este catálogo (e.g. `...-holy-shift`),
+  // así que el filename queda como `{slug}-{variant}-{key}-{WxH}` —
+  // el variant aparece naturalmente 2x sin necesidad de duplicarlo.
+  const size = role === 'front' ? pattern.frontSize : pattern.backSize;
+  const keyword = role === 'front' ? pattern.frontKeyword : pattern.backKeyword;
+  const filename = `${spec.slug.startsWith(spec.brandSlug) ? '' : `${spec.brandSlug}-`}${spec.slug}-${variantSlug}-${keyword}-${size}`;
+
+  return `${basePath}/${spec.slug}/${variantSlug}/${filename}.webp`;
+}
+
+/**
+ * Crea un `Product` (card de catálogo) a partir del spec.
+ *
+ * Usa la variant default para la imagen principal.
+ */
+export function createProductMock(
+  spec: ProductMockSpec,
+  options: { readonly id?: number } = {},
+): Product {
+  const defaultV = defaultVariant(spec.variants);
+  const stock = spec.stock ?? spec.variants.length * DEFAULT_STOCK;
+  const id = options.id ?? stableIdFromSlug(spec.slug);
+
+  return {
+    id,
+    slug: spec.slug,
+    name: spec.name,
+    description: spec.description,
+    priceCents: spec.priceCents,
+    ...(spec.compareAtPriceCents !== undefined && {
+      compareAtPriceCents: spec.compareAtPriceCents,
+    }),
+    imageUrl: buildImageUrl(spec, defaultV.slug, 'front', defaultV.backSku),
+    category: spec.categorySlug,
+    stock,
+    ...(spec.badges !== undefined && { badges: [...spec.badges] }),
+    currency: spec.currency ?? 'USD',
+  };
+}
+
+/**
+ * Crea un `ProductVariant` (entry de la galería PDP) desde un
+ * spec de variant.
+ */
+export function createVariantMock(
+  spec: ProductMockSpec,
+  variant: ProductMockVariantSpec,
+): ProductVariant {
+  const fingerboardAttr: ProductVariantAttribute | null =
+    variant.fingerboard !== undefined
+      ? {
+          type: 'color',
+          id: variant.slug,
+          label: variant.displayName,
+          hex: variant.hex,
+        }
+      : null;
+
+  return {
+    id: variant.slug,
+    sku: variant.sku,
+    attributes: fingerboardAttr !== null ? [fingerboardAttr] : [],
+    priceCents: spec.priceCents,
+    imageUrl: buildImageUrl(spec, variant.slug, 'front', variant.backSku),
+    stock: variant.stock ?? DEFAULT_VARIANT_STOCK,
+  };
+}
+
+/**
+ * Crea un `ProductDetailData` (página de detalle) a partir del spec.
+ *
+ * La galería incluye las 2 imágenes por variant (front + back).
+ * `specs`/`groupedSpecs`/`highlights` quedan vacíos por defecto;
+ * los callers pueden sobreescribirlos con un wrapper si necesitan
+ * contenido específico.
+ */
+export function createProductDetailMock(
+  spec: ProductMockSpec,
+  options: { readonly id?: number } = {},
+): ProductDetailData {
+  const stock = spec.stock ?? spec.variants.length * DEFAULT_STOCK;
+  const id = options.id ?? stableIdFromSlug(spec.slug);
+
+  // Construir galería: para cada variant, su front + back.
+  const images: string[] = [];
+  for (const variant of spec.variants) {
+    images.push(buildImageUrl(spec, variant.slug, 'front', variant.backSku));
+    images.push(buildImageUrl(spec, variant.slug, 'back', variant.backSku));
+  }
+
+  const variantAttributes: ProductVariantAttribute[][] = spec.variants.map((variant) => [
+    {
+      type: 'color',
+      id: variant.slug,
+      label: variant.displayName,
+      ...(variant.hex !== undefined && { hex: variant.hex }),
+    },
+  ]);
+
+  return {
+    id,
+    slug: spec.slug,
+    name: spec.name,
+    description: spec.description,
+    priceCents: spec.priceCents,
+    ...(spec.compareAtPriceCents !== undefined && {
+      compareAtPriceCents: spec.compareAtPriceCents,
+    }),
+    currency: spec.currency ?? 'USD',
+    category: spec.categorySlug,
+    stock,
+    badges: [...(spec.badges ?? [])],
+    hasCondition: spec.hasCondition ?? false,
+    hasSizes: spec.hasSizes ?? false,
+    images,
+    variantAttributes,
+    variants: spec.variants.map((variant) => createVariantMock(spec, variant)),
+    specs: defaultSpecs(spec),
+    groupedSpecs: defaultGroupedSpecs(spec),
+    highlights: defaultHighlights(spec),
+    reviews: [],
+  };
+}
+
+/**
+ * Crea un `RelatedProduct` (card "productos relacionados"). Si no
+ * se pasa variant explícita, usa la default.
+ */
+export function createRelatedProduct(
+  spec: ProductMockSpec,
+  options: { readonly id?: number; readonly variant?: ProductMockVariantSpec } = {},
+): RelatedProduct {
+  const variant = options.variant ?? defaultVariant(spec.variants);
+  const id = options.id ?? stableIdFromSlug(spec.slug);
+
+  const secondary = buildImageUrl(spec, variant.slug, 'back', variant.backSku);
+
+  return {
+    id,
+    slug: spec.slug,
+    name: spec.name,
+    priceCents: spec.priceCents,
+    ...(spec.compareAtPriceCents !== undefined && {
+      compareAtPriceCents: spec.compareAtPriceCents,
+    }),
+    currency: spec.currency ?? 'USD',
+    imageUrl: buildImageUrl(spec, variant.slug, 'front', variant.backSku),
+    imageUrlSecondary: secondary,
+    ...(spec.badges !== undefined && { badges: [...spec.badges] }),
+    vendor: spec.brand,
+    finish: variant.displayName,
+    variantsCount: spec.variants.length,
+    variants: spec.variants.map((v) => ({
+      id: v.slug,
+      label: v.displayName,
+      hex: v.hex ?? '#888888',
+      imageUrl: buildImageUrl(spec, v.slug, 'front', v.backSku),
+    })),
+  };
+}
+
+/**
+ * Hash determinístico del slug → número estable para el campo `id`
+ * de mocks (mismo slug siempre devuelve el mismo id entre sesiones).
+ */
+function stableIdFromSlug(slug: string): number {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i += 1) {
+    hash = (hash * 31 + slug.charCodeAt(i)) | 0;
+  }
+  // Reservar rango 9000+ para guitarras (distinto de 1-12 de PRODUCTS).
+  return 9000 + (Math.abs(hash) % 999);
+}
+
+/** Specs planos por defecto. */
+function defaultSpecs(spec: ProductMockSpec): { label: string; value: string }[] {
+  const defaultV = defaultVariant(spec.variants);
+  return [
+    { label: 'SKU', value: defaultV.sku },
+    { label: 'Categoría', value: spec.category },
+    { label: 'Marca', value: spec.brand },
+    { label: 'Variantes', value: `${spec.variants.length} acabados` },
+  ];
+}
+
+/** Specs agrupados por defecto (estilo Gibson layout). */
+function defaultGroupedSpecs(
+  spec: ProductMockSpec,
+): { category: string; items: { label: string; value: string }[] }[] {
+  return [
+    {
+      category: 'General',
+      items: [
+        { label: 'Marca', value: spec.brand },
+        { label: 'Categoría', value: spec.category },
+        { label: 'Variantes', value: `${spec.variants.length}` },
+      ],
+    },
+  ];
+}
+
+/** Highlights por defecto (icono + etiqueta). */
+function defaultHighlights(_spec: ProductMockSpec): ProductHighlightsItem[] {
+  return [
+    { icon: 'escudo', label: 'Garantía oficial' },
+    { icon: 'estrella', label: 'Calidad premium' },
+    { icon: 'premio', label: 'Edición destacada' },
+  ];
+}

@@ -196,6 +196,13 @@ services:
     volumes:
       - ../../../../frontend:/app
       - ../../../../frontend/bun.lock:/app/bun.lock:ro
+      # Assets unificados del repo (raíz `/assets/`). Bind mount directo
+      # sobre `/app/public/assets/` para que el frontend Astro los sirva
+      # via su public/. Antes este era un symlink en `frontend/public/assets`
+      # apuntando a `../../assets`, pero el symlink resolvía fuera del
+      # container (donde assets/ no existe en /app) y el dev server
+      # respondía 404. Mismo patrón aplica a las 4 instancias dev/production.
+      - ../../../../assets:/app/public/assets:ro
       - atlas_commerce_instrumentos_musicales_la_voz_dev_node_modules:/app/node_modules
       - atlas_commerce_instrumentos_musicales_la_voz_dev_bun_install:/app/node_modules/.bun
       # Named volumes shadow the bind-mount so stale .astro/ or
