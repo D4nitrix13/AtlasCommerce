@@ -31,6 +31,9 @@ export interface LaVozProductSpec {
   value: string;
 }
 
+/** Condición de venta (Phase 7). Espejo del enum backend `product_variants.condition`. */
+export type LaVozProductCondition = 'nuevo' | 'usado' | 'ambos';
+
 export interface LaVozProductVariant {
   id: string;
   label: string;
@@ -38,6 +41,22 @@ export interface LaVozProductVariant {
   hex?: string;
   /** Indica si esta variante esta disponible. */
   inStock: boolean;
+  // ─── Phase 7 — product schema rich ────────────────────────────────
+  /** Slug del acabado (Phase 7). Backend: `product_variants.finish_slug`. */
+  finishSlug?: string;
+  /** Label legible del acabado (Phase 7). Backend: `finish_label`. */
+  finishLabel?: string;
+  /** Condición de venta (Phase 7). Backend: `product_variants.condition`. */
+  condition?: LaVozProductCondition;
+  /** Stock de esta variant (Phase 7). Backend: `product_variants.stock`. */
+  stock?: number;
+}
+
+/** Talla opcional del producto (Phase 7). */
+export interface LaVozProductSize {
+  slug: string;
+  label: string;
+  position?: number;
 }
 
 export interface LaVozProduct {
@@ -63,6 +82,15 @@ export interface LaVozProduct {
   };
   variants: readonly LaVozProductVariant[];
   inStock: boolean;
+  // ─── Phase 7 — product schema rich ────────────────────────────────
+  /** Bandera "Edición Limitada" (Phase 7). Default `false`. */
+  isExclusive?: boolean;
+  /**
+   * Tallas del producto (Phase 7). Vacío/ausente para guitarras
+   * eléctricas. Cuando está definido, el PDP renderiza el grid
+   * `ProductSizeGrid` con estas opciones.
+   */
+  sizes?: readonly LaVozProductSize[];
 }
 
 export const LA_VOZ_CATEGORIES = [
@@ -105,6 +133,10 @@ function mapCategorySlug(slug: string): LaVozProduct['category'] {
  * Genera un LaVozProduct a partir de un ProductMockSpec. Adapta la
  * shape del factory output al contrato LaVozProduct (que es el que
  * consume `la-voz-mock.ts` y los pages que lo usan).
+ *
+ * Phase 7: popula `isExclusive`, `sizes` y los nuevos campos de
+ * variant (`finishSlug`, `finishLabel`, `condition`, `stock`) desde
+ * el spec cuando están definidos.
  */
 function createLaVozProductFromSpec(
   spec: ProductMockSpec,
@@ -145,8 +177,21 @@ function createLaVozProductFromSpec(
       label: v.displayName,
       hex: v.hex,
       inStock: true,
+      ...(v.finishSlug !== undefined && { finishSlug: v.finishSlug }),
+      ...(v.finishLabel !== undefined && { finishLabel: v.finishLabel }),
+      ...(v.condition !== undefined && { condition: v.condition }),
+      ...(v.stock !== undefined && { stock: v.stock }),
     })),
     inStock: true,
+    ...(spec.isExclusive === true && { isExclusive: true }),
+    ...(spec.sizes !== undefined &&
+      spec.sizes.length > 0 && {
+        sizes: spec.sizes.map((size) => ({
+          slug: size.slug,
+          label: size.label,
+          ...(size.position !== undefined && { position: size.position }),
+        })),
+      }),
   };
 }
 

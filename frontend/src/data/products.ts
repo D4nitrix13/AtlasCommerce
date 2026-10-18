@@ -31,6 +31,12 @@ import { LA_VOZ_PRODUCTS, type LaVozProduct } from './la-voz-mock';
  * Solo se copian los campos que existen en ambas shapes. Los campos
  * específicos de LaVozProduct (variants con inStock, specs del
  * attributes) se exponen vía la-voz-mock.ts directamente.
+ *
+ * Phase 7: pasa `isExclusive` y `sizes` desde LaVozProduct a
+ * Product. Los variants con `finishSlug`/`finishLabel`/`condition`/
+ * `stock` se mapean al `ProductVariant` mínimo del catálogo
+ * (`types/catalog.ts`) — el shape rico del PDP vive en
+ * `data/product-detail-mock.ts`.
  */
 function laVozProductToProduct(lv: LaVozProduct): Product {
   return {
@@ -45,10 +51,28 @@ function laVozProductToProduct(lv: LaVozProduct): Product {
     stock: 1, // LaVozProduct no expone stock por variant; asumimos disponible
     badges: lv.badges.map((b) => (b === 'lowStock' ? 'low_stock' : b)) as ('new' | 'sale' | 'low_stock')[],
     currency: lv.currency,
-    // Gallery completa (real para La Voz, placeholder para Kitsune que
+    // Gallery complète (real para La Voz, placeholder para Kitsune que
     // no tienen gallery). Sin esta línea el PDP cae al fallback de
     // SABER_ALTER_DETAIL.images (4 T-shirts mockup).
     images: lv.images,
+    ...(lv.isExclusive === true && { isExclusive: true }),
+    variants: lv.variants.map((variant) => ({
+      id: variant.id,
+      sku: variant.id,
+      ...(variant.finishSlug !== undefined && { finishSlug: variant.finishSlug }),
+      ...(variant.finishLabel !== undefined && { finishLabel: variant.finishLabel }),
+      ...(variant.hex !== undefined && { finishHex: variant.hex }),
+      ...(variant.condition !== undefined && { condition: variant.condition }),
+      stock: variant.stock ?? 1,
+    })),
+    ...(lv.sizes !== undefined &&
+      lv.sizes.length > 0 && {
+        sizes: lv.sizes.map((size) => ({
+          slug: size.slug,
+          label: size.label,
+          ...(size.position !== undefined && { position: size.position }),
+        })),
+      }),
   };
 }
 
