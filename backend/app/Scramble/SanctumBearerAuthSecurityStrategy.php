@@ -61,10 +61,10 @@ class SanctumBearerAuthSecurityStrategy implements SecurityDocumentationStrategy
         }
 
         return $context->config
-            ->withDocumentTransformers(function (OpenApi $openApi) {
+            ->withDocumentTransformers(function (OpenApi $openApi): void {
                 $openApi->secure($this->scheme);
             })
-            ->withOperationTransformers(function (OperationTransformers $transformers) {
+            ->withOperationTransformers(function (OperationTransformers $transformers): void {
                 $transformers->prepend(function (Operation $operation, RouteInfo $routeInfo): void {
                     if ($this->routeHasMiddleware($routeInfo->route)) {
                         // Mantiene el global security (Bearer) que ya aplicamos
