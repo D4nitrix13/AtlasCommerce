@@ -59,8 +59,10 @@ function laVozProductToProduct(lv: LaVozProduct): Product {
     variants: lv.variants.map((variant) => ({
       id: variant.id,
       sku: variant.id,
-      ...(variant.finishSlug !== undefined && { finishSlug: variant.finishSlug }),
-      ...(variant.finishLabel !== undefined && { finishLabel: variant.finishLabel }),
+      // Phase 7: derivar finishSlug/finishLabel del id/label del variant
+      // cuando no vienen seteados (fallback paralelo al factory upstream).
+      finishSlug: variant.finishSlug ?? variant.id,
+      finishLabel: variant.finishLabel ?? variant.label,
       ...(variant.hex !== undefined && { finishHex: variant.hex }),
       ...(variant.condition !== undefined && { condition: variant.condition }),
       stock: variant.stock ?? 1,

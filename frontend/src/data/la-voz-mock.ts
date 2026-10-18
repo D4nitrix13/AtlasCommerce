@@ -145,7 +145,8 @@ function buildLaVozImages(spec: ProductMockSpec): readonly string[] {
 /**
  * Mapea un variant del spec a LaVozProductVariant. Phase 7 propaga
  * los nuevos campos (`finishSlug`, `finishLabel`, `condition`, `stock`)
- * cuando están definidos en el spec.
+ * cuando están definidos en el spec, y los deriva del slug/displayName
+ * cuando no (mismo fallback que `lib/product-mock-factory.ts`).
  */
 function mapSpecVariantToLaVozVariant(
   spec: ProductMockSpec,
@@ -155,8 +156,8 @@ function mapSpecVariantToLaVozVariant(
     label: v.displayName,
     hex: v.hex,
     inStock: true,
-    ...(v.finishSlug !== undefined && { finishSlug: v.finishSlug }),
-    ...(v.finishLabel !== undefined && { finishLabel: v.finishLabel }),
+    finishSlug: v.finishSlug ?? v.slug,
+    finishLabel: v.finishLabel ?? v.displayName,
     ...(v.condition !== undefined && { condition: v.condition }),
     ...(v.stock !== undefined && { stock: v.stock }),
   }));
