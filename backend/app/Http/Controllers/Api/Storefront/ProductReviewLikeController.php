@@ -48,12 +48,14 @@ class ProductReviewLikeController extends Controller
     {
         $customer = $this->resolveCustomer($request);
 
-        // firstOrCreate devuelve [model, created] — usamos el flag para
-        // diferenciar 201 (recién creado) vs 200 (ya existía).
-        [, $created] = ProductReviewLike::firstOrCreate(attributes: [
+        // firstOrCreate + wasRecentlyCreated para diferenciar 201 (recién
+        // creado) vs 200 (ya existía). Laravel marca `wasRecentlyCreated`
+        // únicamente cuando el save INSERT-ea el row.
+        $like = ProductReviewLike::query()->firstOrCreate(attributes: [
             'product_review_id' => $review->id,
             'customer_id' => $customer->id,
         ]);
+        $created = $like->wasRecentlyCreated;
 
         return response()->json(data: [
             'liked' => true,
