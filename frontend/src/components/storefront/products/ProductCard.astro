@@ -24,6 +24,13 @@ export interface ProductCardLabels {
   addToCart: string;
   outOfStock: string;
   viewDetail: string;
+  /**
+   * Label para el badge "Limitado" que aparece cuando
+   * `product.isExclusive === true`. Opcional: si no se pasa, el badge
+   * se renderiza con un fallback hardcoded. Pendiente: migrar todos
+   * los consumidores de ProductCard a pasar esta label via i18n.
+   */
+  limitedBadge?: string;
 }
 
 interface Props {
@@ -61,7 +68,10 @@ const BADGE_STYLES: Record<
   low_stock: { variant: 'primary', status: 'shipped', label: 'lowStockBadge' },
 };
 
-const ariaLabelForBadge = (badge: ProductBadge): string => labels[BADGE_STYLES[badge].label];
+const ariaLabelForBadge = (badge: ProductBadge): string => {
+  const key = BADGE_STYLES[badge].label;
+  return labels[key] ?? '';
+};
 ---
 
 <article class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-[var(--primary,#475569)] focus-within:ring-offset-2">
@@ -98,6 +108,21 @@ const ariaLabelForBadge = (badge: ProductBadge): string => labels[BADGE_STYLES[b
     {isOutOfStock && (
       <div class="absolute right-3 top-3">
         <Badge variant="neutral">{labels.outOfStock}</Badge>
+      </div>
+    )}
+    {/* Phase 7: badge "Limitado" para productos exclusivos. Posicionado
+        top-right debajo del outOfStock badge si ambos aplican, sino en
+        top-right. Fallback a "Limitado" hardcoded si el consumer no
+        pasa `limitedBadge` via labels — los consumers se migrarán
+        progresivamente. */}
+    {product.isExclusive === true && (
+      <div class:list={[
+        'absolute right-3 flex flex-col items-end gap-1.5',
+        isOutOfStock ? 'top-12' : 'top-3',
+      ]}>
+        <Badge variant="primary" status="pending">
+          {labels.limitedBadge ?? 'Limitado'}
+        </Badge>
       </div>
     )}
   </a>

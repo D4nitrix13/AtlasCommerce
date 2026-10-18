@@ -615,6 +615,7 @@ const es: Translations = {
   'storefront.productCard.badge.new': 'Novedades',
   'storefront.productCard.badge.sale': 'Oferta',
   'storefront.productCard.badge.lowStock': 'Últimas unidades',
+  'storefront.productCard.badge.limited': 'Limitado',
   'storefront.productCard.addToCart': 'Añadir al carrito',
   'storefront.productCard.outOfStock': 'Agotado',
   'storefront.productCard.viewDetail': 'Ver detalle',

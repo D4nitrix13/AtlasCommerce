@@ -1380,6 +1380,7 @@ export type TranslationKey =
   | 'storefront.productCard.badge.new'
   | 'storefront.productCard.badge.sale'
   | 'storefront.productCard.badge.lowStock'
+  | 'storefront.productCard.badge.limited'
   | 'storefront.productCard.addToCart'
   | 'storefront.productCard.outOfStock'
   | 'storefront.productCard.viewDetail'
