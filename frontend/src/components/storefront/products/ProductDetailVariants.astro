@@ -1,16 +1,21 @@
 ---
 /**
- * ProductDetailVariants — selector de COLOR (swatches) del detail v4.
+ * ProductDetailVariants — selector de swatches (color o finish) del detail.
  *
- * Decisiones de scope:
- *  - Este componente ahora SOLO renderiza variantes de color. El slot
- *    de tamaño se movió a `ProductSizeGrid` (grid 2-col estilo Nike)
- *    y el slot de condición a `ProductFitSelector` (segmented pill).
- *    Mantener `ProductDetailVariants` como swatches preserva la
- *    responsabilidad SRP y reduce la complejidad condicional.
+ * Decisiones de scope (SRP):
+ *  - Este componente renderiza swatches de COLOR o FINISH (acabado).
+ *    El slot de tamaño vive en `ProductSizeGrid` y el slot de
+ *    condición en `ProductFitSelector`. Mantener esto preserva la
+ *    responsabilidad única y reduce la complejidad condicional.
+ *
+ * Soporta dos modos de swatch:
+ *  - `hex`: círculo sólido del color (default).
+ *  - `imageUrl`: thumbnail cuadrado (44×44) con object-cover.
+ *    Usado por acabados de guitarra donde el color hex no representa
+ *    fielmente el acabado (ej. "3-Color Sunburst").
  *
  * Diseño:
- *  - Colores como swatches redondos (44×44).
+ *  - Swatches 44×44.
  *  - Activos = `scale-110 ring-[var(--primary)] ring-offset-2`.
  *  - Inactivos = `hover:scale-105` + border sutil.
  *  - Sin lógica de URL/form: el padre pasa `selected` y maneja
@@ -26,10 +31,16 @@ export interface VariantOption {
   label: string;
   /** Hex para el swatch. */
   hex?: string;
+  /**
+   * Imagen del acabado (Phase 7). Cuando se provee, se renderiza
+   * como thumbnail en lugar del hex. Útil para acabados complejos
+   * (sunburst, oxblood, fades) donde el hex no es fiel.
+   */
+  imageUrl?: string;
 }
 
 interface Props {
-  /** Opciones de color disponibles. */
+  /** Opciones de swatch disponibles. */
   options: readonly VariantOption[];
   /** ID seleccionado actualmente. */
   selected?: string;
@@ -37,17 +48,23 @@ interface Props {
   legend: string;
   /** Ocultar el legend visible (mantiene aria-label para a11y). */
   hideLegend?: boolean;
+  /**
+   * Variante semántica del fieldset. No afecta el render — sólo el
+   * valor de `data-variant-type` (color | finish). Default 'color'.
+   */
+  variantType?: 'color' | 'finish';
 }
 
-const { options, selected, legend, hideLegend = false } = Astro.props;
+const { options, selected, legend, hideLegend = false, variantType = 'color' } = Astro.props;
 ---
 
-<fieldset class="flex flex-col gap-3" data-reveal data-variant-type="color">
+<fieldset class="flex flex-col gap-3" data-reveal data-variant-type={variantType}>
   {!hideLegend && <legend class="text-sm font-bold text-slate-900">{legend}</legend>}
 
   <div class="flex flex-wrap gap-3" role="radiogroup" aria-label={legend}>
     {options.map((option) => {
       const isActive = option.id === selected;
+      const hasImage = option.imageUrl !== undefined && option.imageUrl !== '';
       return (
         <button
           type="button"
@@ -56,14 +73,28 @@ const { options, selected, legend, hideLegend = false } = Astro.props;
           aria-label={option.label}
           data-variant-id={option.id}
           class:list={[
-            'relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            'relative inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-black/10 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
             isActive
               ? 'scale-110 ring-2 ring-[var(--primary,#475569)] ring-offset-2'
               : 'hover:scale-105',
           ]}
-          style={option.hex !== undefined ? `background-color: ${option.hex};` : undefined}
+          style={
+            !hasImage && option.hex !== undefined
+              ? `background-color: ${option.hex};`
+              : undefined
+          }
           title={option.label}
-        ></button>
+        >
+          {hasImage && (
+            <img
+              src={option.imageUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover"
+            />
+          )}
+        </button>
       );
     })}
   </div>

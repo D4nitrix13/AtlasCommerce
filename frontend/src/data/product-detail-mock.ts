@@ -130,7 +130,7 @@ export interface ProductDetailData {
    * `hasSizes = false`. La PDP itera este array para renderizar
    * el `ProductSizeGrid`.
    */
-  sizes?: ReadonlyArray<{ slug: string; label: string; position?: number }>;
+  sizes?: readonly { slug: string; label: string; position?: number }[];
   /** Galería: 4 imágenes mínimo (Baymard). */
   images: string[];
   /** Variantes estructuradas. */
