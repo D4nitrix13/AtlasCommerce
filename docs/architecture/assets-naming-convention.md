@@ -1,6 +1,6 @@
 # Convención de nombres y almacenamiento de assets
 
-> **Última actualización:** 2026-08-24
+> **Última actualización:** 2026-10-17
 >
 > Define cómo se nombran, dónde se almacenan y cómo se sirven los
 > recursos visuales (imágenes, logos, íconos, favicons) del sistema.
@@ -243,9 +243,9 @@ convivan el código nuevo y el viejo.
 | Fase | Scope | Estado |
 | --- | --- | --- |
 | 2 (DONE) | `StorageKeyDeriver` + soft-mode validation en `AssetController` | mergeada (`10d55e64`) |
-| 3 (NOW) | HMAC signed URLs + cache config-driven + 404 enumeration logging | mergeada |
-| 4 | Pattern de migrations (universal + extension table) | pendiente |
-| 5 | Backfill de imágenes existentes al nuevo formato | pendiente |
+| 3 (DONE) | HMAC signed URLs + cache config-driven + 404 enumeration logging | mergeada (`63088b23`) |
+| 4 (DONE) | Pattern de migrations (universal + extension table) | mergeada (`ff0309f0`) |
+| 5 | Backfill de imágenes existentes al nuevo formato | comando + docs mergeados; ejecución operativa pendiente |
 | 6 | Flip soft → strict + cleanup legacy `fenderImageUrl()` + flip `url_signing.required=true` | pendiente |
 
 ### 6.2. Drift conocido entre doc y código
@@ -321,12 +321,12 @@ la instancia esté lista).
   al tenant pero no existe en FTP).
 - Log: `logger()->warning('asset.not_found', [...])` con contexto
   estructurado:
-    - `hash`: SHA-256 del path normalizado (no logueamos el path raw
-      para no exponer nombres de assets internos).
-    - `tenant_slug`: el slug activo que recibió el request.
-    - `client_ip`: IP del requester (CDN-aware vía TrustProxies).
-    - `user_agent`: truncado a 200 chars (evitar logs gigante si el
-      UA viene con beacon data).
+  - `hash`: SHA-256 del path normalizado (no logueamos el path raw
+    para no exponer nombres de assets internos).
+  - `tenant_slug`: el slug activo que recibió el request.
+  - `client_ip`: IP del requester (CDN-aware vía TrustProxies).
+  - `user_agent`: truncado a 200 chars (evitar logs gigante si el
+    UA viene con beacon data).
 - Voluntary logging paralelo: `asset.path.malformed` (Fase 2)
   captura paths que no matchean la convención pero el archivo sí
   existe en FTP. Misma estructura de contexto, mensaje distinto.
@@ -360,10 +360,220 @@ Estas cosas **NO se hacen** en este proyecto:
 
 ---
 
-## 8. Referencias
+## 8. Backfill procedure (Fase 5)
 
+Las filas existentes en `product_images.image_url` quedaron con formatos
+heterogéneos antes de que esta convención se introdujera: URLs externas
+de CDN (`https://cdn.fender.com/...`), paths legacy del disk `local`
+(`/images/products/...`), y unas pocas keys ya migradas
+(`tenants/{slug}/products/{slug}/{hash}.{ext}`). El comando
+`assets:backfill-images` las re-hashea, las re-sube a nuestro FTP, y
+reemplaza `image_url` con la storage key canónica — dejando la DB
+consistente con el contrato de §2.
+
+El procedimiento siguiente está pensado para ejecutarse **una vez por
+instancia**, supervisado, con ventana de mantenimiento corta. No es un
+paso de deploy automatizado.
+
+### 8.1. Pre-flight checklist
+
+Antes de correr el comando:
+
+1. **Fases 2-4 mergeadas en master.** El `StorageKeyDeriver`, el
+   `AssetController` (con soft mode) y el patrón de migrations tienen
+   que estar en producción. Verificar con `git log --oneline -10
+   backend/app/Services/Assets/StorageKeyDeriver.php` que la rama de
+   release los incluye.
+2. **`config/assets.php` con flags esperados.**
+   `path_validation.strict` debe seguir en `false` durante el backfill
+   — se flipea recién después (ver §8.5). `url_signing.required` debe
+   seguir en `false`.
+3. **Test manual de `StorageKeyDeriver` + `Storage::disk('ftp')`.**
+
+   ```bash
+   php artisan tinker --execute='dump(app(App\Services\Assets\StorageKeyDeriver::class)->derive(tenantSlug: "panda-estampados", collection: "products", entity: "test", content: "smoke-test", extension: "webp"));'
+   php artisan tinker --execute='dump(Storage::disk("ftp")->exists("tenants/panda-estampados/products/test/abc123def456.webp"));'
+   ```
+
+   La primera llamada devuelve un path `tenants/panda-estampados/products/test/{hash}.webp`;
+   la segunda devuelve `false` (no existe todavía, pero el disk responde).
+4. **Backup de la DB** (snapshot del tenant a migrar). El comando hace
+   rollback por-chunk si la transacción falla, pero un snapshot completo
+   permite restore atómico si algo sale mal.
+5. **Cache lock liberado.** El comando adquiere
+   `Cache::lock('backfill-images', ttl: 600)`. Si una corrida previa
+   quedó colgada (TTL 10min), esperar o liberar manualmente:
+
+   ```bash
+   redis-cli -n 1 DEL laravel_cache_backfill-images
+   ```
+
+### 8.2. Dry-run
+
+Empezar siempre por `--dry-run`. El comando hace HTTP GET de cada URL,
+computa el SHA-256, deriva la storage key nueva y reporta stats — pero
+**no toca ni FTP ni DB**. Útil para validar que el dataset tiene la
+forma esperada.
+
+```bash
+cd backend
+php artisan assets:backfill-images --dry-run --tenant=panda-estampados
+```
+
+Output esperado:
+
+```text
+Backfilling product images... (24 encontrados)
+  24/24 [============================] 100%
+[backfill] processed=24 uploaded=0 skipped=0 failed=0
+```
+
+Stats interpretadas:
+
+| Stat | Significado |
+| --- | --- |
+| `processed` | Filas iteradas (total de `product_images` que matchean el filtro). |
+| `uploaded` | **Siempre 0 en dry-run** (no escribe). |
+| `skipped` | Filas que ya tienen storage key canónica (no necesitan backfill). |
+| `failed` | Filas que el comando no pudo resolver (URL rota, path local inexistente, slug faltante, etc). |
+
+Si `failed > 0` en dry-run, **investigar antes de ejecutar real**. Las
+causas más comunes son CDNs externos caídos, archivos locales borrados,
+o productos sin `ProductStore` (huérfanos).
+
+### 8.3. Ejecución real
+
+Una vez validado el dry-run:
+
+```bash
+php artisan assets:backfill-images --tenant=panda-estampados --chunk=50
+```
+
+Sin `--dry-run`, el comando pide confirmación interactiva salvo que se
+pase `--force`. Para scripts automatizados (cron, CI) usar siempre
+`--force`.
+
+El comando:
+
+1. Adquiere `Cache::lock('backfill-images')` para prevenir concurrencia.
+2. Itera `product_images` con `lazyById($chunkSize)` (default 100 filas
+   por chunk — bajar a 50 para CDNs lentos).
+3. Para cada fila:
+   - **Skip** si `image_url` ya matchea la convención.
+   - **Skip** si la storage key derivada ya existe en FTP
+     (idempotencia — re-correr el comando no duplica).
+   - **Upload + update** dentro de `DB::transaction()` por chunk. Si el
+     upload retorna false o el update falla, la transacción hace
+     rollback y la fila queda intacta.
+4. Loguea cada skip/failure estructurado (`backfill.skip`,
+   `backfill.content_resolve_failed`, `backfill.upload_or_update_failed`,
+   etc) en `storage/logs/laravel.log`.
+5. Emite stats line al terminar y exit code:
+   - `0` si `failed == 0`.
+   - `1` si hubo al menos una failure (los successes del batch siguen
+     commiteados).
+
+Output ejemplo:
+
+```text
+Backfilling product images... (24 encontrados)
+  24/24 [============================] 100%
+[backfill] processed=24 uploaded=20 skipped=0 failed=4
+```
+
+En este caso: 20 migradas, 4 con error (investigar logs por
+`image_id` para cada failure). Las 20 exitosas están commiteadas.
+
+### 8.4. Verificación post-backfill
+
+Después de la corrida, validar que el backfill quedó consistente:
+
+1. **Segundo dry-run debe dar todo en cero** (idempotencia):
+
+   ```bash
+   php artisan assets:backfill-images --dry-run --tenant=panda-estampados
+   # Esperado: processed=N uploaded=0 skipped=N failed=0
+   ```
+
+2. **Cero filas con `image_url` fuera de la convención:**
+
+   ```bash
+   php artisan tinker --execute='dump(App\Models\Catalog\ProductImage::where("image_url", "NOT LIKE", "tenants/%")->count());'
+   ```
+
+   Debe devolver `0` para los tenants migrados.
+3. **Cero logs `asset.path.malformed` post-flip:** una vez flipeado
+   `path_validation.strict => true` (§8.5), el `AssetController` debe
+   emitir 0 warnings de paths malformados (los pocos pre-existentes se
+   aceptan vía whitelist explicita — ver §6.2).
+4. **Spot-check visual de la PDP** en `https://panda-estampados.test/p/{slug}`
+   de algunos productos — las imágenes deben servirse via el proxy del
+   `AssetController` sin 404.
+
+### 8.5. Flip strict mode (post-backfill)
+
+Una vez verificado §8.4 y con un periodo de gracia de **24h** monitoreando
+logs `asset.path.malformed`:
+
+1. En `backend/config/assets.php` (o via env en `.env`):
+
+   ```php
+   'path_validation' => [
+       'strict' => true,   // ← flip
+   ],
+   'url_signing' => [
+       'required' => true, // ← flip (default Fase 6)
+       ...
+   ],
+   ```
+
+2. Reiniciar workers (queue workers, octane si aplica) para que el
+   nuevo flag se cargue.
+3. Monitorear `storage/logs/laravel.log` filtrando por
+   `asset.path.malformed` y `asset.not_found` durante 24h. El rate debe
+   ser ~0 (los pocos falsos positivos se aceptan vía whitelist
+   documentada en §6.2).
+4. Si el frontend no estaba firmando URLs previamente, deployar el
+   cambio de frontend en el **mismo release** — sino los assets vuelven
+   403 en seco.
+
+### 8.6. Rollback procedure
+
+Si la ejecución falla a mitad de camino:
+
+1. **Por chunk:** cada upload + update está dentro de `DB::transaction()`.
+   Si el FTP disk falla o el update tira excepción, el chunk se
+   rollbacka — el `image_url` queda intacto en la DB.
+2. **Restore de DB:** si el snapshot pre-flight (§8.1.4) detecta
+   corrupción, restore atómico vía snapshot.
+3. **Limpieza de FTP:** los archivos subidos durante la corrida fallida
+   quedan huérfanos en FTP. Para borrarlos:
+
+   ```bash
+   php artisan tinker --execute='dump(Storage::disk("ftp")->delete("tenants/panda-estampados/products/camiseta-oversized/abc123def456.webp"));'
+   ```
+
+   O un script que recorra el log del backfill y borre los `storage_key`
+   reportados como `uploaded=1` antes del rollback. En la práctica, los
+   huérfanos ocupan espacio despreciable (32 productos × ~200KB = ~6MB)
+   y se pueden dejar hasta el siguiente deploy.
+
+---
+
+## 9. Referencias
+
+- `backend/app/Console/Commands/BackfillProductImagesCommand.php` —
+  comando Artisan que ejecuta el procedimiento de §8.
+- `backend/tests/Feature/Console/BackfillProductImagesCommandTest.php`
+  — tests del comando (happy paths, dry-run, idempotencia, lock,
+  confirmation).
+- `backend/app/Services/Assets/StorageKeyDeriver.php` — derivador de
+  storage keys usado por el `AssetController` (read) y el comando de
+  backfill (write).
 - `backend/config/filesystems.php` — definición de los 4 disks
   (`local`, `public`, `s3`, `ftp`).
+- `backend/config/assets.php` — flags `path_validation.strict`,
+  `url_signing.required`, cache store/TTL.
 - `backend/config/brand.php` — paths default de categoría C.
 - `backend/app/Models/Stores/StoreTheme.php` — modelo que guarda los
   paths de categoría A.
@@ -371,5 +581,7 @@ Estas cosas **NO se hacen** en este proyecto:
   — schema de la tabla que guarda los paths de categoría A.
 - `backend/database/migrations/2026_06_28_193338_create_media_table.php` —
   tabla `media` (Spatie MediaLibrary) para uploads asociados a modelos.
+- `docs/architecture/migration-pattern.md` — patrón de migrations
+  universal + extension table (Fase 4).
 - `docs/architecture/multi-store.md` — qué assets se comparten vs se
   separan entre Panda y Kitsune.
