@@ -1,0 +1,542 @@
+{
+  "_meta": {
+    "description": "Catálogo consolidado de guitarras eléctricas para el demo de AtlasCommerce (Oct 2026). Brand-agnostic: cada producto describe su propio image_pattern para que el seeder pueda generar URLs correctas sin asumir Fender/Gibson conventions.",
+    "version": 1,
+    "image_base_path": "/images/products"
+  },
+  "products": [
+    {
+      "handle": "american-professional-telecaster",
+      "brand": "Fender",
+      "brand_slug": "fender",
+      "name": "Fender American Professional Telecaster",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 169900,
+      "description": "La American Professional Telecaster combina más de setenta años de innovación con pickups V-Mod III single-coil, puente top-load/string-through con ClassicGear™ Compensated Brass Bullet™ Saddles, y perfil de mástil Deep \"C\" con bordes rolled.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "indexed",
+        "front_size": "1600x525",
+        "back_size": "1600x525",
+        "front_index": "01",
+        "back_index": "02"
+      },
+      "variants": [
+        {
+          "slug": "3-color-sunburst",
+          "display_name": "3-Color Sunburst",
+          "sku": "FEND-AMPRO-TEL-0700",
+          "fingerboard": "rosewood",
+          "back_sku": "0111140700",
+          "is_default": true
+        },
+        {
+          "slug": "black",
+          "display_name": "Black",
+          "sku": "FEND-AMPRO-TEL-0706",
+          "fingerboard": "rosewood",
+          "back_sku": "0111140700"
+        },
+        {
+          "slug": "natural",
+          "display_name": "Natural",
+          "sku": "FEND-AMPRO-TEL-0721",
+          "fingerboard": "rosewood",
+          "back_sku": "0111140700"
+        },
+        {
+          "slug": "oxblood",
+          "display_name": "Oxblood",
+          "sku": "FEND-AMPRO-TEL-0730",
+          "fingerboard": "rosewood",
+          "back_sku": "0111140700"
+        },
+        {
+          "slug": "dark-night",
+          "display_name": "Dark Night",
+          "sku": "FEND-AMPRO-TEL-0761",
+          "fingerboard": "rosewood",
+          "back_sku": "0111140700"
+        },
+        {
+          "slug": "aged-cherry-burst-maple",
+          "display_name": "Aged Cherry Burst",
+          "sku": "FEND-AMPRO-TEL-2731",
+          "fingerboard": "maple",
+          "back_sku": "0111142700"
+        },
+        {
+          "slug": "butterscotch-blonde-maple",
+          "display_name": "Butterscotch Blonde",
+          "sku": "FEND-AMPRO-TEL-2750",
+          "fingerboard": "maple",
+          "back_sku": "0111142700"
+        }
+      ]
+    },
+    {
+      "handle": "american-professional-stratocaster",
+      "brand": "Fender",
+      "brand_slug": "fender",
+      "name": "Fender American Professional Stratocaster",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 169900,
+      "description": "La American Professional Stratocaster combina más de setenta años de innovación con pickups V-Mod III single-coil Strat, trémolo 2-point con ClassicGear™ Radial™ bent-steel saddles, y perfil de mástil Deep \"C\" con bordes rolled.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "indexed",
+        "front_size": "1600x523",
+        "back_size": "1600x521",
+        "front_index": "01",
+        "back_index": "02"
+      },
+      "variants": [
+        {
+          "slug": "3-color-sunburst",
+          "display_name": "3-Color Sunburst",
+          "sku": "FEND-AMPRO-STR-0700",
+          "fingerboard": "rosewood",
+          "back_sku": "0111110700",
+          "is_default": true
+        },
+        {
+          "slug": "olympic-white",
+          "display_name": "Olympic White",
+          "sku": "FEND-AMPRO-STR-0705",
+          "fingerboard": "rosewood",
+          "back_sku": "0111110700"
+        },
+        {
+          "slug": "black",
+          "display_name": "Black",
+          "sku": "FEND-AMPRO-STR-0706",
+          "fingerboard": "rosewood",
+          "back_sku": "0111110700"
+        },
+        {
+          "slug": "oxblood",
+          "display_name": "Oxblood",
+          "sku": "FEND-AMPRO-STR-0730",
+          "fingerboard": "rosewood",
+          "back_sku": "0111110700"
+        },
+        {
+          "slug": "dark-night",
+          "display_name": "Dark Night",
+          "sku": "FEND-AMPRO-STR-0761",
+          "fingerboard": "rosewood",
+          "back_sku": "0111110700"
+        },
+        {
+          "slug": "3-color-sunburst-maple",
+          "display_name": "3-Color Sunburst (Maple)",
+          "sku": "FEND-AMPRO-STR-2700",
+          "fingerboard": "maple",
+          "back_sku": "0111112700"
+        },
+        {
+          "slug": "olympic-white-maple",
+          "display_name": "Olympic White (Maple)",
+          "sku": "FEND-AMPRO-STR-2705",
+          "fingerboard": "maple",
+          "back_sku": "0111112700"
+        }
+      ]
+    },
+    {
+      "handle": "american-professional-jaguar",
+      "brand": "Fender",
+      "brand_slug": "fender",
+      "name": "Fender American Professional Jaguar",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 189900,
+      "description": "La American Professional Jaguar combina el scale 24\" único de la Jaguar con pickups V-Mod III Jaguar single-coil, trémolo Panorama, y perfil de mástil Deep \"C\" con bordes rolled.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "indexed",
+        "front_size": "1600x545",
+        "back_size": "1600x543",
+        "front_index": "01",
+        "back_index": "02"
+      },
+      "variants": [
+        {
+          "slug": "3-color-sunburst",
+          "display_name": "3-Color Sunburst",
+          "sku": "FEND-AMPRO-JAG-0700",
+          "back_sku": "0111820700",
+          "is_default": true
+        },
+        {
+          "slug": "olympic-white",
+          "display_name": "Olympic White",
+          "sku": "FEND-AMPRO-JAG-0705",
+          "back_sku": "0111820700"
+        },
+        {
+          "slug": "black",
+          "display_name": "Black",
+          "sku": "FEND-AMPRO-JAG-0706",
+          "back_sku": "0111820700"
+        },
+        {
+          "slug": "oxblood",
+          "display_name": "Oxblood",
+          "sku": "FEND-AMPRO-JAG-0730",
+          "back_sku": "0111820700"
+        },
+        {
+          "slug": "dark-night",
+          "display_name": "Dark Night",
+          "sku": "FEND-AMPRO-JAG-0761",
+          "back_sku": "0111820700"
+        }
+      ]
+    },
+    {
+      "handle": "fender-american-vintage-ii-1957-stratocaster",
+      "brand": "Fender",
+      "brand_slug": "fender",
+      "name": "Fender American Vintage II 1957 Stratocaster, Black",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 239900,
+      "description": "Reproducción de la Stratocaster de 1957 con perfil de mástil \"V\" original, mástil de maple con radio 7.25\", trémolo sincronizado Pure Vintage, y pickups Pure Vintage 57 Strat single-coil. Acabado nitrocelulósico gloss sobre cuerpo de alder.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "indexed",
+        "front_size": "1600x525",
+        "back_size": "1600x525",
+        "front_index": "01",
+        "back_index": "02"
+      },
+      "variants": [
+        {
+          "slug": "black",
+          "display_name": "Black",
+          "sku": "FEND-AMVII-57STR-2806",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Custom 1968 Les Paul Custom Reissue, Gloss, White Sparkle",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 449900,
+      "description": "Reissue Custom Shop de la histórica Les Paul Custom 1968. Construcción mahogany con tapa de arce, binding múltiple, pastillas humbucker.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "gloss-white-sparkle",
+          "display_name": "Gloss, White Sparkle",
+          "sku": "GIBSON-LPC68PSL-WHITE-SPARKLE",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-es-335-smooth-sepia",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection ES-335, Smooth Sepia",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 299900,
+      "description": "ES-335 semisólida en acabado Smooth Sepia. Mástil de mahogany, pickups MHS, stopbar.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "smooth-sepia",
+          "display_name": "Smooth Sepia",
+          "sku": "GIBSON-MOD-ES335-SMOOTH-SEPIA",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-sg-standard-holy-shift",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection SG Standard, Holy Shift",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 189900,
+      "description": "SG Standard con acabado Holy Shift exclusivo del Mod Collection. Mástil de mahogany, pastillas 490R/490T.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "holy-shift",
+          "display_name": "Holy Shift",
+          "sku": "GIBSON-MOD-SGSTD-HOLY-SHIFT",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-les-paul-standard-60s-hornet-burst",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection Les Paul Standard 60s, Hornet Burst",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 269900,
+      "description": "Les Paul Standard 60s con tapa de arce figurado en acabado Hornet Burst. Burstbucker 60s, mástil 60s slim taper.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "hornet-burst",
+          "display_name": "Hornet Burst",
+          "sku": "GIBSON-MOD-LPSTD60S-HORNET",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-sg-modern-tenacity-blue",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection SG Modern, Tenacity Blue",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 229900,
+      "description": "SG Modern con acabado Tenacity Blue. Mástil de maple roastado, pickups Burstbucker Pro, push-pull coil splits.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "tenacity-blue",
+          "display_name": "Tenacity Blue",
+          "sku": "GIBSON-MOD-SGMOD-TENACITY",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-es-339-green-meme",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection ES-339, Green Meme",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 279900,
+      "description": "ES-339 en exclusivo acabado Green Meme. Construcción centerblock semisólida, Burstbucker Pro.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "green-meme",
+          "display_name": "Green Meme",
+          "sku": "GIBSON-MOD-ES339-GREEN-MEME",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-flying-v-80s-boisterous-blue",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection Flying V 80s, Boisterous Blue",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 219900,
+      "description": "Flying V 80s Limited Run con acabado Boisterous Blue. Mástil de maple, pastillas Burstbucker 3.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "boisterous-blue",
+          "display_name": "Boisterous Blue",
+          "sku": "GIBSON-MOD-FV80S-BOISTEROUS",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-les-paul-junior-tropicalia",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection Les Paul Junior, Tropicalia",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 159900,
+      "description": "Les Paul Junior con acabado Tropicalia exclusivo. Cuerpo mahogany single-cut, P-90 dogear.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "tropicalia",
+          "display_name": "Tropicalia",
+          "sku": "GIBSON-MOD-LPJUN-TROPICALIA",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection Les Paul Custom 70s, Nighty-Nite Graphite",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 329900,
+      "description": "Les Paul Custom 70s en exclusivo acabado Nighty-Nite Graphite. Construcción mahogany, binding 5-ply, T-top pickups.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "nighty-nite-graphite",
+          "display_name": "Nighty-Nite Graphite",
+          "sku": "GIBSON-MOD-LPCUST70S-NNITE",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-mod-collection-flying-v-80s-flame-job-hot-rod",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Mod™ Collection Flying V 80s, Flame Job Hot Rod",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 249900,
+      "description": "Flying V 80s con tapa de arce flameado en acabado Flame Job Hot Rod. Burstbucker 3, push-pull coil splits.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "keyword",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_keyword": "front",
+        "back_keyword": "back"
+      },
+      "variants": [
+        {
+          "slug": "flame-job-hot-rod",
+          "display_name": "Flame Job Hot Rod",
+          "sku": "GIBSON-MOD-FV80S-FLAME",
+          "is_default": true
+        }
+      ]
+    },
+    {
+      "handle": "gibson-les-paul-supreme-blueberry-burst",
+      "brand": "Gibson",
+      "brand_slug": "gibson",
+      "name": "Gibson Les Paul Supreme, Blueberry Burst, Exclusive",
+      "category": "Guitarra eléctrica",
+      "category_slug": "guitarra-electrica",
+      "currency": "USD",
+      "base_price_cents": 399900,
+      "description": "La Les Paul Supreme con acabado exclusivo Blueberry Burst. Cuerpo de mahogany con tapa de arce AAA figurado, mástil de mahogany con perfil SlimTaper, diapasón de ebano con inlays Super Split Block mother-of-pearl. Pastillas Burstbucker Pro y Pro Plus humbuckers con coil-tap, phase y Pure Bypass switching. Incluye estuche hardshell.",
+      "has_condition": false,
+      "has_sizes": false,
+      "image_pattern": {
+        "naming": "indexed",
+        "front_size": "1600x1600",
+        "back_size": "1600x1600",
+        "front_index": "01",
+        "back_index": "02"
+      },
+      "variants": [
+        {
+          "slug": "blueberry-burst",
+          "display_name": "Blueberry Burst",
+          "sku": "GIBSON-LPSU25-B9GH3",
+          "is_default": true
+        }
+      ]
+    }
+  ]
+}
