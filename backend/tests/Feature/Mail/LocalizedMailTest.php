@@ -45,12 +45,12 @@ final class LocalizedMailTest extends TestCase
     public function subject_translates_per_locale(): void
     {
         App::setLocale('es');
-        $es = LocalizedMail::for(new User(), 'auth.email_otp')
+        $es = LocalizedMail::for(new User, 'auth.email_otp')
             ->toMailMessage(appName: 'AtlasCommerce');
         $this->assertSame('Tu código de acceso', $es->subject);
 
         App::setLocale('en');
-        $en = LocalizedMail::for(new User(), 'auth.email_otp')
+        $en = LocalizedMail::for(new User, 'auth.email_otp')
             ->toMailMessage(appName: 'AtlasCommerce');
         $this->assertSame('Your access code', $en->subject);
     }
@@ -59,7 +59,7 @@ final class LocalizedMailTest extends TestCase
     public function body_translates_to_spanish_by_default(): void
     {
         // Locale default es 'es' (de setUp).
-        $mail = LocalizedMail::for(new User(), 'auth.email_otp')
+        $mail = LocalizedMail::for(new User, 'auth.email_otp')
             ->toMailMessage(appName: 'AtlasCommerce');
 
         $this->assertStringContainsString('Hola', $this->mailToString($mail));
@@ -70,7 +70,7 @@ final class LocalizedMailTest extends TestCase
     public function body_translates_to_english_when_locale_is_en(): void
     {
         App::setLocale('en');
-        $mail = LocalizedMail::for(new User(), 'auth.email_otp')
+        $mail = LocalizedMail::for(new User, 'auth.email_otp')
             ->toMailMessage(appName: 'AtlasCommerce');
 
         $this->assertStringContainsString('Hi', $this->mailToString($mail));
@@ -80,7 +80,7 @@ final class LocalizedMailTest extends TestCase
     #[Test]
     public function code_and_expires_are_interpolated_in_translated_text(): void
     {
-        $mail = LocalizedMail::for(new User(), 'auth.email_otp')
+        $mail = LocalizedMail::for(new User, 'auth.email_otp')
             ->withCode('123456')
             ->expiresIn(10)
             ->toMailMessage(appName: 'AtlasCommerce');
@@ -94,7 +94,7 @@ final class LocalizedMailTest extends TestCase
     #[Test]
     public function app_name_replaces_in_salutation(): void
     {
-        $mail = LocalizedMail::for(new User(), 'auth.email_otp')
+        $mail = LocalizedMail::for(new User, 'auth.email_otp')
             ->toMailMessage(appName: 'MiTienda');
 
         $this->assertStringContainsString('El equipo de MiTienda', $this->mailToString($mail));
@@ -103,7 +103,7 @@ final class LocalizedMailTest extends TestCase
     #[Test]
     public function password_reset_translation_works(): void
     {
-        $mail = LocalizedMail::for(new User(), 'auth.password_reset_code')
+        $mail = LocalizedMail::for(new User, 'auth.password_reset_code')
             ->withCode('999999')
             ->expiresIn(15)
             ->toMailMessage(appName: 'AtlasCommerce');
@@ -117,14 +117,14 @@ final class LocalizedMailTest extends TestCase
     {
         $this->markTestSkipped(
             'Locale resolution between tests is environment-dependent; '
-            . 'behavior verified manually in production.'
+            .'behavior verified manually in production.',
         );
     }
 
     #[Test]
     public function extra_lines_append_to_intro(): void
     {
-        $mail = LocalizedMail::for(new User(), 'auth.email_otp')
+        $mail = LocalizedMail::for(new User, 'auth.email_otp')
             ->line('PT-EXTRA-LINE-MARKER')
             ->toMailMessage(appName: 'AtlasCommerce');
 

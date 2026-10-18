@@ -139,6 +139,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         $this->assertIsString($errorMessage);
         $this->assertStringContainsString('No tienes acceso', $errorMessage);
     }
+
     #[Test]
     public function admin_login_me_logout_lifecycle(): void
     {
@@ -148,6 +149,7 @@ final class AdminDefaultLoginFlowTest extends TestCase
         // token adicional en otra conexión, ese queda. Investigar
         // antes de re-habilitar.
         $this->markTestSkipped('Logout elimina solo currentAccessToken — ver TODO en test.');
+
         return;
 
         $slug = 'panda-estampados';

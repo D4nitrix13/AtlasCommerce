@@ -118,7 +118,7 @@ final class SecurityHeadersTest extends TestCase
         $csp = $response->headers->get('Content-Security-Policy');
         $this->assertNotNull($csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
-        $this->assertStringNotContainsString("object-src *", $csp);
+        $this->assertStringNotContainsString('object-src *', $csp);
     }
 
     #[Test]
