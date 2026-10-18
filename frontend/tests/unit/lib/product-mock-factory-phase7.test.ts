@@ -151,19 +151,24 @@ describe('createProductMock — variants[] con Phase 7 fields', () => {
     });
   });
 
-  it('NO incluye finishSlug cuando el variant no lo tiene', () => {
+  it('deriva finishSlug/finishLabel del slug/displayName del spec', () => {
     const product = createProductMock(
       baseSpec({
         variants: [{ ...BASE_VARIANT }],
       }),
     );
+    // El factory cae al fallback del slug/displayName del spec cuando
+    // finishSlug/finishLabel no se setean explicitamente. Esto garantiza
+    // que el picker de la PDP siempre tenga datos sin requerir que cada
+    // spec setee los campos Phase 7 explicitamente.
     expect(product.variants?.[0]).toEqual({
       id: 'sunburst',
       sku: 'TEST-SUN',
-      stock: 5, // DEFAULT_VARIANT_STOCK del factory
+      stock: 5,
+      finishSlug: 'sunburst',
+      finishLabel: 'Sunburst',
     });
-    expect(product.variants?.[0]).not.toHaveProperty('finishSlug');
-    expect(product.variants?.[0]).not.toHaveProperty('finishLabel');
+    expect(product.variants?.[0]).not.toHaveProperty('finishHex');
     expect(product.variants?.[0]).not.toHaveProperty('condition');
   });
 
@@ -248,7 +253,7 @@ describe('createProductDetailMock — rich ProductVariant', () => {
     });
   });
 
-  it('omite finish fields cuando el spec no los tiene', () => {
+  it('deriva finishSlug/finishLabel del slug/displayName del spec', () => {
     const detail = createProductDetailMock(
       baseSpec({
         variants: [{ ...BASE_VARIANT }],
@@ -256,8 +261,13 @@ describe('createProductDetailMock — rich ProductVariant', () => {
     );
     const variant = detail.variants[0];
     expect(variant).toBeDefined();
-    expect(variant).not.toHaveProperty('finishSlug');
-    expect(variant).not.toHaveProperty('finishLabel');
+    // El factory deriva los finish fields del slug/displayName del spec
+    // cuando no se setean explicitamente (Phase 7: picker de la PDP
+    // siempre tiene datos sin requerir setearlos en cada spec).
+    expect(variant).toMatchObject({
+      finishSlug: 'sunburst',
+      finishLabel: 'Sunburst',
+    });
     expect(variant).not.toHaveProperty('finishHex');
     expect(variant).not.toHaveProperty('condition');
   });
