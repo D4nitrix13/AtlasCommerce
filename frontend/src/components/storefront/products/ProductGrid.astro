@@ -90,7 +90,7 @@ const showProducts = status === 'success' && filteredProducts.length > 0;
   )}
 
   {showProducts && (
-    <ul class="grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-4">
+    <ul class="products-grid grid grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-4">
       {filteredProducts.map((product) => (
         <li class="list-none">
           <ProductCard product={product} locale={locale} labels={cardLabels} />
@@ -99,3 +99,21 @@ const showProducts = status === 'success' && filteredProducts.length > 0;
     </ul>
   )}
 </section>
+
+<style>
+  /*
+   * Phase 7 fix: card grid alignment.
+   *
+   * `grid-auto-rows: 1fr` fuerza que cada row del grid tenga la
+   * altura máxima de la card más alta de esa row, evitando que la
+   * primera card (sin badges exclusivos o con title corto) se vea
+   * "más arriba" que las demás. Las cards (`ProductCard.astro`)
+   * usan `h-full` para estirarse al alto de su celda.
+   *
+   * Sin esto, los cards tenían alturas distintas porque CSS grid
+   * por default usa `grid-auto-rows: auto` (= content-sized).
+   */
+  .products-grid {
+    grid-auto-rows: 1fr;
+  }
+</style>
