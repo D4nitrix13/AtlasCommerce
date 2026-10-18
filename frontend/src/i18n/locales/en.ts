@@ -614,6 +614,7 @@ const en: Translations = {
   'storefront.productCard.badge.new': 'New',
   'storefront.productCard.badge.sale': 'Sale',
   'storefront.productCard.badge.lowStock': 'Low stock',
+  'storefront.productCard.badge.limited': 'Limited',
   'storefront.productCard.addToCart': 'Add to cart',
   'storefront.productCard.outOfStock': 'Out of stock',
   'storefront.productCard.viewDetail': 'View detail',
