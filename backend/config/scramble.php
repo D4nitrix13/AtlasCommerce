@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
 
 return [
@@ -190,5 +192,5 @@ return [
     //
     // Si Scramble arregla el upstream, restaurar:
     //   'security_strategy' => \Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy::class
-    'security_strategy' => \App\Scramble\SanctumBearerAuthSecurityStrategy::class,
+    'security_strategy' => App\Scramble\SanctumBearerAuthSecurityStrategy::class,
 ];
