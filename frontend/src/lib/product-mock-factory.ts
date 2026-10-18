@@ -22,7 +22,13 @@
  * del image architecture plan).
  */
 
-import type { Product, ProductBadge } from '../types/catalog';
+import type {
+  Product,
+  ProductBadge,
+  ProductCondition,
+  ProductSize,
+  ProductVariant as CatalogVariant,
+} from '../types/catalog';
 import type { ProductHighlightsItem } from '../components/storefront/products/ProductHighlights.types';
 import type {
   ProductDetailData,
@@ -30,6 +36,20 @@ import type {
   ProductVariantAttribute,
   RelatedProduct,
 } from '../data/product-detail-mock';
+
+/**
+ * Talla declarada en un spec de producto. Misma shape que
+ * `ProductSize` en `types/catalog.ts`; alias local para que el
+ * spec pueda usarse sin importar el types barrel.
+ */
+export interface ProductMockSizeSpec {
+  /** Slug URL-safe (e.g. '4-4', 's'). */
+  readonly slug: string;
+  /** Label legible (e.g. '4/4 (Full Size)'). */
+  readonly label: string;
+  /** Posición en el grid (ascendente). */
+  readonly position?: number;
+}
 
 /** Spec declarativo de un producto. Compatible con `products.json`. */
 export interface ProductMockSpec {
@@ -67,6 +87,17 @@ export interface ProductMockSpec {
   readonly imagePattern: ProductImagePatternSpec;
   /** Path base para URLs (default '/assets/products'). */
   readonly imageBasePath?: string;
+  /**
+   * Bandera "Edición Limitada" (Phase 7). Default `false`. Cuando es
+   * `true`, las cards y el PDP muestran badge "Limitado".
+   */
+  readonly isExclusive?: boolean;
+  /**
+   * Tallas del producto (Phase 7). Vacío/ausente para guitarras
+   * eléctricas y productos sin tallas. Cuando está definido, el
+   * PDP renderiza `ProductSizeGrid` con estas opciones.
+   */
+  readonly sizes?: ReadonlyArray<ProductMockSizeSpec>;
 }
 
 export interface ProductMockVariantSpec {
@@ -94,6 +125,16 @@ export interface ProductMockVariantSpec {
   readonly hex?: string;
   /** Stock de la variant (default: 5). */
   readonly stock?: number;
+  /**
+   * Slug del acabado (Phase 7). Típicamente igual a `slug`, pero
+   * mantenemos el campo separado para mapping con el backend
+   * (`product_variants.finish_slug`).
+   */
+  readonly finishSlug?: string;
+  /** Label legible del acabado (Phase 7). Backend: `finish_label`. */
+  readonly finishLabel?: string;
+  /** Condición de la variant (Phase 7). Backend: `product_variants.condition`. */
+  readonly condition?: ProductCondition;
 }
 
 export type ProductImagePatternSpec =
@@ -181,6 +222,17 @@ export function createProductMock(
   const defaultV = defaultVariant(spec.variants);
   const stock = spec.stock ?? spec.variants.length * DEFAULT_STOCK;
   const id = options.id ?? stableIdFromSlug(spec.slug);
+  const variants: readonly CatalogVariant[] = spec.variants.map((variant) =>
+    specVariantToCatalogVariant(spec, variant),
+  );
+  const sizes: readonly ProductSize[] | undefined =
+    spec.sizes !== undefined && spec.sizes.length > 0
+      ? spec.sizes.map((size) => ({
+          slug: size.slug,
+          label: size.label,
+          ...(size.position !== undefined && { position: size.position }),
+        }))
+      : undefined;
 
   return {
     id,
@@ -201,6 +253,9 @@ export function createProductMock(
     images: spec.variants.map((variant) =>
       buildImageUrl(spec, variant.slug, 'front', variant.backSku),
     ),
+    ...(spec.isExclusive === true && { isExclusive: true }),
+    variants,
+    ...(sizes !== undefined && { sizes }),
   };
 }
 
@@ -229,6 +284,9 @@ export function createVariantMock(
     priceCents: spec.priceCents,
     imageUrl: buildImageUrl(spec, variant.slug, 'front', variant.backSku),
     stock: variant.stock ?? DEFAULT_VARIANT_STOCK,
+    ...(variant.condition !== undefined && { condition: variant.condition }),
+    ...(variant.finishSlug !== undefined && { finishSlug: variant.finishSlug }),
+    ...(variant.finishLabel !== undefined && { finishLabel: variant.finishLabel }),
   };
 }
 
@@ -263,6 +321,15 @@ export function createProductDetailMock(
     },
   ]);
 
+  const sizes: ReadonlyArray<{ slug: string; label: string; position?: number }> | undefined =
+    spec.sizes !== undefined && spec.sizes.length > 0
+      ? spec.sizes.map((size) => ({
+          slug: size.slug,
+          label: size.label,
+          ...(size.position !== undefined && { position: size.position }),
+        }))
+      : undefined;
+
   return {
     id,
     slug: spec.slug,
@@ -278,6 +345,8 @@ export function createProductDetailMock(
     badges: [...(spec.badges ?? [])],
     hasCondition: spec.hasCondition ?? false,
     hasSizes: spec.hasSizes ?? false,
+    ...(spec.isExclusive === true && { isExclusive: true }),
+    ...(sizes !== undefined && { sizes }),
     images,
     variantAttributes,
     variants: spec.variants.map((variant) => createVariantMock(spec, variant)),
@@ -285,6 +354,26 @@ export function createProductDetailMock(
     groupedSpecs: defaultGroupedSpecs(spec),
     highlights: defaultHighlights(spec),
     reviews: [],
+  };
+}
+
+/**
+ * Mapea un `ProductMockVariantSpec` al `ProductVariant` del catálogo
+ * (shape mínima para cards y componentes que no necesitan el shape
+ * rico del PDP). Phase 7: popula `finishSlug`/`finishLabel`/`condition`.
+ */
+function specVariantToCatalogVariant(
+  _spec: ProductMockSpec,
+  variant: ProductMockVariantSpec,
+): CatalogVariant {
+  return {
+    id: variant.slug,
+    sku: variant.sku,
+    ...(variant.finishSlug !== undefined && { finishSlug: variant.finishSlug }),
+    ...(variant.finishLabel !== undefined && { finishLabel: variant.finishLabel }),
+    ...(variant.hex !== undefined && { finishHex: variant.hex }),
+    ...(variant.condition !== undefined && { condition: variant.condition }),
+    stock: variant.stock ?? DEFAULT_VARIANT_STOCK,
   };
 }
 
