@@ -242,11 +242,11 @@ convivan el código nuevo y el viejo.
 
 | Fase | Scope | Estado |
 | --- | --- | --- |
-| 2 (NOW) | `StorageKeyDeriver` + soft-mode validation en `AssetController` | en ejecución |
-| 3 | Wire `validate()` strict (post-backfill) + HMAC signed URLs + cache config-driven con fallback + 404 enumeration logging | pendiente |
+| 2 (DONE) | `StorageKeyDeriver` + soft-mode validation en `AssetController` | mergeada (`10d55e64`) |
+| 3 (NOW) | HMAC signed URLs + cache config-driven + 404 enumeration logging | mergeada |
 | 4 | Pattern de migrations (universal + extension table) | pendiente |
 | 5 | Backfill de imágenes existentes al nuevo formato | pendiente |
-| 6 | Flip soft → strict + cleanup legacy `fenderImageUrl()` | pendiente |
+| 6 | Flip soft → strict + cleanup legacy `fenderImageUrl()` + flip `url_signing.required=true` | pendiente |
 
 ### 6.2. Drift conocido entre doc y código
 
@@ -260,25 +260,82 @@ tanto, el **código es la fuente de verdad**.
   bajo el root que defina el host, y `/srv/ftp/images` solo era válido en
   la deploy inicial. Corregido en Fase 3.
 - **`ETag`**: este doc dice "basado en mtime+size" (§2.5, línea 138), pero
-  `backend/app/Http/Controllers/Api/Storefront/AssetController.php:126`
+  `backend/app/Http/Controllers/Api/Storefront/AssetController.php`
   usa `md5($contents)`. La razón del cambio es que `md5(content)` es
   invariante a rotación de archivos en el FTP (un `mv` mantiene el mtime
   accidentalmente), mientras que el contenido garantiza invalidación real.
   Corregido en Fase 3.
+- **`cache TTL`**: el código de Fase 2 tenía `Cache::remember(..., 86400)`
+  hard-coded en `AssetController`; el default aprobado en este doc es 300s
+  (5min). La razón del cambio es que 86400s mantenía assets stale por 24h
+  después de cualquier upload; 300s es suficiente given el `Cache-Control:
+  max-age=31536000` que el browser ya respeta. Corregido en Fase 3
+  vía `config('assets.cache_ttl')`.
 
-### 6.3. Soft mode en Fase 2 — qué esperar
+### 6.3. Runtime protections
 
-Mientras `config('assets.path_validation.strict') === false` (default,
-override por env `ASSETS_PATH_VALIDATION_STRICT`):
+Fase 3 cierra tres gaps de seguridad/operaciones del `AssetController`
+identificados en el audit. Cada uno es **gated por config** para
+permitir rollout gradual (default conservativo, flip explícito cuando
+la instancia esté lista).
 
-- Paths que **no matchean** el regex de `StorageKeyDeriver::validate()`
-  se sirven igual (la PDP no se rompe con un path legacy).
-- Cada uno emite un log `asset.path.malformed` con contexto
-  estructurado (`hash` SHA-256 del path + `tenant_slug` + flag
-  `strict_mode: false`) — el log es la **métrica de progreso** del
-  backfill de Fase 5.
-- Cuando el rate de warnings caiga a ~0, estamos listos para flipear a
-  strict en Fase 6 (`config('assets.path_validation.strict') === true`).
+#### 6.3.1. URL signing
+
+- Servicio: `App\Services\Assets\UrlSigner` (puro, determinístico,
+  timing-safe).
+- Algoritmo: HMAC-SHA256 sobre payload canónico `path|expires`.
+- Comparación: `hash_equals` (evita timing attacks sobre la signature).
+- Flag: `config('assets.url_signing.required')` (default `false`).
+- Env override: `ASSETS_URL_SIGNING_REQUIRED` en `.env`.
+- TTL por defecto: 300s (`config('assets.url_signing.ttl')`, env
+  `ASSETS_URL_SIGNING_TTL`).
+- Secret: `config('assets.url_signing.secret')` con fallback a
+  `config('app.key')` (env `ASSETS_URL_SIGNING_SECRET`).
+- Query format: `?expires=<unix_ts>&sig=<hex64>`.
+- Enforcement en `AssetController`: cuando `required=true`, la request
+  se aborta con 403 (`'Missing signature.'`) si los params faltan, o
+  403 (`'Invalid or expired signature.'`) si la firma no matchea o
+  expiró. Cuando `required=false` (default Fase 3), el chequeo no se
+  ejecuta — comportamiento idéntico a Fase 2.
+- Rollout plan: Fase 6 flipea `required=true` después de que el rate
+  de `asset.path.malformed` caiga a ~0 (post-backfill de Fase 5). El
+  frontend debe empezar a firmar URLs en el momento del flip.
+
+#### 6.3.2. Cache strategy
+
+- Store: configurable vía `config('assets.cache_store')` (default
+  `redis`, env `ASSETS_CACHE_STORE`). El cambio estaba hard-coded a
+  `'redis'` en Fase 2 — Fase 3 lo expone para que instancias
+  single-tenant o entornos degradados puedan usar `file` o `array`.
+- TTL: configurable vía `config('assets.cache_ttl')` (default 300s,
+  env `ASSETS_CACHE_TTL`). Drift histórico: Fase 2 usaba 86400s
+  hard-coded — ver §6.2 para el rationale del cambio.
+- Clave: `ftp-asset:{sha256($path)}` (mismo formato que Fase 2,
+  ahora expuesto como constante `AssetController::CACHE_KEY_PREFIX`).
+- Invalidation: el command `assets:invalidate-cache` (TBD) borrará
+  todas las claves con ese prefijo via Redis `SCAN` (no `KEYS`).
+
+#### 6.3.3. Enumeration detection
+
+- Trigger: cualquier 404 del `AssetController` (path que pertenece
+  al tenant pero no existe en FTP).
+- Log: `logger()->warning('asset.not_found', [...])` con contexto
+  estructurado:
+    - `hash`: SHA-256 del path normalizado (no logueamos el path raw
+      para no exponer nombres de assets internos).
+    - `tenant_slug`: el slug activo que recibió el request.
+    - `client_ip`: IP del requester (CDN-aware vía TrustProxies).
+    - `user_agent`: truncado a 200 chars (evitar logs gigante si el
+      UA viene con beacon data).
+- Voluntary logging paralelo: `asset.path.malformed` (Fase 2)
+  captura paths que no matchean la convención pero el archivo sí
+  existe en FTP. Misma estructura de contexto, mensaje distinto.
+- Detección: un spike de `asset.not_found` con muchos hashes
+  distintos desde la misma IP/subred indica enumeration. El comando
+  `monitor:enumeration-alerts` (TBD) agregará estos eventos contra
+  thresholds por tenant.
+- Privacidad: el path raw nunca se loguea. Solo el hash SHA-256, que
+  es irreversible pero único por path.
 
 ---
 
