@@ -1016,6 +1016,12 @@ const en: Translations = {
   'storefront.products.detail.v4.condition.legend': 'Condition',
   'storefront.products.detail.v4.condition.new': 'New',
   'storefront.products.detail.v4.condition.used': 'Used',
+  // Phase 7 — backend enum `product_variants.condition` accepts
+  // 'nuevo' | 'usado' | 'ambos'. When the same finish is offered in
+  // both conditions, the PDP exposes "Both".
+  'storefront.products.detail.v4.condition.ambos': 'Both',
+  'storefront.products.detail.v4.condition.nuevo': 'New',
+  'storefront.products.detail.v4.condition.usado': 'Used',
   'storefront.products.detail.v4.size.legend': 'Size',
   'storefront.products.detail.v4.shipping.heading': 'Shipping & Returns',
   'storefront.products.detail.v4.details.introLabel': 'Tech & specs',

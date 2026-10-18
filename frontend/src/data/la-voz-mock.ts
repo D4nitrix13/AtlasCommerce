@@ -129,6 +129,39 @@ function mapCategorySlug(slug: string): LaVozProduct['category'] {
   }
 }
 
+/** Specs por defecto del product detail para La Voz (label/value). */
+function defaultLaVozSpecs(spec: ProductMockSpec): readonly LaVozProductSpec[] {
+  return [
+    { label: 'Marca', value: spec.brand },
+    { label: 'Modelo', value: spec.name },
+  ];
+}
+
+/** Imágenes front por variant (gallery para el PDP). */
+function buildLaVozImages(spec: ProductMockSpec): readonly string[] {
+  return spec.variants.map((variant) => buildImageUrl(spec, variant.slug, 'front'));
+}
+
+/**
+ * Mapea un variant del spec a LaVozProductVariant. Phase 7 propaga
+ * los nuevos campos (`finishSlug`, `finishLabel`, `condition`, `stock`)
+ * cuando están definidos en el spec.
+ */
+function mapSpecVariantToLaVozVariant(
+  spec: ProductMockSpec,
+): readonly LaVozProductVariant[] {
+  return spec.variants.map((v) => ({
+    id: v.slug,
+    label: v.displayName,
+    hex: v.hex,
+    inStock: true,
+    ...(v.finishSlug !== undefined && { finishSlug: v.finishSlug }),
+    ...(v.finishLabel !== undefined && { finishLabel: v.finishLabel }),
+    ...(v.condition !== undefined && { condition: v.condition }),
+    ...(v.stock !== undefined && { stock: v.stock }),
+  }));
+}
+
 /**
  * Genera un LaVozProduct a partir de un ProductMockSpec. Adapta la
  * shape del factory output al contrato LaVozProduct (que es el que
@@ -143,7 +176,14 @@ function createLaVozProductFromSpec(
   index: number,
 ): LaVozProduct {
   const product = createProductMock(spec, { id: 9000 + index });
-  const defaultVariant = spec.variants.find((v) => v.isDefault) ?? spec.variants[0];
+  const sizes: readonly LaVozProductSize[] | undefined =
+    spec.sizes !== undefined && spec.sizes.length > 0
+      ? spec.sizes.map((size) => ({
+          slug: size.slug,
+          label: size.label,
+          ...(size.position !== undefined && { position: size.position }),
+        }))
+      : undefined;
 
   return {
     id: String(product.id),
@@ -157,41 +197,12 @@ function createLaVozProductFromSpec(
     badges: spec.badges as LaVozProduct['badges'],
     imageUrl: product.imageUrl,
     imageAlt: `${product.name} — vista frontal`,
-    // Gallery: front por cada variant (back se omite porque muchos specs
-    // no tienen imagen back en assets/). El PDP lo usa para mostrar
-    // imágenes reales de guitarra en lugar del placeholder T-shirt del
-    // spread SABER_ALTER_DETAIL.
-    images: spec.variants.map((variant) =>
-      buildImageUrl(spec, variant.slug, 'front'),
-    ),
-    attributes: {
-      brand: spec.brandSlug,
-      specs: [
-        { label: 'Marca', value: spec.brand },
-        { label: 'Modelo', value: spec.name },
-        // Specs adicionales se pueden extraer del spec si se necesita.
-      ],
-    },
-    variants: spec.variants.map((v) => ({
-      id: v.slug,
-      label: v.displayName,
-      hex: v.hex,
-      inStock: true,
-      ...(v.finishSlug !== undefined && { finishSlug: v.finishSlug }),
-      ...(v.finishLabel !== undefined && { finishLabel: v.finishLabel }),
-      ...(v.condition !== undefined && { condition: v.condition }),
-      ...(v.stock !== undefined && { stock: v.stock }),
-    })),
+    images: buildLaVozImages(spec),
+    attributes: { brand: spec.brandSlug, specs: defaultLaVozSpecs(spec) },
+    variants: mapSpecVariantToLaVozVariant(spec),
     inStock: true,
     ...(spec.isExclusive === true && { isExclusive: true }),
-    ...(spec.sizes !== undefined &&
-      spec.sizes.length > 0 && {
-        sizes: spec.sizes.map((size) => ({
-          slug: size.slug,
-          label: size.label,
-          ...(size.position !== undefined && { position: size.position }),
-        })),
-      }),
+    ...(sizes !== undefined && { sizes }),
   };
 }
 

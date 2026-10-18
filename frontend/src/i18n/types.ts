@@ -1747,6 +1747,11 @@ export type TranslationKey =
   | 'storefront.products.detail.v4.condition.legend'
   | 'storefront.products.detail.v4.condition.new'
   | 'storefront.products.detail.v4.condition.used'
+  // Phase 7 — backend enum `product_variants.condition` accepts
+  // 'nuevo' | 'usado' | 'ambos'.
+  | 'storefront.products.detail.v4.condition.nuevo'
+  | 'storefront.products.detail.v4.condition.usado'
+  | 'storefront.products.detail.v4.condition.ambos'
   | 'storefront.products.detail.v4.size.legend'
   | 'storefront.products.detail.v4.shipping.heading'
   | 'storefront.products.detail.v4.details.introLabel'

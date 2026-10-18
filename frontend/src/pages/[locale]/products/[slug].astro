@@ -21,6 +21,18 @@
  *  - Las nuevas secciones (highlights, specsByCategory) sólo se
  *    renderizan si el mock las provee — no rompen el render del
  *    mock actual (Saber Alter Figma).
+ *
+ * Phase 7: selectores data-driven.
+ *  - COLOR_OPTIONS: deriva de `detail.variants[].finishSlug/Label`
+ *    cuando el producto los provee (Phase 7); fallback a
+ *    variantAttributes[0] (Saber Alter) y luego al set hardcoded.
+ *  - CONDITION_OPTIONS: deriva de la unión de `detail.variants[].condition`
+ *    cuando `hasCondition=true` y hay variants; IDs alineados al enum
+ *    backend ('nuevo' | 'usado' | 'ambos').
+ *  - SIZE_OPTIONS: deriva de `detail.sizes[]` cuando está poblado;
+ *    fallback a violin sizes hardcoded (demo Saber Alter).
+ *  - Tag "Limitado": ahora lo dispara `detail.isExclusive` (Phase 7),
+ *    no la cantidad de reseñas.
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import ProductDetailGallery from '../../../components/storefront/products/ProductDetailGallery.astro';
@@ -124,23 +136,86 @@ const category =
   product !== null ? (CATEGORIES.find((entry) => entry.slug === product.category) ?? null) : null;
 
 // ─── Variants mocks (estáticos hasta cart store) ──────────────────────
-const CONDITION_OPTIONS = [
-  { id: 'new', label: t['storefront.products.detail.v4.condition.new'] },
-  { id: 'used', label: t['storefront.products.detail.v4.condition.used'] },
-];
+//
+// Phase 7: las opciones de los selectores se derivan del detail cuando
+// el mock/producto las provee. Se mantiene el fallback hardcoded para
+// preservar el comportamiento del SABER_ALTER_DETAIL (que no expone
+// los campos nuevos).
+//
+// IDs de condition se alinean con el enum backend `product_variants.
+// condition` ('nuevo' | 'usado' | 'ambos').
 
-const SIZE_OPTIONS: readonly VariantOption[] = [
-  { id: '44', label: '4/4' },
-  { id: '34', label: '3/4' },
-  { id: '12', label: '1/2' },
-  { id: '14', label: '1/4' },
-];
+type ConditionKey =
+  | 'storefront.products.detail.v4.condition.nuevo'
+  | 'storefront.products.detail.v4.condition.usado'
+  | 'storefront.products.detail.v4.condition.ambos';
 
-// Color (swatches) — fuente data-driven: detail.variantAttributes[0].
-// Fallback al set hardcoded de Saber Alter si el mock no trae colores
-// (mantiene compatibilidad con productos sin variantAttributes poblado).
+const CONDITION_OPTIONS: readonly VariantOption[] = (() => {
+  if (detail !== null && detail.hasCondition === true && detail.variants !== undefined) {
+    const distinct = new Set<string>();
+    for (const variant of detail.variants) {
+      if (variant.condition !== undefined) {
+        distinct.add(variant.condition);
+      }
+    }
+    if (distinct.size > 0) {
+      return Array.from(distinct).map((cond) => {
+        const key = `storefront.products.detail.v4.condition.${cond}` as ConditionKey;
+        return {
+          id: cond,
+          label: t[key] ?? cond,
+        };
+      });
+    }
+  }
+  return [
+    { id: 'nuevo', label: t['storefront.products.detail.v4.condition.nuevo'] },
+    { id: 'usado', label: t['storefront.products.detail.v4.condition.usado'] },
+  ];
+})();
+
+const SIZE_OPTIONS: readonly VariantOption[] = (() => {
+  // Phase 7: cuando el detail declara `sizes`, derivamos de ahí.
+  if (detail !== null && detail.sizes !== undefined && detail.sizes.length > 0) {
+    return detail.sizes.map((size) => ({
+      id: size.slug,
+      label: size.label,
+    }));
+  }
+  // Fallback legacy — violin sizes hardcoded para el demo Saber Alter.
+  return [
+    { id: '44', label: '4/4' },
+    { id: '34', label: '3/4' },
+    { id: '12', label: '1/2' },
+    { id: '14', label: '1/4' },
+  ];
+})();
+
+// Color (swatches) — fuente preferida (Phase 7): variants con finish.
+// Fallback al set de Saber Alter via variantAttributes[0].
+// Fallback final: 3 colores hardcoded (sunburst/black/vintage-white).
 const COLOR_OPTIONS: readonly VariantOption[] = (() => {
-  const colorAttrs = detail?.variantAttributes?.find((group) => group[0]?.type === 'color');
+  if (detail === null) {
+    return [
+      { id: 'sunburst', label: 'Sunburst', hex: '#7C3A1A' },
+      { id: 'black', label: 'Negro', hex: '#132028' },
+      { id: 'vintage-white', label: 'Vintage White', hex: '#EDE7D7' },
+    ];
+  }
+  // Phase 7: derivar de detail.variants cuando tienen finishSlug/Label.
+  const phase7 = detail.variants
+    .filter(
+      (v): v is typeof v & { finishSlug: string; finishLabel: string } =>
+        v.finishSlug !== undefined && v.finishLabel !== undefined,
+    )
+    .map((v) => ({
+      id: v.finishSlug,
+      label: v.finishLabel,
+      ...(v.finishHex !== undefined && { hex: v.finishHex }),
+    }));
+  if (phase7.length > 0) return phase7;
+
+  const colorAttrs = detail.variantAttributes.find((group) => group[0]?.type === 'color');
   if (colorAttrs !== undefined && colorAttrs.length > 0) {
     return colorAttrs.map((attr) => ({
       id: attr.id,
@@ -155,8 +230,8 @@ const COLOR_OPTIONS: readonly VariantOption[] = (() => {
   ];
 })();
 
-const SELECTED_CONDITION = 'new';
-const SELECTED_SIZE = '44';
+const SELECTED_CONDITION = CONDITION_OPTIONS[0]?.id ?? 'nuevo';
+const SELECTED_SIZE = SIZE_OPTIONS[0]?.id ?? '44';
 
 // Acabado seleccionado: viene por query param `?finish=<variant-slug>`
 // (English + descriptive por convención del resto de la app — ver
@@ -403,10 +478,11 @@ const cardLabels = {
                 {product.name}
               </h1>
 
-              {HIGHLY_RATED_LABEL !== undefined && (
+              {detail.isExclusive === true && (
                 <a
                   href="#"
                   class="self-start text-xs font-bold uppercase tracking-wider text-[var(--primary,#475569)] underline"
+                  data-product-exclusive
                 >
                   {t['storefront.products.detail.v4.limited']}
                 </a>

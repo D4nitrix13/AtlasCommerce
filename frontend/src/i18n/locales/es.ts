@@ -1021,6 +1021,12 @@ const es: Translations = {
   'storefront.products.detail.v4.condition.legend': 'Condición',
   'storefront.products.detail.v4.condition.new': 'Nuevo',
   'storefront.products.detail.v4.condition.used': 'Usado',
+  // Phase 7 — backend enum `product_variants.condition` ahora puede
+  // ser 'nuevo' | 'usado' | 'ambos'. Cuando el producto ofrece la
+  // misma unidad en condición nueva + usado, la PDP expone "Ambos".
+  'storefront.products.detail.v4.condition.ambos': 'Ambos',
+  'storefront.products.detail.v4.condition.nuevo': 'Nuevo',
+  'storefront.products.detail.v4.condition.usado': 'Usado',
   'storefront.products.detail.v4.size.legend': 'Tamaño',
   'storefront.products.detail.v4.shipping.heading': 'Envío y devoluciones',
   'storefront.products.detail.v4.details.introLabel': 'Tecnología y especificaciones',
