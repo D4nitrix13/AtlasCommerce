@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $base_price_cents
  * @property int $cost_cents
  * @property bool $is_active
+ * @property bool $is_exclusive
  * @property Carbon|null $published_at
  */
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -55,6 +56,7 @@ class Product extends Model
         'base_price_cents',
         'cost_cents',
         'is_active',
+        'is_exclusive',
         'has_condition',
         'has_sizes',
         'published_at',
@@ -64,6 +66,7 @@ class Product extends Model
         'base_price_cents' => 'integer',
         'cost_cents' => 'integer',
         'is_active' => 'boolean',
+        'is_exclusive' => 'boolean',
         'has_condition' => 'boolean',
         'has_sizes' => 'boolean',
         'published_at' => 'datetime',
@@ -99,6 +102,11 @@ class Product extends Model
         return $this->hasMany(ProductAttributeValue::class);
     }
 
+    public function sizes(): HasMany
+    {
+        return $this->hasMany(ProductSize::class);
+    }
+
     public function stores(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -130,6 +138,11 @@ class Product extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeExclusive(Builder $query): Builder
+    {
+        return $query->where('is_exclusive', true);
     }
 
     public function scopePublished(Builder $query): Builder
