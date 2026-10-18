@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Response;
 class SupportTicketController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/support/tickets
      */

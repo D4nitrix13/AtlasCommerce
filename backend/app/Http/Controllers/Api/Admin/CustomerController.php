@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Http\Concerns\CursorPaginates;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\Admin\CustomerStoreRequest;
 use App\Http\Requests\Customers\Admin\CustomerUpdateRequest;
 use App\Http\Resources\Customers\AdminCustomerResource;
@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CustomerController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/customers
      *

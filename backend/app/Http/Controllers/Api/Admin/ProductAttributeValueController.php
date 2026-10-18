@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ProductAttributeValueController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/attribute-values
      *

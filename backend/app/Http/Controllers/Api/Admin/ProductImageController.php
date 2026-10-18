@@ -36,6 +36,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ProductImageController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/products/{product}/images
      *

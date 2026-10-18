@@ -39,6 +39,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ProductController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/products
      *

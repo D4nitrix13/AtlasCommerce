@@ -34,6 +34,7 @@ use Symfony\Component\HttpFoundation\Response;
 class AttributeController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/attributes
      *

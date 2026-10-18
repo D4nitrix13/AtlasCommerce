@@ -16,7 +16,6 @@ use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
 use Database\Seeders\PermissionsCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;

@@ -53,7 +53,7 @@ final class CursorPaginatesTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->controller = new CursorPaginatesTestController();
+        $this->controller = new CursorPaginatesTestController;
     }
 
     private function makeNotifications(int $count): void
@@ -63,7 +63,7 @@ final class CursorPaginatesTest extends TestCase
             Notification::query()->create([
                 'user_id' => $admin->id,
                 'store_id' => $this->store->id,
-                'title' => 'Test ' . $i,
+                'title' => 'Test '.$i,
                 'message' => 'Body',
                 'type' => 'info',
                 'is_read' => false,

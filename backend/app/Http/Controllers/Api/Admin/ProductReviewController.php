@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ProductReviewController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/reviews
      */
