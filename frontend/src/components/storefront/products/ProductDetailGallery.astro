@@ -102,6 +102,7 @@ const showThumbs = images.length > 1;
               decoding={isFirst ? 'sync' : 'async'}
               fetchpriority={isFirst ? 'high' : undefined}
               class="aspect-[22/10] h-full w-full object-cover"
+              onerror="this.onerror=null;this.parentElement?.classList.add('bg-slate-100');this.remove()"
             />
           ) : (
             <div class="flex aspect-[22/10] h-full w-full items-center justify-center p-6 sm:p-10">
