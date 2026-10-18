@@ -658,3 +658,119 @@ del codebase es:
 - **2026-10-17** — `§6.2 Drift` existente desde Fase 2.
 - **2026-10-18** — `§9 Final state` agregado en Fase 6. Cleanup
   completo del legacy + refactor de migration #2.
+- **2026-10-18** — `§11 Refactor estructural` agregado. Consolidación
+  de las imágenes en `assets/` raíz del repo (single source of truth).
+
+---
+
+## 11. Refactor estructural — consolidación en `assets/`
+
+### Contexto
+
+Antes del refactor (Q4 2026), las imágenes del proyecto vivían en
+3 ubicaciones distintas con organizaciones inconsistentes:
+
+- `frontend/public/images/` — assets de dev servidos por Astro
+  (productos, branding, ilustraciones del framework).
+- `brand-assets/` — staging area con Artisan command que sincronizaba
+  al FTP (logos, favicons, social icons).
+- `backend/public/images/stores/` — gitignored, regenerado por algún
+  proceso (fantasma, nadie leía).
+
+Cobertura inconsistente entre los 4 tenants históricos. Duplicados
+entre `frontend/public/images/amico/auth/*.svg` y `brand-assets/frontend/`
+(los mismos archivos en dos lugares). El tenant
+`instrumentos-musicales-la-voz` (primer cliente real según el plan
+original del image architecture) no tenía carpeta de assets en ningún
+lado.
+
+### Estructura objetivo
+
+Después del refactor:
+
+```text
+AtlasCommerce/
+├── backend/
+├── frontend/
+├── database/
+├── assets/                      ← ÚNICA fuente de verdad para imágenes
+│   ├── branding/                # Logos + favicons por tenant
+│   │   ├── panda-estampados/
+│   │   ├── kitsune/
+│   │   ├── mm-boutique/
+│   │   ├── morales-store/
+│   │   └── instrumentos-musicales-la-voz/   (pendiente de archivos)
+│   ├── products/                # Imágenes de producto (Fender/Gibson/etc.)
+│   │   └── {brand-slug}/{product-slug}/{variant}/
+│   ├── frontend/                # Ilustraciones del sistema
+│   │   ├── amico/auth/*.svg     # (era brand-assets/frontend/)
+│   │   └── favicon/             # Favicons del sitio (browser auto-discover)
+│   └── shared/                  # Cross-tenant shared
+│       └── icons/social/
+└── docker/
+```
+
+### Cambios por archivo
+
+| Antes | Después |
+|---|---|
+| `brand-assets/store/{slug}/{logo,favicon}.webp` | `assets/branding/{slug}/{logo,favicon}.webp` |
+| `brand-assets/frontend/amico/auth/{file}.svg` | `assets/frontend/amico/auth/{file}.svg` |
+| `brand-assets/shared/icons/social/*.webp` | `assets/shared/icons/social/*.webp` |
+| `frontend/public/images/products/{slug}/{variant}/{file}.webp` | `assets/products/{slug}/{variant}/{file}.webp` |
+| `frontend/public/images/tenants/panda-estampados/branding/{file}.webp` | (eliminado — duplicado de `assets/branding/panda-estampados/`) |
+| `frontend/public/images/amico/auth/{file}.svg` | (eliminado — duplicado de `assets/frontend/amico/auth/`) |
+| `frontend/public/apple-touch-icon.png` | `assets/frontend/favicon/apple-touch-icon.png` (con symlink) |
+| `frontend/public/favicon.ico` | `assets/frontend/favicon/favicon.ico` (con symlink) |
+| `frontend/public/favicon.svg` | `assets/frontend/favicon/favicon.svg` (con symlink) |
+
+### Acceso en dev
+
+El frontend consume los assets vía symlink
+`frontend/public/assets → ../../assets/`. Cualquier URL del estilo
+`/assets/{path}` la sirve Astro directamente desde la raíz de
+`assets/`.
+
+El backend consume los assets vía filesystem disk `local-assets`
+(configurado en `backend/config/filesystems.php` con root apuntando
+a `assets/`). Sirve como fallback cuando el FTP no está disponible
+y como source para el Artisan `assets:sync-from-public` que migra
+los assets al FTP en producción.
+
+### Acceso en producción
+
+El Artisan `php artisan assets:sync-from-public` (renombrado de
+`brand-assets/` a `assets/`) lee la nueva estructura y sube al FTP
+siguiendo el mismo mapping que antes (ver README de `assets/` para
+detalle).
+
+El frontend en producción consume assets vía el AssetController
+backend (`/api/v1/storefront/assets/{path}`) que lee del FTP disk.
+El storage key devuelto por la API es `tenants/{slug}/products/{slug}/{hash}.{ext}`
+para productos o `tenants/{slug}/branding/{file}.webp` para branding.
+
+### Limpieza aplicada
+
+- `brand-assets/` eliminado, contenido migrado a `assets/`.
+- `frontend/public/images/` eliminado, contenido migrado a `assets/`.
+- Duplicados entre ubicaciones eliminados.
+- Tenant `instrumentos-musicales-la-voz` agregado al `TenantSlug` type
+  en `frontend/src/data/tenants.ts` con carpeta placeholder en
+  `assets/branding/instrumentos-musicales-la-voz/`.
+- Mock data (`product-detail-mock.ts`, `la-voz-mock.ts`, `products.ts`)
+  y páginas Astro actualizadas con paths al prefijo `/assets/`.
+- Artisan command `assets:sync-from-public` actualizado para leer
+  de `assets/` en vez de `brand-assets/`.
+- `filesystems.php` extendido con disk `local-assets`.
+
+### Follow-ups pendientes
+
+- **Subir imágenes reales** de La Voz Instrumentos a
+  `assets/branding/instrumentos-musicales-la-voz/` (logo, favicon).
+- **Subir imágenes faltantes** de productos La Voz (bajos, amps, PA,
+  mics) que están como placeholders apuntando a Stratocaster.
+- **Re-sync al FTP** después del refactor — ejecutar
+  `php artisan assets:sync-from-public` en cada instancia (dev/prod).
+- **Auditar páginas Astro** que referencian paths hardcoded
+  (no quedan según `grep /images/products/` en `src/`, pero podría haber
+  paths en `.css` o `.scss`).
