@@ -47,8 +47,8 @@ export const instrumentosMusicalesLaVozTheme = {
       'admin.localhost',
       'admin.127.0.0.1',
     ],
-    logoPath: '/images/tenants/instrumentos-musicales-la-voz/branding/logo.svg',
-    loginLogoPath: '/images/tenants/instrumentos-musicales-la-voz/branding/logo.svg',
+    logoPath: '/api/storefront/assets/tenants/instrumentos-musicales-la-voz/branding/logo.svg',
+    loginLogoPath: '/api/storefront/assets/tenants/instrumentos-musicales-la-voz/branding/logo.svg',
     // Acentos secundarios: dorado tropical, coral cálido, verde lima,
     // beige arena. Reservados para badges y categorías premium.
     accentColor: '#0E7C7B', // verde tropical (CTA principal)
