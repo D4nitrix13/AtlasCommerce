@@ -46,6 +46,26 @@ export const DEFAULT_THEME: Theme = {
 };
 
 /**
+ * Reescribe paths legacy (`/images/tenants/...`) al formato del refactor
+ * de Fase 6 (`/api/storefront/assets/tenants/...`). El backend de La Voz
+ * tiene datos anteriores al refactor con paths `/images/tenants/...` que
+ * el backend sirve en 404. Reescribimos acá para que el backend sirva el
+ * asset via su AssetController.
+ */
+function rewriteLegacyAssetPath(path: string | null, tenantSlug: string | null): string | null {
+  if (path === null) {
+    return null;
+  }
+  if (path.startsWith('/images/tenants/')) {
+    return path.replace(/^\/images\/tenants\//, `/api/storefront/assets/tenants/${tenantSlug ?? ''}/`);
+  }
+  if (path.startsWith('/images/')) {
+    return path.replace(/^\/images\//, '/api/storefront/assets/');
+  }
+  return path;
+}
+
+/**
  * Combina un theme dinámico (de la API) con un brand estático (de
  * `STORE_BRANDS`) para producir el `StoreBrand` que el frontend usa.
  *
@@ -59,14 +79,19 @@ export const DEFAULT_THEME: Theme = {
  *
  * @param  theme  Theme devuelto por la API.
  * @param  fallback  Brand estático de `STORE_BRANDS`.
+ * @param  tenantSlug  Slug del tenant (para rewrite de paths legacy).
  */
-export function themeToBrand(theme: Theme, fallback: StoreBrand): StoreBrand {
+export function themeToBrand(
+  theme: Theme,
+  fallback: StoreBrand,
+  tenantSlug: string | null = null,
+): StoreBrand {
   return {
     ...fallback,
     shortName: theme.short_name ?? fallback.shortName,
     name: theme.short_name ?? fallback.name,
-    logoPath: theme.logo_path ?? fallback.logoPath,
-    loginLogoPath: theme.login_logo_path ?? fallback.loginLogoPath,
+    logoPath: rewriteLegacyAssetPath(theme.logo_path, tenantSlug) ?? fallback.logoPath,
+    loginLogoPath: rewriteLegacyAssetPath(theme.login_logo_path, tenantSlug) ?? fallback.loginLogoPath,
     accentColor: theme.accent_color ?? fallback.accentColor,
     accentHoverColor: theme.accent_hover_color ?? fallback.accentHoverColor,
     supportEmail: theme.support_email ?? fallback.supportEmail,
@@ -74,4 +99,4 @@ export function themeToBrand(theme: Theme, fallback: StoreBrand): StoreBrand {
   };
 }
 
-export { DEFAULT_BRAND };
+export { DEFAULT_BRAND, rewriteLegacyAssetPath };
