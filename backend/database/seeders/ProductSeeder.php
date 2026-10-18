@@ -207,6 +207,11 @@ final class ProductSeeder extends Seeder
                 'price_cents' => $priceCents,
                 'cost_cents' => (int) ($priceCents * 0.5),
                 'is_active' => true,
+                'finish_slug' => $data['finish_slug'] ?? $data['slug'],
+                'finish_label' => $data['finish_label'] ?? $displayName,
+                'finish_hex' => $data['finish_hex'] ?? null,
+                'condition' => $data['condition'] ?? 'nuevo',
+                'stock' => (int) ($data['stock'] ?? 0),
             ],
         );
     }

@@ -31,49 +31,63 @@
           "sku": "FEND-AMPRO-TEL-0700",
           "fingerboard": "rosewood",
           "back_sku": "0111140700",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "3-color-sunburst",
+          "finish_label": "3-Color Sunburst"
         },
         {
           "slug": "black",
           "display_name": "Black",
           "sku": "FEND-AMPRO-TEL-0706",
           "fingerboard": "rosewood",
-          "back_sku": "0111140700"
+          "back_sku": "0111140700",
+          "finish_slug": "black",
+          "finish_label": "Black"
         },
         {
           "slug": "natural",
           "display_name": "Natural",
           "sku": "FEND-AMPRO-TEL-0721",
           "fingerboard": "rosewood",
-          "back_sku": "0111140700"
+          "back_sku": "0111140700",
+          "finish_slug": "natural",
+          "finish_label": "Natural"
         },
         {
           "slug": "oxblood",
           "display_name": "Oxblood",
           "sku": "FEND-AMPRO-TEL-0730",
           "fingerboard": "rosewood",
-          "back_sku": "0111140700"
+          "back_sku": "0111140700",
+          "finish_slug": "oxblood",
+          "finish_label": "Oxblood"
         },
         {
           "slug": "dark-night",
           "display_name": "Dark Night",
           "sku": "FEND-AMPRO-TEL-0761",
           "fingerboard": "rosewood",
-          "back_sku": "0111140700"
+          "back_sku": "0111140700",
+          "finish_slug": "dark-night",
+          "finish_label": "Dark Night"
         },
         {
           "slug": "aged-cherry-burst-maple",
           "display_name": "Aged Cherry Burst",
           "sku": "FEND-AMPRO-TEL-2731",
           "fingerboard": "maple",
-          "back_sku": "0111142700"
+          "back_sku": "0111142700",
+          "finish_slug": "aged-cherry-burst-maple",
+          "finish_label": "Aged Cherry Burst"
         },
         {
           "slug": "butterscotch-blonde-maple",
           "display_name": "Butterscotch Blonde",
           "sku": "FEND-AMPRO-TEL-2750",
           "fingerboard": "maple",
-          "back_sku": "0111142700"
+          "back_sku": "0111142700",
+          "finish_slug": "butterscotch-blonde-maple",
+          "finish_label": "Butterscotch Blonde"
         }
       ]
     },
@@ -103,49 +117,63 @@
           "sku": "FEND-AMPRO-STR-0700",
           "fingerboard": "rosewood",
           "back_sku": "0111110700",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "3-color-sunburst",
+          "finish_label": "3-Color Sunburst"
         },
         {
           "slug": "olympic-white",
           "display_name": "Olympic White",
           "sku": "FEND-AMPRO-STR-0705",
           "fingerboard": "rosewood",
-          "back_sku": "0111110700"
+          "back_sku": "0111110700",
+          "finish_slug": "olympic-white",
+          "finish_label": "Olympic White"
         },
         {
           "slug": "black",
           "display_name": "Black",
           "sku": "FEND-AMPRO-STR-0706",
           "fingerboard": "rosewood",
-          "back_sku": "0111110700"
+          "back_sku": "0111110700",
+          "finish_slug": "black",
+          "finish_label": "Black"
         },
         {
           "slug": "oxblood",
           "display_name": "Oxblood",
           "sku": "FEND-AMPRO-STR-0730",
           "fingerboard": "rosewood",
-          "back_sku": "0111110700"
+          "back_sku": "0111110700",
+          "finish_slug": "oxblood",
+          "finish_label": "Oxblood"
         },
         {
           "slug": "dark-night",
           "display_name": "Dark Night",
           "sku": "FEND-AMPRO-STR-0761",
           "fingerboard": "rosewood",
-          "back_sku": "0111110700"
+          "back_sku": "0111110700",
+          "finish_slug": "dark-night",
+          "finish_label": "Dark Night"
         },
         {
           "slug": "3-color-sunburst-maple",
           "display_name": "3-Color Sunburst (Maple)",
           "sku": "FEND-AMPRO-STR-2700",
           "fingerboard": "maple",
-          "back_sku": "0111112700"
+          "back_sku": "0111112700",
+          "finish_slug": "3-color-sunburst-maple",
+          "finish_label": "3-Color Sunburst (Maple)"
         },
         {
           "slug": "olympic-white-maple",
           "display_name": "Olympic White (Maple)",
           "sku": "FEND-AMPRO-STR-2705",
           "fingerboard": "maple",
-          "back_sku": "0111112700"
+          "back_sku": "0111112700",
+          "finish_slug": "olympic-white-maple",
+          "finish_label": "Olympic White (Maple)"
         }
       ]
     },
@@ -174,31 +202,41 @@
           "display_name": "3-Color Sunburst",
           "sku": "FEND-AMPRO-JAG-0700",
           "back_sku": "0111820700",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "3-color-sunburst",
+          "finish_label": "3-Color Sunburst"
         },
         {
           "slug": "olympic-white",
           "display_name": "Olympic White",
           "sku": "FEND-AMPRO-JAG-0705",
-          "back_sku": "0111820700"
+          "back_sku": "0111820700",
+          "finish_slug": "olympic-white",
+          "finish_label": "Olympic White"
         },
         {
           "slug": "black",
           "display_name": "Black",
           "sku": "FEND-AMPRO-JAG-0706",
-          "back_sku": "0111820700"
+          "back_sku": "0111820700",
+          "finish_slug": "black",
+          "finish_label": "Black"
         },
         {
           "slug": "oxblood",
           "display_name": "Oxblood",
           "sku": "FEND-AMPRO-JAG-0730",
-          "back_sku": "0111820700"
+          "back_sku": "0111820700",
+          "finish_slug": "oxblood",
+          "finish_label": "Oxblood"
         },
         {
           "slug": "dark-night",
           "display_name": "Dark Night",
           "sku": "FEND-AMPRO-JAG-0761",
-          "back_sku": "0111820700"
+          "back_sku": "0111820700",
+          "finish_slug": "dark-night",
+          "finish_label": "Dark Night"
         }
       ]
     },
@@ -226,7 +264,9 @@
           "slug": "black",
           "display_name": "Black",
           "sku": "FEND-AMVII-57STR-2806",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "black",
+          "finish_label": "Black"
         }
       ]
     },
@@ -254,7 +294,9 @@
           "slug": "gloss-white-sparkle",
           "display_name": "Gloss, White Sparkle",
           "sku": "GIBSON-LPC68PSL-WHITE-SPARKLE",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "gloss-white-sparkle",
+          "finish_label": "Gloss, White Sparkle"
         }
       ]
     },
@@ -282,7 +324,9 @@
           "slug": "smooth-sepia",
           "display_name": "Smooth Sepia",
           "sku": "GIBSON-MOD-ES335-SMOOTH-SEPIA",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "smooth-sepia",
+          "finish_label": "Smooth Sepia"
         }
       ]
     },
@@ -310,7 +354,9 @@
           "slug": "holy-shift",
           "display_name": "Holy Shift",
           "sku": "GIBSON-MOD-SGSTD-HOLY-SHIFT",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "holy-shift",
+          "finish_label": "Holy Shift"
         }
       ]
     },
@@ -338,7 +384,9 @@
           "slug": "hornet-burst",
           "display_name": "Hornet Burst",
           "sku": "GIBSON-MOD-LPSTD60S-HORNET",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "hornet-burst",
+          "finish_label": "Hornet Burst"
         }
       ]
     },
@@ -366,7 +414,9 @@
           "slug": "tenacity-blue",
           "display_name": "Tenacity Blue",
           "sku": "GIBSON-MOD-SGMOD-TENACITY",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "tenacity-blue",
+          "finish_label": "Tenacity Blue"
         }
       ]
     },
@@ -394,7 +444,9 @@
           "slug": "green-meme",
           "display_name": "Green Meme",
           "sku": "GIBSON-MOD-ES339-GREEN-MEME",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "green-meme",
+          "finish_label": "Green Meme"
         }
       ]
     },
@@ -422,7 +474,9 @@
           "slug": "boisterous-blue",
           "display_name": "Boisterous Blue",
           "sku": "GIBSON-MOD-FV80S-BOISTEROUS",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "boisterous-blue",
+          "finish_label": "Boisterous Blue"
         }
       ]
     },
@@ -450,7 +504,9 @@
           "slug": "tropicalia",
           "display_name": "Tropicalia",
           "sku": "GIBSON-MOD-LPJUN-TROPICALIA",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "tropicalia",
+          "finish_label": "Tropicalia"
         }
       ]
     },
@@ -478,7 +534,9 @@
           "slug": "nighty-nite-graphite",
           "display_name": "Nighty-Nite Graphite",
           "sku": "GIBSON-MOD-LPCUST70S-NNITE",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "nighty-nite-graphite",
+          "finish_label": "Nighty-Nite Graphite"
         }
       ]
     },
@@ -506,7 +564,9 @@
           "slug": "flame-job-hot-rod",
           "display_name": "Flame Job Hot Rod",
           "sku": "GIBSON-MOD-FV80S-FLAME",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "flame-job-hot-rod",
+          "finish_label": "Flame Job Hot Rod"
         }
       ]
     },
@@ -534,7 +594,9 @@
           "slug": "blueberry-burst",
           "display_name": "Blueberry Burst",
           "sku": "GIBSON-LPSU25-B9GH3",
-          "is_default": true
+          "is_default": true,
+          "finish_slug": "blueberry-burst",
+          "finish_label": "Blueberry Burst"
         }
       ]
     }
