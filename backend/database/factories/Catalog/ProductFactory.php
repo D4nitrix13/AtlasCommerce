@@ -28,6 +28,13 @@ class ProductFactory extends Factory
             'slug' => Str::slug($name),
             'description' => fake()->paragraph(),
             'sku' => strtoupper(fake()->unique()->bothify('SKU-####-???')),
+            // Phase 7 schema rich — los defaults reflejan las DB
+            // defaults (false/false). Incluirlos en la factory evita
+            // que los tests tengan que llamar a $model->fresh() para
+            // leer los defaults aplicados por PostgreSQL.
+            'is_exclusive' => false,
+            'has_condition' => false,
+            'has_sizes' => false,
             'base_price_cents' => fake()->numberBetween(500, 50_000),
             'cost_cents' => fake()->numberBetween(200, 10_000),
             'is_active' => true,

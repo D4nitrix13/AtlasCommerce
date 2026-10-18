@@ -25,6 +25,15 @@ class ProductVariantFactory extends Factory
             'cost_cents' => fake()->numberBetween(300, 15_000),
             'barcode' => fake()->unique()->numerify('############'),
             'is_active' => true,
+            // Phase 7 schema rich — defaults seguros (sin finish,
+            // condición nuevo, stock 0, sin size). Mismas defaults
+            // que la migración `alter_product_variants_add_finish_*`.
+            'finish_slug' => null,
+            'finish_label' => null,
+            'finish_hex' => null,
+            'condition' => 'nuevo',
+            'stock' => 0,
+            'size_id' => null,
         ];
     }
 }
