@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Sentry Laravel SDK configuration file.
  *
@@ -163,15 +165,15 @@ return [
     // (request_id, trace_id, span_id) en cada breadcrumb. Esto se
     // evalúa LATE en el boot — el container ya tiene LogContext
     // instanciado para esta request.
-    'before_breadcrumb' => static function (\Sentry\Breadcrumb $breadcrumb): ?\Sentry\Breadcrumb {
+    'before_breadcrumb' => static function (Sentry\Breadcrumb $breadcrumb): ?Sentry\Breadcrumb {
         // Si el container todavía no tiene LogContext (ej: contexto
         // consola/jobs antes del primer request), devolvemos el
         // breadcrumb sin modificar.
-        if (! app()->resolved(\App\Logging\LogContext::class)) {
+        if (! app()->resolved(App\Logging\LogContext::class)) {
             return $breadcrumb;
         }
 
-        return app(\App\Observability\SentryBreadcrumbsConfigurator::class)($breadcrumb);
+        return app(App\Observability\SentryBreadcrumbsConfigurator::class)($breadcrumb);
     },
 
 ];
