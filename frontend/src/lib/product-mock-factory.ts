@@ -285,8 +285,13 @@ export function createVariantMock(
     imageUrl: buildImageUrl(spec, variant.slug, 'front', variant.backSku),
     stock: variant.stock ?? DEFAULT_VARIANT_STOCK,
     ...(variant.condition !== undefined && { condition: variant.condition }),
-    ...(variant.finishSlug !== undefined && { finishSlug: variant.finishSlug }),
-    ...(variant.finishLabel !== undefined && { finishLabel: variant.finishLabel }),
+    // Phase 7: derivar finishSlug/finishLabel/finishHex del slug/displayName/hex
+    // del spec cuando no se setean explícitamente. El spec usa `slug` y
+    // `displayName` como nombres canonicos; los campos Phase 7 son un
+    // espejo para alinear con el backend. El fallback garantiza que
+    // el picker de la PDP siempre tenga datos sin requerir update del spec.
+    finishSlug: variant.finishSlug ?? variant.slug,
+    finishLabel: variant.finishLabel ?? variant.displayName,
     ...(variant.hex !== undefined && { finishHex: variant.hex }),
   };
 }
@@ -370,8 +375,10 @@ function specVariantToCatalogVariant(
   return {
     id: variant.slug,
     sku: variant.sku,
-    ...(variant.finishSlug !== undefined && { finishSlug: variant.finishSlug }),
-    ...(variant.finishLabel !== undefined && { finishLabel: variant.finishLabel }),
+    // Phase 7: derivar finishSlug/finishLabel del slug/displayName del
+    // spec cuando no se setean explícitamente, igual que createVariantMock.
+    finishSlug: variant.finishSlug ?? variant.slug,
+    finishLabel: variant.finishLabel ?? variant.displayName,
     ...(variant.hex !== undefined && { finishHex: variant.hex }),
     ...(variant.condition !== undefined && { condition: variant.condition }),
     stock: variant.stock ?? DEFAULT_VARIANT_STOCK,
