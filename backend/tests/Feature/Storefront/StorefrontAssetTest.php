@@ -170,27 +170,111 @@ final class StorefrontAssetTest extends TestCase
     }
 
     #[Test]
-    public function it_caches_assets_in_redis_with_24h_ttl(): void
+    public function it_caches_assets_with_configured_store_and_ttl(): void
     {
-        // Path único por test para evitar cache compartida entre tests
-        // (RefreshDatabase no limpia Redis).
+        // Fase 3: T3 — el cache store y TTL vienen de config en lugar
+        // de hard-coded. Defaults: `redis` + 300s. Path único por test
+        // para evitar cache compartida entre tests (RefreshDatabase
+        // no limpia Redis).
+        $path = 'tenants/panda-estampados/branding/cache-test.webp';
+
         Storage::disk(name: 'ftp')->put(
-            path: 'tenants/panda-estampados/branding/cache-test.webp',
+            path: $path,
             contents: 'cached-content',
         );
 
-        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: 'tenants/panda-estampados/branding/cache-test.webp');
+        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $path);
+        $cacheStore = (string) config(key: 'assets.cache_store');
+        $cacheTtl = (int) config(key: 'assets.cache_ttl');
 
-        // Antes del request: cache no existe.
-        $this->assertFalse(\Illuminate\Support\Facades\Cache::store(name: 'redis')->has($cacheKey));
+        // Antes del request: cache no existe en el store configurado.
+        $this->assertFalse(\Illuminate\Support\Facades\Cache::store(name: $cacheStore)->has($cacheKey));
 
         // Hacer el request: dispara cache miss + lectura FTP + escritura en cache.
-        $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/cache-test.webp')
+        $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path)
             ->assertOk();
 
-        // Despues del request: cache existe.
-        $this->assertTrue(\Illuminate\Support\Facades\Cache::store(name: 'redis')->has($cacheKey));
-        $this->assertSame('cached-content', \Illuminate\Support\Facades\Cache::store(name: 'redis')->get($cacheKey));
+        // Despues del request: cache existe y respeta el TTL configurado.
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::store(name: $cacheStore)->has($cacheKey));
+        $this->assertSame(
+            expected: 'cached-content',
+            actual: \Illuminate\Support\Facades\Cache::store(name: $cacheStore)->get($cacheKey),
+        );
+
+        // Verifica el TTL via la API del RedisStore subyacente. La key
+        // en Redis tiene dos prefijos (predis global + cache store);
+        // usamos el método del cache store para evitar hardcodear
+        // ninguno. Drift permitido: ±5s por latencia entre set y lectura.
+        $store = \Illuminate\Support\Facades\Cache::store(name: $cacheStore)->getStore();
+        assert($store instanceof \Illuminate\Cache\RedisStore);
+        $prefixedKey = $store->getPrefix().$cacheKey;
+        $redisTtl = (int) $store->connection()->ttl($prefixedKey);
+        $this->assertGreaterThan($cacheTtl - 5, $redisTtl);
+        $this->assertLessThanOrEqual($cacheTtl, $redisTtl);
+    }
+
+    #[Test]
+    public function it_uses_configured_cache_store(): void
+    {
+        // Fase 3 T3: cambiar el config `assets.cache_store` debe
+        // cambiar el store usado. Usamos `array` (in-memory) para no
+        // depender de Redis en este test específico.
+        config()->set(key: 'assets.cache_store', value: 'array');
+        config()->set(key: 'assets.cache_ttl', value: 300);
+
+        $path = 'tenants/panda-estampados/branding/cache-store-config-test.webp';
+
+        Storage::disk(name: 'ftp')->put(
+            path: $path,
+            contents: 'array-store-content',
+        );
+
+        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $path);
+
+        // Antes del request: nada en el store `array`.
+        $this->assertFalse(\Illuminate\Support\Facades\Cache::store(name: 'array')->has($cacheKey));
+
+        $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path)
+            ->assertOk();
+
+        // Después del request: presente en `array`, no en `redis`.
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::store(name: 'array')->has($cacheKey));
+        $this->assertSame(
+            expected: 'array-store-content',
+            actual: \Illuminate\Support\Facades\Cache::store(name: 'array')->get($cacheKey),
+        );
+    }
+
+    #[Test]
+    public function it_uses_configured_cache_ttl(): void
+    {
+        // Fase 3 T3: cambiar `assets.cache_ttl` debe cambiar el TTL
+        // aplicado en Redis. Usamos un TTL alto (86400 = 24h, valor
+        // histórico pre-Fase-3) para que no expire durante el test.
+        $customTtl = 86_400;
+        config()->set(key: 'assets.cache_store', value: 'redis');
+        config()->set(key: 'assets.cache_ttl', value: $customTtl);
+
+        $path = 'tenants/panda-estampados/branding/cache-ttl-config-test.webp';
+
+        Storage::disk(name: 'ftp')->put(
+            path: $path,
+            contents: 'ttl-config-content',
+        );
+
+        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $path);
+
+        $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path)
+            ->assertOk();
+
+        // TTL leído a través del RedisStore con prefijo aplicado
+        // correctamente. Drift permitido: ±5s.
+        $store = \Illuminate\Support\Facades\Cache::store(name: 'redis')->getStore();
+        assert($store instanceof \Illuminate\Cache\RedisStore);
+        $prefixedKey = $store->getPrefix().$cacheKey;
+        $redisTtl = (int) $store->connection()->ttl($prefixedKey);
+        $this->assertGreaterThan($customTtl - 5, $redisTtl);
+        $this->assertLessThanOrEqual($customTtl, $redisTtl);
     }
 
     #[Test]
@@ -257,5 +341,123 @@ final class StorefrontAssetTest extends TestCase
 
         $response->assertOk();
         $this->assertSame(expected: $contents, actual: $response->getContent());
+    }
+
+    // -----------------------------------------------------------------------
+    // Fase 3 — URL signing (T2)
+    // -----------------------------------------------------------------------
+
+    #[Test]
+    public function it_serves_without_signature_when_url_signing_not_required(): void
+    {
+        // Default: url_signing.required=false. Una request sin
+        // ?expires&sig debe pasar sin chequeo de firma.
+        $this->assertFalse((bool) config(key: 'assets.url_signing.required'));
+
+        $contents = 'unsigned-content';
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/unsigned.webp',
+            contents: $contents,
+        );
+
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/unsigned.webp');
+
+        $response->assertOk();
+        $this->assertSame(expected: $contents, actual: $response->getContent());
+    }
+
+    #[Test]
+    public function it_rejects_without_signature_when_url_signing_required(): void
+    {
+        config()->set(key: 'assets.url_signing.required', value: true);
+
+        $contents = 'signed-only-content';
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/signed-only.webp',
+            contents: $contents,
+        );
+
+        // Sin query params de firma.
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/tenants/panda-estampados/branding/signed-only.webp');
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_rejects_expired_signature_when_url_signing_required(): void
+    {
+        config()->set(key: 'assets.url_signing.required', value: true);
+
+        $contents = 'expired-sig-content';
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/expired-sig.webp',
+            contents: $contents,
+        );
+
+        // Firma con expires en el pasado (time() - 10).
+        $path = 'tenants/panda-estampados/branding/expired-sig.webp';
+        $expires = (string) (time() - 10);
+        $signature = hash_hmac(
+            algo: 'sha256',
+            data: $path.'|'.$expires,
+            key: (string) config(key: 'assets.url_signing.secret'),
+        );
+
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path.'?expires='.$expires.'&sig='.$signature);
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_serves_with_valid_signature_when_url_signing_required(): void
+    {
+        config()->set(key: 'assets.url_signing.required', value: true);
+
+        $contents = 'signed-content';
+        Storage::disk(name: 'ftp')->put(
+            path: 'tenants/panda-estampados/branding/signed.webp',
+            contents: $contents,
+        );
+
+        $path = 'tenants/panda-estampados/branding/signed.webp';
+        $expires = (string) (time() + 600);
+        $signature = hash_hmac(
+            algo: 'sha256',
+            data: $path.'|'.$expires,
+            key: (string) config(key: 'assets.url_signing.secret'),
+        );
+
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path.'?expires='.$expires.'&sig='.$signature);
+
+        $response->assertOk();
+        $this->assertSame(expected: $contents, actual: $response->getContent());
+    }
+
+    // -----------------------------------------------------------------------
+    // Fase 3 — Enumeration logging (T4)
+    // -----------------------------------------------------------------------
+
+    #[Test]
+    public function it_logs_structured_warning_on_404(): void
+    {
+        Log::spy();
+
+        $missingPath = 'tenants/panda-estampados/branding/missing-enum-test.webp';
+        $expectedHash = hash(algo: 'sha256', data: $missingPath);
+
+        $response = $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$missingPath);
+
+        $response->assertNotFound();
+
+        Log::shouldHaveReceived(method: 'warning')
+            ->withArgs(function (string $message, array $context) use ($expectedHash): bool {
+                return $message === 'asset.not_found'
+                    && $context['tenant_slug'] === 'panda-estampados'
+                    && $context['hash'] === $expectedHash
+                    && array_key_exists(key: 'client_ip', array: $context)
+                    && array_key_exists(key: 'user_agent', array: $context)
+                    && is_string($context['user_agent']);
+            })
+            ->once();
     }
 }

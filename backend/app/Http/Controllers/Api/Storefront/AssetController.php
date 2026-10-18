@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Storefront;
 
 use App\Http\Controllers\Controller;
 use App\Services\Assets\StorageKeyDeriver;
+use App\Services\Assets\UrlSigner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -30,13 +31,26 @@ use Symfony\Component\HttpFoundation\Response;
  * o bajo `shared/` (assets de marca compartida). Esto evita que un
  * tenant sirva accidentalmente un asset de otro tenant.
  *
- * Cache:
- *   El contenido binario se cachea en Redis (store `redis`) con TTL
- *   de 24h. Esto elimina la latencia del FTP en requests repetidos:
- *   primera peticion lee FTP + cachea, siguientes leen Redis. Si el
- *   archivo cambia en FTP, expira despues del TTL y se regenera.
+ * URL signing (Fase 3):
+ *   Cuando `config('assets.url_signing.required') === true`, el
+ *   controller exige query params `expires=<ts>&sig=<hex>` firmadas
+ *   con HMAC-SHA256 y rechaza con 403 si faltan, expiraron, o no
+ *   matchean. Default false (Fase 6 flipea post-backfill).
+ *
+ * Cache (Fase 3):
+ *   El contenido binario se cachea en el store configurado por
+ *   `config('assets.cache_store')` (default `redis`) con TTL de
+ *   `config('assets.cache_ttl')` segundos (default 300, 5min). Si
+ *   el archivo cambia en FTP, expira despues del TTL y se regenera.
  *   Para invalidar inmediatamente, el command `assets:invalidate-cache`
  *   (TBD) borra todas las claves con prefijo `ftp-asset:`.
+ *
+ * Enumeration logging (Fase 3):
+ *   404s y malformed paths emiten logs estructurados con
+ *   `asset.not_found` y `asset.path.malformed` respectivamente (hash
+ *   SHA-256 + tenant_slug + client_ip + user_agent truncado). Esta
+ *   traza es la señal para detectar y alertar sobre ataques de
+ *   enumeración de URLs por terceros.
  *
  * Headers de respuesta:
  *   - Content-Type:    inferido de la extension
@@ -44,13 +58,24 @@ use Symfony\Component\HttpFoundation\Response;
  *   - ETag:            md5 del contenido (browser valida con If-None-Match)
  *
  * Errores:
- *   - 403 Forbidden:   path intenta salir del namespace del tenant
- *   - 404 Not Found:   archivo no existe en el FTP
+ *   - 403 Forbidden:   path intenta salir del namespace del tenant,
+ *                      o firma HMAC invalida/expirada (cuando
+ *                      `url_signing.required`).
+ *   - 404 Not Found:   archivo no existe en el FTP (logueado como
+ *                      `asset.not_found`).
  */
 class AssetController extends Controller
 {
+    /**
+     * Prefijo de las claves de cache del contenido binario de un asset.
+     * Sufijado con sha256 del path normalizado. Otros comandos (ej.
+     * `assets:invalidate-cache`) pueden usar este prefijo para FLUSH.
+     */
+    private const CACHE_KEY_PREFIX = 'ftp-asset:';
+
     public function __construct(
         public StorageKeyDeriver $storageKeyDeriver,
+        public UrlSigner $urlSigner,
     ) {}
 
     /**
@@ -59,11 +84,16 @@ class AssetController extends Controller
      * Path params:
      *   - path (string): path relativo al FTP_ROOT, ej. tenants/panda-estampados/branding/logo.webp
      *
+     * Query params (solo si url_signing.required):
+     *   - expires (int): UNIX timestamp de expiración.
+     *   - sig (string): HMAC-SHA256 hex sobre `path|expires`.
+     *
      * Response:
      *   - 200 con el contenido binario del asset
      *   - 304 Not Modified si el ETag coincide con If-None-Match
-     *   - 403 si el path no pertenece al tenant activo ni a shared/
-     *   - 404 si el archivo no existe
+     *   - 403 si el path no pertenece al tenant activo ni a shared/,
+     *          o si falla la verificación HMAC
+     *   - 404 si el archivo no existe (logueado estructuradamente)
      */
     public function show(Request $request, string $path): Response
     {
@@ -101,18 +131,61 @@ class AssetController extends Controller
             ]);
         }
 
+        // URL signing (Fase 3): si el flag está encendido, exigir firma
+        // HMAC válida. Gated por config para permitir rollout gradual
+        // (default off — Fase 6 flipea a true post-backfill).
+        if (config(key: 'assets.url_signing.required') === true) {
+            $expires = $request->query(key: 'expires');
+            $signature = $request->query(key: 'sig');
+
+            // Laravel devuelve `mixed` desde `query()`; hacemos
+            // narrow a `?string` para poder pasarlo a la firma del
+            // verify() con tipos estrictos.
+            $expiresValue = is_string(value: $expires) ? $expires : null;
+            $signatureValue = is_string(value: $signature) ? $signature : null;
+
+            if ($expiresValue === null || $signatureValue === null) {
+                abort(code: 403, message: 'Missing signature.');
+            }
+
+            if (! $this->urlSigner->verify(
+                path: $normalizedPath,
+                expires: $expiresValue,
+                signature: $signatureValue,
+            )) {
+                abort(code: 403, message: 'Invalid or expired signature.');
+            }
+        }
+
         $disk = Storage::disk(name: 'ftp');
 
         if (! $disk->exists(path: $normalizedPath)) {
+            // Structured 404 logging (Fase 3): emitir warning con
+            // contexto mínimo (hash del path + tenant + IP + UA
+            // truncado) para detección de enumeration attacks. Ver
+            // docs/architecture/assets-naming-convention.md §6.3.3.
+            logger()->warning(message: 'asset.not_found', context: [
+                'hash' => hash(algo: 'sha256', data: $normalizedPath),
+                'tenant_slug' => $tenantSlug,
+                'client_ip' => $request->ip(),
+                'user_agent' => substr(
+                    string: (string) ($request->userAgent() ?? 'unknown'),
+                    offset: 0,
+                    length: 200,
+                ),
+            ]);
+
             return response(content: 'Not found', status: 404);
         }
 
-        // Cache en Redis con TTL 24h. La key usa sha256 del path para
-        // longitud fija y evitar colisiones. Cachea el contenido binario
-        // para eliminar latencia del FTP en requests repetidos.
-        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $normalizedPath);
-        $ttl = 86400; // 24 horas
-        $contents = Cache::store(name: 'redis')->remember(
+        // Cache en el store configurado (default redis) con TTL de
+        // `config('assets.cache_ttl')` segundos (default 300, 5min).
+        // La key usa sha256 del path para longitud fija y evitar
+        // colisiones. Cachea el contenido binario para eliminar
+        // latencia del FTP en requests repetidos.
+        $cacheKey = self::CACHE_KEY_PREFIX.hash(algo: 'sha256', data: $normalizedPath);
+        $ttl = (int) config(key: 'assets.cache_ttl');
+        $contents = Cache::store(config(key: 'assets.cache_store'))->remember(
             key: $cacheKey,
             ttl: $ttl,
             callback: fn (): string|false => $disk->get(path: $normalizedPath),

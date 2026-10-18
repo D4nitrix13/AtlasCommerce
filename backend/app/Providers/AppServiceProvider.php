@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Logging\LogContext;
 use App\Metrics\MetricsService;
 use App\Metrics\MetricsStorageManager;
+use App\Services\Assets\UrlSigner;
 use App\Tracing\Tracer;
 use Core\Shared\Events\EventBus;
 use Core\Shared\Events\InProcessEventBus;
@@ -59,6 +60,25 @@ class AppServiceProvider extends ServiceProvider
                 logContext: $app->make(LogContext::class),
                 config: (array) $app->make('config')->get(key: 'tracing', default: []),
             );
+        });
+
+        // Fase 3: UrlSigner singleton — el secret del HMAC se resuelve
+        // desde config(`assets.url_signing.secret`) con fallback a
+        // `app.key` (declarado en config/assets.php). Singleton porque
+        // el secret es invariante por request y el HMAC no tiene
+        // estado mutable; ahorra instanciación por request.
+        $this->app->singleton(UrlSigner::class, function ($app): UrlSigner {
+            $secret = (string) $app->make('config')->get(
+                key: 'assets.url_signing.secret',
+                default: '',
+            );
+
+            $ttl = (int) $app->make('config')->get(
+                key: 'assets.url_signing.ttl',
+                default: UrlSigner::DEFAULT_TTL_SECONDS,
+            );
+
+            return new UrlSigner(secret: $secret, defaultTtl: $ttl);
         });
     }
 
