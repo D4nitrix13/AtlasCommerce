@@ -71,6 +71,7 @@ import {
   getAverageRating,
 } from '../../../data/product-detail-mock';
 import type { Product } from '../../../types/catalog';
+import { deriveProductDetail } from '../../../lib/product-detail';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -85,31 +86,12 @@ if (product === null) {
   Astro.response.status = 404;
 }
 
-// Detalle enriquecido: si el slug matchea uno de nuestros mocks
-// enriquecidos (Saber Alter), lo usamos directamente.
-// Si no, derivamos un subset mínimo del producto base.
-const detail =
-  product?.slug === SABER_ALTER_DETAIL.slug
-    ? SABER_ALTER_DETAIL
-    : product !== null
-      ? {
-          ...SABER_ALTER_DETAIL,
-          id: product.id,
-          slug: product.slug,
-          name: product.name,
-          description: product.description,
-          priceCents: product.priceCents,
-          compareAtPriceCents: product.compareAtPriceCents,
-          currency: product.currency ?? 'USD',
-          category: product.category,
-          stock: product.stock,
-          badges: product.badges ?? [],
-          // Override `images` con las URLs reales del producto. Si el
-          // producto no tiene gallery (e.g. mocks de Kitsune), cae al
-          // fallback de SABER_ALTER_DETAIL (T-shirt placeholder).
-          images: product.images && product.images.length > 0 ? product.images : SABER_ALTER_DETAIL.images,
-        }
-      : null;
+// Detalle enriquecido: el helper deriveProductDetail decide si usar
+// SABER_ALTER_DETAIL directamente (cuando el slug matchea) o derivar
+// un detail desde el Product base sin heredar colors/sizes/variants
+// del mock de Saber Alter. Antes este spread contaminaba guitarras y
+// otros productos con los selectores equivocados.
+const detail = product !== null ? deriveProductDetail(product) : null;
 
 // Estado inicial del accordion de specs: leído de la cookie SSR
 // (`pdp-specs-expanded-<slug>`) para evitar el flash visual que se
