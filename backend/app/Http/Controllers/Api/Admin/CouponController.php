@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CouponController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/coupons
      *

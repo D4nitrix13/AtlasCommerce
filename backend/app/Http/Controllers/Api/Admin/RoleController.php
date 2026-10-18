@@ -44,6 +44,7 @@ use Symfony\Component\HttpFoundation\Response;
 class RoleController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/roles
      *

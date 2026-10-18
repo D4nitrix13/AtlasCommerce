@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\Response;
 class SupportTicketController extends Controller
 {
     use CursorPaginates;
+
     public function __construct(
         private readonly SupportTicketService $service,
     ) {}

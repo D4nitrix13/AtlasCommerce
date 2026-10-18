@@ -38,6 +38,7 @@ use Symfony\Component\HttpFoundation\Response;
 class WholesalePriceController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/wholesale-prices
      *

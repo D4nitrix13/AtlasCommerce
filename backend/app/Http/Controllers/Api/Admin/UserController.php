@@ -37,6 +37,7 @@ use Symfony\Component\HttpFoundation\Response;
 class UserController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/users
      *

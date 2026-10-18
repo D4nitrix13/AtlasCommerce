@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 class StoreController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/stores
      */

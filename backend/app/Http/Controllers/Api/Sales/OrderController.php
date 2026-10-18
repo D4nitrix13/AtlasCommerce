@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Api\Sales;
 
 use App\Exceptions\Sales\InvalidOrderTransitionException;
 use App\Exceptions\Sales\OrderNotCancellableException;
-use App\Http\Controllers\Controller;
 use App\Http\Concerns\CursorPaginates;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Sales\CancelOrderRequest;
 use App\Http\Requests\Sales\CheckoutRequest;
 use App\Http\Resources\Sales\OrderResource;

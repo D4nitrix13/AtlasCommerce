@@ -42,10 +42,10 @@ class CustomerSegmentsController extends Controller
         $thirtyDaysAgo = $now->copy()->subDays(value: 30);
 
         $totals = DB::table('customers')
-            ->selectRaw("
+            ->selectRaw('
                 COUNT(*)::int as total_customers,
                 COUNT(*) FILTER (WHERE created_at >= ?)::int as new_this_month
-            ")
+            ')
             ->addBinding($monthStart, 'select')
             ->first();
 
@@ -56,11 +56,11 @@ class CustomerSegmentsController extends Controller
         // Segmentation: clientes con orders, grouped by total orders count
         $segmentRaw = DB::table('customers')
             ->leftJoin('orders', 'customers.id', '=', 'orders.customer_id')
-            ->selectRaw("
+            ->selectRaw('
                 customers.id,
                 COUNT(orders.id)::int as orders_count,
                 MAX(orders.ordered_at) as last_order_at
-            ")
+            ')
             ->groupBy('customers.id')
             ->get();
 

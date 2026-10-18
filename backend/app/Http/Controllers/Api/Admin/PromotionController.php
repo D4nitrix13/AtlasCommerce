@@ -29,6 +29,7 @@ use Symfony\Component\HttpFoundation\Response;
 class PromotionController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/promotions
      *

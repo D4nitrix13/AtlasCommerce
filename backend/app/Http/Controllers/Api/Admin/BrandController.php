@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\Response;
 class BrandController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/brands
      *

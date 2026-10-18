@@ -35,7 +35,7 @@ class RevenueYearlyController extends Controller
      * Si el tenant no tiene orders, devuelve shape vacio (months con 0s).
      *
      * @return JsonResponse { data: { year, previous_year, labels[],
-     *                          current_year_values[], previous_year_values[] } }
+     *                      current_year_values[], previous_year_values[] } }
      */
     public function __invoke(): JsonResponse
     {
@@ -47,11 +47,11 @@ class RevenueYearlyController extends Controller
         $end = $now->copy()->endOfDay();
 
         $revenueByMonth = DB::table('orders')
-            ->selectRaw("
+            ->selectRaw('
                 EXTRACT(YEAR FROM ordered_at)::int as year,
                 EXTRACT(MONTH FROM ordered_at)::int as month,
                 COALESCE(SUM(total_cents), 0)::bigint as total_cents
-            ")
+            ')
             ->whereIn('status', ['pending', 'processing', 'completed'])
             ->whereBetween('ordered_at', [$start, $end])
             ->groupBy('year', 'month')

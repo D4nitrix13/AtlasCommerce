@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Test;
 
-use App\Http\Controllers\Controller;
 use App\Http\Concerns\CursorPaginates;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\System\NotificationResource;
 use App\Models\System\Notification;
 use Illuminate\Http\JsonResponse;

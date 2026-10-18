@@ -34,6 +34,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CategoryController extends Controller
 {
     use CursorPaginates;
+
     /**
      * GET /admin/categories
      *

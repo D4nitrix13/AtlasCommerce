@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\Admin\Metrics;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
