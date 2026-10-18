@@ -80,6 +80,14 @@ export interface ProductMockVariantSpec {
   readonly fingerboard?: 'rosewood' | 'maple';
   /** Back SKU opcional para imágenes compartidas por fingerboard. */
   readonly backSku?: string;
+  /** Front image size de esta variant (override del `imagePattern.frontSize`). */
+  readonly frontSize?: string;
+  /** Back image size de esta variant (override del `imagePattern.backSize`). */
+  readonly backSize?: string;
+  /** Front image index de esta variant (override del `imagePattern.frontIndex`). */
+  readonly frontIndex?: string;
+  /** Back image index de esta variant (override del `imagePattern.backIndex`). */
+  readonly backIndex?: string;
   /** Si esta variant es la default para mostrar. */
   readonly isDefault?: boolean;
   /** Hex color para swatch (e.g. '#3B241C'). */
@@ -102,6 +110,8 @@ export type ProductImagePatternSpec =
       readonly backSize: string;
       readonly frontKeyword: string;
       readonly backKeyword: string;
+      readonly frontIndex?: string;
+      readonly backIndex?: string;
     };
 
 const DEFAULT_BASE_PATH = '/assets/products';
@@ -129,15 +139,21 @@ export function buildImageUrl(
 ): string {
   const basePath = spec.imageBasePath ?? DEFAULT_BASE_PATH;
   const pattern = spec.imagePattern;
+  const variant = spec.variants.find((v) => v.slug === variantSlug);
+  const variantFrontSize = variant?.frontSize ?? pattern.frontSize;
+  const variantBackSize = variant?.backSize ?? pattern.backSize;
+  const variantFrontIndex = variant?.frontIndex ?? pattern.frontIndex;
+  const variantBackIndex = variant?.backIndex ?? pattern.backIndex;
+  const brandPrefix = spec.slug.startsWith(spec.brandSlug) ? '' : `${spec.brandSlug}-`;
 
   if (pattern.naming === 'indexed') {
-    const size = role === 'front' ? pattern.frontSize : pattern.backSize;
-    const index = role === 'front' ? pattern.frontIndex : pattern.backIndex;
+    const size = role === 'front' ? variantFrontSize : variantBackSize;
+    const index = role === 'front' ? variantFrontIndex : variantBackIndex;
     const useBackSku = role === 'back' && backSku !== undefined;
 
     const filename = useBackSku
       ? `${backSku}-${backSku}-${size}-${index}`
-      : `${spec.slug.startsWith(spec.brandSlug) ? '' : `${spec.brandSlug}-`}${spec.slug}-${variantSlug}-${size}-${index}`;
+      : `${brandPrefix}${spec.slug}-${variantSlug}-${size}-${index}`;
 
     return `${basePath}/${spec.slug}/${variantSlug}/${filename}.webp`;
   }
@@ -146,9 +162,9 @@ export function buildImageUrl(
   // termina con el variant en este catálogo (e.g. `...-holy-shift`),
   // así que el filename queda como `{slug}-{variant}-{key}-{WxH}` —
   // el variant aparece naturalmente 2x sin necesidad de duplicarlo.
-  const size = role === 'front' ? pattern.frontSize : pattern.backSize;
+  const size = role === 'front' ? variantFrontSize : variantBackSize;
   const keyword = role === 'front' ? pattern.frontKeyword : pattern.backKeyword;
-  const filename = `${spec.slug.startsWith(spec.brandSlug) ? '' : `${spec.brandSlug}-`}${spec.slug}-${variantSlug}-${keyword}-${size}`;
+  const filename = `${brandPrefix}${spec.slug}-${variantSlug}-${keyword}-${size}`;
 
   return `${basePath}/${spec.slug}/${variantSlug}/${filename}.webp`;
 }
