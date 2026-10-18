@@ -40,6 +40,18 @@ return [
             'report' => false,
         ],
 
+        // Disk que apunta a la carpeta `assets/` en la raíz del repo.
+        // Sirve como fallback dev cuando el FTP no está disponible
+        // y como source para el Artisan `assets:sync-from-public`
+        // que migra los assets al FTP en producción. Documentado
+        // en docs/architecture/assets-naming-convention.md §11.
+        'local-assets' => [
+            'driver' => 'local',
+            'root' => base_path(path: '../assets'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

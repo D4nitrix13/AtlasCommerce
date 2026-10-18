@@ -9,15 +9,15 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
- * Sincroniza los assets de marca commiteados en `brand-assets/` al
- * FTP, usando la convencion documentada en
+ * Sincroniza los assets de marca commiteados en `assets/` (raíz del
+ * repo) al FTP, usando la convencion documentada en
  * `docs/architecture/assets-naming-convention.md`.
  *
  * Source (en este repo, versionado en git):
- *     brand-assets/
- *         store/{slug}/logo.webp          # categoria A
- *         store/{slug}/favicon.webp       # categoria A
- *         shared/icons/social/*.webp      # categoria C
+ *     assets/
+ *         branding/{slug}/logo.webp          # categoria A
+ *         branding/{slug}/favicon.webp       # categoria A
+ *         shared/icons/social/*.webp         # categoria C
  *
  * Destino (en FTP, relativo a FTP_ROOT):
  *     tenants/{slug}/branding/logo.webp
@@ -30,18 +30,18 @@ use Throwable;
  *     php artisan assets:sync-from-public --dry-run          # no escribe, solo reporta
  *     php artisan assets:sync-from-public --force            # sobrescribe archivos existentes
  *
- * Estructura esperada en `brand-assets/`:
- *     store/{slug}/logo.webp          (categoria A)
- *     store/{slug}/favicon.webp       (categoria A)
- *     store/{slug}/og-image.webp      (categoria A, futuro)
- *     store/{slug}/cover.webp         (categoria A, futuro)
- *     store/{slug}/login-logo.webp    (categoria A, futuro)
+ * Estructura esperada en `assets/`:
+ *     branding/{slug}/logo.webp          (categoria A)
+ *     branding/{slug}/favicon.webp       (categoria A)
+ *     branding/{slug}/og-image.webp      (categoria A, futuro)
+ *     branding/{slug}/cover.webp         (categoria A, futuro)
+ *     branding/{slug}/login-logo.webp    (categoria A, futuro)
  *     shared/icons/social/facebook.webp  (categoria C)
  *     shared/icons/social/instagram.webp (categoria C)
  *
  * Los archivos que no matcheen estos paths se ignoran silenciosamente
- * (ej. brand-assets/frontend/amico/auth/*.svg son categoria B y NO
- * se suben al FTP — se sirven desde frontend/public/ directo).
+ * (ej. assets/frontend/amico/auth/*.svg son categoria B y NO
+ * se suben al FTP — se sirven desde frontend/public/assets/ directo).
  */
 final class SyncAssetsFromPublicCommand extends Command
 {
@@ -56,15 +56,15 @@ final class SyncAssetsFromPublicCommand extends Command
     /**
      * @var string
      */
-    protected $description = 'Migra assets de marca commiteados en brand-assets/ al FTP bajo la convencion tenants/{slug}/branding/ y shared/';
+    protected $description = 'Migra assets de marca commiteados en assets/ al FTP bajo la convencion tenants/{slug}/branding/ y shared/';
 
     /**
      * Directorio base de los assets de marca (relativo a la raiz del repo).
      */
-    private const BRAND_ASSETS_BASE = 'brand-assets';
+    private const BRAND_ASSETS_BASE = 'assets';
 
     /**
-     * Mapping de paths fuente (relativos a brand-assets/) a paths destino
+     * Mapping de paths fuente (relativos a assets/) a paths destino
      * (relativos a FTP_ROOT).
      *
      * Categoria A — per-tenant, usa placeholder {slug} en el destino.
@@ -74,11 +74,11 @@ final class SyncAssetsFromPublicCommand extends Command
      */
     private const ASSET_MAPPINGS = [
         // Categoria A — per-tenant
-        'store/{slug}/logo.webp' => 'tenants/{slug}/branding/logo.webp',
-        'store/{slug}/favicon.webp' => 'tenants/{slug}/branding/favicon.webp',
-        'store/{slug}/og-image.webp' => 'tenants/{slug}/branding/og-image.webp',
-        'store/{slug}/cover.webp' => 'tenants/{slug}/branding/cover.webp',
-        'store/{slug}/login-logo.webp' => 'tenants/{slug}/branding/login-logo.webp',
+        'branding/{slug}/logo.webp' => 'tenants/{slug}/branding/logo.webp',
+        'branding/{slug}/favicon.webp' => 'tenants/{slug}/branding/favicon.webp',
+        'branding/{slug}/og-image.webp' => 'tenants/{slug}/branding/og-image.webp',
+        'branding/{slug}/cover.webp' => 'tenants/{slug}/branding/cover.webp',
+        'branding/{slug}/login-logo.webp' => 'tenants/{slug}/branding/login-logo.webp',
 
         // Categoria C — compartido
         'shared/icons/social/facebook.webp' => 'shared/icons/social/facebook.webp',
@@ -111,7 +111,7 @@ final class SyncAssetsFromPublicCommand extends Command
         ];
 
         // Procesar categoria A (per-tenant) primero.
-        foreach ($this->detectStores(basePath: $basePath.'/store', storeFilter: $storeFilter) as $storeSlug) {
+        foreach ($this->detectStores(basePath: $basePath.'/branding', storeFilter: $storeFilter) as $storeSlug) {
             $this->line(string: "Store: {$storeSlug}");
 
             foreach (self::ASSET_MAPPINGS as $sourcePattern => $destPattern) {
@@ -264,7 +264,7 @@ final class SyncAssetsFromPublicCommand extends Command
     }
 
     /**
-     * Detectar stores desde los subdirectorios de brand-assets/store/.
+     * Detectar stores desde los subdirectorios de assets/branding/.
      *
      * @return array<int, string>
      */
@@ -288,7 +288,7 @@ final class SyncAssetsFromPublicCommand extends Command
             );
 
             if ($stores === []) {
-                $this->error(string: "Store '{$storeFilter}' no encontrado en brand-assets/store/");
+                $this->error(string: "Store '{$storeFilter}' no encontrado en assets/branding/");
             }
         }
 
