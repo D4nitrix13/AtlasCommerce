@@ -20,6 +20,33 @@
  *    según locale.
  */
 import type { Category, Product } from '../types/catalog';
+import { LA_VOZ_PRODUCTS, type LaVozProduct } from './la-voz-mock';
+
+/**
+ * Adapter: convierte un LaVozProduct (shape del tenant La Voz) al
+ * Product (shape canónico del storefront). Se usa para unificar los
+ * catálogos en `PRODUCTS` y que la PDP pueda resolver slugs de
+ * cualquier tenant via `findProductBySlug`.
+ *
+ * Solo se copian los campos que existen en ambas shapes. Los campos
+ * específicos de LaVozProduct (variants con inStock, specs del
+ * attributes) se exponen vía la-voz-mock.ts directamente.
+ */
+function laVozProductToProduct(lv: LaVozProduct): Product {
+  return {
+    id: Number(lv.id) || 0,
+    slug: lv.slug,
+    name: lv.name,
+    description: lv.description,
+    priceCents: lv.priceCents,
+    compareAtPriceCents: lv.compareAtPriceCents ?? undefined,
+    imageUrl: lv.imageUrl,
+    category: lv.category,
+    stock: 1, // LaVozProduct no expone stock por variant; asumimos disponible
+    badges: lv.badges.map((b) => (b === 'lowStock' ? 'low_stock' : b)) as ('new' | 'sale' | 'low_stock')[],
+    currency: lv.currency,
+  };
+}
 
 const PLACEHOLDER_IMAGE =
   'data:image/svg+xml;utf8,' +
@@ -233,8 +260,20 @@ export function getFeaturedProducts(limit = 4): readonly Product[] {
  * Usado por la página de detalle `/[locale]/products/[slug].astro`.
  */
 export function findProductBySlug(slug: string): Product | null {
-  return PRODUCTS.find((product) => product.slug === slug) ?? null;
+  return ALL_PRODUCTS.find((product) => product.slug === slug) ?? null;
 }
+
+/**
+ * Catálogo unificado de demo: incluye productos de La Voz Instrumentos
+ * (guitarras de GUITAR_SPECS) además de los productos Kitsune hardcoded.
+ *
+ * Dev mode: la PDP (`[slug].astro`) hace lookup contra este array, así
+ * que ambos tenants del dev environment son navegables. En producción
+ * cada tenant tiene su propio PRODUCTS via API.
+ */
+const LA_VOZ_AS_PRODUCTS: readonly Product[] = LA_VOZ_PRODUCTS.map(laVozProductToProduct);
+
+const ALL_PRODUCTS: readonly Product[] = [...PRODUCTS, ...LA_VOZ_AS_PRODUCTS];
 
 /**
  * Helper: filtra productos por categoría. Devuelve `[]` si no hay matches.
@@ -251,3 +290,4 @@ export function getCategoriesInUse(): readonly Category[] {
   const slugs = new Set(PRODUCTS.map((product) => product.category));
   return CATEGORIES.filter((category) => slugs.has(category.slug));
 }
+
