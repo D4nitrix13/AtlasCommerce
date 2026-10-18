@@ -45,6 +45,10 @@ function laVozProductToProduct(lv: LaVozProduct): Product {
     stock: 1, // LaVozProduct no expone stock por variant; asumimos disponible
     badges: lv.badges.map((b) => (b === 'lowStock' ? 'low_stock' : b)) as ('new' | 'sale' | 'low_stock')[],
     currency: lv.currency,
+    // Gallery completa (real para La Voz, placeholder para Kitsune que
+    // no tienen gallery). Sin esta línea el PDP cae al fallback de
+    // SABER_ALTER_DETAIL.images (4 T-shirts mockup).
+    images: lv.images,
   };
 }
 

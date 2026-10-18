@@ -7,6 +7,10 @@
  * el endpoint `GET /api/storefront/products/[slug]` exista, este
  * archivo se reemplaza por fetch + hidratación.
  *
+ * Las guitarras del demo (Fender AmPro + Gibson Mod Collection +
+ * Les Paul Supreme + Custom Select) se generan vía factory desde
+ * `product-mock-specs.ts` — ver `lib/product-mock-factory.ts`.
+ *
  * Decisiones de diseño (Baymard research/product-page):
  *  - Variantes modeladas como matriz color × size con stock
  *    independiente (SKU clásico). Cada variant tiene imageUrl
@@ -18,7 +22,24 @@
  */
 import { PRODUCTS } from './products';
 import type { ProductHighlightsItem } from '../components/storefront/products/ProductHighlights.types';
-import type { Product } from '../types/catalog';
+import { createRelatedProduct } from '../lib/product-mock-factory';
+import {
+  FENDER_AMPRO_JAGUAR,
+  FENDER_AMPRO_STRATOCASTER,
+  FENDER_AMPRO_TELECASTER,
+  FENDER_AMVII_57_STRAT,
+  GIBSON_CUSTOM_SELECT_1968,
+  GIBSON_LES_PAUL_SUPREME,
+  GIBSON_MOD_ES_335,
+  GIBSON_MOD_ES_339_GREEN_MEME,
+  GIBSON_MOD_FLYING_V_BOISTEROUS,
+  GIBSON_MOD_FLYING_V_FLAME_JOB,
+  GIBSON_MOD_LP60S_HORNET,
+  GIBSON_MOD_LP_CUSTOM_70S,
+  GIBSON_MOD_LP_JUNIOR_TROPICALIA,
+  GIBSON_MOD_SG_HOLY_SHIFT,
+  GIBSON_MOD_SG_MODERN_TENACITY,
+} from '../lib/product-mock-specs';
 
 const PLACEHOLDER_IMAGE = PRODUCTS[0].imageUrl;
 
@@ -329,282 +350,34 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
 };
 
 /**
- * Productos relacionados coherentes con el género otaku/anime del
- * producto principal (3 productos destacados — Baymard recomienda
- * entre 3-6).
+ * Productos relacionados — 15 guitarras eléctricas (4 Fender AmPro +
+ * Vintage II + 1 Les Paul Supreme + 10 Gibson Mod/Custom) +
+ * 2 productos del catálogo Kitsune (Evangelion + Chainsaw Man)
+ * para mantener coherencia con el nicho otaku del producto principal.
+ *
+ * Los guitarras se generan vía `createRelatedProduct(spec)` desde
+ * specs declarativos — ver `lib/product-mock-specs.ts`.
  */
 export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
-  {
-    id: PRODUCTS[1].id,
-    slug: PRODUCTS[1].slug,
-    name: PRODUCTS[1].name,
-    priceCents: PRODUCTS[1].priceCents,
-    currency: PRODUCTS[1].currency ?? 'USD',
-    imageUrl: PRODUCTS[1].imageUrl,
-    // Segunda toma (_02) — preview en hover.
-    imageUrlSecondary: fenderImageUrl('ebony-black', '02', '400x183'),
-    badges: PRODUCTS[1].badges,
-    vendor: 'Fender',
-    finish: 'Ultra Heavy Aged',
-    variantsCount: 2,
-    variants: [
-      {
-        id: 'ebony-black',
-        label: 'Ebony Black',
-        hex: '#0F0F0F',
-        imageUrl: fenderImageUrl('ebony-black', '01', '400x183'),
-      },
-      {
-        id: 'halo-metallic',
-        label: 'Halo Metallic',
-        hex: '#B8B5A8',
-        imageUrl: fenderImageUrl('halo-metallic', '01', '400x183'),
-      },
-    ],
-  },
-  {
-    id: 9101,
-    slug: 'gibson-les-paul-supreme-blueberry-burst',
-    name: 'Gibson Les Paul Supreme, Blueberry Burst, Exclusive',
-    priceCents: 399900,
-    currency: 'USD',
-    // Gibson es SQUARE (1600×1600). Usamos la toma `03_Front.png`
-    // (guitarra COMPLETA de frente, no la hero 01 que es más close-up
-    // del body). Las copias WebP viven en assets/products/{slug}/{variant}/.
-    imageUrl:
-      '/assets/products/gibson-les-paul-supreme-blueberry-burst/blueberry-burst/gibson-les-paul-supreme-blueberry-burst-blueberry-burst-1600x1600-03.webp',
-    vendor: 'Gibson',
-    finish: 'Blueberry Burst',
-    badges: ['new'],
-  },
-  {
-    id: 9102,
-    slug: 'fender-american-professional-telecaster',
-    name: 'Fender American Professional Telecaster',
-    priceCents: 169900,
-    currency: 'USD',
-    // Misma guitarra y pickup config (V-Mod III single-coil Tele);
-    // cambia el body color. 7 variants Rosewood FB (3-CS, Olympic White,
-    // Black, Natural, Oxblood, Dark Night, Aged Cherry Burst) y 2 Maple FB
-    // (3-CS, Butterscotch Blonde) = 9 total. El nombre NO incluye el
-    // color en el modelo (los cards muestran "Player Fusion Tele, COLOR").
-    imageUrl:
-      '/assets/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-01.webp',
-    imageUrlSecondary:
-      '/assets/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: '3-Color Sunburst',
-    variantsCount: 9,
-    badges: ['new'],
-    variants: [
-      {
-        id: '3-color-sunburst',
-        label: '3-Color Sunburst',
-        hex: '#3B2410',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst.webp',
-      },
-      {
-        id: 'olympic-white',
-        label: 'Olympic White',
-        hex: '#F4F0E6',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-olympic-white.webp',
-      },
-      {
-        id: 'black',
-        label: 'Black',
-        hex: '#0A0A0A',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-black.webp',
-      },
-      {
-        id: 'natural',
-        label: 'Natural',
-        hex: '#C7A66B',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-natural.webp',
-      },
-      {
-        id: 'oxblood',
-        label: 'Oxblood',
-        hex: '#5C1F22',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-oxblood.webp',
-      },
-      {
-        id: 'dark-night',
-        label: 'Dark Night',
-        hex: '#1B2533',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-dark-night.webp',
-      },
-      {
-        id: 'aged-cherry-burst',
-        label: 'Aged Cherry Burst',
-        hex: '#7C2A26',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-aged-cherry-burst.webp',
-      },
-      {
-        id: '3-color-sunburst-maple',
-        label: '3-Color Sunburst (Maple)',
-        hex: '#3B2410',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst-maple.webp',
-      },
-      {
-        id: 'butterscotch-blonde-maple',
-        label: 'Butterscotch Blonde (Maple)',
-        hex: '#D4A557',
-        imageUrl:
-          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-butterscotch-blonde-maple.webp',
-      },
-    ],
-  },
-  {
-    id: 9130,
-    slug: 'fender-american-professional-stratocaster',
-    name: 'Fender American Professional Stratocaster',
-    priceCents: 169900,
-    currency: 'USD',
-    // 7 variants: 5 Rosewood FB (3-CS, Olympic White, Black, Oxblood,
-    // Dark Night) + 2 Maple FB (3-CS, Olympic White). 3 single-coil V-Mod III
-    // + trémolo 2-point.
-    imageUrl:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x523-01.webp',
-    imageUrlSecondary:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x521-02.webp',
-    vendor: 'Fender',
-    finish: '3-Color Sunburst',
-    variantsCount: 7,
-    badges: ['new'],
-    variants: [
-      {
-        id: '3-color-sunburst',
-        label: '3-Color Sunburst',
-        hex: '#3B2410',
-        imageUrl:
-          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst.webp',
-      },
-      {
-        id: 'olympic-white',
-        label: 'Olympic White',
-        hex: '#F4F0E6',
-        imageUrl:
-          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white.webp',
-      },
-      {
-        id: 'black',
-        label: 'Black',
-        hex: '#0A0A0A',
-        imageUrl:
-          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-black.webp',
-      },
-      {
-        id: 'oxblood',
-        label: 'Oxblood',
-        hex: '#5C1F22',
-        imageUrl:
-          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-oxblood.webp',
-      },
-      {
-        id: 'dark-night',
-        label: 'Dark Night',
-        hex: '#1B2533',
-        imageUrl:
-          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-dark-night.webp',
-      },
-      {
-        id: '3-color-sunburst-maple',
-        label: '3-Color Sunburst (Maple)',
-        hex: '#3B2410',
-        imageUrl:
-          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst-maple.webp',
-      },
-      {
-        id: 'olympic-white-maple',
-        label: 'Olympic White (Maple)',
-        hex: '#F4F0E6',
-        imageUrl:
-          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white-maple.webp',
-      },
-    ],
-  },
-  {
-    id: 9140,
-    slug: 'fender-american-professional-jaguar',
-    name: 'Fender American Professional Jaguar',
-    priceCents: 189900,
-    currency: 'USD',
-    // 5 variants Rosewood FB (3-CS, Olympic White, Black, Oxblood,
-    // Dark Night). Scale 24" corto + 1 humbucker + 1 SC + trémolo
-    // Panorama. (Distinto del Jazzmaster — el user confirmó Jaguar.)
-    imageUrl:
-      '/assets/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x545-01.webp',
-    imageUrlSecondary:
-      '/assets/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x543-02.webp',
-    vendor: 'Fender',
-    finish: '3-Color Sunburst',
-    variantsCount: 5,
-    badges: ['new'],
-    variants: [
-      {
-        id: '3-color-sunburst',
-        label: '3-Color Sunburst',
-        hex: '#3B2410',
-        imageUrl:
-          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-3-color-sunburst.webp',
-      },
-      {
-        id: 'olympic-white',
-        label: 'Olympic White',
-        hex: '#F4F0E6',
-        imageUrl:
-          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-olympic-white.webp',
-      },
-      {
-        id: 'black',
-        label: 'Black',
-        hex: '#0A0A0A',
-        imageUrl:
-          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-black.webp',
-      },
-      {
-        id: 'oxblood',
-        label: 'Oxblood',
-        hex: '#5C1F22',
-        imageUrl:
-          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-oxblood.webp',
-      },
-      {
-        id: 'dark-night',
-        label: 'Dark Night',
-        hex: '#1B2533',
-        imageUrl:
-          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-dark-night.webp',
-      },
-    ],
-  },
-  {
-    id: 9120,
-    slug: 'fender-american-vintage-ii-1957-stratocaster',
-    name: 'Fender American Vintage II 1957 Stratocaster, Black',
-    priceCents: 239900,
-    currency: 'USD',
-    // Fender AmVintage II 1957 Strat: aspect LANDSCAPE 1600×525.
-    // Front específico del SKU Black (0110232806); back es compartido
-    // entre variants del modelo (la 2-Color Sunburst SKU tiene el mismo
-    // back). Las imágenes del recon round 1 (Oct 2026) — recon vía webfetch
-    // porque /products.json está bloqueado por Cloudflare.
-    imageUrl:
-      '/assets/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x518-01.webp',
-    imageUrlSecondary:
-      '/assets/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x523-02.webp',
-    vendor: 'Fender',
-    finish: 'Black',
-    badges: ['new'],
-  },
+  ...[
+    GIBSON_LES_PAUL_SUPREME,
+    FENDER_AMPRO_TELECASTER,
+    FENDER_AMPRO_STRATOCASTER,
+    FENDER_AMPRO_JAGUAR,
+    FENDER_AMVII_57_STRAT,
+    GIBSON_CUSTOM_SELECT_1968,
+    GIBSON_MOD_ES_335,
+    GIBSON_MOD_SG_HOLY_SHIFT,
+    GIBSON_MOD_LP60S_HORNET,
+    GIBSON_MOD_SG_MODERN_TENACITY,
+    GIBSON_MOD_ES_339_GREEN_MEME,
+    GIBSON_MOD_FLYING_V_BOISTEROUS,
+    GIBSON_MOD_LP_JUNIOR_TROPICALIA,
+    GIBSON_MOD_LP_CUSTOM_70S,
+    GIBSON_MOD_FLYING_V_FLAME_JOB,
+  ].map((spec) => createRelatedProduct(spec)),
+  // === Catálogo Kitsune (anime/figures) — mantenido como mock puro,
+  //     no se genera con el factory porque NO viene del backend JSON. ===
   {
     id: PRODUCTS[6].id,
     slug: PRODUCTS[6].slug,
@@ -630,171 +403,7 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     finish: '10 cm',
     variantsCount: 1,
   },
-  // === Gibson Mod™ Collection / Custom — 10 productos (recon batch) ===
-  {
-    id: 9103,
-    slug: 'gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle',
-    name: 'Custom 1968 Les Paul Custom Reissue, Gloss, White Sparkle',
-    priceCents: 449900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Gloss, White Sparkle',
-    badges: ['new'],
-  },
-  {
-    id: 9104,
-    slug: 'gibson-mod-collection-es-335-smooth-sepia',
-    name: 'Mod™ Collection ES-335, Smooth Sepia',
-    priceCents: 299900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Smooth Sepia',
-    badges: ['new'],
-  },
-  {
-    id: 9105,
-    slug: 'gibson-mod-collection-sg-standard-holy-shift',
-    name: 'Mod™ Collection SG Standard, Holy Shift',
-    priceCents: 189900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Holy Shift',
-    badges: ['new'],
-  },
-  {
-    id: 9106,
-    slug: 'gibson-mod-collection-les-paul-standard-60s-hornet-burst',
-    name: 'Mod™ Collection Les Paul Standard 60s, Hornet Burst',
-    priceCents: 269900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Hornet Burst',
-    badges: ['new'],
-  },
-  {
-    id: 9107,
-    slug: 'gibson-mod-collection-sg-modern-tenacity-blue',
-    name: 'Mod™ Collection SG Modern, Tenacity Blue',
-    priceCents: 229900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Tenacity Blue',
-    badges: ['new'],
-  },
-  {
-    id: 9108,
-    slug: 'gibson-mod-collection-es-339-green-meme',
-    name: 'Mod™ Collection ES-339, Green Meme',
-    priceCents: 279900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Green Meme',
-    badges: ['new'],
-  },
-  {
-    id: 9109,
-    slug: 'gibson-mod-collection-flying-v-80s-boisterous-blue',
-    name: 'Mod™ Collection Flying V 80s, Boisterous Blue',
-    priceCents: 219900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Boisterous Blue',
-    badges: ['new'],
-  },
-  {
-    id: 9110,
-    slug: 'gibson-mod-collection-les-paul-junior-tropicalia',
-    name: 'Mod™ Collection Les Paul Junior, Tropicalia',
-    priceCents: 159900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Tropicalia',
-    badges: ['new'],
-  },
-  {
-    id: 9111,
-    slug: 'gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite',
-    name: 'Mod™ Collection Les Paul Custom 70s, Nighty-Nite Graphite',
-    priceCents: 329900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Nighty-Nite Graphite',
-    badges: ['new'],
-  },
-  {
-    id: 9112,
-    slug: 'gibson-mod-collection-flying-v-80s-flame-job-hot-rod',
-    name: 'Mod™ Collection Flying V 80s, Flame Job Hot Rod',
-    priceCents: 249900,
-    currency: 'USD',
-    imageUrl:
-      '/assets/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-front-1600x1600-03.webp',
-    imageUrlSecondary:
-      '/assets/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-back-1600x1600-04.webp',
-    vendor: 'Gibson',
-    finish: 'Flame Job Hot Rod',
-    badges: ['new'],
-  },
-];
-
-/**
- * Imagen base de la galería PDP — sirve las versiones WebP responsive
- * que el script `scripts/convert-product-images.sh` generó en
- * `frontend/public/assets/products/{slug}/{variant}/{...}.webp`.
- *
- * Tamaños servidos (4 anchos, alto derivado del aspect ratio 2.19:1):
- *   - 1600x730  ← imagen principal de la PDP (default)
- *   - 1200x547  ← retina / pantallas HiDPI
- *   - 800x365   ← tablets
- *   - 400x183   ← thumbnails de la PDP y catálogo cards
- *
- * El frontend debe usar `<picture>` con `<source media>` + `<img srcset>`
- * para servir el tamaño correcto según viewport.
- */
-function fenderImageUrl(
-  productSlug: string,
-  variant: string,
-  index: string,
-  size: '1600x730' | '1200x547' | '800x365' | '400x183' = '1600x730'
-): string {
-  // Path convention: /assets/products/{productSlug}/{variant}/{productSlug}-{variant}-{size}-{index}.webp
-  // El symlink frontend/public/assets → ../../assets hace que Astro sirva
+] as const;
 
 /**
  * Helper: promedio de rating (redondeado a 1 decimal para mostrar).
