@@ -585,3 +585,76 @@ Si la ejecución falla a mitad de camino:
   universal + extension table (Fase 4).
 - `docs/architecture/multi-store.md` — qué assets se comparten vs se
   separan entre Panda y Kitsune.
+
+---
+
+## 9. Final state (post Fase 6)
+
+Después de las seis fases del image architecture plan, el estado
+del codebase es:
+
+- `StorageKeyDeriver` y `UrlSigner` puros con tests unitarios
+  exhaustivos (Fases 2-3).
+- `AssetController` con soft-mode validation, HMAC signing gated
+  por config, cache config-driven con fallback, y 404 enumeration
+  logging estructurado (Fases 2-3).
+- `assets:backfill-images` Artisan command operacional con
+  `--dry-run`, `--chunk`, `--tenant` y `--force` (Fase 5). El user
+  lo corre manualmente con `--dry-run` primero para validar.
+- Pattern de migraciones formalizado con decision tree para datos
+  tenant-specific (Fase 4, doc aparte).
+- Migration #2 (`convert_shipping_zones_base_cost_to_cents`)
+  refactorizada con guard en estado NUEVO para idempotencia (Fase 6).
+
+### Decisiones diferidas (no en scope de Fase 6)
+
+- **Flip `path_validation.strict` a `true`** en `config/assets.php`.
+  El user corre esto post-backfill manual + monitorea logs
+  `asset.path.malformed` por 24h. Mientras el flag esté en `false`,
+  paths malformados se loguean pero se sirven igual (soft mode).
+- **Flip `url_signing.required` a `true`** en `config/assets.php`.
+  Requiere un cambio de contrato de API: el backend debe devolver
+  signed URLs (`image_url` con `?expires=...&sig=...`) en lugar del
+  storage key crudo. Defer hasta que el equipo decida si el signing
+  vive en el response del API o en un middleware que wrappea en el
+  controller.
+- **Adoptar la tabla `media` (Spatie MediaLibrary)** — sigue siendo
+  dead code al momento de escribir este doc (ningún modelo usa
+  `HasMedia` o `InteractsWithMedia`). Decisión: NO adoptar.
+  `StorageKeyDeriver` cubre la necesidad de storage keys sin la
+  complejidad de la library de Spatie. Si en el futuro se requiere
+  metadata custom por asset, crear tabla de extensión siguiendo
+  §5 de `migration-pattern.md`.
+- **Backfill para otras tablas** que tienen storage de imágenes
+  (`product_store_images.image_url`, `stores.logo_path`,
+  `store_themes.logo_path`). El patrón del comando
+  `assets:backfill-images` se reusa con ajustes menores para
+  apuntar a cada tabla.
+- **Refactor de `imageSrcset` en `frontend/src/lib/product-image.ts`**
+  para que respete el nuevo contrato (las nuevas URLs no tienen
+  size tokens). El helper actual devuelve srcset vacío para URLs
+  nuevas — degraded pero funcional.
+
+### Cleanup log
+
+- **Eliminado**: `fenderImageUrl()` en
+  `frontend/src/data/product-detail-mock.ts` (líneas 790-798 + su
+  docblock de 14 líneas). Reemplazado por `assetUrl(mockAssetStorageKey(...))`
+  en los 8 call sites.
+- **Refactorizado**: `convert_shipping_zones_base_cost_to_cents.php`
+  con guard invertido — early return si `base_cost_cents` ya existe
+  (estado NUEVO). Mismo patrón en `down()`.
+- **Sin tocar**: `frontend/src/lib/storage.ts` (placeholder vacío,
+  no se elimina para no romper imports hipotéticos).
+- **Sin tocar**: el resto del codebase. El grep post-Fase-6 dio
+  cero referencias a `fenderImageUrl`, `rotateImage`, o variantes
+  legacy del carousel.
+
+---
+
+## 10. Changelog
+
+- **2026-10-17** — `§6.3 Runtime protections` agregado en Fase 3.
+- **2026-10-17** — `§6.2 Drift` existente desde Fase 2.
+- **2026-10-18** — `§9 Final state` agregado en Fase 6. Cleanup
+  completo del legacy + refactor de migration #2.

@@ -6,18 +6,28 @@
  * testearse en isolation. La galería PDP importa estas funciones y
  * genera el atributo `srcset` con la lógica testeada acá.
  *
- * CONVENCIÓN DE NAMING en disco:
- *   /images/products/{slug}/{variant}/{slug}-{variant}-{WxH}-{NN}.webp
+ * CONVENCIÓN DE NAMING (Fase 6 del image architecture plan):
+ *   storage_key:  tenants/{slug}/{collection}/{entity}/{hash}.{ext}
+ *   proxy_url:    /api/v1/storefront/assets/{storage_key}
+ *   helper nuevo: frontend/src/lib/asset-url.ts (assetUrl + mockAssetStorageKey)
  *
- * Por ejemplo:
- *   /images/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/
- *     gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-1600x1600-03.webp
+ * La galería recibe la URL completa del proxy desde la API response.
+ * El storage key NO contiene tokens de tamaño porque las imágenes
+ * se sirven tal cual desde el FTP disk via el AssetController backend
+ * (ver backend/app/Http/Controllers/Api/Storefront/AssetController.php).
  *
- * Tamaños generados por el recon pipeline (cwebp -resize W 0):
+ * DEPRECADO: el `SIZE_TOKEN_RE` y `parseSizeToken()` quedaron de la
+ * convención legacy `/images/products/{slug}/{variant}/{slug}-{variant}-{WxH}-{NN}.webp`
+ * (helper `fenderImageUrl()` removido en Fase 6). Si los callers
+ * activos no usan `imageSrcset()` con URLs nuevas, el helper
+ * devolverá srcset vacío (degraded pero funcional). Migrar callers
+ * al helper `assetUrl()` + `<img>` sin srcset antes de eliminar.
+ *
+ * Tamaños generados por el recon pipeline legacy (cwebp -resize W 0):
  *   1600, 1200, 800, 400 (width)
  *   Height = round(W * source_aspect)
  *
- * Estrategia del srcset:
+ * Estrategia del srcset (legacy, ver DEPRECADO arriba):
  *   - Parsea el token de tamaño (WxH) del URL base via regex
  *   - Deriva `aspect = h / w` del source
  *   - Para cada width objetivo, calcula height proporcional

@@ -13,6 +13,14 @@ return new class extends Migration
     {
         // Convierte `base_cost` (decimal(12,2)) a `base_cost_cents` (bigint unsigned)
         // para alinear con el resto del schema monetario (PHASE 1).
+        //
+        // Refactor Fase 6 del image architecture plan: guard en estado NUEVO
+        // (`base_cost_cents`) en lugar del estado VIEJO (`base_cost`). Esto
+        // hace la migración idempotente — re-corridas no duplican ni fallan.
+        if (Schema::hasColumn('shipping_zones', 'base_cost_cents')) {
+            return;
+        }
+
         Schema::table('shipping_zones', function (Blueprint $table): void {
             $table->unsignedBigInteger('base_cost_cents')->default(0)->after('description');
         });
@@ -33,6 +41,12 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Idempotencia simétrica: si `base_cost` ya existe, el rollback
+        // ya fue aplicado y no hacemos nada.
+        if (Schema::hasColumn('shipping_zones', 'base_cost')) {
+            return;
+        }
+
         Schema::table('shipping_zones', function (Blueprint $table): void {
             $table->decimal('base_cost', 12, 2)->default(0)->after('description');
         });
