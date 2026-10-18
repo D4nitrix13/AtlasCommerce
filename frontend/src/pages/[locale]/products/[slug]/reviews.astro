@@ -31,7 +31,6 @@ import ProductReviews from '../../../../components/storefront/products/ProductRe
 import { findProductBySlug, CATEGORIES } from '../../../../data/products';
 import {
   SABER_ALTER_DETAIL,
-  FENDER_PLAYER_FUSION_BASS_DETAIL,
   getAverageRating,
 } from '../../../../data/product-detail-mock';
 import { getServerDictionary } from '../../../../i18n/server';
@@ -47,29 +46,27 @@ if (product === null) {
 }
 
 // Detalle enriquecido: si el slug matchea uno de nuestros mocks
-// enriquecidos (Saber Alter, Fender), lo usamos directamente. Si no,
+// enriquecidos (Saber Alter), lo usamos directamente. Si no,
 // derivamos un subset mínimo del producto base (misma lógica que
 // `[slug].astro` para mantener consistencia entre vistas).
 const detail =
-  product?.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
-    ? FENDER_PLAYER_FUSION_BASS_DETAIL
-    : product?.slug === SABER_ALTER_DETAIL.slug
-      ? SABER_ALTER_DETAIL
-      : product !== null
-        ? {
-            ...SABER_ALTER_DETAIL,
-            id: product.id,
-            slug: product.slug,
-            name: product.name,
-            description: product.description,
-            priceCents: product.priceCents,
-            compareAtPriceCents: product.compareAtPriceCents,
-            currency: product.currency ?? 'USD',
-            category: product.category,
-            stock: product.stock,
-            badges: product.badges ?? [],
-          }
-        : null;
+  product?.slug === SABER_ALTER_DETAIL.slug
+    ? SABER_ALTER_DETAIL
+    : product !== null
+      ? {
+          ...SABER_ALTER_DETAIL,
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          description: product.description,
+          priceCents: product.priceCents,
+          compareAtPriceCents: product.compareAtPriceCents,
+          currency: product.currency ?? 'USD',
+          category: product.category,
+          stock: product.stock,
+          badges: product.badges ?? [],
+        }
+      : null;
 
 const REVIEWS = detail?.reviews ?? [];
 
