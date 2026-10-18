@@ -65,6 +65,17 @@ export interface ProductVariant {
   compareAtPriceCents?: number;
   imageUrl: string;
   stock: number;
+  // ─── Phase 7 — product schema rich ────────────────────────────────
+  /** Slug del acabado (ej. `rojo`, `negro`, `sunburst`). */
+  finishSlug?: string;
+  /** Label legible del acabado (ej. `Sunburst`, `Negro`). */
+  finishLabel?: string;
+  /** Hex color para swatch visual. */
+  finishHex?: string;
+  /** Condición de venta (`nuevo` | `usado` | `ambos`). */
+  condition?: 'nuevo' | 'usado' | 'ambos';
+  /** Slug del tamaño asociado (si el producto vende por tallas). */
+  sizeSlug?: string;
 }
 
 /** Reseña individual. */
@@ -109,6 +120,17 @@ export interface ProductDetailData {
    * tamaños distintos: true.
    */
   hasSizes?: boolean;
+  /**
+   * Bandera "Edición Limitada". El PDP la muestra como tag
+   * "Limitado" encima del nombre cuando es true.
+   */
+  isExclusive?: boolean;
+  /**
+   * Tallas del producto (sólo si vende por tallas). Vacío cuando
+   * `hasSizes = false`. La PDP itera este array para renderizar
+   * el `ProductSizeGrid`.
+   */
+  sizes?: ReadonlyArray<{ slug: string; label: string; position?: number }>;
   /** Galería: 4 imágenes mínimo (Baymard). */
   images: string[];
   /** Variantes estructuradas. */
