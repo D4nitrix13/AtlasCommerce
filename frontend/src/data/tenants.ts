@@ -30,7 +30,12 @@
 import type { TranslationKey } from '../i18n/types';
 
 /** Slugs de tenants soportados por el storefront. */
-export type TenantSlug = 'panda-estampados' | 'kitsune' | 'mm-boutique' | 'morales-store';
+export type TenantSlug =
+  | 'panda-estampados'
+  | 'kitsune'
+  | 'mm-boutique'
+  | 'morales-store'
+  | 'instrumentos-musicales-la-voz';
 
 /**
  * Use case "localizable": el caller traduce `labelKey` con su
