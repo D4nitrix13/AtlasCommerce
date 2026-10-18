@@ -6,23 +6,25 @@
  * backend exponga `/api/storefront/products` con scope por tenant,
  * este archivo se reemplaza por fetch.
  *
- * Decisiones:
- *   - Productos placeholder coherentes con guitargear.com.mx: guitarras
- *     electricas, bajos, amplificadores, audio, accesorios.
- *   - Marcas conocidas: Fender, Gibson, Yamaha, Marshall, Boss, Shure.
- *   - Cada producto tiene campos Nike+guitargear-ready:
- *     `priceCents`, `compareAtPriceCents`, `badges[]` (new|sale|lowStock),
- *     `attributes.brand`, `attributes.specs` (key/value pairs para
- *     ProductSpecsTable), `variants[]` (size, color, etc).
- *   - Currency por defecto NIO (córdoba nicaragüense) — La Voz es tienda
- *     física en Nicaragua. Bilingue es|en con NIO|USD cuando aplique.
+ * Los productos se generan desde `product-mock-specs.ts` (la misma
+ * fuente que alimenta el seeder backend `ProductSeeder` via JSON)
+ * vía `createProductMock()`. Esto garantiza que el frontend mock y
+ * el backend seed usan exactamente los mismos specs.
  *
- * IMAGES: cada `imageUrl` apunta al path en `assets/products/` que
- * representa el producto. Algunos productos (bajos, amplificadores,
- * PA, mics) todavía no tienen imágenes reales en el repo — en esos
- * casos se apunta al placeholder de Stratocaster con un comment
- * TODO para que el equipo de merchandising suba los reales.
+ * Categories del tenant (guitarras-electricas, bajos,
+ * amplificadores, audio, accesorios) se mapean desde el category
+ * slug del spec. Cuando merchandising defina las verticales finales
+ * y agregue productos de bajos/amplificadores/audio, solo hay que
+ * extender GUITAR_SPECS en product-mock-specs.ts con specs de
+ * otras categorías.
  */
+
+import {
+  buildImageUrl,
+  createProductMock,
+  type ProductMockSpec,
+} from '../lib/product-mock-factory';
+import { GUITAR_SPECS } from '../lib/product-mock-specs';
 
 export interface LaVozProductSpec {
   label: string;
@@ -69,256 +71,76 @@ export const LA_VOZ_CATEGORIES = [
 export const LA_VOZ_BRANDS = [
   { slug: 'fender', label: 'Fender', count: 0 },
   { slug: 'gibson', label: 'Gibson', count: 0 },
-  { slug: 'yamaha', label: 'Yamaha', count: 0 },
-  { slug: 'marshall', label: 'Marshall', count: 0 },
-  { slug: 'boss', label: 'Boss', count: 0 },
-  { slug: 'shure', label: 'Shure', count: 0 },
 ] as const;
 
-export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
-  {
-    id: 'lv-001',
-    slug: 'fender-stratocaster-player-sunburst',
-    name: 'Fender Stratocaster Player Series — Sunburst',
-    description:
-      'La Stratocaster más icónica en su versión Player Series. Tres single-coils, trémolo sincronizado, mástil con perfil moderno C. Lista para estudio y escenario.',
-    priceCents: 1350_00,
-    compareAtPriceCents: 1500_00,
-    currency: 'USD',
-    category: 'guitarras-electricas',
-    badges: ['sale'],
-    imageUrl:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
-    imageAlt: 'Fender Stratocaster Player Series color sunburst',
-    attributes: {
-      brand: 'fender',
-      specs: [
-        { label: 'Cuerpo', value: 'Aliso (Alder)' },
-        { label: 'Mástil', value: 'Arce (Maple), perfil Modern C' },
-        { label: 'Diapasón', value: 'Palo de rosa (Rosewood), 9.5" radius' },
-        { label: 'Trastes', value: '22, Medium Jumbo' },
-        { label: 'Pastillas', value: '3x Single-Coil Player Series Alnico 5' },
-        { label: 'Puente', value: 'Trémolo sincronizado de 2 puntos' },
-        { label: 'Acabado', value: '3-Color Sunburst, poliuretano' },
-      ],
-    },
-    variants: [
-      { id: 'sunburst', label: 'Sunburst', hex: '#C8954B', inStock: true },
-      { id: 'black', label: 'Black', hex: '#1A1A1A', inStock: true },
-      { id: 'tidepool', label: 'Tidepool', hex: '#3B7080', inStock: false },
-    ],
-    inStock: true,
-  },
-  {
-    id: 'lv-002',
-    slug: 'gibson-les-paul-standard-50s-goldtop',
-    name: 'Gibson Les Paul Standard ’50s — Goldtop',
-    description:
-      'La Les Paul más auténtica. Mástil mahogany con perfil años 50, pastillas BurstBucker 1 y 2, acabado Goldtop con protector de tortoise. Sonido cálido con sustain infinito.',
-    priceCents: 2800_00,
+/**
+ * Mapea category-slug del spec al enum LaVozProduct.category.
+ * Solo guitarras-electricas está poblado por ahora (los specs existentes
+ * son guitarras). Cuando se agreguen specs de otras categorías, extender
+ * el switch.
+ */
+function mapCategorySlug(slug: string): LaVozProduct['category'] {
+  switch (slug) {
+    case 'guitarra-electrica':
+      return 'guitarras-electricas';
+    case 'bajo':
+      return 'bajos';
+    case 'amplificador':
+      return 'amplificadores';
+    case 'audio':
+      return 'audio';
+    case 'accesorio':
+      return 'accesorios';
+    default:
+      return 'guitarras-electricas';
+  }
+}
+
+/**
+ * Genera un LaVozProduct a partir de un ProductMockSpec. Adapta la
+ * shape del factory output al contrato LaVozProduct (que es el que
+ * consume `la-voz-mock.ts` y los pages que lo usan).
+ */
+function createLaVozProductFromSpec(
+  spec: ProductMockSpec,
+  index: number,
+): LaVozProduct {
+  const product = createProductMock(spec, { id: 9000 + index });
+  const defaultVariant = spec.variants.find((v) => v.isDefault) ?? spec.variants[0];
+
+  return {
+    id: String(product.id),
+    slug: product.slug,
+    name: product.name,
+    description: product.description,
+    priceCents: product.priceCents,
     compareAtPriceCents: null,
     currency: 'USD',
-    category: 'guitarras-electricas',
-    badges: ['new'],
-    // TODO(merchandising): subir imagen real de Les Paul Goldtop.
-    // Placeholder: imagen más cercana en assets/products/ (hornet-burst).
-    imageUrl:
-      '/assets/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-front-1600x1600-03.webp',
-    imageAlt: 'Gibson Les Paul Standard 50s Goldtop',
+    category: mapCategorySlug(spec.categorySlug),
+    badges: spec.badges as LaVozProduct['badges'],
+    imageUrl: product.imageUrl,
+    imageAlt: `${product.name} — vista frontal`,
     attributes: {
-      brand: 'gibson',
+      brand: spec.brandSlug,
       specs: [
-        { label: 'Cuerpo', value: 'Mástil mahogany con tapa de maple' },
-        { label: 'Mástil', value: 'Mahogany, perfil años 50 rounded' },
-        { label: 'Diapasón', value: 'Rosewood, 12" radius' },
-        { label: 'Trastes', value: '22, Medium Jumbo' },
-        { label: 'Pastillas', value: 'BurstBucker 1 (mástil) + BurstBucker 2 (puente)' },
-        { label: 'Acabado', value: 'Goldtop, nitrocelulosa' },
+        { label: 'Marca', value: spec.brand },
+        { label: 'Modelo', value: spec.name },
+        // Specs adicionales se pueden extraer del spec si se necesita.
       ],
     },
-    variants: [
-      { id: 'goldtop', label: 'Goldtop', hex: '#C9A14D', inStock: true },
-      { id: 'cherry', label: 'Cherry', hex: '#7A1F1F', inStock: false },
-    ],
+    variants: spec.variants.map((v) => ({
+      id: v.slug,
+      label: v.displayName,
+      hex: v.hex,
+      inStock: true,
+    })),
     inStock: true,
-  },
-  {
-    id: 'lv-003',
-    slug: 'fender-jazz-bass-rosewood-fingerboard-3ts',
-    name: 'Fender Jazz Bass — 3-Tone Sunburst',
-    description:
-      'El bajo eléctrico más versátil. Dos pastillas single-coil JBass, sonido definido para slap, fingerstyle y púa. Mástil delgado para tocar cómodo.',
-    priceCents: 1100_00,
-    compareAtPriceCents: null,
-    currency: 'USD',
-    category: 'bajos',
-    badges: [],
-    // TODO(merchandising): subir imagen real de Jazz Bass.
-    // Placeholder: imagen de Stratocaster (no hay bajos en assets aún).
-    imageUrl:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
-    imageAlt: 'Fender Jazz Bass color 3 tone sunburst',
-    attributes: {
-      brand: 'fender',
-      specs: [
-        { label: 'Cuerpo', value: 'Aliso (Alder)' },
-        { label: 'Mástil', value: 'Arce (Maple), perfil Modern C' },
-        { label: 'Diapasón', value: 'Palo de rosa (Rosewood)' },
-        { label: 'Trastes', value: '20, Medium Jumbo' },
-        { label: 'Pastillas', value: '2x Single-Coil Jazz Bass' },
-      ],
-    },
-    variants: [
-      { id: '3ts', label: '3-Color Sunburst', hex: '#7A4E1F', inStock: true },
-      { id: 'blk', label: 'Black', hex: '#1A1A1A', inStock: true },
-    ],
-    inStock: true,
-  },
-  {
-    id: 'lv-004',
-    slug: 'marshall-jvm410c-combo',
-    name: 'Marshall JVM410C — Combo 100W',
-    description:
-      'Cuatro canales limpios, crunch, OD1, OD2. Cada uno con su propio EQ + reverb. Sonido Marshall de los grandes escenarios en un combo transportable.',
-    priceCents: 3200_00,
-    compareAtPriceCents: 3500_00,
-    currency: 'USD',
-    category: 'amplificadores',
-    badges: ['sale'],
-    // TODO(merchandising): subir imagen real del Marshall JVM410C.
-    // Placeholder: imagen de Stratocaster (no hay amps en assets aún).
-    imageUrl:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
-    imageAlt: 'Marshall JVM410C combo amp',
-    attributes: {
-      brand: 'marshall',
-      specs: [
-        { label: 'Potencia', value: '100W (conmutable a 50W)' },
-        { label: 'Canales', value: '4 (Clean, Crunch, OD1, OD2)' },
-        { label: 'Parlantes', value: '4x Celestion G12T-100 (12")' },
-        { label: 'Efectos', value: 'Reverb digital + loop de efectos' },
-      ],
-    },
-    variants: [],
-    inStock: true,
-  },
-  {
-    id: 'lv-005',
-    slug: 'yamaha-stagepas-600bt',
-    name: 'Yamaha STAGEPAS 600BT — Sistema PA portátil',
-    description:
-      'Sistema de PA autoamplificado 680W con dos parlantes de 10", mezcladora integrada con 10 canales y Bluetooth. Perfecto para presentaciones en vivo pequeñas y medianas.',
-    priceCents: 980_00,
-    compareAtPriceCents: null,
-    currency: 'USD',
-    category: 'audio',
-    badges: ['new'],
-    // TODO(merchandising): subir imagen real del Stagepas 600BT.
-    // Placeholder: imagen de Stratocaster (no hay PA en assets aún).
-    imageUrl:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
-    imageAlt: 'Yamaha STAGEPAS 600BT PA system',
-    attributes: {
-      brand: 'yamaha',
-      specs: [
-        { label: 'Potencia', value: '680W peak / 340W RMS' },
-        { label: 'Parlantes', value: '2x 10" + driver de compresión 1.4"' },
-        { label: 'Canales', value: '10 (4 mono + 3 estéreo + Bluetooth)' },
-        { label: 'Conectividad', value: 'Bluetooth 5.0, XLR, TRS, RCA' },
-      ],
-    },
-    variants: [],
-    inStock: true,
-  },
-  {
-    id: 'lv-006',
-    slug: 'shure-sm58-lc',
-    name: 'Shure SM58 — Micrófono vocal',
-    description:
-      'El micrófono vocal más vendido del mundo. Cápsula dinámica cardioide, rechazo excepcional a la retroalimentación. Construcción a prueba de todo.',
-    priceCents: 120_00,
-    compareAtPriceCents: null,
-    currency: 'USD',
-    category: 'audio',
-    badges: [],
-    // TODO(merchandising): subir imagen real del Shure SM58.
-    // Placeholder: imagen de Stratocaster (no hay mics en assets aún).
-    imageUrl:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
-    imageAlt: 'Shure SM58 vocal microphone',
-    attributes: {
-      brand: 'shure',
-      specs: [
-        { label: 'Tipo', value: 'Dinámico cardioide' },
-        { label: 'Respuesta', value: '50 Hz – 15 kHz' },
-        { label: 'Impedancia', value: '300 Ω' },
-        { label: 'Conector', value: 'XLR-3M' },
-      ],
-    },
-    variants: [],
-    inStock: true,
-  },
-  {
-    id: 'lv-007',
-    slug: 'boss-katana-100-mkii',
-    name: 'Boss Katana-100 MkII — Combo 100W',
-    description:
-      'Combo de modelado con 5 voces de amplificador + 60 efectos BOSS. Bluetooth para backing tracks. App BOSS Tone Studio para editar todo desde el celular.',
-    priceCents: 520_00,
-    compareAtPriceCents: null,
-    currency: 'USD',
-    category: 'amplificadores',
-    badges: ['new', 'lowStock'],
-    // TODO(merchandising): subir imagen real del Boss Katana-100.
-    // Placeholder: imagen de Stratocaster (no hay amps en assets aún).
-    imageUrl:
-      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
-    imageAlt: 'Boss Katana-100 MkII combo',
-    attributes: {
-      brand: 'boss',
-      specs: [
-        { label: 'Potencia', value: '100W' },
-        { label: 'Parlante', value: '12" custom' },
-        { label: 'Efectos', value: '60+ efectos digitales' },
-        { label: 'Conectividad', value: 'Bluetooth, USB-C, MIDI, AUX' },
-      ],
-    },
-    variants: [],
-    inStock: true,
-  },
-  {
-    id: 'lv-008',
-    slug: 'gibson-sg-standard-cherry',
-    name: 'Gibson SG Standard — Cherry',
-    description:
-      'La SG original. Mástil mahogany perfil SlimTaper, pastillas 490R + 490T, sustain brillante. Liviana y rápida.',
-    priceCents: 1750_00,
-    compareAtPriceCents: null,
-    currency: 'USD',
-    category: 'guitarras-electricas',
-    badges: [],
-    // TODO(merchandising): imagen cherry exacta no disponible.
-    // Placeholder: SG holy-shift (Gibson SG con color sólido).
-    imageUrl:
-      '/assets/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-front-1600x1600-03.webp',
-    imageAlt: 'Gibson SG Standard cherry',
-    attributes: {
-      brand: 'gibson',
-      specs: [
-        { label: 'Cuerpo', value: 'Mahogany' },
-        { label: 'Mástil', value: 'Mahogany, perfil SlimTaper' },
-        { label: 'Diapasón', value: 'Rosewood, 12" radius' },
-        { label: 'Trastes', value: '22, Cryogenically Treated' },
-        { label: 'Pastillas', value: '490R (mástil) + 490T (puente)' },
-      ],
-    },
-    variants: [
-      { id: 'cherry', label: 'Cherry', hex: '#7A1F1F', inStock: true },
-      { id: 'ebony', label: 'Ebony', hex: '#0A0A0A', inStock: false },
-    ],
-    inStock: true,
-  },
-];
+  };
+}
+
+export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = GUITAR_SPECS.map(
+  createLaVozProductFromSpec,
+);
 
 // Helpers tipo PRODUCTS[] en data/products.ts para no romper la API.
 export function findProductBySlug(slug: string): LaVozProduct | null {
@@ -328,12 +150,12 @@ export function findProductBySlug(slug: string): LaVozProduct | null {
 export function getFeaturedLaVozProducts(limit: number): readonly LaVozProduct[] {
   return LA_VOZ_PRODUCTS.filter((p) => p.badges.includes('new') || p.badges.includes('sale')).slice(
     0,
-    limit
+    limit,
   );
 }
 
 export function getLaVozProductsByCategory(
-  category: LaVozProduct['category']
+  category: LaVozProduct['category'],
 ): readonly LaVozProduct[] {
   return LA_VOZ_PRODUCTS.filter((product) => product.category === category);
 }
