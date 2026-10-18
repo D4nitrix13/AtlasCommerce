@@ -27,6 +27,11 @@ export interface Product {
   compareAtPriceCents?: number;
   /** URL de la imagen principal. */
   imageUrl: string;
+  /**
+   * Galería completa de imágenes (variants con sus front images).
+   * Si está vacía o ausente, el PDP cae al fallback genérico.
+   */
+  images?: readonly string[];
   /** Slug de la categoría. FK lógico a `Category.slug`. */
   category: string;
   /** Stock disponible (0 = agotado). */

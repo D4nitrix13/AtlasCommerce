@@ -52,6 +52,11 @@ export interface LaVozProduct {
   badges: readonly ('new' | 'sale' | 'lowStock')[];
   imageUrl: string;
   imageAlt: string;
+  /**
+   * Galería completa de imágenes (front + back por variant).
+   * Si está vacía, el PDP cae al fallback genérico (placeholder).
+   */
+  images: readonly string[];
   attributes: {
     brand: string;
     specs: readonly LaVozProductSpec[];
@@ -120,6 +125,13 @@ function createLaVozProductFromSpec(
     badges: spec.badges as LaVozProduct['badges'],
     imageUrl: product.imageUrl,
     imageAlt: `${product.name} — vista frontal`,
+    // Gallery: front por cada variant (back se omite porque muchos specs
+    // no tienen imagen back en assets/). El PDP lo usa para mostrar
+    // imágenes reales de guitarra en lugar del placeholder T-shirt del
+    // spread SABER_ALTER_DETAIL.
+    images: spec.variants.map((variant) =>
+      buildImageUrl(spec, variant.slug, 'front'),
+    ),
     attributes: {
       brand: spec.brandSlug,
       specs: [

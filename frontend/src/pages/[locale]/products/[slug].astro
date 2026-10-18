@@ -32,7 +32,12 @@ import ProductDetailVariants, {
 import ProductDetailRatingRow from '../../../components/storefront/products/ProductDetailRatingRow.astro';
 import ProductDetailFinancingBlock from '../../../components/storefront/products/ProductDetailFinancingBlock.astro';
 import ProductFeaturedArticle from '../../../components/storefront/products/ProductFeaturedArticle.astro';
-import ProductFrequentlyBoughtTogether from '../../../components/storefront/products/ProductFrequentlyBoughtTogether.astro';
+// FENDER_PLAYER_FUSION_BASS_DETAIL fue removido en el refactor
+// seeders/mocks brand-agnostic (Oct 2026). El bundle "comprados juntos
+// frecuentemente" que vivía acá se restaurará cuando exista data real
+// para otros productos. El componente ProductFrequentlyBoughtTogether
+// queda en `components/storefront/products/` para reuso futuro.
+// import ProductFrequentlyBoughtTogether from '../../../components/storefront/products/ProductFrequentlyBoughtTogether.astro';
 import ProductRecentlyViewed from '../../../components/storefront/products/ProductRecentlyViewed.astro';
 import ProductFitSelector from '../../../components/storefront/products/ProductFitSelector.astro';
 import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
@@ -49,10 +54,6 @@ import { findProductBySlug, CATEGORIES } from '../../../data/products';
 import { formatCurrency } from '../../../lib/formatters';
 import {
   SABER_ALTER_DETAIL,
-  FENDER_PLAYER_FUSION_BASS_DETAIL,
-  FENDER_PLAYER_FUSION_BASS_INTRO_HTML,
-  FENDER_PLAYER_FUSION_BASS_HEADING,
-  FENDER_BUNDLE_ITEMS,
   RELATED_PRODUCTS,
   type ProductReview,
   getAverageRating,
@@ -73,28 +74,30 @@ if (product === null) {
 }
 
 // Detalle enriquecido: si el slug matchea uno de nuestros mocks
-// enriquecidos (Saber Alter, Fender), lo usamos directamente.
+// enriquecidos (Saber Alter), lo usamos directamente.
 // Si no, derivamos un subset mínimo del producto base.
 const detail =
-  product?.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
-    ? FENDER_PLAYER_FUSION_BASS_DETAIL
-    : product?.slug === SABER_ALTER_DETAIL.slug
-      ? SABER_ALTER_DETAIL
-      : product !== null
-        ? {
-            ...SABER_ALTER_DETAIL,
-            id: product.id,
-            slug: product.slug,
-            name: product.name,
-            description: product.description,
-            priceCents: product.priceCents,
-            compareAtPriceCents: product.compareAtPriceCents,
-            currency: product.currency ?? 'USD',
-            category: product.category,
-            stock: product.stock,
-            badges: product.badges ?? [],
-          }
-        : null;
+  product?.slug === SABER_ALTER_DETAIL.slug
+    ? SABER_ALTER_DETAIL
+    : product !== null
+      ? {
+          ...SABER_ALTER_DETAIL,
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          description: product.description,
+          priceCents: product.priceCents,
+          compareAtPriceCents: product.compareAtPriceCents,
+          currency: product.currency ?? 'USD',
+          category: product.category,
+          stock: product.stock,
+          badges: product.badges ?? [],
+          // Override `images` con las URLs reales del producto. Si el
+          // producto no tiene gallery (e.g. mocks de Kitsune), cae al
+          // fallback de SABER_ALTER_DETAIL (T-shirt placeholder).
+          images: product.images && product.images.length > 0 ? product.images : SABER_ALTER_DETAIL.images,
+        }
+      : null;
 
 // Estado inicial del accordion de specs: leído de la cookie SSR
 // (`pdp-specs-expanded-<slug>`) para evitar el flash visual que se
@@ -248,7 +251,7 @@ const reviewsLabels = {
 
 /** Metadata mínima del producto actual — expuesta a window.__PRODUCT_META__
  *  para que ProductRecentlyViewed pueda trackear este producto via localStorage. */
-const FENDER_PRODUCT =
+const CURRENT_PRODUCT =
   product !== null
     ? {
         slug: product.slug,
@@ -548,16 +551,8 @@ const cardLabels = {
               se renderizan aparte en `<ProductSpecificationsByCategory>`. */}
           {detail.description.length > 0 && (
             <ProductDetailsBlock
-              heading={
-                detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
-                  ? FENDER_PLAYER_FUSION_BASS_HEADING
-                  : undefined
-              }
-              intro={
-                detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug
-                  ? FENDER_PLAYER_FUSION_BASS_INTRO_HTML
-                  : detail.description
-              }
+              heading={undefined}
+              intro={detail.description}
               moreLabel={t['storefront.products.detail.v4.details.more']}
               lessLabel={t['storefront.products.detail.v4.details.less']}
             />
@@ -606,20 +601,6 @@ const cardLabels = {
             <ProductRelated labels={cardLabels} products={RELATED_PRODUCTS} locale={locale} />
           )}
 
-          {/* Frequently bought together — bundle bass + accesorios */}
-          {detail.slug === FENDER_PLAYER_FUSION_BASS_DETAIL.slug && (
-            <ProductFrequentlyBoughtTogether
-              heading="Comprados juntos frecuentemente"
-              items={FENDER_BUNDLE_ITEMS.map((item) => ({
-                product: item.product as Product,
-                position: item.position,
-              }))}
-              addAllHref={`/${locale}/cart?bundle=fender-fusion`}
-              addAllLabel="Agregar todo al carrito"
-              locale={locale}
-            />
-          )}
-
           {/* Recently viewed (client-side via localStorage) */}
           <ProductRecentlyViewed />
         </article>
@@ -631,9 +612,9 @@ const cardLabels = {
     define:vars={{
       productSlug: product?.slug ?? 'unknown',
       productName: product?.name ?? '',
-      productImage: FENDER_PRODUCT.imageUrl,
-      productPriceCents: FENDER_PRODUCT.priceCents,
-      productCurrency: FENDER_PRODUCT.currency ?? 'USD',
+      productImage: CURRENT_PRODUCT.imageUrl,
+      productPriceCents: CURRENT_PRODUCT.priceCents,
+      productCurrency: CURRENT_PRODUCT.currency ?? 'USD',
     }}
   >
     // Inyecta la metadata del producto actual para que ProductRecentlyViewed

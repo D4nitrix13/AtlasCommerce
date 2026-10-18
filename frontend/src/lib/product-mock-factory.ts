@@ -196,6 +196,11 @@ export function createProductMock(
     stock,
     ...(spec.badges !== undefined && { badges: [...spec.badges] }),
     currency: spec.currency ?? 'USD',
+    // Gallery: front image por variant. Se usa en el PDP para mostrar
+    // imágenes reales en lugar del placeholder del mock genérico.
+    images: spec.variants.map((variant) =>
+      buildImageUrl(spec, variant.slug, 'front', variant.backSku),
+    ),
   };
 }
 
