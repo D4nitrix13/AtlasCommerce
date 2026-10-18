@@ -28,7 +28,6 @@ final class TracerSpan
      *
      * @param  string  $key  Nombre del attribute (kebab-case por convención OTel)
      * @param  mixed  $value  Valor serializable. NO pasar closures ni objects grandes.
-     * @return self
      */
     public function setAttribute(string $key, mixed $value): self
     {
@@ -42,7 +41,6 @@ final class TracerSpan
      * `setAttribute()` para cada item, pero atómico a nivel del SDK.
      *
      * @param  array<string, mixed>  $attributes
-     * @return self
      */
     public function setAttributes(array $attributes): self
     {
@@ -63,7 +61,6 @@ final class TracerSpan
      *
      * @param  Throwable  $e  Exception que querés registrar
      * @param  array<string, mixed>  $attributes  Attributes extra para el event (ej: 'error.kind')
-     * @return self
      */
     public function recordException(Throwable $e, array $attributes = []): self
     {
@@ -80,7 +77,6 @@ final class TracerSpan
      * backend de tracing.
      *
      * @param  string  $description  Mensaje corto (1-2 frases)
-     * @return self
      */
     public function setStatusError(string $description): self
     {
