@@ -370,9 +370,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     currency: 'USD',
     // Gibson es SQUARE (1600×1600). Usamos la toma `03_Front.png`
     // (guitarra COMPLETA de frente, no la hero 01 que es más close-up
-    // del body). Las copias WebP viven en public/images/products/.
+    // del body). Las copias WebP viven en assets/products/{slug}/{variant}/.
     imageUrl:
-      '/images/products/gibson-les-paul-supreme-blueberry-burst/blueberry-burst/gibson-les-paul-supreme-blueberry-burst-blueberry-burst-1600x1600-03.webp',
+      '/assets/products/gibson-les-paul-supreme-blueberry-burst/blueberry-burst/gibson-les-paul-supreme-blueberry-burst-blueberry-burst-1600x1600-03.webp',
     vendor: 'Gibson',
     finish: 'Blueberry Burst',
     badges: ['new'],
@@ -389,9 +389,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     // (3-CS, Butterscotch Blonde) = 9 total. El nombre NO incluye el
     // color en el modelo (los cards muestran "Player Fusion Tele, COLOR").
     imageUrl:
-      '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-01.webp',
+      '/assets/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-01.webp',
     imageUrlSecondary:
-      '/images/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x521-02.webp',
+      '/assets/products/fender-american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x521-02.webp',
     vendor: 'Fender',
     finish: '3-Color Sunburst',
     variantsCount: 9,
@@ -402,63 +402,63 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
         label: '3-Color Sunburst',
         hex: '#3B2410',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst.webp',
       },
       {
         id: 'olympic-white',
         label: 'Olympic White',
         hex: '#F4F0E6',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-olympic-white.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-olympic-white.webp',
       },
       {
         id: 'black',
         label: 'Black',
         hex: '#0A0A0A',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-black.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-black.webp',
       },
       {
         id: 'natural',
         label: 'Natural',
         hex: '#C7A66B',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-natural.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-natural.webp',
       },
       {
         id: 'oxblood',
         label: 'Oxblood',
         hex: '#5C1F22',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-oxblood.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-oxblood.webp',
       },
       {
         id: 'dark-night',
         label: 'Dark Night',
         hex: '#1B2533',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-dark-night.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-dark-night.webp',
       },
       {
         id: 'aged-cherry-burst',
         label: 'Aged Cherry Burst',
         hex: '#7C2A26',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-aged-cherry-burst.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-aged-cherry-burst.webp',
       },
       {
         id: '3-color-sunburst-maple',
         label: '3-Color Sunburst (Maple)',
         hex: '#3B2410',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst-maple.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-3-color-sunburst-maple.webp',
       },
       {
         id: 'butterscotch-blonde-maple',
         label: 'Butterscotch Blonde (Maple)',
         hex: '#D4A557',
         imageUrl:
-          '/images/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-butterscotch-blonde-maple.webp',
+          '/assets/products/fender-american-professional-telecaster/fender-american-professional-telecaster/fender-american-professional-telecaster-fender-american-professional-telecaster-1600x525-butterscotch-blonde-maple.webp',
       },
     ],
   },
@@ -472,9 +472,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     // Dark Night) + 2 Maple FB (3-CS, Olympic White). 3 single-coil V-Mod III
     // + trémolo 2-point.
     imageUrl:
-      '/images/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x523-01.webp',
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x523-01.webp',
     imageUrlSecondary:
-      '/images/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x521-02.webp',
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x521-02.webp',
     vendor: 'Fender',
     finish: '3-Color Sunburst',
     variantsCount: 7,
@@ -485,49 +485,49 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
         label: '3-Color Sunburst',
         hex: '#3B2410',
         imageUrl:
-          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst.webp',
+          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst.webp',
       },
       {
         id: 'olympic-white',
         label: 'Olympic White',
         hex: '#F4F0E6',
         imageUrl:
-          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white.webp',
+          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white.webp',
       },
       {
         id: 'black',
         label: 'Black',
         hex: '#0A0A0A',
         imageUrl:
-          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-black.webp',
+          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-black.webp',
       },
       {
         id: 'oxblood',
         label: 'Oxblood',
         hex: '#5C1F22',
         imageUrl:
-          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-oxblood.webp',
+          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-oxblood.webp',
       },
       {
         id: 'dark-night',
         label: 'Dark Night',
         hex: '#1B2533',
         imageUrl:
-          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-dark-night.webp',
+          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-dark-night.webp',
       },
       {
         id: '3-color-sunburst-maple',
         label: '3-Color Sunburst (Maple)',
         hex: '#3B2410',
         imageUrl:
-          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst-maple.webp',
+          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-3-color-sunburst-maple.webp',
       },
       {
         id: 'olympic-white-maple',
         label: 'Olympic White (Maple)',
         hex: '#F4F0E6',
         imageUrl:
-          '/images/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white-maple.webp',
+          '/assets/products/fender-american-professional-stratocaster/fender-american-professional-stratocaster/fender-american-professional-stratocaster-fender-american-professional-stratocaster-1600x523-olympic-white-maple.webp',
       },
     ],
   },
@@ -541,9 +541,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     // Dark Night). Scale 24" corto + 1 humbucker + 1 SC + trémolo
     // Panorama. (Distinto del Jazzmaster — el user confirmó Jaguar.)
     imageUrl:
-      '/images/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x545-01.webp',
+      '/assets/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x545-01.webp',
     imageUrlSecondary:
-      '/images/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x543-02.webp',
+      '/assets/products/fender-american-professional-jaguar/3-color-sunburst/fender-american-professional-jaguar-3-color-sunburst-1600x543-02.webp',
     vendor: 'Fender',
     finish: '3-Color Sunburst',
     variantsCount: 5,
@@ -554,35 +554,35 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
         label: '3-Color Sunburst',
         hex: '#3B2410',
         imageUrl:
-          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-3-color-sunburst.webp',
+          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-3-color-sunburst.webp',
       },
       {
         id: 'olympic-white',
         label: 'Olympic White',
         hex: '#F4F0E6',
         imageUrl:
-          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-olympic-white.webp',
+          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-olympic-white.webp',
       },
       {
         id: 'black',
         label: 'Black',
         hex: '#0A0A0A',
         imageUrl:
-          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-black.webp',
+          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-black.webp',
       },
       {
         id: 'oxblood',
         label: 'Oxblood',
         hex: '#5C1F22',
         imageUrl:
-          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-oxblood.webp',
+          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-oxblood.webp',
       },
       {
         id: 'dark-night',
         label: 'Dark Night',
         hex: '#1B2533',
         imageUrl:
-          '/images/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-dark-night.webp',
+          '/assets/products/fender-american-professional-jaguar/fender-american-professional-jaguar/fender-american-professional-jaguar-fender-american-professional-jaguar-1600x545-dark-night.webp',
       },
     ],
   },
@@ -598,9 +598,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     // back). Las imágenes del recon round 1 (Oct 2026) — recon vía webfetch
     // porque /products.json está bloqueado por Cloudflare.
     imageUrl:
-      '/images/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x518-01.webp',
+      '/assets/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x518-01.webp',
     imageUrlSecondary:
-      '/images/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x523-02.webp',
+      '/assets/products/fender-american-vintage-ii-1957-stratocaster/black/fender-american-vintage-ii-1957-stratocaster-black-1600x523-02.webp',
     vendor: 'Fender',
     finish: 'Black',
     badges: ['new'],
@@ -638,9 +638,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 449900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-front-1600x1600-03.webp',
+      '/assets/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-back-1600x1600-04.webp',
+      '/assets/products/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle/gloss-white-sparkle/gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle-gloss-white-sparkle-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Gloss, White Sparkle',
     badges: ['new'],
@@ -652,9 +652,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 299900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-es-335-smooth-sepia/smooth-sepia/gibson-mod-collection-es-335-smooth-sepia-smooth-sepia-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Smooth Sepia',
     badges: ['new'],
@@ -666,9 +666,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 189900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Holy Shift',
     badges: ['new'],
@@ -680,9 +680,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 269900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Hornet Burst',
     badges: ['new'],
@@ -694,9 +694,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 229900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-sg-modern-tenacity-blue/tenacity-blue/gibson-mod-collection-sg-modern-tenacity-blue-tenacity-blue-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Tenacity Blue',
     badges: ['new'],
@@ -708,9 +708,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 279900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-es-339-green-meme/green-meme/gibson-mod-collection-es-339-green-meme-green-meme-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Green Meme',
     badges: ['new'],
@@ -722,9 +722,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 219900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-flying-v-80s-boisterous-blue/boisterous-blue/gibson-mod-collection-flying-v-80s-boisterous-blue-boisterous-blue-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Boisterous Blue',
     badges: ['new'],
@@ -736,9 +736,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 159900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-les-paul-junior-tropicalia/tropicalia/gibson-mod-collection-les-paul-junior-tropicalia-tropicalia-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Tropicalia',
     badges: ['new'],
@@ -750,9 +750,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 329900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite/nighty-nite-graphite/gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite-nighty-nite-graphite-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Nighty-Nite Graphite',
     badges: ['new'],
@@ -764,9 +764,9 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
     priceCents: 249900,
     currency: 'USD',
     imageUrl:
-      '/images/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-front-1600x1600-03.webp',
+      '/assets/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-front-1600x1600-03.webp',
     imageUrlSecondary:
-      '/images/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-back-1600x1600-04.webp',
+      '/assets/products/gibson-mod-collection-flying-v-80s-flame-job-hot-rod/flame-job-hot-rod/gibson-mod-collection-flying-v-80s-flame-job-hot-rod-flame-job-hot-rod-back-1600x1600-04.webp',
     vendor: 'Gibson',
     finish: 'Flame Job Hot Rod',
     badges: ['new'],
@@ -776,7 +776,7 @@ export const RELATED_PRODUCTS: readonly RelatedProduct[] = [
 /**
  * Imagen base de la galería PDP — sirve las versiones WebP responsive
  * que el script `scripts/convert-product-images.sh` generó en
- * `frontend/public/images/products/{slug}/{variant}/{...}.webp`.
+ * `frontend/public/assets/products/{slug}/{variant}/{...}.webp`.
  *
  * Tamaños servidos (4 anchos, alto derivado del aspect ratio 2.19:1):
  *   - 1600x730  ← imagen principal de la PDP (default)
@@ -793,8 +793,11 @@ function fenderImageUrl(
   index: string,
   size: '1600x730' | '1200x547' | '800x365' | '400x183' = '1600x730'
 ): string {
-  // Path convention: /images/products/{productSlug}/{variant}/{productSlug}-{variant}-{size}-{index}.webp
-  return `/images/products/${productSlug}/${variant}/${productSlug}-${variant}-${size}-${index}.webp`;
+  // Path convention: /assets/products/{productSlug}/{variant}/{productSlug}-{variant}-{size}-{index}.webp
+  // El symlink frontend/public/assets → ../../assets hace que Astro sirva
+  // estos paths directo sin pasar por el backend. Para producción, el
+  // backend devuelve el path via API y se sirve via AssetController.
+  return `/assets/products/${productSlug}/${variant}/${productSlug}-${variant}-${size}-${index}.webp`;
 }
 
 /**
@@ -1052,7 +1055,7 @@ export const FENDER_BUNDLE_ITEMS = [
     product: {
       ...FENDER_PLAYER_FUSION_BASS_DETAIL,
       imageUrl:
-        '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
+        '/assets/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
     } as ProductDetailData,
     position: 1,
   },
@@ -1064,7 +1067,7 @@ export const FENDER_BUNDLE_ITEMS = [
       description: 'Amplificador combo para bajo de 40W con parlante de 10″.',
       priceCents: 39900,
       compareAtPriceCents: undefined,
-      imageUrl: '/images/products/fender-rumble-40-amp/01.webp',
+      imageUrl: '/assets/products/fender-rumble-40-amp/01.webp',
       category: 'bajo-electrico',
       stock: 8,
       badges: ['new'],
@@ -1080,7 +1083,7 @@ export const FENDER_BUNDLE_ITEMS = [
       description: 'Cable profesional para instrumentos de 6 metros.',
       priceCents: 4900,
       compareAtPriceCents: undefined,
-      imageUrl: '/images/products/fender-monster-cable/01.webp',
+      imageUrl: '/assets/products/fender-monster-cable/01.webp',
       category: 'accesorios',
       stock: 25,
       badges: ['new'],

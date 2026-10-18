@@ -16,6 +16,12 @@
  *     ProductSpecsTable), `variants[]` (size, color, etc).
  *   - Currency por defecto NIO (córdoba nicaragüense) — La Voz es tienda
  *     física en Nicaragua. Bilingue es|en con NIO|USD cuando aplique.
+ *
+ * IMAGES: cada `imageUrl` apunta al path en `assets/products/` que
+ * representa el producto. Algunos productos (bajos, amplificadores,
+ * PA, mics) todavía no tienen imágenes reales en el repo — en esos
+ * casos se apunta al placeholder de Stratocaster con un comment
+ * TODO para que el equipo de merchandising suba los reales.
  */
 
 export interface LaVozProductSpec {
@@ -81,7 +87,8 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'guitarras-electricas',
     badges: ['sale'],
-    imageUrl: '/img/la-voz/stratocaster-sunburst.webp',
+    imageUrl:
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
     imageAlt: 'Fender Stratocaster Player Series color sunburst',
     attributes: {
       brand: 'fender',
@@ -113,7 +120,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'guitarras-electricas',
     badges: ['new'],
-    imageUrl: '/img/la-voz/les-paul-goldtop.webp',
+    // TODO(merchandising): subir imagen real de Les Paul Goldtop.
+    // Placeholder: imagen más cercana en assets/products/ (hornet-burst).
+    imageUrl:
+      '/assets/products/gibson-mod-collection-les-paul-standard-60s-hornet-burst/hornet-burst/gibson-mod-collection-les-paul-standard-60s-hornet-burst-hornet-burst-front-1600x1600-03.webp',
     imageAlt: 'Gibson Les Paul Standard 50s Goldtop',
     attributes: {
       brand: 'gibson',
@@ -143,7 +153,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'bajos',
     badges: [],
-    imageUrl: '/img/la-voz/jazz-bass-3ts.webp',
+    // TODO(merchandising): subir imagen real de Jazz Bass.
+    // Placeholder: imagen de Stratocaster (no hay bajos en assets aún).
+    imageUrl:
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
     imageAlt: 'Fender Jazz Bass color 3 tone sunburst',
     attributes: {
       brand: 'fender',
@@ -172,7 +185,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'amplificadores',
     badges: ['sale'],
-    imageUrl: '/img/la-voz/jvm410c-combo.webp',
+    // TODO(merchandising): subir imagen real del Marshall JVM410C.
+    // Placeholder: imagen de Stratocaster (no hay amps en assets aún).
+    imageUrl:
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
     imageAlt: 'Marshall JVM410C combo amp',
     attributes: {
       brand: 'marshall',
@@ -197,7 +213,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'audio',
     badges: ['new'],
-    imageUrl: '/img/la-voz/stagepas-600bt.webp',
+    // TODO(merchandising): subir imagen real del Stagepas 600BT.
+    // Placeholder: imagen de Stratocaster (no hay PA en assets aún).
+    imageUrl:
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
     imageAlt: 'Yamaha STAGEPAS 600BT PA system',
     attributes: {
       brand: 'yamaha',
@@ -222,7 +241,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'audio',
     badges: [],
-    imageUrl: '/img/la-voz/shure-sm58.webp',
+    // TODO(merchandising): subir imagen real del Shure SM58.
+    // Placeholder: imagen de Stratocaster (no hay mics en assets aún).
+    imageUrl:
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
     imageAlt: 'Shure SM58 vocal microphone',
     attributes: {
       brand: 'shure',
@@ -247,7 +269,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'amplificadores',
     badges: ['new', 'lowStock'],
-    imageUrl: '/img/la-voz/katana-100-mkii.webp',
+    // TODO(merchandising): subir imagen real del Boss Katana-100.
+    // Placeholder: imagen de Stratocaster (no hay amps en assets aún).
+    imageUrl:
+      '/assets/products/fender-american-professional-stratocaster/3-color-sunburst/fender-american-professional-stratocaster-3-color-sunburst-1600x520-01.webp',
     imageAlt: 'Boss Katana-100 MkII combo',
     attributes: {
       brand: 'boss',
@@ -272,7 +297,10 @@ export const LA_VOZ_PRODUCTS: readonly LaVozProduct[] = [
     currency: 'USD',
     category: 'guitarras-electricas',
     badges: [],
-    imageUrl: '/img/la-voz/sg-standard-cherry.webp',
+    // TODO(merchandising): imagen cherry exacta no disponible.
+    // Placeholder: SG holy-shift (Gibson SG con color sólido).
+    imageUrl:
+      '/assets/products/gibson-mod-collection-sg-standard-holy-shift/holy-shift/gibson-mod-collection-sg-standard-holy-shift-holy-shift-front-1600x1600-03.webp',
     imageAlt: 'Gibson SG Standard cherry',
     attributes: {
       brand: 'gibson',

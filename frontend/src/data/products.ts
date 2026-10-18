@@ -89,7 +89,7 @@ export const PRODUCTS: readonly Product[] = [
   // Fender Player Fusion Precision Bass HH — producto de referencia para
   // validar la PDP con imágenes WebP reales (ver scripts/convert-product-images.sh
   // y backend/database/seeders/FenderPlayerFusionBassSeeder.php).
-  // Las imágenes viven en /public/images/products/fender-player-fusion-bass-hh/.
+  // Las imágenes viven en /public/assets/products/fender-player-fusion-bass-hh/.
   {
     id: 9001,
     slug: 'fender-player-fusion-bass-hh',
@@ -99,7 +99,7 @@ export const PRODUCTS: readonly Product[] = [
     priceCents: 179900,
     compareAtPriceCents: 199900,
     imageUrl:
-      '/images/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
+      '/assets/products/fender-player-fusion-bass-hh/ebony-black/fender-player-fusion-bass-hh-ebony-black-1600x730-01.webp',
     category: 'bajo-electrico',
     stock: 12,
     badges: ['new'],
