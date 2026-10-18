@@ -54,44 +54,14 @@ class DatabaseSeeder extends Seeder
         // de 5). Ver docs/getting-started/credentials.md.
         $this->call(class: CustomerTestSeeder::class);
 
-        // Catálogo demo — Fender Player Fusion Precision Bass HH con 2 variantes
-        // (Ebony Black + Halo Metallic) y 10 imágenes WebP responsive.
-        // Útil para validar la PDP con imágenes reales en lugar de SVG placeholder.
-        // Las imágenes deben estar en frontend/public/images/products/...
-
-        // Catálogo recon round 1 (Oct 2026) — 10 guitarras Gibson Mod™
-        // Collection + Custom Select con imágenes square 1600x1600 reales.
-        // Ver backend/database/seeders/GibsonModCollectionSeeder.php y
-        // frontend/public/images/products/gibson-mod-collection-*/
-        $this->call(class: GibsonModCollectionSeeder::class);
-
-        // Catálogo recon round 1 (Oct 2026) — Fender American Professional
-        // Telecaster, todas las 7 variantes (3-CS, Black, Natural, Oxblood,
-        // Dark Night, Aged Cherry Burst, Butterscotch Blonde). Imágenes
-        // landscape 1600x525; back image compartido por fingerboard.
-        $this->call(class: FenderAmericanProfessionalTelecasterSeeder::class);
-
-        // Catálogo recon round 1 (Oct 2026) — Fender American Professional
-        // Stratocaster, 7 variantes (3-CS, Olympic White, Black, Oxblood,
-        // Dark Night, 3-CS Maple, Olympic White Maple). Misma línea de
-        // productos que el Tele, distinto body shape.
-        $this->call(class: FenderAmericanProfessionalStratocasterSeeder::class);
-
-        // Catálogo recon round 1 (Oct 2026) — Fender American Professional
-        // Jaguar, 5 variants (3-CS, Olympic White, Black, Oxblood, Dark
-        // Night). Distinto del Jazzmaster (el user confirmó Jaguar como
-        // intención de las URLs). Scale 24" único + pickup Jaguar
-        // single-coil + trémolo Panorama.
-        $this->call(class: FenderAmericanProfessionalJaguarSeeder::class);
-
-        // Catálogo recon round 1 (Oct 2026) — Fender American Vintage II
-        // 1957 Stratocaster Black. Front específico del SKU, back compartido
-        // entre colores del modelo.
-        $this->call(class: FenderAmericanVintageII1957StratocasterSeeder::class);
-
-        // Catálogo recon round 1 (Oct 2026) — Gibson Les Paul Supreme
-        // Blueberry Burst (exclusive). Square 1600x1600.
-        $this->call(class: GibsonLesPaulSupremeBlueberryBurstSeeder::class);
+        // Catálogo demo (Oct 2026) — 16 guitarras eléctricas consolidadas
+        // desde `database/seeds/products.json`: 4 líneas Fender AmPro
+        // (Tele/Strat/Jaguar/VintageII 1957) + 10 Gibson Mod™ Collection
+        // + 1 Custom Select 1968 + 1 Les Paul Supreme. Cada producto
+        // describe su propio `image_pattern` para soportar las dos
+        // convenciones (indexed vs keyword) que conviven en el recon
+        // pipeline. Idempotente. Ver `ProductSeeder.php`.
+        $this->call(class: ProductSeeder::class);
     }
 
     /**
