@@ -1,0 +1,198 @@
+@startuml 8.2.4 - Diagrama de Clases (Operaciones: Carrito, Pedidos, Inventario, simplificado)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+hide <<internal>>
+
+' ============================================================
+' 8.2.4 — OPERACIONES (simplificado)
+' ============================================================
+
+package "Carrito y Checkout" {
+
+  class Carrito {
+    - id: UUID
+    - clienteId: UUID
+    - tiendaId: UUID
+    - status: EstadoCarrito
+    - expiresAt: DateTime
+    + calcularSubtotal(): Decimal
+    + agregarItem(productoId: UUID, cantidad: Integer): ItemCarrito
+    + removerItem(itemId: UUID): void
+    + convertirAPedido(): Pedido
+    + estaExpirado(): Boolean
+  }
+
+  enum EstadoCarrito {
+    ACTIVO
+    CONVERTIDO
+    ABANDONADO
+    EXPIRADO
+  }
+
+  class ItemCarrito {
+    - id: UUID
+    - carritoId: UUID
+    - productoId: UUID
+    - cantidad: Integer
+    - precioUnitarioCents: Integer
+    + calcularSubtotal(): Integer
+    + cambiarCantidad(nueva: Integer): void
+  }
+
+  class ItemCarritoMayorista <<internal>>
+}
+
+package "Inventario" {
+
+  class Almacen {
+    - id: UUID
+    - nombre: String
+    - ubicacion: String
+    - esPrincipal: Boolean
+    - isActive: Boolean
+    + activar(): void
+    + desactivar(): void
+    + marcarComoPrincipal(): void
+    + obtenerStockTotal(productoId: UUID): Integer
+  }
+
+  class RegistroInventario {
+    - id: UUID
+    - almacenId: UUID
+    - productoId: UUID
+    - currentStock: Integer
+    - minimumStock: Integer
+    + isLow(): Boolean
+    + reservar(cantidad: Integer): Boolean
+    + liberar(cantidad: Integer): void
+    + descontar(cantidad: Integer): void
+  }
+
+  class MovimientoInventario {
+    - id: UUID
+    - registroInventarioId: UUID
+    - tipoMovimiento: TipoMovimiento
+    - cantidad: Integer
+    - ocurridoEn: DateTime
+    + esEntrada(): Boolean
+    + esSalida(): Boolean
+    + calcularDelta(): Integer
+  }
+
+  enum TipoMovimiento {
+    ENTRADA
+    SALIDA
+    AJUSTE
+    RESERVA
+    LIBERACION
+  }
+}
+
+package "Pedidos y Ventas" {
+
+  class CanalVenta {
+    - id: UUID
+    - nombre: String
+    - descripcion: String
+    - active: Boolean
+    + activar(): void
+    + desactivar(): void
+  }
+
+  class Pedido {
+    - id: UUID
+    - tiendaId: UUID
+    - clienteId: UUID
+    - orderNumber: String
+    - status: EstadoPedido
+    - subtotalCents: Integer
+    - totalCents: Integer
+    + confirmarPago(): void
+    + cancelar(motivo: String): void
+    + marcarEnviado(guia: String, empresaId: UUID): void
+    + marcarEntregado(): void
+    + calcularTotal(): Integer
+  }
+
+  enum EstadoPedido {
+    PENDIENTE
+    PROCESANDO
+    COMPLETADO
+    CANCELADO
+  }
+
+  class LineaPedido {
+    - id: UUID
+    - pedidoId: UUID
+    - productoId: UUID
+    - cantidad: Integer
+    - unitPriceCents: Integer
+    - subtotalCents: Integer
+    + calcularSubtotal(): Integer
+  }
+
+  class HistorialEstadoPedido <<internal>>
+
+  class Factura {
+    - id: UUID
+    - pedidoId: UUID
+    - numeroFactura: String
+    - emitidaEn: DateTime
+    + generarPDF(): String
+    + descargar(): String
+  }
+
+  class CierreCaja {
+    - id: UUID
+    - tiendaId: UUID
+    - fecha: Date
+    - diferenciaCents: Integer
+    - estado: EstadoCierreCaja
+    + calcularMontoEsperado(): Integer
+    + validar(): void
+    + rechazar(observaciones: String): void
+    + calcularDiferencia(): Integer
+  }
+
+  enum EstadoCierreCaja {
+    PENDIENTE
+    EN_REVISION
+    VALIDADO
+    RECHAZADO
+  }
+}
+
+' ============================================================
+' RELACIONES
+' ============================================================
+Cliente "1" *-- "*" Carrito
+Carrito "*" --> "1" Tienda
+Carrito "*" --> "1" Moneda
+Carrito "*" --> "1" EstadoCarrito
+Carrito "1" *-- "*" ItemCarrito
+Carrito "1" --> "0..1" Pedido : "se convierte en"
+
+Almacen "1" *-- "*" RegistroInventario
+RegistroInventario "1" *-- "*" MovimientoInventario
+MovimientoInventario "*" --> "1" TipoMovimiento
+MovimientoInventario "*" --> "1" Usuario
+
+Cliente "1" *-- "*" Pedido
+Pedido "*" --> "1" Tienda
+Pedido "*" --> "1" EstadoPedido
+Pedido "*" --> "1" Moneda
+Pedido "*" --> "0..1" CanalVenta
+Pedido "1" *-- "*" LineaPedido
+Pedido "1" -- "0..1" Factura
+Tienda "1" *-- "*" CierreCaja
+CierreCaja "*" --> "1" EstadoCierreCaja
+
+ItemCarrito "*" --> "1" Producto
+ItemCarrito "*" --> "0..1" VarianteProducto
+RegistroInventario "*" --> "1" Producto
+LineaPedido "*" --> "1" Producto
+LineaPedido "*" --> "0..1" VarianteProducto
+
+@enduml

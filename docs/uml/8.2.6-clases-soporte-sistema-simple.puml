@@ -1,0 +1,223 @@
+@startuml 8.2.6 - Diagrama de Clases (Soporte, Devoluciones, Sistema, simplificado)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+hide <<internal>>
+
+' ============================================================
+' 8.2.6 — SOPORTE, DEVOLUCIONES Y SISTEMA (simplificado)
+' ============================================================
+
+package "Soporte" {
+
+  class TicketSoporte {
+    - id: UUID
+    - tiendaId: UUID
+    - clienteId: UUID
+    - subject: String
+    - status: EstadoTicket
+    - priority: PrioridadTicket
+    - abiertoEn: DateTime
+    + asignar(usuarioId: UUID): void
+    + cerrar(usuarioId: UUID): void
+    + reabrir(motivo: String): void
+    + escalar(): void
+    + agregarMensaje(contenido: String, autorId: UUID): MensajeTicket
+  }
+
+  enum EstadoTicket {
+    ABIERTO
+    EN_PROGRESO
+    ESPERANDO_CLIENTE
+    RESUELTO
+    CERRADO
+  }
+
+  enum PrioridadTicket {
+    BAJA
+    MEDIA
+    ALTA
+    URGENTE
+  }
+
+  enum MetodoAsignacion {
+    ROUND_ROBIN
+    MANUAL_POR_SUPERVISOR
+    AUTOMATICA_POR_TIENDA
+  }
+
+  class MensajeTicket <<internal>>
+
+  class PreguntaProducto {
+    - id: UUID
+    - productoId: UUID
+    - clienteId: UUID
+    - pregunta: String
+    - estado: EstadoPregunta
+    - creadaEn: DateTime
+    + responder(contenido: String, usuarioId: UUID): void
+    + rechazar(motivo: String): void
+    + esPendiente(): Boolean
+  }
+
+  enum EstadoPregunta {
+    PENDIENTE
+    RESPONDIDA
+    RECHAZADA
+  }
+
+  class ResenaProducto {
+    - id: UUID
+    - productoId: UUID
+    - clienteId: UUID
+    - calificacion: Integer
+    - comentario: String
+    - aprobada: Boolean
+    + aprobar(moderadorId: UUID): void
+    + rechazar(moderadorId: UUID, motivo: String): void
+    + esAprobada(): Boolean
+  }
+}
+
+package "Devoluciones" {
+
+  class Devolucion {
+    - id: UUID
+    - tiendaId: UUID
+    - pedidoId: UUID
+    - clienteId: UUID
+    - motivo: String
+    - status: EstadoDevolucion
+    - montoReembolsadoCents: Integer
+    + aprobar(): void
+    + rechazar(motivo: String): void
+    + marcarRecibida(): void
+    + crearReembolso(): Reembolso
+    + totalAmountCents(): Integer
+  }
+
+  enum TipoResolucionDevolucion {
+    REEMBOLSO_DINERO
+    CAMBIO_PRODUCTO
+    NOTA_CREDITO
+  }
+
+  enum EstadoDevolucion {
+    SOLICITADA
+    APROBADA
+    RECHAZADA
+    RECIBIDA
+    REEMBOLSADA
+  }
+
+  class ItemDevolucion {
+    - id: UUID
+    - devolucionId: UUID
+    - lineaPedidoId: UUID
+    - cantidad: Integer
+    - amountCents: Integer
+    + obtenerLineaPedido(): LineaPedido
+    + calcularMontoTotal(): Integer
+  }
+
+  class Reembolso {
+    - id: UUID
+    - pagoId: UUID
+    - montoCents: Integer
+    - motivo: String
+    - status: EstadoReembolso
+    + procesar(referencia: String): void
+    + marcarRechazado(motivo: String): void
+    + obtenerPago(): Pago
+  }
+
+  enum EstadoReembolso {
+    SOLICITADO
+    APROBADO
+    PROCESADO
+    RECHAZADO
+  }
+}
+
+package "Sistema" {
+
+  class Respaldo {
+    - id: UUID
+    - nombreArchivo: String
+    - tipoRespaldo: TipoRespaldo
+    - status: EstadoRespaldo
+    - tamanoBytes: BigInt
+    - retencionDias: Integer
+    + ejecutar(): void
+    + restaurar(): void
+    + verificarIntegridad(): Boolean
+    + eliminar(): void
+  }
+
+  enum TipoRespaldo {
+    COMPLETO
+    INCREMENTAL
+  }
+
+  enum EstadoRespaldo {
+    EN_PROGRESO
+    COMPLETADO
+    FALLIDO
+  }
+
+  enum FrecuenciaRespaldo {
+    DIARIO
+    SEMANAL
+    MENSUAL
+    MANUAL
+  }
+
+  class Notificacion <<internal>>
+
+  enum TipoNotificacion {
+    PEDIDO_CREADO
+    PEDIDO_PAGADO
+    PEDIDO_ENVIADO
+    STOCK_BAJO
+    TICKET_ASIGNADO
+    PROMOCION
+    SISTEMA
+  }
+}
+
+' ============================================================
+' RELACIONES
+' ============================================================
+Cliente "1" *-- "*" TicketSoporte
+Tienda "1" *-- "*" TicketSoporte
+TicketSoporte "*" --> "0..1" Pedido
+TicketSoporte "*" --> "1" EstadoTicket
+TicketSoporte "*" --> "1" PrioridadTicket
+TicketSoporte "*" --> "1" MetodoAsignacion
+TicketSoporte "*" --> "0..1" Usuario : "asignado a"
+
+Producto "1" *-- "*" PreguntaProducto
+Cliente "1" *-- "*" PreguntaProducto
+PreguntaProducto "*" --> "1" EstadoPregunta
+Producto "1" *-- "*" ResenaProducto
+Cliente "1" *-- "*" ResenaProducto
+ResenaProducto "*" --> "0..1" Pedido
+
+Pedido "1" *-- "*" Devolucion
+Devolucion "*" --> "1" Cliente
+Devolucion "*" --> "1" EstadoDevolucion
+Devolucion "*" --> "1" TipoResolucionDevolucion
+Devolucion "1" *-- "*" ItemDevolucion
+ItemDevolucion "*" --> "1" LineaPedido
+Pago "1" *-- "*" Reembolso
+Reembolso "*" --> "1" EstadoReembolso
+
+Respaldo "*" --> "1" TipoRespaldo
+Respaldo "*" --> "1" EstadoRespaldo
+Respaldo "*" --> "1" FrecuenciaRespaldo
+Usuario "1" *-- "*" Notificacion
+Tienda "1" *-- "*" Notificacion
+Notificacion "*" --> "1" TipoNotificacion
+
+@enduml

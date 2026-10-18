@@ -1,0 +1,25 @@
+@startuml 8.1.2 - Casos de Uso de Operador y Supervisor
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #FAFAFA
+
+actor "Operador de tienda" as OT
+actor "Supervisor" as SV
+
+package "Operaciones" {
+  usecase "CU-08\nAdministrar productos (CRUD)" as CU08
+  usecase "CU-09\nGestionar stock e inventario" as CU09
+  usecase "CU-10\nGestionar pedido" as CU10
+  usecase "CU-11\nAtender tickets de soporte" as CU11
+  usecase "CU-12\nVer dashboard y reportes" as CU12
+  usecase "CU-13\nValidar cierre de caja diario" as CU13
+}
+
+OT --> CU08
+OT --> CU09
+OT --> CU10
+OT --> CU11
+SV --> CU12
+SV --> CU13
+
+@enduml

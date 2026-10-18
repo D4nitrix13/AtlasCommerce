@@ -1,0 +1,65 @@
+@startuml 8.5 - Diagrama de Estados: Pedido (alineado con la implementación)
+hide methods
+hide attributes
+hide empty members
+skinparam state {
+  BackgroundColor #FAFAFA
+  BorderColor #333333
+  FontStyle bold
+}
+
+state "PENDIENTE" as PEND
+state "PROCESANDO" as PROC
+state "COMPLETADO" as COMP
+state "CANCELADO" as CANC
+
+[*] --> PEND : Pedido creado\n/checkout
+
+note right of PEND
+  Estado inicial. El pedido existe pero
+  el pago aún no fue confirmado.
+  Equivale a OrderStatus::Pending.
+end note
+
+PEND --> PROC : pago.aprobado\n[webhook pasarela = APROBADO]\n/ actualizarPago(APROBADO)\n  cambiarPedido(PROCESSING)\n  registrarEnOrderStatusHistory()
+PEND --> CANC : pago.rechazado\n[webhook pasarela = RECHAZADO]\n/ marcarPago(REJECTED/FAILED)\n  cambiarPedido(CANCELLED)\n  registrarEnOrderStatusHistory()
+PEND --> CANC : pago.timeout\n[sin webhook en ≥ 30 min]\n/ cambiarPedido(CANCELLED)\n  registrarEnOrderStatusHistory()
+PEND --> CANC : cliente.cancela\n[antes de pagar, vía storefront]\n/ cambiarPedido(CANCELLED)\n  liberarStockReservado()
+
+note right of PROC
+  Pago confirmado, en preparación o despacho.
+  Incluye los sub-estados académicos
+  PAGADO → CONFIRMADO → EN_PRODUCCION →
+  PREPARADO_ENVIO → ENVIADO.
+  Equivale a OrderStatus::Processing.
+end note
+
+PROC --> COMP : entrega.confirmada\n[empresa de envío notifica / webhook]\n/ cambiarPedido(COMPLETED)\n  crearShipment(ENTREGADO)\n  registrarEnOrderStatusHistory()
+PROC --> CANC : operador.cancela\n[pago ya cobrado, requiere refund]\n/ cambiarPedido(CANCELLED)\n  crearRefund()\n  registrarEnOrderStatusHistory()
+
+note right of CANC
+  Pedido cancelado (antes o después del pago).
+  Si hubo pago, queda registrado para Refund.
+  Las devoluciones y reembolsos se modelan
+  como entidades separadas (Devolucion + Refund).
+  Equivale a OrderStatus::Cancelled.
+end note
+
+note right of COMP
+  Pedido entregado y cerrado.
+  Estado terminal.
+  Equivale a OrderStatus::Completed.
+end note
+
+COMP --> [*]
+CANC --> [*]
+
+note bottom
+  Cada transición registra un OrderStatusHistory
+  (auditoría) con estadoAnterior, estadoNuevo,
+  cambiadoPorUsuarioId y cambiadoEn.
+  El modelo soporta SoftDeletes (deleted_at)
+  para borrado físico posterior.
+end note
+
+@enduml

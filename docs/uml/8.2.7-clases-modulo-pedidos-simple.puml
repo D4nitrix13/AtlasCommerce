@@ -1,0 +1,211 @@
+@startuml 8.2 - Diagrama de Clases (Módulo Pedidos, Vista Reducida, simplificado)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+hide <<internal>>
+
+' ============================================================
+' 8.2 — MÓDULO PEDIDOS (Vista reducida, simplificado)
+' Cada clase: atributos y métodos representativos.
+' ============================================================
+
+package "Módulo de Pedidos" {
+
+  class Carrito {
+    - id: UUID
+    - clienteId: UUID
+    - tiendaId: UUID
+    - estado: EstadoCarrito
+    - subtotal: Decimal
+    - total: Decimal
+    + calcularSubtotal(): Decimal
+    + agregarItem(productoId: UUID, cantidad: Integer): ItemCarrito
+    + removerItem(itemId: UUID): void
+    + convertirAPedido(): Pedido
+  }
+
+  enum EstadoCarrito {
+    ACTIVO
+    CONVERTIDO
+    ABANDONADO
+  }
+
+  class ItemCarrito {
+    - id: UUID
+    - carritoId: UUID
+    - productoId: UUID
+    - varianteId: UUID
+    - cantidad: Integer
+    - precioUnitario: Decimal
+    + calcularSubtotal(): Decimal
+    + cambiarCantidad(cantidad: Integer): void
+  }
+
+  class Pedido {
+    - id: UUID
+    - tiendaId: UUID
+    - clienteId: UUID
+    - numeroPedido: String
+    - estado: EstadoPedido
+    - subtotal: Decimal
+    - impuestos: Decimal
+    - costoEnvio: Decimal
+    - total: Decimal
+    + confirmarPago(): void
+    + cancelar(motivo: String): void
+    + marcarEnviado(numeroGuia: String): Envio
+    + marcarEntregado(): void
+  }
+
+  enum EstadoPedido {
+    PENDIENTE_PAGO
+    PAGADO
+    CONFIRMADO
+    EN_PRODUCCION
+    PREPARADO_ENVIO
+    ENVIADO
+    ENTREGADO
+    CANCELADO
+    DEVUELTO
+    REEMBOLSADO
+  }
+
+  class LineaPedido {
+    - id: UUID
+    - pedidoId: UUID
+    - productoId: UUID
+    - varianteId: UUID
+    - cantidad: Integer
+    - precioUnitario: Decimal
+    - subtotal: Decimal
+    + calcularSubtotal(): Decimal
+  }
+
+  class Pago {
+    - id: UUID
+    - pedidoId: UUID
+    - metodoPagoId: UUID
+    - monto: Decimal
+    - estado: EstadoPago
+    - creadoEn: DateTime
+    + marcarCompletado(): void
+    + marcarFallido(motivo: String): void
+    + reembolsar(): Reembolso
+  }
+
+  enum EstadoPago {
+    PENDIENTE
+    APROBADO
+    RECHAZADO
+    REEMBOLSADO
+  }
+
+  class TransaccionPago {
+    - id: UUID
+    - pagoId: UUID
+    - pasarelaPagoId: UUID
+    - referenciaPasarela: String
+    - estadoDevuelto: String
+    - webhookRecibidoEn: DateTime
+    + obtenerRespuestaCruda(): JSON
+    + fueExitosa(): Boolean
+  }
+
+  class Factura {
+    - id: UUID
+    - pedidoId: UUID
+    - numeroFactura: String
+    - urlPDF: String
+    - emitidaEn: DateTime
+    + generarPDF(): String
+    + descargar(): String
+  }
+
+  class Envio {
+    - id: UUID
+    - pedidoId: UUID
+    - empresaEnvioId: UUID
+    - numeroGuia: String
+    - estado: EstadoEnvio
+    - costo: Decimal
+    + marcarEnviado(guia: String): void
+    + marcarEntregado(): void
+    + marcarDevuelto(): void
+  }
+
+  enum EstadoEnvio {
+    PENDIENTE
+    EN_TRANSITO
+    ENTREGADO
+    DEVUELTO
+  }
+
+  class CierreCaja {
+    - id: UUID
+    - tiendaId: UUID
+    - fecha: Date
+    - diferencia: Decimal
+    - estado: EstadoCierreCaja
+    - validadoPorUsuarioId: UUID
+    + validar(): void
+    + rechazar(observaciones: String): void
+    + calcularDiferencia(): Decimal
+    + calcularMontoEsperado(): Decimal
+  }
+
+  enum EstadoCierreCaja {
+    PENDIENTE
+    VALIDADO
+    RECHAZADO
+  }
+
+  class Devolucion {
+    - id: UUID
+    - pedidoId: UUID
+    - tipoResolucion: TipoResolucionDevolucion
+    - estado: EstadoDevolucion
+    - montoReembolsado: Decimal
+    + aprobar(): void
+    + rechazar(motivo: String): void
+    + crearReembolso(): Reembolso
+  }
+
+  enum TipoResolucionDevolucion {
+    REEMBOLSO_DINERO
+    CAMBIO_PRODUCTO
+    NOTA_CREDITO
+  }
+
+  enum EstadoDevolucion {
+    SOLICITADA
+    APROBADA
+    RECHAZADA
+    REEMBOLSADA
+  }
+}
+
+' --- Relaciones del módulo ---
+Carrito --> EstadoCarrito
+Carrito "1" *-- "many" ItemCarrito
+Carrito "1" --> "1" Pedido : "se convierte en"
+
+Pedido --> EstadoPedido
+Pedido "1" *-- "many" LineaPedido
+Pedido "1" *-- "many" Pago
+Pedido "1" -- "0..1" Factura
+Pedido "1" *-- "many" Envio
+Pedido "1" *-- "many" Devolucion
+
+Pago --> EstadoPago
+Pago "1" *-- "many" TransaccionPago
+
+Envio --> EstadoEnvio
+
+Devolucion --> EstadoDevolucion
+Devolucion --> TipoResolucionDevolucion
+
+Pedido "many" -- "1" CierreCaja : "agrupado en"
+CierreCaja --> EstadoCierreCaja
+
+@enduml

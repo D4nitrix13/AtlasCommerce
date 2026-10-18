@@ -1,0 +1,59 @@
+@startuml 8.5.2 - Diagrama de Estados: Verificación 2FA
+hide methods
+hide attributes
+hide empty members
+skinparam state {
+  BackgroundColor #FAFAFA
+  BorderColor #333333
+  FontStyle bold
+}
+
+state "SIN_2FA" as S2FA
+state "PENDIENTE_VERIFICACION" as PV
+state "ACTIVO" as ACT
+state "DESHABILITADO" as DES
+
+[*] --> S2FA
+
+S2FA --> PV : usuario.solicitaActivar(metodo)\n/ generarSecreto()\n  guardarCredencialTemporal()
+
+note right of S2FA
+  Estado inicial. El usuario no tiene
+  2FA habilitado. No existe fila en
+  two_factor_settings para este user.
+end note
+
+PV --> ACT : usuario.verificaCodigo\n[código = TOTP/OTP válido]\n/ confirmarCredencial()\n  enviarEmailConfirmacion()
+PV --> S2FA : codigo.invalido\n[3 intentos fallidos]\n/ limpiarCredencialTemporal()
+PV --> S2FA : usuario.cancela\n/ limpiarCredencialTemporal()
+PV --> S2FA : timeout\n[≥ 10min sin verificar]\n/ limpiarCredencialTemporal()
+
+note right of PV
+  Estado intermedio. El usuario generó
+  un secreto pero aún no confirmó con
+  un código válido. TTL de 10 minutos.
+  Se invalidan tras 3 intentos fallidos.
+end note
+
+ACT --> ACT : usuario.usa2FA\n[código válido en login]\n/ verificarCodigo()
+ACT --> DES : usuario.desactiva\n/ limpiarCredencial()
+ACT --> ACT : codigo.invalido\n[intento de login]\n/ registrarIntentoFallido()
+ACT --> S2FA : cuenta.eliminada\n/ limpiarCredencial()\n  eliminarUsuario()
+
+note right of ACT
+  2FA habilitada y operativa. El usuario
+  debe ingresar código TOTP o OTP en cada
+  login. Los recovery codes sirven como
+  respaldo si pierde acceso al dispositivo.
+end note
+
+DES --> S2FA : limpieza.completada\n/ limpiarCredencial()
+
+note right of DES
+  Estado transitorio. El usuario desactivó
+  2FA pero la credencial aún no fue purgada.
+  Tras la limpieza (job batch), vuelve a
+  SIN_2FA para permitir nueva activación.
+end note
+
+@enduml

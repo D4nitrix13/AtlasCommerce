@@ -1,0 +1,194 @@
+@startuml 8.2.2 - Diagrama de Clases (Catálogo, simplificado)
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageStyle rectangle
+hide circle
+hide <<internal>>
+
+' ============================================================
+' 8.2.2 — CATÁLOGO (simplificado)
+' Clases con <<internal>> se ocultan del render.
+' ============================================================
+
+package "Catálogo" {
+
+  class Marca {
+    - id: UUID
+    - nombre: String
+    - slug: String
+    - isActive: Boolean
+    + activar(): void
+    + desactivar(): void
+    + contarProductos(): Integer
+  }
+
+  class Categoria {
+    - id: UUID
+    - nombre: String
+    - slug: String
+    - categoriaPadreId: UUID
+    - isActive: Boolean
+    + esRaiz(): Boolean
+    + obtenerHijos(): List<Categoria>
+    + obtenerAncestros(): List<Categoria>
+  }
+
+  abstract class Producto <<abstract>> {
+    - id: UUID
+    - name: String
+    - slug: String
+    - basePriceCents: Integer
+    - isActive: Boolean
+    + calcularPrecio(tiendaId: UUID): Decimal
+    + publicar(): void
+    + despublicar(): void
+    + scopeActive(query): Query
+  }
+
+  class ProductoSimple {
+    - id: UUID
+    - peso: Decimal
+    + calcularCostoEnvio(): Decimal
+  }
+
+  class ProductoPersonalizable {
+    - id: UUID
+    - tiempoProduccionDias: Integer
+    - requiereAprobacionDiseno: Boolean
+    + tiempoEstimadoProduccion(): Integer
+    + agregarOpcion(opcion: OpcionPersonalizacion): void
+    + eliminarOpcion(opcionId: UUID): void
+  }
+
+  class VarianteProducto {
+    - id: UUID
+    - productId: UUID
+    - sku: String
+    - nameVariant: String
+    - isActive: Boolean
+    + calcularPrecioConAtributos(): Decimal
+    + activar(): void
+    + desactivar(): void
+  }
+
+  class ImagenProducto {
+    - id: UUID
+    - productId: UUID
+    - imageUrl: String
+    - sortOrder: Integer
+    - isPrimary: Boolean
+    + marcarComoPrincipal(): void
+    + reordenar(nuevoOrden: Integer): void
+  }
+
+  class Atributo {
+    - id: UUID
+    - nombre: String
+    - slug: String
+    - type: String
+    - isFilterable: Boolean
+    + esFiltrable(): Boolean
+    + esRequerido(): Boolean
+  }
+
+  class ValorAtributo {
+    - id: UUID
+    - atributoId: UUID
+    - productId: UUID
+    - valor: String
+    + obtenerAtributo(): Atributo
+  }
+
+  class PrecioMayorista {
+    - id: UUID
+    - productId: UUID
+    - storeId: UUID
+    - minQty: Integer
+    - priceCents: Integer
+    + aplicaPara(cantidad: Integer): Boolean
+    + calcularDescuento(cantidad: Integer): Integer
+  }
+
+  class ProductoTienda {
+    - id: UUID
+    - productId: UUID
+    - storeId: UUID
+    - slug: String
+    - isVisible: Boolean
+    - isFeatured: Boolean
+    + publicar(): void
+    + despublicar(): void
+    + marcarComoDestacado(): void
+    + generarSlug(): String
+  }
+}
+
+package "Personalización" {
+
+  class OpcionPersonalizacion {
+    - id: UUID
+    - productId: UUID
+    - nombre: String
+    - tipoOpcion: TipoOpcionPersonalizacion
+    - obligatorio: Boolean
+    + esObligatoria(): Boolean
+    + calcularCostoTotal(cantidadOpciones: Integer): Integer
+  }
+
+  enum TipoOpcionPersonalizacion {
+    TEXTO_PERSONALIZADO
+    IMAGEN_SUBIDA
+    SELECCION_COLOR
+    ESTAMPADO
+    SUBLIMACION
+    BORDADO
+    DTF
+    VINIL_TEXTIL
+  }
+
+  enum TecnicaImpresion {
+    ESTAMPADO
+    SUBLIMACION
+    BORDADO
+    DTF
+    VINIL_TEXTIL
+  }
+
+  class AreaImpresion {
+    - id: UUID
+    - productId: UUID
+    - tecnica: TecnicaImpresion
+    - nombre: String
+    - anchoMM: Decimal
+    - altoMM: Decimal
+    + calcularArea(): Decimal
+    + obtenerUrlPlantilla(): String
+  }
+
+  class DisenoPersonalizado <<internal>>
+}
+
+' ============================================================
+' RELACIONES
+' ============================================================
+Producto <|-- ProductoSimple
+Producto <|-- ProductoPersonalizable
+Producto "*" --> "1" Marca
+Producto "*" --> "1" Categoria
+Categoria "*" --> "0..1" Categoria : "categoría padre"
+Producto "1" *-- "*" VarianteProducto
+Producto "1" *-- "*" ImagenProducto
+Producto "1" *-- "*" PrecioMayorista
+Producto "*" -- "*" Atributo : "definido vía"
+ValorAtributo "*" --> "1" Atributo
+ValorAtributo "*" --> "1" Producto
+Producto "*" -- "*" Tienda : "publicado vía"
+ProductoTienda "*" --> "1" Producto
+ProductoTienda "*" --> "1" Tienda
+ProductoPersonalizable "1" --> "*" TecnicaImpresion
+ProductoPersonalizable "1" *-- "*" OpcionPersonalizacion
+ProductoPersonalizable "1" *-- "*" AreaImpresion
+OpcionPersonalizacion "*" --> "1" TipoOpcionPersonalizacion
+AreaImpresion "*" --> "1" TecnicaImpresion
+
+@enduml

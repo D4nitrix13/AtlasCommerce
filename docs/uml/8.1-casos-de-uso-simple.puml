@@ -1,0 +1,189 @@
+@startuml 8.1 - Diagrama de Casos de Uso (simplificado)
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #FAFAFA
+skinparam actorBackgroundColor #FFE4B5
+skinparam actorBorderColor #8B4513
+hide circle
+hide <<internal>>
+
+' ============================================================
+' ACTORES
+' ============================================================
+actor "Cliente externo" as CE
+actor "Operador de tienda" as OT
+actor "Supervisor" as SV
+actor "Administrador" as AD
+
+' ============================================================
+' MÓDULO: AUTENTICACIÓN
+' ============================================================
+package "Módulo Autenticación" {
+  usecase "CU-02\nRegistrarse en el sistema" as CU02
+  usecase "CU-14\nGestionar usuarios" as CU14
+  usecase "Activar segundo factor (2FA)" as UC2FA <<internal>>
+  usecase "Asignar rol y tienda al usuario" as UC_ROL <<internal>>
+}
+
+' ============================================================
+' MÓDULO: CATÁLOGO
+' ============================================================
+package "Módulo Catálogo" {
+  usecase "CU-01\nNavegar catálogo público" as CU01
+  usecase "CU-08\nAdministrar productos (CRUD)" as CU08
+  usecase "Buscar y filtrar productos" as UC_BUSCAR <<internal>>
+  usecase "Gestionar variantes de producto" as UC_VARIANTES <<internal>>
+}
+
+' ============================================================
+' MÓDULO: CARRITO
+' ============================================================
+package "Módulo Carrito" {
+  usecase "CU-03\nGestionar carrito de compras" as CU03
+  usecase "Recalcular subtotal y total del carrito" as UC_TOTAL <<internal>>
+}
+
+' ============================================================
+' MÓDULO: CHECKOUT
+' ============================================================
+package "Módulo Checkout" {
+  usecase "CU-04\nRealizar checkout paso a paso" as CU04
+  usecase "Validar stock disponible" as UC_STOCK <<internal>>
+  usecase "Validar dirección de envío" as UC_DIR <<internal>>
+  usecase "Aplicar cupón de descuento" as UC_CUPON <<internal>>
+}
+
+' ============================================================
+' MÓDULO: PAGOS
+' ============================================================
+package "Módulo Pagos" {
+  usecase "CU-05\nPagar pedido en línea" as CU05
+  usecase "CU-16\nConfigurar pasarela de pago" as CU16
+  usecase "Validar método de pago" as UC_METPAGO <<internal>>
+  usecase "Probar conexión con pasarela" as UC_PROBAR <<internal>>
+}
+
+' ============================================================
+' MÓDULO: PEDIDOS
+' ============================================================
+package "Módulo Pedidos" {
+  usecase "CU-06\nConsultar estado de pedido" as CU06
+  usecase "CU-10\nGestionar pedido (confirmar, preparar, enviar)" as CU10
+  usecase "CU-13\nValidar cierre de caja diario" as CU13
+  usecase "Descargar factura en PDF" as UC_FACTURA <<internal>>
+  usecase "Validar pago del pedido" as UC_VALPAGO <<internal>>
+  usecase "Actualizar inventario por despacho" as UC_INVDESP <<internal>>
+  usecase "Registrar guía de envío" as UC_GUIA <<internal>>
+  usecase "Calcular monto esperado del cierre" as UC_MONTOCIERRE <<internal>>
+}
+
+' ============================================================
+' MÓDULO: INVENTARIO
+' ============================================================
+package "Módulo Inventario" {
+  usecase "CU-09\nGestionar stock e inventario" as CU09
+  usecase "Registrar movimiento de inventario" as UC_MOV <<internal>>
+}
+
+' ============================================================
+' MÓDULO: MARKETING
+' ============================================================
+package "Módulo Marketing" {
+  usecase "CU-07\nGestionar lista de deseos" as CU07
+  usecase "Recibir notificaciones de promoción" as UC_NOTIF <<internal>>
+}
+
+' ============================================================
+' MÓDULO: SOPORTE
+' ============================================================
+package "Módulo Soporte" {
+  usecase "CU-11\nAtender tickets de soporte" as CU11
+  usecase "Responder mensaje de ticket" as UC_RESP <<internal>>
+}
+
+' ============================================================
+' MÓDULO: REPORTES
+' ============================================================
+package "Módulo Reportes" {
+  usecase "CU-12\nVer dashboard y reportes" as CU12
+  usecase "Exportar reporte a Excel" as UC_EXCEL <<internal>>
+}
+
+' ============================================================
+' MÓDULO: TIENDAS
+' ============================================================
+package "Módulo Tiendas / Configuración" {
+  usecase "CU-15\nConfigurar tienda" as CU15
+  usecase "Configurar tema visual" as UC_TEMA <<internal>>
+  usecase "Configurar impuestos de tienda" as UC_IMP <<internal>>
+  usecase "Configurar dominio personalizado" as UC_DOM <<internal>>
+}
+
+' ============================================================
+' MÓDULO: SISTEMA
+' ============================================================
+package "Módulo Sistema" {
+  usecase "CU-17\nGestionar respaldos" as CU17
+  usecase "CU-18\nRevisar bitácora de auditoría" as CU18
+  usecase "Ejecutar restauración desde respaldo" as UC_REST <<internal>>
+  usecase "Exportar log de bitácora" as UC_LOGEXP <<internal>>
+}
+
+' ============================================================
+' ASOCIACIONES ACTOR → CASO DE USO
+' ============================================================
+CE --> CU01
+CE --> CU02
+CE --> CU03
+CE --> CU04
+CE --> CU05
+CE --> CU06
+CE --> CU07
+
+OT --> CU08
+OT --> CU09
+OT --> CU10
+OT --> CU11
+
+SV --> CU12
+SV --> CU13
+
+AD --> CU15
+AD --> CU16
+AD --> CU17
+AD --> CU18
+AD --> CU14
+
+' ============================================================
+' RELACIONES <<include>> (subflujos obligatorios)
+' ============================================================
+CU01 ..> UC_BUSCAR : <<include>>
+CU03 ..> UC_TOTAL : <<include>>
+CU04 ..> UC_STOCK : <<include>>
+CU04 ..> UC_DIR : <<include>>
+CU05 ..> UC_METPAGO : <<include>>
+CU05 ..> UC_INVDESP : <<include>>
+CU08 ..> UC_VARIANTES : <<include>>
+CU09 ..> UC_MOV : <<include>>
+CU10 ..> UC_VALPAGO : <<include>>
+CU10 ..> UC_INVDESP : <<include>>
+CU13 ..> UC_MONTOCIERRE : <<include>>
+CU14 ..> UC_ROL : <<include>>
+CU15 ..> UC_TEMA : <<include>>
+CU15 ..> UC_IMP : <<include>>
+CU16 ..> UC_PROBAR : <<include>>
+CU17 ..> UC_REST : <<include>>
+CU12 ..> UC_EXCEL : <<include>>
+
+' ============================================================
+' RELACIONES <<extend>> (subflujos opcionales)
+' ============================================================
+CU02 <.. UC2FA : <<extend>>
+CU04 <.. UC_CUPON : <<extend>>
+CU06 <.. UC_FACTURA : <<extend>>
+CU07 <.. UC_NOTIF : <<extend>>
+CU10 <.. UC_GUIA : <<extend>>
+CU15 <.. UC_DOM : <<extend>>
+CU18 <.. UC_LOGEXP : <<extend>>
+
+@enduml

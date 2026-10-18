@@ -1,0 +1,26 @@
+@startuml 8.1.1 - Casos de Uso del Cliente
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #FAFAFA
+
+actor "Cliente externo" as CE
+
+package "Casos de uso del Cliente" {
+  usecase "CU-01\nNavegar catálogo público" as CU01
+  usecase "CU-02\nRegistrarse en el sistema" as CU02
+  usecase "CU-03\nGestionar carrito de compras" as CU03
+  usecase "CU-04\nRealizar checkout" as CU04
+  usecase "CU-05\nPagar pedido en línea" as CU05
+  usecase "CU-06\nConsultar estado de pedido" as CU06
+  usecase "CU-07\nGestionar lista de deseos" as CU07
+}
+
+CE --> CU01
+CE --> CU02
+CE --> CU03
+CE --> CU04
+CE --> CU05
+CE --> CU06
+CE --> CU07
+
+@enduml
