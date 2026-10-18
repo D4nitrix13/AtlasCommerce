@@ -12,6 +12,7 @@ use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -118,7 +119,7 @@ final class TracerTest extends TestCase
 
         // Si nos dieron un exporter memory, reemplazamos el provider.
         if ($exporter !== null && $enabled) {
-            $reflection = new \ReflectionClass($tracer);
+            $reflection = new ReflectionClass($tracer);
             $providerProp = $reflection->getProperty('provider');
             $providerProp->setAccessible(true);
             $providerProp->setValue($tracer, TracerProvider::builder()

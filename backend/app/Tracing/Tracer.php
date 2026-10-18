@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace App\Tracing;
 
 use App\Logging\LogContext;
-use OpenTelemetry\API\Trace\NoopTracer;
 use OpenTelemetry\API\Trace\TracerInterface;
 use OpenTelemetry\API\Trace\TracerProviderInterface;
-use OpenTelemetry\Context\Context;
-use OpenTelemetry\Context\ScopeInterface;
 use OpenTelemetry\SDK\Common\Attribute\Attributes;
 use OpenTelemetry\SDK\Resource\ResourceInfo;
 use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
