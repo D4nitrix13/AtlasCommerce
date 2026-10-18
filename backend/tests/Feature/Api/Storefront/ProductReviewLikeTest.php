@@ -233,6 +233,9 @@ final class ProductReviewLikeTest extends TestCase
     #[TestAttr]
     public function unlike_nonexistent_review_returns_404(): void
     {
+        Sanctum::actingAs(user: $this->user, abilities: ['*']);
+
+        // ID de reseña que no existe. El route-model-binding lanza 404.
         $this->deleteJson(uri: $this->likeUrl(999_999))->assertStatus(status: 404);
     }
 
