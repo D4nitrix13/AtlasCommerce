@@ -34,14 +34,14 @@ describe('buildImageUrl', () => {
   it('indexed naming (Fender): back con back_sku usa el SKU en el filename', () => {
     const url = buildImageUrl(teleSpec, '3-color-sunburst', 'back', '0111140700');
     expect(url).toBe(
-      '/assets/products/american-professional-telecaster/3-color-sunburst/0111140700-0111140700-1600x525-02.webp',
+      '/assets/products/american-professional-telecaster/3-color-sunburst/0111140700-0111140700-1600x521-02.webp',
     );
   });
 
   it('indexed naming (Fender): back sin back_sku usa brandSlug+slug+variant', () => {
     const url = buildImageUrl(teleSpec, '3-color-sunburst', 'back');
     expect(url).toBe(
-      '/assets/products/american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x525-02.webp',
+      '/assets/products/american-professional-telecaster/3-color-sunburst/fender-american-professional-telecaster-3-color-sunburst-1600x521-02.webp',
     );
   });
 
