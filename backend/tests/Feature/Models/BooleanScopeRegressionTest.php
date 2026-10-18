@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Models;
 
 use App\Models\Auth\Role;
+use App\Models\Carts\Wishlist;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Category;
 use App\Models\Catalog\ProductAttribute;
@@ -22,9 +23,7 @@ use App\Models\Stores\StoreFeature;
 use App\Models\Support\ProductReview;
 use App\Models\System\Notification;
 use App\Models\Taxes\Tax;
-use App\Models\Carts\Wishlist;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -43,7 +42,7 @@ final class BooleanScopeRegressionTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function promotion_scopeValid_filters_by_is_active_true_not_null(): void
+    public function promotion_scope_valid_filters_by_is_active_true_not_null(): void
     {
         Promotion::factory()->create(['is_active' => true]);
         Promotion::factory()->create(['is_active' => false]);
@@ -53,7 +52,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function coupon_scopeValid_filters_by_is_active_true_not_null(): void
+    public function coupon_scope_valid_filters_by_is_active_true_not_null(): void
     {
         Coupon::factory()->create(['is_active' => true]);
         Coupon::factory()->create(['is_active' => false]);
@@ -63,7 +62,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function category_scopeActive_filters_correctly(): void
+    public function category_scope_active_filters_correctly(): void
     {
         Category::factory()->create(['is_active' => true]);
         Category::factory()->create(['is_active' => false]);
@@ -72,7 +71,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function brand_scopeActive_filters_correctly(): void
+    public function brand_scope_active_filters_correctly(): void
     {
         Brand::factory()->create(['is_active' => true]);
         Brand::factory()->create(['is_active' => false]);
@@ -81,7 +80,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function role_scopeActive_filters_correctly(): void
+    public function role_scope_active_filters_correctly(): void
     {
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
@@ -93,7 +92,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function tax_scopeActive_filters_correctly(): void
+    public function tax_scope_active_filters_correctly(): void
     {
         Tax::query()->create(['name' => 'IVA', 'percentage' => 15.00, 'is_active' => true]);
         Tax::query()->create(['name' => 'Old', 'percentage' => 10.00, 'is_active' => false]);
@@ -102,7 +101,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function customer_scopeActive_filters_correctly(): void
+    public function customer_scope_active_filters_correctly(): void
     {
         Customer::factory()->create(['is_active' => true]);
         Customer::factory()->create(['is_active' => false]);
@@ -111,7 +110,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function customer_address_scopePrimary_filters_correctly(): void
+    public function customer_address_scope_primary_filters_correctly(): void
     {
         $customer = Customer::factory()->create();
         CustomerAddress::factory()->for($customer)->create(['is_primary' => true]);
@@ -121,7 +120,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function shipping_company_scopeActive_filters_correctly(): void
+    public function shipping_company_scope_active_filters_correctly(): void
     {
         ShippingCompany::factory()->create(['is_active' => true]);
         ShippingCompany::factory()->create(['is_active' => false]);
@@ -130,7 +129,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function supplier_scopeActive_filters_correctly(): void
+    public function supplier_scope_active_filters_correctly(): void
     {
         Supplier::query()->create(['name' => 'A', 'is_active' => true]);
         Supplier::query()->create(['name' => 'B', 'is_active' => false]);
@@ -139,7 +138,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function wishlist_scopeDefault_filters_correctly(): void
+    public function wishlist_scope_default_filters_correctly(): void
     {
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
@@ -162,7 +161,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function product_image_scopePrimary_filters_correctly(): void
+    public function product_image_scope_primary_filters_correctly(): void
     {
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
@@ -198,7 +197,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function notification_scopeUnread_filters_correctly(): void
+    public function notification_scope_unread_filters_correctly(): void
     {
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
@@ -233,7 +232,7 @@ final class BooleanScopeRegressionTest extends TestCase
     }
 
     #[Test]
-    public function store_hasFeature_works_for_active_features(): void
+    public function store_has_feature_works_for_active_features(): void
     {
         $currency = Currency::factory()->primary()->create();
         $store = Store::factory()->for($currency, 'currency')->create();
