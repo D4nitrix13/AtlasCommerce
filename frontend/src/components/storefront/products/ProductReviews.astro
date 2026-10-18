@@ -568,7 +568,7 @@ const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
         if (!hasAuth) {
           const hintElForLogin =
             btn.parentElement?.querySelector<HTMLElement>('[data-review-like-hint]');
-          if (hintElForLogin !== null) {
+          if (hintElForLogin) {
             const redirect = encodeURIComponent(window.location.pathname);
             const originalText = hintElForLogin.textContent ?? '';
             const link = document.createElement('a');

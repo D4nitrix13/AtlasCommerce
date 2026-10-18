@@ -160,6 +160,13 @@ export const TENANT_USE_CASES: Record<TenantSlug, readonly LocalizableUseCase[]>
       href: '/products?segment=accesorios',
     },
   ],
+  // La Voz Instrumentos — pendiente. UseCases.astro es empty-safe y no
+  // renderiza la sección si el array está vacío, así que este tenant
+  // no rompe la home mientras se definen las verticales (guitarras,
+  // bajos, amplificadores, audio, accesorios). Las TranslationKeys
+  // correspondientes se agregan en i18n/es.json + i18n/en.json cuando
+  // merchandising confirme las categorías finales.
+  'instrumentos-musicales-la-voz': [],
 } as const;
 
 /**
