@@ -287,6 +287,7 @@ export function createVariantMock(
     ...(variant.condition !== undefined && { condition: variant.condition }),
     ...(variant.finishSlug !== undefined && { finishSlug: variant.finishSlug }),
     ...(variant.finishLabel !== undefined && { finishLabel: variant.finishLabel }),
+    ...(variant.hex !== undefined && { finishHex: variant.hex }),
   };
 }
 
