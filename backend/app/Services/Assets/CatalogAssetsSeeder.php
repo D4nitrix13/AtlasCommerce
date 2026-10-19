@@ -233,7 +233,7 @@ final class CatalogAssetsSeeder
                         }
                         $result[$key]['variants'][$variantSlug][] = [
                             'role' => $parsed['role'],
-                            'size' => $parsed['size'],
+                            'size' => $parsed['size_w'],
                             'webp_path' => $webp,
                         ];
                     }
@@ -245,31 +245,36 @@ final class CatalogAssetsSeeder
     }
 
     /**
-     * Parsea "NN-role-WxH" o "role-WxH" → ['role' => ..., 'size' => 'WxH'].
+     * Parsea "NN-role-WxH" o "role-WxH" → ['role' => ..., 'size_w' => 'W'].
      *
      * Filenames esperados: `01-front-1600x1600.webp`, `body-400x400.webp`,
      * `06-back-headstock-1200x1200.webp`, `17-finish-top-800x800.webp`.
      *
-     * @return null|array{role: string, size: string}
+     * Solo extrae el ANCHO (W) del WxH porque el seeder compara con
+     * '1600' para identificar la imagen de mayor resolución. La altura
+     * (H) es irrelevante para la lógica de primary/max-size.
+     *
+     * @return null|array{role: string, size_w: string}
      */
     private function parseRoleAndSize(string $base): ?array
     {
-        // Match sufijo "WxH" o "WIDTHxHEIGHT"
-        if (! preg_match('/^(?:[0-9]{2}-)?(?P<role>[a-z\-]+)-(?P<size>[0-9]+x[0-9]+)$/', $base, $m)) {
+        // Match solo el ANCHO (no "WxH" completo). Regex con grupo 'size_w'
+        // que captura solo dígitos antes de la 'x'.
+        if (! preg_match('/^(?:[0-9]{2}-)?(?P<role>[a-z\-]+)-(?P<size_w>[0-9]+)x[0-9]+$/', $base, $m)) {
             return null;
         }
         $role = $m['role'];
-        $size = $m['size'];
+        $sizeW = $m['size_w'];
 
         // Validar contra KNOWN_ROLES (longest-first para hyphenated)
         foreach (self::KNOWN_ROLES as $known) {
             if ($role === $known || str_starts_with($base, $known . '-')) {
-                return ['role' => $role, 'size' => $size];
+                return ['role' => $role, 'size_w' => $sizeW];
             }
         }
 
         // Fallback: si no matchea ningún known role, aceptar lo que sea parseable
-        return ['role' => $role, 'size' => $size];
+        return ['role' => $role, 'size_w' => $sizeW];
     }
 
     /**
