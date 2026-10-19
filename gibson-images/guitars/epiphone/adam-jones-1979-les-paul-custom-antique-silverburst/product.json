@@ -1,0 +1,72 @@
+{
+  "title": "Epiphone Adam Jones 1979 Les Paul Custom, Antique Silverburst",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EIGCAJLPC79NH1",
+  "handle": "epiphone-adam-jones-1979-les-paul-custom-antique-silverburst",
+  "url": "https://www.gibson.com/products/epiphone-adam-jones-1979-les-paul-custom-antique-silverburst",
+  "price": {
+    "regular": 1499.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106137414",
+  "available": true,
+  "long_description": {
+    "title": "Epiphone and Gibson Custom Partner to Recreate Adam’s 1979 Silverburst Les Paul Custom",
+    "body": "Multi-platinum-selling and four-time Grammy Award® winner Adam Jones, from the band Tool, is one of rock’s most talented and sonically innovative guitarists. Now Epiphone has partnered with Gibson Custom to create a new model that pays tribute to what Adam calls “one of my top favorite guitars of all time” - his Silverburst 1979 Gibson Les Paul Custom. It has a three-piece maple neck with a custom Adam Jones profile, an ebony fretboard, and a mahogany body with a maple cap. Finished in Antique Silverburst, it also features a Custombucker pickup in the neck position and a Seymour Duncan® Distortion® in the bridge position, along with CTS® potentiometers and Orange Drop® capacitors. It also has a Gibson “open book” headstock profile with custom artwork on the headstock's rear that was designed by Joyce Su and Adam Jones, and even comes with a replica two-inch convex mirror included in the Deluxe Protector Series hardshell case."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "7-ply Top, 5-ply Back and Headstock, Single-ply Fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "Maple"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fret Count": "22",
+      "Frets": "Medium, 18% Nickel Silver",
+      "Inlays": "Mother of Pearl Block",
+      "Joint": "Glued In, Set Neck, Long Neck Tenon",
+      "Neck Material": "3-piece Maple",
+      "Nut Material": "Graph Tech",
+      "Profile": "Adam Jones Custom Profile"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Seymour Duncan Distortion",
+      "Controls": "2 Volume, 2 Tone, CTS Potentiometers, Orange Drop Capacitors",
+      "Neck Pickup": "Custombucker Reverse Mounted",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-Way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Epiphone LockTone Tune-O-Matic",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Speed with Nickel Dial Pointers",
+      "finish": "Nickel",
+      "Jack Plate Cover": "Nickel Plated Metal",
+      "Mounting Rings": "Black",
+      "Pickup Covers": "Nickel (Neck Pickup Only)",
+      "Strap Buttons": "2 - Bottom and Shoulder (PosiLock Buttons)",
+      "Switch Tip": "Chrome",
+      "Switchwasher": "Black; Rhythm/Treble in Silver Hot Stamp",
+      "Tailpiece": "Epiphone LockTone Stop Bar",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "2-Ply Bell, Les Paul Custom"
+    },
+    "Misc Specs": {
+      "Accessories": "2\" Convex Mirror (Included in the Case)",
+      "Model": "EIGCAJLPC79NH1",
+      "Case": "Protector Series Hardshell Case",
+      "Headstock": "Gibson Open Book Profile",
+      "Headstock Inlay": "Epiphone Logo and Custom Split Diamond in Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 14,
+  "fetched_at": "2026-10-19T02:45:26+00:00"
+}

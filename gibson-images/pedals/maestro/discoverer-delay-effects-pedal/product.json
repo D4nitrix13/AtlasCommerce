@@ -1,0 +1,23 @@
+{
+  "title": "Maestro Discoverer Delay Effects Pedal",
+  "vendor": "Maestro",
+  "product_type": "Pedal",
+  "sku": "MOCDDP",
+  "handle": "maestro-discoverer-delay-effects-pedal",
+  "url": "https://www.gibson.com/products/maestro-discoverer-delay-effects-pedal",
+  "price": {
+    "regular": 59.99,
+    "currency": "USD",
+    "compare_at": 59.0
+  },
+  "weight_g": 907,
+  "barcode": "711106069173",
+  "available": true,
+  "long_description": {
+    "title": "Discover Your New Favorite Analog Delay Pedal",
+    "body": "The Maestro Discoverer Delay is a modern analog delay pedal that proudly utilizes legendary analog bucket brigade device (BBD) technology to deliver classic, warm, and inviting delay sounds. The intuitive 3-knob control layout lets users quickly dial up the length of the Delay time (with a range from 20 ms to 600 ms), the amount of Sustain (delay repeats), and adjust the level of the delays in the Mix. A toggle switch engages built-in modulation that applies anything from a slightly saturated, tape-like wow and flutter effect to a heavily pitch-shifted modulation effect to the delayed signal. Two internal trim pots allow the user to adjust the Rate (speed) and Width (sweep range) of the modulation. The true bypass footswitch triggers the LED lights in the bugles in the Maestro logo when it’s on, so you’ll always know when the effect is active."
+  },
+  "specifications": {},
+  "images_count": 6,
+  "fetched_at": "2026-10-19T02:51:46+00:00"
+}

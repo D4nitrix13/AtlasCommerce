@@ -1,0 +1,68 @@
+{
+  "title": "Gibson Hummingbird Standard with HiFi DNA, Vintage Cherry Sunburst",
+  "vendor": "Gibson",
+  "product_type": "Acoustic Guitar",
+  "sku": "MCSSHBHFVCS",
+  "handle": "gibson-hummingbird-standard-vintage-cherry-sunburst",
+  "url": "https://www.gibson.com/products/gibson-hummingbird-standard-vintage-cherry-sunburst",
+  "price": {
+    "regular": 3999.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106246093",
+  "available": true,
+  "long_description": {
+    "title": "The distinctive Hummingbird",
+    "body": "Introduced in 1960 as the first square-shoulder Gibson acoustic model, the unmistakable Hummingbird™ has become one of the most popular acoustic guitars ever made and the choice of countless players across generations and genres. Much of the Hummingbird’s appeal lies in its versatility. No matter how you attack this flat-top, it pumps out rich, deep tones and is equally at home strumming first-position chords as it is taking the spotlight for picking lead lines. The Hummingbird Standard now comes equipped with the Gibson-exclusive, custom-voiced Baggs™ HiFi DNA™ pickup system, delivering the guitar’s unique voice and every nuance of your playing with exceptional realism when amplified.\n\nThe Gibson Hummingbird Standard is handcrafted with care in Bozeman, Montana, by Gibson’s expert acoustic luthiers and features a square-shoulder body crafted using solid mahogany for the back and sides. The top is solid Sitka spruce and is reinforced with scalloped X-bracing. This proven construction is equally capable of holding down the rhythm in the hands of a rock ‘n’ roll sideman or accompanying the most nuanced performance under the fingers of today’s alternative singer-songwriter. Both the top and back are framed with multi-ply binding, and the gloss nitrocellulose lacquer finish completes its classic Hummingbird aesthetic. Along with the iconic Hummingbird graphics on the pickguard, these design elements have made this model instantly recognizable to generations of players and music fans.\n\nThe Hummingbird Standard’s mahogany neck is attached to the body with a compound dovetail neck-to-body joint using hot hide glue and features a comfortable Round profile. The neck is equipped with a bound rosewood fretboard with 20 standard frets and mother-of-pearl parallelogram inlays. The reverse-belly bridge is also crafted from rosewood. This ’bird has a TUSQ® nut, saddle, and bridge pins. Paired with high-quality Grover® Rotomatic® tuners, the smooth, self-lubricating nut helps ensure solid tuning stability.\n\nInside, the Hummingbird Standard is now equipped with the all-new Gibson-exclusive Baggs™ HiFi DNA™ pickup system. This active system uses two lightweight sensors mounted on the internal bridge plate. The sensors are matched with optimized individual preamps to deliver full-bodied, amplified acoustic tone that lets the guitar’s character and personality come through when amplified, with no impact on the unamplified tone. The Baggs HiFi DNA system offers comparable gain-before-feedback to an under-saddle pickup. The system also includes soundhole-mounted volume and tone controls that are quick and easy to access while playing, and all but invisible to your audience.\n\nThe Hummingbird has been a favorite of performing and recording musicians for more than six decades and comes ready for the stage and studio in a Gibson hardshell case. Available in both right and left-handed versions."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Mahogany",
+      "Binding": "5-ply Top, 3-ply Back, Single-ply Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Hummingbird",
+      "Body Styles": "Square Shoulder",
+      "Side": "Mahogany",
+      "Top": "Sitka Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "20",
+      "Frets": "Standard",
+      "Inlays": "Mother of Pearl Parallelograms",
+      "Joint": "Compound Dovetail Neck-to-body Joint; Hot Hide Glue",
+      "Neck Material": "Mahogany",
+      "Nut Material": "TUSQ",
+      "Profile": "Rounded"
+    },
+    "Electronics Specs": {
+      "Controls": "Soundhole-mounted volume and tone",
+      "Output Jack": "1/4\"",
+      "Preamp": "Baggs HiFi DNA",
+      "Under Saddle Pickup": "Baggs HiFi DNA"
+    },
+    "Hardware Specs": {
+      "Bridge": "Reverse Belly, Rosewood",
+      "Bridge Pins": "TUSQ",
+      "finish": "Nickel",
+      "Pickguard": ".060'' Hummingbird",
+      "Saddle Material": "TUSQ",
+      "Strap Buttons": "2",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "2-ply Bell, Black and White",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover Rotomatic"
+    },
+    "Misc Specs": {
+      "Case": "Gibson Hardshell",
+      "Model": "MCSSHBHFVCS",
+      "Headstock Inlay": "Mother of Pearl Gibson Logo and Crown",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:48:48+00:00"
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Kramer Striker Figured HSS, Floyd Rose, Wild Ivy",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KSTFLFRHSSWIBF1",
+  "handle": "kramer-striker-figured-hss-laurel-fb-floyd-rose-special-wild-ivy",
+  "url": "https://www.gibson.com/products/kramer-striker-figured-hss-laurel-fb-floyd-rose-special-wild-ivy",
+  "price": {
+    "regular": 399.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 9072,
+  "barcode": "711106086118",
+  "available": true,
+  "long_description": {
+    "title": "A Speed Demon With Flame Maple Looks That Kill",
+    "body": "Part of the Modern Collection, the Kramer Striker™ Figured HSS is a gorgeous entry into the high-performance, shred-ready world of Kramer guitars! Along with its stunning, AAA flame maple veneer, it features a satin-finished maple neck with a Kramer K-Speed SlimTaper™ C profile that's fast, easy to play, and incredibly comfortable. Exceptional sonic versatility comes courtesy of a zebra-coil bridge humbucker™ and two single coils, delivering sparkling cleans as easily as harder-rocking tones that can cover a variety of styles. And, of course, the licensed Floyd Rose® locking vibrato provides all the whammy-bar dives and theatrics a true performer needs while keeping in tune. An optional hardshell case is available."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Body, Satin Neck",
+      "Body Material": "Mahogany",
+      "Body Shape": "Striker",
+      "Body Styles": "Double Cut",
+      "Top": "AAA Figured Maple Veneer"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "24",
+      "Frets": "Medium Jumbo",
+      "Inlays": "White Dot",
+      "Joint": "Bolt-On with Mounting Ferrules",
+      "Neck Material": "Maple",
+      "Nut Material": "Licensed Floyd Rose R2 Locking Nut, Top Mount",
+      "Profile": "Kramer K-Speed SlimTaper C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Kramer Alnico 5 HB-1 Zebra coil",
+      "Controls": "Master Volume, Master Tone",
+      "Middle Pickup": "Kramer Alnico 5 SC-1 Black",
+      "Neck Pickup": "Kramer Alnico 5 SC-1 Black",
+      "Output Jack": "1/4\" Black Barrel Rim Mount Jack",
+      "Pickup Selector": "5-way Selector"
+    },
+    "Hardware Specs": {
+      "Bridge": "Licensed Floyd Rose",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Knurled",
+      "finish": "Black",
+      "Mounting Rings": "Black (Bridge Pickup Only)",
+      "Pickguard": "None",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Switch Tip": "Black",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black Bullet, 3-screw; White Silkscreen Striker",
+      "Tuner Plating": "Black",
+      "Tuning Machines": "Die Cast"
+    },
+    "Misc Specs": {
+      "Case": "Optional (940-KRSTCS)",
+      "Model": "KSTFLFRHSSWIBF1",
+      "Headstock": "Kramer Banana; 14 Degree Angle",
+      "Headstock Inlay": "Kramer Pyramid Logo in Gold",
+      "Strings Gauge": ".009, .011, .016, .024, .032, .042"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:51:14+00:00"
+}

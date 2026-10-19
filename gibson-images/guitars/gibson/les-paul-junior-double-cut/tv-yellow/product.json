@@ -1,0 +1,65 @@
+{
+  "title": "Gibson Les Paul Junior Double Cut, TV Yellow",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "LPJD00TVNH1",
+  "handle": "gibson-les-paul-junior-double-cut-tv-yellow",
+  "url": "https://www.gibson.com/products/gibson-les-paul-junior-double-cut-tv-yellow",
+  "price": {
+    "regular": 1699.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106171821",
+  "available": true,
+  "long_description": {
+    "title": "Perfect simplicity, surprising versatility",
+    "body": "The Les Paul™ Junior Double Cut is a guitar known for being nearly perfect in its simplicity, with everything you need to rock and no frills to get in your way. However, some players underestimate this legendary guitar’s versatility. While this single-pickup solidbody electric guitar was designed initially as a student model, the number of different tones that are available simply by adjusting the position of the volume and tone knobs and the position of your picking hand is nearly unlimited. It has resulted in the enthusiastic embrace of the model by countless professional musicians across genres and generations. The Les Paul Junior Double Cut’s double cutaway body also offers unimpeded access to the entire length of the fretboard, including the upper frets, making it an excellent choice for lead guitarists, too.\n\n\n\n\nThe Les Paul Junior Double Cut features a slab, double-cutaway mahogany body, a mahogany neck with a fast-playing SlimTaper™ profile that is topped with a rosewood fretboard with 22 medium jumbo frets and adorned with simple acrylic dot inlays. The wraparound bridge bolts straight into the body for exceptional sustain, while the Graph Tech® nut and Vintage Deluxe tuners with white buttons ensure rock-solid tuning stability. The single Dogear P-90 pickup in the bridge position is renowned for its ability to go from sweet and clean to aggressive and dirty with a twist of the master volume control. A single tone control with an Orange Drop® capacitor provides further tonal flexibility.\n\n\n\n\nDiscover the perfect simplicity and surprising versatility of the Les Paul Junior Double Cut today and experience the fun and tonal magic of this legendary guitar. A Gibson hardshell case is also included to help keep your investment safe and secure when you’re not playing it and when you’re traveling to your next gig, whether that’s your first gig at a local club or the next stop on your latest world tour."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul Double Cut",
+      "Body Styles": "Double Cut,Les Paul"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Dot",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Dogear P-90",
+      "Controls": "Master Volume, Master Tone, Hand-wired with an Orange Drop Capacitor",
+      "Output Jack": "1/4\""
+    },
+    "Hardware Specs": {
+      "Bridge": "Wraparound",
+      "Control Knobs": "Black Top Hat",
+      "finish": "Nickel",
+      "Jack Plate Cover": "Black",
+      "Pickguard": "Black",
+      "Pickup Covers": "Black Dogear P-90",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "2-ply Black Bell",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Vintage Deluxe with White Button"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "LPJD00TVNH1",
+      "Case": "Hardshell Case",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 8,
+  "fetched_at": "2026-10-19T04:00:50+00:00"
+}

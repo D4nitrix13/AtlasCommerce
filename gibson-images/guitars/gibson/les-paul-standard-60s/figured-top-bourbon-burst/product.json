@@ -1,0 +1,69 @@
+{
+  "title": "Gibson Les Paul Standard 60s, Bourbon Burst",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "LPS600B8NH1",
+  "handle": "gibson-les-paul-standard-60s-figured-top-bourbon-burst",
+  "url": "https://www.gibson.com/products/gibson-les-paul-standard-60s-figured-top-bourbon-burst",
+  "price": {
+    "regular": 2799.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10433,
+  "barcode": "711106035567",
+  "available": false,
+  "long_description": {
+    "title": "A Whole Lotta Les!",
+    "body": "The Les Paul™ Standard returns to the classic design that made it relevant, played, and loved – shaping sound across generations and genres of music. It pays tribute to Gibson's Golden Era of innovation and brings authenticity back to life. The Gibson Les Paul Standard is one of the world’s most beloved electric guitar designs, and the Les Paul Standard 60s delivers the classic features found on Les Paul models from the very early 1960s. \n\n\n\n\nThe Les Paul Standard 60s has a non-weight-relieved solid mahogany body with an AA figured maple top that adds a bit of extra sustain and bite to the warmth and midrange punch of the mahogany. The mahogany neck has a fast-playing SlimTaper™ profile for hours and hours of comfortable play, while the bound Indian rosewood fretboard is outfitted with 22 medium jumbo frets and is adorned with acrylic trapezoid inlays. The 12” fretboard radius makes it equally comfortable when you’re playing first-position chords or bending the strings further up the neck, and despite the low action, there’s no risk of string bends choking out.\n\n\n\n\nThe Les Paul Standard 60s is equipped with a classic ABR-1 Tune-O-Matic™ bridge, aluminum Stop Bar tailpiece, Grover® Rotomatic® tuning machines “with Kidney\" buttons, and gold Top Hat knobs with silver reflectors. A Graph Tech® nut also helps keep the tuning nice and solid in partnership with the Grover tuners, ABR-1 bridge, and Stop Bar tailpiece. The two 60s Burstbucker™ pickups are loaded with Alnico 5 magnets and hand-wired to individual volume and tone controls that feature audio taper potentiometers. The tone controls use Orange Drop® capacitors. The 3-way pickup selector toggle switch lets you use either pickup individually or combine them, and the individual controls allow you to blend the pickups in any ratio you prefer. The controls are topped with gold Top Hat knobs with silver reflectors, just like the classic early 60s Les Paul Standard models. A hardshell case is also included to keep this iconic guitar safe when in storage or when traveling."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "AA Figured Maple",
+      "Weight Relief": "None"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Trapezoid",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "60s Burstbucker",
+      "Controls": "2 Volume, 2 Tone; Hand-wired with Orange Drop Capacitors",
+      "Neck Pickup": "60s Burstbucker",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "ABR-1 Tune-O-Matic",
+      "Control Knobs": "Gold Top Hat with Silver Reflector & Dial Pointer",
+      "finish": "Nickel",
+      "Jack Plate Cover": "Cream",
+      "Pickguard": "Cream",
+      "Strap Buttons": "2",
+      "Switch Tip": "Amber",
+      "Switchwasher": "Cream",
+      "Tailpiece": "Aluminum Stop Bar",
+      "Truss Rod": "Adjustable",
+      "Tuning Machines": "Grover Rotomatic with Kidney Button"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "LPS600B8NH1",
+      "Case": "Hardshell",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 5,
+  "fetched_at": "2026-10-19T04:02:07+00:00"
+}

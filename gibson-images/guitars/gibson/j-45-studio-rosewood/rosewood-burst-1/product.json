@@ -1,0 +1,68 @@
+{
+  "title": "Gibson J-45 Studio Rosewood, Rosewood Burst",
+  "vendor": "Gibson",
+  "product_type": "Acoustic Guitar",
+  "sku": "MCRS4SRSRBG",
+  "handle": "gibson-j-45-studio-rosewood-rosewood-burst-1",
+  "url": "https://www.gibson.com/products/gibson-j-45-studio-rosewood-rosewood-burst-1",
+  "price": {
+    "regular": 2699.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10659,
+  "barcode": "711106170206",
+  "available": false,
+  "long_description": {
+    "title": "An updated full-bodied rosewood Workhorse with a gloss lacquer top that’s ready for the studio and stage",
+    "body": "The J-45™ was first released in 1942. It became widely known as “The Workhorse” due to its no-nonsense simplicity and understated elegance. It is Gibson’s best-selling acoustic guitar model of all time and one of the most recorded acoustic guitars in history, and it has graced countless recordings and concert stages in the hands of artists across a wide range of genres. Now, Gibson is proud to introduce the updated J-45 Studio Rosewood. The J-45 Studio Rosewood is handcrafted in Bozeman, Montana, using all-solid tonewoods, including a gloss nitrocellulose lacquer-finished Sitka spruce top for wide dynamic range, playing responsiveness, and balanced tone. The satin nitrocellulose lacquer-finished rosewood used for crafting the back and sides delivers a bit more rich-sounding bass and sparkling treble overtones than the traditional mahogany-bodied J-45 models. The J-45 Studio Rosewood’s full-depth, round shoulder body ensures rich, deep tone and outstanding volume and projection. The J-45 Studio Rosewood is equipped with an Advanced Response profile and satin nitrocellulose lacquer-finished utile neck for smooth, easy playability. The Advanced Response neck profile sits in between some of the other Gibson neck profiles and is not too large or too thin but fits “just right” in the hand for many players. The rosewood fretboard has 20 standard-sized frets and is adorned with the simple mother-of-pearl dot inlays, one of the visual hallmarks of the iconic J-45. The fretboard’s 16” radius makes playing fast note runs easy and efficient, contributing further to the model’s excellent playability. You’ll find yourself reaching for this guitar again and again since playing it is so enjoyable. The headstock is equipped with smooth and precise Grover® Rotomatic® tuning machines and a Graph Tech® TUSQ® nut for rock-solid tuning stability so you can spend more time playing and less time tuning. The saddle and bridge pins installed on the belly-up bridge plate are also TUSQ. The J-45 Studio Rosewood has a Baggs™ Element Bronze active under-saddle piezo pickup with a quick-to-access soundhole-mounted volume control for easy studio-quality plug-and-play anywhere. Packaged in a modern hardshell case for portability and protection, the J-45 Studio Rosewood is ready to join you wherever your music takes you."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Rosewood",
+      "Binding": "Multi-ply Top, Single-ply Back",
+      "Body Finish": "Gloss Nitro Lacquer (Top), Satin Nitro Lacquer (Back, Neck, & Sides)",
+      "Body Material": "Rosewood",
+      "Body Shape": "J-45",
+      "Body Styles": "Round Shoulder",
+      "Bracing": "Traditional Hand-scalloped X-bracking",
+      "Side": "Rosewood",
+      "Top": "Sitka Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "20",
+      "Frets": "Standard",
+      "Inlays": "Mother-of-pearl Dot",
+      "Joint": "Compound Dovetail Neck-to-body, Hot Hide Glue",
+      "Neck Material": "Utile",
+      "Nut Material": "Tusq",
+      "Profile": "Advanced Response"
+    },
+    "Electronics Specs": {
+      "Controls": "Soundhole-mounted Volume",
+      "Output Jack": "1/4\" Endpin",
+      "Preamp": "Baggs Element Bronze",
+      "Under Saddle Pickup": "Baggs Element Bronze"
+    },
+    "Hardware Specs": {
+      "Bridge": "Belly-up, Rosewood",
+      "Bridge Pins": "Tusq",
+      "Pickguard": "Tear Drop, Tortoise",
+      "Saddle Material": "Tusq",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "Black Bell, Studio",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover Rotomatic"
+    },
+    "Misc Specs": {
+      "Case": "Modern Hardshell",
+      "Model": "MCRS4SRSRBG",
+      "Headstock Inlay": "Gold Gibson Logo Decal",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 7,
+  "fetched_at": "2026-10-19T03:37:40+00:00"
+}

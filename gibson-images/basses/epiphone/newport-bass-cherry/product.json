@@ -1,0 +1,65 @@
+{
+  "title": "Epiphone Newport Bass, Cherry",
+  "vendor": "Epiphone",
+  "product_type": "Electric Bass",
+  "sku": "EONB4CHNH1",
+  "handle": "epiphone-newport-bass-cherry",
+  "url": "https://www.gibson.com/products/epiphone-newport-bass-cherry",
+  "price": {
+    "regular": 449.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 9072,
+  "barcode": "711106060842",
+  "available": true,
+  "long_description": {
+    "title": "An Epiphone Original From the Early 60s Returns",
+    "body": "The Epiphone Newport Bass is an all-original design that debuted in 1961. The modern Newport Bass pays tribute to that rare vintage model while offering refinements to meet the needs of today’s bassists. The 30.5” scale length and comfortable Medium C profile make it suitable for players with a wide range of hand sizes, while the symmetrical double-cutaway body ensures excellent access to every fret. The Bass Sidewinder neck pickup provides rich, deep tones, while the TB PRO in the bridge position delivers brighter timbres. The two pickups are paired with master volume and tone controls and a blend knob so you can get precisely the tonal balance you desire. Available with a classic Cherry finish and three custom colors - California Coral, Sunset Yellow, and Pacific Blue."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Newport",
+      "Body Styles": "Double Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "20",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Pearloid Dot",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "PVC",
+      "Profile": "Medium C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "TB PRO",
+      "Controls": "Master Volume, Blend Knob, Master Tone",
+      "Neck Pickup": "Bass Sidewinder",
+      "Output Jack": "Epiphone 1/4\" Heavy-Duty"
+    },
+    "Hardware Specs": {
+      "Bridge": "Historic Bass Tune-O-Matic",
+      "Control Covers": "Black",
+      "Control Knobs": "Historic Insert Barrel",
+      "finish": "Nickel",
+      "Pickguard": "Newport Bass 3-ply (White/Black/White)",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Tailpiece": "Historic Claw",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black Bullet",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Die Cast"
+    },
+    "Misc Specs": {
+      "Headstock": "Newport Bass - Two on a Side",
+      "Model": "EONB4CHNH1",
+      "Headstock Inlay": "Epiphone Bikini Badge",
+      "Strings Gauge": ".045. .065. .085. .105"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:44:25+00:00"
+}

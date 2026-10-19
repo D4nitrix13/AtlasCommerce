@@ -1,0 +1,69 @@
+{
+  "title": "Gibson Custom 1957 Les Paul Special Reissue, Left-Handed, TV Yellow",
+  "vendor": "Gibson Custom",
+  "product_type": "Electric Guitar",
+  "sku": "LPSPSC57LHVOTVNH1",
+  "handle": "gibson-custom-1957-les-paul-special-single-cut-reissue-vos-tv-yellow-left-handed",
+  "url": "https://www.gibson.com/products/gibson-custom-1957-les-paul-special-single-cut-reissue-vos-tv-yellow-left-handed",
+  "price": {
+    "regular": 4199.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 13608,
+  "barcode": "711106929798",
+  "available": true,
+  "long_description": {
+    "title": "As Seen on TV...",
+    "body": "Gibson Custom Shop is the pinnacle of craftsmanship, quality, and sound excellence. Each instrument celebrates Gibson's legacy through accuracy, authenticity and attention to detail.\n\n\n\n\nLegend has it that the famous \"TV Yellow\" color of the Les Paul Special was named for its vivid appearance on black & white televisions in the 1950s. That's debatable. What's not up for debate is the indelible imprint this model had on music history since its inception. The classy looks and thick, meaty tones of the Les Paul Special have been preferred by players of all genres. And this 1957 Les Paul Special Reissue from Custom Shop revives every single feature in spectacular detail for the ultimate vintage ownership experience -- from the solid mahogany construction to the roaring P90s."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Fretboard 1-ply Cream",
+      "Body Finish": "Nitrocellulose VOS (Vintage Patina)",
+      "Body Material": "Solid Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Weight Relief": "None"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "22",
+      "Inlays": "Pearloid Dot",
+      "Neck Material": "Solid Mahogany",
+      "Nut Material": "Nylon",
+      "Profile": "1950s Chunky D"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Custom Soapbar P90",
+      "Controls": "CTS 500K Audio Taper Potentiometers, Paper-in-Oil Capacitors",
+      "Neck Pickup": "Custom Soapbar P-90",
+      "Output Jack": "Switchcraft",
+      "Pickup Selector": "3-Way Switchcraft"
+    },
+    "Hardware Specs": {
+      "Bridge": "Wraparound",
+      "Control Knobs": "Black Top Hats",
+      "finish": "Nickel",
+      "Jack Plate Cover": "Black Multi-Ply",
+      "Pickguard": "Black Multi-Ply",
+      "Pickup Covers": "Black Soapbar",
+      "Strap Buttons": "Aluminum",
+      "Switch Tip": "Amber",
+      "Switchwasher": "Black",
+      "Tailpiece": "Wraparound",
+      "Truss Rod": "Authentic 1950s No-Tube",
+      "Truss Rod Cover": "Authentic Stepped 2-Ply",
+      "Tuner Plating": "Nickel"
+    },
+    "Misc Specs": {
+      "Accessories": "Gibson Custom Switchplate Medallion (w/ Historic Black Plastic Cover in Case), Certificate of Authenticity Booklet, Historic Reissue Hang Tags",
+      "Model": "LPSPSC57LHVOTVNH1",
+      "Case": "Custom Shop Hardshell",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 8,
+  "fetched_at": "2026-10-19T04:01:23+00:00"
+}

@@ -1,0 +1,60 @@
+{
+  "title": "Kramer 50th Anniversary Volante HHFR, Anniversary Gold",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "K50VO",
+  "handle": "kramer-50th-anniversary-volante-hhfr-anniversary-gold",
+  "url": "https://www.gibson.com/products/kramer-50th-anniversary-volante-hhfr-anniversary-gold",
+  "price": {
+    "regular": 1299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106237756",
+  "available": true,
+  "long_description": {
+    "title": "Celebrating the 50th anniversary of the world’s hardest-rockin’ guitar brand",
+    "body": "Kramer is turning 50, so naturally, we’re cranking things up to 11! In honor of five decades of boundary-pushing tone and iconic design, we’re unleashing a special limited-edition series of some of our most popular models, each finished in glossy metallic Anniversary Gold. These guitars defined an era and continue to inspire generations of players. Each model is limited to this anniversary year, making them a must-have for collectors and players alike. \n\nThe Italian word “Volante” translates to “flying” or “light” in English and signifies the musical ideas of speed and movement. As a musical direction, it commands playing fast and fluidly. Kramer’s latest platform, the Volante, embodies that spirit of speed and fluidity. The 50th Anniversary Volante HHFR offers cutting-edge features, including a lightweight alder body with forearm and body comfort carves. A three-piece, thermally-aged, satin-finished maple neck is bolted to the body with five bolts and ferrules, and features a sculpted heel for improved upper-fret access. It also features the new Kramer KeyLock system. The KeyLock, developed by Senior Product Development Engineer Richard Akers, provides incredible neck stability. Paired with Kramer’s five-bolt neck-to-body joint, it prevents movement in the neck pocket, increasing vibrational tone transfer, sustain, and intonation. The fretboard is ebony, has a 10-14” compound radius, and is dressed up with mother-of-pearl small diamond inlays, while the 24 jumbo frets facilitate easy string bends and left-hand vibrato. The truss rod uses a spoke wheel style adjustment at the body end of the fretboard, making it quick and easy to access. The headstock features the classic Kramer “beak” profile and is outfitted with a rear-mounted Floyd Rose® R3 locking nut, black mini die-cast tuners, a black string retaining bar, and a matching black wrench holder on the rear so you’ll always have the tools available for quick adjustments and string changes. The headstock is also finished in Anniversary Gold to match the body. The Floyd Rose 1000 Series tremolo delivers unmatched tuning stability, regardless of how hard or often you work the vibrato bar. \n\nThe pickups are a pair of Kramer USA Neptune humbuckers™ wired to master volume and tone controls and a 5-way blade-style pickup selector switch that is wired for maximum tonal versatility. In position 1, the bridge pickup operates alone as a humbucker wired in series. In position 2, the bridge and neck pickups run together, but each is in single-coil mode, with the slug coil of the bridge pickup running with the screw coil of the neck pickup. Position 3 uses both pickups combined, with each running as a series-wired humbucker. Position 4 uses the neck pickup by itself, running as a parallel-wired humbucker, while position 5 gives you the neck humbucker pickup wired in series. The pickups are hum-canceling in all positions. \n\nThe 50th Anniversary Volante HHFR comes packed in a Kramer premium gig bag, so it’s ready for the road. This is more than a guitar—it is a collector’s dream with premium components and a piece of rock history, and will only be available during this anniversary year. Don’t miss your chance to own a legend, reborn for Kramer’s 50th Anniversary."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "None",
+      "Body Finish": "Gloss",
+      "Body Material": "Alder",
+      "Body Shape": "Volante",
+      "Body Styles": "Solidbody"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fingerboard Radius": "Compound, 10 in. to 14 in. | 254 mm to 355.6 mm",
+      "Inlays": "Small diamond",
+      "Joint": "Bolt-on",
+      "Neck Material": "3-piece maple",
+      "Nut Material": "Locking",
+      "Profile": "Elliptical C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Kramer USA Neptune Treble",
+      "Controls": "Master volume, master tone",
+      "Neck Pickup": "Kramer USA Neptune Rhythm",
+      "Pickup Selector": "5-way blade"
+    },
+    "Hardware Specs": {
+      "Bridge": "Floyd Rose 1000 Series",
+      "Control Knobs": "Knurled",
+      "finish": "Black",
+      "Pickup Covers": "Double Black",
+      "Plastic Parts": "Black",
+      "Tuning Machines": "Die cast"
+    },
+    "Misc Specs": {
+      "Case": "Premium gig bag",
+      "Model": "K50VO",
+      "Headstock": "Kramer beak",
+      "Strings Gauge": ".009, .011, .016, .024, .032, .042"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:50:05+00:00"
+}

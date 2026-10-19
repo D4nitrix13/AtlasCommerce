@@ -1,0 +1,71 @@
+{
+  "title": "Epiphone Hummingbird 12-String, Aged Cherry Sunburst Gloss",
+  "vendor": "Epiphone",
+  "product_type": "Acoustic Guitar",
+  "sku": "IGMTHUM12ACHNH1",
+  "handle": "epiphone-hummingbird-12-string-all-solid-wood-fishman-presys-vt-aged-cherry-sunburst-gloss",
+  "url": "https://www.gibson.com/products/epiphone-hummingbird-12-string-all-solid-wood-fishman-presys-vt-aged-cherry-sunburst-gloss",
+  "price": {
+    "regular": 899.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106045320",
+  "available": false,
+  "long_description": {
+    "title": "A Rarely Offered Iconic 12-String Guitar!",
+    "body": "Inspired by the iconic Gibson™ Hummingbird acoustic, the Epiphone Inspired by Gibson™ Hummingbird™ 12-String produces a clear, bright tone with a beautifully balanced sonic range and comes equipped with a unique Hummingbird pickguard. The Epiphone Inspired by Gibson Hummingbird 12-String has a solid spruce top, solid mahogany back and sides, dovetail neck joint, bone nut and saddle, Fishman® Presys VT™ pickup system, and an aged vintage gloss finish. Hardshell case or EpiLite™ case sold separately.\n\nA battery is not included. To power your pickup, you will need a 9-volt battery."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Solid Mahogany",
+      "Binding": "6-ply Top, 4-ply Back",
+      "Body Finish": "Aged Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Hummingbird",
+      "Body Styles": "Square Shoulder",
+      "Bracing": "Quarter Sawn Spruce",
+      "Side": "Solid Mahogany",
+      "Top": "Solid Sitka Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "20",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Mother of Pearl Split Parallelogram",
+      "Joint": "Tapered Dovetail",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Bone",
+      "Profile": "Rounded C"
+    },
+    "Electronics Specs": {
+      "Controls": "Fishman Presys VT Soundhole mounted Volume and Tone",
+      "Output Jack": "Endpin Jack",
+      "Preamp": "Fishman Presys VT",
+      "Under Saddle Pickup": "Fishman Presys VT"
+    },
+    "Hardware Specs": {
+      "Bridge": "12-String, Reverse Bell",
+      "Bridge Pins": "Ivory",
+      "finish": "Nickel",
+      "Pickguard": "Hummingbird Shape with Hummingbird Graphics",
+      "Saddle Material": "Bone",
+      "Strap Buttons": "2 - end pin jack and side of heel",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "2-ply Bell with HUMMINGBIRD in White",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover® Mini Rotomatic®"
+    },
+    "Misc Specs": {
+      "Case": "Optional Acoustic AJ/Dreadnought Hard Case 940-EDREAD; Dread/AJ Acoustic EpiLite™ Case 940-EDREADHG",
+      "Model": "IGMTHUM12ACHNH1",
+      "Headstock": "Kalamazoo style 12-String",
+      "Headstock Inlay": "Modern Epiphone logo in Mother of Pearl, Gibson Crown in Mother of Pearl",
+      "Strings Gauge": "Gibson Coated Phosphor Bronze Acoustic Guitar Strings - Plain Steel .010/.10, .014/.014, Wound .023/.008(p), .030/.012(p), .039/.018(p), .047/.027(w)"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 7,
+  "fetched_at": "2026-10-19T03:47:44+00:00"
+}

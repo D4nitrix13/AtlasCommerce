@@ -1,0 +1,70 @@
+{
+  "title": "Kramer Nite-V, Royal Blue Metallic",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KNVPRBMBH1",
+  "handle": "kramer-nite-v-royal-blue-metallic",
+  "url": "https://www.gibson.com/products/kramer-nite-v-royal-blue-metallic",
+  "price": {
+    "regular": 899.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 5443,
+  "barcode": "711106146560",
+  "available": true,
+  "long_description": {
+    "title": "The Ultimate Shredder’s V From Kramer",
+    "body": "Ever since it was first introduced in 2008, the Kramer Nite-V has been embraced by many notable metal players, including Charlie Parra, Prika Amaral (Nervosa), and The Jasons. The Kramer Nite-V is the ultimate shredder’s V™, and its distinctive body carve makes it a very comfortable model to play when standing. The latest version of this manic metal machine features a mahogany body with string-through-body construction, a 14-degree angled headstock, locking tuners, a Graph Tech® nut, a thermally-aged maple neck with a K-Speed SlimTaper™ C-shaped profile outfitted with a bound ebony fretboard with Thorn inlays and jumbo frets, and a pair of Kramer USA-made Eruption pickups. A premium gig bag is also included. Pick one up today and rule the stage all Nite long!"
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply, Fretboard and Headstock",
+      "Body Finish": "Gloss Body, Satin Neck",
+      "Body Material": "Mahogany",
+      "Body Shape": "Nite-V",
+      "Body Styles": "Flying V"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fret Count": "22",
+      "Frets": "Jumbo",
+      "Inlays": "Pearloid Thorn",
+      "Joint": "Bolt-on with Black Ferrules",
+      "Neck Material": "Thermally Aged Maple",
+      "Nut Material": "Graph Tech",
+      "Profile": "Kramer K-Speed SlimTaper C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Kramer USA Eruption Treble",
+      "Controls": "Master Volume, Master Tone",
+      "Neck Pickup": "Kramer USA Eruption Rhythm",
+      "Output Jack": "1/4\" Black Barrel",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Tune-O-Matic",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Knurled",
+      "finish": "Black",
+      "Pickguard": "None",
+      "Pickup Covers": "None",
+      "Strap Buttons": "2",
+      "Switch Tip": "Black",
+      "Tailpiece": "String-Through-Body with Black Ferrules",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black Bullet with Nite-V in White 80s Kramer Font",
+      "Tuner Plating": "Black",
+      "Tuning Machines": "6-inline, Locking"
+    },
+    "Misc Specs": {
+      "Case": "Premium Gig Bag",
+      "Model": "KNVPRBMBH1",
+      "Headstock": "Kramer Pointy; 14 Degree Angle",
+      "Headstock Inlay": "Kramer Classic Logo in Silver Silkscreen",
+      "Strings Gauge": ".009, .011, .016, .024, .032, .042"
+    }
+  },
+  "images_count": 7,
+  "fetched_at": "2026-10-19T02:50:49+00:00"
+}

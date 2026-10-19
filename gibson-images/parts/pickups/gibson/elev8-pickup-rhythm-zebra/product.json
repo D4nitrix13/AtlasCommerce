@@ -1,0 +1,24 @@
+{
+  "title": "Gibson ELEV8 Pickup, Rhythm, Zebra",
+  "vendor": "Gibson",
+  "product_type": "Pickup",
+  "sku": "PUE8RZB4",
+  "handle": "gibson-elev8-pickup-rhythm-zebra",
+  "url": "https://www.gibson.com/products/gibson-elev8-pickup-rhythm-zebra",
+  "price": {
+    "regular": 139.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 318,
+  "barcode": "711106234014",
+  "available": true,
+  "long_description": {
+    "title": null,
+    "body": "Gibson invented the original humbucking Patent Applied For pickup in 1955. Over the years, Gibson has utilized Alnico 2, 3, 4, and 5 magnets in pickup construction, each grade with its own unique tonal characteristics. For the all-new Gibson ELEV8 pickups, we are, for the first time, utilizing powerful Alnico 8 magnets harnessed within coils of custom-gauge wire to set the stage for a series of pickups that modern players will use to shape and define the Gibson tones of the future. \n\n\n\n\nThe all-new Gibson ELEV8 pickups deliver powerful, focused tones with an intensity that doesn’t sacrifice articulation, clarity, and dynamic control. The pairing of Alnico 8 magnets with custom-gauge wire allows for a wide variety of tones with a tighter low-end that is ideal for high-gain and modern styles. The standard ELEV8 (10k ohms) is available in both traditional Gibson neck and bridge spacings. \n\n\n\nPosition: Rhythm\nMagnets: Alnico 8\nWiring: 4-Conductor\nCovers: None\nWax Potted\nZebra Bobbins\nAverage DC Resistance: 10k\nDetails: Powerful, focused modern tones with an intensity that doesn’t sacrifice articulation, clarity, and dynamic control. Ideal for high-gain and modern styles"
+  },
+  "specifications": {},
+  "metadata_status": "partial",
+  "images_count": 2,
+  "fetched_at": "2026-10-19T03:58:14+00:00"
+}

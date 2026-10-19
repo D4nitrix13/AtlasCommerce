@@ -1,0 +1,71 @@
+{
+  "title": "Epiphone IGC 1963 Firebird V, Cherry, Exclusive",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EIGC63FB5CHNM3",
+  "handle": "epiphone-1963-firebird-v-exclusive-cherry-cherry-exclusive",
+  "url": "https://www.gibson.com/products/epiphone-1963-firebird-v-exclusive-cherry-cherry-exclusive",
+  "price": {
+    "regular": 1699.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 12701,
+  "barcode": "711106148151",
+  "available": true,
+  "long_description": {
+    "title": "Made in Collaboration With Gibson Custom",
+    "body": "Epiphone and the Gibson Custom Shop have teamed up again to create the Inspired by Gibson Custom 1963 Firebird V – an authentic replica of the guitar designed by legendary automotive designer Ray Dietrich. When it was launched in 1963, the Firebird™ was Gibson’s first neck-through-body model, and it went on to be used by players in a wide range of genres, including blues legend Johnny Winter, Keith Richards and Brian Jones of The Rolling Stones, Eric Clapton, and Phil Manzanera of Roxy Music, to name a few.\n\nThe Epiphone Inspired by Gibson Custom 1963 Firebird V delivers vintage Firebird specifications at an accessible price, including a 9-ply neck-through-body made of mahogany and walnut with mahogany body wings to either side. Kluson® planetary geared “banjo” tuners anchor the strings at the headstock, while an Epiphone ABR-1 bridge and newly redesigned Maestro™ Vibrola™ with an engraved Epiphone logo hold things down at the other end. The electronics are also premium and include Gibson USA Firebird mini humbucker™ pickups with Alnico 5 magnets, CTS® potentiometers, Mallory™ capacitors, and a Switchcraft® 3-way pickup selector toggle switch and 1/4” output jack, giving this remarkable recreation not only the look but also the sound of a classic Firebird V. An Epiphone Inspired by Gibson Custom hardshell case is also included."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply Cream, Fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "9-ply Mahogany/Walnut Neck-Through",
+      "Body Shape": "Firebird",
+      "Body Styles": "Firebird",
+      "Side": "Solid Mahogany Wings"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Laurel",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Mother of Pearl Trapezoid",
+      "Joint": "Neck-Through-Body Construction",
+      "Neck Material": "9-ply Mahogany/Walnut",
+      "Nut Material": "Graph Tech",
+      "Profile": "1963 Firebird"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Gibson USA Firebird Mini Humbucker with Alnico 5 Magnet",
+      "Controls": "2 Volume, 2 Tone, Hand-wired with CTS Potentiometers and Mallory Capacitors",
+      "Neck Pickup": "Gibson USA Firebird Mini Humbucker with Alnico 5 Magnet",
+      "Output Jack": "1/4\" Switchcraft",
+      "Pickup Selector": "3-way Switchcraft"
+    },
+    "Hardware Specs": {
+      "Bridge": "Epiphone ABR",
+      "Control Covers": "Black with Inspired by Gibson Custom Hotstamped Logo",
+      "Control Knobs": "Gold with Silver Reflectors (Frost Blue) or Black with Silver Reflectors (Ember Red)",
+      "finish": "Nickel",
+      "Mounting Rings": "Nickel",
+      "Pickguard": "3-ply White; Firebird Logo Hotstamp in Red",
+      "Strap Buttons": "3 - Bottom, Shoulder, and Neck Heel - Historic Firebird Strap Button Placement Locations",
+      "Switch Tip": "Ivory",
+      "Tailpiece": "Maestro Vibrola",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black with Epiphone Logo in Gold",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Kluson Banjo-style Planetary"
+    },
+    "Misc Specs": {
+      "Case": "Hardshell",
+      "Model": "EIGC63FB5CHNM3",
+      "Headstock": "Firebird",
+      "Headstock Inlay": "Modern Epiphone Logo in Gold (on Truss Rod Cover)",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:45:18+00:00"
+}

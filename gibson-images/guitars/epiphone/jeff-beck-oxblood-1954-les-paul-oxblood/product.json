@@ -1,0 +1,76 @@
+{
+  "title": "Epiphone Jeff Beck Oxblood 1954 Les Paul, Oxblood",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "ECJB54AOXNH3",
+  "handle": "epiphone-jeff-beck-oxblood-1954-les-paul-oxblood",
+  "url": "https://www.gibson.com/products/epiphone-jeff-beck-oxblood-1954-les-paul-oxblood",
+  "price": {
+    "regular": 1299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 6350,
+  "barcode": "711106155593",
+  "available": true,
+  "long_description": {
+    "title": "A tribute to one of the most iconic electric guitars in history, made famous by Jeff Beck",
+    "body": "Tone. Touch. Taste. Grace and finesse. In the minds of many of his fellow guitarists, as well as those of countless fans, Jeff Beck was one of the finest players ever to pick up the instrument. From his early work with the Yardbirds to his work with the Jeff Beck Group, Beck, Bogert & Appice, as a session musician and throughout his solo career, Jeff Beck was one of the most influential lead guitarists of all time. A guitarist’s guitarist and sonic innovator, he was a master of genres who played rock, blues, hard rock, and jazz fusion; helped popularize the use of feedback, fuzz pedals, and distortion; and influenced countless players with his inimitable style. An eight-time GRAMMY® Award winner, including six times for Best Rock Instrumental Performance, Beck also received the Ivor Novello Award for Outstanding Contribution to British Music. He was also inducted into the Rock and Roll Hall of Fame twice: as a member of the Yardbirds and also as a solo artist.\n\nHis heavily modified 1954 Les Paul™, known to millions as the Oxblood due to its unique chocolate brown/oxblood finish, was immortalized on the cover of his first solo album, the groundbreaking Blow by Blow. The original Oxblood recently sold at auction for a record-setting $1.3 million. In 2009, Gibson Custom recreated the Oxblood in a limited edition run of only 50 aged guitars, which collectors still highly value. Now, Epiphone, in collaboration with Gibson Custom, is very proud to introduce the Jeff Beck Oxblood 1954 Les Paul™, based on his iconic 1954 Les Paul. It features a mahogany body with a maple cap, a one-piece mahogany neck with a long neck tenon and a Jeff Beck Custom Large C neck profile, a rosewood fretboard with 22 medium jumbo frets and aged mother-of-pearl trapezoid inlays, and a Gibson “open book” style headstock with an Epiphone logo inlaid in aged mother-of-pearl. The headstock is equipped with a low-friction Graph Tech® nut and Grover® Rotomatic® with spade button tuning machines. It is powered by a pair of USA-made Gibson Custombucker humbucker™ pickups that are connected to CTS® potentiometers and Mallory capacitors using 50s-style wiring. Other thoughtfully considered details are included to match the original guitar, including gold Speed knobs, a Les Paul pickguard with a gap above the bridge pickup, and a Gibson Historic Wraparound bridge. It comes packaged in an Epiphone hardshell case with Inspired by Gibson Custom graphics and includes a vintage-style replica strap. Available for a limited time, so don’t miss this rare opportunity to own an accessible tribute to one of the world’s most famous, cherished, and valuable electric guitars and the master instrumentalist who made it famous–Jeff Beck."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply, Top and Fretboard",
+      "Body Finish": "Vintage Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "Maple"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Aged Mother-of-Pearl Trapezoid",
+      "Joint": "Glued In, Set Neck; Long Tenon",
+      "Neck Material": "One-Piece Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "Jeff Beck Custom Large C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Custombucker",
+      "Controls": "2 Volume, 2 Tone; CTS Potentiometers, Mallory Capacitors",
+      "Neck Pickup": "Custombucker",
+      "Output Jack": "1/4\" Switchcraft",
+      "Pickup Selector": "Switchcraft 3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Gibson Historic Aluminum Wraparound",
+      "Control Covers": "Cream; Smooth Gloss",
+      "Control Knobs": "Gold Speed with Nickel-Plated Dial Pointer",
+      "finish": "Nickel",
+      "Jack Plate Cover": "Nickel Plated",
+      "Mounting Rings": "Cream",
+      "Pickguard": "1959 Les Paul; Cream, No Bevel, with Gap Above Bridge Pickup",
+      "Pickup Covers": "None",
+      "Plastic Parts": "Cream",
+      "Saddle Material": "Aluminum",
+      "Strap Buttons": "2 - Bottom and Upper Bout",
+      "Switch Tip": "Ivory",
+      "Switchwasher": "Cream with Gold Text",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Single Ply Bell; Black",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover Rotomatic with Spade Button"
+    },
+    "Misc Specs": {
+      "Accessories": "Vintage-style Replica Strap",
+      "Model": "ECJB54AOXNH3",
+      "Case": "Black Epiphone Hardshell with Gold Hardware, Red Interior, and Gold Inspired by Gibson Custom Exterior Graphics",
+      "Headstock": "Gibson Open Book; Inspired by Gibson Double Diamond Logo Etched on Rear",
+      "Headstock Inlay": "Epiphone Logo in Aged Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 14,
+  "fetched_at": "2026-10-19T02:46:49+00:00"
+}

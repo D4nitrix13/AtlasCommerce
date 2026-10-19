@@ -1,0 +1,64 @@
+{
+  "title": "Kramer Baretta, Custom Graphics, “Feral Cat”",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KBVRRBLBF3",
+  "handle": "kramer-baretta-custom-graphics-feral-cat-rainbow-leopard",
+  "url": "https://www.gibson.com/products/kramer-baretta-custom-graphics-feral-cat-rainbow-leopard",
+  "price": {
+    "regular": 1099.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106094311",
+  "available": false,
+  "long_description": {
+    "title": "A Double Cutaway Classic In Rainbow Leopard",
+    "body": "This Leopard is on the prowl and is ready for some shredding. Designed by Kramer Custom Graphic Artist Chris Stemmer and influenced by classic Kramer Leopard graphics, this bright take will make you stand out over other cats for sure! The Baretta Vintage is a tribute to one of the most iconic and original guitar designs in rock. Features an alder body, satin-finished maple neck, a single Seymour Duncan® JB™ zebra-coil humbucker, and a Floyd Rose® 1000 series tremolo with an R2 1000 series locking nut. It is finished in an eye-catching Rainbow Leopard. A premium gig bag is also included."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Body, Satin Neck",
+      "Body Material": "Alder",
+      "Body Shape": "Baretta",
+      "Body Styles": "Double Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Maple",
+      "Fret Count": "22",
+      "Frets": "Jumbo",
+      "Inlays": "Black Dots",
+      "Joint": "Bolt On",
+      "Neck Material": "Maple",
+      "Nut Material": "Floyd Rose R2 1000 Series Locking Nut with Black String Retaining Bar",
+      "Profile": "Kramer Thin Profile"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Seymour Duncan JB Zebra Coil Humbucker",
+      "Controls": "500K Master Volume with Push/Pull Series/Parallel Switch",
+      "Output Jack": "1/4\""
+    },
+    "Hardware Specs": {
+      "Bridge": "Floyd Rose 1000 Series Tremolo",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Chrome Knurled",
+      "finish": "Black",
+      "Mounting Rings": "Black",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black with Gold Print Baretta",
+      "Tuner Plating": "Black",
+      "Tuning Machines": "Mini Die Cast"
+    },
+    "Misc Specs": {
+      "Accessories": "Black Wrench Holder - Back of Headstock",
+      "Model": "KBVRRBLBF3",
+      "Case": "Kramer Premium Gig Bag",
+      "Headstock": "Kramer Hockey",
+      "Strings Gauge": ".009 .011 .016 .024 .032 .042"
+    }
+  },
+  "images_count": 9,
+  "fetched_at": "2026-10-19T02:50:15+00:00"
+}

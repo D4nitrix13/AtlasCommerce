@@ -1,0 +1,67 @@
+{
+  "title": "Kramer 50th Anniversary NightSwan, Anniversary Gold",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "K50NS",
+  "handle": "kramer-50th-anniversary-nightswan-anniversary-gold",
+  "url": "https://www.gibson.com/products/kramer-50th-anniversary-nightswan-anniversary-gold",
+  "price": {
+    "regular": 1099.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106237725",
+  "available": true,
+  "long_description": {
+    "title": "Celebrating the 50th anniversary of the world’s hardest-rockin’ guitar brand",
+    "body": "Kramer is turning 50, so naturally, we’re cranking things up to 11! In honor of five decades of boundary-pushing tone and iconic design, we’re unleashing a special limited-edition series of some of our most popular models, each finished in glossy metallic Anniversary Gold. These guitars defined an era and continue to inspire generations of players. Each model is limited to this anniversary year, making them a must-have for collectors and players alike. \n\nThe 50th Anniversary NightSwan™ delivers all of the performance you’ve come to expect from the legendary late-80s shred sled, with a double-cutaway mahogany body with a deep cut lower horn for exceptional upper-fret access. The bolt-on three-piece hard maple neck is fastened to the body with a black Kramer four-bolt neck plate and features a fast-playing natural satin finish and a slim, comfortable C profile that invites virtuosic playing and lightning-fast licks. The ebony fretboard has 24 jumbo frets and a 16” radius and features white side dot position markers and “ping pong” dot fretboard inlays of varying sizes, giving it a unique appearance.\n\nThe headstock features the Kramer NightSwan reverse Explorer™ shape. It features a top-mounted Floyd Rose® R2 locking nut, black premium die-cast six-in-line mini tuners, a black string retaining bar, and a matching black wrench holder on the rear so you’ll always have the tools available for quick adjustments and string changes. The headstock is also finished in Anniversary Gold to match the body. The Floyd Rose 1000 Series tremolo delivers unmatched tuning stability, regardless of how hard or often you work the vibrato bar. \n\nThe pickups are a pair of Kramer Eruption PRO™ humbuckers™. The controls are intentionally kept simple and easy to use, with just a master volume control and a three-way mini toggle switch for pickup selection. The black, knurled metal volume knob complements the rest of the all-black hardware and provides a firm grip, even in hot, sweaty onstage conditions.  \n\nThe 50th Anniversary NightSwan comes packed in a Kramer premium gig bag, so it’s ready to join you wherever your musical adventures take you. This is more than a guitar—it is a piece of rock history and a collector’s dream with premium components, and will only be available during this anniversary year. Don’t miss your chance to own a legend, reborn for Kramer’s 50th Anniversary."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "NightSwan",
+      "Body Styles": "Solidbody,Double Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fret Count": "24",
+      "Frets": "Jumbo",
+      "Inlays": "White Pearloid Dots (size varies) in Ping Pong Configuration",
+      "Joint": "Bolt Neck with Black Kramer Neck Plate",
+      "Neck Material": "3-piece Hard Maple with Satin Finish",
+      "Nut Material": "Floyd Rose R2 Lock Nut, Black",
+      "Profile": "Kramer C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Kramer Eruption PRO",
+      "Controls": "Master volume",
+      "Middle Pickup": "Kramer Eruption PRO",
+      "Pickup Selector": "3-way mini toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Floyd Rose 1000 Series Tremolo",
+      "Control Covers": "Black, ABS",
+      "Control Knobs": "Black Metal Knurled Knob",
+      "finish": "Black Chrome",
+      "Mounting Rings": "Black, ABS",
+      "Plastic Parts": "Black, ABS",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Switch Tip": "Black Paddle",
+      "Tailpiece": "Floyd Rose 1000 Series Tremolo",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black ABS, Small Bullet",
+      "Tuner Plating": "Black Chrome",
+      "Tuning Machines": "Die Cast Mini 6-Inline - Black"
+    },
+    "Misc Specs": {
+      "Case": "Comes with gig bag; Optional hard case (940-KRSTCS) available for purchase",
+      "Model": "K50NS",
+      "Headstock": "Kramer NightSwan Shape with Kramer Pyramid and NightSwan Logos",
+      "Strings Gauge": ".010, .013, .017, .026, 036., 046"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:50:01+00:00"
+}

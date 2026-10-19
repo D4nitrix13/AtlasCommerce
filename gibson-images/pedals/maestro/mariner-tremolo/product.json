@@ -1,0 +1,23 @@
+{
+  "title": "Maestro Mariner Tremolo",
+  "vendor": "Maestro",
+  "product_type": "Pedal",
+  "sku": "MOCMTP",
+  "handle": "maestro-mariner-tremolo",
+  "url": "https://www.gibson.com/products/maestro-mariner-tremolo",
+  "price": {
+    "regular": 59.99,
+    "currency": "USD",
+    "compare_at": 59.0
+  },
+  "weight_g": 907,
+  "barcode": "711106088242",
+  "available": true,
+  "long_description": {
+    "title": "Two Tremolo Pedals in One",
+    "body": "The Maestro Mariner Tremolo offers two amp-like tremolo options for “two pedals in one” functionality and increased sonic versatility. In Classic mode, you can swing from subtle, smooth amplitude modulation all the way to a sharper-edged, biting modulation, with many creative areas to explore in-between. In Harmonic mode, you can dial up timeless textural Harmonic Tremolo tones that are very reminiscent of the tones produced by a select few vintage amplifier tremolos. With its amp-like tones and ability to vary the tremolo’s wave shape, the Mariner Tremolo delivers a wide range of inspiring possibilities. The intuitive 3-knob control layout lets users quickly set the desired Depth (the intensity of the tremolo effect), control the Shape of the waveform (from a triangle wave to a square wave), and adjust the Speed of the tremolo effect. The true bypass footswitch triggers the LED lights in the bugles in the Maestro logo when it’s on, so you’ll always know when the effect is active."
+  },
+  "specifications": {},
+  "images_count": 6,
+  "fetched_at": "2026-10-19T02:51:50+00:00"
+}

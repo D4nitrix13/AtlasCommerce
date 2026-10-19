@@ -1,0 +1,23 @@
+{
+  "title": "Maestro Titan Boost",
+  "vendor": "Maestro",
+  "product_type": "Pedal",
+  "sku": "MOCTBP",
+  "handle": "maestro-titan-boost",
+  "url": "https://www.gibson.com/products/maestro-titan-boost",
+  "price": {
+    "regular": 59.99,
+    "currency": "USD",
+    "compare_at": 59.0
+  },
+  "weight_g": 907,
+  "barcode": "711106088204",
+  "available": true,
+  "long_description": {
+    "title": "The Ultimate Tone-Sculpting Boost Pedal",
+    "body": "The Maestro Titan Boost provides over 25 dB of clean boost, so it can easily drive any tube amp into natural overdrive. Even better, it’s designed to be the ultimate tone-sculpting boost. Equipped with a classic Tone control and a variable HI-Pass filter, any high-frequency shrillness can be easily dialed out, and low-end muddiness can be well tamed. The Titan Boost creates the perfect boosted tone, regardless of guitar, pickups, or pickup switch position. The intuitive 3-knob control layout lets you quickly set the desired Tone (which functions as a traditional tone control/variable low-pass filter), HPF (variable high-pass filter), and adjust the Level of the output volume and boost. The true bypass footswitch triggers the LED lights in the bugles in the Maestro logo when it’s on, so you’ll always know when the effect is active."
+  },
+  "specifications": {},
+  "images_count": 6,
+  "fetched_at": "2026-10-19T02:51:54+00:00"
+}

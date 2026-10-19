@@ -1,0 +1,57 @@
+{
+  "title": "Epiphone Casino, Forest Green Metallic, Exclusive",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EOCAFGNH",
+  "handle": "epiphone-casino-forest-green-metallic",
+  "url": "https://www.gibson.com/products/epiphone-casino-forest-green-metallic",
+  "price": {
+    "regular": 699.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106223292",
+  "available": false,
+  "long_description": {
+    "title": "Epiphone’s best-selling archtop and a rock ’n’ roll legend",
+    "body": "The Casino is certainly one of the most noteworthy guitars in the Epiphone lineup, in no small part due to the numerous famous musicians who have embraced the model, including Paul McCartney, George Harrison, and John Lennon of The Beatles, Keith Richards of The Rolling Stones, Paul Weller, Howlin’ Wolf, Matthew Sweet, Noel Gallagher, Gary Clark Jr., Dave Davies, and countless more. The Casino has been a player favorite since its introduction in 1961, and it remains the best-selling Epiphone thinline archtop model, a rock ’n’ roll standard. \n\nThe Casino’s lightweight, fully hollow thinline body is made from layered 5-ply maple/poplar/maple. It is exceptionally resonant and rich-sounding due to its hollow body, trapeze tailpiece, and deep-set neck, which create an optimized bridge location. The glued-in mahogany neck has a comfortable SlimTaper™ 60s C profile and joins the body at the 16th fret, just as on vintage Casino models. It is topped with a rosewood fretboard that is equipped with 22 medium jumbo frets and adorned with mother-of-pearl parallelogram inlays. The sloped Dovewing headstock features Epiphone Vintage Deluxe tuners and a Graph Tech® nut for stable tuning. The other ends of the strings pass over a Tune-O-Matic™ bridge that ensures precise intonation. \n\nThe Casino is powered by a pair of Dogear P-90 PRO™ pickups, each with separate volume and tone controls and selected by a three-way toggle switch, delivering all the tonal versatility the Casino is famous for, from bright, jangly clean tones to raunchy, snarling overdrive. Yes, the Casino is prone to feedback when pushed hard, so it’s probably not an ideal choice for ultra-high gain tones in high-volume situations, but that feedback’s a notable part of the Casino’s appeal; it can be surprisingly easy to control, even with a generous helping of gain, through the use of some palm and fretting hand muting, delivering musical, singing sustain that feels alive and responsive under your fingers—the Casino can deliver controlled feedback and singing sustain in ways most other guitars simply can’t match. For rock, blues, Americana, 60s pop, country, jazz, and more, the Casino is a fantastic guitar choice. Along with its close cousin, the Gibson ES-330, the Casino is considered by many players the ideal “couch guitar” because it can be played and enjoyed acoustically without plugging in. The Epiphone Casino comes packed in a gig bag, so it’s ready to go whenever you are. Isn’t it time you found out for yourself why so many legendary musicians have chosen this rock ’n’ roll icon? Order today, and discover the many charms of the Casino and what it can do for your music."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "5-ply maple/poplar",
+      "Body Shape": "Casino"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper 60s C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "P-90",
+      "Controls": "2 volume, 2 tone",
+      "Neck Pickup": "P-90",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Locktone Tune-O-Matic",
+      "Control Knobs": "Gold Top Hats with silver inserts",
+      "finish": "Nickel",
+      "Pickup Covers": "Dogear",
+      "Tailpiece": "Trapeze",
+      "Tuning Machines": "Epiphone Deluxe"
+    },
+    "Misc Specs": {
+      "Case": "Gig bag",
+      "Model": "EOCAFGNH"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:45:37+00:00"
+}

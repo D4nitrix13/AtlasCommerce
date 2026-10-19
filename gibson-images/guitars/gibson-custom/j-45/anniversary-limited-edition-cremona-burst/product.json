@@ -1,0 +1,61 @@
+{
+  "title": "Gibson Custom J-45 Anniversary Limited Edition, Cremona Burst",
+  "vendor": "Gibson Custom",
+  "product_type": "Acoustic Guitar",
+  "sku": "MCRS45BCCB",
+  "handle": "gibson-custom-j-45-anniversary-limited-edition-cremona-burst",
+  "url": "https://www.gibson.com/products/gibson-custom-j-45-anniversary-limited-edition-cremona-burst",
+  "price": {
+    "regular": 4499.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106233666",
+  "available": false,
+  "long_description": {
+    "title": "A very special J-45 Limited Edition celebrating 100 Years of Gibson Flat-Tops",
+    "body": "In celebration of 100 Years of Gibson Flat-Tops, Gibson Custom is proud to introduce the J-45™ Anniversary Limited Edition. Part of a special Anniversary Collection of five iconic acoustic models, with only 100 guitars of each model available, this stunning and collectible J-45 is crafted under the big skies of Bozeman, Montana, and built to inspire for generations. \n\n\n\n\nThe J-45 Anniversary Limited Edition features mahogany back and sides paired with a select bear claw Sitka spruce top, delivering not only classic J-45 tone, but also exceptional beauty. The back is framed by multi-ply binding. The top features multi-ply binding with abalone and an abalone rosette. \n\n\n\n\nThe mahogany neck has a comfortable SlimTaper™ profile. The bound rosewood fretboard is equipped with 20 standard frets and adorned with mother-of-pearl dot inlays. The single-ply bound headstock proudly displays the vintage script-style “The Gibson” logo, which is also inlaid in mother of pearl. The headstock comes equipped with a bone nut and gold-plated Grover® open-back tuning machines. \n\n\n\n\nThe teardrop pickguard is tortoise-shell-colored. The rosewood belly-up bridge is equipped with a bone saddle and TUSQ® bridge pins, and features pyramid carvings on the bridge wings, just like the earliest Gibson flat-top models. \n\n\n\n\nThe J-45 Anniversary Limited Edition is finished in a historic Cremona Burst gloss nitrocellulose lacquer and comes craftory-equipped with Baggs™ VTC electronics, with a piezo under-saddle sensor and active preamp. The soundhole-mounted volume and tone controls are easily accessible by the player while remaining all but invisible to the audience. It comes packaged in a Gibson Custom hardshell case, along with a Certificate of Authenticity. \n\n\n\n\nThe J-45 is Gibson’s best-selling acoustic model of all time. It is world-renowned for its full, balanced expression, warm bass, and excellent projection. First introduced in 1942 and nicknamed “The Workhorse” due to its wide acceptance, no-nonsense simplicity, and understated elegance, it is one of the most recorded acoustic guitars in history and the cornerstone of the Gibson round-shoulder dreadnought line. Here is a once-in-a-lifetime opportunity to own a limited-edition J-45 celebrating a century of Gibson flat-top acoustic guitar luthiery. Act fast and get yours while they’re still available."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Mahogany",
+      "Binding": "Multi-ply top and back",
+      "Body Finish": "Gloss nitrocellulose lacquer",
+      "Body Shape": "J-45",
+      "Side": "Mahogany",
+      "Top": "Bearclaw spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Frets": "Standard",
+      "Inlays": "Mother-of-pearl dot",
+      "Joint": "Dovetail",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Bone",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Controls": "1 volume, 1 tone",
+      "Under Saddle Pickup": "Baggs VTC"
+    },
+    "Hardware Specs": {
+      "Bridge": "Belly Up",
+      "Bridge Pins": "TUSQ",
+      "finish": "Gold",
+      "Pickguard": "Teardrop",
+      "Saddle Material": "Bone",
+      "Tuning Machines": "Grover Open Back"
+    },
+    "Misc Specs": {
+      "Accessories": "Gibson Custom Certificate of Authenticity",
+      "Model": "MCRS45BCCB",
+      "Case": "Gibson Hardshell",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 9,
+  "fetched_at": "2026-10-19T03:41:57+00:00"
+}

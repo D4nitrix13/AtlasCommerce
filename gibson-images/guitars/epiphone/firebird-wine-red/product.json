@@ -1,0 +1,72 @@
+{
+  "title": "Epiphone Firebird, Wine Red",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EIFBWRNH1",
+  "handle": "epiphone-firebird-wine-red",
+  "url": "https://www.gibson.com/products/epiphone-firebird-wine-red",
+  "price": {
+    "regular": 799.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106166322",
+  "available": true,
+  "long_description": {
+    "title": "The majestic Firebird, now with a rosewood fretboard",
+    "body": "Epiphone’s Inspired by Gibson Firebird™ rocks the reverse body and headstock design that appeared on the Firebird when it was originally introduced in 1963. The Firebird was designed by famous automotive designer Ray Dietrich and was Gibson’s first neck-through-body design. The Firebird features a traditional 9-ply mahogany and walnut neck-through-body design, providing rich, warm tonality and incredible sustain. Due to the neck-through-body design, the tuners, pickups, bridge, and tailpiece are all mounted on the same pieces of wood, providing exceptional resonance. The neck, featuring a SlimTaper C neck profile, is equipped with a bound rosewood fretboard and 22 medium jumbo frets, along with pearloid trapezoid position marker inlays, offering undeniable style and fast and effortless playability.\n\nThe newly refreshed Epiphone Firebird is outfitted with a set of ProBucker™ FB720 Firebird pickups with Alnico 2 magnets that are made to the original specifications of Gibson Firebird pickups from the 1960s and wired to high-quality CTS® potentiometers to recapture the unique, bright, hum-free tones and the original voice for which the Firebird is known. While they’re smaller-sized humbucker™ pickups, Firebird pickups should not be confused with the similarly sized mini humbuckers. Firebird pickups are constructed differently, and unlike mini humbuckers, which employ traditional Patent Applied For-style construction with pole pieces within and a magnet beneath the two coils, Firebird pickups omit pole pieces entirely and utilize two blade magnets positioned within the coils themselves, along with a steel reflector plate, delivering a sound unlike any other humbucking pickup design.\n\nThe Epiphone Inspired by Gibson Firebird is equipped with premium hardware, including an Epiphone LockTone™ Tune-O-Matic™ bridge and LockTone Stop Bar tailpiece, along with Grover® Mini Rotomatic six-in-line tuners. A Graph Tech® nut also helps to ensure stable tuning. The pickguard features the iconic Frebird logo hotstamped in red. Whether you’re rocking out on stage or jamming in your garage, the Firebird’s radical shape and powerful sound make it a true rock ’n’ roll icon.\n\nA premium gig bag is included for grab-and-go convenience and protection."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-Ply Fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "Mahogany (Wings)",
+      "Body Shape": "Firebird",
+      "Body Styles": "Firebird"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Pearloid Trapezoid",
+      "Joint": "Neck-Through-Body",
+      "Neck Material": "9-ply Mahogany/Walnut",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Epiphone Firebird ProBucker",
+      "Controls": "2 Volume, 2 Tone; CTS Potentiometers",
+      "Neck Pickup": "Epiphone Firebird ProBucker",
+      "Output Jack": "Epiphone 1/4\"",
+      "Pickup Selector": "Epiphone 3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "LockTone Tune-O-Matic",
+      "Control Covers": "Black",
+      "Control Knobs": "Gold Top Hat with Silver Reflector",
+      "finish": "Nickel",
+      "Mounting Rings": "Nickel",
+      "Pickguard": "3-ply; White with Red Firebird Graphic",
+      "Pickup Covers": "Nickel",
+      "Strap Buttons": "2",
+      "Switch Tip": "Ivory",
+      "Tailpiece": "LockTone Stop Bar",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black; Epiphone Logo in Gold",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover Mini Rotomatic Six-in-Line"
+    },
+    "Misc Specs": {
+      "Case": "Premium Gig Bag",
+      "Model": "EIFBWRNH1",
+      "Headstock": "Reverse Firebird",
+      "Headstock Inlay": "Epiphone Logo in Gold Hotstamp on Truss Rod Cover",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 6,
+  "fetched_at": "2026-10-19T02:46:10+00:00"
+}

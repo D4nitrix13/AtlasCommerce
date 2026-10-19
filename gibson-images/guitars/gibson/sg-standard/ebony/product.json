@@ -1,0 +1,68 @@
+{
+  "title": "Gibson SG Standard, Ebony",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "SGS00EBCH1",
+  "handle": "gibson-sg-standard-ebony",
+  "url": "https://www.gibson.com/products/gibson-sg-standard-ebony",
+  "price": {
+    "regular": 1799.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106035611",
+  "available": true,
+  "long_description": {
+    "title": "Back in Black… Heritage Cherry, and Dark Walnut!",
+    "body": "The Gibson SG Standard rocks the classic looks and features associated with the late-60s-style SG™ models so many players love. A solid mahogany body provides the backbone for singing sustain, while a rounded profile mahogany neck and bound rosewood fingerboard deliver a comfortable playing experience across all 22 frets. A long tenon 19th fret neck joint enhances resonance, making it ideal for everything from vintage blues to modern high-gain solos.\n\nIn the electronics department, the 490R (neck) and 490T (bridge) Alnico 2 humbuckers™ produce a versatile range of tones. Their clear, balanced output can easily cover a wide range of genres—softening nicely for warm clean passages and roaring to life when pushing an amp into overdrive. Dedicated volume and tone controls, along with a 3-way toggle switch, offer quick access to any sound you need.\n\nVisually, a black 5-ply full-face pickguard sets this SG Standard apart from other models, and chrome-finished hardware adds a timeless touch. Grover® Rotomatics® tuners keep tuning precise, while the aluminum Tune-O-Matic™ bridge and Stop Bar tailpiece ensure reliable intonation. Rounded out by black Top Hat knobs with silver reflectors, this SG Standard captures the look and spirit of Gibson’s classic late-60s design.\n\nA soft shell case is also included, providing convenient protection whether you’re heading to rehearsal or hitting the road. If you’re in search of an iconic, no-nonsense rock machine with a heritage that spans decades, the Gibson SG Standard stands ready to deliver."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply Cream, Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "SG",
+      "Body Styles": "SG"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Trapezoid",
+      "Joint": "Glued In, Long Tenon, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "Rounded"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "490T",
+      "Controls": "2 Volume, 2 Tone",
+      "Neck Pickup": "490R",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Aluminum Nashville Tune-O-Matic",
+      "Control Knobs": "Black Top Hat with Silver Reflector",
+      "finish": "Chrome",
+      "Pickguard": "Black 5-ply Full Face",
+      "Strap Buttons": "2",
+      "Switch Tip": "Cream",
+      "Switchwasher": "Black",
+      "Tailpiece": "Aluminum Stop Bar",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "Black 2-ply Bell, SG",
+      "Tuning Machines": "Grover Rotomatic with Kidney Button"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "SGS00EBCH1",
+      "Case": "Soft Shell Case",
+      "Headstock Inlay": "Gibson Logo and Crown in Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 5,
+  "fetched_at": "2026-10-19T02:49:35+00:00"
+}

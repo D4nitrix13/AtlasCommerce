@@ -1,0 +1,72 @@
+{
+  "title": "Epiphone Masterbilt Gem Archer Sheraton, Left-Handed, Cherry Red",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EMGASCHGH1L",
+  "handle": "epiphone-masterbilt-gem-archer-sheraton-left-handed",
+  "url": "https://www.gibson.com/products/epiphone-masterbilt-gem-archer-sheraton-left-handed",
+  "price": {
+    "regular": 1299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106178332",
+  "available": true,
+  "long_description": {
+    "title": "Epiphone unveils the Masterbilt Gem Archer Sheraton, a new artist model inspired by a legendary guitar",
+    "body": "Epiphone is proud to introduce the Masterbilt Gem Archer Sheraton, a signature model honoring the iconic 1966 Sheraton played by Gem Archer—renowned for his work with Oasis, Beady Eye, and Noel Gallagher’s High Flying Birds. Originally loaned to Gem by Noel Gallagher, the vintage Sheraton remains a staple in his collection, and this new release pays tribute to that cherished instrument.\n\nFirst launched in 1958, the Sheraton is a classic Epiphone original. This latest Masterbilt edition blends timeless semi-hollowbody design with premium craftsmanship and components, reflecting the same high standards found in Epiphone’s Inspired by Gibson Custom lineup. It even features the etched Double Diamond emblem on the back of the headstock, a hallmark of those elite models.\n\nBuilt with a 5-ply layered maple and poplar body and a solid maple centerblock, the Masterbilt Gem Archer Sheraton offers enhanced sustain and reduced feedback. Multi-ply binding accents the top, back, headstock, and fretboard, while the one-piece mahogany neck sports a comfortable 60s C profile. A rosewood fretboard with 22 medium jumbo frets is adorned with elegant mother-of-pearl block and abalone triangle inlays. The large Sloped Dovewing headstock showcases the historic Epiphone logo and a Tree of Life motif, both inlaid in mother-of-pearl.\n\nFinished in a rich Vintage Gloss and fitted with gold hardware throughout, the guitar includes Grover® Rotomatic® tuners with Milk Bottle buttons and a Graph Tech® nut for stable tuning. An ABR-1 bridge and Casino™-style raised diamond trapeze tailpiece complete the setup.\n\nThe electronics that power the Masterbilt Gem Archer Sheraton include a pair of USA-made Gibson Mini Humbucker™ pickups, each with dedicated volume and tone controls using CTS® potentiometers and Mallory™ capacitors. A Switchcraft® three-way toggle and ¼” output jack ensure reliable signal routing. Available in both right-handed and left-handed configurations, the guitar ships with a durable Epiphone hardshell case, making it ready for the road and the stage.\n\n\n\n\n\nHighlighted Features: \n\n\n\n\nAuthentic artist-inspired design\nModeled after Gem Archer’s original 1966 Epiphone Sheraton™, this signature model captures the spirit and style of the iconic guitar loaned to him by Noel Gallagher, blending vintage aesthetics with modern craftsmanship.\n\n\n\n\nPremium construction and detailing\nFeaturing a semi-hollow 5-ply maple/poplar body with a maple centerblock, a one-piece mahogany neck, and multi-ply binding throughout, this guitar is built to the same high standards as Epiphone’s Inspired by Gibson Custom models.\n\n\n\n\nHigh-performance hardware and tuning stability \nGold Grover® Rotomatic® tuners with Milk Bottle buttons, a Graph Tech® nut, ABR-1 bridge, and Casino™-style raised diamond trapeze tailpiece ensure smooth tuning and solid string tension for reliable performance.\n\n\n\n\nExceptional tone and electronics\nEquipped with USA-made Gibson Mini Humbucker™ pickups and premium CTS® pots, Mallory™ capacitors, and Switchcraft® components, this Sheraton delivers rich, articulate tone with versatile control for studio and stage."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "7-ply Top, 3-ply Back and Headstock, and 5-ply Fretboard",
+      "Body Finish": "Vintage Gloss",
+      "Body Material": "5-ply Layered Maple/Poplar",
+      "Body Shape": "Sheraton",
+      "Body Styles": "ES",
+      "Centerblock": "Maple"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Block (Mother of Pearl) and Triangle (Abalone)",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "One Piece Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "60s C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Gibson USA Mini Humbucker",
+      "Controls": "2 Volume, 2 Tone; 500 k CTS Potentiometers, Mallory Capacitors",
+      "Neck Pickup": "Gibson USA Mini Humbucker",
+      "Output Jack": "1/4\" Switchcraft",
+      "Pickup Selector": "3-way Gold Switchcraft Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "ABR-1",
+      "Control Knobs": "Black Top Hat with Gold Insert",
+      "finish": "Gold",
+      "Mounting Rings": "Black",
+      "Pickguard": "Sheraton Historic 5-layer Bound Tortoiseshell with Foil E Logo",
+      "Pickup Covers": "Gold",
+      "Strap Buttons": "2 - Bottom and Neck Heel",
+      "Switch Tip": "Ivory",
+      "Tailpiece": "Raised Diamond Trapeze",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "3-ply Crescent Moon Bullet with White E Logo",
+      "Tuner Plating": "Gold",
+      "Tuning Machines": "Grover Rotomatic with Milk Bottle Button"
+    },
+    "Misc Specs": {
+      "Case": "Hardshell",
+      "Model": "EMGASCHGH1L",
+      "Headstock": "Large 60s Sloped Dovewing",
+      "Headstock Inlay": "Historic Epiphone Logo and Tree of Life in Mother of Pearl; Double Diamond Etched on Headstock Rear",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 10,
+  "fetched_at": "2026-10-19T03:32:01+00:00"
+}

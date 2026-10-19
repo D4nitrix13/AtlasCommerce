@@ -1,0 +1,68 @@
+{
+  "title": "Gibson Custom Les Paul Custom, Nickel Hardware, Ebony, Exclusive",
+  "vendor": "Gibson Custom",
+  "product_type": "Electric Guitar",
+  "sku": "LPC-PSL21889",
+  "handle": "gibson-custom-les-paul-custom-nickel-hardware-ebony",
+  "url": "https://www.gibson.com/products/gibson-custom-les-paul-custom-nickel-hardware-ebony",
+  "price": {
+    "regular": 5499.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 13608,
+  "barcode": "711106157887",
+  "available": false,
+  "long_description": {
+    "title": "The Tuxedo Without the Gold Jewelry",
+    "body": "This Gibson Custom Select Les Paul™ Custom with nickel hardware is an understated adaptation of a classic. Made by the skilled craftspeople at the Custom Shop, Gibson Custom Select Collection guitars are made in small batches with hand-selected features. Exciting finishes and unique hardware are featured on modern and classic models, which makes each of these guitars special. Finished in a gloss Ebony nitrocellulose lacquer, this Les Paul Customs features nickel hardware instead of the usual gold hardware. Powering this Les Paul Custom is a set of 490R and 498T humbuckers, which offer versatility with modern tones on tap. The 490R neck pickup provides rhythm tones and utilizes an Alnico 2 magnet with a DC resistance of 8k. The 498T bridge pickup, which features an Alnico 5 magnet and clocks in with a DC resistance of 14.2k, is well-suited for high-gain tones. Between these two pickups, a wide variety of tones are available, from subtle clean tones from the neck pickup to all-out aggressive, distorted sounds courtesy of the bridge humbucker™. Adjust the CTS® audio taper potentiometers in the slightest amount, and the tones will gradually change, anywhere between zero and ten on the dial.\n\nThis Les Paul Custom has all the usual features, from the multi-ply binding to the split diamond inlaid headstock. Another key identifier of a Les Paul Custom is the Mother of Pearl block inlays on the ebony fingerboard from the 1st fret all the way up the neck to the 21st fret. The Modern Medium C-Shape neck profile measures 0.82” at the 1st fret and 0.965” at the 12th fret. Thinner than some of the vintage-era neck profiles from the Historic Collection, this neck provides a modern playing experience. A bound ebony fingerboard with white binding and rolled fingerboard edges provides extra comfort while playing up and down the neck. The weight-relieved mahogany body sheds some heft off the guitar without sacrificing any of the tone. Nickel-finished Grover® Rotomatic® Kidney tuners provide rock-solid tuning stability while giving the guitar a modern appearance. All the plastics on the guitar are black, which includes the pickup rings, pickguard, Speed knobs, toggle switch washer, and control cavity covers.\n\nWith the addition of nickel hardware, this Les Paul Custom is only available through Made to Measure and Gibson Custom Select. Featuring a gloss Ebony nitrocellulose lacquer finish, this Les Paul is still dressed up in the tuxedo, but without the gold jewelry. Included with the guitar is a Gibson Custom Certificate of Authenticity and a black hardshell case with a gold interior."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Multi-ply Top, Back, and Headstock, Single-ply Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "Maple",
+      "Weight Relief": "9-Hole"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Mother of Pearl",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Corian",
+      "Profile": "Modern Medium C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "498T",
+      "Controls": "2 500K CTS Volume Pots, 2 500K CTS Tone Pots, Hand-Wired Harness, Switchcraft Toggle Switch",
+      "Neck Pickup": "490R",
+      "Output Jack": "Switchcraft"
+    },
+    "Hardware Specs": {
+      "Bridge": "Tune-O-Matic",
+      "Control Knobs": "Black Speed",
+      "finish": "Nickel; Gloss",
+      "Mounting Rings": "Black M69",
+      "Pickguard": "Black Multi-Ply",
+      "Strap Buttons": "2",
+      "Switch Tip": "Black",
+      "Switchwasher": "Black",
+      "Tailpiece": "Stop Bar",
+      "Truss Rod": "2-Way Adjustable",
+      "Truss Rod Cover": "Molded Hot Stamped",
+      "Tuning Machines": "Grover Kidney"
+    },
+    "Misc Specs": {
+      "Case": "Black with Gold Interior",
+      "Model": "LPC-PSL21889",
+      "Headstock Inlay": "Gibson Logo and Custom Split Diamond in Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:49:45+00:00"
+}

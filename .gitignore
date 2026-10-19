@@ -51,6 +51,9 @@ backend/backend/
 .archify/
 docs/uml/build/
 
+# Gibson reference images are tracked via Git LFS (see .gitattributes).
+# Images live in LFS storage, only pointers in the regular git tree.
+
 # Node modules (bun manages workspaces, root + frontend)
 node_modules/
 **/node_modules/

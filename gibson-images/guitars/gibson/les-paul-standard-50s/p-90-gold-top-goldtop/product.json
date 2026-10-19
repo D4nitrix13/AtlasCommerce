@@ -1,0 +1,66 @@
+{
+  "title": "Gibson Les Paul Standard 50s P-90, Goldtop",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "LPS5P900GTNH1",
+  "handle": "gibson-les-paul-standard-50s-p-90-gold-top-goldtop",
+  "url": "https://www.gibson.com/products/gibson-les-paul-standard-50s-p-90-gold-top-goldtop",
+  "price": {
+    "regular": 2599.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106035581",
+  "available": false,
+  "long_description": {
+    "title": "Back Where It All Began",
+    "body": "The Les Paul Standard returns to the classic design that made it famous, paying tribute to Gibson's Golden Era of innovation and placing authenticity at the forefront. Pairing a naturally resonant solid mahogany body with a bright, clear maple top—a combination that has shaped music since the 1950s—this instrument reflects the era when Gibson cemented its reputation for unparalleled craftsmanship and tone.\n\n\n\n\nThe mahogany neck—featuring a rosewood fingerboard, trapezoid inlays, and a 50s Vintage profile—keeps the feel authentically vintage for comfortable chording and smooth bends, while 22 medium jumbo frets allow for both precise intonation and easy fretwork. On the hardware side, you’ll find an ABR-1 Tune-O-Matic™ bridge paired with an aluminum Stop Bar tailpiece—classic components that enhance stability and sustain. Vintage Deluxe tuners with Keystone buttons complete the old-school look.\n\n\n\n\nAdding to the sonic formula is a pair of P-90 pickups, each loaded with Alnico 5 magnets. Revered for their raw, rich midrange and robust attack, these single-coil pickups can handle everything from laid-back blues to searing rock solos. They’re wired with audio taper potentiometers and Orange Drop® capacitors, ensuring that your volume and tone controls respond smoothly and predictably. Roll back the volume for cleaner tones or dime it for added punch and edgy breakup that cuts through any mix.\n\n\n\n\nWhether you’re an enthusiast of Gibson’s Golden Era or simply looking for a tone monster that captures the essence of vintage rock, the Les Paul Standard 50s P-90 delivers the goods. From its historically inspired construction to its unmistakable Les Paul sound and playability, this instrument embodies the spirit of early electric guitar innovation, proving once again why Gibson’s classic designs remain at the heart of modern music."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Top": "Maple",
+      "Weight Relief": "None"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Trapezoids",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "50s Vintage"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "P-90",
+      "Controls": "2 Volumes, 2 Tones & Toggle Switch (Hand-wired with Orange Drop Capacitors)",
+      "Neck Pickup": "P-90"
+    },
+    "Hardware Specs": {
+      "Bridge": "ABR-1 Tune-O-Matic",
+      "Control Knobs": "Gold Top Hats with Dial Pointers",
+      "finish": "Nickel",
+      "Jack Plate Cover": "Cream",
+      "Pickguard": "Cream",
+      "Switch Tip": "Amber",
+      "Switchwasher": "Cream",
+      "Tailpiece": "Aluminum Stop Bar",
+      "Truss Rod": "Adjustable",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Vintage Deluxe with Keystone Buttons"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "LPS5P900GTNH1",
+      "Case": "Hard Shell Case",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 5,
+  "fetched_at": "2026-10-19T03:59:40+00:00"
+}

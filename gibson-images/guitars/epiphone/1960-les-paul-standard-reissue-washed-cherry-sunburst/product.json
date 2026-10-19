@@ -1,0 +1,74 @@
+{
+  "title": "Epiphone IGC 1960 Les Paul Standard Reissue, Washed Cherry Sunburst",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "ECLPR0WCNH1",
+  "handle": "epiphone-1960-les-paul-standard-reissue-washed-cherry-sunburst",
+  "url": "https://www.gibson.com/products/epiphone-1960-les-paul-standard-reissue-washed-cherry-sunburst",
+  "price": {
+    "regular": 1299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106165875",
+  "available": true,
+  "long_description": {
+    "title": "A 1960 vintage-style Les Paul Reissue Inspired by Gibson Custom, now with a rosewood fretboard",
+    "body": "The 1960 Gibson Les Paul™ Standard is one of the world’s most coveted vintage guitars. It has been embraced by such luminaries as Eric Clapton, Paul McCartney, and Joe Walsh. The 1960 Les Paul Standard is very similar to the famous 1959 model year that preceded it, but with a few changes, most notably, a thinner and faster-playing SlimTaper™ neck profile that many players prefer over the somewhat beefier 1959 Les Paul Standard neck profile. Now, Epiphone is proud to introduce the Epiphone 1960 Les Paul Standard Reissue, a beautiful recreation of those vintage 1960 Les Paul Standard models. Made in partnership with Gibson Custom, the Epiphone Les Paul Standard 1960 Reissue delivers vintage Les Paul looks and performance at an accessible price. All of the classic appointments the 1960 Les Paul Standard model is known and loved for are present here, including a one-piece mahogany neck with a long neck tenon for increased stability and sustain, a comfortable, fast-playing SlimTaper™ profile, and a bound rosewood fretboard. It also features mother-of-pearl trapezoid fretboard inlays, an aged mother-of-pearl Epiphone headstock logo, and the words “Les Paul Model” silkscreened in gold on the Gibson-style “open book” headstock. Even the side dot position markers are the same size as on vintage 1960 Les Paul Standard models and are placed in historically accurate locations. The genuine mahogany body features a carved maple cap that is topped with a beautiful AAA flamed maple veneer. The electronics are equally impressive, with two USA Gibson Custombucker humbucking pickups with Alnico 3 magnets that are hand-wired to CTS® potentiometers, Bumblebee paper-in-oil capacitors, and a Switchcraft® pickup selector toggle switch and output jack. The Vintage Gloss finish gives the guitar a vintage appearance without looking overly aged and is nicely complimented by the nickel hardware, including the Epiphone Deluxe “Double Ring” Keystone button tuners. A Brown hardshell case with Inspired by Gibson Custom graphics and a pink plush-lined interior is also included. This is the perfect Les Paul for players who love the vintage appeal of the classic 1959 Les Paul Standard but who want a more comfortable neck profile."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply Cream, Top and Fretboard",
+      "Body Finish": "Vintage Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "Maple with AAA Flame Maple Veneer"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Mother-of-Pearl Trapezoid",
+      "Joint": "Glued In, Set Neck; Long Tenon",
+      "Neck Material": "One Piece Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "60s SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Gibson Custombucker",
+      "Controls": "2 Volume, 2 Tone; CTS Potentiometers, Bumblebee Paper in Oil Capacitors",
+      "Neck Pickup": "Gibson Custombucker",
+      "Output Jack": "1/4\" Switchcraft",
+      "Pickup Selector": "Switchcraft 3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "ABR-1 Tune-O-Matic",
+      "Control Covers": "Black with Gold Inspired by Gibson Custom Logo",
+      "Control Knobs": "Gold Top Hat with Reflector and Nickel-plated Dial Pointer",
+      "finish": "Nickel",
+      "Jack Plate Cover": "Cream",
+      "Mounting Rings": "Cream",
+      "Pickguard": "Historic-style Cream, No Bevel",
+      "Pickup Covers": "Nickel",
+      "Strap Buttons": "2 - Bottom and Shoulder",
+      "Switch Tip": "Amber",
+      "Switchwasher": "Cream with Gold Hotstamp",
+      "Tailpiece": "Historical Aluminum Stop Bar",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "2-ply Black Bell; Blank, Wide White",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Epiphone Deluxe, Double Ring Keystone Button"
+    },
+    "Misc Specs": {
+      "Case": "Hardshell with Brown Exterior, Pink Interior, and Inspired by Gibson Custom Graphics",
+      "Model": "ECLPR0WCNH1",
+      "Headstock": "Gibson Open Book; Historical Headstock Wing Blocks",
+      "Headstock Inlay": "Epiphone Logo in Aged Mother of Pearl, Les Paul Model Gold Silkscreen; Historical Logo Placement",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:45:06+00:00"
+}

@@ -1,0 +1,74 @@
+{
+  "title": "Epiphone ES-335 Figured with Rosewood Fretboard, Raspberry Tea Burst",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EIES335FRTBNHR",
+  "handle": "epiphone-es-335-figured-with-rosewood-fretboard-raspberry-tea-burst",
+  "url": "https://www.gibson.com/products/epiphone-es-335-figured-with-rosewood-fretboard-raspberry-tea-burst",
+  "price": {
+    "regular": 699.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106247465",
+  "available": true,
+  "long_description": {
+    "title": "A beautifully flamed version of the legendary ES-335, updated with a rosewood fretboard",
+    "body": "The Epiphone ES-335 Figured honors the legendary ES-335, the thin, semi-hollow archtop design that brought archtop class to the rock era. Part of the Inspired by Gibson Collection, the Epiphone ES-335 Figured takes everything you love about the ES-335 and elevates it to a new level of beauty and elegance.\n\nFirst introduced in 1958, the ES-335 is considered by many players to be one of the most versatile guitar designs ever created. With its thinline, semi-hollow body and f-holes, it looks similar to traditional hollowbody archtop guitars. However, a solid maple centerblock within gives it the feedback resistance and sustain of a solidbody while retaining some of a hollowbody’s resonance, making it a “best of both worlds” design and highly flexible tonally.\n\nThe ES-335 Figured is crafted with a five-ply maple body with AAA maple veneer on top, sides, and back for exceptional beauty. As with a regular ES-335, the solid maple centerblock adds sustain while reducing feedback. Single-ply binding frames both the top and back.\n\nThe glued-in mahogany neck features a comfortable Rounded C profile that sits somewhere between a beefier 50s-style neck and a SlimTaper profile, making it just right for many players. It is topped with a rosewood fretboard featuring 22 medium jumbo frets and pearloid small-block inlays.\n\nThe Kalamazoo-style headstock displays the Epiphone logo and Gibson crown, both inlaid in mother of pearl. The headstock is equipped with Vintage Deluxe tuners and a GraphTech® nut, which work in tandem to ensure easy tune-ups and rock-solid stability once it’s there. A nickel-plated LockTone™ Tune-O-Matic™ bridge and Stop Bar tailpiece deliver full action height and individual string intonation adjustability and contribute to the model’s excellent sustain.\n\nA pair of Epiphone Alnico Classic PRO™ humbucker™ pickups gives the ES-335 Figured its highly versatile, rich, and powerful voice. Each is wired to individual volume and tone controls, with high-quality CTS® potentiometers for reliable, consistent performance. A three-way pickup selector switch lets you use either pickup individually or run them together. You can get a wide range of tones out of this guitar with just a twist of a knob or flick of a switch. From blues to hard rock, jazz to country, there’s nothing you can’t do with an ES-335 Figured.\n\nThe ES-335 Figured is perfect for every player and every stage. It comes packaged in a premium gig bag for protection on the road or at home, and is ready to take your music—and your look—to the next level. Order today, and see why the ES-335 has been the choice of musical legends across genres and generations for over 60 years."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "5-ply laminated maple with figured maple veneer",
+      "Binding": "Single-ply cream top, back, and fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "5-ply laminated maple with figured maple veneer",
+      "Body Shape": "ES-335",
+      "Body Styles": "Semi-hollowbody",
+      "Centerblock": "Maple",
+      "Side": "5-ply laminated maple",
+      "Top": "5-ply laminated maple with figured maple veneer"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Fret Count": "22",
+      "Frets": "Standard",
+      "Inlays": "Dot",
+      "Joint": "Glued-in, set neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "GraphTech",
+      "Profile": "Rounded C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Alnico Classic PRO",
+      "Controls": "2 volume, 2 tone",
+      "Neck Pickup": "Alnico Classic PRO",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "LockTone Tune-O-Matic",
+      "Control Knobs": "Black Top Hats with silver inserts",
+      "finish": "Nickel",
+      "Mounting Rings": "Black",
+      "Pickguard": "Multi-ply black",
+      "Pickup Covers": "Nickel",
+      "Plastic Parts": "Mixed",
+      "Strap Buttons": "2",
+      "Switch Tip": "Cream",
+      "Tailpiece": "LockTone Stop Bar",
+      "Truss Rod Cover": "2-ply black",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Epiphone Deluxe with press-in bushings"
+    },
+    "Misc Specs": {
+      "Case": "Premium Epiphone gig bag",
+      "Model": "EIES335FRTBNHR",
+      "Headstock": "Kalamazoo",
+      "Headstock Inlay": "Mother-of-pearl Epiphone logo and crown"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:45:46+00:00"
+}

@@ -1,0 +1,23 @@
+{
+  "title": "MESA/Boogie Throttle Box",
+  "vendor": "Mesa/Boogie",
+  "product_type": "Pedal",
+  "sku": "FP.THROTTLEBOX",
+  "handle": "mesa-boogie-throttle-box",
+  "url": "https://www.gibson.com/products/mesa-boogie-throttle-box",
+  "price": {
+    "regular": 219.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 907,
+  "barcode": "809404005556",
+  "available": false,
+  "long_description": {
+    "title": "The Signature Warmth and Organic Sonic Quality Found in All Our Amplifiers",
+    "body": "The THROTTLE BOX™ Distortion serves up all genres of ROCK with cut and aggression, but retains the signature warmth and organic sonic quality found in all our amplifiers. While its main strengths lie in higher-gain sounds, it is quite versatile and it’s lower gain options shouldn’t be overlooked for classic rock or howling blues. The THROTTLE BOX also features a unique MID CUT that scoops out midrange to produce the signature Boogie® “V” EQ-curve that so many artists have employed in our amps to create the world’s heaviest guitar tones!\n\nFeatures:\n\nDesigned and Handcrafted in Petaluma, California, USA\n\nTrue Bypass On/Off Switching - Bypasses all circuitry when off to ensure no tonal loss\n\nGain Control allows you to dial in the perfect amount of classic to modern high-gain\n\nLo/High Gain Switch provides classic crunch to modern meltdown\n\nMaster Level Control provides a variable range of signal boost up to +20dB\n\nTone Control balances the amount of high frequencies\n\nMid-Cut Control provides powerful mid-scoop for modern high-gain styles\n\nInternal EQ-Boost Switch provides added style/voicing option\n\nOn/Off Status LED\n\n9V Battery Powered or Externally Powered (optional) via External Power Jack Input\n\nInput & Output Jacks (Nominal Input -20dB)"
+  },
+  "specifications": {},
+  "images_count": 4,
+  "fetched_at": "2026-10-19T02:52:02+00:00"
+}

@@ -1,0 +1,24 @@
+{
+  "title": "Gibson Faded Denim Hat",
+  "vendor": "Gibson",
+  "product_type": "Headwear",
+  "sku": "GA-DNMC",
+  "handle": "gibson-faded-denim-hat",
+  "url": "https://www.gibson.com/products/gibson-faded-denim-hat",
+  "price": {
+    "regular": 29.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 91,
+  "barcode": "711106534824",
+  "available": true,
+  "long_description": {
+    "title": null,
+    "body": "This Gibson Logo denim ballcap features a 1D embroidered logo on semi-structured front panels with an unstructured mesh back and Adjustable snapback. One size fits most."
+  },
+  "specifications": {},
+  "metadata_status": "partial",
+  "images_count": 2,
+  "fetched_at": "2026-10-19T03:55:22+00:00"
+}

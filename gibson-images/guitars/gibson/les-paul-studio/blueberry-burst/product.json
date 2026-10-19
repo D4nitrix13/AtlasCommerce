@@ -1,0 +1,71 @@
+{
+  "title": "Gibson Les Paul Studio, Blueberry Burst",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "LPST01B9CH1",
+  "handle": "gibson-les-paul-studio-blueberry-burst",
+  "url": "https://www.gibson.com/products/gibson-les-paul-studio-blueberry-burst",
+  "price": {
+    "regular": 1599.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10433,
+  "barcode": "711106158457",
+  "available": true,
+  "long_description": {
+    "title": "Play it. Feel it. Hear it. It’s the One",
+    "body": "When a guitar is “the one,” you know it. It feels right in your hands and delivers the sounds you hear in your head. It becomes your faithful companion, musical soulmate, and muse. It helps you express your artistic vision. We designed the Les Paul™ Studio to be precisely that type of guitar: the perfect musical companion, the guitar you won’t be able to put down. The one guitar you’ll be able to rely on every time and will find yourself reaching for again and again. For years, the Les Paul Studio has been the choice of countless guitarists who appreciate the combination of the essential Les Paul features–humbucking pickups, a glued-in, set neck, and a mahogany body with a maple cap–at an accessible price and without some of the flashier and more costly cosmetic features of higher-end Les Paul models.\n\n\n\n\nNow, the Les Paul Studio has been reimagined and is better and more versatile than ever. It features an Ultra Modern weight-relieved mahogany body, making it lighter and more comfortable to play, no matter how long the gig or jam session runs. The carved, plain maple cap adds brightness and definition to the overall tone and combines perfectly with the warmth and midrange punch from the mahogany body for that legendary Les Paul sound that has been featured on countless hit recordings and on concert stages worldwide. The glued-in mahogany neck provides rock-solid coupling between the neck and body for increased resonance and sustain. The neck features a traditional heel and a fast-playing SlimTaper™ profile, and it is capped with a bound rosewood fretboard that is equipped with acrylic trapezoid inlays and 22 medium jumbo frets. The 12” fretboard radius makes both rhythm chording and lead string bending equally effortless, and you’re going to love how this instrument feels in your hands. The Vintage Deluxe tuners with Keystone buttons add to the guitar’s classic visual appeal, and together with the fully adjustable aluminum Nashville Tune-O-Matic™ bridge, lightweight aluminum Stop Bar tailpiece, and Graph Tech® nut, help to keep the tuning stability nice and solid so you can spend more time playing and less time tuning.\n\n\n\n\nThe Les Paul Studio doesn’t lack anything in the electronics department, either. It packs a pair of Gibson’s acclaimed Burstbucker™ Pro pickups and a three-way pickup selector switch that allows you to use either pickup individually or run them together. Each of the two pickups is wired to its own volume control, so you can blend the sound from the pickups together in any amount you choose. Each volume control is equipped with a push/pull switch for coil tapping, giving you two different sounds from each pickup, and each pickup also has its own individual tone control for even more sonic options. The endless tonal possibilities, exceptional sustain, resonance, and comfortable playability make the Les Paul Studio the one guitar you can rely on for any musical genre or scenario. The Les Paul Studio is the essential Les Paul, reimagined and updated for today’s players who want more than just another guitar–they want their guitar. The one. Here it is.\n\n\n\n\nKey Features:\n\n\n\n\n\nAn Ultra Modern weight-relieved mahogany body with a carved, plain maple cap\n\n\n\n\nA mahogany neck with a traditional heel, SlimTaper profile, and bound rosewood fretboard with acrylic trapezoid inlays\n\n\n\n\nBurstbucker Pro pickups wired to push/pull volume controls for coil tapping and individual tone controls for even more sonic options\n\n\n\n\nAvailable in a variety of gloss nitrocellulose lacquer finishes with matching trim and shipped in a soft shell case"
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply Cream; Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "Maple",
+      "Weight Relief": "Ultra-Modern"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Trapezoid",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Burstbucker Pro",
+      "Controls": "2 Push/Pull Volume (Coil Tap), 2 Tone",
+      "Neck Pickup": "Burstbucker Pro",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Nashville Tune-O-Matic",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Top Hat",
+      "finish": "Chrome",
+      "Pickguard": "Black",
+      "Plastic Parts": "Black",
+      "Switch Tip": "Black",
+      "Switchwasher": "Black (Not Mounted)",
+      "Tailpiece": "Stop Bar",
+      "Truss Rod": "Adjustable",
+      "Tuning Machines": "Vintage Deluxe with Keystone Button"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "LPST01B9CH1",
+      "Case": "Soft Shell",
+      "Headstock Inlay": "Gibson Logo in Gold Silkscreen",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 8,
+  "fetched_at": "2026-10-19T04:02:50+00:00"
+}
