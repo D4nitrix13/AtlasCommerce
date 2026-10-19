@@ -7,7 +7,12 @@ namespace Database\Seeders;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Category;
 use App\Models\Catalog\Product;
+use App\Models\Catalog\ProductExtendedDescription;
+use App\Models\Catalog\ProductFaq;
+use App\Models\Catalog\ProductGroupedSpec;
+use App\Models\Catalog\ProductHighlight;
 use App\Models\Catalog\ProductImage;
+use App\Models\Catalog\ProductSpecValue;
 use App\Models\Catalog\ProductVariant;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
@@ -120,6 +125,26 @@ final class ProductSeeder extends Seeder
             productHandle: $productData['handle'],
             imagePattern: $productData['image_pattern'],
             variants: $productData['variants'] ?? [],
+        );
+
+        // Contenido extendido (Fase 8) — todos los campos son opcionales
+        // en products.json; los productos sin contenido extendido no
+        // generan filas en las tablas nuevas y la PDP los omite.
+        $this->syncExtendedDescriptions(
+            productId: $product->id,
+            descriptions: $productData['extended_descriptions'] ?? [],
+        );
+        $this->syncHighlights(
+            productId: $product->id,
+            highlights: $productData['highlights'] ?? [],
+        );
+        $this->syncGroupedSpecs(
+            productId: $product->id,
+            groups: $productData['grouped_specs'] ?? [],
+        );
+        $this->syncFaqs(
+            productId: $product->id,
+            faqs: $productData['faqs'] ?? [],
         );
     }
 
@@ -417,6 +442,106 @@ final class ProductSeeder extends Seeder
                     'sort_order' => 1,
                 ]);
             }
+        }
+    }
+
+    /**
+     * Sincroniza los bloques de descripción extendida del producto.
+     *
+     * Idempotente: borra las filas previas del producto y recrea
+     * desde el array. La posición se asigna por índice del array
+     * (mantiene el orden declarado en el JSON).
+     *
+     * @param  array<int, array<string, mixed>>  $descriptions
+     */
+    private function syncExtendedDescriptions(int $productId, array $descriptions): void
+    {
+        ProductExtendedDescription::query()
+            ->where(column: 'product_id', operator: '=', value: $productId)
+            ->delete();
+
+        foreach (array_values($descriptions) as $position => $entry) {
+            ProductExtendedDescription::query()->create(attributes: [
+                'product_id' => $productId,
+                'title' => (string) $entry['title'],
+                'body' => (string) $entry['body'],
+                'position' => $position,
+            ]);
+        }
+    }
+
+    /**
+     * Sincroniza los highlights (icono + label) del producto.
+     *
+     * @param  array<int, array<string, mixed>>  $highlights
+     */
+    private function syncHighlights(int $productId, array $highlights): void
+    {
+        ProductHighlight::query()
+            ->where(column: 'product_id', operator: '=', value: $productId)
+            ->delete();
+
+        foreach (array_values($highlights) as $position => $entry) {
+            ProductHighlight::query()->create(attributes: [
+                'product_id' => $productId,
+                'icon' => (string) $entry['icon'],
+                'label' => (string) $entry['label'],
+                'position' => $position,
+            ]);
+        }
+    }
+
+    /**
+     * Sincroniza los grupos de specs (Cuerpo, Mástil, …) con sus
+     * valores label/value anidados.
+     *
+     * @param  array<int, array<string, mixed>>  $groups
+     */
+    private function syncGroupedSpecs(int $productId, array $groups): void
+    {
+        // Borrar los grupos viejos del producto; cascade borra sus
+        // product_spec_values filas asociadas (consistencia atómica).
+        ProductGroupedSpec::query()
+            ->where(column: 'product_id', operator: '=', value: $productId)
+            ->delete();
+
+        foreach (array_values($groups) as $groupPosition => $group) {
+            $spec = ProductGroupedSpec::query()->create(attributes: [
+                'product_id' => $productId,
+                'category' => (string) $group['category'],
+                'position' => $groupPosition,
+            ]);
+
+            foreach (array_values($group['items'] ?? []) as $itemPosition => $item) {
+                ProductSpecValue::query()->create(attributes: [
+                    'grouped_spec_id' => $spec->id,
+                    'label' => (string) $item['label'],
+                    'value' => (string) $item['value'],
+                    'position' => $itemPosition,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Sincroniza las FAQs del producto. Si el array es vacío no se
+     * insertan filas (la PDP omite la sección FAQ cuando no hay data).
+     *
+     * @param  array<int, array<string, mixed>>  $faqs
+     */
+    private function syncFaqs(int $productId, array $faqs): void
+    {
+        ProductFaq::query()
+            ->where(column: 'product_id', operator: '=', value: $productId)
+            ->delete();
+
+        foreach (array_values($faqs) as $position => $entry) {
+            ProductFaq::query()->create(attributes: [
+                'product_id' => $productId,
+                'question' => (string) $entry['question'],
+                'answer' => (string) $entry['answer'],
+                'position' => $position,
+            ]);
         }
     }
 }

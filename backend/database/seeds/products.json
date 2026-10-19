@@ -598,7 +598,61 @@
           "finish_slug": "blueberry-burst",
           "finish_label": "Blueberry Burst"
         }
-      ]
+      ],
+      "extended_descriptions": [
+        {
+          "title": "The Les Paul, llevada al extremo",
+          "body": "Gibson se enorgullece de presentar el regreso de la Les Paul Supreme, una guitarra que redefine los límites de la artesanía y el rendimiento sonoro. Esta edición exclusiva Blueberry Burst combina la silueta clásica de la Les Paul con materiales premium y un diseño meticuloso que captura la atención de músicos y coleccionistas por igual. Equipada con un par de humbuckers Burstbucker Pro y Burstbucker Pro Plus, ofrece una versatilidad tonal sin precedentes: desde los tonos cálidos y melosos del neck pickup hasta la potencia cortante y agresiva del bridge. Los controles push/pull permiten la división de bobinas, el cambio de fase fuera de fase y la derivación pura, llevando la flexibilidad sonora a un nivel completamente nuevo. Cada detalle ha sido cuidadosamente considerado: el hardware dorado aporta un contraste elegante con el exclusivo acabado Blueberry Burst, mientras que el estuche rígido incluido protege esta obra maestra durante el transporte y almacenamiento. La Les Paul Supreme Blueberry Burst no es solo una guitarra, es una declaración de intenciones para el escenario y el estudio."
+        }
+      ],
+      "highlights": [
+        { "icon": "premio", "label": "Cuerpo de caoba" },
+        { "icon": "premio", "label": "Tapa de arce" },
+        { "icon": "musica", "label": "Mástil de caoba con perfil SlimTaper" },
+        { "icon": "regla", "label": "Diapasón de ébano de radio compuesto con 22 trastes medio jumbo" },
+        { "icon": "estrella", "label": "Inlays de madreperla en la pala y el diapasón" },
+        { "icon": "destello", "label": "Pastillas humbucker Burstbucker Pro y Burstbucker Pro Plus" },
+        { "icon": "escudo", "label": "Controles push/pull para la división de bobinas, el cambio de fase y la derivación pura" },
+        { "icon": "escudo", "label": "Estuche rígido Gibson" }
+      ],
+      "grouped_specs": [
+        {
+          "category": "Cuerpo",
+          "items": [
+            { "label": "Madera", "value": "Caoba" },
+            { "label": "Tapa", "value": "Arce AAA" }
+          ]
+        },
+        {
+          "category": "Mástil",
+          "items": [
+            { "label": "Madera", "value": "Caoba" },
+            { "label": "Perfil", "value": "SlimTaper" },
+            { "label": "Diapasón", "value": "Ébano" },
+            { "label": "Trastes", "value": "22 medium jumbo" },
+            { "label": "Inlays", "value": "Madreperla" }
+          ]
+        },
+        {
+          "category": "Electrónica",
+          "items": [
+            { "label": "Pastillas", "value": "Burstbucker Pro + Burstbucker Pro Plus" }
+          ]
+        },
+        {
+          "category": "Hardware",
+          "items": [
+            { "label": "Herrajes", "value": "Dorado" }
+          ]
+        },
+        {
+          "category": "Miscelánea",
+          "items": [
+            { "label": "Estuche", "value": "Rígido" }
+          ]
+        }
+      ],
+      "faqs": []
     }
   ]
 }
