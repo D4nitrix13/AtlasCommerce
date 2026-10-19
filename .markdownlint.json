@@ -10,11 +10,14 @@
     "siblings_only": true
   },
   "MD033": {
-    "allowed_elements": ["br", "kbd", "sub", "sup"]
+    "allowed_elements": ["br", "kbd", "sub", "sup", "details", "summary"]
   },
-  "MD041": true,
-  "MD046": {
-    "style": "fenced"
-  },
-  "MD060": false
+  "overrides": [
+    {
+      "files": ["odd/tasks/**/*.md"],
+      "MD013": false,
+      "MD022": false,
+      "MD032": false
+    }
+  ]
 }
