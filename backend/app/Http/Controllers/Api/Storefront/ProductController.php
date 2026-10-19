@@ -34,9 +34,18 @@ class ProductController extends Controller
         $products = Product::whereHas('stores', function ($query) use ($store): void {
             $query->where('store_id', $store->id)
                 ->where('is_visible', true);
-        })->get();
+        })
+            ->with(relations: [
+                'highlights',
+                'groupedSpecs.values',
+                'faqs',
+                'extendedDescriptions',
+            ])
+            ->get();
 
-        return response()->json($products);
+        return response()->json(data: $products->map(
+            fn (Product $product): array => $this->serializeProductWithExtended($product),
+        )->all());
     }
 
     /**
@@ -95,6 +104,9 @@ class ProductController extends Controller
      * Devuelve un producto por slug dentro de la tienda actual.
      *
      * Lanza 404 si el producto no existe o no está publicado en la tienda.
+     * Eager-loads el contenido extendido (Fase 8) para que el response
+     * incluya highlights, groupedSpecs, faqs y extendedDescriptions en
+     * una sola query batched por tabla.
      */
     public function show(Request $request, string $slug): JsonResponse
     {
@@ -104,9 +116,16 @@ class ProductController extends Controller
             ->whereHas('stores', function ($query) use ($store): void {
                 $query->where('store_id', $store->id)
                     ->where('is_visible', true);
-            })->firstOrFail();
+            })
+            ->with(relations: [
+                'highlights',
+                'groupedSpecs.values',
+                'faqs',
+                'extendedDescriptions',
+            ])
+            ->firstOrFail();
 
-        return response()->json($product);
+        return response()->json(data: $this->serializeProductWithExtended($product));
     }
 
     /**
@@ -151,5 +170,57 @@ class ProductController extends Controller
             'quantity' => $quantity,
             'price_cents' => $priceCents,
         ]);
+    }
+
+    /**
+     * Serializa un Product mergeando el contenido extendido (Fase 8)
+     * al payload crudo del modelo.
+     *
+     * Mantiene la firma histórica del endpoint (raw model JSON) y
+     * sólo agrega los 4 arrays anidados cuando existen en la eager
+     * load. Las relaciones llegan ya ordenadas por `position` vía el
+     * `orderBy` declarado en `Product::highlights()` etc.
+     *
+     * @return array<string, mixed>
+     */
+    private function serializeProductWithExtended(Product $product): array
+    {
+        /** @var array<string, mixed> $payload */
+        $payload = $product->toArray();
+
+        $payload['highlights'] = $product->highlights
+            ->map(fn ($highlight): array => [
+                'icon' => $highlight->icon,
+                'label' => $highlight->label,
+            ])
+            ->all();
+
+        $payload['groupedSpecs'] = $product->groupedSpecs
+            ->map(fn ($group): array => [
+                'category' => $group->category,
+                'items' => $group->values
+                    ->map(fn ($value): array => [
+                        'label' => $value->label,
+                        'value' => $value->value,
+                    ])
+                    ->all(),
+            ])
+            ->all();
+
+        $payload['faqs'] = $product->faqs
+            ->map(fn ($faq): array => [
+                'question' => $faq->question,
+                'answer' => $faq->answer,
+            ])
+            ->all();
+
+        $payload['extendedDescriptions'] = $product->extendedDescriptions
+            ->map(fn ($entry): array => [
+                'title' => $entry->title,
+                'body' => $entry->body,
+            ])
+            ->all();
+
+        return $payload;
     }
 }

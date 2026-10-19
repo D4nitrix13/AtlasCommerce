@@ -14,6 +14,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * No expone `cost_cents` ni datos internos del inventario. Diseñado
  * para el storefront y para el carrito/checkout.
  *
+ * Las colecciones de contenido extendido (highlights, groupedSpecs,
+ * faqs, extendedDescriptions) sólo se incluyen si las relaciones
+ * fueron eager-loaded en el query. Esto permite que el resource
+ * siga siendo liviano para usos que no las necesitan (carrito,
+ * returns) y a la vez exponga el shape completo cuando el
+ * storefront PDP pide el product detail.
+ *
  * @property int $id
  * @property int $category_id
  * @property int|null $brand_id
@@ -37,7 +44,7 @@ class ProductResource extends JsonResource
             ? $this->resource->currency
             : null;
 
-        return [
+        $payload = [
             'id' => $this->id,
             'category_id' => $this->category_id,
             'brand_id' => $this->brand_id,
@@ -52,5 +59,48 @@ class ProductResource extends JsonResource
                 currency: $currency,
             ),
         ];
+
+        if ($this->resource->relationLoaded('highlights')) {
+            $payload['highlights'] = $this->resource->highlights
+                ->map(fn ($highlight): array => [
+                    'icon' => $highlight->icon,
+                    'label' => $highlight->label,
+                ])
+                ->all();
+        }
+
+        if ($this->resource->relationLoaded('groupedSpecs')) {
+            $payload['groupedSpecs'] = $this->resource->groupedSpecs
+                ->map(fn ($group): array => [
+                    'category' => $group->category,
+                    'items' => $group->values
+                        ->map(fn ($value): array => [
+                            'label' => $value->label,
+                            'value' => $value->value,
+                        ])
+                        ->all(),
+                ])
+                ->all();
+        }
+
+        if ($this->resource->relationLoaded('faqs')) {
+            $payload['faqs'] = $this->resource->faqs
+                ->map(fn ($faq): array => [
+                    'question' => $faq->question,
+                    'answer' => $faq->answer,
+                ])
+                ->all();
+        }
+
+        if ($this->resource->relationLoaded('extendedDescriptions')) {
+            $payload['extendedDescriptions'] = $this->resource->extendedDescriptions
+                ->map(fn ($entry): array => [
+                    'title' => $entry->title,
+                    'body' => $entry->body,
+                ])
+                ->all();
+        }
+
+        return $payload;
     }
 }
