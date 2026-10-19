@@ -59,6 +59,8 @@ import ProductDetailsBlock from '../../../components/storefront/products/Product
 import ProductReviews from '../../../components/storefront/products/ProductReviews.astro';
 import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
 import ProductHighlights from '../../../components/storefront/products/ProductHighlights.astro';
+import ProductExtendedDescription from '../../../components/storefront/products/ProductExtendedDescription.astro';
+import ProductFAQ from '../../../components/storefront/products/ProductFAQ.astro';
 
 import ProductSpecificationsByCategory from '../../../components/storefront/products/ProductSpecificationsByCategory.astro';
 import { getServerDictionary } from '../../../i18n/server';
@@ -637,6 +639,22 @@ const cardLabels = {
               heading={t['storefront.products.detail.v4.specsByCategory.heading']}
               groups={detail.groupedSpecs}
               expanded={expandedSpecs}
+            />
+          )}
+
+          {/* Descripción extendida — Fase 8. Vacío = no renderiza. */}
+          {detail.extendedDescriptions !== undefined && detail.extendedDescriptions.length > 0 && (
+            <ProductExtendedDescription
+              items={detail.extendedDescriptions}
+              labels={{ heading: t['storefront.products.detail.v4.extendedDescription.heading'] }}
+            />
+          )}
+
+          {/* Preguntas frecuentes — Fase 8. Vacío = no renderiza. */}
+          {detail.faqs !== undefined && detail.faqs.length > 0 && (
+            <ProductFAQ
+              faqs={detail.faqs}
+              labels={{ heading: t['storefront.products.detail.v4.faq.heading'] }}
             />
           )}
 
