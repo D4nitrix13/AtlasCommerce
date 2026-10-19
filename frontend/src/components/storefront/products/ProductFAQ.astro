@@ -1,0 +1,46 @@
+---
+/**
+ * ProductFAQ — sección de preguntas frecuentes del PDP.
+ *
+ * Wrapper sobre el componente genérico `FaqAccordion` (raíz de
+ * `storefront/`) que ata el shape `question`/`answer` a las FAQs
+ * reales del producto y aplica el heading localized.
+ *
+ * Layout:
+ *   - Section `border-t border-slate-200 bg-slate-50/60` (mismo fondo
+ *     que usa `FaqAccordion` para mantener coherencia visual con la
+ *     sección FAQ de la rama B2B Panda).
+ *   - Inner `mx-auto max-w-4xl` con heading centrado y accordion.
+ *   - Empty-safe: si `faqs` está vacío NO renderiza ni la sección
+ *     ni el heading — la página decide cuándo omitir pasando [].
+ *
+ * Por qué wrapper y no uso directo de FaqAccordion:
+ *   - Permite agregar en el futuro elementos propios del producto
+ *     (ej. CTA "Hacer una pregunta" linkeando a /questions) sin
+ *     ensuciar el componente genérico compartido.
+ *   - Centraliza el i18n key del heading en un solo archivo
+ *     (`ProductFAQ.types.ts` + `types.ts` de i18n) en lugar de
+ *     hardcodearlo en la PDP.
+ *
+ * Accesibilidad:
+ *   - Heredada del `FaqAccordion` (toggle con Enter/Espacio del
+ *     summary nativo, region role implícito).
+ *   - El heading `<h2 id>` permite anclar la sección vía fragment
+ *     `#faq-heading` para deep-links desde emails y campañas.
+ */
+import FaqAccordion from '../FaqAccordion.astro';
+import type { ProductFAQLabels, ProductFAQItem } from './ProductFAQ.types';
+
+interface Props {
+  /** Lista de preguntas frecuentes del producto. Vacío = no renderiza. */
+  faqs: readonly ProductFAQItem[];
+  /** Labels de i18n (heading principal). */
+  labels: ProductFAQLabels;
+}
+
+const { faqs, labels } = Astro.props;
+---
+
+{faqs.length > 0 && (
+  <FaqAccordion heading={labels.heading} items={faqs} />
+)}
