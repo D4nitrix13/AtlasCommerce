@@ -390,9 +390,9 @@ RM_VOLUMES_SKIP_CONFIRM=0
 SETUP_INSTALL_CADDY=0
 KNOWN_FLAGS=()
 case "$cmd_canonical" in
-    build)
-        KNOWN_FLAGS=("no-cache")
-        ;;
+        build)
+            KNOWN_FLAGS=("--no-cache")
+            ;;
     rm-volumes)
         KNOWN_FLAGS=("-y")
         ;;
