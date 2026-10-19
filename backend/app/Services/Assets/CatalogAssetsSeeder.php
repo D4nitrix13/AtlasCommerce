@@ -65,6 +65,14 @@ final class CatalogAssetsSeeder
     ];
 
     /**
+     * Cache del índice `handle → product.json path` del backup.
+     * Lazy-loaded por lookupBackupMetadata().
+     *
+     * @var array<string, string>|null
+     */
+    private ?array $backupIndex = null;
+
+    /**
      * Roles que extraemos del filename `{role}-{WxH}.webp`.
      * Keys ordenadas LONGEST-FIRST para evitar matches parciales.
      * (back-headstock antes que back, finish-top antes que finish, etc.)
@@ -96,6 +104,8 @@ final class CatalogAssetsSeeder
         private readonly string $tenantSlug,
         private readonly string $storageDisk,
         private readonly StorageKeyDeriver $deriver,
+        /** Backup root con product.json por variante. Null → fallback placeholder. */
+        private readonly ?string $backupBase = null,
     ) {
     }
 
@@ -290,22 +300,33 @@ final class CatalogAssetsSeeder
             'instrumento-musical',
         );
 
+        // Cargar metadata del backup si está disponible
+        $meta = $this->lookupBackupMetadata($productSlug);
+
+        // Detección determinística desde handle/title
+        $isExclusive = $this->detectExclusive(handle: $productSlug, title: $meta['title'] ?? null);
+        $isLeftHanded = $this->strContains($productSlug, 'left-handed');
+
         $product = Product::query()->updateOrCreate(
             ['slug' => $productSlug],
             [
-                'name' => ucwords(str_replace('-', ' ', $productSlug))
-                    . " ({$brandName})",
-                'sku' => strtoupper(substr($brandSlug, 0, 4)) . '-'
-                    . strtoupper(substr(str_replace('-', '', $productSlug), 0, 12)),
-                'description' => "Producto {$productSlug} de la marca {$brandName}, "
-                    . "importado al catálogo de {$tenantStore->name}.",
+                'name' => $meta['title']
+                    ?? ucwords(str_replace('-', ' ', $productSlug)) . " ({$brandName})",
+                'sku' => $meta['sku']
+                    ?? (strtoupper(substr($brandSlug, 0, 4)) . '-'
+                        . strtoupper(substr(str_replace('-', '', $productSlug), 0, 12))),
+                'description' => $meta['long_description']
+                    ?? ($meta['description']
+                        ?? "Producto {$productSlug} de la marca {$brandName}, "
+                            . "importado al catálogo de {$tenantStore->name}."),
                 'brand_id' => $brand->id,
                 'category_id' => $category->id,
                 'currency_id' => $defaultCurrency->id,
-                'base_price_cents' => 0, // placeholder; actualizar via admin
+                'base_price_cents' => $meta['base_price_cents'] ?? 0,
                 'cost_cents' => 0,
                 'is_active' => true,
-                'is_exclusive' => false,
+                'is_exclusive' => $isExclusive,
+                'is_left_handed' => $isLeftHanded,
                 'has_condition' => false,
                 'has_sizes' => false,
                 'published_at' => now(),
@@ -318,22 +339,25 @@ final class CatalogAssetsSeeder
             ['product_id' => $product->id, 'store_id' => $tenantStore->id],
             [
                 'slug' => $productSlug,
-                'public_price' => 0, // placeholder
+                'public_price' => $meta['base_price_cents'] ?? 0,
                 'is_visible' => true,
-                'is_featured' => false,
+                'is_featured' => $isExclusive, // feature flag: exclusivos destacados en home
                 'sort_order' => 0,
                 'published_at' => now(),
             ],
         );
 
         foreach ($data['variants'] as $variantSlug => $webps) {
+            // Detección handedness per-variant
+            $handedness = $this->detectHandedness($variantSlug);
+
             $variant = ProductVariant::query()->updateOrCreate(
                 ['product_id' => $product->id, 'sku' => strtoupper(substr($brandSlug, 0, 4))
                     . '-' . strtoupper(substr(str_replace('-', '', $productSlug), 0, 12))
                     . '-' . strtoupper(substr(str_replace('-', '', $variantSlug), 0, 8))],
                 [
                     'name' => ucwords(str_replace('-', ' ', $variantSlug)),
-                    'price_cents' => 0,
+                    'price_cents' => $meta['base_price_cents'] ?? 0,
                     'cost_cents' => 0,
                     'is_active' => true,
                     'finish_slug' => $variantSlug,
@@ -341,6 +365,7 @@ final class CatalogAssetsSeeder
                     'finish_hex' => null,
                     'condition' => 'nuevo',
                     'stock' => 0,
+                    'handedness' => $handedness,
                 ],
             );
             $stats['variants_created']++;
@@ -358,6 +383,164 @@ final class CatalogAssetsSeeder
                 );
             }
         }
+    }
+
+    /**
+     * Detecta si un producto es "exclusive" basado en su título o handle.
+     *
+     * Reglas:
+     *   - Si el título contiene "exclusive" (case-insensitive) → exclusive
+     *   - Si el handle contiene "exclusive" → exclusive
+     *   - Si la variant slug termina en "-exclusive" → exclusive
+     *
+     * Detección directa desde filesystem (no requiere backup JSON).
+     */
+    private function detectExclusive(string $handle, ?string $title): bool
+    {
+        $titleLower = $title !== null ? strtolower($title) : '';
+        $handleLower = strtolower($handle);
+
+        return str_contains($titleLower, 'exclusive')
+            || str_contains($titleLower, 'exclusivo')
+            || str_contains($handleLower, 'exclusive')
+            || str_contains($handleLower, 'exclusivo');
+    }
+
+    /**
+     * Detecta handedness de un variant slug.
+     *   - "foo-left-handed-bar" → 'left-handed'
+     *   - "foo-bar" → null (regular)
+     *   - "foo-left-handed" → 'left-handed'
+     */
+    private function detectHandedness(string $variantSlug): ?string
+    {
+        return str_contains($variantSlug, 'left-handed') ? 'left-handed' : null;
+    }
+
+    /**
+     * Carga metadata del product.json del backup para un handle dado.
+     *
+     * Estructura del backup: `gibson-images/{cat}/{brand}/.../.../{finish}/product.json`
+     * con `handle` y opcionalmente otros campos.
+     *
+     * Devuelve array asociativo con keys null si no hay metadata:
+     *   - title, sku, description, long_description, base_price_cents,
+     *     weight_g, barcode, specifications, type
+     *
+     * Cachea índice por handle para búsquedas O(N) en lugar de O(N×M).
+     */
+    private function lookupBackupMetadata(string $productSlug): array
+    {
+        if ($this->backupBase === null) {
+            return $this->emptyMetadata();
+        }
+
+        $index = $this->loadBackupIndex();
+        if (! isset($index[$productSlug])) {
+            return $this->emptyMetadata();
+        }
+
+        $jsonPath = $index[$productSlug];
+        $bytes = @file_get_contents($jsonPath);
+        if ($bytes === false) {
+            return $this->emptyMetadata();
+        }
+
+        try {
+            $d = json_decode($bytes, associative: true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return $this->emptyMetadata();
+        }
+
+        $priceCents = isset($d['price']['regular']) && is_numeric($d['price']['regular'])
+            ? (int) round((float) $d['price']['regular'] * 100)
+            : null;
+
+        $longDesc = isset($d['long_description']) && is_array($d['long_description'])
+            ? ($d['long_description']['body'] ?? $d['long_description']['title'] ?? null)
+            : null;
+
+        return [
+            'title' => $d['title'] ?? null,
+            'sku' => $d['sku'] ?? null,
+            'description' => isset($d['body_html']) ? strip_tags($d['body_html']) : null,
+            'long_description' => $longDesc,
+            'base_price_cents' => $priceCents,
+            'weight_g' => $d['weight_g'] ?? null,
+            'barcode' => $d['barcode'] ?? null,
+            'specifications' => $d['specifications'] ?? null,
+            'type' => $d['product_type'] ?? null,
+        ];
+    }
+
+    /**
+     * Carga el índice de product.jsons del backup. Cachea en memoria.
+     *
+     * Formato del path: `{backupBase}/{category}/{brand}/{...}/{finish}/product.json`
+     * Mapping: handle (key del json) → ruta absoluta del archivo.
+     *
+     * Costo: O(N) en primera llamada, O(1) después.
+     * Si el backup tiene 410 productos, son ~10ms-100ms.
+     */
+    private function loadBackupIndex(): array
+    {
+        if ($this->backupIndex !== null) {
+            return $this->backupIndex;
+        }
+
+        $this->backupIndex = [];
+
+        if ($this->backupBase === null || ! is_dir($this->backupBase)) {
+            return $this->backupIndex;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                $this->backupBase,
+                \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS
+            )
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->getFilename() !== 'product.json') {
+                continue;
+            }
+            $bytes = @file_get_contents($file->getPathname());
+            if ($bytes === false) {
+                continue;
+            }
+            try {
+                $d = json_decode($bytes, associative: true, flags: JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                continue;
+            }
+            $handle = $d['handle'] ?? null;
+            if (is_string($handle) && $handle !== '') {
+                $this->backupIndex[$handle] = $file->getPathname();
+            }
+        }
+
+        return $this->backupIndex;
+    }
+
+    private function emptyMetadata(): array
+    {
+        return [
+            'title' => null,
+            'sku' => null,
+            'description' => null,
+            'long_description' => null,
+            'base_price_cents' => null,
+            'weight_g' => null,
+            'barcode' => null,
+            'specifications' => null,
+            'type' => null,
+        ];
+    }
+
+    private function strContains(string $haystack, string $needle): bool
+    {
+        return $needle !== '' && str_contains($haystack, $needle);
     }
 
     /**

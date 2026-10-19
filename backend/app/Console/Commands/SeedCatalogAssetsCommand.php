@@ -56,6 +56,7 @@ final class SeedCatalogAssetsCommand extends Command
     protected $signature = 'assets:seed-catalog
         {--tenant=instrumentos-musicales-la-voz : Tenant slug}
         {--asset-base= : Path to repo assets/ (default: env ATLAS_ASSET_BASE or default)}
+        {--backup-base= : Path to staging root con product.json (e.g. ~/.local/atlascommerce-archive/gibson-images)}
         {--storage-disk=local : Storage disk name (local / ftp)}
         {--dry-run : Report without writing}
         {--verify-only : Run only Phase 5 verification (no upload or DB insert)}';
@@ -66,6 +67,8 @@ final class SeedCatalogAssetsCommand extends Command
     {
         $assetBase = $this->option('asset-base')
             ?: env('ATLAS_ASSET_BASE', base_path('../../assets'));
+        $backupBase = $this->option('backup-base')
+            ?: env('ATLAS_BACKUP_BASE');
         $tenant = $this->option('tenant');
         $disk = $this->option('storage-disk');
         $dryRun = (bool) $this->option('dry-run');
@@ -73,6 +76,7 @@ final class SeedCatalogAssetsCommand extends Command
 
         $this->info("=== SeedCatalogAssets ===");
         $this->line("Asset base:     {$assetBase}/products/{$tenant}/");
+        $this->line("Backup base:    " . ($backupBase ?: '(none — placeholder descriptions only)'));
         $this->line("Storage disk:   {$disk}");
         $this->line("Mode:           " . ($dryRun ? 'DRY-RUN' : ($verifyOnly ? 'VERIFY-ONLY' : 'WRITE')));
         $this->line("");
@@ -89,6 +93,7 @@ final class SeedCatalogAssetsCommand extends Command
             tenantSlug: $tenant,
             storageDisk: $disk,
             deriver: $deriver,
+            backupBase: $backupBase,
         );
 
         // VERIFY ONLY
