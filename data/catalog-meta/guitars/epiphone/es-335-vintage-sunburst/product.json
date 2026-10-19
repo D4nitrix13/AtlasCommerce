@@ -1,0 +1,73 @@
+{
+  "title": "Epiphone ES-335, Vintage Sunburst",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EIES335VSNH1",
+  "handle": "epiphone-es-335-vintage-sunburst",
+  "url": "https://www.gibson.com/products/epiphone-es-335-vintage-sunburst",
+  "price": {
+    "regular": 599.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106044019",
+  "available": true,
+  "long_description": {
+    "title": "Sweet and Soulful Semi-Hollow",
+    "body": "The ES-335 is Epiphone's version of the historic ES-335 that has been wowing guitar players all over the world for over six decades. From its inaugural appearance in 1958, the Gibson™ ES-335 set an unmatched standard. Our Epiphone ES-335 is no exception. It is simply one of the best deals today for guitar players who want the classic sound of an ES-335 at an accessible price. The ES-335 is crafted with a layered maple top, back, and sides coupled with a solid maple tone block to create the amazing sustain, warmth, and resonant tone that players crave in a semi-hollow instrument. Epiphone's Alnico Classic PRO™ Humbuckers deliver a wide range of vintage sounds while the rounded C neck profile is extremely comfortable and easy to play, and the headstock features the 60s style Kalamazoo shape. Optional hardshell or EpiLite™ Case available."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Layered Maple",
+      "Binding": "Single-ply Cream - Top, Back and Fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "Layered Maple",
+      "Body Shape": "ES-335",
+      "Body Styles": "ES",
+      "Centerblock": "Maple",
+      "Side": "Layered Maple",
+      "Top": "Layered Maple"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Dot",
+      "Joint": "Glued in; Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech® NuBone®",
+      "Profile": "Rounded C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Alnico Classic PRO",
+      "Controls": "2 Volume, 2 Tone, CTS® potentiometers",
+      "Neck Pickup": "Alnico Classic PRO",
+      "Output Jack": "1/4\" Epiphone Heavy-Duty",
+      "Pickup Selector": "3-way toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "LockTone™ Tune-O-Matic™",
+      "Control Knobs": "Black Top Hat knobs with metal inserts",
+      "finish": "Nickel",
+      "Mounting Rings": "Black; PVC",
+      "Pickguard": "Gibson™ ES-335 Shape, Black, 5-ply",
+      "Plastic Parts": "Black; PVC",
+      "Strap Buttons": "2 - bottom and back of heel",
+      "Switch Tip": "Cream cap",
+      "Tailpiece": "LockTone™ Stop Bar",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "2-ply Bell",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Epiphone Deluxe"
+    },
+    "Misc Specs": {
+      "Headstock": "60s Kalamazoo",
+      "Model": "EIES335VSNH1",
+      "Headstock Inlay": "Epiphone logo and Crown in Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 5,
+  "fetched_at": "2026-10-19T02:45:49+00:00"
+}

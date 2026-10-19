@@ -1,0 +1,62 @@
+{
+  "title": "Gibson Flying V 70s with Gold Hardware, Vintage Sunburst, Exclusive",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "DSVS25TBGH3",
+  "handle": "gibson-flying-v-70s-gold-hardware-vintage-sunburst-exclusive",
+  "url": "https://www.gibson.com/products/gibson-flying-v-70s-gold-hardware-vintage-sunburst-exclusive",
+  "price": {
+    "regular": 2599.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106238524",
+  "available": true,
+  "long_description": {
+    "title": "The radically shaped guitar that launched generations of legends",
+    "body": "Countless famous players have embraced the Flying V™, and, in the process, shaped the very fabric of modern music across multiple genres. The Flying V is one of the most instantly identifiable and widely recognized guitars of all time. With its radically futuristic design, the Flying V was less than enthusiastically received upon its 1958 release. However, as the 60s progressed, that began to change, and by the 70s, the model was firmly established and well on the way to the iconic status that it enjoys today. \n\nNow, Gibson is proud to introduce a new version of the Flying V 70s, with gold-plated hardware. The Flying V 70s with Gold Hardware retains all of the features that have made the standard Flying V 70s a hit with modern guitarists. The angular, V-shaped mahogany body has symmetrical wings that form an arrow-like silhouette, giving it a sense of motion and setting it apart from the regular single and double-cutaway guitar shapes that preceded it. The mahogany neck features a SlimTaper™ profile and is built for speed and expressive playing. The bound rosewood fretboard has a 12” radius, so fast, fluid runs, buzz-free bends, and first-position chords are all equally comfortable to play, even with the action set low. The fretboard is fitted with 22 medium jumbo frets and adorned with simple acrylic dot inlays. \n\nThe arrowhead-shaped Flying V headstock features high-quality Grover® Rotomatic® tuning machines and a Graph Tech® nut, ensuring stable tuning. The other ends of the strings pass over a fully adjustable, aluminum Nashville Tune-O-Matic™ bridge and anchor to an aluminum Stop Bar tailpiece for excellent intonation and sustain. \n\nThe Flying V 70s with Gold Hardware is propelled by a pair of uncovered 70s Tribute humbucker™ pickups that can produce sparkling clean tones as well as raunchy, thick distorted tones when you turn up your amp. Each pickup is hand-wired to its own volume control, allowing you to blend them in any ratio you choose. A master tone control with an Orange Drop® capacitor, a three-way pickup selector, and a 1/4” output jack round out the electronics. \n\nThe Flying V 70s with Gold Hardware includes a Gibson hardshell case for safe storage and transport, and is presented in a beautiful gloss Tobacco Sunburst nitrocellulose lacquer finish that perfectly complements the gold hardware. The Flying V 70s with Gold Hardware sounds fantastic, plays like a dream, and is sure to draw appreciative looks from fans and fellow guitarists alike. Are you cool enough to rock a V? If so, order today and discover why it has been the first choice of so many musical legends."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Flying V"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Dot",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "70s Tribute",
+      "Controls": "2 Volume, 1 Tone; Hand-wired with Orange Drop Capacitors",
+      "Neck Pickup": "70s Tribute",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Nashville Tune-O-Matic",
+      "Control Knobs": "Black Top Hats with gold inserts",
+      "finish": "Gold",
+      "Pickguard": "White multi-ply",
+      "Pickup Covers": "Gold",
+      "Tailpiece": "Stop Bar",
+      "Tuning Machines": "Grover Rotomatic with Kidney buttons"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "DSVS25TBGH3",
+      "Case": "Hardshell",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:48:26+00:00"
+}

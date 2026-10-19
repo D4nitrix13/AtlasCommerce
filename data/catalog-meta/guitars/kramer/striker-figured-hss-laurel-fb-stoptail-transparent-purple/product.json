@@ -1,0 +1,71 @@
+{
+  "title": "Kramer Striker Figured HSS, Transparent Purple",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KSTFLSTHSSTPBH1",
+  "handle": "kramer-striker-figured-hss-laurel-fb-stoptail-transparent-purple",
+  "url": "https://www.gibson.com/products/kramer-striker-figured-hss-laurel-fb-stoptail-transparent-purple",
+  "price": {
+    "regular": 379.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 9072,
+  "barcode": "711106086149",
+  "available": false,
+  "long_description": {
+    "title": "A Speed Demon With Flame Maple Looks That Kill - Now Available in Stoptail",
+    "body": "Part of the Modern Collection, the Kramer Striker™ Figured HSS is a gorgeous entry into the high-performance, shred-ready world of Kramer guitars! Along with its stunning AAA flame maple top veneer, it features a satin-finished maple neck with a Kramer K-Speed SlimTaper™ C profile that's fast, easy to play, and incredibly comfortable. Exceptional sonic versatility comes courtesy of a zebra-coil bridge humbucker™ and two single coils, delivering sparkling cleans as easily as harder-rocking tones that can cover a variety of styles. An Epiphone™ LockTone Tune-O-Matic™ bridge and Stop Bar tailpiece ensure excellent intonation and loads of sustain. An optional hardshell case is available."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Body, Satin Neck",
+      "Body Material": "Mahogany",
+      "Body Shape": "Striker",
+      "Body Styles": "Double Cut",
+      "Top": "AAA Flame Maple Veneer"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "24",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic White Dot",
+      "Joint": "Bolt-on with Neck Ferrules",
+      "Neck Material": "Maple",
+      "Nut Material": "Graph Tech NuBone",
+      "Profile": "Kramer K-Speed SlimTaper C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Kramer Alnico V HB-1 Zebra Coils",
+      "Controls": "Master Volume, Master Tone",
+      "Middle Pickup": "Kramer Alnico V SC-1",
+      "Neck Pickup": "Kramer Alnico V SC-1",
+      "Output Jack": "1/4\" Black Barrel, Rim Mount Jack",
+      "Pickup Selector": "5-way Selector"
+    },
+    "Hardware Specs": {
+      "Bridge": "Epiphone LockTone Tune-O-Matic",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Knurled",
+      "finish": "Black",
+      "Mounting Rings": "Black (Bridge Pickup Only)",
+      "Pickguard": "None",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Switch Tip": "Black",
+      "Tailpiece": "Epiphone LockTone Stop Bar",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black Bullet, 3-screw; White Silkscreen Striker",
+      "Tuner Plating": "Black",
+      "Tuning Machines": "Die Cast"
+    },
+    "Misc Specs": {
+      "Case": "Optional (940-KRSTCS)",
+      "Model": "KSTFLSTHSSTPBH1",
+      "Headstock": "Kramer Banana; 14 Degree Angle",
+      "Headstock Inlay": "Kramer Pyramid Logo in Gold",
+      "Strings Gauge": ".009, .011, .016, .024, .032, .042"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:51:20+00:00"
+}

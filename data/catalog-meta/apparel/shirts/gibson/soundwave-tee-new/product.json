@@ -1,0 +1,24 @@
+{
+  "title": "Gibson Soundwave Tee",
+  "vendor": "Gibson",
+  "product_type": "Shirts & Tops",
+  "sku": "GA-TEE-SDWV-WHT-SM",
+  "handle": "gibson-soundwave-tee-new",
+  "url": "https://www.gibson.com/products/gibson-soundwave-tee-new",
+  "price": {
+    "regular": 29.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 227,
+  "barcode": "711106117133",
+  "available": true,
+  "long_description": {
+    "title": null,
+    "body": "This simple white tee features center chest art with the Soundwave logo.\n\n\n\nStandard fit, unisex sizing\n100% Cotton\nMachine wash cold with similar colors, tumble dry on low."
+  },
+  "specifications": {},
+  "metadata_status": "partial",
+  "images_count": 2,
+  "fetched_at": "2026-10-19T03:52:50+00:00"
+}

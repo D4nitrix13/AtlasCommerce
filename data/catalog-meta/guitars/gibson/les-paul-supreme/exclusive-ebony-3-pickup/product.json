@@ -1,0 +1,72 @@
+{
+  "title": "Gibson Les Paul Supreme, Ebony, 3-Pickup, Exclusive",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "LPSU3P00EBGH1",
+  "handle": "gibson-les-paul-supreme-exclusive-ebony-3-pickup",
+  "url": "https://www.gibson.com/products/gibson-les-paul-supreme-exclusive-ebony-3-pickup",
+  "price": {
+    "regular": 3999.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10433,
+  "barcode": "711106120249",
+  "available": true,
+  "long_description": {
+    "title": "A Three Pickup Les Paul, Taken to the Supreme",
+    "body": "Gibson is excited to announce the return of the Les Paul Supreme. With a refreshed feature set, it is bound to overshadow everything else in sight and be one of the most exciting new releases of the year. This exclusive model features a maple top on a mahogany body with Ultra-Modern Weight Relief. The mahogany neck has an ebony fretboard with a compound radius and Super Split Block mother-of-pearl inlays. The neck has a Modern Contoured Heel for exceptional upper fret access, and the headstock is adorned with a striking new mother-of-pearl inlay inspired by a design from the 1940s that was discovered in the Gibson archives. The three pickups, two Burstbucker Pros (neck and middle positions), and one Burstbucker Pro + (in the bridge/lead position) are paired with individual push/pull Volume controls for flexible coil tap switching and a Master Tone control. The Ebony nitrocellulose gloss lacquer finish is elegantly highlighted with gold hardware, making this a great-sounding and highly flexible instrument and an exceptionally beautiful-looking modern rock machine. A hardshell case is also included."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Multi-ply Top and Headstock, Single-ply Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "Maple",
+      "Weight Relief": "Ultra-Modern"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Mother of Pearl Super Split Block",
+      "Joint": "Glued In, with Modern Contoured Heel",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Burstbucker Pro Plus Lead",
+      "Controls": "3 Push/Pull Volume (Coil Tap), Master Tone",
+      "Middle Pickup": "Burstbucker Pro Mid",
+      "Neck Pickup": "Burstbucker Pro Rhythm",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Aluminum Nashville Tune-O-Matic",
+      "Control Knobs": "Black Top Hat with Gold Insert",
+      "finish": "Gold",
+      "Jack Plate Cover": "Gold",
+      "Pickguard": "Black 5-ply (Uninstalled)",
+      "Pickup Covers": "Gold",
+      "Switch Tip": "Black",
+      "Switchwasher": "None",
+      "Tailpiece": "Aluminum Stop Bar",
+      "Truss Rod": "Adjustable",
+      "Tuner Plating": "Gold",
+      "Tuning Machines": "Locking Grover Keystone"
+    },
+    "Misc Specs": {
+      "Accessories": "Gibson Accessory Kit",
+      "Model": "LPSU3P00EBGH1",
+      "Case": "Hardshell Case",
+      "Headstock Inlay": "Gibson Logo and 1940s-Inspired Headstock Inlay, Both in Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 9,
+  "fetched_at": "2026-10-19T02:49:16+00:00"
+}

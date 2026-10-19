@@ -1,0 +1,55 @@
+{
+  "title": "Epiphone Billie Joe Armstrong Les Paul Junior, Limited, Radiant Red",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EIBJLPJRRNH",
+  "handle": "epiphone-billie-joe-armstrong-les-paul-junior-limited-radiant-red",
+  "url": "https://www.gibson.com/products/epiphone-billie-joe-armstrong-les-paul-junior-limited-radiant-red",
+  "price": {
+    "regular": 649.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106234366",
+  "available": false,
+  "long_description": {
+    "title": "One pickup, two knobs, and a whole lot of attitude",
+    "body": "Billie Joe Armstrong has always kept it simple and loud, and his guitars are no exception. As Green Day continues to pack stadiums and inspire a new wave of punk rockers, the Epiphone Billie Joe Armstrong Les Paul Junior spotlights his signature sound and style in a bold new Radiant Red finish. Stripped down to the essentials—one pickup, two knobs, and a whole lot of attitude, it’s built for players who want to plug in and go full throttle. No distractions, just pure punk energy. \n\nThe Billie Joe Armstrong Les Paul Junior was designed in collaboration with the Green Day legend and delivers pro-grade quality at an affordable price. It features a single cutaway slab mahogany body with a glued-in mahogany neck. The neck has a hand-filling 50s Vintage profile and is equipped with a rosewood fretboard with 22 medium jumbo frets and pearloid dot inlays. The Kalamazoo headstock is equipped with smooth and precise Epiphone Vintage Deluxe machine heads and a Graph Tech® nut to ensure rock-solid tuning stability. You’ll also find a reproduction of Billie Joe Armstrong’s signature in black on the back of the headstock. \n\nAt the other end, the strings anchor to a nickel-plated Lightning Bar wraparound bridge that bolts directly into the body for outstanding sustain and resonance. The bridge is also compensated for improved intonation. You’ll also find a black, single-ply Les Paul Junior pickguard on the body. The Billie Joe Armstrong Les Paul Junior is powered by a single Epiphone P-90 PRO™ pickup that can deliver everything from sweet cleans to a mighty roar. The pickup is wired to master volume and tone controls, which utilize high-quality CTS® potentiometers. You can get a wide range of tones with this relatively simple setup by adjusting the two controls and changing the location of your picking hand. It’s a simple yet powerful setup that delivers the goods night after night—just ask Billie Joe! \n\nThe Billie Joe Armstrong Les Paul Junior comes packaged in a black custom hardshell case with a leopard print interior, so it’s ready to join you on the way to your first bar gig or next world tour. Get one today and discover for yourself just how much great tone and serious attitude you can project when you strap one on—but don’t delay; the Billie Joe Armstrong Les Paul Junior in Radiant Red from Epiphone is only available for a limited time, so get yours while they’re still available."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Solidbody"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Inlays": "Dot",
+      "Joint": "Glued in, set neck",
+      "Nut Material": "Graph Tech",
+      "Profile": "Vintage 50s"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "P-90 PRO",
+      "Controls": "1 volume, 1 tone"
+    },
+    "Hardware Specs": {
+      "Bridge": "Wraparound Lightning",
+      "Control Knobs": "Black Top Hats",
+      "finish": "Nickel",
+      "Pickup Covers": "Dogear",
+      "Plastic Parts": "Black",
+      "Tuning Machines": "Epiphone Deluxe"
+    },
+    "Misc Specs": {
+      "Case": "Hardshell case",
+      "Model": "EIBJLPJRRNH",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:45:28+00:00"
+}

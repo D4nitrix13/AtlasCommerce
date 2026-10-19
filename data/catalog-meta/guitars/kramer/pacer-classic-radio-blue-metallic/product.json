@@ -1,0 +1,64 @@
+{
+  "title": "Kramer Pacer Classic, Radio Blue Metallic",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KPCRBMCF1",
+  "handle": "kramer-pacer-classic-radio-blue-metallic",
+  "url": "https://www.gibson.com/products/kramer-pacer-classic-radio-blue-metallic",
+  "price": {
+    "regular": 379.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 6350,
+  "barcode": "711106057736",
+  "available": true,
+  "long_description": {
+    "title": "A Rock Original Featuring Licensed Floyd Rose Hardware and Alnico 5 Classic Humbuckers",
+    "body": "The Pacer Classic is part of Kramer's Original Collection and is a superb tribute to the original 1982 Kramer that knocked the guitar world for a loop. The Pacer Classic is built for speed, with a 25.5\" scale maple neck with a Kramer K-Speed SlimTaper™ C profile and 22 medium jumbo frets. The Pacer Classic has chrome hardware, an alder double-cutaway body, a pair of double white, open-coil Alnico Classic 5 humbuckers™, and a licensed Floyd Rose® Tremolo bridge and R2 Locking Nut. Available in Radio Blue Metallic, Scarlet Red Metallic, and Purple Passion Metallic gloss finishes. An optional hardshell case is available."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "Alder",
+      "Body Shape": "Pacer",
+      "Body Styles": "Single Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Maple",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Dot",
+      "Joint": "Bolt On with Chrome Plate",
+      "Neck Material": "Maple",
+      "Nut Material": "Licensed Floyd Rose R2 Lock Nut, Top Mount",
+      "Profile": "Kramer K-Speed SlimTaper C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Alnico 5 Classic Humbucker with Double White Exposed Coils",
+      "Controls": "2 Volume, Master Tone",
+      "Neck Pickup": "Alnico 5 Classic Humbucker with Double White Exposed Coils",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Mini Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Licensed Floyd Rose",
+      "Control Covers": "White",
+      "Control Knobs": "Chrome Knurled",
+      "finish": "Chrome",
+      "Mounting Rings": "White",
+      "Strap Buttons": "2",
+      "Truss Rod": "Dual Action",
+      "Tuner Plating": "Chrome",
+      "Tuning Machines": "Die Cast"
+    },
+    "Misc Specs": {
+      "Case": "Optional hard case (940-KRSTCS, for right-handed guitars only), optional gig bag (940-KPGIGBAR) will fit both left and right-handed models.",
+      "Model": "KPCRBMCF1",
+      "Headstock": "Kramer Classic with White Kramer Logo and Chrome String Retaining Bar; Chrome Wrench Holder on Headstock Rear",
+      "Strings Gauge": ".009 .011 .016 .024 .032 .042"
+    }
+  },
+  "images_count": 7,
+  "fetched_at": "2026-10-19T02:50:58+00:00"
+}

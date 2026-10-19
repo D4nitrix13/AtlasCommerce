@@ -1,0 +1,65 @@
+{
+  "title": "Kramer 84, Left-Handed, Eruption Red Satin, Exclusive",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "K84AERSCF1L",
+  "handle": "kramer-84-eruption-red-satin-left-handed-exclusive",
+  "url": "https://www.gibson.com/products/kramer-84-eruption-red-satin-left-handed-exclusive",
+  "price": {
+    "regular": 899.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 5443,
+  "barcode": "711106148236",
+  "available": true,
+  "long_description": {
+    "title": "We Updated the Features but Kept the In-Your-Face Attitude",
+    "body": "The Kramer 84 honors Kramer’s first Golden Age and is one of the most influential electric guitars of all time. This updated version has more in common with the 80s-era originals than ever, including a new headstock rear stinger that matches the body and front headstock finish, a new direct-to-body mounted Kramer USA Eruption T humbucker™ pickup that Gibson Master Luthier Jim DeCola designed, and even a new retro-style volume knob. Of course, we kept the classic features like the lightweight alder body, 84 Banana headstock, and Floyd Rose® 1000 series tremolo, but now the R2 locking nut is rear-mounted, just like in the 80s. And it’s a Kramer, so you know we kept the in-your-face, Made to Rock Hard attitude. A premium gig bag is also included."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Satin",
+      "Body Material": "Alder",
+      "Body Shape": "84",
+      "Body Styles": "Double Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Maple",
+      "Fret Count": "22",
+      "Frets": "Jumbo",
+      "Inlays": "Dot",
+      "Joint": "Bolt-on with Kramer Nickel Backplate",
+      "Neck Material": "One-piece Hard Maple with Walnut Skunk Stripe",
+      "Nut Material": "Floyd Rose R2 Locking, Rear-mounted",
+      "Profile": "Kramer K-Speed SlimTaper C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Kramer USA Eruption T Humbucker",
+      "Controls": "Master Volume with Push/Pull Series/Parallel Switch",
+      "Output Jack": "1/4\""
+    },
+    "Hardware Specs": {
+      "Bridge": "Floyd Rose 1000 Series",
+      "Control Covers": "84 Style, Black",
+      "Control Knobs": "Black, Retro-styled",
+      "finish": "Nickel",
+      "Mounting Rings": "None",
+      "Pickguard": "None",
+      "Pickup Covers": "None",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Truss Rod": "Dual Action",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Die Cast"
+    },
+    "Misc Specs": {
+      "Case": "Premium Gig Bag",
+      "Model": "K84AERSCF1L",
+      "Headstock": "84 Non-angled Big Banana, Wrench Holder on Rear",
+      "Headstock Inlay": "Kramer Classic Logo",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:50:08+00:00"
+}

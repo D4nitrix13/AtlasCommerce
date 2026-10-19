@@ -1,0 +1,64 @@
+{
+  "title": "Gibson Thunderbird Bass, Ebony",
+  "vendor": "Gibson",
+  "product_type": "Electric Bass",
+  "sku": "BAT4SN00EBCH1",
+  "handle": "gibson-thunderbird-bass-guitar-ebony",
+  "url": "https://www.gibson.com/products/gibson-thunderbird-bass-guitar-ebony",
+  "price": {
+    "regular": 2499.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 8505,
+  "barcode": "711106171807",
+  "available": true,
+  "long_description": {
+    "title": "Own the low end in thunderous style",
+    "body": "When the Gibson Thunderbird™ Bass was first introduced in 1963, the world had never seen another bass quite like it. Designed by automotive coach designer Ray Dietrich, who also designed the Gibson Firebird™, its new, curvaceous, and asymmetrical body design was radical and groundbreaking at the time, and still looks fresh and contemporary even today. The earliest Thunderbirds had a 9-ply neck-through-body with mahogany “wings,” and were the first Gibson basses with neck-through-body construction. Later, the Thunderbird was redesigned with a Non-Reverse body shape and a glued-in, set neck. The Thunderbird was also the first Gibson bass model to feature a long-scale (34”) neck; previous Gibson basses had a shorter 30.5” scale length. \n\nNow, Gibson is proud to bring a new version of the legendary Thunderbird to the Gibson lineup. The new Thunderbird Bass features a solid mahogany body in the original reverse body shape. The body retains the appearance of the original neck-through design, featuring a raised section running through the middle. However, this new Thunderbird boasts a glued-in, set mahogany neck with a fast-playing SlimTaper™ profile, making it more comfortable and accessible than ever. Additionally, the headstock on the Thunderbird Bass features the popular Non-Reverse headstock style, making tuning up quick and intuitive. Other modern updates include Hipshot® Ultralite® Mini Clover tuning machines, which offer precise tuning and improved balance, along with a Hipshot Supertone bridge that delivers full intonation and adjustable action height. \n\nLike the mythical bird-like spirit of the North American indigenous peoples’ culture that it is named after, the Thunderbird Bass is powerful, thanks to its two EB Bass humbucker™ pickups, which deliver the boom with plenty of output and low-end punch. Each pickup is connected to a separate volume control, allowing you to use either one individually or to blend them in any ratio you prefer. A master tone control allows for additional tonal control. And, of course, the Thunderbird’s 3-ply white pickguard features the iconic Thunderbird logo. The Thunderbird Bass comes packed in a Gibson hardshell case for protection during travel. Order your own Thunderbird Bass today, and own the low end in thunderous style."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Thunderbird"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "20",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Dot",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "GraphTech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Thunderbird Lead",
+      "Controls": "2 volume, 1 tone",
+      "Neck Pickup": "Thunderbird Rhythm",
+      "Output Jack": "1/4\""
+    },
+    "Hardware Specs": {
+      "Bridge": "Hipshot Supertone",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Top hat with Silver Reflector",
+      "finish": "Chrome",
+      "Pickguard": "3-ply White with Thunderbird Graphic",
+      "Pickup Covers": "Black",
+      "Strap Buttons": "2 - Bottom and Heel",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "Black",
+      "Tuning Machines": "Hipshot Ultralite Mini-Clover"
+    },
+    "Misc Specs": {
+      "Case": "Hardshell",
+      "Model": "BAT4SN00EBCH1",
+      "Headstock": "Non-Reverse Thunderbird",
+      "Headstock Inlay": "Gibson Logo Gold Silkscreen",
+      "Strings Gauge": ".045, .065, .085, .105"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:44:52+00:00"
+}

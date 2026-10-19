@@ -1,0 +1,56 @@
+{
+  "title": "Gibson J-45 Century 12-Fret, Vintage Amber",
+  "vendor": "Gibson",
+  "product_type": "Acoustic Guitar",
+  "sku": "OCRS4C12AN",
+  "handle": "gibson-j-45-century-12-fret-vintage-amber",
+  "url": "https://www.gibson.com/products/gibson-j-45-century-12-fret-vintage-amber",
+  "price": {
+    "regular": 2399.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106233475",
+  "available": true,
+  "long_description": {
+    "title": "A new Workhorse with a 12-fret neck",
+    "body": "Since the 1930s, the full-sized, round shoulder acoustics from Gibson have become the most recorded acoustic guitars in American music history, delivering expressive tone, superior warmth, and note-to-note balance that makes them stand apart from other acoustic guitars. One of the most famous of the Gibson round shoulder models is the J-45™—the famous “Workhorse,” which was first introduced in 1942 and has gone on to become the best-selling Gibson acoustic model of all time. The nickname comes from its no-nonsense simplicity, understated elegance, and widespread use on stages and in recording studios worldwide. \n\n\n\n\nNow, Gibson is proud to introduce a new version of this legendary model: the J-45 Century 12-Fret. It retains many of the classic features that players love about the J-45, but features a 12-fret neck-to-body joint instead of the standard 14-fret joint. Why is this important? With a 12-fret neck joint, the neck is shorter and the position of the bridge plate is relocated, which places it further from the body’s waist and closer to the center of the widest area of the body, where it can drive the top more efficiently, making the guitar more comfortable to hold and play and resulting in a tone that is warm, punchy, and resonant and that responds ideally to the dynamics of fingerstyle players and players with a lighter picking attack. \n\n\n\n\nWhile this is not the first J-45 to feature a 12-fret neck, such models have previously been limited to artist signature models and limited-run releases from Gibson Custom, making them relatively rare and somewhat difficult to find. Now, the beautiful tone of a 12-fret neck is available to all in the form of the Gibson J-45 Century 12-Fret. Part of the new Century Collection celebrating 100 Years of Gibson Flat-Tops, it features a mahogany body with a Sitka spruce top, with single ply cream top and back binding framing the body’s perimeter. \n\n\n\n\nThe mahogany neck has a fast-playing SlimTaper™ 12-Fret profile and attaches to the body at the 12th fret with a compound dovetail neck-to-body joint that is fastened with hot hide glue, just like all of the Gibson acoustic models. The rosewood fretboard is equipped with 19 standard frets and adorned with simple mother-of-pearl dot inlays. \n\n\n\n\nThe headstock is outfitted with open-back Golden Age strap tuners with cream buttons and features an early-1900s Gibson script logo decal for a vintage-inspired touch. Another vintage-inspired detail is the sloped rectangle closed-slot rosewood bridge, similar to those found on the earliest J-45 models. The nut and saddle of the J-45 Century 12-Fret are bone, while the bridge pins are TUSQ®. The J-45 Century 12-Fret has a classic Gibson L-00-style pickguard and features a hand-sprayed satin nitrocellulose lacquer finish. It comes packed in a premium Century Collection tweed hardshell case and is available in both right and left-handed versions. Pick up a J-45 Century 12-Fret today and experience the sweet tone of a 12-fret neck Gibson acoustic for yourself."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Mahogany",
+      "Binding": "Single-ply top and back",
+      "Body Finish": "Thin satin nitrocellulose lacquer",
+      "Body Shape": "J-45",
+      "Side": "Mahogany",
+      "Top": "Sitka spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Frets": "Standard",
+      "Inlays": "Mother of pearl dot",
+      "Joint": "Dovetail, 12th fret",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Bone",
+      "Profile": "SlimTaper 12-Fret"
+    },
+    "Hardware Specs": {
+      "Bridge": "Rectangle rosewood",
+      "Bridge Pins": "TUSQ",
+      "finish": "Nickel",
+      "Pickguard": "L-00 style",
+      "Saddle Material": "Bone",
+      "Tuning Machines": "Please note: Due to a temporary shortage of Golden Age tuners, some guitars may ship with closed-back nickel Grover® strap tuners with cream buttons instead of open-back Golden Age strap tuners with cream buttons"
+    },
+    "Misc Specs": {
+      "Case": "Century Series tweed hardshell case",
+      "Model": "OCRS4C12AN",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 11,
+  "fetched_at": "2026-10-19T03:45:04+00:00"
+}

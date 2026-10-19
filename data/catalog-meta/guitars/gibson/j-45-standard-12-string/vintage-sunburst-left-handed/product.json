@@ -1,0 +1,70 @@
+{
+  "title": "Gibson J-45 Standard 12-String with HiFi DNA, Left-Handed, Vintage Sunburst",
+  "vendor": "Gibson",
+  "product_type": "Acoustic Guitar",
+  "sku": "MCRS4512HFVSL",
+  "handle": "gibson-j-45-standard-12-string-vintage-sunburst-left-handed",
+  "url": "https://www.gibson.com/products/gibson-j-45-standard-12-string-vintage-sunburst-left-handed",
+  "price": {
+    "regular": 3599.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106245980",
+  "available": false,
+  "long_description": {
+    "title": "The J-45 gets six extra strings and sings like never before",
+    "body": "The J-45™ is a truly legendary guitar. Introduced in 1942, it quickly earned its nickname “The Workhorse.” Gibson’s best-selling acoustic model of all time, it has become the cornerstone of the round-shoulder dreadnought line. The J-45 Standard 12-String heralds a sonic expansion to that familiar formula with a full, chiming voice, and now comes equipped with the Gibson-exclusive, custom-voiced Baggs™ HiFi DNA™ pickup system for amplified sound that preserves the guitar’s character and every nuance of your playing.\n\n\n\n\n\nThe J-45 Standard 12-String features a round-shoulder dreadnought body crafted with solid mahogany back and sides paired with a solid Sitka spruce top. Scalloped X-bracing supports the top, while multi-ply binding frames the top and single-ply binding outlines the back. This proven tonewood combination and construction provide a strong foundation for the shimmer, depth, and natural chorus effect created by its 12-string configuration, adding width and definition to strummed chords, picked passages, and open-position voicings without changing the comfortable round-shoulder format that defines the J-45. A gloss nitrocellulose lacquer finish completes the classic Workhorse appearance.\n\n\n\n\n\nThe mahogany neck has a fast, comfortable SlimTaper™ profile and is attached to the body with a compound dovetail neck-to-body joint using hot hide glue. Its wider, 1.88-inch bone nut provides the spacing needed for the 12-string configuration, while the Indian rosewood fretboard has a 12-inch radius, 20 standard frets, and mother-of-pearl dot inlays. Nickel-plated Grover® Mini Rotomatic® tuners provide smooth, precise adjustment across all 12 strings.\n\n\n\n\n\nThe reverse-belly bridge is crafted from rosewood and fitted with a TUSQ® saddle and bridge pins. A tortoiseshell teardrop pickguard completes the familiar J-45 aesthetic.\n\n\n\n\n\nInside, the J-45 Standard 12-String is now equipped with the all-new Gibson-exclusive Baggs™ HiFi DNA™ pickup system. This active system uses two lightweight sensors mounted on the internal bridge plate. The sensors are matched with optimized individual preamps to deliver full-bodied, amplified acoustic tone that lets the guitar’s character and personality come through when amplified, with no impact on the unamplified tone. The Baggs™ HiFi DNA™ system offers comparable gain-before-feedback to an under-saddle pickup. The system also includes soundhole-mounted volume and tone controls that are quick and easy to access while playing, and all but invisible to your audience.\n\n\n\n\n\nThe J-45 Standard 12-String brings the inimitable chime and dimension of a 12-string voice to Gibson’s world-famous Workhorse. It comes ready for the stage and studio in a Gibson hardshell case."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Mahogany",
+      "Binding": "Multi-ply Top, Single-ply Back",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "J-45",
+      "Body Styles": "Round Shoulder",
+      "Bracing": "Traditional Hand-Scalloped X-Bracing",
+      "Side": "Mahogany",
+      "Top": "Sitka Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "20",
+      "Frets": "Standard",
+      "Inlays": "Mother of Pearl Dots",
+      "Joint": "Compound Dovetail Neck-to-body Joint; Hot Hide Glue",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Bone",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Controls": "Soundhole-mounted volume and tone",
+      "Output Jack": "1/4\"",
+      "Preamp": "Baggs HiFi DNA",
+      "Under Saddle Pickup": "Baggs HiFi DNA"
+    },
+    "Hardware Specs": {
+      "Bridge": "Reverse Belly, Rosewood",
+      "Bridge Pins": "Bone",
+      "finish": "Nickel",
+      "Pickguard": "Tortoise Teardrop",
+      "Saddle Material": "Bone",
+      "Strap Buttons": "2",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "Bell Shaped, 2-ply Black and White",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover Mini Rotomatic"
+    },
+    "Misc Specs": {
+      "Case": "Gibson Hardshell",
+      "Model": "MCRS4512HFVSL",
+      "Headstock Inlay": "Gibson Logo in Mother of Pearl",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 8,
+  "fetched_at": "2026-10-19T04:02:41+00:00"
+}

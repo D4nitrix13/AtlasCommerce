@@ -1,0 +1,68 @@
+{
+  "title": "Epiphone Les Paul Standard 60s, Left-Handed, Bourbon Burst",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EILS6LBBNH1",
+  "handle": "epiphone-les-paul-standard-60s-left-handed-bourbon-burst",
+  "url": "https://www.gibson.com/products/epiphone-les-paul-standard-60s-left-handed-bourbon-burst",
+  "price": {
+    "regular": 699.0,
+    "currency": "USD",
+    "compare_at": 599.0
+  },
+  "weight_g": 10433,
+  "barcode": "711106041735",
+  "available": false,
+  "long_description": {
+    "title": "Featuring ProBucker™ Humbuckers",
+    "body": "The Les Paul™ Standard 60s models from Epiphone’s new Inspired by Gibson™ Collection recreate the sound of 1960s era Les Pauls. Featuring a classic mahogany body with a maple cap, Grover® tuners, and powered by ProBucker™ humbuckers with CTS® potentiometers. Epiphone’s long friendship with Mr. Les Paul began in 1940 when Les built one of the world’s first solid body electric guitars while working nights at the original Epiphone factory in Manhattan. Les’ first solid body guitar, nicknamed “the Log”, would go on to inspire the Les Paul Standard, which many consider the greatest electric guitar ever made."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Cream",
+      "Body Finish": "Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "AA Flame Maple"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Pearloid Trapezoid",
+      "Joint": "Glued in",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech®",
+      "Profile": "SlimTaper 60s C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "ProBucker 3",
+      "Controls": "2 Volume, 2 Tone, CTS® potentiometers",
+      "Neck Pickup": "ProBucker 2",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Epiphone toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "LockTone™ ABR Tune-o-matic™",
+      "Control Knobs": "Gold insert knobs with nickel plated dial pointers",
+      "finish": "Nickel",
+      "Pickguard": "cream",
+      "Pickup Covers": "Nickel",
+      "Strap Buttons": "2",
+      "Tailpiece": "Stopbar",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "Bell Shaped; 2-layer (Black/White); 60s era E",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover® Rotomatic® 18:1"
+    },
+    "Misc Specs": {
+      "Case": "Optional",
+      "Model": "EILS6LBBNH1",
+      "Headstock": "60s Kalamazoo",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:47:22+00:00"
+}

@@ -1,0 +1,59 @@
+{
+  "title": "Kramer Malina Moye Pacer Deluxe, Left-Handed, Splash Blue",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KPDMMSBGH1L",
+  "handle": "malina-moye-pacer-deluxe-left-handed",
+  "url": "https://www.gibson.com/products/malina-moye-pacer-deluxe-left-handed",
+  "price": {
+    "regular": 1299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106233055",
+  "available": true,
+  "long_description": {
+    "title": "A genre-defying guitar for an exceptional, genre-defying guitarist",
+    "body": "Acclaimed genre-defying singer-songwriter and innovative lefty guitarist Malina Moye doesn’t just play guitar; she redefines what it means to be a guitarist. As a lefty, she draws comparisons to Hendrix, but actually plays her guitar strung upside-down, similar to Albert King. Named as one of the world’s top guitarists of her generation by Guitar World Magazine, she is a singular presence in the rock world and has received praise for her contributions to music culture. Moye’s latest album, Dirty, landed at the top of the Billboard blues chart and was listed among the top five albums of the year on Guitar World Magazine’s Greatest Guitar Albums of the Year list. Her distinct pop-soul vocals are as powerful as her acclaimed songwriting. Her music has been featured on TV and film, and she has been a featured guest artist on several GRAMMY®-nominated albums. She is currently featured at the Rock and Roll Hall of Fame’s new Revolutionary Women exhibit. With a sound that blends pop, blues-rock, funk, R&B, and soul, and a presence that commands every stage that she steps on, Malina’s signature Kramer Pacer Deluxe is crafted to match her fearless style. It’s a guitar that’s all about individuality, expression, and power. \n\nThe new Kramer Malina Moye Pacer Deluxe features a double-cutaway alder body with forearm and belly sculpting for enhanced playing comfort. The bolt-on maple neck is equipped with Kramer’s new spoke wheel truss rod adjustment at the body end of the fretboard for easy adjustability. It also features a sculpted heel for improved access to the upper frets. The maple fretboard has a custom Malina Moye Medium C profile, 10” fretboard radius, and 22 medium jumbo frets that make string bends and chording equally effortless. The fretboard is adorned with black dot position markers and a 12th fret Malina logo marker. The hardware is gold, including the two-point Kramer tremolo. The Kramer reverse beak headstock is finished to match the body’s head-turning Splash Blue gloss finish, and features a reproduction of Malina’s signature on the rear. It is outfitted with locking tuners and a Graph Tech® TUSQ® nut to ensure stable tuning. \n\nThe Malina Moye Pacer Deluxe is equipped with DiMarzio® pickups, with a Virtual Vintage® Blues in the neck position, an Area 67™ in the middle, and a Super Distortion® in the bridge position. The pickups are selected using a five-way blade switch. A master volume and two tone controls (one for the middle pickup and one for the neck pickup) complete the controls, all of which are mounted in a tortoise shell-colored pickguard. The Malina Moye Pacer Deluxe is available in right-handed versions, and a made-to-order left-handed option is also available, with a limited number of left-handed guitars to be made available upon the model’s release. Either way, you’re getting a guitar that meets Malina Moye’s high standards, and it will come packaged in a Kramer premium gig bag with a reproduction of Malina’s signature on the exterior to help keep it safe wherever you go."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "Alder",
+      "Body Shape": "Pacer"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Maple",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Dot, black",
+      "Joint": "Bolt on",
+      "Neck Material": "Maple with walnut skunk stripe",
+      "Nut Material": "TUSQ",
+      "Profile": "Rounded"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "DiMarzio Super Distortion",
+      "Controls": "1 volume, 2 tone",
+      "Middle Pickup": "DiMarzio Area 67",
+      "Neck Pickup": "DiMarzio Virtual Vintage Blues",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "5-way blade"
+    },
+    "Hardware Specs": {
+      "Bridge": "Kramer 2-point tremolo",
+      "Control Knobs": "Knurled",
+      "finish": "Gold",
+      "Pickguard": "Tortoise shell",
+      "Pickup Covers": "White",
+      "Tuning Machines": "Locking"
+    },
+    "Misc Specs": {
+      "Case": "Gig bag",
+      "Model": "KPDMMSBGH1L"
+    }
+  },
+  "images_count": 11,
+  "fetched_at": "2026-10-19T02:50:43+00:00"
+}

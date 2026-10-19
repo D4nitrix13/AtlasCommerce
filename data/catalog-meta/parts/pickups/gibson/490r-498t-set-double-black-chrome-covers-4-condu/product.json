@@ -1,0 +1,24 @@
+{
+  "title": "Gibson 490R/498T Pickup Set, Chrome",
+  "vendor": "Gibson",
+  "product_type": "Pickup",
+  "sku": "PU490498DBCC2-SET",
+  "handle": "gibson-490r-498t-set-double-black-chrome-covers-4-condu",
+  "url": "https://www.gibson.com/products/gibson-490r-498t-set-double-black-chrome-covers-4-condu",
+  "price": {
+    "regular": 229.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 635,
+  "barcode": "711106134741",
+  "available": false,
+  "long_description": {
+    "title": null,
+    "body": "This pickup set combines the 490R and the 498T. The 490R has the traditional characteristics of the original Patent Applied For pickups but with two key modifications. First, a four-conductor wiring scheme allows the 490s to be connected to any push/pull knob, which lets players split the coils and increase versatility. Gibson also introduced wax potting, which does away with any air space, minimizing microphonic feedback. The 490R is a humbucker with the tonal characteristics of an original Patent Applied For, with a slight increase in upper midrange response.\n\n\n\n\nGibson's 498T humbucker™ is a high-output version of the 490T. It combines the more powerful response of an Alnico 5 magnet with additional balanced windings on each coil, which puts the emphasis on the pickup's upper midrange frequencies for enhanced crunch and sustain. The 498T is perfect for any hard rock application, easily overdriving amplifiers for a beefy, sizzling output that boosts any guitar's power and presence. The pole pieces on the 498T are also aligned a little further apart to accommodate the spacing of the strings at the bridge, which is different than the spacing of the strings at the neck. This aids in producing powerful leads and thick rhythm without sacrificing single-note definition. Like the 490R, the 498T features shielded, four-conductor wiring for series, parallel, or split coil operation and is fully wax potted to eliminate any chance of microphonic feedback.\n\n\n\n\n\nPosition: Rhythm/Treble (Set of Two)\n\n\n\n\nMagnets: Alnico 2 (490R) and Alnico 5 (498T)\n\n\n\n\nWiring: 4-Conductor\n\n\n\n\nCovers: Chrome\n\n\n\n\nDouble Black Bobbins\n\n\n\n\nWax Potted\n\n\n\n\nAverage DC Resistance: Rhythm: 8K / Treble: 14.2K\n\n\n\n\nDetails: Original Gibson Patent Applied For pickup tone."
+  },
+  "specifications": {},
+  "metadata_status": "partial",
+  "images_count": 6,
+  "fetched_at": "2026-10-19T03:57:01+00:00"
+}

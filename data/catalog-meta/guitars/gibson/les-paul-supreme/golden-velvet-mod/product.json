@@ -1,0 +1,63 @@
+{
+  "title": "Gibson Mod™ Collection Les Paul Supreme, Golden Velvet",
+  "vendor": "Gibson Mod™ Collection",
+  "product_type": "Electric Guitar",
+  "sku": "RAM028008",
+  "handle": "gibson-mod-collection-les-paul-supreme-golden-velvet",
+  "url": "https://www.gibson.com/products/gibson-mod-collection-les-paul-supreme-golden-velvet",
+  "price": {
+    "regular": 4299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": null,
+  "available": true,
+  "long_description": {
+    "title": null,
+    "body": "A Mod Collection Les Paul Supreme in Golden Velvet\n\nGibson Mod™ Collection - Break the mold with our one-of-a-kind, customized guitars.\n\nThis Mod Collection 2025 Les Paul™ Supreme has a Golden Velvet finish. The modifications consist of the Mod Collection-exclusive, custom two-tone metallic finish with the pickguard and knobs painted to match the back, chrome hardware including Grover® tuners, and 490R neck and 498T bridge pickups with white mounting rings. It weighs 8.45 pounds and comes with a hardshell case and two-year playability warranty.\n\nAll Gibson guitars go through rigorous QC, but every once in a while, a guitar with outstanding playability and tone doesn’t quite meet the strict cosmetic standards at our craftories. As part of our ongoing commitment to sustainability, these instruments are sent to the Mod Collection team to use as a blank canvas—and let their imaginations run riot. With a fresh batch of Gibson Mod Collection guitars dropping every week, act fast to get your hands on these one-of-a-kind guitars with unique hardware and electronics customizations, and the wildest finishes in Music City. \n\nGibson Mod Collection products may have minor cosmetic defects which are listed in the Warranty Evaluation for each product. These defects are AS-IS and are not covered under the Gibson Mod Collection's Limited Warranty."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Multi-ply Top and Headstock, Single-ply Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Les Paul",
+      "Body Styles": "Les Paul",
+      "Top": "AAA Figured Maple",
+      "Weight Relief": "Ultra-Modern"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fingerboard Radius": "Compound, 10 in. to 16 in. | 254 mm to 406.4 mm",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Mother of Pearl Super Split Block",
+      "Joint": "Glued In, with Modern Contoured Heel",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "498T",
+      "Controls": "2 volume, 2 tone with push/pull",
+      "Neck Pickup": "490R",
+      "Pickup Selector": "3-way toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Nashville Tune-O-Matic",
+      "Control Knobs": "Custom Top Hats",
+      "finish": "Chrome",
+      "Tailpiece": "Stop Bar",
+      "Tuning Machines": "Grover"
+    },
+    "Misc Specs": {
+      "Accessories": "Demo Shop Certificate of Authenticity and Gibson Limited Warranty",
+      "Model": "RAM028008",
+      "Case": "Hard Shell Case",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 20,
+  "fetched_at": "2026-10-19T02:49:22+00:00"
+}

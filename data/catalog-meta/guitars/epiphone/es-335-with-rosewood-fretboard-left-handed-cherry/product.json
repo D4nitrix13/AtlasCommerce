@@ -1,0 +1,75 @@
+{
+  "title": "Epiphone ES-335 with Rosewood Fretboard, Left-Handed, Cherry",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EIES335LCHNHR",
+  "handle": "epiphone-es-335-with-rosewood-fretboard-left-handed-cherry",
+  "url": "https://www.gibson.com/products/epiphone-es-335-with-rosewood-fretboard-left-handed-cherry",
+  "price": {
+    "regular": 599.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106247472",
+  "available": false,
+  "long_description": {
+    "title": "Timeless tone meets modern craftsmanship",
+    "body": "Timeless tone meets modern craftsmanship in the Epiphone ES-335™. Part of the Inspired by Gibson Collection, this semi-hollowbody icon delivers the warm, resonant voice that defined a generation of music, now enhanced with premium features like Alnico Classic PRO™ humbucker™ pickups. Considered by many players as the most flexible electric guitar ever designed, and ideal for any genre, the ES-335 offers unmatched versatility and style, whether you’re after smooth jazz, gritty blues, or soaring rock leads, all in a package that makes legendary performance more accessible than ever.\n\nThe Epiphone ES-335 features the iconic semi-hollowbody design introduced by the ES-335 when it was first released in 1958. The body features single-ply binding on the top and back, crafted from 5-ply layered maple and poplar, and features a solid maple centerblock for increased sustain and improved feedback resistance. The glued-in mahogany neck has a comfortable Rounded C profile and is equipped with a bound rosewood fretboard that’s outfitted with 22 medium jumbo frets and dressed up with pearloid dot inlays for the iconic “dot neck” appearance. The fretboard’s 12” radius delivers the ideal playing experience, whether you’re bending strings up high or playing first-position chords. The Kalamazoo-style headstock features high-quality Epiphone Deluxe tuning machines with keystone buttons for style and precision, and, along with a Graph Tech® nut, ensures solid tuning stability. The headstock also features the Epiphone logo and Gibson crown, both inlaid in mother of pearl. A fully adjustable LockTone™ Tune-O-Matic™ bridge and LockTone Stop Bar tailpiece deliver precise intonation and excellent sustain.\n\nThe ES-335 is powered by a pair of Epiphone’s acclaimed Alnico Classic PRO™ humbucker™ pickups with nickel covers, delivering the outstanding range of clean and dirty tones the ES-335 is famous for. Selected either individually or together via a three-way toggle switch, each pickup is paired with its own volume and tone controls, which use premium CTS® potentiometers for precise, reliable adjustments. No matter what style of music you play, the ES-335 is an excellent musical partner, perfect for every player and every stage. It comes in a range of gloss finishes and is packed in a premium gig bag to help protect it during storage and transport. Pick up your own ES-335 today and discover why it has been the choice of countless professional guitarists for over 60 years."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "5-ply laminated maple",
+      "Binding": "Single-ply cream top, back, and fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "5-ply laminated maple",
+      "Body Shape": "ES-335",
+      "Body Styles": "Semi-hollow body",
+      "Bracing": "Spruce",
+      "Centerblock": "Maple",
+      "Side": "5-ply laminated maple",
+      "Top": "5-ply laminated maple"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Fret Count": "22",
+      "Frets": "Standard",
+      "Inlays": "Dot",
+      "Joint": "Glued-in, set neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "GraphTech",
+      "Profile": "Rounded C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Alnico Classic PRO",
+      "Controls": "2 volume, 2 tone",
+      "Neck Pickup": "Alnico Classic PRO",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "LockTone Tune-O-Matic",
+      "Control Knobs": "Black Top Hats with silver inserts",
+      "finish": "Nickel",
+      "Mounting Rings": "Black",
+      "Pickguard": "Multi-ply black",
+      "Pickup Covers": "Nickel",
+      "Plastic Parts": "Mixed",
+      "Strap Buttons": "2",
+      "Switch Tip": "Cream",
+      "Tailpiece": "LockTone Stop Bar",
+      "Truss Rod Cover": "2-ply black",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Epiphone Deluxe with press-in bushings"
+    },
+    "Misc Specs": {
+      "Case": "Premium Epiphone gig bag",
+      "Model": "EIES335LCHNHR",
+      "Headstock": "Kalamazoo",
+      "Headstock Inlay": "Mother-of-pearl Epiphone logo and crown"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:45:54+00:00"
+}

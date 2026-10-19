@@ -1,0 +1,63 @@
+{
+  "title": "Kramer Baretta, Left-Handed, Ebony",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KBVEBBF1L",
+  "handle": "kramer-baretta-left-handed-ebony",
+  "url": "https://www.gibson.com/products/kramer-baretta-left-handed-ebony",
+  "price": {
+    "regular": 799.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 6804,
+  "barcode": "711106086965",
+  "available": true,
+  "long_description": {
+    "title": "Double Cutaway Classic for the 21st Century",
+    "body": "The Baretta is part of the Kramer Original Collection and is a tribute to one of the most iconic and original guitar designs in rock. Featuring a maple body, hard maple neck with a fast-playing satin finish, a single Seymour Duncan® JB™ zebra-coil humbucker, and a Floyd Rose® 1000 series tremolo with an R2 1000 series locking nut. Available in Ebony, Jumper Red, and Bumblebee Yellow."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Body, Satin Neck",
+      "Body Material": "Maple",
+      "Body Shape": "Baretta",
+      "Body Styles": "Double Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Maple",
+      "Fret Count": "22",
+      "Frets": "Jumbo",
+      "Inlays": "Dot",
+      "Joint": "Bolt-on",
+      "Neck Material": "3-piece Maple",
+      "Nut Material": "Floyd Rose R2 1000 Series Locking Nut with Black String Retaining Bar",
+      "Profile": "Kramer Thin Profile"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Seymour Duncan JB zebra-coil humbucker",
+      "Controls": "Master Volume with Push/Pull Series/Parallel Switch",
+      "Output Jack": "1/4\""
+    },
+    "Hardware Specs": {
+      "Bridge": "Floyd Rose 1000 series Tremolo",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Chrome Knurled",
+      "finish": "Black Chrome",
+      "Mounting Rings": "Black",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "Black with Gold Print Baretta",
+      "Tuner Plating": "Black Chrome",
+      "Tuning Machines": "Mini Die Cast"
+    },
+    "Misc Specs": {
+      "Case": "Optional (940-KRSTCS)",
+      "Model": "KBVEBBF1L",
+      "Headstock": "Kramer Hockey",
+      "Strings Gauge": ".009 .011 .016 .024 .032 .042"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:50:29+00:00"
+}

@@ -1,0 +1,69 @@
+{
+  "title": "Epiphone Hummingbird Studio EC, Natural",
+  "vendor": "Epiphone",
+  "product_type": "Acoustic Guitar",
+  "sku": "EASHCANNH1",
+  "handle": "epiphone-hummingbird-studio-ec-natural",
+  "url": "https://www.gibson.com/products/epiphone-hummingbird-studio-ec-natural",
+  "price": {
+    "regular": 499.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106173979",
+  "available": false,
+  "long_description": {
+    "title": "A Hummingbird with a cutaway that’s perfect for beginners and seasoned players alike",
+    "body": "The Epiphone Hummingbird™ Studio EC is part of the all-new Epiphone Studio Acoustic Collection. These guitars have been completely reimagined to offer the most authentic and affordable acoustic guitars inspired by iconic Gibson designs. The Hummingbird Studio EC offers a blend of modern functionality and classic design, appealing equally to beginners and seasoned players alike. Based on the iconic Gibson Hummingbird acoustic guitar, which has been the choice of players across a wide range of musical genres since its introduction in 1960, the Hummingbird Studio EC features a square-shoulder dreadnought body with a cutaway for easier access to the upper frets. The Hummingbird Studio EC delivers a rich, balanced tone with excellent projection, making it an ideal choice for exploring a wide range of musical styles.\n\nThe Hummingbird Studio EC features a layered mahogany body with six-ply antique ivory and black binding on the top and four-ply antique ivory and black binding on the back, complemented by a solid spruce top for a responsive, balanced tone with excellent dynamic range that will sound even better as it ages. The mahogany neck is joined to the body with a glued-in tapered dovetail neck-to-body joint and features a Rounded C profile that ensures comfortable playability. The neck is capped with a bound rosewood fretboard equipped with 20 standard frets and adorned with the classic split parallelogram inlays that are one of the hallmarks of the Hummingbird design. The other ends of the strings run over a compensated plastic saddle and anchor to the belly-up rosewood bridge with ivory-colored bridge pins. Other details that give the Hummingbird Studio EC even more vintage-style visual appeal are also included, such as a Hummingbird tortoise shell-colored pickguard with iconic Hummingbird graphics, high-quality Grover® Rotomatic® tuners for precise and stable tuning, and a 60s Kalamazoo-style headstock with the Epiphone logo and Gibson Crown prominently inlaid in mother of pearl. The Hummingbird Studio EC is equipped with Fishman™ electronics, including an S-Core under-saddle pickup and Fishman Presys II preamp with side-mounted volume, bass, treble, and phase controls. It also has a convenient built-in electronic tuner, making it quick and easy to get tuned up. The Epiphone Hummingbird Studio EC has a gloss finish and is offered in two vintage-inspired colors—Natural and Heritage Cherry Sunburst. Both right and left-handed versions are available. A standard gig bag is also included.\n\nA battery is not included. To power your pickup, you will need a 9-volt battery."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Layered Mahogany",
+      "Binding": "6-ply Top, 4-ply Back, Single-ply Fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "Layered Mahogany",
+      "Body Shape": "Hummingbird",
+      "Body Styles": "Square Shoulder",
+      "Side": "Layered Mahogany",
+      "Top": "Solid Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "20",
+      "Frets": "Standard",
+      "Inlays": "Pearloid Split Parallelogram",
+      "Joint": "Glued In, Set Neck with Tapered Dovetail Joint",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Plastic",
+      "Profile": "Rounded \\C\\"
+    },
+    "Electronics Specs": {
+      "Controls": "Side-mounted Volume, Bass, Treble, Phase Switch, and Tuner",
+      "Output Jack": "Combination Battery Box and 1/4\" Output Jack",
+      "Preamp": "Fishman Presys II",
+      "Under Saddle Pickup": "Fishman S-Core"
+    },
+    "Hardware Specs": {
+      "Bridge": "Belly-up, Rosewood",
+      "Bridge Pins": "Ivory Plastic",
+      "finish": "Nickel",
+      "Pickguard": "Hummingbird Tortoise Shell with Graphics; Epoxy Style",
+      "Saddle Material": "Compensated Plastic",
+      "Strap Buttons": "2 - Bottom and Back of Heel",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "Black 2-ply Bell, Studio in White",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover Rotomatic"
+    },
+    "Misc Specs": {
+      "Case": "Standard Gig Bag",
+      "Model": "EASHCANNH1",
+      "Headstock": "60s Kalamazoo",
+      "Headstock Inlay": "Epiphone Logo and Gibson Crown in Mother of Pearl",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "images_count": 9,
+  "fetched_at": "2026-10-19T02:46:27+00:00"
+}

@@ -1,0 +1,67 @@
+{
+  "title": "Gibson SG Standard ‘61 Custom Color, TV Yellow",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "SG6100TVNH1",
+  "handle": "gibson-sg-standard-61-tv-yellow",
+  "url": "https://www.gibson.com/products/gibson-sg-standard-61-tv-yellow",
+  "price": {
+    "regular": 1999.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10433,
+  "barcode": "711106140025",
+  "available": true,
+  "long_description": {
+    "title": "The Classic SG For Every Generation, Now in Custom Colors",
+    "body": "The SG Standard ‘61 returns to the classic design that made it relevant, played, and loved -- shaping sound across generations and genres of music. And now it‘s available in custom colors. In 1961, the Les Paul™ model was put on hiatus, and an all-new design evolved into what is today known as the SG™ or “solid guitar.” The Gibson SG Standard ‘61 retains the styling of the legendary original models from the early 1960s. It features a solid mahogany body with the classic double-cutaway SG shape, complete with the iconic deeply sculpted body scarfing and double horns that make this model instantly identifiable. The mahogany neck has a fast-playing SlimTaper™ profile and is capped with a bound rosewood fretboard that is equipped with 22 medium jumbo frets and acrylic trapezoid inlays. The fretboard has a 12” radius, so it’s comfortable for first-position chords, and lead lines played higher up the neck won’t fret out. The neck joins the body at the 22nd fret, ensuring easy access to its entire length, making the SG an ideal guitar for lead players. As with the earliest SG models, the SG Standard ’61 features a 5-ply teardrop-shaped pickguard. The nickel-plated hardware includes a classic-style ABR-1 Tune-O-Matic™ bridge and aluminum Stop Bar tailpiece that help contribute to the model’s excellent sustain. The SG Standard ’61 is equipped with smooth-turning Vintage Deluxe tuners with Keystone buttons and has a Graph Tech® nut. The pair ensure rock-solid tuning stability. The pickups are 60s Burstbucker™ humbuckers™ for a classic voice with added power and top end. The 2 volume and 2 tone controls feature audio taper potentiometers and are hand-wired with Orange Drop® capacitors. The controls are capped with black Top Hat knobs. The SG Standard ’61 delivers the legendary SG tone, outstanding playability, and American-made Gibson quality that have made the SG the choice of countless players around the world for decades. A Gibson hardshell case is also included."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply Cream, Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "SG",
+      "Body Styles": "SG"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Trapezoid",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "60s Burstbucker",
+      "Controls": "2 Volume, 2 Tone, Hand-wired with Orange Drop Capacitors",
+      "Neck Pickup": "60s Burstbucker",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "ABR-1 Tune-O-Matic",
+      "Control Knobs": "Black Top Hat with Silver Reflector",
+      "finish": "Nickel",
+      "Pickguard": "Black 5-ply",
+      "Switch Tip": "Cream",
+      "Switchwasher": "Black",
+      "Tailpiece": "Aluminum Stop Bar",
+      "Truss Rod": "Adjustable",
+      "Tuning Machines": "Vintage Deluxe with Keystone Buttons"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "SG6100TVNH1",
+      "Case": "Hardshell Case",
+      "Headstock Inlay": "Gibson Logo and Crown in Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 7,
+  "fetched_at": "2026-10-19T03:36:41+00:00"
+}

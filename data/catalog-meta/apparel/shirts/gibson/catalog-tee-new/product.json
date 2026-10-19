@@ -1,0 +1,24 @@
+{
+  "title": "Gibson Catalog Tee",
+  "vendor": "Gibson",
+  "product_type": "Shirts & Tops",
+  "sku": "GA-TEE-CTLG-CHAR-SM",
+  "handle": "gibson-catalog-tee-new",
+  "url": "https://www.gibson.com/products/gibson-catalog-tee-new",
+  "price": {
+    "regular": 32.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 227,
+  "barcode": "711106162195",
+  "available": true,
+  "long_description": {
+    "title": null,
+    "body": "This soft, standard-fit tee shirt features a graphic inspired by Gibson catalogs from the 1960s with the phrase, “Quality stringed instruments since 1894” printed at the bottom of the graphic.\n\n\n\n100% Cotton\nStandard Fit\nMachine Wash Cold\n4.4 Ounce Weight"
+  },
+  "specifications": {},
+  "metadata_status": "partial",
+  "images_count": 1,
+  "fetched_at": "2026-10-19T03:54:18+00:00"
+}

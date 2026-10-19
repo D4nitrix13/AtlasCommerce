@@ -1,0 +1,68 @@
+{
+  "title": "Epiphone Embassy Bass with Rosewood Fretboard, Sparkling Burgundy",
+  "vendor": "Epiphone",
+  "product_type": "Electric Bass",
+  "sku": "EBEMSBUNHR",
+  "handle": "epiphone-embassy-bass-with-rosewood-fretboard-sparkling-burgundy",
+  "url": "https://www.gibson.com/products/epiphone-embassy-bass-with-rosewood-fretboard-sparkling-burgundy",
+  "price": {
+    "regular": 649.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106247571",
+  "available": true,
+  "long_description": {
+    "title": "Epiphone’s premier solidbody bass, now updated with a rosewood fretboard",
+    "body": "The Embassy bass is Epiphone’s premier solidbody bass model and an Epiphone original, designed in Kalamazoo and first introduced in 1963. While Epiphone has a long and rich history of manufacturing basses before that year, the Embassy Bass was Epiphone’s first solidbody electric model to feature a 34” scale length.\n\nNow, Epiphone is proud to introduce a newly refreshed version of the classic Embassy Bass. The new Embassy Bass features an asymmetrical double cutaway mahogany body for a rich, full-bodied tone. The longer upper-body horn improves balance when worn on a strap, while the comfort carve on the rear of the body makes it comfortable to hold and play for hours.\n\nThe mahogany neck features an easy-playing Medium C profile that is well-suited to the hands and preferences of most players. The neck is glued to the body for enhanced resonance and sustain. The neck is now topped with a rosewood fretboard for a premium playing feel under the fingers. The fretboard features 20 medium jumbo frets and is adorned with pearloid dot inlays. The 2x2 headstock design also contributes to improved balance when the bass is worn on a strap, and is outfitted with die-cast tuners and an imitation bone nut for solid, stable, and reliable tuning. The three-ply Epiphone bullet truss rod cover proudly displays the Epiphone E logo, and the headstock also features the Epiphone logo inlaid in mother of pearl.\n\nThe Epiphone Embassy Bass features nickel-plated hardware, including a Historic Bass Tune-O-Matic bridge and Historic Claw tailpiece. The pair delivers full adjustability for action height and individual string intonation, and contributes to the excellent tone and sustain of the bass.\n\nA pair of Epiphone ProBucker™ Bass 760 humbucker™ pickups powers the Embassy Bass for rich, powerful tones without annoying 60-cycle hum. In keeping with the nickel hardware theme, the metal pickup mounting rings are also nickel plated. The pickups are connected to master volume and master tone controls that feature high-quality CTS® potentiometers for smooth, consistent performance and are topped off with stylish Epiphone Historic barrel knobs with metal inserts. A third knob lets you use the two pickups separately or blend them in any ratio you prefer, offering extensive tonal possibilities.\n\nThe Epiphone Embassy Bass delivers a perfect blend of vintage style, modern sonic versatility, and exceptional playability, making it ideal for every player and every stage. It comes packaged in a premium gig bag, so it’s ready to join you wherever your music takes you."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "Mahogany",
+      "Body Shape": "Asymmetrical Epiphone Embassy",
+      "Body Styles": "Solidbody"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Fret Count": "20",
+      "Frets": "Standard",
+      "Inlays": "Pearloid dot",
+      "Joint": "Glued-in, set neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Imitation bone",
+      "Profile": "Medium C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "ProBucker Bass 760",
+      "Controls": "1 volume, 1 pickup blend, 1 tone",
+      "Neck Pickup": "ProBucker Bass 760",
+      "Output Jack": "1/4\""
+    },
+    "Hardware Specs": {
+      "Bridge": "Historic Bass Tune-O-Matic",
+      "Control Knobs": "Epiphone Historic insert barrel knob",
+      "finish": "Nickel",
+      "Mounting Rings": "Nickel",
+      "Pickguard": "Single-ply white",
+      "Pickup Covers": "Nickel",
+      "Plastic Parts": "Mixed",
+      "Strap Buttons": "2",
+      "Tailpiece": "Historic Claw",
+      "Truss Rod Cover": "2-ply black E",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Die-cast"
+    },
+    "Misc Specs": {
+      "Case": "Premium gig bag",
+      "Model": "EBEMSBUNHR",
+      "Headstock": "Embassy 2-on-a-side",
+      "Headstock Inlay": "Epiphone logo",
+      "Strings Gauge": ".045, .065, .085, .105"
+    }
+  },
+  "images_count": 8,
+  "fetched_at": "2026-10-19T02:44:12+00:00"
+}

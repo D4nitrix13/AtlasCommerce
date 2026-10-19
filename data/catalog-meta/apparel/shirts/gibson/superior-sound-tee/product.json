@@ -1,0 +1,24 @@
+{
+  "title": "Gibson Superior Sound Tee, White, Exclusive",
+  "vendor": "Gibson",
+  "product_type": "Shirts & Tops",
+  "sku": "GA-TEE-SSND-VWHT-SM",
+  "handle": "gibson-superior-sound-tee",
+  "url": "https://www.gibson.com/products/gibson-superior-sound-tee",
+  "price": {
+    "regular": 35.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 227,
+  "barcode": "711106162430",
+  "available": true,
+  "long_description": {
+    "title": null,
+    "body": "This soft, standard fit tee shirt is made from 100% cotton that features a graphic inspired by Gibson product catalogs from the 1960s.\n\n\n\n100% Cotton\nStandard Fit\nMachine Wash Cold\n4.4 Ounce Weight"
+  },
+  "specifications": {},
+  "metadata_status": "partial",
+  "images_count": 2,
+  "fetched_at": "2026-10-19T03:53:21+00:00"
+}

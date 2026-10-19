@@ -1,0 +1,68 @@
+{
+  "title": "Gibson Hummingbird Standard, Ebony, Exclusive",
+  "vendor": "Gibson",
+  "product_type": "Acoustic Guitar",
+  "sku": "DTCSSHBEB",
+  "handle": "gibson-hummingbird-standard-exclusive-ebony",
+  "url": "https://www.gibson.com/products/gibson-hummingbird-standard-exclusive-ebony",
+  "price": {
+    "regular": 3999.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 12247,
+  "barcode": "711106056623",
+  "available": true,
+  "long_description": {
+    "title": "The Distinctive Hummingbird",
+    "body": "The Hummingbird™ was first introduced in 1960 and was the first square-shoulder acoustic model from Gibson. Since its introduction, it has become one of the most popular acoustic guitars ever made and has been the choice of countless players across generations and genres. Much of the Hummingbird’s appeal lies in its versatility. No matter how you attack this flat-top, it pumps out rich, deep tones and is equally at home strumming first-position chords as it is taking the spotlight for picking lead lines. The Hummingbird Standard is more than capable of nailing down the rhythm in the hands of a rock ’n’ roll sideman or accompanying the most nuanced performance under the fingers of today’s alternative singer-songwriter. \n\nThe Gibson Hummingbird Standard is handcrafted with care in Bozeman, Montana, by Gibson’s expert acoustic luthiers and features a square shoulder body crafted using solid mahogany for the back and sides. The top is solid Sitka spruce and is reinforced with scalloped X-bracing. Both the top and back are framed with multi-ply binding. \n\nThe Hummingbird Standard’s mahogany neck is attached to the body with a compound dovetail neck-to-body joint using hot hide glue and features a comfortable Rounded profile. The neck is equipped with a bound rosewood fretboard with 20 standard frets and mother-of-pearl parallelogram inlays. The belly-up bridge is also crafted from rosewood. This ’bird has a TUSQ® nut, saddle, and bridge pins. The smooth, self-lubricating TUSQ nut, in partnership with high-quality Grover® Rotomatic® tuners, ensures solid tuning stability. The Hummingbird Standard features the iconic Hummingbird graphics on the pickguard, which is one of the design elements that have made this model instantly recognizable, even to many non-guitarists. \n\nThe Hummingbird has long been a favorite of performing and recording musicians, so the Hummingbird Standard comes craftory-equipped with Baggs® VTC electronics, which feature an under-saddle piezo pickup and active preamp. The volume and tone controls are discreetly mounted at the edge of the soundhole, making them readily accessible to the player while remaining all but invisible to the audience. The inclusion of high-quality electronics means the Hummingbird Standard is stage studio-ready from the moment you take it out of the included hardshell case. The Hummingbird Standard is available in both right and left-handed versions. Isn’t it time you discovered for yourself why so many players love the Hummingbird? Pick one up today and see what this long-cherished model can do for you and your music."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Mahogany",
+      "Binding": "5-ply Top, 3-ply Back, Single-ply Fretboard",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "Hummingbird",
+      "Body Styles": "Square Shoulder",
+      "Side": "Mahogany",
+      "Top": "Sitka Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "20",
+      "Frets": "Standard",
+      "Inlays": "Mother of Pearl Parallelograms",
+      "Joint": "Compound Dovetail Neck-to-body Joint; Hot Hide Glue",
+      "Neck Material": "Mahogany",
+      "Nut Material": "TUSQ",
+      "Profile": "Rounded"
+    },
+    "Electronics Specs": {
+      "Controls": "Soundhole Mounted Volume and Tone",
+      "Output Jack": "1/4\" Endpin Jack",
+      "Preamp": "Baggs VTC",
+      "Under Saddle Pickup": "Baggs VTC"
+    },
+    "Hardware Specs": {
+      "Bridge": "Reverse Belly, Rosewood",
+      "Bridge Pins": "TUSQ",
+      "finish": "Nickel",
+      "Pickguard": ".060'' Hummingbird",
+      "Saddle Material": "TUSQ",
+      "Strap Buttons": "2",
+      "Truss Rod": "Adjustable",
+      "Truss Rod Cover": "2-ply Bell, Black and White",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover Rotomatic"
+    },
+    "Misc Specs": {
+      "Case": "Gibson Hardshell",
+      "Model": "DTCSSHBEB",
+      "Headstock Inlay": "Mother of Pearl Gibson Logo and Crown",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "images_count": 7,
+  "fetched_at": "2026-10-19T02:48:29+00:00"
+}

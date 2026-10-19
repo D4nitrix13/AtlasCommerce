@@ -1,0 +1,66 @@
+{
+  "title": "Kramer Pacer Carrera, Ebony",
+  "vendor": "Kramer",
+  "product_type": "Electric Guitar",
+  "sku": "KPVCEBBF1",
+  "handle": "kramer-pacer-carrera-ebony",
+  "url": "https://www.gibson.com/products/kramer-pacer-carrera-ebony",
+  "price": {
+    "regular": 999.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 8618,
+  "barcode": "711106121727",
+  "available": true,
+  "long_description": {
+    "title": "Strap in and Get Ready for Serious Speed and Racecar-Inspired Looks!",
+    "body": "Nothing says “rock & roll” like fast cars and fast guitars! So we decided to bring them together with the Pacer Carrera, a Seymour Duncan®-equipped tone machine with a shred-ready ebony fretboard, and your choice of an Ebony or a fiery Defender Red gloss finish inspired by the fastest cars on four wheels. The satin-finished maple neck has a Slim profile for the ultimate in control and comfort as you weave your way around the track. The hot-rodded Seymour Duncan SH-2N neck and JB™ bridge pickups are well-known for cranking out plenty of horsepower and tonal variety. Add a genuine Floyd Rose® 1000 Series vibrato and R2 Locking Nut, and you've got an axe that's just begging to be played fast and mean. A premium gig bag is also included."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss Body, Satin Neck",
+      "Body Material": "Maple",
+      "Body Shape": "Pacer",
+      "Body Styles": "Double Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "None",
+      "Joint": "Bolt On With Kramer Neck Plate",
+      "Neck Material": "Maple",
+      "Nut Material": "Floyd Rose R2",
+      "Profile": "Slim"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Seymour Duncan JB",
+      "Controls": "Master Volume, Neck Tone, Bridge Tone",
+      "Neck Pickup": "Seymour Duncan SH-2N",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Black Mini Toggle Switch"
+    },
+    "Hardware Specs": {
+      "Bridge": "Floyd Rose 1000 Series",
+      "Control Covers": "Black",
+      "Control Knobs": "Black Knurled",
+      "finish": "Black",
+      "Mounting Rings": "Black",
+      "Pickup Covers": "None",
+      "Strap Buttons": "2 - Bottom and Upper Horn",
+      "Truss Rod": "Dual Action",
+      "Tuner Plating": "Black",
+      "Tuning Machines": "Premium Die Cast"
+    },
+    "Misc Specs": {
+      "Case": "Premium Gig Bag",
+      "Model": "KPVCEBBF1",
+      "Headstock": "Kramer Pacer",
+      "Headstock Inlay": "Kramer Logo in Gold Silkscreen",
+      "Strings Gauge": ".009, .011, .016, .024, .032, .042"
+    }
+  },
+  "images_count": 9,
+  "fetched_at": "2026-10-19T02:50:55+00:00"
+}

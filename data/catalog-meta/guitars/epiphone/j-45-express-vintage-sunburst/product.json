@@ -1,0 +1,63 @@
+{
+  "title": "Epiphone J-45 Express, Vintage Sunburst",
+  "vendor": "Epiphone",
+  "product_type": "Acoustic Guitar",
+  "sku": "ES1PPJ45VSNH1",
+  "handle": "epiphone-j-45-express-vintage-sunburst",
+  "url": "https://www.gibson.com/products/epiphone-j-45-express-vintage-sunburst",
+  "price": {
+    "regular": 299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 6804,
+  "barcode": "711106154824",
+  "available": true,
+  "long_description": {
+    "title": "A great travel companion that's also a perfect choice for new players",
+    "body": "The J-45 Express from Epiphone is a cool new 7/8 size guitar that makes the perfect travel companion for seasoned guitarists and is also an excellent first guitar choice for aspiring new players. The shorter 22.68\" scale length not only makes it compact and easy to take with you but also eases finger stretching for new players and makes learning how to play easier and more comfortable. It is made from quality materials, including a layered mahogany body, a mahogany neck with a laurel fretboard, and a layered spruce top. A gig bag is also included."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Layered Mahogany",
+      "Binding": "4-ply Top, Single-ply Back",
+      "Body Finish": "Gloss",
+      "Body Material": "Layered Mahogany",
+      "Body Shape": "J-45",
+      "Body Styles": "Small Body",
+      "Side": "Layered Mahogany",
+      "Top": "Layered Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "19",
+      "Frets": "Medium",
+      "Inlays": "Pearloid Dot",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Molded White",
+      "Profile": "C"
+    },
+    "Hardware Specs": {
+      "Bridge": "Reverse Belly; Laurel",
+      "Bridge Pins": "White Plastic with Black Dot",
+      "finish": "Nickel",
+      "Pickguard": "Tear Drop; Tortoise",
+      "Saddle Material": "Compensated White",
+      "Strap Buttons": "2 - Bottom and Side of Heel",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "3-ply Bell",
+      "Tuning Machines": "Mini Die-Cast"
+    },
+    "Misc Specs": {
+      "Accessories": "Three Guitar Picks",
+      "Model": "ES1PPJ45VSNH1",
+      "Case": "Gig Bag",
+      "Headstock": "7/8 Scale Kalamazoo",
+      "Headstock Inlay": "Epiphone Logo in Silver Silkscreen",
+      "Strings Gauge": ".012, .016, .024, .032, .042, .053"
+    }
+  },
+  "images_count": 6,
+  "fetched_at": "2026-10-19T02:46:46+00:00"
+}

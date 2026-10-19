@@ -1,0 +1,76 @@
+{
+  "title": "Epiphone ES-345, Tri-Burst, Exclusive",
+  "vendor": "Epiphone",
+  "product_type": "Electric Guitar",
+  "sku": "EI-345VTBGH1",
+  "handle": "epiphone-es-345-tri-burst-exclusive",
+  "url": "https://www.gibson.com/products/epiphone-es-345-tri-burst-exclusive",
+  "price": {
+    "regular": 749.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106150802",
+  "available": false,
+  "long_description": {
+    "title": "The ES-335's better looking sibling joins the Epiphone Inspired by Gibson lineup",
+    "body": "The Gibson ES-345 was first introduced in 1959, a year after the introduction of the ES-335, the world’s first semi-hollowbody electric guitar. It bears many similarities to its predecessor but is an upgraded model with some notable differences. This Epiphone ES-345 is an Inspired by Gibson version of the legendary ES-345. It has a 5-ply layered maple body with a solid maple center block that gives the semi-hollowbody ES-345 sustain and feedback resistance that’s more similar to a solidbody guitar while retaining some of the resonance of a hollowbody, making it the best of both worlds. The body features multi-ply top and single-ply back binding. The mahogany neck has a comfortable Rounded C profile and is topped with a bound laurel fretboard. The fretboard has 22 medium jumbo frets and a 12” radius that is equally well-suited to playing first-position chords and lead lines with lots of string bends. The pearloid split parallelogram inlays are one of the defining features of an ES-345 that separate it from the ES-335, as is the gold hardware. Speaking of hardware, the Epiphone ES-345 is equipped with an Epiphone LockTone™ Tune-O-Matic™ bridge and Stop Bar tailpiece. Both are anchored through the top and directly into the maple center block, contributing to the model’s accurate intonation and outstanding sustain. At the other end, the strings cross over a Graph Tech® nut that reduces string friction and helps ensure tuning stability along with the smooth-turning, gold Epiphone Deluxe tuners. The Keystone buttons of the tuners give them a more vintage-correct appearance. This ES-345 has a 60s Kalamazoo-style headstock that is adorned with a mother-of-pearl Epiphone logo and Gibson Crown inlay. For the electronics, it is equipped with a pair of Epiphone’s acclaimed Alnico Classic PRO™ pickups that are wired to individual volume and tone controls. along with a three-way pickup selector switch that lets you use either pickup by itself or combine them in any ratio that you prefer. A 6-position mono Varitone switch provides even more tonal flexibility. Finished in gloss Tri-Burst, the Epiphone ES-345 is a beautiful example of what an ES-345 is all about and is available at an attainable price. A premium gig bag is also included to keep this beauty safe when it’s not in use."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "5-ply Layered Maple",
+      "Binding": "3-ply Top, Single-ply Back and Fretboard",
+      "Body Finish": "Gloss",
+      "Body Material": "5-ply Layered Maple",
+      "Body Shape": "ES-335",
+      "Body Styles": "ES",
+      "Bracing": "Spruce",
+      "Centerblock": "Maple",
+      "Side": "5-ply Layered Maple",
+      "Top": "5-ply Layered Maple"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Laurel",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Pearloid Split Parallelogram",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "Rounded C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Alnico Classic PRO",
+      "Controls": "2 Volume, 2 Tone, Mono Varitone",
+      "Neck Pickup": "Alnico Classic PRO",
+      "Output Jack": "Epiphone 1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "LockTone Tune-O-Matic",
+      "Control Knobs": "Black Top Hat with Gold Insert",
+      "finish": "Gold",
+      "Mounting Rings": "Black",
+      "Pickguard": "5-ply Black ES-345",
+      "Pickup Covers": "Gold",
+      "Strap Buttons": "2 - Bottom and Back of Heel",
+      "Switch Tip": "Ivory",
+      "Switchwasher": "Gold (Varitone Washer)",
+      "Tailpiece": "LockTone Stop Bar",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "2-ply Black Bell",
+      "Tuner Plating": "Gold",
+      "Tuning Machines": "Epiphone Deluxe"
+    },
+    "Misc Specs": {
+      "Case": "Premium Gig Bag",
+      "Model": "EI-345VTBGH1",
+      "Headstock": "60s Kalamazoo",
+      "Headstock Inlay": "Epiphone Logo and Gibson Crown in Mother of Pearl",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "images_count": 7,
+  "fetched_at": "2026-10-19T02:48:43+00:00"
+}

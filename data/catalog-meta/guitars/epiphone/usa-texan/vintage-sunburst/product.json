@@ -1,0 +1,66 @@
+{
+  "title": "Epiphone USA Texan, Vintage Sunburst",
+  "vendor": "Epiphone",
+  "product_type": "Acoustic Guitar",
+  "sku": "OCRSETVS",
+  "handle": "epiphone-usa-texan-vintage-sunburst",
+  "url": "https://www.gibson.com/products/epiphone-usa-texan-vintage-sunburst",
+  "price": {
+    "regular": 2849.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 10886,
+  "barcode": "711106036946",
+  "available": false,
+  "long_description": {
+    "title": "Made in the USA for the first time in over 50 years!",
+    "body": "Since 1958, the Epiphone Texan has been the inspiration for generations of world-class songwriters including Paul McCartney, Peter Frampton, and Noel Gallagher of Oasis. Now, the Texan is made in the USA once again and is proudly handcrafted in Bozeman, Montana by Gibson’s finest acoustic luthiers. Featuring all solid woods, X-bracing, and a 25.5” scale length for a powerful tone. Available in Antique Natural and Vintage Sunburst. Featuring Gibson™ Strings."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Solid Mahogany",
+      "Binding": "Multi-ply top, single-ply back",
+      "Body Finish": "Gloss Nitrocellulose Lacquer",
+      "Body Material": "Solid Mahogany",
+      "Body Shape": "Texan",
+      "Body Styles": "Jumbo",
+      "Bracing": "Traditional hand-scalloped X bracing",
+      "Side": "Solid Mahogany",
+      "Top": "Solid Spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Indian Rosewood",
+      "Fret Count": "20",
+      "Frets": "Legend",
+      "Inlays": "Mother-of-pearl single Parallelogram",
+      "Joint": "Compound dovetail neck joint",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Bone",
+      "Profile": "Rounded D"
+    },
+    "Electronics Specs": {
+      "Controls": "Volume and Tone controls",
+      "Under Saddle Pickup": "Baggs VTC"
+    },
+    "Hardware Specs": {
+      "Bridge": "Indian Rosewood",
+      "Bridge Pins": "TUSQ®",
+      "Pickguard": "Authentic Celluloid Pickguard",
+      "Saddle Material": "Bone",
+      "Truss Rod Cover": "Epiphone Bullet",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Grover® Cream Button"
+    },
+    "Misc Specs": {
+      "Accessories": "Gibson™ Strings",
+      "Model": "OCRSETVS",
+      "Case": "Case included",
+      "Headstock": "60s Dovewing",
+      "Strings Gauge": ".012 .016 .024 .032 .042 .053"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 7,
+  "fetched_at": "2026-10-19T03:32:58+00:00"
+}

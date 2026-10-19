@@ -1,0 +1,67 @@
+{
+  "title": "Epiphone Mike Dirnt Grabber G-3 Bass, Natural, Exclusive",
+  "vendor": "Epiphone",
+  "product_type": "Electric Bass",
+  "sku": "EIG3MDNANH1",
+  "handle": "epiphone-mike-dirnt-grabber-g-3-natural-exclusive",
+  "url": "https://www.gibson.com/products/epiphone-mike-dirnt-grabber-g-3-natural-exclusive",
+  "price": {
+    "regular": 1299.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 8165,
+  "barcode": "711106178370",
+  "available": false,
+  "long_description": {
+    "title": "The legendary Grabber G-3 returns as a Mike Dirnt signature model",
+    "body": "Mike Dirnt is the bassist and co-founder of the iconic punk rock band Green Day. A member of the Rock and Roll Hall of Fame, his distinctive bass lines, vocal contributions, and energetic stage presence have been integral to Green Day’s success. Now, Mike Dirnt has collaborated with Epiphone to recreate the Gibson Grabber G-3 bass that he has played on countless tours and albums, including Green Day’s groundbreaking 1994 album, “Dookie,” which recently celebrated its 30th anniversary.\n\nThe Epiphone Mike Dirnt Grabber G-3 bass has a double-cutaway maple Grabber body. The 34” scale three-piece maple neck has an ebony fretboard (maple on the Natural-finished model) with 20 medium jumbo frets, and black abalone dot position markers adorn the fretboard. The classic Grabber “V™” headstock is equipped with open-gear bass tuners with historic clover buttons and a bone nut, while the other ends of the strings pass over a high-density Leo Quan® Badass II™ bridge for increased attack and sustain and full intonation and action adjustment, then run through the body and are anchored with string ferrules on the back of the body for excellent tone and sustain.\n\nThe three Gibson G-3 pickups are made at the Gibson Pickup Shop in Nashville, Tennessee, USA, and are wired in a “buck-and-a-half” pickup configuration. When the three-way switch is in the top position, both the neck and middle pickups are activated simultaneously, producing a humbucker™ effect. When the switch is in the middle position, all three pickups are engaged. When the toggle switch is in the bottom position, the middle and bridge pickups are activated, working together to produce a humbucking effect. This versatile pickup configuration, combined with the master volume and tone controls, offers a wide range of hum-free tonal options. The Epiphone Mike Dirnt Grabber G-3 bass comes packed in a hardshell case to help keep it safe when you’re out on your next world tour."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Body Finish": "Gloss",
+      "Body Material": "Maple",
+      "Body Shape": "Grabber",
+      "Body Styles": "Double Cut"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Ebony (Maple on Natural-finished Model)",
+      "Fret Count": "20",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Black Abalone Dot",
+      "Joint": "Bolt On",
+      "Neck Material": "3-piece Maple",
+      "Nut Material": "Bone",
+      "Profile": "C"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "Gibson USA G-3",
+      "Controls": "Master Volume, Master Tone",
+      "Middle Pickup": "Gibson USA G-3",
+      "Neck Pickup": "Gibson USA G-3",
+      "Output Jack": "1/4\"",
+      "Pickup Selector": "3-way Toggle"
+    },
+    "Hardware Specs": {
+      "Bridge": "Leo Quan Badass II",
+      "Control Knobs": "Black Speed",
+      "finish": "Nickel",
+      "Pickguard": "4-ply Black",
+      "Strap Buttons": "2 - Bottom and Tip of Horn",
+      "Switch Tip": "Ivory",
+      "Truss Rod": "Dual Action",
+      "Truss Rod Cover": "2-ply with Mike Dirnt Signature Reproduction; Blank 2-ply in the Case",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Open-Gear Bass with Historic Clover Button"
+    },
+    "Misc Specs": {
+      "Case": "Hardshell",
+      "Model": "EIG3MDNANH1",
+      "Headstock": "Grabber V",
+      "Headstock Inlay": "Epiphone Logo in Gold Silkscreen",
+      "Strings Gauge": ".045, .065, .085, .105"
+    }
+  },
+  "images_count": 10,
+  "fetched_at": "2026-10-19T02:44:19+00:00"
+}

@@ -1,0 +1,67 @@
+{
+  "title": "Epiphone Marcus King El Dorado, Antique Natural",
+  "vendor": "Epiphone",
+  "product_type": "Acoustic Guitar",
+  "sku": "EMEDMKANNH1",
+  "handle": "epiphone-marcus-king-el-dorado-antique-natural",
+  "url": "https://www.gibson.com/products/epiphone-marcus-king-el-dorado-antique-natural",
+  "price": {
+    "regular": 999.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106237688",
+  "available": true,
+  "long_description": {
+    "title": "The legendary El Dorado returns in the form of a Marcus King signature model",
+    "body": "The Epiphone El Dorado acoustic guitar model holds a special place in the hearts of musicians and collectors. Its rich history, excellent craftsmanship, and unique features make it an instrument that inspires creativity and passion. Marcus King, a highly respected musician, singer, songwriter, and guitarist, pays homage to the El Dorado, which was his first-ever guitar, with his 2020 GRAMMY®-nominated Americana album of the same name, a testament to the enduring legacy of this remarkable guitar. \n\nThe new Epiphone Marcus King El Dorado is a tribute to King’s original. It captures the spirit of the cherished vintage models and symbolizes the inspiration and creativity that the El Dorado continues to provide musicians worldwide. It features a square-shoulder dreadnought body with solid rosewood back and sides paired with a solid spruce top for deep, rich tone that will keep getting better and better as it ages. The body features four-ply top binding and single-ply back binding. The 25.5” scale mahogany neck has a comfortable C-profile and a headstock volute. The headstock has a 70s MIJ shape, a bone nut, smooth-turning, precise Epiphone Deluxe tuners with metal buttons, and an Epiphone logo inlaid in mother-of-pearl. The three-ply bound rosewood fretboard features mother-of-pearl rounded-corner block inlays and 20 standard frets. It is attached to the body with a glued-in dovetail joint. The belly down rosewood bridge is outfitted with a compensated bone saddle and black bridge pins. It is inlaid with the outline of South Carolina, the home state of Marcus King, and the Tri-Star emblem of Tennessee in mother-of-pearl. As another personalized touch, the custom pickguard matches the one on Marcus King’s vintage El Dorado. \n\nThe Marcus King El Dorado comes with a Baggs™ Element Bronze under-saddle pickup and preamp pre-installed at the craftory, with volume and tone controls that are discreetly mounted at the edge of the sound hole, where they’re easy to access while playing yet remain all but invisible to the audience. It is ready to accompany you on stage or in the studio without any modification, and to ensure it stays safe wherever you go, it comes packaged in a hardshell case with a Marcus King signature reproduction graphic on the exterior. Here’s your golden opportunity to own a very special tribute to a rare and coveted 70s-era Epiphone and Marcus King himself. But act fast—the Epiphone Marcus King El Dorado is only available for a limited time. \n\nA battery is not included. To power your pickup, you will need a 9-volt battery."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Back": "Solid rosewood",
+      "Binding": "4-ply top binding and single-ply back, 3-ply fingerboard and headstock",
+      "Body Finish": "Gloss",
+      "Body Material": "Solid rosewood",
+      "Body Shape": "El Dorado",
+      "Side": "Solid rosewood",
+      "Top": "Solid spruce"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fingerboard Radius": "12 in. | 304.8 mm",
+      "Fret Count": "20",
+      "Frets": "Standard",
+      "Inlays": "Rounded-corner block, mother-of-pearl",
+      "Joint": "Glued-in, dovetail",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Bone",
+      "Profile": "C profile with volute"
+    },
+    "Electronics Specs": {
+      "Output Jack": "1/4\"",
+      "Preamp": "Baggs Element Bronze",
+      "Under Saddle Pickup": "Baggs Element Bronze"
+    },
+    "Hardware Specs": {
+      "Bridge": "Belly down, rosewood with Tennessee and South Carolina inlays",
+      "Bridge Pins": "Black",
+      "finish": "Nickel",
+      "Pickguard": "1-ply black, large Marcus King shape",
+      "Saddle Material": "Compensated bone",
+      "Strap Buttons": "End pin jack and side of heel",
+      "Truss Rod Cover": "2-ply crescent bullet, blank",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Epiphone Deluxe"
+    },
+    "Misc Specs": {
+      "Case": "Hardshell case with Marcus King signature reproduction graphic",
+      "Model": "EMEDMKANNH1",
+      "Headstock": "70s made in Japan shape",
+      "Headstock Inlay": "Epiphone historic, mother-of-pearl",
+      "Strings Gauge": "D'Addario XT Phosphor Bronze Coated, .012, .016, .024, .032 .042, .053"
+    }
+  },
+  "images_count": 11,
+  "fetched_at": "2026-10-19T02:47:37+00:00"
+}

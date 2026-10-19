@@ -1,0 +1,24 @@
+{
+  "title": "Gibson Les Paul Tee",
+  "vendor": "Gibson",
+  "product_type": "Shirts & Tops",
+  "sku": "GA-SC-LPBSXS",
+  "handle": "gibson-les-paul-tee-new",
+  "url": "https://www.gibson.com/products/gibson-les-paul-tee-new",
+  "price": {
+    "regular": 29.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 181,
+  "barcode": "711106000268",
+  "available": true,
+  "long_description": {
+    "title": null,
+    "body": "This comfy Les Paul tee features the historic Les Paul and Gibson graphic. \n\n\n\n52% Cotton, 48% Polyester\nUnisex Sizing\nMachine wash cold with like colors. See shirt instructions for details."
+  },
+  "specifications": {},
+  "metadata_status": "partial",
+  "images_count": 1,
+  "fetched_at": "2026-10-19T03:53:16+00:00"
+}

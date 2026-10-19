@@ -1,0 +1,66 @@
+{
+  "title": "Gibson SG Standard '61 Faded, Faded Vintage Cherry",
+  "vendor": "Gibson",
+  "product_type": "Electric Guitar",
+  "sku": "SG61F00ESNH1",
+  "handle": "gibson-sg-standard-61-faded-vintage-cherry",
+  "url": "https://www.gibson.com/products/gibson-sg-standard-61-faded-vintage-cherry",
+  "price": {
+    "regular": 1799.0,
+    "currency": "USD",
+    "compare_at": null
+  },
+  "weight_g": 11340,
+  "barcode": "711106233147",
+  "available": true,
+  "long_description": {
+    "title": "The classic SG for every generation, now in a beautiful faded finish and with 60s Burstbucker pickups",
+    "body": "The SG™ Standard ’61 Faded returns to the classic design that made it relevant, played, and loved — shaping sound across generations and genres of music. In 1961, the Les Paul™ model was put on hiatus, and an all-new design evolved into what is today known as the SG™ or “solid guitar.” The Gibson SG Standard ’61 Faded retains the styling of the legendary original models from the early 1960s. It has a solid mahogany body with the classic double-cutaway SG shape, complete with the iconic, deeply sculpted body scarfing and double horns that make this model instantly identifiable. The faded nitrocellulose lacquer finish gives it an unmistakable vintage vibe and the look and feel of a long-cherished musical companion. \n\n\n\n\nThe mahogany neck features a comfortable and fast-playing SlimTaper™ profile and is capped with a bound rosewood fretboard that’s equipped with 22 medium jumbo frets and adorned with acrylic trapezoid inlays. The fretboard has a 12” radius, so it’s comfortable for first-position chords, and lead lines played higher up the neck won’t fret out. The neck joins the body at the 22nd fret, ensuring easy access to its entire length, making the SG an ideal guitar for lead players. As with the earliest SG models, the SG Standard ’61 Faded features a 5-ply teardrop-shaped pickguard rather than the larger “batwing” design used on later SG models.\n\n\n\n\nThe nickel-plated hardware includes an ABR-1 Tune-O-Matic™ bridge and an aluminum Stop Bar tailpiece. The SG Standard ’61 Faded is equipped with smooth-turning Vintage Deluxe tuners with Keystone buttons and a Graph Tech® nut, ensuring rock-solid tuning stability. The SG Standard Faded ’61 is powered by a pair of 60s Burstbucker™ humbuckers™ with historically unbalanced coils and Alnico 5 magnets that deliver a classic Patent Applied For voice that’s airy and full, and when overdriven, they achieve a magical distortion with the slightly enhanced highs that made the originals so coveted. The individual volume and tone controls for each pickup feature audio taper potentiometers and are hand-wired with Orange Drop® capacitors, providing a responsive range of sounds. The controls are capped with black Top Hat knobs with silver reflectors, further adding to its classic aesthetic.\n\n\n\n\nThe SG Standard ’61 Faded delivers the legendary SG tone, outstanding playability, and American-made Gibson quality that have made the SG the choice of countless players worldwide for decades. A Gibson hardshell case is also included to ensure safe storage and transport."
+  },
+  "specifications": {
+    "Body Specs": {
+      "Binding": "Single-ply Fretboard",
+      "Body Finish": "Satin Nitrocellulose Lacquer",
+      "Body Material": "Mahogany",
+      "Body Shape": "SG"
+    },
+    "Neck Specs": {
+      "Fingerboard Material": "Rosewood",
+      "Fret Count": "22",
+      "Frets": "Medium Jumbo",
+      "Inlays": "Acrylic Trapezoids",
+      "Joint": "Glued In, Set Neck",
+      "Neck Material": "Mahogany",
+      "Nut Material": "Graph Tech",
+      "Profile": "SlimTaper"
+    },
+    "Electronics Specs": {
+      "Bridge Pickup": "60s Burstbucker",
+      "Controls": "2 Volume, 2 Tone, Hand-wired with Orange Drop Capacitors",
+      "Neck Pickup": "60s Burstbucker"
+    },
+    "Hardware Specs": {
+      "Bridge": "ABR-1 Tune-O-Matic",
+      "Control Knobs": "Black Top Hat with Silver Reflector",
+      "finish": "Nickel",
+      "Pickguard": "Black 5-ply",
+      "Pickup Covers": "Nickel",
+      "Strap Buttons": "2",
+      "Switch Tip": "Cream",
+      "Switchwasher": "Black",
+      "Tailpiece": "Aluminum Stop Bar",
+      "Truss Rod": "Adjustable",
+      "Tuner Plating": "Nickel",
+      "Tuning Machines": "Vintage Deluxe with Keystone Button"
+    },
+    "Misc Specs": {
+      "Accessories": "Includes Gibson Accessory Kit",
+      "Model": "SG61F00ESNH1",
+      "Case": "Hardshell",
+      "Strings Gauge": ".010, .013, .017, .026, .036, .046"
+    }
+  },
+  "metadata_status": "full",
+  "images_count": 8,
+  "fetched_at": "2026-10-19T03:35:15+00:00"
+}

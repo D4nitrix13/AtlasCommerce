@@ -1,0 +1,23 @@
+{
+  "title": "Maestro Fuzz-Tone FZ-M Effects Pedal",
+  "vendor": "Maestro",
+  "product_type": "Pedal",
+  "sku": "MOCFTP",
+  "handle": "maestro-fuzz-tone-fz-m-effects-pedal",
+  "url": "https://www.gibson.com/products/maestro-fuzz-tone-fz-m-effects-pedal",
+  "price": {
+    "regular": 59.99,
+    "currency": "USD",
+    "compare_at": 59.0
+  },
+  "weight_g": 907,
+  "barcode": "711106069166",
+  "available": true,
+  "long_description": {
+    "title": "A Direct Descendant of the Very First Fuzz Pedals",
+    "body": "Maestro created the world’s first fuzz pedal – the Maestro Fuzz-Tone FZ-1. Introduced in 1962, the Fuzz-Tone became the sound of rock and roll and a must-have accessory for guitarists everywhere after the success of 1965’s (I Can’t Get No) Satisfaction by the Rolling Stones, which prominently featured its cutting edge sound. Now Maestro is bringing the fun and sonic fury of those early Fuzz-Tones back with the new Maestro Fuzz-Tone FZ-M. This all-analog pedal boasts a Mode toggle switch that provides two pedals in one functionality for increased sonic versatility with both an FZ-1 inspired fuzz sound and a thicker, more modern fuzz tone. Its 3-knob control layout gives you intuitive control. The Attack knob controls the amount of fuzz. The Tone control lets you adjust the timbre from bright and raspy to warm and wooly and anywhere in between. Use the Level control to set the output volume; it can go way beyond unity gain when desired. The true bypass footswitch triggers the LED lights in the bugles in the Maestro logo when it’s on, so you’ll always know when the effect is active."
+  },
+  "specifications": {},
+  "images_count": 6,
+  "fetched_at": "2026-10-19T02:51:47+00:00"
+}
