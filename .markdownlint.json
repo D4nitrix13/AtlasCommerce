@@ -1,18 +1,5 @@
 {
   "default": false,
-  "MD022": true,
   "MD024": true,
-  "MD032": true,
-  "MD041": true,
-  "MD004": {
-    "style": "dash"
-  },
-  "overrides": [
-    {
-      "files": ["odd/tasks/**/*.md"],
-      "MD022": false,
-      "MD032": false,
-      "MD004": false
-    }
-  ]
+  "MD041": true
 }
