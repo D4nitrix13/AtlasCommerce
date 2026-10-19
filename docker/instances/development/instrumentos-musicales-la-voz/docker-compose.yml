@@ -118,6 +118,12 @@ services:
       - atlas_commerce_instrumentos_musicales_la_voz_dev_storage:/var/www/html/storage
       - atlas_commerce_instrumentos_musicales_la_voz_dev_bootstrap:/var/www/html/bootstrap/cache
       - atlas_commerce_instrumentos_musicales_la_voz_dev_logs:/var/log/php
+      # Staging externo (NO en el repo, ~4.7 GB en el host). Read-only.
+      # Requerido por `php artisan assets:seed-catalog --backup-base=/var/seeds/gibson-images`
+      # para poblar productos con metadata rica (title, description, specs,
+      # price, weight, barcode) desde los product.json scrapeados de gibson.com.
+      # - ATLAS_BACKUP_BASE env var se setea via environment block debajo.
+      - ~/.local/atlascommerce-archive/gibson-images:/var/seeds/gibson-images:ro
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -139,6 +145,11 @@ services:
       - FTP_USERNAME=${FTP_USERNAME:-dev-ftp}
       - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
       - FTP_ROOT=/srv/ftp
+      # Ruta dentro del container donde se montó el staging externo del repo
+      # (~/.local/atlascommerce-archive/gibson-images). El comando
+      # `php artisan assets:seed-catalog` lo lee cuando se le pasa
+      # --backup-base=/var/seeds/gibson-images (o se setea ATLAS_BACKUP_BASE).
+      - ATLAS_BACKUP_BASE=/var/seeds/gibson-images
       - LOG_CHANNEL=stderr
     extra_hosts:
       - "host.docker.internal:host-gateway"

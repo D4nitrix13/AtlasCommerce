@@ -71,6 +71,16 @@ RUN /usr/bin/composer install \
 
 COPY backend/ .
 
+# Assets del catálogo de productos (imágenes WebP). Requerido por
+# `php artisan assets:seed-catalog` que los lee desde filesystem para
+# hashear contenido y subir al FTP. Tamaño actual ~480 MB (guitars + basses
+# de gibson-custom, epiphone, kramer).
+COPY assets/products /var/www/html/assets/products
+
+# Seeds de tenants (docker/instances/{env,prod}/.../seeds/*.json).
+# Requerido por `php artisan tenants:bootstrap` que crea Stores al provisionar.
+COPY docker/instances /var/www/html/docker/instances
+
 RUN /usr/bin/composer dump-autoload --optimize
 
 EXPOSE 8000
