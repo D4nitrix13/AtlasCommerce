@@ -19,6 +19,7 @@
 |---|---|
 | [`tooling/package-manager.md`](tooling/package-manager.md) | Frontend usa `bun` exclusivamente. NO `pnpm`, NO `npm`. |
 | [`tooling/docker-stack.md`](tooling/docker-stack.md) | Toda operación con containers va por `scripts/docker-stack.sh`. NO `docker compose` directo, NO `bun astro dev` ad-hoc. |
+| [`assets-naming-policy.md`](assets-naming-policy.md) | Estructura per-tenant de `assets/products/`, naming legible en repo vs hasheado en FTP, roles de galería, comandos del seeder. |
 | [`workflow/conventions-first.md`](workflow/conventions-first.md) | Antes de cualquier edición, leer las reglas del scope + AGENTS.md + skill load-bearing. |
 
 ---
@@ -31,7 +32,7 @@
    - `database/migrations/**` → leer `docs/architecture/migration-pattern.md` (Fase 4)
    - `docs/architecture/**` → leer docs/styleguide si existe
    - `docker/**` → leer `docs/agent-skills/docker-stack-orchestration/SKILL.md`
-   - `assets/**` → leer `docs/architecture/assets-naming-convention.md`
+   - `assets/**` → leer [`assets-naming-policy.md`](assets-naming-policy.md) (per-tenant, naming, roles, comandos)
 
 2. **Reglas load-bearing** (las que ya están automatizadas en CI):
    - `docs/agent-skills/conventional-commits-and-prs/SKILL.md` — commits
