@@ -77,9 +77,11 @@ COPY backend/ .
 # de gibson-custom, epiphone, kramer).
 COPY assets/products /var/www/html/assets/products
 
-# Seeds de tenants (docker/instances/{env,prod}/.../seeds/*.json).
-# Requerido por `php artisan tenants:bootstrap` que crea Stores al provisionar.
-COPY docker/instances /var/www/html/docker/instances
+# Metadata rica del catálogo (product.json scrapeados de gibson.com).
+# Requerido por `php artisan assets:seed-catalog --backup-base=/var/www/html/data/catalog-meta`
+# para poblar title, description, specs, price, weight, barcode.
+# NO incluye PNGs (esos viven solo en staging LFS externo, fuera del repo).
+COPY data/catalog-meta /var/www/html/data/catalog-meta
 
 RUN /usr/bin/composer dump-autoload --optimize
 
