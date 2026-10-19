@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Services\Assets\StorageKeyDeriver;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -50,6 +51,8 @@ final class SyncAssetsFromPublicCommand extends Command
      */
     protected $signature = 'assets:sync-from-public
         {--store= : Slug del store especifico a sincronizar (default: todos)}
+        {--asset-base= : Path to repo assets/ (default: base_path(assets))}
+        {--storage-disk=ftp : Storage disk name (ftp real / local mock para tests)}
         {--dry-run : Solo reporta lo que haria, sin escribir en el FTP}
         {--force : Sobrescribe archivos existentes en el FTP}';
 
@@ -85,9 +88,11 @@ final class SyncAssetsFromPublicCommand extends Command
         'shared/icons/social/instagram.webp' => 'shared/icons/social/instagram.webp',
     ];
 
-    public function handle(): int
+    public function handle(StorageKeyDeriver $deriver): int
     {
         $storeFilter = $this->option(key: 'store');
+        $assetBase = $this->option(key: 'asset-base') ?: base_path(path: self::BRAND_ASSETS_BASE);
+        $storageDisk = $this->option(key: 'storage-disk') ?: 'ftp';
         $isDryRun = (bool) $this->option(key: 'dry-run');
         $isForce = (bool) $this->option(key: 'force');
 
@@ -95,8 +100,8 @@ final class SyncAssetsFromPublicCommand extends Command
             $this->warn(string: 'DRY-RUN mode: no se escribira nada en el FTP.');
         }
 
-        $disk = Storage::disk(name: 'ftp');
-        $basePath = base_path(path: self::BRAND_ASSETS_BASE);
+        $disk = Storage::disk(name: $storageDisk);
+        $basePath = $assetBase;
 
         if (! is_dir(filename: $basePath)) {
             $this->error(string: 'Directorio '.$basePath.' no existe.');
@@ -155,10 +160,129 @@ final class SyncAssetsFromPublicCommand extends Command
             }
         }
 
+        // Procesar categoria D (products per-tenant). Hashea con
+        // StorageKeyDeriver y sube a tenants/{slug}/products/{slug}/{hash}.webp.
+        // Solo si no hay filtro de store (un store no deberia tener sus
+        // imagenes en estado inconsistente vs. las de otros stores).
+        if ($storeFilter === null) {
+            $this->syncProducts(
+                disk: $disk,
+                basePath: $basePath,
+                deriver: $deriver,
+                isDryRun: $isDryRun,
+                isForce: $isForce,
+                stats: $stats,
+            );
+        }
+
         $this->newLine();
         $this->info(string: "Resumen: {$stats['uploaded']} subidos, {$stats['skipped']} saltados, {$stats['errors']} errores.");
 
         return $stats['errors'] === 0 ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * Sincroniza los webps de assets/products/{tenant}/{brand}/.../*.webp
+     * al FTP, hasheando el storage_key con StorageKeyDeriver (mismo
+     * algoritmo que usa SeedCatalogAssetsCommand para que el hash sea
+     * reproducible).
+     *
+     * Estructura del repo:
+     *   assets/products/{tenant-slug}/{brand-slug}/{product-slug}/
+     *     {variant-slug}/{role}-{WxH}.webp
+     *
+     * Destino en FTP:
+     *   tenants/{tenant-slug}/products/{product-slug}/{hash12}.webp
+     *
+     * ⚠️ La imagen se hashea por su CONTENIDO, no por el filename.
+     *    Si el webp cambia (re-compresion), el hash cambia → el archivo
+     *    viejo en el FTP queda huerfano. NO regenerar webps sin antes
+     *    limpiar el FTP.
+     *
+     * @param  array{uploaded: int, skipped: int, errors: int}  $stats
+     */
+    private function syncProducts(
+        \Illuminate\Contracts\Filesystem\Filesystem $disk,
+        string $basePath,
+        StorageKeyDeriver $deriver,
+        bool $isDryRun,
+        bool $isForce,
+        array &$stats,
+    ): void {
+        $productBase = $basePath.'/products';
+        if (! is_dir(filename: $productBase)) {
+            return;
+        }
+
+        $this->line('Products:');
+        // PHP glob('**/*.webp') NO es recursivo (sin GLOB_BRACE). Usamos
+        // RecursiveDirectoryIterator para garantizar recursividad.
+        $webps = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                $productBase,
+                \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS
+            )
+        );
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'webp') {
+                $webps[] = $file->getPathname();
+            }
+        }
+        $processed = 0;
+
+        foreach ($webps as $webpPath) {
+            $relPath = substr(string: $webpPath, offset: strlen(string: $productBase) + 1);
+            $parts = explode('/', $relPath);
+            // Esperado: {tenant}/{brand}/{product}/{variant}/{file}.webp
+            if (count($parts) !== 5) {
+                continue;
+            }
+            [$tenantSlug, $brandSlug, $productSlug, $variantSlug, $filename] = $parts;
+
+            $bytes = @file_get_contents(filename: $webpPath);
+            if ($bytes === false) {
+                $this->error("  - No se pudo leer {$webpPath}");
+                $stats['errors']++;
+                continue;
+            }
+
+            $storageKey = $deriver->derive(
+                tenantSlug: $tenantSlug,
+                collection: 'products',
+                entity: $productSlug,
+                content: $bytes,
+                extension: 'webp',
+            );
+
+            if ($isDryRun) {
+                $this->line("  - DRY-RUN: subiria {$relPath} -> {$storageKey}");
+                $stats['uploaded']++;
+                continue;
+            }
+
+            try {
+                $existsAlready = $disk->exists(path: $storageKey);
+            } catch (Throwable) {
+                $existsAlready = false;
+            }
+
+            if ($existsAlready && ! $isForce) {
+                $this->line("  - {$storageKey} ya existe (usar --force para sobrescribir)");
+                $stats['skipped']++;
+                continue;
+            }
+
+            try {
+                $disk->put(path: $storageKey, contents: $bytes);
+                $this->info("  - Subido: {$storageKey} (".strlen(string: $bytes).' bytes)');
+                $stats['uploaded']++;
+                $processed++;
+            } catch (Throwable $e) {
+                $this->error("  - Error subiendo {$storageKey}: {$e->getMessage()}");
+                $stats['errors']++;
+            }
+        }
     }
 
     /**
