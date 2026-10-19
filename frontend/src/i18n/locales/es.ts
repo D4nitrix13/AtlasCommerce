@@ -1034,6 +1034,7 @@ const es: Translations = {
   'storefront.products.detail.v4.details.specsHeading': 'Ficha técnica',
   'storefront.products.detail.v4.highlights.heading': 'Características destacadas',
   'storefront.products.detail.v4.specsByCategory.heading': 'Especificaciones',
+  'storefront.products.detail.v4.faq.heading': 'Preguntas frecuentes',
   'storefront.products.detail.v4.inclusions.tuning': 'Ajuste incluido',
   'storefront.products.detail.v4.inclusions.case': 'Estuche incluido',
   'storefront.products.detail.v4.inclusions.warranty': 'Garantía de por vida',

@@ -1029,6 +1029,7 @@ const en: Translations = {
   'storefront.products.detail.v4.details.specsHeading': 'Tech specs',
   'storefront.products.detail.v4.highlights.heading': 'Highlights',
   'storefront.products.detail.v4.specsByCategory.heading': 'Specifications',
+  'storefront.products.detail.v4.faq.heading': 'Frequently Asked Questions',
   'storefront.products.detail.v4.inclusions.tuning': 'Free setup included',
   'storefront.products.detail.v4.inclusions.case': 'Hardshell case included',
   'storefront.products.detail.v4.inclusions.warranty': 'Limited lifetime warranty',
