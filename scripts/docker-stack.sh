@@ -426,7 +426,7 @@ for arg in "$@"; do
         if [[ "$arg" == "$flag" ]]; then
             is_flag=1
             case "$flag" in
-                no-cache)         HAS_NO_CACHE=1 ;;
+                --no-cache)       HAS_NO_CACHE=1 ;;
                 -y)               RM_VOLUMES_SKIP_CONFIRM=1 ;;
                 --dry-run)        SYNC_ASSETS_DRY_RUN=1 ;;
                 --force)          SYNC_ASSETS_FORCE=1 ;;
