@@ -107,6 +107,43 @@ class Product extends Model
         return $this->hasMany(ProductSize::class);
     }
 
+    /**
+     * Características destacadas del producto (icono + label).
+     *
+     * Ordenadas por `position` ascendente para que el grid de la
+     * PDP respete el orden declarado por el seeder.
+     */
+    public function highlights(): HasMany
+    {
+        return $this->hasMany(ProductHighlight::class)->orderBy(value: 'position');
+    }
+
+    /**
+     * Grupos de specs (Cuerpo, Mástil, Electrónica, …) con sus
+     * valores anidados. El `with('groupedSpecs.values')` eager-load
+     * del consumer resuelve los 2 niveles en 2 queries indexadas.
+     */
+    public function groupedSpecs(): HasMany
+    {
+        return $this->hasMany(ProductGroupedSpec::class)->orderBy(value: 'position');
+    }
+
+    /**
+     * Preguntas frecuentes del producto, ordenadas por posición.
+     */
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(ProductFaq::class)->orderBy(value: 'position');
+    }
+
+    /**
+     * Bloques de descripción extendida, ordenados por posición.
+     */
+    public function extendedDescriptions(): HasMany
+    {
+        return $this->hasMany(ProductExtendedDescription::class)->orderBy(value: 'position');
+    }
+
     public function stores(): BelongsToMany
     {
         return $this->belongsToMany(
