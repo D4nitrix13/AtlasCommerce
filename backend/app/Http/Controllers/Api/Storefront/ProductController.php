@@ -10,6 +10,7 @@ use App\Services\Catalog\ProductSearchService;
 use App\Services\Catalog\WholesalePricingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Endpoints públicos del storefront.
@@ -31,10 +32,18 @@ class ProductController extends Controller
     {
         $store = $request->attributes->get('store');
 
-        $products = Product::whereHas('stores', function ($query) use ($store): void {
-            $query->where('store_id', $store->id)
-                ->where('is_visible', true);
-        })
+        $products = Product::query()
+            ->whereExists(callback: function ($query) use ($store): void {
+                $query->select(DB::raw(value: 1))
+                    ->from(table: 'product_stores')
+                    ->whereColumn(
+                        first: 'product_stores.product_id',
+                        operator: '=',
+                        second: 'products.id',
+                    )
+                    ->where(column: 'store_id', operator: '=', value: $store->id)
+                    ->where(column: 'is_visible', operator: '=', value: true);
+            })
             ->with(relations: [
                 'highlights',
                 'groupedSpecs.values',
@@ -113,9 +122,16 @@ class ProductController extends Controller
         $store = $request->attributes->get('store');
 
         $product = Product::where('slug', $slug)
-            ->whereHas('stores', function ($query) use ($store): void {
-                $query->where('store_id', $store->id)
-                    ->where('is_visible', true);
+            ->whereExists(callback: function ($query) use ($store): void {
+                $query->select(DB::raw(value: 1))
+                    ->from(table: 'product_stores')
+                    ->whereColumn(
+                        first: 'product_stores.product_id',
+                        operator: '=',
+                        second: 'products.id',
+                    )
+                    ->where(column: 'store_id', operator: '=', value: $store->id)
+                    ->where(column: 'is_visible', operator: '=', value: true);
             })
             ->with(relations: [
                 'highlights',
@@ -147,9 +163,16 @@ class ProductController extends Controller
         $store = $request->attributes->get('store');
 
         $product = Product::where('slug', $slug)
-            ->whereHas('stores', function ($query) use ($store): void {
-                $query->where('store_id', $store->id)
-                    ->where('is_visible', true);
+            ->whereExists(callback: function ($query) use ($store): void {
+                $query->select(DB::raw(value: 1))
+                    ->from(table: 'product_stores')
+                    ->whereColumn(
+                        first: 'product_stores.product_id',
+                        operator: '=',
+                        second: 'products.id',
+                    )
+                    ->where(column: 'store_id', operator: '=', value: $store->id)
+                    ->where(column: 'is_visible', operator: '=', value: true);
             })
             ->firstOrFail();
 

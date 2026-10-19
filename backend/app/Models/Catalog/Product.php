@@ -115,7 +115,7 @@ class Product extends Model
      */
     public function highlights(): HasMany
     {
-        return $this->hasMany(ProductHighlight::class)->orderBy(value: 'position');
+        return $this->hasMany(ProductHighlight::class)->orderBy(column: 'position');
     }
 
     /**
@@ -125,7 +125,7 @@ class Product extends Model
      */
     public function groupedSpecs(): HasMany
     {
-        return $this->hasMany(ProductGroupedSpec::class)->orderBy(value: 'position');
+        return $this->hasMany(ProductGroupedSpec::class)->orderBy(column: 'position');
     }
 
     /**
@@ -133,7 +133,7 @@ class Product extends Model
      */
     public function faqs(): HasMany
     {
-        return $this->hasMany(ProductFaq::class)->orderBy(value: 'position');
+        return $this->hasMany(ProductFaq::class)->orderBy(column: 'position');
     }
 
     /**
@@ -141,7 +141,7 @@ class Product extends Model
      */
     public function extendedDescriptions(): HasMany
     {
-        return $this->hasMany(ProductExtendedDescription::class)->orderBy(value: 'position');
+        return $this->hasMany(ProductExtendedDescription::class)->orderBy(column: 'position');
     }
 
     public function stores(): BelongsToMany

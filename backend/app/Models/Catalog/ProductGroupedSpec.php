@@ -52,6 +52,6 @@ class ProductGroupedSpec extends Model
     public function values(): HasMany
     {
         return $this->hasMany(ProductSpecValue::class, 'grouped_spec_id')
-            ->orderBy(value: 'position');
+            ->orderBy(column: 'position');
     }
 }
