@@ -660,6 +660,11 @@ del codebase es:
   completo del legacy + refactor de migration #2.
 - **2026-10-18** — `§11 Refactor estructural` agregado. Consolidación
   de las imágenes en `assets/` raíz del repo (single source of truth).
+- **2026-10-19** — Productos reubicados a `assets/products/{tenant-slug}/{brand-slug}/{product-slug}/{variant-slug}/`
+  (per-tenant literal). Estructura intermedia `_images/` +
+  `_manifest/` evaluada, committeada, revertida y descartada — el journey
+  queda registrado en §12 como decision record. Detalles de la Opción C
+  en el README de `assets/`.
 
 ---
 
@@ -717,7 +722,7 @@ AtlasCommerce/
 | `brand-assets/store/{slug}/{logo,favicon}.webp` | `assets/branding/{slug}/{logo,favicon}.webp` |
 | `brand-assets/frontend/amico/auth/{file}.svg` | `assets/frontend/amico/auth/{file}.svg` |
 | `brand-assets/shared/icons/social/*.webp` | `assets/shared/icons/social/*.webp` |
-| `frontend/public/images/products/{slug}/{variant}/{file}.webp` | `assets/products/{slug}/{variant}/{file}.webp` |
+| `frontend/public/images/products/{slug}/{variant}/{file}.webp` | `assets/products/{tenant-slug}/{brand-slug}/{product-slug}/{variant-slug}/{file}.webp` (per-tenant literal desde Oct 2026 — ver §12) |
 | `frontend/public/images/tenants/panda-estampados/branding/{file}.webp` | (eliminado — duplicado de `assets/branding/panda-estampados/`) |
 | `frontend/public/images/amico/auth/{file}.svg` | (eliminado — duplicado de `assets/frontend/amico/auth/`) |
 | `frontend/public/apple-touch-icon.png` | `assets/frontend/favicon/apple-touch-icon.png` (con symlink) |
@@ -771,6 +776,127 @@ para productos o `tenants/{slug}/branding/{file}.webp` para branding.
   mics) que están como placeholders apuntando a Stratocaster.
 - **Re-sync al FTP** después del refactor — ejecutar
   `php artisan assets:sync-from-public` en cada instancia (dev/prod).
-- **Auditar páginas Astro** que referencian paths hardcoded
+- **Auditar páginas Astro** que referencien paths hardcoded
   (no quedan según `grep /images/products/` en `src/`, pero podría haber
   paths en `.css` o `.scss`).
+
+---
+
+## 12. Decision record — per-tenant product images (Oct 2026)
+
+### Contexto
+
+Después del refactor de §11, `assets/products/` quedó como
+**una sola carpeta compartida** donde vivían los webps de Fender y
+Gibson mezclados, independientemente del tenant que los vendía. En la
+BD el modelo multi-tenant ya estaba resuelto vía `product_stores`
+(productos globales con publicación per-tenant), pero el filesystem
+no reflejaba el ownership claro de cada dataset.
+
+Se necesitaba una decisión arquitectónica: ¿per-tenant literal en
+el filesystem, o estructura global con manifests?
+
+### Opciones evaluadas
+
+| Opción | Estructura filesystem | Pros | Contras |
+|---|---|---|---|
+| **A. Status quo** | `assets/products/{brand-slug}/{product-slug}/{variant}/` | Simple, sin abstracción | No refleja ownership per-tenant en el filesystem |
+| **B. Global + manifests** | `assets/products/_images/{brand}/{product}/{variant}/` + `assets/products/_manifest/{tenant}.json` | Webps viven una vez (no duplicar), manifests declaran qué vende cada tenant | Nivel extra de indirección, los manifests añaden ruido a PRs sin imagenes |
+| **C. Per-tenant literal** | `assets/products/{tenant-slug}/{brand-slug}/{product-slug}/{variant-slug}/` | Refleja ownership claro en filesystem, `find` y `grep` triviales, una carpeta por tenant | Si 2 tenants comparten 1 producto, hay duplicación de webps |
+
+### Cronología del journey
+
+| Fecha | Evento | Commit |
+|---|---|---|
+| 2026-10-17 | Commit inicial Fase 6 (cleanup legacy Fender URLs) — `fenderImageUrl()` removido del frontend | varios (incluido `cc9d24f4~1`) |
+| 2026-10-19 | Backup local de `gibson-images/` (LFS 4.6 GB / quota GitHub 1 GB excedida — preservado en `~/.local/atlascommerce-archive/gibson-images/`) | `ad74103e` |
+| 2026-10-19 | Remoción de productos Fender del catálogo (4 productos respaldados en `~/.local/atlascommerce-archive/fender-products/`) | `ed3b6953` |
+| 2026-10-19 | **Opción B committeada**: `assets/products/_images/ + _manifest/` con 5 manifests (4 vacíos + 1 con 15 productos de La Voz) | `cc9d24f4` |
+| 2026-10-19 | **Revert de Opción B** (decision refinada) — el revert fue incompleto y borró los 160 webps Fender del filesystem, recuperados con `git checkout cc9d24f4 -- assets/products/_images/fender/` | `bcd80680` |
+| 2026-10-19 | **Opción C aplicada**: estructura per-tenant literal, las 5 carpetas de tenant existentes con su `.gitkeep` (4 vacías) + La Voz con 15 productos completos | este refactor |
+
+### Decisión final: Opción C
+
+**Por qué ganó Opción C** (a pesar de la duplicación teórica):
+
+1. **El modelo multi-tenant ya tiene `product_stores`** en la BD para
+   resolver la publicación per-tenant en runtime. El filesystem no
+   necesita duplicar esa lógica — solo refleja ownership claro.
+2. **La duplicación solo ocurre si 2 tenants comparten 1 producto**.
+   Hoy (Oct 2026) eso no pasa — cada tienda tiene su catálogo único
+   (Panda estampados, Kitsune anime, MM vestidos, Morales ?, La Voz
+   instrumentos musicales).
+3. **La simplicidad del filesystem** (un nivel menos, sin manifests)
+   hace que `find assets/products/` y `grep` sean triviales para
+   auditorías.
+4. **El costo de migrar a Opción B más adelante** es barato si el
+   caso "compartir producto entre tenants" se materializa: un
+   `git mv` + reescribir 5 manifests (~30 minutos).
+
+### Trade-off aceptado (documentado)
+
+> Si en el futuro 2 tenants comparten un mismo producto, se duplicarán
+> los webps. En ese momento el costo de migración a opción B es un
+> `git mv` + reescribir manifests. Riesgo aceptado: bajo (escenario
+> "Panda vende cuerdas musicales" es plausible pero no inminente).
+
+### Por qué descartamos la Opción B después de committearla
+
+La lógica original detrás de Opción B era evitar duplicación futura.
+Pero descubrimos durante el commit que:
+
+- Los manifests vacíos son **ruido en PRs**: un developer que quiere
+  agregar una imagen tiene que entender el modelo dual (imágenes vs
+  manifests) — fricción innecesaria.
+- El `_images/` con su prefijo underscore (convención de "directorio
+  reservado/interno") confunde a quien hace `ls assets/products/` —
+  parece "magia" en lugar de "datos reales".
+- El refactor revert + reset demostró que Opción B era sobre-ingeniería
+  para el caso de uso actual.
+
+La Opción C es lo que siempre quisimos decir con per-tenant; el desvío
+por B fue útil para verificar la decisión comparando ambas.
+
+### Estado final del filesystem
+
+```text
+assets/products/
+├── panda-estampados/.gitkeep                       (vacío)
+├── kitsune/.gitkeep                                (vacío)
+├── mm-boutique/.gitkeep                            (vacío)
+├── morales-store/.gitkeep                          (vacío)
+└── instrumentos-musicales-la-voz/                  (TIENE productos)
+    ├── gibson/                                     (11 productos)
+    └── fender/                                     (4 productos)
+```
+
+Total webps: **241** (81 Gibson + 160 Fender) en `instrumentos-musicales-la-voz/`.
+Las otras 4 carpetas existen (con `.gitkeep`) pero vacías — explícitamente
+declaran que esos tenants aún no venden productos musicales.
+
+### Contrato hacia adelante
+
+Si un nuevo tenant empieza a vender productos (ej: "Panda Estampados
+abre sección Musical" o "Kitsune abre sección Merch"), el flujo es:
+
+1. `mkdir -p assets/products/{nuevo-tenant}/{brand}/{product}/{variant}/`
+2. Optimizar webps multi-size (400, 800, 1200, 1600).
+3. Commit + PR.
+4. Agregar entry a `backend/database/seeds/products.json`.
+5. `php artisan db:seed`.
+6. `php artisan assets:sync-from-public --store={nuevo-tenant}` para
+   subir al FTP hasheado vía `StorageKeyDeriver`.
+
+El `StorageKeyDeriver` no sabe nada del filesystem layout — produce el
+mismo storage key `tenants/{slug}/products/{product-slug}/{hash12}.webp`
+independientemente de cómo los webps se organizan en el repo.
+
+### Refs
+
+- `assets/README.md` — documentación operativa de la estructura.
+- `backend/app/Services/Assets/StorageKeyDeriver.php` — derivador puro
+  que el seeder invocará en Fase 3 del plan v3.
+- `backend/app/Console/Commands/SyncAssetsFromPublicCommand.php` —
+  puente repo→FTP que extenderemos en Fase 4 del plan v3.
+- `odd/tasks/asset-pipeline-refactor.md` — feature document ODD con el
+  plan completo de fases (0 a 6).
