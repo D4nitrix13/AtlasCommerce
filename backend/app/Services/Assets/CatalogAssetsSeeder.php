@@ -371,14 +371,16 @@ final class CatalogAssetsSeeder
             $stats['variants_created']++;
 
             // Determinar role "primary" del variant: el de sort_order
-            // mínimo de los roles disponibles (si no hay 'front', usar el
-            // siguiente que exista). Eso garantiza que cada variant tenga
-            // exactamente 1 imagen primary.
+            // mínimo de los roles disponibles. Si no hay 'front', usar el
+            // siguiente role que exista.
             $rolesInVariant = array_unique(array_column($webps, 'role'));
             $primaryRole = $this->pickPrimaryRole($rolesInVariant);
 
-            // Subir cada webp del variant + crear ProductImage
+            // Subir cada webp del variant + crear ProductImage. Primary va
+            // SOLO al size 1600 (max resolution) del role elegido, no a los
+            // 4 sizes — sino quedaría 1 primary × 4 sizes = 4 falses positives.
             foreach ($webps as $webpEntry) {
+                $isPrimary = ($webpEntry['role'] === $primaryRole && $webpEntry['size'] === '1600');
                 $this->uploadAndInsertImage(
                     product: $product,
                     variant: $variant,
@@ -386,7 +388,7 @@ final class CatalogAssetsSeeder
                     role: $webpEntry['role'],
                     size: $webpEntry['size'],
                     brandSlug: $brandSlug,
-                    isPrimary: ($webpEntry['role'] === $primaryRole),
+                    isPrimary: $isPrimary,
                     stats: $stats,
                 );
             }
