@@ -314,7 +314,7 @@ final class CatalogAssetsSeeder
                     ?? ucwords(str_replace('-', ' ', $productSlug)) . " ({$brandName})",
                 'sku' => $meta['sku']
                     ?? (strtoupper(substr($brandSlug, 0, 4)) . '-'
-                        . strtoupper(substr(str_replace('-', '', $productSlug), 0, 12))),
+                        . strtoupper(str_replace('-', '', $productSlug))),
                 'description' => $meta['long_description']
                     ?? ($meta['description']
                         ?? "Producto {$productSlug} de la marca {$brandName}, "
@@ -353,8 +353,8 @@ final class CatalogAssetsSeeder
 
             $variant = ProductVariant::query()->updateOrCreate(
                 ['product_id' => $product->id, 'sku' => strtoupper(substr($brandSlug, 0, 4))
-                    . '-' . strtoupper(substr(str_replace('-', '', $productSlug), 0, 12))
-                    . '-' . strtoupper(substr(str_replace('-', '', $variantSlug), 0, 8))],
+                    . '-' . strtoupper(str_replace('-', '', $productSlug))
+                    . '-' . strtoupper(str_replace('-', '', $variantSlug))],
                 [
                     'name' => ucwords(str_replace('-', ' ', $variantSlug)),
                     'price_cents' => $meta['base_price_cents'] ?? 0,
@@ -370,6 +370,13 @@ final class CatalogAssetsSeeder
             );
             $stats['variants_created']++;
 
+            // Determinar role "primary" del variant: el de sort_order
+            // mínimo de los roles disponibles (si no hay 'front', usar el
+            // siguiente que exista). Eso garantiza que cada variant tenga
+            // exactamente 1 imagen primary.
+            $rolesInVariant = array_unique(array_column($webps, 'role'));
+            $primaryRole = $this->pickPrimaryRole($rolesInVariant);
+
             // Subir cada webp del variant + crear ProductImage
             foreach ($webps as $webpEntry) {
                 $this->uploadAndInsertImage(
@@ -379,10 +386,32 @@ final class CatalogAssetsSeeder
                     role: $webpEntry['role'],
                     size: $webpEntry['size'],
                     brandSlug: $brandSlug,
+                    isPrimary: ($webpEntry['role'] === $primaryRole),
                     stats: $stats,
                 );
             }
         }
+    }
+
+    /**
+     * Elige el role "primary" del variant: el de sort_order mínimo
+     * de los disponibles. Si 'front' existe, ese gana. Si no,
+     * el siguiente role del ROLE_ORDER presente.
+     *
+     * @param  array<int, string>  $availableRoles
+     */
+    private function pickPrimaryRole(array $availableRoles): string
+    {
+        $bestRole = null;
+        $bestOrder = PHP_INT_MAX;
+        foreach ($availableRoles as $r) {
+            $order = self::ROLE_ORDER[$r] ?? 99;
+            if ($order < $bestOrder) {
+                $bestOrder = $order;
+                $bestRole = $r;
+            }
+        }
+        return $bestRole ?? 'front';
     }
 
     /**
@@ -556,6 +585,7 @@ final class CatalogAssetsSeeder
         string $role,
         string $size,
         string $brandSlug,
+        bool $isPrimary,
         array &$stats,
     ): void {
         $bytes = @file_get_contents($webpPath);
@@ -586,7 +616,6 @@ final class CatalogAssetsSeeder
         }
 
         $position = self::ROLE_ORDER[$role] ?? 99;
-        $isPrimary = ($role === 'front');
 
         ProductImage::query()->updateOrCreate(
             [
