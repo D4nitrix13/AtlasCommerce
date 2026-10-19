@@ -83,6 +83,11 @@ COPY assets/products /var/www/html/assets/products
 # NO incluye PNGs (esos viven solo en staging LFS externo, fuera del repo).
 COPY data/catalog-meta /var/www/html/data/catalog-meta
 
+# Seeds de tenants (docker/instances/{env,prod}/.../seeds/*.json).
+# Requerido por `php artisan tenants:bootstrap <path>` que crea el Store
+# del tenant (vincula la instancia La Voz con Currency y configura dominio).
+COPY docker/instances /var/www/html/docker/instances
+
 RUN /usr/bin/composer dump-autoload --optimize
 
 EXPOSE 8000
