@@ -99,7 +99,8 @@ AtlasCommerce/
 
 - Docker Engine 24+ con Compose v2
 - Bash 4+ (para los scripts)
-- **bun** 1.4+ (solo si vas a tocar el frontend fuera de Docker; dentro del container ya viene instalado vía corepack)
+- **bun** 1.4+ (solo si vas a tocar el frontend fuera de Docker;
+  dentro del container ya viene instalado vía corepack)
 - PHP 8.4+ (solo si vas a tocar el backend fuera de Docker)
 
 ## Instalación

@@ -1,17 +1,20 @@
 # UML Diagrams Simplification — Vertical for Word
 
 ## Objective
+
 Simplify all 16 UML diagrams of Avance 3 so they fit a vertical Word page and
 remain readable. Goal: same essential semantics, ~50% less visual clutter, aspect
 ratio closer to portrait so each diagram occupies one A4 vertical page.
 
 ## Problem
+
 La profesora marcó los diagramas como demasiado verbosos. Hay muchos detalles
 (includes/extends, métodos en cada clase, atributos redundantes, paquetes
 wrappers) que saturan la imagen y, combinados con un layout horizontal (mucho
 más ancho que alto), no caben en una página Word vertical.
 
 ## Why
+
 - Trazabilidad con la implementación (78 modelos Laravel) sobrevive aunque
   simplifiquemos, porque el README y los archivos `.md` por módulo siguen
   siendo la fuente de verdad.
@@ -19,7 +22,9 @@ más ancho que alto), no caben en una página Word vertical.
   legible vale más que uno completo pero ilegible.
 
 ## Scope
+
 **In scope (los 16 `.puml` en `docs/uml/`):**
+
 1. `8.1-casos-de-uso.puml`
 2. `8.2.1-clases-nucleo.puml`
 3. `8.2.2-clases-catalogo.puml`
@@ -41,6 +46,7 @@ más ancho que alto), no caben en una página Word vertical.
 archivos de build originales.
 
 ## Constraints
+
 - **NO sobrescribir originales.** Crear copias con sufijo `-simple.puml`.
 - **Renderizar a `build/svg-simple/` y `build/pdf-simple/`** (no `build/svg/`).
 - Mantener semántica UML (relaciones, multiplicidades, cardinalidades).
@@ -59,15 +65,18 @@ archivos de build originales.
 ## Reglas de simplificación por tipo
 
 ### 8.1 — Casos de uso
+
 - Mantener los **4 actores** y los **18 CUs principales** (CU-01…CU-18) con número.
-- Eliminar sub-flujos sin número (`UC_BUSCAR`, `UC_TOTAL`, `UC_STOCK`, `UC_DIR`, …).
-- Eliminar TODAS las relaciones `<<include>>` y `<<extend>>` (saturación pura,
-  no aportan comprensión para una vista global).
+- Eliminar sub-flujos sin número (`UC_BUSCAR`, `UC_TOTAL`, `UC_STOCK`,
+  `UC_DIR`, …).
+- Eliminar TODAS las relaciones `<<include>>` y `<<extend>>` (saturación
+  pura, no aportan comprensión para una vista global).
 - Consolidar los ~11 paquetes en **4 paquetes de alto nivel**: Autenticación,
   Catálogo/Ventas, Operaciones, Sistema.
 - Resultado esperado: ~50% menos elementos.
 
 ### 8.2.x — Clases (7 diagramas)
+
 - Cada clase: mantener solo **atributos identificadores y 2-3 campos clave**
   (id + nombre + 1-2 más representativos). Quitar el resto.
 - **Quitar TODOS los métodos**, salvo `+ crear()` o `+ buscar()` si la clase
@@ -81,21 +90,25 @@ archivos de build originales.
 - Quitar `<<aggregate root>>` y otros estereotipos verbosos.
 
 ### 8.3.x — Actividad (3 diagramas)
+
 - Eliminar nodos de decisión/merge redundantes con la misma etiqueta.
 - Eliminar notas (`note left of ... : "..."`) excepto si documentan una regla
   de negocio esencial.
 - Mantener swimlanes solo si hay más de un actor responsable en el flujo.
 
 ### 8.4.x — Secuencia (3 diagramas)
+
 - Eliminar mensajes `->>:` de log / observabilidad (`logger.info(...)`, etc.).
 - Mantener solo el primer y último mensaje de los loops.
 - Quitar alt/else blocks con condiciones triviales.
 
 ### 8.5.x — Estados (2 diagramas)
+
 - Ya están simples. Solo verificar que el nombre del estado inicial y final
   sean legibles. Si hay sub-estados anidados, dejarlos.
 
 ### Ajuste al Word vertical
+
 - PlantUML no controla aspect-ratio directamente, pero `scale` ayuda.
 - Probar renderizar con `scale 0.8` y `dpi 96` por defecto.
 - Si el SVG sale >1800px de ancho, aplicar post-procesado con `sed`/`awk` para
@@ -104,6 +117,7 @@ archivos de build originales.
 - **NO** usar `width="100%"` en SVG inline; eso Word lo ignora.
 
 ## Acceptance Criteria
+
 - [x] 16 archivos `<nombre>-simple.puml` creados.
 - [x] 16 SVGs en `build/svg-simple/` con aspect-ratio más cercano a vertical que
       los originales — 16/16 con alto ≥ ancho.
@@ -130,12 +144,14 @@ archivos de build originales.
 | 8.4.3 gestion-pedido | 1854×2114 | 1609×2297 | 1.43 | ✓ |
 
 Archivos entregados:
+
 - `docs/uml/<nombre>-simple.puml` (16 fuentes simplificadas)
 - `docs/uml/build/svg-simple/<nombre>-simple.svg` (16 SVGs vectoriales)
 - `docs/uml/build/pdf-simple/<nombre>-simple.pdf` (16 PDFs de respaldo)
 - `docs/uml/build/simple-report.md` y `simple-report.csv` (reporte)
 
 ## Verification
+
 - Comparar lado a lado original vs simple: conteo de elementos visuales
   (clases, CUs, mensajes) reducido ≥30%.
 - Verificar que ningún `<nombre>-simple.puml` falla al renderizar con
@@ -145,6 +161,7 @@ Archivos entregados:
   horizontal?
 
 ## Decision Log
+
 - **Decisión 2026-10-17**: usar sufijo `-simple` para no chocar nombres con
   los originales. El build simple va a `build/svg-simple/` para no pisar
   el build oficial.
@@ -152,5 +169,6 @@ Archivos entregados:
   Mantener los `.puml` originales intactos mitiga este riesgo.
 
 ## Next Step
+
 Lanzar sub-agente `general` con lectura+escritura+renderizado de los 16
 diagramas aplicando estas reglas.
