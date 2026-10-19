@@ -21,6 +21,7 @@
  *    de ejemplo (anime/figures/manga) — coherencia nicho kitsune.
  */
 import { PRODUCTS } from './products';
+import type { ProductExtendedDescriptionItem } from '../components/storefront/products/ProductExtendedDescription.types';
 import type { ProductHighlightsItem } from '../components/storefront/products/ProductHighlights.types';
 import { createRelatedProduct } from '../lib/product-mock-factory';
 import {
@@ -146,6 +147,10 @@ export interface ProductDetailData {
   financing?: { syncMonthly: string; shopPayMonthly: string };
   /** Artículo/video destacado mostrado debajo de la descripción (Gibson layout). */
   featuredArticle?: { eyebrow: string; title: string; imageUrl: string; href: string };
+  /** Bloques de descripción extendida (Fase 8). Vacío = no renderiza. */
+  extendedDescriptions?: readonly ProductExtendedDescriptionItem[];
+  /** Preguntas frecuentes (Fase 8). Vacío = no renderiza. */
+  faqs?: { question: string; answer: string }[];
   /** Reseñas. */
   reviews: ProductReview[];
 }
@@ -312,6 +317,13 @@ export const SABER_ALTER_DETAIL: ProductDetailData = {
     { label: 'Dimensiones', value: '14 × 8 × 6 cm' },
     { label: 'Material', value: 'PVC + ABS articulado' },
   ],
+  // Phase 8: arrays vacíos para que la PDP pueda iterarlos sin
+  // checks `?? []` y para que el render respete el comportamiento
+  // "no contenido = no sección" sin romper el render del mock.
+  highlights: [],
+  groupedSpecs: [],
+  faqs: [],
+  extendedDescriptions: [],
   reviews: [
     {
       id: 1,

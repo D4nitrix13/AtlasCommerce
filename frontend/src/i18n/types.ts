@@ -1760,6 +1760,7 @@ export type TranslationKey =
   | 'storefront.products.detail.v4.highlights.heading'
   | 'storefront.products.detail.v4.specsByCategory.heading'
   | 'storefront.products.detail.v4.faq.heading'
+  | 'storefront.products.detail.v4.extendedDescription.heading'
   | 'storefront.products.detail.v4.inclusions.tuning'
   | 'storefront.products.detail.v4.inclusions.case'
   | 'storefront.products.detail.v4.inclusions.warranty'

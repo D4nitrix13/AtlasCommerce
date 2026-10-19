@@ -98,5 +98,13 @@ export function deriveProductDetail(product: Product): ProductDetailData {
     variants,
     specs: [],
     reviews: [],
+    // Phase 8: contenido extendido. Defaults a arrays vacíos para
+    // que la PDP pueda iterarlos sin checks `?? []` y para que
+    // productos derivados que aún no tienen contenido extendido no
+    // rompan el render (el componente ya tiene empty-safe built-in).
+    highlights: [],
+    groupedSpecs: [],
+    faqs: [],
+    extendedDescriptions: [],
   };
 }
