@@ -132,12 +132,16 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
   // el backend responde 419 CSRF token mismatch en el primer POST
   // post-mount. Solo agrega latencia al primer POST (~50ms); los
   // siguientes son instantáneos porque la cookie ya está.
-  if (isStateChangingMethod(rest.method) && getXsrfToken() === null) {
+  //
+  // IMPORTANTE: getXsrfToken() lee `document.cookie` (browser only).
+  // En SSR (Node.js) `document` no existe. Por eso el check
+  // isStateChangingMethod(rest.method) DEBE ir primero en cortocircuito:
+  // para GET/HEAD/OPTIONS ni siquiera llamamos getXsrfToken().
+  const xsrfToken = isStateChangingMethod(rest.method) ? getXsrfToken() : null;
+  if (xsrfToken === null && isStateChangingMethod(rest.method)) {
     await bootstrapCsrf();
   }
-
-  const xsrfToken = getXsrfToken();
-  const shouldInjectXsrf = isStateChangingMethod(rest.method) && xsrfToken !== null;
+  const shouldInjectXsrf = xsrfToken !== null;
 
   const requestHeaders: HeadersInit = {
     Accept: 'application/json',
