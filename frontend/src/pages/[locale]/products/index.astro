@@ -36,7 +36,8 @@ import FiltersSidebar from '../../../components/storefront/products/FiltersSideb
 import SortDropdown from '../../../components/storefront/products/SortDropdown.astro';
 import Pagination from '../../../components/ui/Pagination.astro';
 import { getServerDictionary } from '../../../i18n/server';
-import { PRODUCTS, getCategoriesInUse } from '../../../data/products';
+import { apiFetch } from '../../../lib/api';
+import { API_ENDPOINTS } from '../../../lib/endpoints';
 import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
 
 const locale = Astro.locals.locale ?? 'es';
@@ -44,14 +45,83 @@ const t = getServerDictionary(locale);
 
 const cartCount = 0;
 
-// Paginación: 8 productos por página, primera página activa.
-const PAGE_SIZE = 8;
+// Fetch real del backend: SSR trae la lista de productos visibles
+// del tenant actual. El tenant se resuelve via middleware store.domain
+// (no se pasa explicitamente). Filtra por is_visible via el controller.
+//
+// El backend retorna el modelo Eloquent Product (snake_case: image_url,
+// base_price_cents, etc). Mapeamos al shape del ProductCardCatalog
+// (camelCase + tipos narrowed) para que el render funcione sin tocar
+// el componente.
+//
+// Fase 5 plan v3: storage keys hasheadas via StorageKeyDeriver.
+// El frontend las consume via `assetUrl(storage_key)` (lib/asset.ts).
+const PAGE_SIZE = 24;
 const currentPage = 1;
-const allProducts = PRODUCTS.slice(0, PAGE_SIZE);
+type BackendProduct = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  base_price_cents: number;
+  compare_at_price_cents: number | null;
+  image_url: string | null;
+  is_exclusive: boolean;
+  is_active: boolean;
+  brand_id: number | null;
+  category_id: number;
+  published_at: string | null;
+  brand?: { id: number; name: string; slug: string } | null;
+  category?: { id: number; name: string; slug: string } | null;
+};
+type StorefrontProductsResponse = BackendProduct[];
+
+let apiProducts: BackendProduct[] = [];
+try {
+  apiProducts = await apiFetch<StorefrontProductsResponse>(
+    API_ENDPOINTS.storefront.products + '?per_page=200',
+    { headers: { 'Accept': 'application/json' } },
+  );
+} catch (e) {
+  // Si el backend no responde, devolvemos lista vacía y el empty state
+  // del ProductGrid se renderiza. Log para debugging.
+  console.error('[products/index] apiFetch failed:', e);
+}
+
+const allProducts = apiProducts.slice(0, PAGE_SIZE);
 const lastPage = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
 const totalProducts = allProducts.length;
 const from = totalProducts === 0 ? 0 : 1;
 const to = Math.min(PAGE_SIZE, totalProducts);
+
+// Adapter backend (snake_case Eloquent) -> frontend (camelCase Product).
+// Mapea solo campos que ProductCardCatalog requiere. Si el backend agrega
+// campos, este adapter los ignora (mejor que el frontend truene).
+// `stock` lo inferimos de `is_active` por ahora (el backend no lo
+// expone en /products publico — solo is_visible). Si el backend expone
+// stock en una iteración futura, agregar al BackendProduct type.
+function mapBackendToProduct(b: BackendProduct) {
+  return {
+    id: b.id,
+    slug: b.slug,
+    name: b.name,
+    description: b.description ?? '',
+    priceCents: b.base_price_cents,
+    compareAtPriceCents: b.compare_at_price_cents ?? undefined,
+    imageUrl: b.image_url ?? '/images/product-placeholder.png',
+    category: b.category?.slug ?? 'instrumentos',
+    categoryId: b.category_id,
+    brandId: b.brand_id ?? 0,
+    brand: b.brand?.name ?? '',
+    isExclusive: b.is_exclusive,
+    inStock: b.is_active,
+    stock: b.is_active ? 5 : 0, // placeholder: is_active como proxy de stock
+    badges: [] as Array<'new' | 'sale' | 'low_stock'>,
+    updatedAt: b.published_at ?? new Date().toISOString(),
+  };
+}
+
+const productsForUi = allProducts.map(mapBackendToProduct);
 
 // Diccionario para los subcomponentes
 const dictionary = {
@@ -80,20 +150,28 @@ const dictionary = {
   eyebrow: t['storefront.products.v3.eyebrow'],
 };
 
-// Categorías: la primera opción es "Todo" (count = total de products),
-// seguidas de las categorías en uso con su count.
-const categoriesInUse = getCategoriesInUse();
+// Categorías: derivamos del backend. En vez de getCategoriesInUse()
+// (que leía del mock PRODUCTS), construimos de apiProducts agrupando
+// por category.slug con count. El shape coincide con CategoryFilterOption
+// (que requiere `label`, no `name`).
+const categoryCounts = apiProducts.reduce<Record<string, { slug: string; label: string; count: number }>>(
+  (acc, p) => {
+    const catSlug = p.category?.slug ?? 'unknown';
+    if (!acc[catSlug]) {
+      acc[catSlug] = { slug: catSlug, label: p.category?.name ?? catSlug, count: 0 };
+    }
+    acc[catSlug].count += 1;
+    return acc;
+  },
+  {},
+);
 const filterCategoryOptions = [
   {
     slug: 'all',
     label: t['storefront.products.v3.filter.categoriaAll'],
-    count: PRODUCTS.length,
+    count: apiProducts.length,
   },
-  ...categoriesInUse.map((category) => ({
-    slug: category.slug,
-    label: category.name,
-    count: PRODUCTS.filter((p) => p.category === category.slug).length,
-  })),
+  ...Object.values(categoryCounts),
 ];
 
 // Marcas: combinamos la lista canonica de La Voz (instrumentos
@@ -135,12 +213,12 @@ const filterSizeOptions = [
   { slug: 'xg', label: 'XG', count: 8 },
 ];
 
-const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(PRODUCTS.length));
+const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(apiProducts.length));
 
 const countRange = t['storefront.products.v3.countRange']
   .replace('{from}', String(from))
   .replace('{to}', String(to))
-  .replace('{total}', String(PRODUCTS.length));
+  .replace('{total}', String(apiProducts.length));
 
 const baseUrl = `/${locale}/products`;
 ---
@@ -209,7 +287,7 @@ const baseUrl = `/${locale}/products`;
             class="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 xl:grid-cols-4"
             aria-label={t['storefront.products.v3.title']}
           >
-            {allProducts.map((product) => (
+            {productsForUi.map((product) => (
               <li class="list-none">
                 <ProductCardCatalog
                   product={product}
