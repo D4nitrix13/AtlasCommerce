@@ -90,6 +90,8 @@ export interface Product {
   images?: readonly string[];
   /** Slug de la categoría. FK lógico a `Category.slug`. */
   category: string;
+  /** Nombre del brand (vacío si el backend no expone el join). */
+  brand?: string;
   /** Stock disponible (0 = agotado). */
   stock: number;
   /** Badges opcionales para marketing ("Novedades", "Oferta", etc.). */

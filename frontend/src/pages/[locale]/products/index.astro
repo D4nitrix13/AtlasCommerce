@@ -32,6 +32,7 @@
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import ProductCardCatalog from '../../../components/storefront/products/ProductCardCatalog.astro';
+import StorefrontProductsList from '../../../components/storefront/products/StorefrontProductsList';
 import FiltersSidebar from '../../../components/storefront/products/FiltersSidebar.astro';
 import SortDropdown from '../../../components/storefront/products/SortDropdown.astro';
 import Pagination from '../../../components/ui/Pagination.astro';
@@ -123,12 +124,18 @@ function mapBackendToProduct(b: BackendProduct) {
 
 const productsForUi = allProducts.map(mapBackendToProduct);
 
+// API path usado por StorefrontProductsList (CSR, no SSR).
+// Relativo porque el fetch ocurre en el browser, no en el container
+// Astro — Caddy resuelve el host del .test y enruta /api → backend:9000.
+// Sin acoplamiento a hostname del container. A largo plazo: cambiar
+// a /api/v2/ cuando el backend versionee. Hoy: /api/v1/.
+const apiPath = '/api/v1/storefront/products?per_page=200';
+
 // Diccionario para los subcomponentes
 const dictionary = {
   viewDetail: t['storefront.productCard.viewDetail'],
   sort: {
-    label: t['storefront.products.v3.sort.label'],
-    relevancia: t['storefront.products.v3.sort.relevancia'],
+    label: t['storefront.products.v3.sort.label'],    relevancia: t['storefront.products.v3.sort.relevancia'],
     precioAsc: t['storefront.products.v3.sort.precioAsc'],
     precioDesc: t['storefront.products.v3.sort.precioDesc'],
     nombre: t['storefront.products.v3.sort.nombre'],
@@ -287,7 +294,7 @@ const baseUrl = `/${locale}/products`;
             class="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 xl:grid-cols-4"
             aria-label={t['storefront.products.v3.title']}
           >
-            {productsForUi.map((product) => (
+            {productsForUi.length > 0 ? productsForUi.map((product) => (
               <li class="list-none">
                 <ProductCardCatalog
                   product={product}
@@ -295,8 +302,25 @@ const baseUrl = `/${locale}/products`;
                   labels={{ viewDetail: dictionary.viewDetail }}
                 />
               </li>
-            ))}
+            )) : (
+              /* SSR fetch fallo (problema operacional del container). El
+                 CSR island hace el fetch real desde el browser, asi que
+                 los productos se renderizan via JS aunque el SSR falle. */
+            )}
           </ul>
+
+          {/* CSR island: hace fetch al backend desde el browser. Caddy
+              resuelve el host del .test y enruta /api → backend. Sin
+              acoplamiento a hostname del container. Mejor opcion a largo
+              plazo vs SSR fetch (que depende de PUBLIC_API_URL en build
+              time y hostname del Docker network). */}
+          <StorefrontProductsList
+            client:visible
+            apiPath={apiPath}
+            loadingLabel={'Cargando productos...'}
+            emptyLabel={'No hay productos disponibles.'}
+            locale={locale}
+          />
 
           <Pagination
             currentPage={currentPage}
