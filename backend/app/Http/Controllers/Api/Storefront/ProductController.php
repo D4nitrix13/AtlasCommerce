@@ -31,10 +31,16 @@ class ProductController extends Controller
     {
         $store = $request->attributes->get('store');
 
-        $products = Product::whereHas('stores', function ($query) use ($store): void {
-            $query->where('store_id', $store->id)
-                ->where('is_visible', true);
-        })->get();
+        // Filtra primero los product_ids visibles del tenant (en la pivot
+        // product_stores), después hace el whereIn. Equivalente a whereHas
+        // 'stores' pero sin el JOIN doble del mismo pivot que causa
+        // "Duplicate alias: product_stores" en PostgreSQL.
+        $productIds = DB::table('product_stores')
+            ->where('store_id', $store->id)
+            ->where('is_visible', true)
+            ->pluck('product_id');
+
+        $products = Product::whereIn('id', $productIds)->get();
 
         return response()->json($products);
     }
@@ -100,11 +106,17 @@ class ProductController extends Controller
     {
         $store = $request->attributes->get('store');
 
-        $product = Product::where('slug', $slug)
-            ->whereHas('stores', function ($query) use ($store): void {
-                $query->where('store_id', $store->id)
-                    ->where('is_visible', true);
-            })->firstOrFail();
+        $productId = DB::table('product_stores')
+            ->where('store_id', $store->id)
+            ->where('is_visible', true)
+            ->whereHas('product', function ($query) use ($slug): void {
+                $query->where('slug', $slug);
+            })
+            ->value('product_id');
+
+        $product = $productId === null
+            ? abort(code: 404)
+            : Product::findOrFail($productId);
 
         return response()->json($product);
     }
