@@ -1,22 +1,33 @@
-@startuml 9.1 - Diagrama Entidad-Relacion (nucleo, simplificado)
+@startuml 9.1 - Diagrama Entidad-Relacion (nucleo esencial)
 skinparam classAttributeIconSize 0
-skinparam classFontSize 10
+skinparam classFontSize 15
 skinparam packageStyle rectangle
 skinparam linetype ortho
-skinparam nodesep 24
-skinparam ranksep 251
+skinparam nodesep 30
+skinparam ranksep 390
 top to bottom direction
 
 ' ============================================================
-' 9.1 — DIAGRAMA ENTIDAD-RELACION (VERSION SIMPLIFICADA, A4 VERTICAL)
-' Mismas 16 entidades y mismas multiplicidades que 9.1-diagrama-er.puml.
-' Cada entidad conserva su clave primaria y TODAS sus claves foraneas
-' (eso es la semantica del diagrama entidad-relacion); se eliminan
-' indices, valores por defecto, auditoria, snapshots y columnas
-' *_cents redundantes, y se reducen los campos de negocio a los
-' representativos.
+' 9.1 — DIAGRAMA ENTIDAD-RELACION (NUCLEO ESENCIAL)
+'
+' Version de solo 8 entidades para lectura rapida en A4 vertical.
+' Recorta la version de 16 entidades (9.1-diagrama-er.puml) dejando
+' unicamente el recorrido central de la venta:
+'
+'   TIENDA -> CATALOGO -> CLIENTE -> PEDIDO -> PAGO -> FACTURA
+'                    \-> INVENTARIO
+'
+' Cada entidad conserva su clave primaria y sus claves foraneas
+' internas, mas uno o dos campos representativos. Las claves
+' foraneas hacia tablas externas (moneda, metodo de pago, almacen)
+' no se dibujan: se listan en la nota final.
+'
 '   <<PK>>   clave primaria (BIGSERIAL)
 '   <<FK>>   clave foranea
+'
+' Los atributos se expresan en espanol academico. El nombre fisico
+' de cada columna es el ingles que usa la migracion; la tabla
+' equivalente esta al final del diagrama.
 ' ============================================================
 
 ' ============================================================
@@ -27,59 +38,21 @@ package "MULTI-TENANCIA" {
 
   entity "TIENDA" as stores {
     * id : BIGSERIAL <<PK>>
-    currency_id : BIGINT <<FK>>
+    nombre : VARCHAR(160)
     slug : VARCHAR(160)
-    tax_rate : DECIMAL(5,2)
-    is_active : BOOLEAN
-  }
-
-  entity "TIENDA_DOMINIO" as store_domains {
-    * id : BIGSERIAL <<PK>>
-    store_id : BIGINT <<FK>>
-    domain : VARCHAR(255)
-    is_primary : BOOLEAN
-    is_active : BOOLEAN
   }
 }
 
 ' ============================================================
-' IDENTIDAD Y ACCESO
-' ============================================================
-
-package "IDENTIDAD Y ACCESO" {
-
-  entity "USUARIO" as users {
-    * id : BIGSERIAL <<PK>>
-    role_id : BIGINT <<FK>>
-    email : VARCHAR(150)
-    is_active : BOOLEAN
-  }
-
-  entity "ROL" as roles {
-    * id : BIGSERIAL <<PK>>
-    slug : VARCHAR(100)
-    is_active : BOOLEAN
-  }
-}
-
-' ============================================================
-' CLIENTE
+' ACTORES
 ' ============================================================
 
 package "CLIENTE" {
 
   entity "CLIENTE" as customers {
     * id : BIGSERIAL <<PK>>
-    user_id : BIGINT <<FK>>
-    customer_type : VARCHAR(50)
-    email : VARCHAR(150)
-  }
-
-  entity "CLIENTE_DIRECCION" as customer_addresses {
-    * id : BIGSERIAL <<PK>>
-    customer_id : BIGINT <<FK>>
-    address_type : VARCHAR(50)
-    is_primary : BOOLEAN
+    correo : VARCHAR(150)
+    tipo_cliente : VARCHAR(50)
   }
 }
 
@@ -89,81 +62,35 @@ package "CLIENTE" {
 
 package "CATALOGO" {
 
-  entity "CATEGORIA" as categories {
-    * id : BIGSERIAL <<PK>>
-    parent_id : BIGINT <<FK>>
-    name : VARCHAR(120)
-    is_active : BOOLEAN
-  }
-
-  entity "MARCA" as brands {
-    * id : BIGSERIAL <<PK>>
-    name : VARCHAR(120)
-    slug : VARCHAR(150)
-  }
-
   entity "PRODUCTO" as products {
     * id : BIGSERIAL <<PK>>
-    category_id : BIGINT <<FK>>
-    brand_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    sku : VARCHAR(120)
-    base_price_cents : BIGINT
-  }
-
-  entity "PRODUCTO_VARIANTE" as product_variants {
-    * id : BIGSERIAL <<PK>>
-    product_id : BIGINT <<FK>>
-    size_id : BIGINT <<FK>>
-    sku : VARCHAR(120)
-    price_cents : BIGINT
-    condition : VARCHAR(16)
+    codigo : VARCHAR(120)
+    precio_base : BIGINT
   }
 
   entity "INVENTARIO" as inventories {
     * id : BIGSERIAL <<PK>>
-    warehouse_id : BIGINT <<FK>>
-    product_id : BIGINT <<FK>>
-    product_variant_id : BIGINT <<FK>>
-    current_stock : INTEGER
+    stock_actual : INTEGER
   }
 }
 
 ' ============================================================
-' OPERACIONES
+' TRANSACCION
 ' ============================================================
 
-package "OPERACIONES" {
+package "TRANSACCION" {
 
   entity "PEDIDO" as orders {
     * id : BIGSERIAL <<PK>>
-    customer_id : BIGINT <<FK>>
-    store_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    shipping_address_id : BIGINT <<FK>>
-    sales_channel_id : BIGINT <<FK>>
-    user_creator_id : BIGINT <<FK>>
-    order_number : VARCHAR(80)
-    status : VARCHAR(50)
+    numero_pedido : VARCHAR(80)
+    estado : VARCHAR(50)
+    total : BIGINT
   }
 
   entity "DETALLE_PEDIDO" as order_items {
     * id : BIGSERIAL <<PK>>
-    order_id : BIGINT <<FK>>
-    product_id : BIGINT <<FK>>
-    product_variant_id : BIGINT <<FK>>
-    custom_design_id : BIGINT <<FK>>
-    quantity : INTEGER
-    unit_price_cents : BIGINT
-  }
-
-  entity "ENVIO" as shipments {
-    * id : BIGSERIAL <<PK>>
-    order_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    shipping_company_id : BIGINT <<FK>>
-    shipping_zone_id : BIGINT <<FK>>
-    status : VARCHAR(50)
+    cantidad : INTEGER
+    precio_unitario : BIGINT
   }
 }
 
@@ -175,88 +102,88 @@ package "FINANZAS" {
 
   entity "PAGO" as payments {
     * id : BIGSERIAL <<PK>>
-    customer_id : BIGINT <<FK>>
-    store_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    payment_method_id : BIGINT <<FK>>
-    amount_cents : BIGINT
-    status : VARCHAR(50)
+    monto : BIGINT
+    estado : VARCHAR(50)
   }
 
   entity "FACTURA" as invoices {
     * id : BIGSERIAL <<PK>>
-    customer_id : BIGINT <<FK>>
-    store_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    order_id : BIGINT <<FK>>
-    sales_channel_id : BIGINT <<FK>>
-    user_issuer_id : BIGINT <<FK>>
-    shipping_zone_id : BIGINT <<FK>>
-    invoice_number : VARCHAR(80)
-    invoice_status : VARCHAR(50)
+    numero_factura : VARCHAR(80)
+    estado_factura : VARCHAR(50)
   }
 }
 
 ' ============================================================
-' RELACIONES — MULTI-TENANCIA
+' RELACIONES
 ' ============================================================
-stores "1" -- "0..*" store_domains : "store_id"
-stores "1" -- "0..*" orders : "store_id"
-stores "1" -- "0..*" payments : "store_id"
-stores "1" -- "0..*" invoices : "store_id"
+
+stores "1" -- "0..*" orders : "id_tienda"
+stores "1" -- "0..*" payments : "id_tienda"
+stores "1" -- "0..*" invoices : "id_tienda"
+
+customers "1" -- "0..*" orders : "id_cliente"
+customers "1" -- "0..*" payments : "id_cliente"
+customers "1" -- "0..*" invoices : "id_cliente"
+
+products "1" -- "0..*" order_items : "id_producto"
+products "1" -- "0..*" inventories : "id_producto"
+
+orders "1" -- "0..*" order_items : "id_pedido"
+orders "0..1" -- "0..*" invoices : "id_pedido"
+
+'   PAGO no tiene id_pedido: se vincula con FACTURA mediante la
+'   tabla puente invoice_payments (N:M, un pago puede cubrir
+'   varias facturas).
+payments "*" -- "0..*" invoices : "invoice_payments (N:M)"
 
 ' ============================================================
-' RELACIONES — IDENTIDAD Y ACCESO
+' NOTA — ENTIDADES OMITIDAS POR SIMPLIFICACION
+'
+' La version completa de 16 entidades esta en
+' 9.1-diagrama-er.puml. Las siguientes siguen existiendo en la base
+' de datos y conservan su clave foranea, pero se omiten aqui:
+'
+'   TIENDA_DOMINIO, USUARIO, ROL, CLIENTE_DIRECCION, CATEGORIA,
+'   MARCA, PRODUCTO_VARIANTE, ENVIO
+'
+'   PEDIDO.id_direccion_envio    -> CLIENTE_DIRECCION
+'   PEDIDO.id_usuario_creador    -> USUARIO
+'   PRODUCTO.id_categoria        -> CATEGORIA
+'   PRODUCTO.id_marca            -> MARCA
+'   INVENTARIO.id_variante       -> PRODUCTO_VARIANTE
+'
+' Las columnas existen; no se dibujan para no recargar el diagrama.
+'
+'   CLIENTE no tiene id_tienda: su vinculo con TIENDA es N:N
+'   mediante la tabla puente customer_stores.
+'   ENVIO no tiene id_tienda: la tienda se deriva de PEDIDO.
+'
+'   Los montos se almacenan en centavos (BIGINT) para evitar
+'   errores de punto flotante.
 ' ============================================================
-roles "1" -- "0..*" users : "role_id"
-users "1" -- "0..1" customers : "user_id"
-users "1" -- "0..*" orders : "user_creator_id (trazabilidad)"
-users "1" -- "0..*" invoices : "user_issuer_id (trazabilidad)"
-
-' ============================================================
-' RELACIONES — CLIENTE
-'   CLIENTE no tiene store_id: la pertenencia a una tienda se
-'   resuelve por la tabla puente customer_stores (N:N, externa).
-' ============================================================
-customers "1" -- "0..*" customer_addresses : "customer_id"
-customers "1" -- "0..*" orders : "customer_id"
-customers "1" -- "0..*" payments : "customer_id"
-customers "1" -- "0..*" invoices : "customer_id"
-customer_addresses "0..1" -- "0..*" orders : "shipping_address_id"
-
-' ============================================================
-' RELACIONES — CATALOGO
-' ============================================================
-categories "1" -- "0..*" products : "category_id"
-categories "0..1" -- "0..*" categories : "parent_id (auto-referencia)"
-brands "0..1" -- "0..*" products : "brand_id"
-products "1" -- "0..*" product_variants : "product_id"
-products "1" -- "0..*" order_items : "product_id"
-products "1" -- "0..*" inventories : "product_id"
-product_variants "0..1" -- "0..*" order_items : "product_variant_id"
-product_variants "0..1" -- "0..*" inventories : "product_variant_id"
-
-' ============================================================
-' RELACIONES — OPERACIONES
-' ============================================================
-orders "1" -- "0..*" order_items : "order_id"
-orders "1" -- "0..*" shipments : "order_id"
-orders "0..1" -- "0..*" invoices : "order_id"
-
-' ============================================================
-' RELACIONES — FINANZAS
-'   PAGO NO tiene order_id: se vincula con FACTURA mediante la
-'   tabla puente invoice_payments (N:M).
-' ============================================================
-payments "*" -- "0..*" invoices : "invoice_payments (tabla puente N:M)"
-
-' ============================================================
-' NOTAS — CLAVES FORANEAS EXTERNAS (no se dibujan)
-'   currencies, payment_methods, sales_channels, shipping_companies,
-'   shipping_zones, warehouses, product_sizes, custom_designs.
-'   Tablas puente: invoice_payments (PAGO <-> FACTURA, N:M) y
-'   customer_stores (CLIENTE <-> TIENDA, N:N).
-'   ENVIO no tiene store_id: la tienda se deriva de PEDIDO.
+'
+'   CLAVES FORANEAS EXTERNAS (no se dibujan):
+'   currencies (moneda), payment_methods (metodo de pago),
+'   warehouses (almacen), sales_channels (canal de venta),
+'   shipping_companies y shipping_zones (envio).
+'
+'   EQUIVALENCIA CON LA BASE DE DATOS:
+'   TIENDA.nombre            -> stores.name
+'   TIENDA.slug              -> stores.slug
+'   CLIENTE.correo           -> customers.email
+'   CLIENTE.tipo_cliente     -> customers.customer_type
+'   PRODUCTO.codigo          -> products.sku
+'   PRODUCTO.precio_base     -> products.base_price_cents
+'   INVENTARIO.stock_actual  -> inventories.current_stock
+'   PEDIDO.numero_pedido     -> orders.order_number
+'   PEDIDO.estado            -> orders.status
+'   PEDIDO.total             -> orders.total_cents
+'   DETALLE_PEDIDO.cantidad  -> order_items.quantity
+'   DETALLE_PEDIDO.precio_unitario -> order_items.unit_price_cents
+'   PAGO.monto               -> payments.amount_cents
+'   PAGO.estado              -> payments.status
+'   FACTURA.numero_factura   -> invoices.invoice_number
+'   FACTURA.estado_factura   -> invoices.invoice_status
 ' ============================================================
 
 @enduml
