@@ -19,12 +19,21 @@
 |---|---|
 | [`tooling/package-manager.md`](tooling/package-manager.md) | Frontend usa `bun` exclusivamente. NO `pnpm`, NO `npm`. |
 | [`tooling/docker-stack.md`](tooling/docker-stack.md) | Toda operación con containers va por `scripts/docker-stack.sh`. NO `docker compose` directo, NO `bun astro dev` ad-hoc. |
+| [`tooling/resource-budget.md`](tooling/resource-budget.md) | Presupuesto de recursos: un comando pesado por bloque, Docker en bloques separados, preflight de carga, higiene de disco. |
 | [`assets-naming-policy.md`](assets-naming-policy.md) | Estructura per-tenant de `assets/products/`, naming legible en repo vs hasheado en FTP, roles de galería, comandos del seeder. |
 | [`workflow/conventions-first.md`](workflow/conventions-first.md) | Antes de cualquier edición, leer las reglas del scope + AGENTS.md + skill load-bearing. |
+| [`workflow/decisions-storefront-rendering.md`](workflow/decisions-storefront-rendering.md) | Decisión CSR vs SSR del listado de productos del storefront y su porqué. |
 
 ---
 
 ## Cómo cargar las reglas
+
+> **Regla universal — independiente del path:**
+> [`tooling/resource-budget.md`](tooling/resource-budget.md) aplica a
+> TODA tarea del repo. Regula CÓMO se ejecutan los comandos (un comando
+> pesado por bloque, Docker en bloques separados, tests filtrados
+> durante iteración, preflight de carga, higiene de disco), no un path
+> específico. Es la única regla transversal de ejecución.
 
 1. **Path glob** del archivo que vas a tocar:
    - `frontend/src/**` → leer `tooling/package-manager.md` (bun) + `frontend/AGENTS.md` (frontend conventions)

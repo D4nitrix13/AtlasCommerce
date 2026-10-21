@@ -12,6 +12,15 @@
 > este archivo **no contradicen** las de CONTRIBUTING.md — las complementan y
 > detallan. Si hay conflicto, manda CONTRIBUTING.md.
 
+> **Reglas transversales del proyecto.** Este archivo cubre lo
+> específico del frontend. Las reglas load-bearing que aplican a varios
+> scopes viven en
+> [`.ai/rules/index.md`](../.ai/rules/index.md). Antes de editar
+> CUALQUIER archivo del frontend, abrí ese índice y leé las reglas
+> cuyos globs cubran los paths en scope. Si una regla contradice este
+> archivo, gana este archivo; si contradice `CONTRIBUTING.md`, gana
+> `CONTRIBUTING.md`.
+
 ---
 
 ## 1. Tamaño de archivos
@@ -532,3 +541,49 @@ bun run storybook:test         # smoke test
 Más detalle en
 [`docs/frontend/storybook.md`](../docs/frontend/storybook.md
 "docs/frontend/storybook.md").
+
+---
+
+## 23. Islands React dentro de `.astro`
+
+Cuando un componente React se monta como island dentro de un `.astro`,
+los atributos del DOM usan la forma **JSX**, no la forma HTML.
+
+### Mapeo de atributos HTML → JSX
+
+| Atributo HTML | Atributo JSX (en TSX) |
+|---|---|
+| `class` | `className` |
+| `for` | `htmlFor` |
+| `tabindex` | `tabIndex` |
+| `readonly` | `readOnly` |
+| `maxlength` | `maxLength` |
+| `cellpadding` | `cellPadding` |
+
+### Regla concreta
+
+- En TSX (`.tsx`), usar **siempre** `className`, NUNCA `class`. El
+  bundle no aplica la clase al elemento y el estilo se pierde.
+- El aviso de React por esto sale sólo por la consola del navegador en
+  modo dev. En el build de producción no aparece nada: el error no
+  llega a fallar la compilación ni a romper un test.
+- `eslint-plugin-react` está instalado, pero la regla
+  `react/no-unknown-property` **no está activada** en
+  `frontend/eslint.config.js`. Por eso `bun run lint` no te va a marcar
+  el `class`. El chequeo de esta tabla es manual y obligatorio.
+- La misma idea aplica a cualquier otro atributo renombrado de HTML
+  a JSX (`for` → `htmlFor`, `tabindex` → `tabIndex`, etc.). La lista
+  completa vive en la doc oficial de React ("DOM Elements").
+
+### Pre-commit de una island
+
+Antes de commitear una island nueva o modificada:
+
+```bash
+bun run typecheck          # astro check (TS strict)
+bun run lint               # eslint .
+```
+
+`bun run lint` **no** cubre el caso `class` → `className` en este
+proyecto, porque la regla que lo detectaría no está activada. Revisá la
+tabla de atributos de arriba a mano antes de commitear.
