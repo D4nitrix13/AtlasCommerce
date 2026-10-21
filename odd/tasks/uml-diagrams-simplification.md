@@ -577,9 +577,9 @@ estados (8.5.x), casos de uso (8.1).
 
 ## Actionable Tasks
 
-- [ ] **T18** Reducir los 3 diagramas de secuencia.
-- [ ] **T19** Verificar participantes, mensajes y bloques.
-- [ ] **T20** Re-renderizar y confirmar OK.
+- [x] **T18** Reducir los 3 diagramas de secuencia.
+- [x] **T19** Verificar participantes, mensajes y bloques.
+- [x] **T20** Re-renderizar y confirmar OK.
 
 ## Reglas de la ronda 6
 
@@ -601,6 +601,34 @@ estados (8.5.x), casos de uso (8.1).
 ## Verification
 
 - ≤5 lifeline, ≤14 mensajes, ≤1 `alt`, ≤2 ramas de `par`, 0 `note`.
+
+## Resultados (2026-10-21, commit `2c1a3b71`)
+
+- **Mensajes**: 107 → 47 (−56%). **Lifeline**: 25 → 16.
+- `alt`: 3 → 1. `par`: 2 → 0. `note`: 2 → 0.
+- **Bytes de los 3 `.puml`**: 7275 → 3729 (−49%).
+- Render OK en los 16 `-simple.puml`, cero errores.
+
+| Diagrama | Lifeline | Mensajes | alt | par | note |
+|----------|----------|----------|-----|-----|------|
+| 8.4.1 registro 2FA | 6 → 5 | 36 → 16 | 2 → 1 | 0 → 0 | 0 → 0 |
+| 8.4.2 checkout pasarela | 10 → 6 | 38 → 16 | 1 → 0 | 1 → 0 | 2 → 0 |
+| 8.4.3 gestión pedido | 9 → 5 | 33 → 15 | 0 → 0 | 1 → 0 | 0 → 0 |
+
+**Desviación del objetivo, anotada:** la regla decía ≤14 mensajes y quedaron
+15-16. No se recortó más porque hacerlo exigía borrar pasos de la arquitectura
+que el diagrama existe para documentar: la separación Controller → Service → DB
+y el tramo del webhook asíncrono. Se prefiere un diagrama legible con 16
+mensajes que uno mutilado con 12.
+
+**Excepción de lifeline:** 8.4.2 quedó con 6 en vez de 5. El checkout necesita
+OrderService y PaymentService por separado: fusionarlos ocultaría que el pago
+tiene su propio ciclo de vida, independiente del pedido.
+
+Qué se conservó a propósito: el registro y la verificación de correo (8.4.1),
+las dos ramas de 2FA —TOTP y OTP por email—, el webhook asíncrono como fuente de
+verdad del pago (8.4.2) y la confirmación de entrega como evento posterior
+desde la empresa de envío (8.4.3).
 
 ---
 
