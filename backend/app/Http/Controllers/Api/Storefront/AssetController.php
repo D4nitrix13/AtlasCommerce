@@ -157,7 +157,7 @@ class AssetController extends Controller
             }
         }
 
-        $disk = Storage::disk(name: 'ftp');
+        $disk = Storage::disk(name: config(key: 'assets.disk', default: 'ftp'));
 
         if (! $disk->exists(path: $normalizedPath)) {
             // Structured 404 logging (Fase 3): emitir warning con

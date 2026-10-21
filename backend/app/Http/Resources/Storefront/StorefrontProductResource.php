@@ -78,7 +78,7 @@ class StorefrontProductResource extends JsonResource
      * consciente: un path local servible siempre, sin depender de
      * CDN/almacenamiento configurable.
      */
-    private const PLACEHOLDER_IMAGE_PATH = '/images/product-placeholder.png';
+    private const PLACEHOLDER_IMAGE_PATH = '/images/product-placeholder.svg';
 
     /**
      * Override del wrapper por defecto (`'data'`). El storefront espera
@@ -154,13 +154,36 @@ class StorefrontProductResource extends JsonResource
         $images = $this->resource->images->sortBy('sort_order')->values();
 
         $allUrls = $images->pluck('image_url')
-            ->map(static fn (mixed $url): string => (string) $url)
+            ->map(fn (mixed $url): string => $this->toProxyUrl((string) $url))
             ->all();
 
         $primary = $images->firstWhere('is_primary', true);
-        $primaryUrl = $primary !== null ? (string) $primary->image_url : null;
+        $primaryUrl = $primary !== null ? $this->toProxyUrl((string) $primary->image_url) : null;
 
         return ['all' => $allUrls, 'primary' => $primaryUrl];
+    }
+
+    /**
+     * Convierte el storage key de una imagen en la URL del proxy que la
+     * sirve: `/api/v1/storefront/assets/{storage_key}`.
+     *
+     * El AssetController resuelve el archivo desde el disco configurado y
+     * valida que el path viva bajo el namespace del tenant, así que el
+     * cliente no necesita conocer el backend de storage. Es una URL
+     * relativa a propósito: no ata la API a ningún hostname.
+     *
+     * Los valores que ya son URL absoluta se respetan sin tocar.
+     */
+    private function toProxyUrl(string $storageKey): string
+    {
+        if (
+            str_starts_with($storageKey, 'http://')
+            || str_starts_with($storageKey, 'https://')
+        ) {
+            return $storageKey;
+        }
+
+        return '/api/v1/storefront/assets/' . ltrim($storageKey, '/');
     }
 
     /**
