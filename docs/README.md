@@ -48,7 +48,9 @@ git workflow.
 
 ### Stack tecnológico
 
-`architecture/tech-stack.md` — vista general. Detalles por capa en
+`operations/tech-stack.md` — decisiones, tradeoffs y contexto del stack.
+`architecture/tech-versions.md` — registro autoritativo de versiones
+verificadas contra los lockfiles. Detalles por capa en
 `architecture/tech-{backend,database,frontend,infrastructure}.md`.
 
 ### Base de datos

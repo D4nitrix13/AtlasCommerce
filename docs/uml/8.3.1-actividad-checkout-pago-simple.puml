@@ -1,68 +1,40 @@
 @startuml 8.3 - Actividad: Proceso de Checkout y Pago
-hide methods
-hide attributes
-hide empty members
 |Cliente|
 start
 
-:Selecciona productos desde el storefront;
-:Selecciona variante (talla, color, etc.) y agrega al carrito;
-
-while (¿Continúa modificando carrito?) is (sí)
-  :Modificar carrito (agregar / cambiar cantidad / eliminar ítem);
-  :Ver subtotal y total;
-endwhile (no, continúa al checkout)
-
-:Confirma "Ir a checkout";
+:Seleccionar productos y variantes;
+:Modificar el carrito y revisar subtotal y total;
+:Confirmar "Ir a checkout";
 
 |Sistema AtlasCommerce|
-:Cargar carrito activo de la tienda;
+:Cargar carrito activo y validar stock de cada ItemCarrito;
 
-if (¿Carrito vacío o todos los items sin stock?) then (sí)
+if (¿Carrito vacío o hay ítems sin stock suficiente?) then (sí)
   |Cliente|
-  :Mostrar mensaje "Carrito vacío o sin stock";
+  :Notificar productos sin stock o carrito vacío;
   stop
-else (no)
-endif
-
-:Validar stock disponible por cada ItemCarrito;
-
-if (¿Hay ítems sin stock suficiente?) then (sí)
-  |Cliente|
-  :Notificar productos sin stock;
-  stop
-else (no)
 endif
 
 |Cliente|
-:Ingresa o selecciona dirección de envío;
-:Selecciona zona de envío (calcula costo);
-
-note right
-  [Opcional]
-  Aplicar cupón de descuento
-end note
-
-:Confirma resumen (subtotal + envío + impuestos - descuentos = total);
+:Ingresar dirección y zona de envío (calcula costo);
+:Confirmar resumen (subtotal + envío + impuestos - descuentos = total);
 
 |Sistema AtlasCommerce|
-:Crear Pedido en estado PENDIENTE_PAGO;
-:Congelar precio unitario por línea;
+:Crear Pedido PENDIENTE_PAGO congelando el precio unitario por línea;
 
 |Cliente|
-:Selecciona método de pago;
+:Seleccionar método de pago;
 
 |Sistema AtlasCommerce|
-:Validar método de pago seleccionado;
+:Validar método de pago habilitado en la tienda;
 
-if (¿Método de pago válido y habilitado en la tienda?) then (no)
+if (¿Método de pago válido?) then (no)
   |Cliente|
   :Mostrar error de método;
   stop
-else (sí)
 endif
 
-:Solicitar pago a pasarela;
+:Solicitar pago a la pasarela;
 
 |Pasarela de Pago|
 :Procesar solicitud de pago;
@@ -73,29 +45,24 @@ if (¿Pasarela responde en ≤ 30 segundos?) then (no)
   |Cliente|
   :Mostrar "La pasarela no responde. Permite reintentar o cambiar método";
   stop
-else (sí)
 endif
 
 :Procesar transacción;
 
 if (¿Pago aprobado por la pasarela?) then (no)
   |Sistema AtlasCommerce|
-  :Registrar TransaccionPago fallida;
-  :Marcar Pago como RECHAZADO;
+  :Registrar TransaccionPago fallida y marcar Pago como RECHAZADO;
   |Cliente|
   :Mostrar error de pago;
   :Permite reintentar o cambiar de método de pago;
   stop
-else (sí)
 endif
 
-|Sistema AtlasCommerce|
-:Actualizar Pago a APROBADO;
-:Actualizar TransaccionPago con datos de pasarela;
+:Registrar TransaccionPago y actualizar Pago a APROBADO;
 :Cambiar Pedido a PAGADO;
 
 fork
-  :Descontar stock y registrar MovimientoInventario (tipo SALIDA);
+  :Descontar stock y registrar MovimientoInventario (SALIDA);
 fork again
   :Generar Factura en PDF;
 fork again

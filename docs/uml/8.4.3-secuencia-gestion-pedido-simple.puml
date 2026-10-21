@@ -1,10 +1,6 @@
 @startuml 8.4 - Secuencia: Gestión de Pedido por Operador
-hide methods
-hide attributes
-hide empty members
 
 actor "Operador\nde tienda" as O
-participant "Admin Panel" as AP
 participant "OrderController" as OC
 participant "OrderService" as OS
 participant "PaymentService" as PS
@@ -12,104 +8,55 @@ participant "InventoryService" as IS
 participant "ShippingService" as SS
 participant "EmailService" as ES
 participant "DB" as DB
-participant "Servicio\nde Email" as EM
 participant "Empresa\nde Envío" as EE
 
 == LISTADO DE PEDIDOS ==
-O -> AP : Accede a "Pedidos"
-AP -> OC : GET /api/v1/orders?estado=PAGADO
-activate OC
+O -> OC : GET /api/v1/orders?estado=PAGADO
 OC -> OS : listarPorEstado("PAGADO", tiendaId)
-activate OS
-OS -> DB : SELECT pedidos WHERE tiendaId=? AND estado='PAGADO'
-DB --> OS : pedidos[]
-OS --> OC : pedidos
-deactivate OS
-OC --> AP : 200 OK {pedidos: [...]}
-deactivate OC
-AP --> O : Mostrar tabla de pedidos pendientes
+OS -> DB : SELECT pedidos\nWHERE tiendaId=? AND estado='PAGADO'
+OS --> OC : pedidos[]
+OC --> O : 200 OK {pedidos: [...]}\ntabla de pedidos pendientes
 
 == DETALLE DEL PEDIDO ==
-O -> AP : Selecciona pedido #123
-AP -> OC : GET /api/v1/orders/123
-activate OC
+O -> OC : GET /api/v1/orders/123
 OC -> OS : obtenerDetalle(123)
-activate OS
-OS -> DB : SELECT pedido JOIN cliente JOIN direccion
-OS -> DB : SELECT lineas_pedido JOIN producto
-OS -> DB : SELECT pago
-OS -> DB : SELECT envio (si existe)
-DB --> OS : pedidoCompleto
+OS -> DB : SELECT pedido, cliente, dirección,\nlíneas, pago y envío (pedidoCompleto)
 OS -> PS : verificarEstadoPago(pedidoId)
-activate PS
-PS -> DB : SELECT pago WHERE pedidoId=?
-DB --> PS : pago(APROBADO)
-PS --> OS : ok
-deactivate PS
+PS -> DB : SELECT pago WHERE pedidoId=?\n(pago APROBADO)
 OS --> OC : pedidoCompleto
-deactivate OS
-OC --> AP : 200 OK {pedido: {...}}
-deactivate OC
-AP --> O : Mostrar detalle del pedido
+OC --> O : 200 OK {pedido: {...}}\ndetalle del pedido
 
 == MARCAR COMO ENVIADO ==
-O -> AP : Click "Marcar como enviado"\nIngresa empresa de envío + número de guía
-AP -> OC : POST /api/v1/orders/123/ship\n{empresaEnvioId, numeroGuia}
-activate OC
+O -> OC : POST /api/v1/orders/123/ship\n{empresaEnvioId, numeroGuia}
 OC -> OS : marcarComoEnviado(123, envio)
-activate OS
 OS -> PS : validarPago(123)
-activate PS
-PS -> DB : SELECT pago WHERE pedidoId=123
-DB --> PS : pago(APROBADO)
-PS --> OS : ok
-deactivate PS
-
+PS -> DB : SELECT pago WHERE pedidoId=123\n(pago APROBADO)
 OS -> DB : BEGIN TRANSACTION
 
 par Acciones paralelas al despachar
   OS -> DB : UPDATE pedidos SET estado=PROCESANDO
 else
-  OS -> DB : INSERT INTO envios (pedido, empresa, guia, estado=EN_TRANSITO)
+  OS -> DB : INSERT INTO envios\n(pedido, empresa, guia, estado=EN_TRANSITO)
 else
   OS -> IS : descontarStock(pedido)
-  activate IS
-  IS -> DB : SELECT inventarios WHERE productoId IN lineas
-  IS -> DB : INSERT INTO movimientos_inventario (tipo=SALIDA)
-  IS -> DB : UPDATE inventarios SET stockActual
-  deactivate IS
+  IS -> DB : SELECT inventarios + INSERT movimientos_inventario\n(SALIDA) + UPDATE stockActual
 else
   OS -> SS : notificarRastreo(envio)
-  activate SS
   SS -> EE : POST /api/rastreo/notificar\n{guia, pedidoId}
-  EE --> SS : ok
-  deactivate SS
 else
-  OS -> ES : enviarEmailRastreo(cliente, envio)
-  activate ES
-  ES -> EM : SMTP send email con guía
-  deactivate ES
+  OS -> ES : enviarEmailRastreo(cliente, envio) vía email
 end
 
 OS -> DB : INSERT INTO order_status_histories\n(estadoAnterior, estadoNuevo, usuario, notas)
 OS -> DB : COMMIT
 OS --> OC : {estado: PROCESANDO, envioId}
-deactivate OS
-OC --> AP : 200 OK {ok: true}
-deactivate OC
-AP --> O : Mostrar "Pedido marcado como enviado"
+OC --> O : 200 OK {ok: true}\n"Pedido marcado como enviado"
 
 == CONFIRMACIÓN DE ENTREGA (evento posterior) ==
 EE -> SS : Webhook o polling: entrega confirmada
-activate SS
 SS -> OS : confirmarEntrega(envioId)
-activate OS
 OS -> DB : UPDATE pedidos SET estado=COMPLETADO
-OS -> DB : INSERT INTO order_status_histories\n(estadoAnterior=PROCESANDO, estadoNuevo=COMPLETADO)
+OS -> DB : INSERT INTO order_status_histories\n(PROCESANDO → COMPLETADO)
 OS -> DB : UPDATE envios SET estado=ENTREGADO, entregadoEn
-OS --> SS : ok
-deactivate OS
-SS --> EE : 200 OK
-deactivate SS
 
 @enduml

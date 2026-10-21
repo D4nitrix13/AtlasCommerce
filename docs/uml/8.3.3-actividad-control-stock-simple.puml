@@ -1,117 +1,91 @@
 @startuml 8.3 - Actividad: Control de Stock
-hide methods
-hide attributes
-hide empty members
 |Operador de tienda|
 start
 
-:Selecciona tipo de operación;
-
-note right
-  • Registrar movimiento manual
-  • Ajustar stock por inventario físico
-  • Revisar alertas de stock bajo mínimo
-end note
+:Seleccionar tipo de operación;
 
 if (¿Tipo de operación?) then (Registro manual)
-
   |Operador de tienda|
-  :Selecciona producto (y opcionalmente variante) y almacén;
-  :Selecciona tipo de movimiento (ENTRADA / SALIDA / AJUSTE);
-  :Ingresa cantidad, motivo y referencia;
+  :Seleccionar producto (variante), almacén y tipo de movimiento;
+  :Ingresar cantidad, motivo y referencia;
 
   |Sistema AtlasCommerce|
   :Validar operación;
 
-  if (¿Tipo es SALIDA?) then (sí)
-    if (¿Stock actual ≥ cantidad solicitada?) then (no)
-      |Operador de tienda|
-      :Recibir alerta "Stock insuficiente";
-      stop
-    else (sí)
-    endif
-  else (no)
+  if (¿Es SALIDA y el stock actual < cantidad?) then (sí)
+    |Operador de tienda|
+    :Recibir alerta "Stock insuficiente";
+    stop
   endif
 
-  :Crear MovimientoInventario (tipo ENTRADA / SALIDA / AJUSTE);
+  :Crear MovimientoInventario (ENTRADA / SALIDA / AJUSTE);
 
   fork
     :Actualizar RegistroInventario.stockActual;
   fork again
     :Registrar MovimientoInventario en BitacoraAuditoria;
   fork again
-    if (stockActual resultante < stockMinimo) then (sí)
+    if (¿stockActual resultante < stockMinimo?) then (sí)
       |Operador de tienda|
       :Recibir alerta "Stock bajo mínimo";
-    else (no)
     endif
   end fork
 
   stop
 
 elseif (¿Tipo de operación?) then (Ajuste por inventario físico)
-
   |Operador de tienda|
-  :Cuenta inventario físico;
-  :Selecciona producto (variante) y almacén;
-  :Ingresa stock físico contado;
+  :Contar inventario físico y cargar el stock contado;
 
   |Sistema AtlasCommerce|
   :Calcular diferencia (stock físico - stock actual);
 
   if (¿Diferencia = 0?) then (sí)
     :No requiere ajuste;
-  else (no)
   endif
 
-  :Crear MovimientoInventario de tipo AJUSTE con la diferencia;
+  :Crear MovimientoInventario AJUSTE con la diferencia;
   :Actualizar RegistroInventario.stockActual;
 
   if (¿|Diferencia - stock| > umbral_limite?) then (sí)
     :Notificar al usuario / supervisor para revisión;
-  else (no)
   endif
 
   stop
 
 else (Consulta de stock bajo)
-
   |Sistema AtlasCommerce|
   :Listar productos con stockActual < stockMinimo;
 
   |Operador de tienda|
-  :Visualiza lista de alertas;
+  :Visualizar lista de alertas;
 
   stop
-
 endif
 
 note right
   === Validación automática durante checkout ===
-  Este sub-flujo se ejecuta de forma automática
-  cuando el cliente inicia checkout (ver CU-04).
+  Ocurre sola al iniciar el cliente el checkout (ver CU-04).
 end note
 
 |Cliente|
-:Inicia checkout con productos en el carrito;
+:Iniciar checkout con productos en el carrito;
 
 |Sistema AtlasCommerce|
-:Para cada ItemCarrito, consultar stock actual;
+:Consultar stock actual de cada ItemCarrito;
 
 if (¿Stock disponible para todas las líneas?) then (no)
   |Cliente|
   :Mostrar alerta de producto sin stock;
   :Bloquear checkout;
   stop
-else (sí)
 endif
 
-note right
-  El descuento real del stock NO ocurre aquí.
-  Ocurre tras la confirmación del pago (ver diagrama de Checkout y Pago)
-  Y al marcar el pedido como enviado (ver diagrama de Gestión de Pedidos).
-end note
-
 :Continuar con checkout;
+note right
+  El descuento real del stock NO ocurre aquí: ocurre
+  tras la confirmación del pago y al marcar el pedido
+  como enviado (ver Checkout y Gestión de Pedidos).
+end note
 
 @enduml
