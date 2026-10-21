@@ -70,12 +70,18 @@ import { CATEGORIES } from '../../../data/products';
 import { formatCurrency } from '../../../lib/formatters';
 import {
   SABER_ALTER_DETAIL,
-  RELATED_PRODUCTS,
   type ProductReview,
   getAverageRating,
 } from '../../../data/product-detail-mock';
 import type { Product } from '../../../types/catalog';
 import { deriveProductDetail } from '../../../lib/product-detail';
+// `RELATED_PRODUCTS` ya NO se importa: el carrusel se deriva del catálogo
+// real del tenant en SSR (ver bloque más abajo). El export se mantiene en
+// `data/product-detail-mock.ts` por compat con quien lo consuma fuera de acá.
+import {
+  pickRelatedProducts,
+  type StorefrontApiProductSummary,
+} from '../../../lib/related-products';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -227,6 +233,69 @@ if (notFound) {
   // transitorio y pueda reintentar. La página igual renderiza
   // un fallback visible (no crashea).
   Astro.response.status = 503;
+}
+
+/**
+ * Productos relacionados — segundo SSR fetch al catálogo filtrado por
+ * la categoría del producto actual.
+ *
+ * Por qué un fetch aparte:
+ *   - El endpoint público `/api/v1/storefront/products/{slug}` sólo
+ *     devuelve el producto individual (no sus relacionados).
+ *   - El catálogo completo del tenant es accesible via
+ *     `/api/v1/storefront/products?category=<slug>` (parámetro opcional
+ *     agregado en `ProductController::index` para no crear un endpoint
+ *     nuevo).
+ *   - Filtrar por categoría en SSR evita traer los 356 productos del
+ *     catálogo completo por cada PDP (~500KB innecesarios).
+ *
+ * Estados (independientes del fetch principal):
+ *   - `relatedProducts === [] && relatedError === null`
+ *     → sin productos en la categoría (la sección se oculta).
+ *   - `relatedError !== null`
+ *     → 5xx / timeout / network → la sección se oculta, el PDP sigue
+ *       respondiendo con los datos del producto principal (no se
+ *       degrada la respuesta HTTP).
+ *   - `relatedProducts.length > 0`
+ *     → happy path: el carrusel muestra hasta N productos.
+ *
+ * Reutilizamos el mismo `apiOrigin` (resuelve Caddy/nginx según stage)
+ * y la misma `apiRequestHeaders` (Host header cuando vamos por la red
+ * interna del container).
+ */
+let relatedProducts: ReturnType<typeof pickRelatedProducts> = [];
+let relatedError: string | null = null;
+
+const relatedCategory = product?.category ?? '';
+if (product !== null && relatedCategory !== '') {
+  const relatedUrl = new URL(
+    `/api/v1/storefront/products?category=${encodeURIComponent(relatedCategory)}`,
+    apiOrigin,
+  );
+  const relatedController = new AbortController();
+  const relatedTimeout = setTimeout(
+    (): void => relatedController.abort(),
+    SSR_FETCH_TIMEOUT_MS,
+  );
+  try {
+    const relatedResponse = await fetch(relatedUrl, {
+      headers: apiRequestHeaders,
+      signal: relatedController.signal,
+    });
+    if (relatedResponse.ok) {
+      const data = (await relatedResponse.json()) as StorefrontApiProductSummary[];
+      relatedProducts = pickRelatedProducts(product.id, data);
+    } else if (relatedResponse.status !== 404) {
+      // 404 sería "categoría sin productos" pero el controller devuelve
+      // [] para ese caso; cualquier otro status sí es error.
+      relatedError = `HTTP ${relatedResponse.status}`;
+    }
+  } catch (err) {
+    relatedError =
+      err instanceof Error ? `${err.name}: ${err.message}` : 'Network error';
+  } finally {
+    clearTimeout(relatedTimeout);
+  }
 }
 
 // Detalle enriquecido: el helper deriveProductDetail decide si usar
@@ -821,9 +890,15 @@ const cardLabels = {
 
           {/* Features carousel — removido: sección redundante con Highlights. */}
 
-          {/* Related products — "You May Also Like" */}
-          {RELATED_PRODUCTS.length > 0 && (
-            <ProductRelated labels={cardLabels} products={RELATED_PRODUCTS} locale={locale} />
+          {/* Related products — "You May Also Like"
+              Derivados del catálogo real del tenant, filtrados por la
+              categoría del producto actual (ver fetch SSR arriba).
+              Si el backend devolvió error o la categoría sólo contiene el
+              producto actual, la sección se oculta. `relatedError` se ignora
+              a propósito: el PDP no expone el error al cliente (sólo en
+              logs del server) y la sección vacía es suficiente. */}
+          {relatedProducts.length > 0 && (
+            <ProductRelated labels={cardLabels} products={relatedProducts} locale={locale} />
           )}
 
           {/* Recently viewed (client-side via localStorage) */}

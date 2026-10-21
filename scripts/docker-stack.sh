@@ -382,10 +382,12 @@ esac
 #
 # Patrón de flags:
 #   build      → no-cache      (en cualquier posición)
+#   up         → --no-build    (recrea containers usando imágenes ya construidas)
 #   rm-volumes → -y            (skip confirmation)
 #   setup      → --install-caddy / -install-caddy
 #                              (copia Caddyfile a /etc/caddy/ y reinicia)
 HAS_NO_CACHE=0
+HAS_NO_BUILD=0
 RM_VOLUMES_SKIP_CONFIRM=0
 SETUP_INSTALL_CADDY=0
 KNOWN_FLAGS=()
@@ -393,6 +395,9 @@ case "$cmd_canonical" in
         build)
             KNOWN_FLAGS=("--no-cache")
             ;;
+    up)
+        KNOWN_FLAGS=("--no-build")
+        ;;
     rm-volumes)
         KNOWN_FLAGS=("-y")
         ;;
@@ -427,6 +432,7 @@ for arg in "$@"; do
             is_flag=1
             case "$flag" in
                 --no-cache)       HAS_NO_CACHE=1 ;;
+                --no-build)       HAS_NO_BUILD=1 ;;
                 -y)               RM_VOLUMES_SKIP_CONFIRM=1 ;;
                 --dry-run)        SYNC_ASSETS_DRY_RUN=1 ;;
                 --force)          SYNC_ASSETS_FORCE=1 ;;
@@ -553,6 +559,7 @@ fi
 # Esto evita filtrarlos manualmente en cada call site y mantiene
 # la firma cmd_*(stage, store, [svc]) estable.
 export HAS_NO_CACHE
+export HAS_NO_BUILD
 export RM_VOLUMES_SKIP_CONFIRM
 export SYNC_ASSETS_DRY_RUN
 export SETUP_INSTALL_CADDY

@@ -54,7 +54,7 @@ cmd_help() {
         "start"        ""                           "Levantar containers existentes (sin rebuild)" \
         "stop"         ""                           "Detener containers (preserva estado)" \
         "restart"      ""                           "Reiniciar containers corriendo" \
-        "up"           ""                           "Build + start (recrea si cambiaron Dockerfile/.env)" \
+        "up"           "--no-build"                 "Build + start (recrea si cambiaron Dockerfile/.env)" \
         "down"         ""                           "Detener + eliminar containers (preserva volumenes)" \
         "build"        "--no-cache"                 "Reconstruir imagenes Docker" \
         "ps"           ""                           "Vista global de containers de las 6 instancias" \
@@ -135,15 +135,27 @@ No tocar .env/Dockerfile/composer.json entre 'restart' y un nuevo start sin
             ;;
         up)
             description="Equivalente a 'docker compose up -d --build --remove-orphans': construye imágenes (si Dockerfile/compose cambiaron) Y arranca containers en background. Recrea solo los services cuyo compose/config cambió; NO toca volúmenes named. Usar después de un git pull que tocó backend/Dockerfile, frontend/Dockerfile, docker-compose.yml, o variables de .env. Para un rebuild completo desde cero (BD incluida) usar 'nuke' + 'up' o 'fresh'."
-            usage_args="<stage> <store|all> [<svc>|all]"
+            usage_args="[--no-build] <stage> <store|all> [<svc>|all]"
             example="$0 up dev panda-estampados-and-kitsune             # rebuild (si hace falta) + levantar Panda dev
 $0 up dev panda-estampados-and-kitsune backend      # rebuild + levantar SOLO backend
-$0 up production all                               # las 3 prod (rebuild si cambió algo)"
-            notes="Diferencias con comandos vecinos:
+$0 up production all                               # las 3 prod (rebuild si cambió algo)
+$0 up --no-build dev panda-estampados-and-kitsune frontend  # recrea frontend sin rebuildear (la imagen ya existe)"
+            notes="Flags:
+  no-build → NO invoca 'docker compose build': reusa las imágenes
+             existentes y solo recrea containers (--force-recreate). Útil
+             cuando la build de OTRO servicio está rota y querés
+             recrear solo 1 container, o cuando ya construiste la imagen
+             via 'build' por separado. NO usar después de un cambio de
+             Dockerfile (el container viejo quedaría con la imagen
+             anterior).
+
+Diferencias con comandos vecinos:
   start   → arranca SIN rebuild aunque haya cambios (NO usar tras git pull).
   build   → solo reconstruye imágenes, no arranca nada.
   fresh   → down -v + up --build + migrate + seed (DESTRUCTIVO con BD).
-Si solo querés bounce rápido de procesos, 'restart' es más barato que 'up'."
+Si solo querés bounce rápido de procesos, 'restart' es más barato que 'up'.
+Si tenés que recrear 1 container sin rebuildear (build rota, imagen ya
+construida, no querés build lento), usar 'up --no-build'."
             ;;
         down)
             description="Detiene Y elimina containers via 'docker compose down --remove-orphans' (preserva volúmenes named, imágenes y la build cache). Equivalente a hacer 'docker rm' de los containers del compose. Útil cuando querés un estado limpio de containers pero conservar BD y storage. Para volver a levantar: 'up' o 'start'."

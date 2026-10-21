@@ -143,23 +143,32 @@ health check todavía en rojo.
 todos los servicios que tienen sección `build:`**, no solo el indicado. Si
 el build de otro servicio falla, el que querías recrear tampoco se recrea.
 
-Para recrear **un solo servicio sin reconstruir imágenes**, cuando el build
-está roto o no hizo falta:
+### Recrear un solo servicio sin rebuildear imágenes
+
+Cuando el build está roto en otro servicio, o cuando ya construiste la
+imagen por separado y solo querés recrear el container, usar el flag
+`--no-build` del orquestador (en lugar de invocar `docker compose`
+directo, lo cual está prohibido arriba):
 
 ```bash
-cd docker/instances/<stage>/<store>
-docker compose --env-file environment/.env \
-  up -d --no-build --force-recreate <servicio>
+./scripts/docker-stack.sh up --no-build dev instrumentos-musicales-la-voz frontend
+# Internamente: docker compose up -d --no-build --force-recreate --remove-orphans frontend
 ```
 
-**Antes de.applylo, validá el compose** — no toca containers:
+Internamente `docker_compose` agrega `--force-recreate` al `--no-build`
+porque, sin build, compose no detecta cambios y NO recrearía el container
+"viejo" con la imagen ya construida. Con `--force-recreate`, el container
+se recrea aunque su config no haya cambiado — que es exactamente lo que
+querés cuando pediste explícitamente `--no-build`.
 
-```bash
-docker compose --env-file environment/.env config >/dev/null && echo OK
-```
+**NO usar `--no-build` después de un cambio en el Dockerfile**: el
+container quedaría con la imagen anterior. Para cambios de Dockerfile,
+usar `up` (sin flag) o `build --no-cache` + `start`.
 
-Corré ese comando **desde el directorio de la instancia**: las rutas de
-los `volumes` y `env_file` son relativas a ese cwd.
+El flag `--no-build` también es útil como alternativa al clásico
+`docker compose ... up -d --no-build --force-recreate` directo, sin
+necesidad de caer al bypass del orquestador (ver
+[Antipatrones](#antipatrones)).
 
 ## Caché del dev server de Astro
 

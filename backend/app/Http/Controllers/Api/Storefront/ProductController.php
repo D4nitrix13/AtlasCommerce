@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\Storefront;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Storefront\StorefrontProductResource;
+use App\Models\Catalog\Category;
 use App\Models\Catalog\Product;
 use App\Services\Catalog\ProductSearchService;
 use App\Services\Catalog\WholesalePricingService;
@@ -28,10 +29,25 @@ class ProductController extends Controller
      *
      * Solo se devuelven productos publicados en `product_stores` con
      * `is_visible = true`. No expone stock, costo ni datos internos.
+     *
+     * Query params:
+     *   - category: string opcional (slug). Si se pasa, filtra a productos
+     *     cuya `category_id` apunte a una categoría con ese slug. Útil
+     *     para derivar "productos relacionados por categoría" en la PDP
+     *     sin necesitar un endpoint dedicado.
      */
     public function index(Request $request): JsonResponse
     {
         $store = $request->attributes->get('store');
+
+        $validated = $request->validate(rules: [
+            'category' => ['nullable', 'string', 'max:100'],
+        ]);
+        $categorySlugRaw = $validated['category'] ?? null;
+        $categorySlug = $categorySlugRaw !== null ? trim($categorySlugRaw) : null;
+        if ($categorySlug === '') {
+            $categorySlug = null;
+        }
 
         // Filtra primero los product_ids visibles del tenant (en la pivot
         // product_stores), después hace el whereIn. Equivalente a whereHas
@@ -45,17 +61,32 @@ class ProductController extends Controller
         // Eager-load de las relaciones que el Resource necesita para
         // emitir su shape completa. Sin with(), category/brand/images
         // quedan ausentes y dispara N+1 si el Resource los tocara.
-        $products = Product::query()
+        $query = Product::query()
             ->whereIn('id', $productIds)
-            ->with(['category', 'brand', 'images', 'variants'])
-            ->get();
+            ->with(['category', 'brand', 'images', 'variants']);
+
+        if ($categorySlug !== null) {
+            // Lookup directo por slug; el modelo respeta soft-deletes.
+            // Si la categoría no existe, devolvemos lista vacía (misma
+            // shape plana) en vez de 404 — la PDP consume este endpoint
+            // para derivar relacionados y prefiere empty sobre error.
+            $category = Category::query()
+                ->where(column: 'slug', operator: '=', value: $categorySlug)
+                ->first();
+
+            if ($category === null) {
+                return response()->json(data: []);
+            }
+
+            $query->where(column: 'category_id', operator: '=', value: $category->id);
+        }
 
         // Shape plana (array de productos, NO `{data: [...]}`). El
         // listado storefront (`StorefrontProductsList.tsx`) consume esa
         // forma y un cambio de envoltura rompe el contrato. Ver PHPDoc
         // de `StorefrontProductResource::$wrap = null`.
         return response()->json(
-            data: StorefrontProductResource::collection($products)->resolve(),
+            data: StorefrontProductResource::collection($query->get())->resolve(),
         );
     }
 

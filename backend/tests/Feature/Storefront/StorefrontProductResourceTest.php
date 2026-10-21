@@ -142,7 +142,7 @@ final class StorefrontProductResourceTest extends TestCase
 
         // imageUrl siempre presente (placeholder si no hay imágenes).
         $this->assertArrayHasKey('imageUrl', $resource);
-        $this->assertSame('/images/product-placeholder.png', $resource['imageUrl']);
+        $this->assertSame('/images/product-placeholder.svg', $resource['imageUrl']);
 
         // Flags siempre presentes.
         $this->assertTrue($resource['hasCondition']);
@@ -186,10 +186,18 @@ final class StorefrontProductResourceTest extends TestCase
         $resource = (new StorefrontProductResource($product))
             ->resolve(request: $this->app['request']);
 
-        // Primary gana aunque no sea la primera por sort_order.
-        $this->assertSame('images/b.webp', $resource['imageUrl']);
-        // Galería ordenada por sort_order ASC.
-        $this->assertSame(['images/a.webp', 'images/b.webp', 'images/c.webp'], $resource['images']);
+// Primary gana aunque no sea la primera por sort_order. El Resource
+    // devuelve la ruta del proxy de assets, no el storage key crudo.
+    $this->assertSame('/api/v1/storefront/assets/images/b.webp', $resource['imageUrl']);
+    // Galería ordenada por sort_order ASC.
+    $this->assertSame(
+        [
+            '/api/v1/storefront/assets/images/a.webp',
+            '/api/v1/storefront/assets/images/b.webp',
+            '/api/v1/storefront/assets/images/c.webp',
+        ],
+        $resource['images'],
+    );
     }
 
     #[Test]
@@ -202,7 +210,7 @@ final class StorefrontProductResourceTest extends TestCase
         $resource = (new StorefrontProductResource($product))
             ->resolve(request: $this->app['request']);
 
-        $this->assertSame('/images/product-placeholder.png', $resource['imageUrl']);
+        $this->assertSame('/images/product-placeholder.svg', $resource['imageUrl']);
         $this->assertArrayNotHasKey('images', $resource);
     }
 
@@ -232,7 +240,7 @@ final class StorefrontProductResourceTest extends TestCase
         $response->assertJsonPath(path: 'priceCents', expect: 150_000);
         $response->assertJsonPath(path: 'category', expect: 'guitarras');
         $response->assertJsonPath(path: 'brand', expect: 'Fender');
-        $response->assertJsonPath(path: 'imageUrl', expect: '/images/product-placeholder.png');
+        $response->assertJsonPath(path: 'imageUrl', expect: '/images/product-placeholder.svg');
         // No envoltura "data".
         $response->assertJsonMissingPath(path: 'data.id');
     }
@@ -296,5 +304,86 @@ final class StorefrontProductResourceTest extends TestCase
         $slugs = collect($response->json())->pluck('slug')->all();
         $this->assertContains('mine', $slugs);
         $this->assertNotContains('theirs', $slugs);
+    }
+
+    #[Test]
+    public function index_filters_by_category_slug_when_provided(): void
+    {
+        // 2 productos en la categoría guitarras (default de setUp) + 1 en otra.
+        $this->makeProduct(attributes: ['slug' => 'guitar-a', 'name' => 'Guitarra A']);
+        $this->makeProduct(attributes: ['slug' => 'guitar-b', 'name' => 'Guitarra B']);
+
+        Category::query()->create(attributes: [
+            'name' => 'Amplificadores',
+            'slug' => 'amps',
+        ]);
+
+        $otherCategory = Category::query()->where('slug', 'amps')->firstOrFail();
+        $otherProduct = Product::factory()->create([
+            'category_id' => $otherCategory->id,
+            'brand_id' => $this->brand->id,
+            'currency_id' => $this->currency->id,
+            'slug' => 'amp-z',
+            'name' => 'Amplificador Z',
+        ]);
+        ProductStore::query()->create([
+            'product_id' => $otherProduct->id,
+            'store_id' => $this->store->id,
+            'is_visible' => true,
+        ]);
+
+        $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products?category=guitarras');
+
+        $response->assertOk();
+        $items = $response->json();
+        $slugs = collect($items)->pluck('slug')->all();
+        $this->assertContains('guitar-a', $slugs);
+        $this->assertContains('guitar-b', $slugs);
+        $this->assertNotContains('amp-z', $slugs);
+    }
+
+    #[Test]
+    public function index_without_category_param_returns_all_visible_products(): void
+    {
+        $this->makeProduct(attributes: ['slug' => 'in-category', 'name' => 'En categoría']);
+
+        Category::query()->create(attributes: [
+            'name' => 'Amplificadores',
+            'slug' => 'amps',
+        ]);
+        $otherCategory = Category::query()->where('slug', 'amps')->firstOrFail();
+        $otherProduct = Product::factory()->create([
+            'category_id' => $otherCategory->id,
+            'brand_id' => $this->brand->id,
+            'currency_id' => $this->currency->id,
+            'slug' => 'other-category',
+            'name' => 'Otra categoría',
+        ]);
+        ProductStore::query()->create([
+            'product_id' => $otherProduct->id,
+            'store_id' => $this->store->id,
+            'is_visible' => true,
+        ]);
+
+        $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products');
+
+        $response->assertOk();
+        $slugs = collect($response->json())->pluck('slug')->all();
+        // Sin filtro, el listado expone ambas categorías.
+        $this->assertContains('in-category', $slugs);
+        $this->assertContains('other-category', $slugs);
+    }
+
+    #[Test]
+    public function index_returns_empty_array_for_unknown_category_slug(): void
+    {
+        $this->makeProduct(attributes: ['slug' => 'exists', 'name' => 'Existe']);
+
+        $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products?category=does-not-exist');
+
+        $response->assertOk();
+        // Lista vacía (NO 404): la PDP prefiere empty sobre error al
+        // derivar relacionados de una categoría inválida.
+        $this->assertSame([], $response->json());
     }
 }
