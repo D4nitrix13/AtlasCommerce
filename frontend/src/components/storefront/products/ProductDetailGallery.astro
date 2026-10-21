@@ -135,11 +135,20 @@ const showThumbs = images.length > 1;
               loading={isFirst ? 'eager' : 'lazy'}
               decoding={isFirst ? 'sync' : 'async'}
               fetchpriority={isFirst ? 'high' : undefined}
-              class="aspect-[22/10] h-full w-full object-cover"
+              class="aspect-[22/10] h-full w-full object-contain"
               onerror="this.onerror=null;this.parentElement?.classList.add('bg-slate-100');this.remove()"
             />
+          /*
+           * Las imágenes del catálogo son cuadradas (1600x1600) y el marco
+           * de la galería es horizontal 22:10. Con `object-cover` una
+           * cuadrada pierde cerca del 63% del alto y el instrumento queda
+           * cortado. `object-contain` conserva el marco: las cuadradas se
+           * ven completas con aire a los lados, y las panorámicas del flujo
+           * antiguo, que sí están pensadas para ese ratio, siguen llenando.
+           * Ninguna imagen se recorta.
+           */
           ) : (
-            <div class="flex aspect-[22/10] h-full w-full items-center justify-center p-6 sm:p-10">
+            <div class="flex aspect-[22/10] h-full w-full items-center justify-center bg-slate-50 p-6 sm:p-10">
               <ProductMockup
                 variant={mockupVariant}
                 logoText={labels.logoText}
