@@ -137,7 +137,7 @@ services:
       - FTP_HOST=ftp
       - FTP_PORT=21
       - FTP_USERNAME=${FTP_USERNAME:-dev-ftp}
-      - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
+      - "FTP_PASSWORD=${FTP_PASSWORD:?FTP_PASSWORD es obligatorio en environment/.env - sin fallback para no enmascarar una credencial equivocada}"
       - FTP_ROOT=/srv/ftp
       - LOG_CHANNEL=stderr
     extra_hosts:

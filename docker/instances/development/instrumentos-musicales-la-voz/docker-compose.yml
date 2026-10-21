@@ -145,7 +145,7 @@ services:
       - FTP_HOST=ftp
       - FTP_PORT=21
       - FTP_USERNAME=${FTP_USERNAME:-dev-ftp}
-      - FTP_PASSWORD=${FTP_PASSWORD:-dev-ftp-pass}
+      - "FTP_PASSWORD=${FTP_PASSWORD:?FTP_PASSWORD es obligatorio en environment/.env - sin fallback para no enmascarar una credencial equivocada}"
       - FTP_ROOT=/srv/ftp
       # Path dentro del container a data/catalog-meta/ (baked-in al build
       # via COPY en el Dockerfile). Contiene los product.json scrapeados de
