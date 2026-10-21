@@ -30,6 +30,23 @@
         <env name="CACHE_STORE" value="array"/>
 
         <!--
+          El store de la caché de assets NO hereda de `CACHE_STORE`:
+          `config/assets.php` lee su propia variable `ASSETS_CACHE_STORE`
+          y usa `redis` como default. Sin esta línea, `CACHE_STORE=array`
+          no alcanzaba y los tests del AssetController medían el Redis
+          real —claves y TTLs de corridas anteriores—, por eso fallaban
+          sólo cuando se repetía la suite dentro de la ventana de TTL.
+
+          Fijarlo acá en `array` aísla la suite por diseño: cada test
+          corre contra un store en memoria que Laravel reconstruye con
+          la app, así que no hay estado que heredar entre corridas ni
+          entre tests. El default `redis` queda sólo para runtime, que es
+          donde tiene sentido. Los tests que necesitan observar el TTL
+          usan un double sobre `ArrayStore` en vez de Redis.
+        -->
+        <env name="ASSETS_CACHE_STORE" value="array"/>
+
+        <!--
           Tests DEBEN correr contra una DB aislada: `RefreshDatabase`
           hace TRUNCATE y este repo tiene cuatro instancias con datos
           reales.

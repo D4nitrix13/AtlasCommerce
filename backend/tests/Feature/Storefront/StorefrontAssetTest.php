@@ -7,11 +7,14 @@ namespace Tests\Feature\Storefront;
 use App\Models\Settings\Currency;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
+use Illuminate\Cache\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Support\RecordingTtlStore;
 use Tests\TestCase;
 
 /**
@@ -185,10 +188,12 @@ final class StorefrontAssetTest extends TestCase
     #[Test]
     public function it_caches_assets_with_configured_store_and_ttl(): void
     {
-        // Fase 3: T3 — el cache store y TTL vienen de config en lugar
-        // de hard-coded. Defaults: `redis` + 300s. Path único por test
-        // para evitar cache compartida entre tests (RefreshDatabase
-        // no limpia Redis).
+        // Fase 3: T3 — el cache store y TTL vienen de config en lugar de
+        // hard-coded. El store configurado en la suite es `array`
+        // (`phpunit.xml`), o sea un store en memoria que Laravel
+        // reconstruye por test: el "antes del request no hay nada" es
+        // una propiedad del diseño, no una casualidad de que la key no
+        // haya quedado de una corrida anterior.
         $path = 'tenants/panda-estampados/branding/cache-test.webp';
 
         Storage::disk(name: 'ftp')->put(
@@ -196,43 +201,42 @@ final class StorefrontAssetTest extends TestCase
             contents: 'cached-content',
         );
 
-        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $path);
-        $cacheStore = (string) config(key: 'assets.cache_store');
+        $cacheStoreName = (string) config(key: 'assets.cache_store');
         $cacheTtl = (int) config(key: 'assets.cache_ttl');
+        $recorder = $this->recordTtlOf(name: $cacheStoreName);
+        $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $path);
 
         // Antes del request: cache no existe en el store configurado.
-        $this->assertFalse(\Illuminate\Support\Facades\Cache::store(name: $cacheStore)->has($cacheKey));
+        $this->assertFalse(Cache::store(name: $cacheStoreName)->has($cacheKey));
 
         // Hacer el request: dispara cache miss + lectura FTP + escritura en cache.
         $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path)
             ->assertOk();
 
         // Despues del request: cache existe y respeta el TTL configurado.
-        $this->assertTrue(\Illuminate\Support\Facades\Cache::store(name: $cacheStore)->has($cacheKey));
+        $this->assertTrue(Cache::store(name: $cacheStoreName)->has($cacheKey));
         $this->assertSame(
             expected: 'cached-content',
-            actual: \Illuminate\Support\Facades\Cache::store(name: $cacheStore)->get($cacheKey),
+            actual: Cache::store(name: $cacheStoreName)->get($cacheKey),
         );
 
-        // Verifica el TTL via la API del RedisStore subyacente. La key
-        // en Redis tiene dos prefijos (predis global + cache store);
-        // usamos el método del cache store para evitar hardcodear
-        // ninguno. Drift permitido: ±5s por latencia entre set y lectura.
-        $store = \Illuminate\Support\Facades\Cache::store(name: $cacheStore)->getStore();
-        assert($store instanceof \Illuminate\Cache\RedisStore);
-        $prefixedKey = $store->getPrefix().$cacheKey;
-        $redisTtl = (int) $store->connection()->ttl($prefixedKey);
-        $this->assertGreaterThan($cacheTtl - 5, $redisTtl);
-        $this->assertLessThanOrEqual($cacheTtl, $redisTtl);
+        // El TTL va exacto, sin ventana de drift: se lee lo que el
+        // controller le pasó al store, no lo que quedó en un reloj
+        // externo degradándose con el paso del tiempo.
+        $this->assertSame(expected: $cacheTtl, actual: $recorder->ttlFor($cacheKey));
     }
 
     #[Test]
     public function it_uses_configured_cache_store(): void
     {
-        // Fase 3 T3: cambiar el config `assets.cache_store` debe
-        // cambiar el store usado. Usamos `array` (in-memory) para no
-        // depender de Redis en este test específico.
-        config()->set(key: 'assets.cache_store', value: 'array');
+        // Cambiar `assets.cache_store` debe cambiar el store usado. El
+        // probe es un store en memoria propio de este test: prueba que
+        // el controller escribe donde dice la config y NO donde dice por
+        // defecto. Con `array` como destino el assert sería vacío, porque
+        // `array` es justamente el default de la suite.
+        $probe = $this->registerRecordingCacheStore(name: 'assets-probe');
+
+        config()->set(key: 'assets.cache_store', value: 'assets-probe');
         config()->set(key: 'assets.cache_ttl', value: 300);
 
         $path = 'tenants/panda-estampados/branding/cache-store-config-test.webp';
@@ -244,28 +248,34 @@ final class StorefrontAssetTest extends TestCase
 
         $cacheKey = 'ftp-asset:'.hash(algo: 'sha256', data: $path);
 
-        // Antes del request: nada en el store `array`.
-        $this->assertFalse(\Illuminate\Support\Facades\Cache::store(name: 'array')->has($cacheKey));
+        // Antes del request: nada en el probe.
+        $this->assertFalse(Cache::store(name: 'assets-probe')->has($cacheKey));
 
         $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path)
             ->assertOk();
 
-        // Después del request: presente en `array`, no en `redis`.
-        $this->assertTrue(\Illuminate\Support\Facades\Cache::store(name: 'array')->has($cacheKey));
+        // Después del request: presente en el store configurado.
+        $this->assertTrue(Cache::store(name: 'assets-probe')->has($cacheKey));
         $this->assertSame(
             expected: 'array-store-content',
-            actual: \Illuminate\Support\Facades\Cache::store(name: 'array')->get($cacheKey),
+            actual: Cache::store(name: 'assets-probe')->get($cacheKey),
         );
+
+        // Y ausente del store por defecto de la suite: la config manda.
+        $this->assertFalse(Cache::store(name: (string) config(key: 'cache.default'))->has($cacheKey));
     }
 
     #[Test]
     public function it_uses_configured_cache_ttl(): void
     {
-        // Fase 3 T3: cambiar `assets.cache_ttl` debe cambiar el TTL
-        // aplicado en Redis. Usamos un TTL alto (86400 = 24h, valor
-        // histórico pre-Fase-3) para que no expire durante el test.
+        // Cambiar `assets.cache_ttl` debe cambiar el TTL que se aplica.
+        // El probe registra el TTL en el `put()` que dispara el
+        // `remember()` del controller, así que el assert mide el
+        // comportamiento del controller y no el estado de Redis.
         $customTtl = 86_400;
-        config()->set(key: 'assets.cache_store', value: 'redis');
+        $probe = $this->registerRecordingCacheStore(name: 'assets-ttl-probe');
+
+        config()->set(key: 'assets.cache_store', value: 'assets-ttl-probe');
         config()->set(key: 'assets.cache_ttl', value: $customTtl);
 
         $path = 'tenants/panda-estampados/branding/cache-ttl-config-test.webp';
@@ -280,14 +290,42 @@ final class StorefrontAssetTest extends TestCase
         $this->getJson(uri: 'http://panda-estampados.test/api/v1/storefront/assets/'.$path)
             ->assertOk();
 
-        // TTL leído a través del RedisStore con prefijo aplicado
-        // correctamente. Drift permitido: ±5s.
-        $store = \Illuminate\Support\Facades\Cache::store(name: 'redis')->getStore();
-        assert($store instanceof \Illuminate\Cache\RedisStore);
-        $prefixedKey = $store->getPrefix().$cacheKey;
-        $redisTtl = (int) $store->connection()->ttl($prefixedKey);
-        $this->assertGreaterThan($customTtl - 5, $redisTtl);
-        $this->assertLessThanOrEqual($customTtl, $redisTtl);
+        $this->assertSame(expected: $customTtl, actual: $probe->ttlFor($cacheKey));
+    }
+
+    /**
+     * Reemplaza el store subyacente del cache store `name` por un double
+     * que registra el TTL de cada escritura, y lo devuelve.
+     *
+     * `Cache::store()` devuelve el mismo repository en todo el test, así
+     * que el double es el mismo objeto que usa el controller.
+     */
+    private function recordTtlOf(string $name): RecordingTtlStore
+    {
+        $recorder = new RecordingTtlStore;
+        Cache::store(name: $name)->setStore($recorder);
+
+        return $recorder;
+    }
+
+    /**
+     * Registra un cache store nuevo, en memoria, respaldado por un double
+     * que registra el TTL. Sirve para distinguir "el controller usó el
+     * store configurado" de "el controller usó el store por defecto".
+     *
+     * El creator devuelve el `Repository`, no el store pelado: Laravel no
+     * envuelve lo que devuelve `Cache::extend()`.
+     */
+    private function registerRecordingCacheStore(string $name): RecordingTtlStore
+    {
+        $recorder = new RecordingTtlStore;
+        Cache::extend(
+            driver: 'assets-recording',
+            callback: static fn (): Repository => Cache::repository(store: $recorder),
+        );
+        config()->set(key: 'cache.stores.'.$name, value: ['driver' => 'assets-recording']);
+
+        return $recorder;
     }
 
     #[Test]
