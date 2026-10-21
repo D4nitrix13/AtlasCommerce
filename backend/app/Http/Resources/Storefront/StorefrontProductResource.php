@@ -64,10 +64,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *    la relación `variants` fue eager-loaded por el controller (lo hace
  *    el endpoint `show()` del PDP; el `index()` del listado no). Shape
  *    por variante: `{id, name, finishSlug, finishLabel, finishHex,
- *    condition, stock}`. Variantes con `is_active=false` o sin
- *    `finish_slug` se filtran porque la PDP no las necesita. Permite
- *    a la PDP derivar el picker de acabado desde el backend en lugar
- *    de caer al set hardcoded de Saber Alter.
+ *    condition, stock, handedness}`. Variantes con `is_active=false` o
+ *    sin `finish_slug` se filtran porque la PDP no las necesita.
+ *    Permite a la PDP derivar el picker de acabado y de mano desde el
+ *    backend en lugar de caer al set hardcoded de Saber Alter.
  *
  * Prevención de N+1: las relaciones usadas en este Resource (images,
  * category, brand, variants, currency) deben eager-loadearse via
@@ -232,6 +232,13 @@ class StorefrontProductResource extends JsonResource
      *   - finishHex    string|null
      *   - condition    string
      *   - stock        int
+     *   - handedness   string|null  ('left-handed' o null = diestro)
+     *
+     * `handedness` se emite VERBATIM, sin normalizar: `NULL` en BD
+     * significa "regular / diestro" según la convención de la migración
+     * `2026_10_19_160000_add_left_handed_flags_to_products`, y el
+     * consumer decide cómo presentarlo. El campo es aditivo — el
+     * frontend lo trata como opcional para no romper clientes old.
      *
      * Variantes con `is_active = false` se filtran (no aparecen en el
      * PDP). Variantes sin `finish_slug` también se filtran — son
@@ -257,6 +264,7 @@ class StorefrontProductResource extends JsonResource
                 'finishHex' => $variant->finish_hex,
                 'condition' => (string) ($variant->condition ?? 'nuevo'),
                 'stock' => (int) ($variant->stock ?? 0),
+                'handedness' => $variant->handedness,
             ];
         }
 

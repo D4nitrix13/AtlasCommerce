@@ -82,6 +82,16 @@ import {
   pickRelatedProducts,
   type StorefrontApiProductSummary,
 } from '../../../lib/related-products';
+import {
+  HANDEDNESS_LEFT,
+  HANDEDNESS_RIGHT,
+  buildFinishOptions,
+  collectHandednessOptions,
+  hasFinishPicker,
+  hasHandednessPicker,
+  resolveSelectedFinishId,
+  type ProductApiVariant,
+} from '../../../lib/product-variant-selection';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -124,15 +134,14 @@ interface StorefrontApiProductImage {
   sortOrder: number;
 }
 
-interface StorefrontApiProductVariant {
-  id: number;
-  name: string;
-  finishSlug: string;
-  finishLabel: string;
-  finishHex: string | null;
-  condition: 'nuevo' | 'usado' | 'ambos' | string;
-  stock: number;
-}
+/**
+ * Shape de `variants[]` del PDP.
+ *
+ * Reexportada desde `lib/product-variant-selection` para que el tipo y
+ * los helpers que lo consumen no puedan divergir. `handedness` es
+ * opcional a propósito: el campo se agregó al resource en Oct 2026.
+ */
+type StorefrontApiProductVariant = ProductApiVariant;
 
 interface StorefrontApiProduct {
   id: number;
@@ -505,17 +514,82 @@ const COLOR_OPTIONS: readonly VariantOption[] = (() => {
 const SELECTED_CONDITION = CONDITION_OPTIONS[0]?.id ?? 'nuevo';
 const SELECTED_SIZE = SIZE_OPTIONS[0]?.id ?? '44';
 
-// Acabado seleccionado: viene por query param `?finish=<variant-slug>`
-// (English + descriptive por convención del resto de la app — ver
-// `2fa.astro`/`admin/sales/*` que usan `token`/`status`/`dateFrom`).
-// Default = primera variante. Esto permite cambiar el acabado via SSR sin JS.
+// ─── Mano (izquierda / derecha) ───────────────────────────────────────
+//
+// `handedness` viene verbatim del backend: `'left-handed'` o `null`
+// (que el dominio significa "regular / diestro"). El módulo de dominio
+// normaliza `null` a `HANDEDNESS_RIGHT` para que la UI pueda comparar y
+// armar slugs de URL, pero NO inventa un valor que el backend no mandó.
+//
+// `?hand=<valor>` (English + descriptive, misma convención que
+// `?finish=`) filtra la lista de acabados. Sólo tiene efecto cuando el
+// producto ofrece más de una mano: con una sola, filtrar deja la lista
+// igual y lo único que gana es una URL con un parámetro inerte.
+const HANDEDNESS_LABELS: Readonly<Record<string, string>> = {
+  [HANDEDNESS_LEFT]: t['storefront.products.detail.v4.hand.left'],
+  [HANDEDNESS_RIGHT]: t['storefront.products.detail.v4.hand.right'],
+};
+
+const handednessOptions = collectHandednessOptions(apiVariants ?? [], HANDEDNESS_LABELS);
+const showHandednessPicker = hasHandednessPicker(handednessOptions);
+const selectedHandedness: string | null = (() => {
+  const fromUrl = url.searchParams.get('hand');
+  if (!showHandednessPicker || fromUrl === null) return null;
+  return handednessOptions.some((option) => option.id === fromUrl) ? fromUrl : null;
+})();
+
+// ─── Acabado ──────────────────────────────────────────────────────────
+//
+// `?finish=<slug>` gana siempre sobre el default (un link compartido
+// tiene que respetarse). Sin query param el default es la PRIMERA
+// variante con `stock > 0`, y si ninguna tiene stock la primera de la
+// lista: lo que se ve en la primera pintura debería ser algo comprable
+// antes que algo agotado.
+//
+// El filtro por mano se aplica ANTES de resolver el default: con una
+// mano seleccionada, el stock que cuenta es el de esa mano.
+const finishesForHand: readonly VariantOption[] = (() => {
+  const fromVariants = buildFinishOptions(apiVariants ?? [], selectedHandedness);
+  if (fromVariants.length > 0) return fromVariants;
+  return COLOR_OPTIONS;
+})();
+
+const variantsForHand: readonly StorefrontApiProductVariant[] = (() => {
+  if (apiVariants === undefined || selectedHandedness === null) return apiVariants ?? [];
+  return apiVariants.filter(
+    (variant) =>
+      (variant.handedness ?? HANDEDNESS_RIGHT) === selectedHandedness,
+  );
+})();
+
 const selectedFinishFromUrl = url.searchParams.get('finish');
 const SELECTED_COLOR =
-  COLOR_OPTIONS.find((option) => option.id === selectedFinishFromUrl)?.id ??
-  COLOR_OPTIONS[0]?.id ??
+  resolveSelectedFinishId(finishesForHand, variantsForHand, selectedFinishFromUrl) ??
+  finishesForHand[0]?.id ??
   'sunburst';
 const selectedFinish =
-  COLOR_OPTIONS.find((option) => option.id === SELECTED_COLOR) ?? COLOR_OPTIONS[0];
+  finishesForHand.find((option) => option.id === SELECTED_COLOR) ?? finishesForHand[0];
+
+/**
+ * ¿El selector de acabado se renderiza?
+ *
+ * Un solo acabado no necesita un control: el chip único posible sería
+ * un botón que no cambia nada. El dato se sigue mostrando como texto
+ * arriba. Esto cubre los productos con un único acabado real y los que
+ * todavía conservan el `finish_slug` de fallback.
+ */
+const showFinishPicker = hasFinishPicker(finishesForHand);
+
+/**
+ * ¿La mano se muestra como dato (no como selector)?
+ *
+ * El catálogo actual ofrece una sola mano por producto, así que la
+ * respuesta es sí para el 100% de los casos. Cuando aparezca el primer
+ * producto con ambas manos, `showHandednessPicker` pasa a `true` y esto
+ * se apaga solo.
+ */
+const showHandednessLabel =
+  !showHandednessPicker && handednessOptions.length === 1;
 
 // Imágenes filtradas por el acabado seleccionado. Estrategia en 3 capas:
 //   1. Si la API devolvió `apiVariants` y `product.images` como objetos
@@ -829,49 +903,104 @@ const cardLabels = {
                     {/* Picker de variantes con thumbnails reales (estilo Nike).
                         Cada swatch es un <a> con ?finish=<id> que filtra la galería
                         via query param (sin JS). Thumbnails uniformes ~48×48
-                        con object-cover para mantener el aspect ratio. */}
-                    <ul
-                      class="flex flex-wrap items-center gap-1.5"
-                      role="list"
-                      aria-label="Selector de acabado"
-                    >
-                      {COLOR_OPTIONS.map((option) => {
-                        const isActive = option.id === SELECTED_COLOR;
-                        const thumbSrc = variantFirstImage[option.id];
-                        return (
-                          <li>
-                            <a
-                              href={`?finish=${option.id}`}
-                              title={option.label}
-                              aria-label={`Cambiar a ${option.label}`}
-                              aria-current={isActive ? 'true' : undefined}
-                              class:list={[
-                                'block h-12 w-12 overflow-hidden rounded-md border-2 bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
-                                isActive
-                                  ? 'border-slate-900'
-                                  : 'border-slate-200 opacity-70 hover:opacity-100',
-                              ]}
-                            >
-                              {thumbSrc !== undefined ? (
-                                <img
-                                  src={thumbSrc}
-                                  alt=""
-                                  loading="lazy"
-                                  decoding="async"
-                                  class="h-full w-full rounded-md object-cover"
-                                />
-                              ) : (
-                                <span
-                                  aria-hidden="true"
-                                  class="block h-full w-full rounded-md"
-                                  style={`background-color: ${option.hex ?? '#e2e8f0'};`}
-                                />
-                              )}
-                            </a>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                        con object-cover para mantener el aspect ratio.
+
+                        `showFinishPicker` oculta el control cuando el producto
+                        ofrece un solo acabado: el dato de arriba alcanza y un
+                        chip único sería un botón que no cambia nada. */}
+                    {showFinishPicker && (
+                      <ul
+                        class="flex flex-wrap items-center gap-1.5"
+                        role="list"
+                        aria-label="Selector de acabado"
+                      >
+                        {finishesForHand.map((option) => {
+                          const isActive = option.id === SELECTED_COLOR;
+                          const thumbSrc = variantFirstImage[option.id];
+                          return (
+                            <li>
+                              <a
+                                href={`?finish=${option.id}`}
+                                title={option.label}
+                                aria-label={`Cambiar a ${option.label}`}
+                                aria-current={isActive ? 'true' : undefined}
+                                class:list={[
+                                  'block h-12 w-12 overflow-hidden rounded-md border-2 bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
+                                  isActive
+                                    ? 'border-slate-900'
+                                    : 'border-slate-200 opacity-70 hover:opacity-100',
+                                ]}
+                              >
+                                {thumbSrc !== undefined ? (
+                                  <img
+                                    src={thumbSrc}
+                                    alt=""
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="h-full w-full rounded-md object-cover"
+                                  />
+                                ) : (
+                                  <span
+                                    aria-hidden="true"
+                                    class="block h-full w-full rounded-md"
+                                    style={`background-color: ${option.hex ?? '#e2e8f0'};`}
+                                  />
+                                )}
+                              </a>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+
+                    {/* Mano — dos ramas, porque el catálogo actual ofrece
+                        una sola mano por producto:
+
+                          · `showHandednessPicker` (producto con ambas manos):
+                            chips navegables vía `?hand=`.
+                          · `showHandednessLabel` (una sola mano): sólo el
+                            dato. Un selector de una opción es ruido.
+                          · ninguna (sin `handedness` en BD): no se
+                            renderiza nada. */}
+                    {showHandednessPicker && (
+                      <ul
+                        class="flex flex-wrap items-center gap-2"
+                        role="list"
+                        aria-label={t['storefront.products.detail.v4.hand.legend']}
+                      >
+                        {handednessOptions.map((option) => {
+                          const isActive = option.id === selectedHandedness;
+                          return (
+                            <li>
+                              <a
+                                href={`?hand=${option.id}`}
+                                aria-current={isActive ? 'true' : undefined}
+                                class:list={[
+                                  'inline-flex rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
+                                  isActive
+                                    ? 'border-slate-900 bg-slate-900 text-white'
+                                    : 'border-slate-200 text-slate-600 hover:border-slate-900 hover:text-slate-900',
+                                ]}
+                              >
+                                {option.label}
+                              </a>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+
+                    {showHandednessLabel && (
+                      <p
+                        class="text-xs text-slate-500"
+                        data-product-handedness={handednessOptions[0]?.id}
+                      >
+                        {t['storefront.products.detail.v4.hand.label']}:{' '}
+                        <span class="font-semibold text-slate-700">
+                          {handednessOptions[0]?.label}
+                        </span>
+                      </p>
+                    )}
                   </dd>
                 </div>
               </dl>

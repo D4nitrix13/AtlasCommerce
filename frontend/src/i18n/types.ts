@@ -1754,6 +1754,13 @@ export type TranslationKey =
   | 'storefront.products.detail.v4.condition.usado'
   | 'storefront.products.detail.v4.condition.ambos'
   | 'storefront.products.detail.v4.size.legend'
+  // Mano de la variante — el backend emite 'left-handed' o null
+  // (null = regular/diestro). Las keys se indexan por el valor de
+  // dominio, no por el índice del array.
+  | 'storefront.products.detail.v4.hand.left'
+  | 'storefront.products.detail.v4.hand.right'
+  | 'storefront.products.detail.v4.hand.legend'
+  | 'storefront.products.detail.v4.hand.label'
   | 'storefront.products.detail.v4.shipping.heading'
   | 'storefront.products.detail.v4.details.introLabel'
   | 'storefront.products.detail.v4.details.specsHeading'
