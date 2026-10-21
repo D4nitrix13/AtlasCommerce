@@ -3,195 +3,67 @@ skinparam classAttributeIconSize 0
 skinparam classFontSize 11
 skinparam packageStyle rectangle
 hide circle
-hide <<internal>>
 
-' ============================================================
-' 8.2.1 — NÚCLEO DEL SISTEMA (simplificado)
-' Clases marcadas con <<internal>> se ocultan del render.
-' ============================================================
+' Núcleo: tenant (Tienda + DominioTienda) y acceso (Usuario, Rol, Permiso).
 
-package "Núcleo Multitenant" {
-
-  class Tienda {
-    - id: UUID
-    - nombre: String
-    - slug: String
-    - taxRate: Decimal
-    - isActive: Boolean
-    + obtenerConfiguracion(clave: String): String
-    + hasFeature(slug: String): Boolean
-    + primaryDomain(): DominioTienda
-    + activarModoMantenimiento(): void
-    + desactivarModoMantenimiento(): void
-  }
-
-  class DominioTienda {
-    - id: UUID
-    - tiendaId: UUID
-    - domain: String
-    - isPrimary: Boolean
-    + marcarComoPrimario(): void
-    + verificar(): void
-    + desactivar(): void
-  }
-
-  class ConfiguracionTienda {
-    - id: UUID
-    - tiendaId: UUID
-    - clave: String
-    - valor: String
-    - isPublic: Boolean
-    + obtenerValor(): String
-    + esValorBooleano(): Boolean
-    + serializar(): String
-  }
-
-  class StoreFeature {
-    - id: UUID
-    - tiendaId: UUID
-    - slug: String
-    - isActive: Boolean
-    + activar(): void
-    + desactivar(): void
-  }
-
-  class StoreTheme {
-    - id: UUID
-    - tiendaId: UUID
-    - shortName: String
-    - primaryColor: String
-    - tokens: JSON
-    + regenerarTokens(): void
-    + obtenerColor(nombre: String): String
-  }
-
-  class Moneda {
-    - id: UUID
-    - codigoISO: String
-    - nombre: String
-    - simbolo: String
-    - decimalPlaces: Integer
-    + latestRate(): TasaCambio
-    + activar(): void
-    + desactivar(): void
-    + formatear(montoCents: Integer): String
-  }
-
-  class TasaCambio {
-    - id: UUID
-    - value: Decimal
-    - fechaVigencia: Date
-    + calcularInversa(): Decimal
-    + esValida(): Boolean
-  }
-
-  class Impuesto {
-    - id: UUID
-    - tiendaId: UUID
-    - nombre: String
-    - porcentaje: Decimal
-    - retencionIRPorcentaje: Decimal
-    + calcularImpuesto(montoBase: Decimal): Decimal
-    + aplicar(subtotal: Decimal): Decimal
-  }
-
-  enum TipoContribuyente {
-    B2C_MINORISTA
-    B2B_MAYORISTA
-    AMBOS
-  }
+class Tienda {
+  - id: UUID
+  - currencyId: UUID
+  - nombre: String
+  - slug: String
+  - isActive: Boolean
+  + activarModoMantenimiento(): void
+  + desactivarModoMantenimiento(): void
+  + primaryDomain(): DominioTienda
 }
 
-package "Identidad y Acceso" {
-
-  class Usuario {
-    - id: UUID
-    - email: String
-    - twoFactorEnabled: Boolean
-    - isActive: Boolean
-    - registeredAt: DateTime
-    + verificarContrasena(contrasena: String): Boolean
-    + hasPermission(slug: String): Boolean
-    + marcarCorreoVerificado(): void
-    + habilitarSegundoFactor(metodo: String): void
-    + registrarAcceso(): void
-  }
-
-  class CredencialSegundoFactor {
-    - id: UUID
-    - usuarioId: UUID
-    - metodo: TipoSegundoFactor
-    - secret: String
-    - enabledAt: DateTime
-    + isEnabled(): Boolean
-    + validarCodigo(codigo: String): Boolean
-    + habilitar(): void
-    + regenerarCodigosRecuperacion(): void
-  }
-
-  enum TipoSegundoFactor {
-    OTP_EMAIL
-    TOTP
-  }
-
-  class CodigoRecuperacion <<internal>>
-  class CuentaSocial <<internal>>
-  class TokenResetContrasena <<internal>>
-  class OtpChallenge <<internal>>
-
-  class Rol {
-    - id: UUID
-    - nombre: String
-    - slug: String
-    - descripcion: String
-    - isActive: Boolean
-    + asignarPermiso(permisoId: UUID): void
-    + revocarPermiso(permisoId: UUID): void
-    + tienePermiso(slug: String): Boolean
-    + activar(): void
-  }
-
-  class Permiso {
-    - id: UUID
-    - nombre: String
-    - slug: String
-    - modulo: String
-    + esDeModulo(modulo: String): Boolean
-  }
-
-  class UsuarioTienda {
-    - id: UUID
-    - usuarioId: UUID
-    - tiendaId: UUID
-    - rolId: UUID
-    - activo: Boolean
-    + activar(): void
-    + desactivar(): void
-    + cambiarRol(rolId: UUID): void
-  }
-
-  class BitacoraAuditoria <<internal>>
+class DominioTienda {
+  - id: UUID
+  - tiendaId: UUID
+  - domain: String
+  - isPrimary: Boolean
+  - verifiedAt: DateTime
+  + marcarComoPrimario(): void
+  + verificar(): void
+  + desactivar(): void
 }
 
-' ============================================================
-' RELACIONES
-' ============================================================
+class Usuario {
+  - id: UUID
+  - roleId: UUID
+  - firstName: String
+  - email: String
+  - isActive: Boolean
+  + habilitarSegundoFactor(metodo: String): void
+  + desactivarSegundoFactor(): void
+  + cambiarContrasena(nuevaContrasena: String): void
+  + registrarAcceso(): void
+}
+
+class Rol {
+  - id: UUID
+  - nombre: String
+  - slug: String
+  - descripcion: String
+  - isActive: Boolean
+  + asignarPermiso(permisoId: UUID): void
+  + revocarPermiso(permisoId: UUID): void
+  + activar(): void
+  + desactivar(): void
+}
+
+class Permiso {
+  - id: UUID
+  - nombre: String
+  - slug: String
+  - modulo: String
+  - descripcion: String
+  + esDeModulo(modulo: String): Boolean
+}
+
 Tienda "1" *-- "*" DominioTienda
-Tienda "1" *-- "*" ConfiguracionTienda
-Tienda "1" *-- "*" StoreFeature
-Tienda "1" --> "0..1" StoreTheme
-Tienda "1" --> "1" Moneda : "moneda por defecto"
-Tienda "1" *-- "*" Impuesto
-TasaCambio "*" --> "1" Moneda
-Impuesto "*" --> "1" TipoContribuyente
-
-Usuario "1" --> "0..1" CredencialSegundoFactor
-CredencialSegundoFactor "*" --> "1" TipoSegundoFactor
 Usuario "*" --> "*" Rol : "asignado vía"
 Rol "*" --> "*" Permiso : "otorga"
 Usuario "*" -- "*" Tienda : "asignado vía"
-UsuarioTienda "*" --> "1" Usuario
-UsuarioTienda "*" --> "1" Tienda
-UsuarioTienda "*" --> "1" Rol
 
 @enduml

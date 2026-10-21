@@ -2,14 +2,13 @@
 |Cliente|
 start
 
-:Seleccionar productos y variantes;
-:Modificar el carrito y revisar subtotal y total;
+:Selecciona productos y modifica el carrito;
 :Confirmar "Ir a checkout";
 
 |Sistema AtlasCommerce|
-:Cargar carrito activo y validar stock de cada ItemCarrito;
+:Cargar carrito activo y validar stock por cada ItemCarrito;
 
-if (¿Carrito vacío o hay ítems sin stock suficiente?) then (sí)
+if (¿Carrito vacío o ítems sin stock suficiente?) then (sí)
   |Cliente|
   :Notificar productos sin stock o carrito vacío;
   stop
@@ -20,56 +19,27 @@ endif
 :Confirmar resumen (subtotal + envío + impuestos - descuentos = total);
 
 |Sistema AtlasCommerce|
-:Crear Pedido PENDIENTE_PAGO congelando el precio unitario por línea;
+:Crear Pedido PENDIENTE_PAGO y congelar precio unitario por línea;
 
 |Cliente|
 :Seleccionar método de pago;
 
 |Sistema AtlasCommerce|
-:Validar método de pago habilitado en la tienda;
-
-if (¿Método de pago válido?) then (no)
-  |Cliente|
-  :Mostrar error de método;
-  stop
-endif
-
-:Solicitar pago a la pasarela;
-
-|Pasarela de Pago|
-:Procesar solicitud de pago;
-
-if (¿Pasarela responde en ≤ 30 segundos?) then (no)
-  |Sistema AtlasCommerce|
-  :Cancelar intento de pago;
-  |Cliente|
-  :Mostrar "La pasarela no responde. Permite reintentar o cambiar método";
-  stop
-endif
-
-:Procesar transacción;
+:Validar método y solicitar pago a la pasarela;
 
 if (¿Pago aprobado por la pasarela?) then (no)
-  |Sistema AtlasCommerce|
-  :Registrar TransaccionPago fallida y marcar Pago como RECHAZADO;
   |Cliente|
   :Mostrar error de pago;
-  :Permite reintentar o cambiar de método de pago;
   stop
 endif
 
-:Registrar TransaccionPago y actualizar Pago a APROBADO;
+:Actualizar Pago a APROBADO y registrar TransaccionPago;
 :Cambiar Pedido a PAGADO;
 
 fork
   :Descontar stock y registrar MovimientoInventario (SALIDA);
 fork again
-  :Generar Factura en PDF;
-fork again
-  :Cambiar Carrito a CONVERTIDO;
-fork again
-  |Sistema de Email|
-  :Enviar email de confirmación de pago al cliente;
+  :Generar Factura en PDF, cambiar Carrito a CONVERTIDO y enviar email al cliente;
 end fork
 
 |Cliente|

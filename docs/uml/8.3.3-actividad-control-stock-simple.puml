@@ -2,90 +2,31 @@
 |Operador de tienda|
 start
 
-:Seleccionar tipo de operación;
-
-if (¿Tipo de operación?) then (Registro manual)
-  |Operador de tienda|
-  :Seleccionar producto (variante), almacén y tipo de movimiento;
-  :Ingresar cantidad, motivo y referencia;
+if (¿Tipo de operación?) then (Modificación de stock)
+  :Selecciona producto (variante), almacén y tipo de movimiento;
+  :Ingresa cantidad, motivo y referencia;
 
   |Sistema AtlasCommerce|
-  :Validar operación;
+  :Validar operación (incluye chequeo de stock para SALIDA);
 
-  if (¿Es SALIDA y el stock actual < cantidad?) then (sí)
-    |Operador de tienda|
-    :Recibir alerta "Stock insuficiente";
-    stop
+  if (¿Es ajuste por inventario físico?) then (sí)
+    :Calcular diferencia (stock físico - stock actual);
+    :Crear MovimientoInventario AJUSTE con la diferencia;
+  else (Registro manual)
+    :Crear MovimientoInventario (ENTRADA / SALIDA);
   endif
 
-  :Crear MovimientoInventario (ENTRADA / SALIDA / AJUSTE);
+  :Actualizar RegistroInventario.stockActual (alerta si queda bajo mínimo);
 
-  fork
-    :Actualizar RegistroInventario.stockActual;
-  fork again
-    :Registrar MovimientoInventario en BitacoraAuditoria;
-  fork again
-    if (¿stockActual resultante < stockMinimo?) then (sí)
-      |Operador de tienda|
-      :Recibir alerta "Stock bajo mínimo";
-    endif
-  end fork
-
-  stop
-
-elseif (¿Tipo de operación?) then (Ajuste por inventario físico)
   |Operador de tienda|
-  :Contar inventario físico y cargar el stock contado;
-
-  |Sistema AtlasCommerce|
-  :Calcular diferencia (stock físico - stock actual);
-
-  if (¿Diferencia = 0?) then (sí)
-    :No requiere ajuste;
-  endif
-
-  :Crear MovimientoInventario AJUSTE con la diferencia;
-  :Actualizar RegistroInventario.stockActual;
-
-  if (¿|Diferencia - stock| > umbral_limite?) then (sí)
-    :Notificar al usuario / supervisor para revisión;
-  endif
-
   stop
-
 else (Consulta de stock bajo)
+
   |Sistema AtlasCommerce|
   :Listar productos con stockActual < stockMinimo;
 
   |Operador de tienda|
   :Visualizar lista de alertas;
-
   stop
 endif
-
-note right
-  === Validación automática durante checkout ===
-  Ocurre sola al iniciar el cliente el checkout (ver CU-04).
-end note
-
-|Cliente|
-:Iniciar checkout con productos en el carrito;
-
-|Sistema AtlasCommerce|
-:Consultar stock actual de cada ItemCarrito;
-
-if (¿Stock disponible para todas las líneas?) then (no)
-  |Cliente|
-  :Mostrar alerta de producto sin stock;
-  :Bloquear checkout;
-  stop
-endif
-
-:Continuar con checkout;
-note right
-  El descuento real del stock NO ocurre aquí: ocurre
-  tras la confirmación del pago y al marcar el pedido
-  como enviado (ver Checkout y Gestión de Pedidos).
-end note
-
 @enduml

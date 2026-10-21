@@ -3,163 +3,65 @@ skinparam classAttributeIconSize 0
 skinparam classFontSize 11
 skinparam packageStyle rectangle
 hide circle
-hide <<internal>>
 
-' ============================================================
-' 8.2.5 — PAGOS Y ENVÍOS (simplificado)
-' ============================================================
+' Pago con su método y transacción; envío por empresa de transporte.
 
-package "Pagos" {
-
-  class MetodoPago {
-    - id: UUID
-    - tiendaId: UUID
-    - pasarelaPagoId: UUID
-    - nombre: String
-    - tipo: TipoMetodoPago
-    - comisionPorcentaje: Decimal
-    + activar(): void
-    + desactivar(): void
-    + calcularComision(montoCents: Integer): Integer
-  }
-
-  enum TipoMetodoPago {
-    TARJETA_CREDITO
-    TARJETA_DEBITO
-    TRANSFERENCIA_BANCARIA
-    SINPE_MOVIL
-    PAYPAL
-    EFECTIVO_CONTRAENTREGA
-  }
-
-  class Pago {
-    - id: UUID
-    - clienteId: UUID
-    - paymentMethodId: UUID
-    - amountCents: Integer
-    - status: EstadoPago
-    - paidAt: DateTime
-    + marcarCompletado(): void
-    + marcarFallido(motivo: String): void
-    + reembolsar(montoCents: Integer): Reembolso
-    + calcularMontoConComision(): Integer
-  }
-
-  enum EstadoPago {
-    PENDIENTE
-    COMPLETADO
-    FALLIDO
-    REEMBOLSADO
-    CANCELADO
-  }
-
-  class TransaccionPago {
-    - id: UUID
-    - pagoId: UUID
-    - referenciaPasarela: String
-    - estadoDevuelto: String
-    - webhookRecibidoEn: DateTime
-    + obtenerRespuestaCruda(): JSON
-    + fueExitosa(): Boolean
-  }
-
-  class PagoFactura <<internal>>
-
-  interface PasarelaPago <<interface>> {
-    + iniciarPago(pago: Pago): RespuestaPasarela
-    + verificarFirma(headers: Map, cuerpo: String): Boolean
-    + procesarWebhook(cuerpo: JSON): EventoPago
-  }
-
-  class PasarelaGenerica {
-    - credencialesCifradas: String
-    - modo: ModoPasarela
-    - monedasSoportadas: List<String>
-    + encriptarCredenciales(credenciales: String): void
-    + probarConexion(): Boolean
-    + cambiarModo(nuevo: ModoPasarela): void
-  }
-
-  enum ModoPasarela {
-    PRUEBA
-    PRODUCCION
-  }
+class Pago {
+  - id: UUID
+  - clienteId: UUID
+  - paymentMethodId: UUID
+  - tiendaId: UUID
+  - amountCents: Integer
+  + marcarCompletado(): void
+  + marcarFallido(motivo: String): void
+  + calcularMontoConComision(): Integer
 }
 
-package "Envíos" {
-
-  interface ServicioEnvio <<interface>> {
-    + cotizar(origen: Direccion, destino: Direccion, peso: Decimal): Decimal
-    + generarGuia(envio: Envio): String
-    + rastrear(guia: String): EstadoEnvio
-  }
-
-  class Envio {
-    - id: UUID
-    - orderId: UUID
-    - shippingCompanyId: UUID
-    - trackingCode: String
-    - status: EstadoEnvio
-    - shippedAt: DateTime
-    + marcarEnviado(guia: String): void
-    + marcarEntregado(): void
-    + marcarDevuelto(): void
-    + calcularCosto(peso: Decimal, destino: Direccion): Integer
-  }
-
-  enum EstadoEnvio {
-    PENDIENTE
-    EN_TRANSITO
-    ENTREGADO
-    DEVUELTO
-    PERDIDO
-  }
-
-  class EmpresaEnvio {
-    - id: UUID
-    - nombre: String
-    - urlRastreo: String
-    - phone: String
-    - isActive: Boolean
-    + activar(): void
-    + desactivar(): void
-    + obtenerUrlRastreo(guia: String): String
-  }
-
-  class ZonaEnvio {
-    - id: UUID
-    - tiendaId: UUID
-    - nombre: String
-    - baseCostCents: Integer
-    - isActive: Boolean
-    + cubre(departamento: String): Boolean
-    + activar(): void
-    + desactivar(): void
-  }
+class MetodoPago {
+  - id: UUID
+  - tiendaId: UUID
+  - pasarelaPagoId: UUID
+  - nombre: String
+  - tipo: TipoMetodoPago
+  + activar(): void
+  + desactivar(): void
+  + calcularComision(montoCents: Integer): Integer
 }
 
-' ============================================================
-' RELACIONES
-' ============================================================
-PasarelaPago <|.. PasarelaGenerica
-Tienda "1" *-- "*" MetodoPago
-MetodoPago "*" --> "1" TipoMetodoPago
-MetodoPago "*" --> "1" PasarelaPago
-Cliente "1" *-- "*" Pago
+class TransaccionPago {
+  - id: UUID
+  - pagoId: UUID
+  - pasarelaPagoId: UUID
+  - referenciaPasarela: String
+  - estadoDevuelto: String
+  + obtenerRespuestaCruda(): JSON
+  + fueExitosa(): Boolean
+}
+
+class Envio {
+  - id: UUID
+  - orderId: UUID
+  - shippingCompanyId: UUID
+  - shippingZoneId: UUID
+  - trackingCode: String
+  + marcarEnviado(guia: String): void
+  + marcarEntregado(): void
+  + marcarDevuelto(): void
+}
+
+class EmpresaEnvio {
+  - id: UUID
+  - nombre: String
+  - urlRastreo: String
+  - phone: String
+  - email: String
+  + activar(): void
+  + desactivar(): void
+  + obtenerUrlRastreo(guia: String): String
+}
+
 Pago "*" --> "1" MetodoPago
-Pago "*" --> "1" Moneda
-Pago "*" --> "1" EstadoPago
 Pago "1" *-- "*" TransaccionPago
-TransaccionPago "*" --> "1" PasarelaPago
-Pago "*" -- "*" Factura : "aplicado vía"
-PasarelaGenerica "*" --> "1" ModoPasarela
-
-ServicioEnvio <|.. EmpresaEnvio
-Pedido "1" *-- "*" Envio
 Envio "*" --> "1" EmpresaEnvio
-Envio "*" --> "0..1" ZonaEnvio
-Envio "*" --> "1" Moneda
-Envio "*" --> "1" EstadoEnvio
-Tienda "1" *-- "*" ZonaEnvio
 
 @enduml

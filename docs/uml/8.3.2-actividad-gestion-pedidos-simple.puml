@@ -2,40 +2,32 @@
 |Operador de tienda|
 start
 
-:Acceder al listado de pedidos;
+:Acceder al listado y seleccionar pedido de la cola;
 
 |Sistema AtlasCommerce|
-:Listar pedidos filtrados por tienda y estado;
-
-|Operador de tienda|
-:Seleccionar pedido de la cola (PAGADO / CONFIRMADO / EN_PRODUCCION);
-:Revisar detalle del pedido (líneas, pago, cliente, dirección);
-
-|Sistema AtlasCommerce|
-:Validar estado del pago del pedido;
+:Listar pedidos y validar estado del pago;
 
 if (¿Pago confirmado?) then (no)
   |Operador de tienda|
-  :Pedido en estado PENDIENTE_PAGO;
-  :Notificar al cliente y escalar a revisión;
+  :Notificar al cliente que el pedido sigue PENDIENTE_PAGO y escalar a revisión;
   stop
 endif
 
-if (¿Pedido tiene líneas con productos personalizados?) then (sí)
-  |Operador de tienda|
-  :Confirmar que está "En producción" e ingresar tiempo estimado;
-  |Sistema AtlasCommerce|
-  :Cambiar Pedido a EN_PRODUCCION;
-endif
+|Operador de tienda|
+:Revisar pago, cliente y dirección;
+:Confirmar tiempo si hay productos personalizados;
+
+|Sistema AtlasCommerce|
+:Cambiar Pedido a EN_PRODUCCION;
 
 |Operador de tienda|
-:Preparar el envío del producto;
+:Preparar el envío;
 
 |Sistema AtlasCommerce|
 :Cambiar Pedido a PREPARADO_ENVIO;
 
 |Operador de tienda|
-:Marcar como enviado, elegir empresa de envío e ingresar número de guía;
+:Ingresar datos de envío (empresa y número de guía);
 
 |Sistema AtlasCommerce|
 :Validar número de guía;
@@ -47,29 +39,14 @@ if (¿Guía válida?) then (no)
 endif
 
 fork
-  :Cambiar Pedido a ENVIADO;
-fork again
-  :Registrar Envío con número de guía;
+  :Cambiar Pedido a ENVIADO y registrar Envío con número de guía;
 fork again
   :Descontar stock y registrar MovimientoInventario (SALIDA);
-fork again
-  :Notificar a empresa de envío que rastree el paquete;
-fork again
-  |Sistema de Email|
-  :Enviar email al cliente con número de guía y datos de rastreo;
+  :Notificar al cliente y a la empresa de envío;
 end fork
 
-|Empresa de envío|
-:Confirmar entrega al cliente;
-
 |Sistema AtlasCommerce|
-:Cambiar Pedido a ENTREGADO;
-
-|Cliente|
-:Consultar estado del pedido y número de guía;
-note right
-  Ver CU-06 — Consultar estado de pedido
-end note
+:Cambiar Pedido a ENTREGADO tras confirmar entrega al cliente;
 
 stop
 @enduml

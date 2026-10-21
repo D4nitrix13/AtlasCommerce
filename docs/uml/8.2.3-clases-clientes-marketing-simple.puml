@@ -3,135 +3,54 @@ skinparam classAttributeIconSize 0
 skinparam classFontSize 11
 skinparam packageStyle rectangle
 hide circle
-hide <<internal>>
 
-' ============================================================
-' 8.2.3 — CLIENTES Y MARKETING (simplificado)
-' ============================================================
+' Cliente con su dirección y listas de deseos.
 
-package "Clientes" {
-
-  class Cliente {
-    - id: UUID
-    - userId: UUID
-    - customerType: TipoCliente
-    - email: String
-    - isActive: Boolean
-    + getFullNameAttribute(): String
-    + isAnonymized(): Boolean
-    + anonimizar(): void
-    + solicitarEliminacion(): void
-    + desactivar(): void
-  }
-
-  enum TipoCliente {
-    MINORISTA
-    MAYORISTA
-    CORPORATIVO
-  }
-
-  class Direccion {
-    - id: UUID
-    - clienteId: UUID
-    - country: String
-    - department: String
-    - municipality: String
-    - isPrimary: Boolean
-    + marcarComoPrincipal(): void
-    + esPrincipal(): Boolean
-    + formatearCompleta(): String
-  }
-
-  class ClienteTienda {
-    - id: UUID
-    - clienteId: UUID
-    - tiendaId: UUID
-    - customerType: TipoCliente
-    - active: Boolean
-    + activar(): void
-    + desactivar(): void
-    + cambiarTipo(tipo: TipoCliente): void
-  }
+class Cliente {
+  - id: UUID
+  - userId: UUID
+  - firstName: String
+  - lastName: String
+  - email: String
+  + anonimizar(): void
+  + solicitarEliminacion(): void
+  + activar(): void
+  + desactivar(): void
 }
 
-package "Marketing" {
-
-  class ListaDeseos {
-    - id: UUID
-    - clienteId: UUID
-    - tiendaId: UUID
-    - nombre: String
-    - visibilidad: VisibilidadLista
-    + agregarProducto(productoId: UUID): void
-    + eliminarProducto(productoId: UUID): void
-    + esPublica(): Boolean
-    + cambiarVisibilidad(nueva: VisibilidadLista): void
-  }
-
-  enum VisibilidadLista {
-    PRIVADA
-    PUBLICA
-    COMPARTIDA_CON_ENLACE
-  }
-
-  class ItemListaDeseos {
-    - id: UUID
-    - listaDeseosId: UUID
-    - productoId: UUID
-    - anadidoEn: DateTime
-    + obtenerProducto(): Producto
-  }
-
-  class Cupon {
-    - id: UUID
-    - tiendaId: UUID
-    - codigo: String
-    - valorCents: Integer
-    - fechaExpiracion: Date
-    - isActive: Boolean
-    + esValido(): Boolean
-    + calcularDescuento(montoCents: Integer): Integer
-    + registrarUso(): Boolean
-    + desactivar(): void
-  }
-
-  enum TipoDescuento {
-    PORCENTAJE
-    MONTO_FIJO
-  }
-
-  class Promocion {
-    - id: UUID
-    - tiendaId: UUID
-    - nombre: String
-    - fechaInicio: Date
-    - fechaFin: Date
-    - isActive: Boolean
-    + esVigente(): Boolean
-    + calcularDescuento(items: List<ItemCarrito>): Integer
-    + activar(): void
-  }
-
-  class CuponUso <<internal>>
+class Direccion {
+  - id: UUID
+  - clienteId: UUID
+  - addressType: String
+  - country: String
+  - detailedAddress: String
+  + marcarComoPrincipal(): void
+  + esPrincipal(): Boolean
+  + formatearCompleta(): String
 }
 
-' ============================================================
-' RELACIONES
-' ============================================================
-Usuario "1" --> "0..1" Cliente
+class ListaDeseos {
+  - id: UUID
+  - clienteId: UUID
+  - tiendaId: UUID
+  - nombre: String
+  - visibilidad: VisibilidadLista
+  + agregarProducto(productoId: UUID): void
+  + eliminarProducto(productoId: UUID): void
+  + cambiarVisibilidad(nueva: VisibilidadLista): void
+  + esPublica(): Boolean
+}
+
+class ItemListaDeseos {
+  - id: UUID
+  - listaDeseosId: UUID
+  - productoId: UUID
+  - anadidoEn: DateTime
+  + obtenerProducto(): Producto
+}
+
 Cliente "1" *-- "*" Direccion
-Cliente "*" -- "*" Tienda : "vinculado vía"
-ClienteTienda "*" --> "1" Cliente
-ClienteTienda "*" --> "1" Tienda
-Cliente "*" --> "1" TipoCliente
-
 Cliente "1" *-- "*" ListaDeseos
-ListaDeseos "*" --> "1" Tienda
-ListaDeseos "*" --> "1" VisibilidadLista
 ListaDeseos "1" *-- "*" ItemListaDeseos
-ItemListaDeseos "*" --> "1" Producto
-Tienda "1" *-- "*" Cupon
-Cupon "*" --> "1" TipoDescuento
-Tienda "1" *-- "*" Promocion
 
 @enduml
