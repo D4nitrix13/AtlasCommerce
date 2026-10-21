@@ -650,8 +650,8 @@ redundante son las 3 notas al pie.
 
 ## Actionable Tasks
 
-- [ ] **T21** Recortar notas de los 2 diagramas de estados.
-- [ ] **T22** Re-renderizar y confirmar OK.
+- [x] **T21** Recortar notas de los 2 diagramas de estados.
+- [x] **T22** Re-renderizar y confirmar OK.
 
 ## Reglas de la ronda 7
 
