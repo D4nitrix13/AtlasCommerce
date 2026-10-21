@@ -1,0 +1,118 @@
+// Diagrama Entidad-Relacion en Notacion Chen
+// AtlasCommerce — nucleo de 6 entidades
+//
+// Notacion Chen: rectangulo = entidad · rombo = relacion · ovalo = atributo
+// Ovalo punteado = atributo derivado · texto subrayado = clave primaria
+// Cardinalidad 1:N escrita como "1" junto a la entidad padre y "N" junto a la hija
+//
+// Fuente de verdad de los nombres de columna: backend/database/migrations/
+//   stores, categories, products, customers, orders, payments
+//
+// Render:
+//   dot -Tsvg docs/uml/9.3-diagrama-chen.dot -o docs/uml/build/svg-simple/9.3-diagrama-chen.svg
+//   dot -Tpdf docs/uml/9.3-diagrama-chen.dot -o docs/uml/build/pdf-simple/9.3-diagrama-chen.pdf
+
+digraph Chen {
+  rankdir=TB;
+  graph [
+    fontname="Helvetica",
+    fontsize=13,
+    labelloc=t,
+    label="AtlasCommerce — Diagrama Entidad-Relacion (Notacion Chen)\nrectangulos = entidades · rombos = relaciones · ovalos = atributos · ovalo punteado = derivado · subrayado = clave primaria",
+    nodesep=0.14,
+    ranksep=1.2,
+    newrank=true,
+    ratio=1.4
+  ];
+  node [fontname="Helvetica", fontsize=10, margin="0.06,0.03"];
+  edge [fontname="Helvetica", fontsize=9, color="#777777", arrowsize=0.6];
+
+  // ============================================================
+  // ENTIDADES (rectangulos verdes)
+  // ============================================================
+  TIENDA    [shape=box, style=filled, fillcolor="#e8f5e9", color="#2e7d32", penwidth=1.4, width=1.3, label="TIENDA"];
+  CATEGORIA [shape=box, style=filled, fillcolor="#e8f5e9", color="#2e7d32", penwidth=1.4, width=1.3, label="CATEGORIA"];
+  PRODUCTO  [shape=box, style=filled, fillcolor="#e8f5e9", color="#2e7d32", penwidth=1.4, width=1.3, label="PRODUCTO"];
+  CLIENTE   [shape=box, style=filled, fillcolor="#e8f5e9", color="#2e7d32", penwidth=1.4, width=1.3, label="CLIENTE"];
+  PEDIDO    [shape=box, style=filled, fillcolor="#e8f5e9", color="#2e7d32", penwidth=1.4, width=1.3, label="PEDIDO"];
+  PAGO      [shape=box, style=filled, fillcolor="#e8f5e9", color="#2e7d32", penwidth=1.4, width=1.3, label="PAGO"];
+
+  // ============================================================
+  // RELACIONES (rombos naranjas)
+  // ============================================================
+  PUBLICA   [shape=diamond, style=filled, fillcolor="#fff3e0", color="#e65100", width=1.5, label="PUBLICA"];
+  PERTENECE [shape=diamond, style=filled, fillcolor="#fff3e0", color="#e65100", width=1.5, label="PERTENECE"];
+  REALIZA   [shape=diamond, style=filled, fillcolor="#fff3e0", color="#e65100", width=1.5, label="REALIZA"];
+  GENERA    [shape=diamond, style=filled, fillcolor="#fff3e0", color="#e65100", width=1.5, label="GENERA"];
+
+  // ============================================================
+  // RELACIONES Y CARDINALIDAD
+  // ============================================================
+  TIENDA    -> PUBLICA   [taillabel="1", headlabel="N", arrowhead=none];
+  PUBLICA   -> PRODUCTO  [arrowhead=none];
+
+  PRODUCTO  -> PERTENECE [taillabel="N", headlabel="1", arrowhead=none];
+  PERTENECE -> CATEGORIA [arrowhead=none];
+
+  CLIENTE   -> REALIZA   [taillabel="1", headlabel="N", arrowhead=none];
+  REALIZA   -> PEDIDO    [arrowhead=none];
+
+  PEDIDO    -> GENERA    [taillabel="1", headlabel="1", arrowhead=none];
+  GENERA    -> PAGO      [arrowhead=none];
+
+  // ============================================================
+  // ATRIBUTOS (ovales grises), apilados bajo su entidad
+  // ============================================================
+  TIENDA    -> t_id  -> t_name -> t_slug            [style=invis];
+  CATEGORIA -> c_id  -> c_name -> c_parent          [style=invis];
+  PRODUCTO  -> p_id  -> p_name -> p_sku -> p_price -> p_cat [style=invis];
+  CLIENTE   -> cl_id -> cl_mail -> cl_type          [style=invis];
+  PEDIDO    -> pe_id -> pe_num -> pe_status -> pe_total [style=invis];
+  PAGO      -> pg_id -> pg_amt -> pg_ref -> pg_paid [style=invis];
+
+  // ============================================================
+  // ATRIBUTOS DE TIENDA
+  // ============================================================
+  t_id   [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="<u>id</u>"];
+  t_name [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="name"];
+  t_slug [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="slug"];
+
+  // ============================================================
+  // ATRIBUTOS DE CATEGORIA
+  // ============================================================
+  c_id     [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="<u>id</u>"];
+  c_name   [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="name"];
+  c_parent [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="parent_id"];
+
+  // ============================================================
+  // ATRIBUTOS DE PRODUCTO
+  // ============================================================
+  p_id     [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="<u>id</u>"];
+  p_name   [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="name"];
+  p_sku    [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="sku"];
+  p_price  [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="base_price_cents"];
+  p_cat    [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="category_id"];
+
+  // ============================================================
+  // ATRIBUTOS DE CLIENTE
+  // ============================================================
+  cl_id   [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="<u>id</u>"];
+  cl_mail [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="email"];
+  cl_type [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="customer_type"];
+
+  // ============================================================
+  // ATRIBUTOS DE PEDIDO (total_cents es DERIVADO: se calcula de las lineas)
+  // ============================================================
+  pe_id     [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="<u>id</u>"];
+  pe_num    [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="order_number"];
+  pe_status [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="status"];
+  pe_total  [shape=ellipse, style="filled,dashed", fillcolor="#fffde7", color="#f9a825", label="total_cents"];
+
+  // ============================================================
+  // ATRIBUTOS DE PAGO
+  // ============================================================
+  pg_id   [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="<u>id</u>"];
+  pg_amt  [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="amount_cents"];
+  pg_ref  [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="reference"];
+  pg_paid [shape=ellipse, style=filled, fillcolor="#f5f5f5", color="#9e9e9e", label="paid_at"];
+}
