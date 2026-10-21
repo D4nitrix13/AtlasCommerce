@@ -43,6 +43,19 @@ final class StorefrontAssetTest extends TestCase
         // Fake del disk `ftp` para no depender de un FTP real en tests.
         Storage::fake(disk: 'ftp');
 
+        // El `AssetController` resuelve el disk vía `config('assets.disk')`,
+        // no hardcodea `'ftp'`. En dev `ASSETS_DISK=local` (porque el
+        // seeder puebla el disco local y el FTP queda vacío), entonces
+        // sin este override el controller leería de `local` (que NO está
+        // faked) y devolvería 404 en todos los asserts.
+        //
+        // Fijar el config explícitamente al disk faked es la única forma
+        // de que el controller y el test hablen del mismo filesystem.
+        // Patrón análogo al que usan los tests de Fase 3 (cache_store,
+        // cache_ttl) — el helper del controller ya está separado en el
+        // `Config` facade, solo faltaba este override.
+        config()->set(key: 'assets.disk', value: 'ftp');
+
         $this->currency = Currency::query()->create(attributes: [
             'code' => 'NIO',
             'name' => 'Cordoba',

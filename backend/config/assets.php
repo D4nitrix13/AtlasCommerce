@@ -38,8 +38,26 @@ return [
     /**
      * Validación de path: rechaza assets que no vivan bajo el namespace
      * del tenant activo ni bajo `shared/`.
+     *
+     * Default `false` (soft mode): el `AssetController` sigue sirviendo
+     * el binario aunque el path no matchee la convención (paths legacy
+     * sin hash, p.ej. `tenants/{slug}/branding/logo.webp`) y emite un
+     * log estructurado `asset.path.malformed`. Esto existe para que el
+     * rollout de Fase 5 (backfill al formato con hash) pueda migrar el
+     * 100% del catálogo SIN dejar al storefront sin imágenes durante el
+     * proceso.
+     *
+     * Pasar a `true` SOLO cuando el rate de warnings `asset.path.malformed`
+     * en logs caiga a ~0 (post Fase 6). Flippearlo antes rompe la PDP y
+     * los tests: el `StorefrontAssetTest` asume soft mode como default
+     * porque los fixtures usan paths sin hash.
+     *
+     * Nota histórica: la creación de este archivo en `2950b7a3` setteó
+     * `default: true` por error y dejó 13 tests fallando en master. La
+     * docstring del archivo original (commit `9d565597`) ya declaraba
+     * `false` como default. Esta corrección vuelve al contrato original.
      */
     'path_validation' => [
-        'strict' => env(key: 'ASSETS_PATH_VALIDATION_STRICT', default: true),
+        'strict' => env(key: 'ASSETS_PATH_VALIDATION_STRICT', default: false),
     ],
 ];

@@ -680,6 +680,23 @@ final class CatalogAssetsSeeder
     /**
      * Fase 5 del plan: verifica end-to-end.
      *
+     * Validaciones (Oct 2026 — ajustadas al modelo multi-acabado):
+     *
+     *   - PRIMARY: una y solo una imagen `is_primary` POR VARIANT, no
+     *     por producto. Un producto con N variantes legítimamente tiene
+     *     N imágenes primary — una por acabado (c/u es la miniatura del
+     *     card de su picker). Contar por producto devolvía exit 1 en
+     *     los 19 productos multi-acabado aunque los datos estuvieran
+     *     bien.
+     *   - STORAGE: cada `image_url` debe existir en el disk configurado.
+     *     Esto detecta drift entre la BD y el filesystem/FTP.
+     *   - VARIANTS: el conteo de variantes es informativo (no falla).
+     *
+     * Decisión deliberada: `stats.products_with_primary` se redefinió a
+     * `variants_with_primary` para no mentir (contar productos con al
+     * menos una primary da una señal errónea cuando el producto es
+     * multi-acabado y le falta primary a UNA sola variante).
+     *
      * @return array{
      *   ok: bool,
      *   issues: array<int, string>,
@@ -688,7 +705,7 @@ final class CatalogAssetsSeeder
      *     variants_in_db: int,
      *     images_in_db: int,
      *     images_in_storage: int,
-     *     products_with_primary: int,
+     *     variants_with_primary: int,
      *     products_with_gallery: int,
      *   },
      * }
@@ -709,25 +726,40 @@ final class CatalogAssetsSeeder
             'variants_in_db' => 0,
             'images_in_db' => 0,
             'images_in_storage' => 0,
-            'products_with_primary' => 0,
+            'variants_with_primary' => 0,
             'products_with_gallery' => 0,
         ];
 
         $issues = [];
         foreach ($tenantProducts as $p) {
-            $variants = $p->variants()->count();
-            $stats['variants_in_db'] += $variants;
+            $variants = $p->variants()->get();
+            $stats['variants_in_db'] += $variants->count();
 
             $images = ProductImage::query()->where('product_id', $p->id)->get();
             $stats['images_in_db'] += $images->count();
 
-            $primaryCount = $images->where('is_primary', true)->count();
-            if ($primaryCount === 0) {
-                $issues[] = "Producto {$p->slug}: sin imagen primary";
-            } elseif ($primaryCount > 1) {
-                $issues[] = "Producto {$p->slug}: {$primaryCount} imágenes primary (debería ser 1)";
-            } else {
-                $stats['products_with_primary']++;
+            // Validación de primary POR VARIANT. Un producto sin
+            // variantes (caso del directorio vacío o 0 imágenes)
+            // simplemente no entra al loop, sin reportar.
+            foreach ($variants as $variant) {
+                $variantImages = $images->where('variant_id', $variant->id);
+                $primaryCount = $variantImages->where('is_primary', true)->count();
+                $primaryVariant = $variantImages->firstWhere('is_primary', true);
+
+                if ($primaryCount === 0) {
+                    $issues[] = "Producto {$p->slug} variant {$variant->finish_slug}: sin imagen primary";
+                } elseif ($primaryCount > 1) {
+                    $issues[] = "Producto {$p->slug} variant {$variant->finish_slug}: {$primaryCount} imágenes primary (debería ser 1)";
+                } else {
+                    $stats['variants_with_primary']++;
+                }
+
+                // Regla secundaria: una imagen primaria en un variant
+                // DEBE ser el size 1600 (max resolution). Sin esto se
+                // colaría un thumbnail de 400px como "primary".
+                if ($primaryVariant !== null && (int) $primaryVariant->width !== 1600) {
+                    $issues[] = "Producto {$p->slug} variant {$variant->finish_slug}: primary width={$primaryVariant->width} (debería ser 1600)";
+                }
             }
 
             if ($images->count() > 0) {
