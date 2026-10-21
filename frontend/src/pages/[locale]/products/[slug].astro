@@ -110,6 +110,30 @@ const url = new URL(Astro.request.url);
  * Timeout de 5s para abortar el fetch y degradar con fallback antes
  * de que la request al PDP quede colgada en el SSR.
  */
+interface StorefrontApiProductImage {
+  url: string;
+  altText: string;
+  isPrimary: boolean;
+  /**
+   * Variante (acabado) al que pertenece la imagen. `null` cuando la
+   * imagen no se pudo asociar a ninguna variante (caso 4/19
+   * multi-variant con assets faltantes según diagnóstico Oct 2026) — en
+   * ese caso la PDP degrada a mostrar TODAS las imágenes del producto.
+   */
+  variantId: number | null;
+  sortOrder: number;
+}
+
+interface StorefrontApiProductVariant {
+  id: number;
+  name: string;
+  finishSlug: string;
+  finishLabel: string;
+  finishHex: string | null;
+  condition: 'nuevo' | 'usado' | 'ambos' | string;
+  stock: number;
+}
+
 interface StorefrontApiProduct {
   id: number;
   slug: string;
@@ -120,7 +144,18 @@ interface StorefrontApiProduct {
   category: string;
   stock: number;
   compareAtPriceCents?: number;
-  images?: readonly string[];
+  /**
+   * Galería del producto. Shape dependiente del endpoint:
+   *   - `/storefront/products/{slug}` (PDP, variants eager-loaded):
+   *     objetos `StorefrontApiProductImage` con `variantId` para
+   *     filtrar por acabado.
+   *   - `/storefront/products` (listado, sin variants): `string[]`
+   *     de URLs.
+   *
+   * Mantenemos la unión para tolerar ambos contratos sin romper tipos.
+   */
+  images?: readonly StorefrontApiProductImage[] | readonly string[];
+  variants?: readonly StorefrontApiProductVariant[];
   brand?: string;
   currency?: string;
   isExclusive?: boolean;
@@ -164,6 +199,26 @@ if (apiOrigin !== Astro.url.origin) {
 }
 
 let product: Product | null = null;
+/**
+ * Variantes del producto en la shape del API (id numérico, finishSlug,
+ * finishLabel, finishHex). Se mantiene como variable separada del
+ * `Product` del frontend para no acoplar el type `Product` (que usa
+ * `id: string` derivado del slug) a la shape del backend. La PDP los
+ * lee directamente para el picker de acabado y el filtro de la
+ * galería.
+ */
+let apiVariants: readonly StorefrontApiProductVariant[] | undefined = undefined;
+/**
+ * Imágenes del producto en la shape cruda del API (puede ser
+ * `readonly string[]` para el listado legacy o
+ * `readonly StorefrontApiProductImage[]` con metadata `variantId` para
+ * el PDP). Se mantiene como variable separada del `Product` del
+ * frontend por la misma razón que `apiVariants`: el type `Product`
+ * declara `images?: readonly string[]` y un array de objetos requiere
+ * tipo ancho o cast agresivo. La PDP los lee directamente para el
+ * filtro de la galería.
+ */
+let apiImages: readonly StorefrontApiProductImage[] | readonly string[] | undefined = undefined;
 let notFound = false;
 let fetchError: string | null = null;
 
@@ -206,15 +261,17 @@ if (typeof slug !== 'string' || slug.length === 0) {
         ...(data.compareAtPriceCents !== undefined && {
           compareAtPriceCents: data.compareAtPriceCents,
         }),
-        ...(data.images !== undefined && {
-          images: data.images,
-        }),
         ...(data.brand !== undefined && { brand: data.brand }),
         ...(data.currency !== undefined && { currency: data.currency }),
         ...(data.isExclusive === true && { isExclusive: true }),
         ...(data.hasCondition !== undefined && { hasCondition: data.hasCondition }),
         ...(data.hasSizes !== undefined && { hasSizes: data.hasSizes }),
       };
+      // Resguardar la shape cruda del API (variants y images con metadata
+      // `variantId`) en variables separadas. La galería del PDP los lee
+      // directamente porque el type `Product` no modela esa info.
+      apiVariants = data.variants;
+      apiImages = data.images;
     } else {
       fetchError = `HTTP ${response.status}`;
     }
@@ -385,9 +442,22 @@ const SIZE_OPTIONS: readonly VariantOption[] = (() => {
   ];
 })();
 
-// Color (swatches) — fuente preferida (Phase 7): variants con finish.
-// Fallback al set de Saber Alter via variantAttributes[0].
-// Fallback final: 3 colores hardcoded (sunburst/black/vintage-white).
+// Color (swatches) — fuente preferida: `apiVariants` que devuelve la
+// API del PDP con `id, finishSlug, finishLabel, finishHex`. El `id`
+// usado en el `COLOR_OPTION` es el slug del acabado (NO el id
+// numérico) — preserva el contrato del query param `?finish=<slug>`.
+//
+// Si la API no devolvió variantes (ruta legacy o producto sin
+// variants cargadas), caemos al set de Saber Alter via
+// `variantAttributes[0]` y, como última instancia, a 3 colores
+// hardcoded (sunburst/black/vintage-white) — preserva el render del
+// mock Saber Alter que no expone los campos nuevos.
+//
+// Single-variant product (caso 327/346 según diagnóstico Oct 2026): la
+// lista tiene 1 entrada. La galería siempre filtra por ese variant, y
+// como todas las imágenes del producto están atadas a él (por el
+// backfill), el resultado visible es el set completo — comportamiento
+// correcto para productos sin acabado alternativo.
 const COLOR_OPTIONS: readonly VariantOption[] = (() => {
   if (detail === null) {
     return [
@@ -396,7 +466,15 @@ const COLOR_OPTIONS: readonly VariantOption[] = (() => {
       { id: 'vintage-white', label: 'Vintage White', hex: '#EDE7D7' },
     ];
   }
-  // Phase 7: derivar de detail.variants cuando tienen finishSlug/Label.
+  // Phase 8 (Oct 2026): derivar de `apiVariants` (camino real del PDP).
+  if (apiVariants !== undefined && apiVariants.length > 0) {
+    return apiVariants.map((v) => ({
+      id: v.finishSlug,
+      label: v.finishLabel,
+      ...(v.finishHex !== null && { hex: v.finishHex }),
+    }));
+  }
+  // Fallback legacy (mock Saber Alter) — preserva el render previo.
   const phase7 = detail.variants
     .filter(
       (v): v is typeof v & { finishSlug: string; finishLabel: string } =>
@@ -439,25 +517,74 @@ const SELECTED_COLOR =
 const selectedFinish =
   COLOR_OPTIONS.find((option) => option.id === SELECTED_COLOR) ?? COLOR_OPTIONS[0];
 
-// Imágenes filtradas por el color seleccionado. Convención: la URL de
-// la imagen contiene el slug del variant (ej. "ebony-black"). Si el
-// mock no sigue esta convención (Saber Alter usa placeholder), caemos
-// al set completo.
-const VARIANT_SLUG_PATTERN = SELECTED_COLOR.toLowerCase();
-const displayedImages = (() => {
-  const all = detail?.images ?? [];
-  const filtered = all.filter((url) => url.toLowerCase().includes(VARIANT_SLUG_PATTERN));
-  return filtered.length > 0 ? filtered : all;
+// Imágenes filtradas por el acabado seleccionado. Estrategia en 3 capas:
+//   1. Si la API devolvió `apiVariants` y `product.images` como objetos
+//      con `variantId`, match exacto por `variantId`. Caso típico del
+//      PDP real (Oct 2026).
+//   2. Si la API devolvió imágenes como strings (camino legacy o
+//      listing), no hay forma de filtrar — devuelve el set completo.
+//   3. Si el slug del URL no matchea ningún variant (caso raro: URL
+//      stale con acabado que el producto ya no ofrece), degradamos al
+//      set completo en vez de mostrar galería vacía.
+//
+// El filtro NUNCA muestra imágenes donde `variantId` es null (huérfanas
+// sin asociación): la PDP debe mostrar las imágenes del acabado real, no
+// imágenes que el seeder no pudo categorizar.
+type ApiImageObject = {
+  readonly url: string;
+  readonly altText: string;
+  readonly isPrimary: boolean;
+  readonly variantId: number | null;
+  readonly sortOrder: number;
+};
+
+const isImageObject = (v: unknown): v is ApiImageObject =>
+  typeof v === 'object' && v !== null && 'url' in v && typeof (v as { url: unknown }).url === 'string';
+
+const displayedImages: readonly string[] = (() => {
+  if (product === null) return [];
+  const raw = apiImages ?? product.images ?? [];
+  if (raw.length === 0) return [];
+
+  // Caso legacy: `raw` es array de strings. Devolvemos sin filtrar.
+  if (typeof raw[0] === 'string') {
+    return raw as readonly string[];
+  }
+
+  // Caso nuevo: array de objetos con metadata.
+  const objects = raw as readonly ApiImageObject[];
+  const selectedVariantId =
+    apiVariants?.find((v) => v.finishSlug === SELECTED_COLOR)?.id ?? null;
+
+  if (selectedVariantId === null) {
+    // URL `?finish=...` no matchea ningún variant disponible (caso stale).
+    // Degradamos a galería completa para no mostrar pantalla vacía.
+    return objects.map((o) => o.url);
+  }
+
+  const filtered = objects.filter((img) => img.variantId === selectedVariantId);
+  // Si el filtro quedó con N imágenes, las mostramos. Si quedó vacío
+  // (caso teórico: variant existe en BD pero ninguna imagen tiene ese
+  // variant_id), caemos al set completo: comportamiento seguro y
+  // consistente con el brief (single-variant → mostrar todas).
+  return (filtered.length > 0 ? filtered : objects).map((o) => o.url);
 })();
 
-// Para cada variante, exponemos la PRIMERA imagen (thumbnail del picker).
-// Si no hay imágenes suficientes, caemos al hex como fallback visual.
+// Thumbnail del picker (primera imagen por variant del producto real).
+// Solo relevante para el camino de objetos; en el legacy cae a hex.
 const variantFirstImage: Record<string, string | undefined> = {};
-if (detail !== null) {
-  for (const option of COLOR_OPTIONS) {
-    const slug = option.id.toLowerCase();
-    variantFirstImage[option.id] =
-      detail.images.find((url) => url.toLowerCase().includes(slug)) ?? detail.images[0];
+{
+  if (product !== null) {
+    const raw = apiImages ?? product.images ?? [];
+    if (raw.length > 0 && !isImageObject(raw[0])) {
+      // Legacy: nada que hacer, el render cae al hex fallback.
+    } else if (apiVariants !== undefined && apiVariants.length > 0) {
+      const objects = raw as readonly ApiImageObject[];
+      for (const variant of apiVariants) {
+        const first = objects.find((img) => img.variantId === variant.id);
+        variantFirstImage[variant.finishSlug] = first?.url;
+      }
+    }
   }
 }
 

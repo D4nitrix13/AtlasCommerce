@@ -29,8 +29,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *         construye una URL de CDN/runtime porque eso acoplaría la API
  *         a un hostname configurable y rompería el contrato actual.
  *
- *  - `images`: array de URLs ordenado por `sort_order` ASC. Se OMITE
- *    del payload cuando `images` no fue eager-load (controller decide).
+ *  - `images`: array con shape dependiente del contexto (ver
+ *    `resolveImages()` para el detalle):
+ *      - PDP (variants eager-loaded): objetos
+ *        `{url, altText, isPrimary, variantId, sortOrder}`. `variantId`
+ *        permite a la PDP filtrar la galería por acabado.
+ *      - Listado (variants NO eager-loaded): lista plana de URLs.
+ *    Se OMITE del payload cuando `images` no fue eager-loaded.
  *
  *  - `category`: `categories.slug`. Si el producto no tiene categoría
  *    o la relación no fue cargada, string vacío '' para no romper el
@@ -55,11 +60,22 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *  - `currency`: emitido solo cuando la relación `currency` fue cargada
  *    Y existe; opcional para el frontend que ya tiene default 'USD'.
  *
+ *  - `variants`: array de variantes del producto. Emitido SOLO cuando
+ *    la relación `variants` fue eager-loaded por el controller (lo hace
+ *    el endpoint `show()` del PDP; el `index()` del listado no). Shape
+ *    por variante: `{id, name, finishSlug, finishLabel, finishHex,
+ *    condition, stock}`. Variantes con `is_active=false` o sin
+ *    `finish_slug` se filtran porque la PDP no las necesita. Permite
+ *    a la PDP derivar el picker de acabado desde el backend en lugar
+ *    de caer al set hardcoded de Saber Alter.
+ *
  * Prevención de N+1: las relaciones usadas en este Resource (images,
  * category, brand, variants, currency) deben eager-loadearse via
  * `with([...])` en el controller. Sin eager-load, los campos
  * dependientes quedan ausentes (lo cual es seguro — el frontend los
- * trata como opcionales).
+ * trata como opcionales). El campo `variants` requiere eager-load
+ * explícito: si el controller no lo cargó, el Resource cae al shape
+ * legacy sin variantes (listado público), preservando el contrato.
  *
  * Wrap del JSON: este Resource usa `static $wrap = null` para emitir
  * la forma plana (no `{data: [...]}`) en ambos endpoints, ya que el
@@ -92,8 +108,8 @@ class StorefrontProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         $imageData = $this->resolveImages();
-        $images = $imageData['all'];
         $primaryUrl = $imageData['primary'];
+        $hasVariantContext = $this->resource->relationLoaded('variants');
 
         $payload = [
             'id' => $this->resource->id,
@@ -110,8 +126,18 @@ class StorefrontProductResource extends JsonResource
             'hasSizes' => (bool) $this->resource->has_sizes,
         ];
 
-        if ($images !== []) {
-            $payload['images'] = $images;
+        // Shape de `images` depende del contexto:
+        //   - PDP (variants cargado): objetos con `variantId` para
+        //     filtrar la galería por acabado. Si no hay objetos (sin
+        //     images eager-loaded), no emitimos el campo.
+        //   - Listado (variants NO cargado): lista de URLs, más liviana
+        //     para response de 346 productos.
+        if ($hasVariantContext) {
+            if ($imageData['objects'] !== []) {
+                $payload['images'] = $imageData['objects'];
+            }
+        } elseif ($imageData['all'] !== []) {
+            $payload['images'] = $imageData['all'];
         }
 
         if (
@@ -132,6 +158,14 @@ class StorefrontProductResource extends JsonResource
             $payload['currency'] = $this->resource->currency->code;
         }
 
+        // Variantes del producto (con finish, condition, stock, etc.).
+        // Se emiten SOLO cuando el eager-load se disparó (la PDP las
+        // necesita; el listado no las usa). El shape exacto está
+        // documentado en cada campo de resolveVariants().
+        if ($hasVariantContext) {
+            $payload['variants'] = $this->resolveVariants();
+        }
+
         return $payload;
     }
 
@@ -143,12 +177,24 @@ class StorefrontProductResource extends JsonResource
      * vacío como ausencia y el Resource cae al placeholder en el
      * toArray principal.
      *
-     * @return array{all: list<string>, primary: string|null}
+     * Shape del array devuelto:
+     *   - `all`  — lista de URLs (sin metadata) para endpoints que solo
+     *              necesitan URLs (listado, sitemap, etc.).
+     *   - `objects` — lista de objetos `{url, altText, isPrimary,
+     *                  variantId, sortOrder}` para el PDP, donde
+     *                  `variantId` permite filtrar la galería por
+     *                  acabado. Solo se popula cuando la relación
+     *                  `variants` también fue eager-loadada (señal de
+     *                  que el consumer es el detalle). En el listado
+     *                  emitimos objetos vacíos para mantener el shape
+     *                  consistente y permitir fallback del frontend.
+     *
+     * @return array{all: list<string>, objects: list<array<string, mixed>>, primary: string|null}
      */
     private function resolveImages(): array
     {
         if (! $this->resource->relationLoaded('images')) {
-            return ['all' => [], 'primary' => null];
+            return ['all' => [], 'objects' => [], 'primary' => null];
         }
 
         $images = $this->resource->images->sortBy('sort_order')->values();
@@ -157,10 +203,64 @@ class StorefrontProductResource extends JsonResource
             ->map(fn (mixed $url): string => $this->toProxyUrl((string) $url))
             ->all();
 
+        $objects = $images->map(fn ($img): array => [
+            'url' => $this->toProxyUrl((string) $img->image_url),
+            'altText' => (string) ($img->alt_text ?? ''),
+            'isPrimary' => (bool) $img->is_primary,
+            // variantId nullable: si la imagen no tiene variant asociado
+            // (caso 4/19 multi-variant con finish_slug real pero assets
+            // no presentes en disco), el frontend no puede filtrar y
+            // degrada a mostrar todas.
+            'variantId' => $img->variant_id,
+            'sortOrder' => (int) $img->sort_order,
+        ])->all();
+
         $primary = $images->firstWhere('is_primary', true);
         $primaryUrl = $primary !== null ? $this->toProxyUrl((string) $primary->image_url) : null;
 
-        return ['all' => $allUrls, 'primary' => $primaryUrl];
+        return ['all' => $allUrls, 'objects' => $objects, 'primary' => $primaryUrl];
+    }
+
+    /**
+     * Resuelve la lista de variantes para el PDP.
+     *
+     * Shape por variante (camelCase, fiel a frontend ProductVariant):
+     *   - id           int   (PK de product_variants; id estable)
+     *   - name         string
+     *   - finishSlug   string|null
+     *   - finishLabel  string|null
+     *   - finishHex    string|null
+     *   - condition    string
+     *   - stock        int
+     *
+     * Variantes con `is_active = false` se filtran (no aparecen en el
+     * PDP). Variantes sin `finish_slug` también se filtran — son
+     * ambiguas para el picker de acabado, y la PDP no las necesita.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function resolveVariants(): array
+    {
+        $rows = [];
+        foreach ($this->resource->variants as $variant) {
+            if (! ($variant->is_active ?? true)) {
+                continue;
+            }
+            if ($variant->finish_slug === null || $variant->finish_slug === '') {
+                continue;
+            }
+            $rows[] = [
+                'id' => (int) $variant->id,
+                'name' => (string) ($variant->name ?? ''),
+                'finishSlug' => (string) $variant->finish_slug,
+                'finishLabel' => (string) ($variant->finish_label ?? $variant->finish_slug),
+                'finishHex' => $variant->finish_hex,
+                'condition' => (string) ($variant->condition ?? 'nuevo'),
+                'stock' => (int) ($variant->stock ?? 0),
+            ];
+        }
+
+        return $rows;
     }
 
     /**
@@ -183,7 +283,7 @@ class StorefrontProductResource extends JsonResource
             return $storageKey;
         }
 
-        return '/api/v1/storefront/assets/' . ltrim($storageKey, '/');
+        return '/api/v1/storefront/assets/'.ltrim($storageKey, '/');
     }
 
     /**

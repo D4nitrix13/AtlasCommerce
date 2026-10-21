@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $id
  * @property int $product_id
+ * @property int|null $variant_id
  * @property string $image_url
  * @property string|null $alt_text
  * @property int $sort_order
@@ -27,6 +28,7 @@ class ProductImage extends Model
 {
     protected $fillable = [
         'product_id',
+        'variant_id',
         'image_url',
         'alt_text',
         'sort_order',
@@ -44,6 +46,19 @@ class ProductImage extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Variante (acabado) al que pertenece la imagen.
+     *
+     * Nullable: el seeder histórico no persiste la asociación y los
+     * productos single-variant sin assets en disco (4/19 según
+     * diagnóstico Oct 2026) se quedan con `variant_id = NULL`. La PDP
+     * degrada limpiamente: si no hay match por variant, muestra todas.
+     */
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'variant_id', 'id');
     }
 
     /**
