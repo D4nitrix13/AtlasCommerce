@@ -15,8 +15,11 @@ top to bottom direction
 '   <<FK>>   clave foranea declarada con constrained()
 '   --       separador de grupos de campos dentro de la entidad
 '   Multiplicidades explicitas en AMBOS extremos de cada relacion.
-'   Cada entidad declara su tabla fisica real como alias PlantUML
-'   para trazabilidad con docs/database/README.md.
+'
+' Los atributos y las claves foraneas se expresan en espanol
+' academico. Cada entidad declara su tabla fisica real como alias
+' PlantUML, y la equivalencia completa entre el nombre academico y
+' la columna fisica en ingles esta al final del diagrama.
 ' ============================================================
 
 ' ============================================================
@@ -28,43 +31,43 @@ package "MULTI-TENANCIA" {
   entity "TIENDA" as stores {
     * id : BIGSERIAL <<PK>>
     --
-    currency_id : BIGINT <<FK>>
+    moneda_id : BIGINT <<FK>>
     --
-    name : VARCHAR(160)
+    nombre : VARCHAR(160)
     slug : VARCHAR(160)
-    logo_path : VARCHAR(255)
-    favicon_path : VARCHAR(255)
-    cover_image_path : VARCHAR(255)
-    og_image_path : VARCHAR(255)
-    email : VARCHAR(150)
-    phone : VARCHAR(30)
+    ruta_logo : VARCHAR(255)
+    ruta_favicon : VARCHAR(255)
+    ruta_imagen_portada : VARCHAR(255)
+    ruta_imagen_compartida : VARCHAR(255)
+    correo : VARCHAR(150)
+    telefono : VARCHAR(30)
     whatsapp : VARCHAR(30)
-    address : TEXT
-    description : TEXT
-    primary_color : VARCHAR(20)
-    secondary_color : VARCHAR(20)
-    tax_rate : DECIMAL(5,2)
-    maintenance_mode : BOOLEAN
-    is_active : BOOLEAN
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    direccion : TEXT
+    descripcion : TEXT
+    color_primario : VARCHAR(20)
+    color_secundario : VARCHAR(20)
+    tasa_impuesto : DECIMAL(5,2)
+    modo_mantenimiento : BOOLEAN
+    activo : BOOLEAN
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "TIENDA_DOMINIO" as store_domains {
     * id : BIGSERIAL <<PK>>
     --
-    store_id : BIGINT <<FK>>
+    tienda_id : BIGINT <<FK>>
     --
-    domain : VARCHAR(255)
-    type : VARCHAR(20)
-    base_path : VARCHAR(255)
-    redirect_to_primary : BOOLEAN
-    is_primary : BOOLEAN
-    is_active : BOOLEAN
-    verified_at : TIMESTAMP
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
+    dominio : VARCHAR(255)
+    tipo : VARCHAR(20)
+    ruta_base : VARCHAR(255)
+    redirigir_a_principal : BOOLEAN
+    es_principal : BOOLEAN
+    activo : BOOLEAN
+    verificado_en : TIMESTAMP
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
   }
 }
 
@@ -77,38 +80,38 @@ package "IDENTIDAD Y ACCESO" {
   entity "USUARIO" as users {
     * id : BIGSERIAL <<PK>>
     --
-    role_id : BIGINT <<FK>>
+    rol_id : BIGINT <<FK>>
     --
-    first_name : VARCHAR(80)
-    last_name : VARCHAR(80)
-    email : VARCHAR(150)
-    email_verified_at : TIMESTAMP
-    password : VARCHAR(255)
-    phone : VARCHAR(30)
-    is_active : BOOLEAN
-    registered_at : TIMESTAMP
-    password_changed_at : TIMESTAMP
-    last_login_at : TIMESTAMP
-    last_login_ip : VARCHAR(45)
-    failed_login_attempts : INTEGER
-    locked_until : TIMESTAMP
-    preferred_recovery_method : VARCHAR(20)
-    remember_token : VARCHAR(100)
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    nombre : VARCHAR(80)
+    apellido : VARCHAR(80)
+    correo : VARCHAR(150)
+    correo_verificado_en : TIMESTAMP
+    contrasena : VARCHAR(255)
+    telefono : VARCHAR(30)
+    activo : BOOLEAN
+    registrado_en : TIMESTAMP
+    contrasena_cambiada_en : TIMESTAMP
+    ultimo_inicio_sesion_en : TIMESTAMP
+    ip_ultimo_inicio_sesion : VARCHAR(45)
+    intentos_fallidos : INTEGER
+    bloqueado_hasta : TIMESTAMP
+    metodo_recuperacion_preferido : VARCHAR(20)
+    token_recordatorio : VARCHAR(100)
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "ROL" as roles {
     * id : BIGSERIAL <<PK>>
     --
-    name : VARCHAR(80)
+    nombre : VARCHAR(80)
     slug : VARCHAR(100)
-    description : TEXT
-    is_active : BOOLEAN
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    descripcion : TEXT
+    activo : BOOLEAN
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 }
 
@@ -121,40 +124,40 @@ package "CLIENTE" {
   entity "CLIENTE" as customers {
     * id : BIGSERIAL <<PK>>
     --
-    user_id : BIGINT <<FK>>
+    usuario_id : BIGINT <<FK>>
     --
-    customer_type : VARCHAR(50)
-    identity_document : VARCHAR(80)
-    first_name : VARCHAR(80)
-    last_name : VARCHAR(80)
-    email : VARCHAR(150)
-    phone : VARCHAR(30)
-    registered_at : TIMESTAMP
-    is_active : BOOLEAN
-    anonymized_at : TIMESTAMP
-    deletion_requested_at : TIMESTAMP
-    deletion_token_hash : VARCHAR(64)
-    deletion_token_expires_at : TIMESTAMP
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    tipo_cliente : VARCHAR(50)
+    documento_identidad : VARCHAR(80)
+    nombre : VARCHAR(80)
+    apellido : VARCHAR(80)
+    correo : VARCHAR(150)
+    telefono : VARCHAR(30)
+    registrado_en : TIMESTAMP
+    activo : BOOLEAN
+    anonimizado_en : TIMESTAMP
+    eliminacion_solicitada_en : TIMESTAMP
+    hash_token_eliminacion : VARCHAR(64)
+    token_eliminacion_expira_en : TIMESTAMP
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "CLIENTE_DIRECCION" as customer_addresses {
     * id : BIGSERIAL <<PK>>
     --
-    customer_id : BIGINT <<FK>>
+    cliente_id : BIGINT <<FK>>
     --
-    address_type : VARCHAR(50)
-    country : VARCHAR(80)
-    department : VARCHAR(100)
-    municipality : VARCHAR(100)
-    detailed_address : TEXT
-    reference : TEXT
-    is_primary : BOOLEAN
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    tipo_direccion : VARCHAR(50)
+    pais : VARCHAR(80)
+    departamento : VARCHAR(100)
+    municipio : VARCHAR(100)
+    direccion_detallada : TEXT
+    referencia : TEXT
+    es_principal : BOOLEAN
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 }
 
@@ -167,90 +170,90 @@ package "CATALOGO" {
   entity "CATEGORIA" as categories {
     * id : BIGSERIAL <<PK>>
     --
-    parent_id : BIGINT <<FK>>
+    categoria_padre_id : BIGINT <<FK>>
     --
-    name : VARCHAR(120)
+    nombre : VARCHAR(120)
     slug : VARCHAR(150)
-    description : TEXT
-    image_path : VARCHAR(255)
-    is_active : BOOLEAN
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    descripcion : TEXT
+    ruta_imagen : VARCHAR(255)
+    activo : BOOLEAN
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "MARCA" as brands {
     * id : BIGSERIAL <<PK>>
     --
-    name : VARCHAR(120)
+    nombre : VARCHAR(120)
     slug : VARCHAR(150)
-    description : TEXT
-    logo_url : VARCHAR(255)
-    is_active : BOOLEAN
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    descripcion : TEXT
+    url_logo : VARCHAR(255)
+    activo : BOOLEAN
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "PRODUCTO" as products {
     * id : BIGSERIAL <<PK>>
     --
-    category_id : BIGINT <<FK>>
-    brand_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
+    categoria_id : BIGINT <<FK>>
+    marca_id : BIGINT <<FK>>
+    moneda_id : BIGINT <<FK>>
     --
-    name : VARCHAR(160)
+    nombre : VARCHAR(160)
     slug : VARCHAR(180)
-    description : TEXT
+    descripcion : TEXT
     sku : VARCHAR(120)
-    base_price_cents : BIGINT
-    cost_cents : BIGINT
-    is_active : BOOLEAN
-    published_at : TIMESTAMP
-    has_condition : BOOLEAN
-    has_sizes : BOOLEAN
-    is_exclusive : BOOLEAN
-    is_left_handed : BOOLEAN
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    precio_base_centavos : BIGINT
+    costo_centavos : BIGINT
+    activo : BOOLEAN
+    publicado_en : TIMESTAMP
+    tiene_estado : BOOLEAN
+    tiene_tallas : BOOLEAN
+    es_exclusivo : BOOLEAN
+    es_para_zurdos : BOOLEAN
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "PRODUCTO_VARIANTE" as product_variants {
     * id : BIGSERIAL <<PK>>
     --
-    product_id : BIGINT <<FK>>
-    size_id : BIGINT <<FK>>
+    producto_id : BIGINT <<FK>>
+    talla_id : BIGINT <<FK>>
     --
-    name : VARCHAR(160)
+    nombre : VARCHAR(160)
     sku : VARCHAR(120)
-    price_cents : BIGINT
-    cost_cents : BIGINT
-    barcode : VARCHAR(120)
-    is_active : BOOLEAN
-    finish_slug : VARCHAR(64)
-    finish_label : VARCHAR(120)
-    finish_hex : VARCHAR(9)
-    condition : VARCHAR(16)
-    stock : INTEGER
-    handedness : VARCHAR(16)
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    precio_centavos : BIGINT
+    costo_centavos : BIGINT
+    codigo_barras : VARCHAR(120)
+    activo : BOOLEAN
+    acabado_slug : VARCHAR(64)
+    etiqueta_acabado : VARCHAR(120)
+    color_acabado : VARCHAR(9)
+    estado_producto : VARCHAR(16)
+    existencias : INTEGER
+    lateralidad : VARCHAR(16)
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "INVENTARIO" as inventories {
     * id : BIGSERIAL <<PK>>
     --
-    warehouse_id : BIGINT <<FK>>
-    product_id : BIGINT <<FK>>
-    product_variant_id : BIGINT <<FK>>
+    almacen_id : BIGINT <<FK>>
+    producto_id : BIGINT <<FK>>
+    variante_id : BIGINT <<FK>>
     --
-    current_stock : INTEGER
-    minimum_stock : INTEGER
-    reserved_stock : INTEGER
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
+    stock_actual : INTEGER
+    stock_minimo : INTEGER
+    stock_reservado : INTEGER
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
   }
 }
 
@@ -263,67 +266,67 @@ package "OPERACIONES" {
   entity "PEDIDO" as orders {
     * id : BIGSERIAL <<PK>>
     --
-    customer_id : BIGINT <<FK>>
-    store_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    shipping_address_id : BIGINT <<FK>>
-    sales_channel_id : BIGINT <<FK>>
-    user_creator_id : BIGINT <<FK>>
+    cliente_id : BIGINT <<FK>>
+    tienda_id : BIGINT <<FK>>
+    moneda_id : BIGINT <<FK>>
+    direccion_envio_id : BIGINT <<FK>>
+    canal_venta_id : BIGINT <<FK>>
+    usuario_creador_id : BIGINT <<FK>>
     --
-    order_number : VARCHAR(80)
-    subtotal_cents : BIGINT
-    discount_cents : BIGINT
-    tax_cents : BIGINT
-    shipping_cents : BIGINT
-    total_cents : BIGINT
-    exchange_rate_snapshot : NUMERIC(18,8)
-    total_in_base_currency_cents : BIGINT
-    status : VARCHAR(50)
-    ordered_at : TIMESTAMP
-    notes : TEXT
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    numero_pedido : VARCHAR(80)
+    subtotal_centavos : BIGINT
+    descuento_centavos : BIGINT
+    impuesto_centavos : BIGINT
+    envio_centavos : BIGINT
+    total_centavos : BIGINT
+    tasa_cambio_congelada : NUMERIC(18,8)
+    total_moneda_base_centavos : BIGINT
+    estado : VARCHAR(50)
+    pedido_en : TIMESTAMP
+    notas : TEXT
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "DETALLE_PEDIDO" as order_items {
     * id : BIGSERIAL <<PK>>
     --
-    order_id : BIGINT <<FK>>
-    product_id : BIGINT <<FK>>
-    product_variant_id : BIGINT <<FK>>
-    custom_design_id : BIGINT <<FK>>
+    pedido_id : BIGINT <<FK>>
+    producto_id : BIGINT <<FK>>
+    variante_id : BIGINT <<FK>>
+    diseno_personalizado_id : BIGINT <<FK>>
     --
-    quantity : INTEGER
-    unit_price_cents : BIGINT
-    discount_cents : BIGINT
-    subtotal_cents : BIGINT
-    product_name_snapshot : VARCHAR(160)
-    product_sku_snapshot : VARCHAR(120)
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
+    cantidad : INTEGER
+    precio_unitario_centavos : BIGINT
+    descuento_centavos : BIGINT
+    subtotal_centavos : BIGINT
+    nombre_producto_congelado : VARCHAR(160)
+    sku_producto_congelado : VARCHAR(120)
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
   }
 
   entity "ENVIO" as shipments {
     * id : BIGSERIAL <<PK>>
     --
-    order_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    shipping_company_id : BIGINT <<FK>>
-    shipping_zone_id : BIGINT <<FK>>
+    pedido_id : BIGINT <<FK>>
+    moneda_id : BIGINT <<FK>>
+    empresa_envio_id : BIGINT <<FK>>
+    zona_envio_id : BIGINT <<FK>>
     --
-    tracking_code : VARCHAR(160)
-    tracking_url : VARCHAR(255)
-    last_event_status : VARCHAR(80)
-    last_event_location : VARCHAR(255)
-    last_event_at : TIMESTAMP
-    shipping_cost_cents : BIGINT
-    status : VARCHAR(50)
-    shipped_at : TIMESTAMP
-    delivered_at : TIMESTAMP
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    codigo_seguimiento : VARCHAR(160)
+    url_seguimiento : VARCHAR(255)
+    estado_ultimo_evento : VARCHAR(80)
+    ubicacion_ultimo_evento : VARCHAR(255)
+    ultimo_evento_en : TIMESTAMP
+    costo_envio_centavos : BIGINT
+    estado : VARCHAR(50)
+    enviado_en : TIMESTAMP
+    entregado_en : TIMESTAMP
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 }
 
@@ -336,49 +339,49 @@ package "FINANZAS" {
   entity "PAGO" as payments {
     * id : BIGSERIAL <<PK>>
     --
-    customer_id : BIGINT <<FK>>
-    store_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    payment_method_id : BIGINT <<FK>>
+    cliente_id : BIGINT <<FK>>
+    tienda_id : BIGINT <<FK>>
+    moneda_id : BIGINT <<FK>>
+    metodo_pago_id : BIGINT <<FK>>
     --
-    amount_cents : BIGINT
-    exchange_rate_snapshot : NUMERIC(18,8)
-    reference : VARCHAR(160)
-    status : VARCHAR(50)
-    paid_at : TIMESTAMP
-    notes : TEXT
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    monto_centavos : BIGINT
+    tasa_cambio_congelada : NUMERIC(18,8)
+    referencia : VARCHAR(160)
+    estado : VARCHAR(50)
+    pagado_en : TIMESTAMP
+    notas : TEXT
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 
   entity "FACTURA" as invoices {
     * id : BIGSERIAL <<PK>>
     --
-    customer_id : BIGINT <<FK>>
-    store_id : BIGINT <<FK>>
-    currency_id : BIGINT <<FK>>
-    order_id : BIGINT <<FK>>
-    sales_channel_id : BIGINT <<FK>>
-    user_issuer_id : BIGINT <<FK>>
-    shipping_zone_id : BIGINT <<FK>>
+    cliente_id : BIGINT <<FK>>
+    tienda_id : BIGINT <<FK>>
+    moneda_id : BIGINT <<FK>>
+    pedido_id : BIGINT <<FK>>
+    canal_venta_id : BIGINT <<FK>>
+    usuario_emisor_id : BIGINT <<FK>>
+    zona_envio_id : BIGINT <<FK>>
     --
-    invoice_number : VARCHAR(80)
-    subtotal_cents : BIGINT
-    discount_cents : BIGINT
-    tax_cents : BIGINT
-    shipping_cents : BIGINT
-    total_cents : BIGINT
-    refunded_cents : BIGINT
-    exchange_rate_snapshot : NUMERIC(18,8)
-    payment_status : VARCHAR(50)
-    invoice_status : VARCHAR(50)
-    issued_at : TIMESTAMP
-    due_at : TIMESTAMP
-    notes : TEXT
-    created_at : TIMESTAMP
-    updated_at : TIMESTAMP
-    deleted_at : TIMESTAMP
+    numero_factura : VARCHAR(80)
+    subtotal_centavos : BIGINT
+    descuento_centavos : BIGINT
+    impuesto_centavos : BIGINT
+    envio_centavos : BIGINT
+    total_centavos : BIGINT
+    reembolsado_centavos : BIGINT
+    tasa_cambio_congelada : NUMERIC(18,8)
+    estado_pago : VARCHAR(50)
+    estado_factura : VARCHAR(50)
+    emitida_en : TIMESTAMP
+    vence_en : TIMESTAMP
+    notas : TEXT
+    creado_en : TIMESTAMP
+    actualizado_en : TIMESTAMP
+    eliminado_en : TIMESTAMP
   }
 }
 
@@ -387,56 +390,56 @@ package "FINANZAS" {
 '   TIENDA es la raiz del multi-tenant: delimita los dominios que
 '   resuelven a la tienda y delimita los documentos transaccionales.
 ' ============================================================
-stores "1" -- "0..*" store_domains : "store_id"
-stores "1" -- "0..*" orders : "store_id"
-stores "1" -- "0..*" payments : "store_id"
-stores "1" -- "0..*" invoices : "store_id"
+stores "1" -- "0..*" store_domains : "tienda_id"
+stores "1" -- "0..*" orders : "tienda_id"
+stores "1" -- "0..*" payments : "tienda_id"
+stores "1" -- "0..*" invoices : "tienda_id"
 
 ' ============================================================
 ' RELACIONES — IDENTIDAD Y ACCESO
-'   user_creator_id y user_issuer_id documentan la trazabilidad
+'   usuario_creador_id y usuario_emisor_id documentan la trazabilidad
 '   del operador administrativo que creo el documento.
 ' ============================================================
-roles "1" -- "0..*" users : "role_id"
-users "1" -- "0..1" customers : "user_id"
-users "1" -- "0..*" orders : "user_creator_id (trazabilidad)"
-users "1" -- "0..*" invoices : "user_issuer_id (trazabilidad)"
+roles "1" -- "0..*" users : "rol_id"
+users "1" -- "0..1" customers : "usuario_id"
+users "1" -- "0..*" orders : "usuario_creador_id (trazabilidad)"
+users "1" -- "0..*" invoices : "usuario_emisor_id (trazabilidad)"
 
 ' ============================================================
 ' RELACIONES — CLIENTE
-'   CLIENTE no tiene store_id: la pertenencia a una tienda se
+'   CLIENTE no tiene tienda_id: la pertenencia a una tienda se
 '   resuelve por la tabla puente customer_stores (N:N, externa).
 ' ============================================================
-customers "1" -- "0..*" customer_addresses : "customer_id"
-customers "1" -- "0..*" orders : "customer_id"
-customers "1" -- "0..*" payments : "customer_id"
-customers "1" -- "0..*" invoices : "customer_id"
-customer_addresses "0..1" -- "0..*" orders : "shipping_address_id"
+customers "1" -- "0..*" customer_addresses : "cliente_id"
+customers "1" -- "0..*" orders : "cliente_id"
+customers "1" -- "0..*" payments : "cliente_id"
+customers "1" -- "0..*" invoices : "cliente_id"
+customer_addresses "0..1" -- "0..*" orders : "direccion_envio_id"
 
 ' ============================================================
 ' RELACIONES — CATALOGO
-'   categories.parent_id es auto-referencia nullable: la jerarquia
-'   de categorias es recursiva y una raiz tiene parent_id NULL.
+'   categoria_padre_id es auto-referencia nullable: la jerarquia
+'   de categorias es recursiva y una raiz tiene categoria_padre_id NULL.
 ' ============================================================
-categories "1" -- "0..*" products : "category_id"
-categories "0..1" -- "0..*" categories : "parent_id (auto-referencia)"
-brands "0..1" -- "0..*" products : "brand_id"
-products "1" -- "0..*" product_variants : "product_id"
-products "1" -- "0..*" order_items : "product_id"
-products "1" -- "0..*" inventories : "product_id"
-product_variants "0..1" -- "0..*" order_items : "product_variant_id"
-product_variants "0..1" -- "0..*" inventories : "product_variant_id"
+categories "1" -- "0..*" products : "categoria_id"
+categories "0..1" -- "0..*" categories : "categoria_padre_id (auto-ref)"
+brands "0..1" -- "0..*" products : "marca_id"
+products "1" -- "0..*" product_variants : "producto_id"
+products "1" -- "0..*" order_items : "producto_id"
+products "1" -- "0..*" inventories : "producto_id"
+product_variants "0..1" -- "0..*" order_items : "variante_id"
+product_variants "0..1" -- "0..*" inventories : "variante_id"
 
 ' ============================================================
 ' RELACIONES — OPERACIONES
 ' ============================================================
-orders "1" -- "0..*" order_items : "order_id"
-orders "1" -- "0..*" shipments : "order_id"
-orders "0..1" -- "0..*" invoices : "order_id"
+orders "1" -- "0..*" order_items : "pedido_id"
+orders "1" -- "0..*" shipments : "pedido_id"
+orders "0..1" -- "0..*" invoices : "pedido_id"
 
 ' ============================================================
 ' RELACIONES — FINANZAS
-'   PAGO NO tiene order_id: se vincula con FACTURA mediante la
+'   PAGO NO tiene pedido_id: se vincula con FACTURA mediante la
 '   tabla puente invoice_payments (N:M), de modo que un pago puede
 '   cubrir varias facturas y una factura varios pagos.
 ' ============================================================
@@ -446,18 +449,18 @@ payments "*" -- "0..*" invoices : "invoice_payments (tabla puente N:M)"
 ' NOTAS — CLAVES FORANEAS EXTERNAS
 ' Las siguientes claves foraneas apuntan a tablas que quedan fuera
 ' del nucleo de 16 entidades y por eso NO se dibujan como entidad:
-'   currencies           <- stores, products, orders, payments,
-'                           invoices, shipments
-'   payment_methods      <- payments
-'   sales_channels       <- orders, invoices
-'   shipping_companies   <- shipments
-'   shipping_zones       <- invoices, shipments
-'   warehouses           <- inventories
-'   product_sizes        <- product_variants
-'   custom_designs       <- order_items
+'   currencies (moneda)      <- stores, products, orders, payments,
+'                               invoices, shipments
+'   payment_methods          <- payments
+'   sales_channels           <- orders, invoices
+'   shipping_companies       <- shipments
+'   shipping_zones           <- invoices, shipments
+'   warehouses               <- inventories
+'   product_sizes            <- product_variants
+'   custom_designs           <- order_items
 ' Tablas puente (pivots) externas:
-'   invoice_payments     PAGO <-> FACTURA (N:M)
-'   customer_stores      CLIENTE <-> TIENDA (N:N)
+'   invoice_payments         PAGO <-> FACTURA (N:M)
+'   customer_stores          CLIENTE <-> TIENDA (N:N)
 ' ============================================================
 ' NOTAS — REGLAS DE INTEGRIDAD
 '   ON DELETE RESTRICT: tienda, cliente, categoria, marca, moneda,
@@ -469,6 +472,61 @@ payments "*" -- "0..*" invoices : "invoice_payments (tabla puente N:M)"
 '                       diseno, canal, zona de envio, direccion).
 '   Aislamiento multi-tenant: RLS activo sobre orders, invoices y
 '                       payments; el resto se filtra por middleware.
+' ============================================================
+' EQUIVALENCIA — NOMBRE ACADEMICO / COLUMNA FISICA
+'   La base de datos guarda los nombres en ingles. La tabla fisica
+'   de cada entidad es su alias PlantUML. Correspondencias:
+'
+'   TIENDA.nombre / slug / correo / tasa_impuesto
+'                    -> stores.name / slug / email / tax_rate
+'   TIENDA_DOMINIO.tienda_id / dominio
+'                    -> store_domains.store_id / domain
+'   USUARIO.rol_id / correo / contrasena / bloqueado_hasta
+'                    -> users.role_id / email / password / locked_until
+'   ROL.nombre / descripcion / activo
+'                    -> roles.name / description / is_active
+'   CLIENTE.usuario_id / tipo_cliente / documento_identidad / correo
+'                    -> customers.user_id / customer_type /
+'                       identity_document / email
+'   CLIENTE_DIRECCION.cliente_id / direccion_detallada / es_principal
+'                    -> customer_addresses.customer_id /
+'                       detailed_address / is_primary
+'   CATEGORIA.categoria_padre_id / nombre
+'                    -> categories.parent_id / name
+'   MARCA.nombre / url_logo
+'                    -> brands.name / logo_url
+'   PRODUCTO.categoria_id / marca_id / precio_base_centavos
+'                    -> products.category_id / brand_id / base_price_cents
+'   PRODUCTO_VARIANTE.producto_id / talla_id / precio_centavos
+'                    -> product_variants.product_id / size_id / price_cents
+'   INVENTARIO.almacen_id / variante_id / stock_actual
+'                    -> inventories.warehouse_id / product_variant_id /
+'                       current_stock
+'   PEDIDO.cliente_id / tienda_id / direccion_envio_id /
+'   usuario_creador_id / numero_pedido / total_centavos / estado
+'                    -> orders.customer_id / store_id /
+'                       shipping_address_id / user_creator_id /
+'                       order_number / total_cents / status
+'   DETALLE_PEDIDO.pedido_id / variante_id / cantidad /
+'   precio_unitario_centavos
+'                    -> order_items.order_id / product_variant_id /
+'                       quantity / unit_price_cents
+'   ENVIO.pedido_id / empresa_envio_id / zona_envio_id /
+'   codigo_seguimiento / costo_envio_centavos / enviado_en
+'                    -> shipments.order_id / shipping_company_id /
+'                       shipping_zone_id / tracking_code /
+'                       shipping_cost_cents / shipped_at
+'   PAGO.cliente_id / metodo_pago_id / monto_centavos / pagado_en
+'                    -> payments.customer_id / payment_method_id /
+'                       amount_cents / paid_at
+'   FACTURA.pedido_id / usuario_emisor_id / numero_factura /
+'   reembolsado_centavos / estado_pago / estado_factura / emitida_en
+'                    -> invoices.order_id / user_issuer_id /
+'                       invoice_number / refunded_cents /
+'                       payment_status / invoice_status / issued_at
+'
+'   Los campos created_at, updated_at y deleted_at se nombran
+'   creado_en, actualizado_en y eliminado_en en todo el diagrama.
 ' ============================================================
 
 @enduml
