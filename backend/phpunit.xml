@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          colors="true"
 >
     <testsuites>
@@ -30,13 +30,25 @@
         <env name="CACHE_STORE" value="array"/>
 
         <!--
-          Tests DEBEN correr contra una DB aislada para que el trait
-          `RefreshDatabase` no wipee la dev DB. Forzamos DB_DATABASE
-          aquí (phpunit.xml tiene prioridad sobre el `.env` cuando se
-          corre via `phpunit` o `php artisan test`).
+          Tests DEBEN correr contra una DB aislada: `RefreshDatabase`
+          hace TRUNCATE y este repo tiene cuatro instancias con datos
+          reales.
+
+          OJO, este comentario antes afirmaba que phpunit.xml tiene
+          prioridad sobre el `.env`. ES FALSO. Los `<env>` de PHPUnit
+          NO pisan una variable ya exportada por el entorno salvo con
+          force="true", asi que cuando los tests corren dentro del
+          container de una instancia gana el DB_DATABASE de esa
+          instancia y RefreshDatabase vacia la base de DESARROLLO.
+          Eso losing los datos tres veces.
+
+          La proteccion real no es este bloque sino `tests/bootstrap.php`,
+          que aborta el proceso antes de abrir una conexion si la base
+          no termina en `_test`. Este valor es solo el default para
+          correr tests fuera de los containers.
         -->
         <env name="DB_CONNECTION" value="pgsql"/>
-        <env name="DB_DATABASE" value="panda-estampados-and-kitsune_test"/>
+        <env name="DB_DATABASE" value="panda-estampados-and-kitsune_test" force="false"/>
         <env name="DB_HOST" value="postgres"/>
         <env name="DB_PORT" value="5432"/>
 
