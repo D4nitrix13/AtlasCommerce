@@ -118,7 +118,7 @@ class ProductReview extends Model
      */
     public function scopeByProduct(Builder $query, int $productId): Builder
     {
-        return $query->where(column: 'product_id', value: $productId);
+        return $query->where(column: 'product_id', operator: '=', value: $productId);
     }
 
     /**
@@ -130,7 +130,7 @@ class ProductReview extends Model
      */
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where(column: 'customer_id', value: $customerId);
+        return $query->where(column: 'customer_id', operator: '=', value: $customerId);
     }
 
     /**
@@ -142,6 +142,6 @@ class ProductReview extends Model
      */
     public function scopeByRating(Builder $query, int $rating): Builder
     {
-        return $query->where(column: 'rating', value: $rating);
+        return $query->where(column: 'rating', operator: '=', value: $rating);
     }
 }

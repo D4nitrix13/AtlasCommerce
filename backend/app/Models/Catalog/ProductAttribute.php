@@ -89,6 +89,6 @@ class ProductAttribute extends Model
      */
     public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where(column: 'type', value: $type);
+        return $query->where(column: 'type', operator: '=', value: $type);
     }
 }

@@ -71,6 +71,6 @@ class Tax extends Model
      */
     public function scopeByName(Builder $query, string $name): Builder
     {
-        return $query->where(column: 'name', value: $name);
+        return $query->where(column: 'name', operator: '=', value: $name);
     }
 }

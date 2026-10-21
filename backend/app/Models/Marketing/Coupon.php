@@ -151,7 +151,7 @@ class Coupon extends Model
      */
     public function scopeByCode(Builder $query, string $code): Builder
     {
-        return $query->where(column: 'code', value: $code);
+        return $query->where(column: 'code', operator: '=', value: $code);
     }
 
     /**
@@ -163,6 +163,6 @@ class Coupon extends Model
      */
     public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where(column: 'store_id', value: $storeId);
+        return $query->where(column: 'store_id', operator: '=', value: $storeId);
     }
 }

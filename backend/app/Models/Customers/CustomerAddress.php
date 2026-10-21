@@ -77,7 +77,7 @@ class CustomerAddress extends Model
      */
     public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where(column: 'address_type', value: $type);
+        return $query->where(column: 'address_type', operator: '=', value: $type);
     }
 
     /**
@@ -89,6 +89,6 @@ class CustomerAddress extends Model
      */
     public function scopeByCountry(Builder $query, string $country): Builder
     {
-        return $query->where(column: 'country', value: $country);
+        return $query->where(column: 'country', operator: '=', value: $country);
     }
 }

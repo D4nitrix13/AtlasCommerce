@@ -65,7 +65,7 @@ class SupportTicketMessage extends Model
      */
     public function scopeByTicket(Builder $query, int $ticketId): Builder
     {
-        return $query->where(column: 'support_ticket_id', value: $ticketId);
+        return $query->where(column: 'support_ticket_id', operator: '=', value: $ticketId);
     }
 
     /**

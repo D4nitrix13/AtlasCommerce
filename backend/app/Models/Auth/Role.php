@@ -70,6 +70,6 @@ class Role extends Model
      */
     public function scopeBySlug(Builder $query, string $slug): Builder
     {
-        return $query->where(column: 'slug', value: $slug);
+        return $query->where(column: 'slug', operator: '=', value: $slug);
     }
 }

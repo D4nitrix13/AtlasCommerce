@@ -77,7 +77,7 @@ class SupportTicket extends Model
      */
     public function scopeOpen(Builder $query): Builder
     {
-        return $query->where(column: 'status', value: 'open');
+        return $query->where(column: 'status', operator: '=', value: 'open');
     }
 
     /**
@@ -88,7 +88,7 @@ class SupportTicket extends Model
      */
     public function scopeClosed(Builder $query): Builder
     {
-        return $query->where(column: 'status', value: 'closed');
+        return $query->where(column: 'status', operator: '=', value: 'closed');
     }
 
     /**
@@ -100,7 +100,7 @@ class SupportTicket extends Model
      */
     public function scopeByStatus(Builder $query, string $status): Builder
     {
-        return $query->where(column: 'status', value: $status);
+        return $query->where(column: 'status', operator: '=', value: $status);
     }
 
     /**
@@ -112,7 +112,7 @@ class SupportTicket extends Model
      */
     public function scopeByPriority(Builder $query, string $priority): Builder
     {
-        return $query->where(column: 'priority', value: $priority);
+        return $query->where(column: 'priority', operator: '=', value: $priority);
     }
 
     /**
@@ -124,6 +124,6 @@ class SupportTicket extends Model
      */
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where(column: 'customer_id', value: $customerId);
+        return $query->where(column: 'customer_id', operator: '=', value: $customerId);
     }
 }

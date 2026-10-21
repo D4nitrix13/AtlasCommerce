@@ -121,7 +121,7 @@ class Inventory extends Model
      */
     public function scopeByWarehouse(Builder $query, int $warehouseId): Builder
     {
-        return $query->where(column: 'warehouse_id', value: $warehouseId);
+        return $query->where(column: 'warehouse_id', operator: '=', value: $warehouseId);
     }
 
     /**
@@ -133,6 +133,6 @@ class Inventory extends Model
      */
     public function scopeByProduct(Builder $query, int $productId): Builder
     {
-        return $query->where(column: 'product_id', value: $productId);
+        return $query->where(column: 'product_id', operator: '=', value: $productId);
     }
 }

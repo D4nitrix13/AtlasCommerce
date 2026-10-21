@@ -78,7 +78,7 @@ class Wishlist extends Model
      */
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where(column: 'customer_id', value: $customerId);
+        return $query->where(column: 'customer_id', operator: '=', value: $customerId);
     }
 
     /**

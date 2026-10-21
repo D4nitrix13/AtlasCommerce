@@ -82,7 +82,7 @@ class Audit extends Model
      */
     public function scopeByAction(Builder $query, string $action): Builder
     {
-        return $query->where(column: 'action', value: $action);
+        return $query->where(column: 'action', operator: '=', value: $action);
     }
 
     /**
@@ -94,7 +94,7 @@ class Audit extends Model
      */
     public function scopeByTable(Builder $query, string $tableName): Builder
     {
-        return $query->where(column: 'table_name', value: $tableName);
+        return $query->where(column: 'table_name', operator: '=', value: $tableName);
     }
 
     /**
@@ -106,7 +106,7 @@ class Audit extends Model
      */
     public function scopeByUser(Builder $query, int $userId): Builder
     {
-        return $query->where(column: 'user_id', value: $userId);
+        return $query->where(column: 'user_id', operator: '=', value: $userId);
     }
 
     /**
@@ -118,7 +118,7 @@ class Audit extends Model
      */
     public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where(column: 'store_id', value: $storeId);
+        return $query->where(column: 'store_id', operator: '=', value: $storeId);
     }
 
     /**
@@ -131,8 +131,8 @@ class Audit extends Model
      */
     public function scopeByRecord(Builder $query, string $tableName, int $recordId): Builder
     {
-        return $query->where(column: 'table_name', value: $tableName)
-            ->where(column: 'record_id', value: $recordId);
+        return $query->where(column: 'table_name', operator: '=', value: $tableName)
+            ->where(column: 'record_id', operator: '=', value: $recordId);
     }
 
     /**

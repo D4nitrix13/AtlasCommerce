@@ -107,7 +107,7 @@ class ProductQuestion extends Model
      */
     public function scopeByProduct(Builder $query, int $productId): Builder
     {
-        return $query->where(column: 'product_id', value: $productId);
+        return $query->where(column: 'product_id', operator: '=', value: $productId);
     }
 
     /**
@@ -119,6 +119,6 @@ class ProductQuestion extends Model
      */
     public function scopeByCustomer(Builder $query, int $customerId): Builder
     {
-        return $query->where(column: 'customer_id', value: $customerId);
+        return $query->where(column: 'customer_id', operator: '=', value: $customerId);
     }
 }

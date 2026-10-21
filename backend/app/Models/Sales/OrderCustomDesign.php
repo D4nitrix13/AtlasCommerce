@@ -107,7 +107,7 @@ class OrderCustomDesign extends Model
      */
     public function scopePending(Builder $query): Builder
     {
-        return $query->where(column: 'production_status', value: 'pending');
+        return $query->where(column: 'production_status', operator: '=', value: 'pending');
     }
 
     /**
@@ -118,7 +118,7 @@ class OrderCustomDesign extends Model
      */
     public function scopeApproved(Builder $query): Builder
     {
-        return $query->where(column: 'production_status', value: 'approved');
+        return $query->where(column: 'production_status', operator: '=', value: 'approved');
     }
 
     /**
@@ -129,7 +129,7 @@ class OrderCustomDesign extends Model
      */
     public function scopeRejected(Builder $query): Builder
     {
-        return $query->where(column: 'production_status', value: 'rejected');
+        return $query->where(column: 'production_status', operator: '=', value: 'rejected');
     }
 
     /**
@@ -140,7 +140,7 @@ class OrderCustomDesign extends Model
      */
     public function scopeInProduction(Builder $query): Builder
     {
-        return $query->where(column: 'production_status', value: 'in_production');
+        return $query->where(column: 'production_status', operator: '=', value: 'in_production');
     }
 
     /**
@@ -151,6 +151,6 @@ class OrderCustomDesign extends Model
      */
     public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where(column: 'production_status', value: 'completed');
+        return $query->where(column: 'production_status', operator: '=', value: 'completed');
     }
 }

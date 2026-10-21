@@ -51,7 +51,7 @@ class Permission extends Model
      */
     public function scopeByModule(Builder $query, string $module): Builder
     {
-        return $query->where(column: 'module', value: $module);
+        return $query->where(column: 'module', operator: '=', value: $module);
     }
 
     /**
@@ -63,6 +63,6 @@ class Permission extends Model
      */
     public function scopeBySlug(Builder $query, string $slug): Builder
     {
-        return $query->where(column: 'slug', value: $slug);
+        return $query->where(column: 'slug', operator: '=', value: $slug);
     }
 }

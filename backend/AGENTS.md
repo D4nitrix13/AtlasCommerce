@@ -197,6 +197,34 @@ User::query()
     ->first();
 ```
 
+### ⚠️ Trampa: `where()` con 2 named arguments falla en silencio
+
+Laravel define `where($column, $operator = null, $value = null,
+$boolean = 'and')`. Si pasás **solo** `column:` y `value:` sin
+`operator:`, PHP deja `$operator = null` y Laravel ejecuta
+`invalidOperator()`, que intercambia los valores: tu valor cae en el
+slot del operador y `$value` queda `NULL`.
+
+```php
+// ❌ ROTO — genera `where "status" = null`. Cero filas. SIN excepción.
+$query->where(column: 'status', value: 'open');
+
+// ✅ Correcto — la forma de 3 argumentos
+$query->where(column: 'status', operator: '=', value: 'open');
+
+// ✅ También correcto — posicional, y más legible para 2 argumentos
+$query->where('status', 'open');
+```
+
+**El síntoma es invisible**: la consulta devuelve cero filas sin error,
+sin log y sin excepción. Los scopes afectados parecen funcionar y
+nunca filtran nada.
+
+**Regla**: en `where()`, `orWhere()` y similares, usá la forma de **3**
+named arguments (`column`, `operator`, `value`) o la **posicional**.
+Nunca la de 2. Para 2 argumentos, la posicional es más legible y es lo
+preferido salvo que la columna y el valor sean ambiguos entre sí.
+
 ### Cuándo SÍ usar named arguments
 
 | Caso                                                                                  | Ejemplo                                                          |

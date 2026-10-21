@@ -107,13 +107,17 @@ class ProductController extends Controller
     {
         $store = $request->attributes->get('store');
 
+        // Mismo criterio que index(): se resuelve el product_id contra el
+        // pivot product_stores antes de tocar Product. whereHas() es API de
+        // Eloquent Builder y no existe en Query Builder, por eso falla con
+        // `column "has" does not exist`.
         $productId = DB::table('product_stores')
-            ->where('store_id', $store->id)
-            ->where('is_visible', true)
-            ->whereHas('product', function ($query) use ($slug): void {
-                $query->where('slug', $slug);
-            })
-            ->value('product_id');
+            ->where(column: 'store_id', operator: '=', value: $store->id)
+            ->where(column: 'is_visible', operator: '=', value: true)
+            ->whereIn('product_id', DB::table('products')
+                ->select('id')
+                ->where(column: 'slug', operator: '=', value: $slug))
+            ->value(column: 'product_id');
 
         $product = $productId === null
             ? abort(code: 404)

@@ -153,7 +153,7 @@ class Customer extends Model
      */
     public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where(column: 'customer_type', value: $type);
+        return $query->where(column: 'customer_type', operator: '=', value: $type);
     }
 
     /**

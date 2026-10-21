@@ -75,7 +75,7 @@ class InventoryMovement extends Model
      */
     public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where(column: 'movement_type', value: $type);
+        return $query->where(column: 'movement_type', operator: '=', value: $type);
     }
 
     /**
@@ -87,7 +87,7 @@ class InventoryMovement extends Model
      */
     public function scopeByInventory(Builder $query, int $inventoryId): Builder
     {
-        return $query->where(column: 'inventory_id', value: $inventoryId);
+        return $query->where(column: 'inventory_id', operator: '=', value: $inventoryId);
     }
 
     /**

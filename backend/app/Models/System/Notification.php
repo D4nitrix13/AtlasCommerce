@@ -96,7 +96,7 @@ class Notification extends Model
      */
     public function scopeByType(Builder $query, string $type): Builder
     {
-        return $query->where(column: 'type', value: $type);
+        return $query->where(column: 'type', operator: '=', value: $type);
     }
 
     /**
@@ -108,7 +108,7 @@ class Notification extends Model
      */
     public function scopeByUser(Builder $query, int $userId): Builder
     {
-        return $query->where(column: 'user_id', value: $userId);
+        return $query->where(column: 'user_id', operator: '=', value: $userId);
     }
 
     /**
@@ -120,6 +120,6 @@ class Notification extends Model
      */
     public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where(column: 'store_id', value: $storeId);
+        return $query->where(column: 'store_id', operator: '=', value: $storeId);
     }
 }

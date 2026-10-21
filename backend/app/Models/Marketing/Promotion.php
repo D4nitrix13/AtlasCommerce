@@ -143,6 +143,6 @@ class Promotion extends Model
      */
     public function scopeByStore(Builder $query, int $storeId): Builder
     {
-        return $query->where(column: 'store_id', value: $storeId);
+        return $query->where(column: 'store_id', operator: '=', value: $storeId);
     }
 }
