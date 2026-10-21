@@ -12,9 +12,14 @@ use App\Models\Catalog\ProductVariant;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
 use App\Models\Stores\Store;
+use App\Services\Catalog\VariantHandednessResolver;
+use FilesystemIterator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
+use JsonException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use Throwable;
 
 /**
  * Servicio que pobla la base de datos + storage desde
@@ -36,6 +41,11 @@ use RuntimeException;
  *   front, back, body, backbody, headstock, back-headstock, pickup, knobs,
  *   side, case, beauty, finish-top, finish-back, finish-sides, binding,
  *   fingerboard, sn-label, tailpiece, finish-peghead.
+ *
+ * Persistencia por imagen (Oct 2026): cada fila guarda `variant_id` y
+ * `width`. Sin `width` la PDP no puede distinguir las 4 resoluciones de
+ * una misma foto y las muestra como 4 fotos distintas; sin `variant_id`
+ * no puede filtrar la galería por acabado.
  */
 final class CatalogAssetsSeeder
 {
@@ -72,42 +82,16 @@ final class CatalogAssetsSeeder
      */
     private ?array $backupIndex = null;
 
-    /**
-     * Roles que extraemos del filename `{role}-{WxH}.webp`.
-     * Keys ordenadas LONGEST-FIRST para evitar matches parciales.
-     * (back-headstock antes que back, finish-top antes que finish, etc.)
-     */
-    private const KNOWN_ROLES = [
-        'back-headstock',
-        'finish-peghead',
-        'finish-sides',
-        'finish-top',
-        'finish-back',
-        'sn-label',
-        'tailpiece',
-        'headstock',
-        'backbody',
-        'fingerboard',
-        'binding',
-        'pickup',
-        'front',
-        'back',
-        'body',
-        'knobs',
-        'side',
-        'case',
-        'beauty',
-    ];
-
     public function __construct(
         private readonly string $assetBase,
         private readonly string $tenantSlug,
         private readonly string $storageDisk,
         private readonly StorageKeyDeriver $deriver,
+        private readonly AssetFilenameParser $filenames,
+        private readonly VariantHandednessResolver $handedness,
         /** Backup root con product.json por variante. Null → fallback placeholder. */
         private readonly ?string $backupBase = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta el seed completo.
@@ -136,14 +120,16 @@ final class CatalogAssetsSeeder
 
         if ($discovered === []) {
             $stats['warnings'][] = 'No se encontraron webps en '
-                . $this->assetBase . '/products/' . $this->tenantSlug;
+                .$this->assetBase.'/products/'.$this->tenantSlug;
+
             return $stats;
         }
 
         $tenantStore = Store::query()->where('slug', $this->tenantSlug)->first();
         if ($tenantStore === null) {
             $stats['errors'][] = "Tenant store con slug='{$this->tenantSlug}' no existe. "
-                . 'Ejecuta tenants:bootstrap primero.';
+                .'Ejecuta tenants:bootstrap primero.';
+
             return $stats;
         }
         $defaultBrand = Brand::query()->where('slug', 'gibson')->first();
@@ -152,7 +138,7 @@ final class CatalogAssetsSeeder
             ->first();
         if ($defaultBrand === null || $electricGuitarCat === null) {
             $stats['warnings'][] = 'Brand/Categoría seed básicos no encontrados. '
-                . "Se crearán con defaults mínimos.";
+                .'Se crearán con defaults mínimos.';
         }
 
         $defaultCurrency = Currency::query()->where('code', 'USD')->first()
@@ -179,8 +165,8 @@ final class CatalogAssetsSeeder
                         stats: $stats,
                     );
                 });
-            } catch (\Throwable $e) {
-                $stats['errors'][] = "Product {$productKey}: " . $e->getMessage();
+            } catch (Throwable $e) {
+                $stats['errors'][] = "Product {$productKey}: ".$e->getMessage();
             }
         }
 
@@ -200,17 +186,17 @@ final class CatalogAssetsSeeder
      */
     private function discoverFromFilesystem(): array
     {
-        $tenantBase = rtrim($this->assetBase, '/') . '/products/' . $this->tenantSlug;
+        $tenantBase = rtrim($this->assetBase, '/').'/products/'.$this->tenantSlug;
         if (! is_dir($tenantBase)) {
             return [];
         }
 
         $result = [];
-        $brandDirs = glob($tenantBase . '/*', GLOB_ONLYDIR) ?: [];
+        $brandDirs = glob($tenantBase.'/*', GLOB_ONLYDIR) ?: [];
 
         foreach ($brandDirs as $brandDir) {
             $brandSlug = basename($brandDir);
-            $productDirs = glob($brandDir . '/*', GLOB_ONLYDIR) ?: [];
+            $productDirs = glob($brandDir.'/*', GLOB_ONLYDIR) ?: [];
             foreach ($productDirs as $productDir) {
                 $productSlug = basename($productDir);
                 $key = "{$brandSlug}/{$productSlug}";
@@ -220,23 +206,23 @@ final class CatalogAssetsSeeder
                     'variants' => [],
                 ];
 
-                $variantDirs = glob($productDir . '/*', GLOB_ONLYDIR) ?: [];
+                $variantDirs = glob($productDir.'/*', GLOB_ONLYDIR) ?: [];
 
                 // Un chunk grande del catálogo no tiene subdirectorio de
                 // variante: los .webp cuelgan directo del directorio del
                 // producto. Sin este caso quedaban sin ninguna imagen, porque
                 // el recorrido solo miraba dentro de las variantes.
-                if ($variantDirs === [] && glob($productDir . '/*-*.webp') !== []) {
+                if ($variantDirs === [] && glob($productDir.'/*-*.webp') !== []) {
                     $variantDirs = [$productDir];
                 }
 
                 foreach ($variantDirs as $variantDir) {
                     $variantSlug = basename($variantDir);
                     $result[$key]['variants'][$variantSlug] = [];
-                    $webps = glob($variantDir . '/*-*.webp') ?: [];
+                    $webps = glob($variantDir.'/*-*.webp') ?: [];
                     foreach ($webps as $webp) {
                         $base = basename($webp, '.webp');
-                        $parsed = $this->parseRoleAndSize($base);
+                        $parsed = $this->filenames->parseRoleAndSize(base: $base);
                         if ($parsed === null) {
                             continue;
                         }
@@ -251,39 +237,6 @@ final class CatalogAssetsSeeder
         }
 
         return $result;
-    }
-
-    /**
-     * Parsea "NN-role-WxH" o "role-WxH" → ['role' => ..., 'size_w' => 'W'].
-     *
-     * Filenames esperados: `01-front-1600x1600.webp`, `body-400x400.webp`,
-     * `06-back-headstock-1200x1200.webp`, `17-finish-top-800x800.webp`.
-     *
-     * Solo extrae el ANCHO (W) del WxH porque el seeder compara con
-     * '1600' para identificar la imagen de mayor resolución. La altura
-     * (H) es irrelevante para la lógica de primary/max-size.
-     *
-     * @return null|array{role: string, size_w: string}
-     */
-    private function parseRoleAndSize(string $base): ?array
-    {
-        // Match solo el ANCHO (no "WxH" completo). Regex con grupo 'size_w'
-        // que captura solo dígitos antes de la 'x'.
-        if (! preg_match('/^(?:[0-9]{2}-)?(?P<role>[a-z\-]+)-(?P<size_w>[0-9]+)x[0-9]+$/', $base, $m)) {
-            return null;
-        }
-        $role = $m['role'];
-        $sizeW = $m['size_w'];
-
-        // Validar contra KNOWN_ROLES (longest-first para hyphenated)
-        foreach (self::KNOWN_ROLES as $known) {
-            if ($role === $known || str_starts_with($base, $known . '-')) {
-                return ['role' => $role, 'size_w' => $sizeW];
-            }
-        }
-
-        // Fallback: si no matchea ningún known role, aceptar lo que sea parseable
-        return ['role' => $role, 'size_w' => $sizeW];
     }
 
     /**
@@ -313,7 +266,7 @@ final class CatalogAssetsSeeder
         // la clave de descubrimiento `{brand}/{product}`. El handle combina
         // marca y producto, así que se prueban las dos formas.
         $category = $this->resolveCategory(
-            handles: [$brandSlug . '-' . $productSlug, $productSlug],
+            handles: [$brandSlug.'-'.$productSlug, $productSlug],
             fallback: $defaultCategory,
         );
 
@@ -328,14 +281,14 @@ final class CatalogAssetsSeeder
             ['slug' => $productSlug],
             [
                 'name' => $meta['title']
-                    ?? ucwords(str_replace('-', ' ', $productSlug)) . " ({$brandName})",
+                    ?? ucwords(str_replace('-', ' ', $productSlug))." ({$brandName})",
                 'sku' => $meta['sku']
-                    ?? (strtoupper(substr($brandSlug, 0, 4)) . '-'
-                        . strtoupper(str_replace('-', '', $productSlug))),
+                    ?? (strtoupper(substr($brandSlug, 0, 4)).'-'
+                        .strtoupper(str_replace('-', '', $productSlug))),
                 'description' => $meta['long_description']
                     ?? ($meta['description']
                         ?? "Producto {$productSlug} de la marca {$brandName}, "
-                            . "importado al catálogo de {$tenantStore->name}."),
+                            ."importado al catálogo de {$tenantStore->name}."),
                 'brand_id' => $brand->id,
                 'category_id' => $category->id,
                 'currency_id' => $defaultCurrency->id,
@@ -364,14 +317,19 @@ final class CatalogAssetsSeeder
             ],
         );
 
-        foreach ($data['variants'] as $variantSlug => $webps) {
-            // Detección handedness per-variant
-            $handedness = $this->detectHandedness($variantSlug);
+        // La mano es una propiedad del MODELO (el catálogo no ofrece el
+        // mismo instrumento en ambas manos), no del acabado: se resuelve
+        // una vez por producto desde slug + nombre y se replica en cada
+        // variante. `VariantHandednessResolver` es la única fuente de esa
+        // regla — también la usan los backfills, así que el seeder y el
+        // comando no pueden discrepar.
+        $handedness = $this->handedness->resolveForProduct(product: $product);
 
+        foreach ($data['variants'] as $variantSlug => $webps) {
             $variant = ProductVariant::query()->updateOrCreate(
                 ['product_id' => $product->id, 'sku' => strtoupper(substr($brandSlug, 0, 4))
-                    . '-' . strtoupper(str_replace('-', '', $productSlug))
-                    . '-' . strtoupper(str_replace('-', '', $variantSlug))],
+                    .'-'.strtoupper(str_replace('-', '', $productSlug))
+                    .'-'.strtoupper(str_replace('-', '', $variantSlug))],
                 [
                     'name' => ucwords(str_replace('-', ' ', $variantSlug)),
                     'price_cents' => $meta['base_price_cents'] ?? 0,
@@ -430,6 +388,7 @@ final class CatalogAssetsSeeder
                 $bestRole = $r;
             }
         }
+
         return $bestRole ?? 'front';
     }
 
@@ -452,17 +411,6 @@ final class CatalogAssetsSeeder
             || str_contains($titleLower, 'exclusivo')
             || str_contains($handleLower, 'exclusive')
             || str_contains($handleLower, 'exclusivo');
-    }
-
-    /**
-     * Detecta handedness de un variant slug.
-     *   - "foo-left-handed-bar" → 'left-handed'
-     *   - "foo-bar" → null (regular)
-     *   - "foo-left-handed" → 'left-handed'
-     */
-    private function detectHandedness(string $variantSlug): ?string
-    {
-        return str_contains($variantSlug, 'left-handed') ? 'left-handed' : null;
     }
 
     /**
@@ -496,7 +444,7 @@ final class CatalogAssetsSeeder
 
         try {
             $d = json_decode($bytes, associative: true, flags: JSON_THROW_ON_ERROR);
-        } catch (\JsonException) {
+        } catch (JsonException) {
             return $this->emptyMetadata();
         }
 
@@ -542,11 +490,11 @@ final class CatalogAssetsSeeder
             return $this->backupIndex;
         }
 
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(
                 $this->backupBase,
-                \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS
-            )
+                FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS,
+            ),
         );
 
         foreach ($iterator as $file) {
@@ -559,7 +507,7 @@ final class CatalogAssetsSeeder
             }
             try {
                 $d = json_decode($bytes, associative: true, flags: JSON_THROW_ON_ERROR);
-            } catch (\JsonException) {
+            } catch (JsonException) {
                 continue;
             }
             $handle = $d['handle'] ?? null;
@@ -596,6 +544,7 @@ final class CatalogAssetsSeeder
      *   products_created: int, variants_created: int, images_uploaded: int,
      *   images_skipped: int, errors: array<int, string>, warnings: array<int, string>
      * }  $stats
+     * @param  string  $size  Ancho en px tal cual lo parsea el filename (`'1600'`).
      */
     private function uploadAndInsertImage(
         Product $product,
@@ -610,6 +559,7 @@ final class CatalogAssetsSeeder
         $bytes = @file_get_contents($webpPath);
         if ($bytes === false) {
             $stats['errors'][] = "No pude leer {$webpPath}";
+
             return;
         }
 
@@ -628,8 +578,9 @@ final class CatalogAssetsSeeder
             try {
                 Storage::disk($this->storageDisk)->put($storageKey, $bytes);
                 $stats['images_uploaded']++;
-            } catch (\Throwable $e) {
-                $stats['errors'][] = "Upload falló para {$storageKey}: " . $e->getMessage();
+            } catch (Throwable $e) {
+                $stats['errors'][] = "Upload falló para {$storageKey}: ".$e->getMessage();
+
                 return;
             }
         }
@@ -645,6 +596,15 @@ final class CatalogAssetsSeeder
                 'alt_text' => "{$product->name} - vista {$role}",
                 'is_primary' => $isPrimary,
                 'sort_order' => $position,
+                // El slug del variant es una propiedad del directorio de
+                // donde cuelga el webp, o sea que acá ya se sabe: dejarlo
+                // fuera era perder el dato y obligar a un backfill aparte
+                // para que la PDP pueda filtrar por acabado.
+                'variant_id' => $variant->id,
+                // Sin el ancho persistido, las 4 resoluciones de una misma
+                // foto son filas indistinguibles y la galería muestra la
+                // misma foto 4 veces.
+                'width' => (int) $size,
             ],
         );
     }

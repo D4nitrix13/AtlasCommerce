@@ -63,6 +63,22 @@ final class VariantHandednessResolver
     ];
 
     /**
+     * Vocabulario textual que delata mano izquierda, ya normalizado a
+     * minúsculas.
+     *
+     * Se expone para que los comandos puedan acotar el `WHERE` con la
+     * MISMA lista que usa `containsLeftHanded()` en vez de copiar tres
+     * `ILIKE` a mano. Una copia del vocabulario en SQL es una copia que
+     * nadie actualiza cuando se agrega una variante del patrón.
+     *
+     * @return list<string>
+     */
+    public static function leftHandedPatterns(): array
+    {
+        return self::LEFT_HANDED_PATTERNS;
+    }
+
+    /**
      * Resuelve la mano de TODAS las variantes de un producto.
      *
      * La mano es una propiedad del modelo completo, no de una variante

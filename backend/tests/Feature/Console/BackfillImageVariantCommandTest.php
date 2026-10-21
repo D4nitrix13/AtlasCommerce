@@ -35,6 +35,9 @@ use Tests\TestCase;
  *   - --force: reescribe filas que ya tenían `variant_id` seteado.
  *   - Mismatch: si la storage_key de la imagen NO aparece en disco
  *     (huérfana), el contador `images_orphans` la cuenta sin tocarla.
+ *   - `product_images.width` se rellena del mismo recorrido, así que las
+ *     resoluciones de una misma foto quedan distinguibles y la galería
+ *     puede colapsarlas en un slide + srcset.
  */
 #[CoversClass(\App\Console\Commands\BackfillImageVariantCommand::class)]
 #[Group('console')]
@@ -436,6 +439,66 @@ final class BackfillImageVariantCommandTest extends TestCase
             '--tenant' => 'nonexistent-tenant',
         ])->run();
         $this->assertSame(expected: 1, actual: $exitCode);
+    }
+
+    #[Test]
+    public function it_backfills_the_width_of_each_resolution_from_the_filename(): void
+    {
+        $this->artisan(command: 'assets:backfill-image-variant', parameters: [
+            '--asset-base' => $this->tempAssetBase,
+            '--tenant' => 'instrumentos-musicales-la-voz',
+        ])->run();
+
+        // Los webps del fixture: front-1600x1600, back-1200x1200,
+        // body-800x800. El ancho sale del MISMO parseo que usa el seeder.
+        // Se comparan ordenados porque las dos variantes comparten
+        // `sort_order = 1` y el orden entre empatadas no es estable.
+        $widths = ProductImage::query()
+            ->where(column: 'product_id', operator: '=', value: $this->multiVariantProduct->id)
+            ->pluck('width')
+            ->map(fn (mixed $w): int => (int) $w)
+            ->sort()
+            ->values()
+            ->all();
+        $this->assertSame([1200, 1600, 1600], $widths);
+
+        $singleWidths = ProductImage::query()
+            ->where(column: 'product_id', operator: '=', value: $this->singleVariantProduct->id)
+            ->orderBy(column: 'sort_order')
+            ->pluck('width')
+            ->all();
+        $this->assertSame([1600, 800], array_map('intval', $singleWidths));
+    }
+
+    #[Test]
+    public function it_leaves_the_width_null_for_an_orphan_image(): void
+    {
+        $this->artisan(command: 'assets:backfill-image-variant', parameters: [
+            '--asset-base' => $this->tempAssetBase,
+            '--tenant' => 'instrumentos-musicales-la-voz',
+        ])->run();
+
+        // La imagen huérfana no tiene contraparte en disco: inventarle un
+        // ancho haría que la galería la tomara por una resolución válida.
+        $this->assertSame(expected: 1, actual: ProductImage::query()
+            ->where(column: 'product_id', operator: '=', value: $this->noAssetsProduct->id)
+            ->whereNull(columns: 'width')
+            ->count());
+    }
+
+    #[Test]
+    public function dry_run_does_not_persist_the_width(): void
+    {
+        $this->artisan(command: 'assets:backfill-image-variant', parameters: [
+            '--asset-base' => $this->tempAssetBase,
+            '--tenant' => 'instrumentos-musicales-la-voz',
+            '--dry-run' => true,
+        ])->run();
+
+        $this->assertSame(expected: 0, actual: ProductImage::query()
+            ->whereNotNull(columns: 'width')
+            ->count(),
+            message: 'dry-run no debe persistir width en ninguna fila');
     }
 
     /**

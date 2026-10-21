@@ -35,7 +35,9 @@
  *    no la cantidad de reseñas.
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
-import ProductDetailGallery from '../../../components/storefront/products/ProductDetailGallery.astro';
+import ProductDetailGallery, {
+  type GalleryImageSource,
+} from '../../../components/storefront/products/ProductDetailGallery.astro';
 import ProductDetailVariants, {
   type VariantOption,
 } from '../../../components/storefront/products/ProductDetailVariants.astro';
@@ -132,6 +134,16 @@ interface StorefrontApiProductImage {
    */
   variantId: number | null;
   sortOrder: number;
+  /**
+   * Candidatos responsive de la MISMA foto armados por el backend.
+   *
+   * El backend emite UNA entrada por rol (la de mayor resolución) y deja
+   * las demás en este string: cada resolución se sirve con un
+   * `storage_key` distinto porque el key es el SHA-256 del binario, así
+   * que el srcset no se puede construir desde la URL. Vacío cuando el rol
+   * no tiene resoluciones conocidas → el browser usa `src` solo.
+   */
+  srcset: string;
 }
 
 /**
@@ -630,12 +642,13 @@ type ApiImageObject = {
   readonly isPrimary: boolean;
   readonly variantId: number | null;
   readonly sortOrder: number;
+  readonly srcset: string;
 };
 
 const isImageObject = (v: unknown): v is ApiImageObject =>
   typeof v === 'object' && v !== null && 'url' in v && typeof (v as { url: unknown }).url === 'string';
 
-const displayedImages: readonly string[] = (() => {
+const displayedImages: readonly (string | GalleryImageSource)[] = (() => {
   if (product === null) return [];
   const raw = apiImages ?? product.images ?? [];
   if (raw.length === 0) return [];
@@ -645,15 +658,20 @@ const displayedImages: readonly string[] = (() => {
     return raw as readonly string[];
   }
 
-  // Caso nuevo: array de objetos con metadata.
+  // Caso nuevo: array de objetos con metadata. El backend ya colapsó las
+  // resoluciones: una entrada por rol, con el srcset de las demás.
   const objects = raw as readonly ApiImageObject[];
+  const toGalleryImage = (o: ApiImageObject): GalleryImageSource => ({
+    src: o.url,
+    srcset: o.srcset,
+  });
   const selectedVariantId =
     apiVariants?.find((v) => v.finishSlug === SELECTED_COLOR)?.id ?? null;
 
   if (selectedVariantId === null) {
     // URL `?finish=...` no matchea ningún variant disponible (caso stale).
     // Degradamos a galería completa para no mostrar pantalla vacía.
-    return objects.map((o) => o.url);
+    return objects.map(toGalleryImage);
   }
 
   const filtered = objects.filter((img) => img.variantId === selectedVariantId);
@@ -661,7 +679,7 @@ const displayedImages: readonly string[] = (() => {
   // (caso teórico: variant existe en BD pero ninguna imagen tiene ese
   // variant_id), caemos al set completo: comportamiento seguro y
   // consistente con el brief (single-variant → mostrar todas).
-  return (filtered.length > 0 ? filtered : objects).map((o) => o.url);
+  return (filtered.length > 0 ? filtered : objects).map(toGalleryImage);
 })();
 
 // Thumbnail del picker (primera imagen por variant del producto real).

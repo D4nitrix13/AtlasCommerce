@@ -32,9 +32,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *  - `images`: array con shape dependiente del contexto (ver
  *    `resolveImages()` para el detalle):
  *      - PDP (variants eager-loaded): objetos
- *        `{url, altText, isPrimary, variantId, sortOrder}`. `variantId`
- *        permite a la PDP filtrar la galería por acabado.
- *      - Listado (variants NO eager-loaded): lista plana de URLs.
+ *        `{url, altText, isPrimary, variantId, sortOrder, srcset}`. Una
+ *        entrada POR ROL de galería (`sort_order` es 1:1 con
+ *        `CatalogAssetsSeeder::ROLE_ORDER`): la de mayor resolución, con
+ *        `srcset` apuntando a las demás resoluciones del mismo rol.
+ *        `variantId` permite a la PDP filtrar la galería por acabado.
+ *      - Listado (variants NO eager-loaded): lista plana de URLs, sin
+ *        agrupar — el contrato del listado no cambia.
  *    Se OMITE del payload cuando `images` no fue eager-loaded.
  *
  *  - `category`: `categories.slug`. Si el producto no tiene categoría
@@ -181,13 +185,14 @@ class StorefrontProductResource extends JsonResource
      *   - `all`  — lista de URLs (sin metadata) para endpoints que solo
      *              necesitan URLs (listado, sitemap, etc.).
      *   - `objects` — lista de objetos `{url, altText, isPrimary,
-     *                  variantId, sortOrder}` para el PDP, donde
-     *                  `variantId` permite filtrar la galería por
-     *                  acabado. Solo se popula cuando la relación
-     *                  `variants` también fue eager-loadada (señal de
-     *                  que el consumer es el detalle). En el listado
-     *                  emitimos objetos vacíos para mantener el shape
-     *                  consistente y permitir fallback del frontend.
+     *                  variantId, sortOrder, srcset}` para el PDP. Una
+     *                  entrada POR ROL (la de mayor resolución) con el
+     *                  `srcset` de las demás resoluciones de ese rol.
+     *                  Solo se popula cuando la relación `variants`
+     *                  también fue eager-loadada (señal de que el
+     *                  consumer es el detalle). En el listado emitimos
+     *                  objetos vacíos para mantener el shape consistente
+     *                  y permitir fallback del frontend.
      *
      * @return array{all: list<string>, objects: list<array<string, mixed>>, primary: string|null}
      */
@@ -199,26 +204,146 @@ class StorefrontProductResource extends JsonResource
 
         $images = $this->resource->images->sortBy('sort_order')->values();
 
+        // El listado NO se agrupa: su contrato es una lista plana de URLs
+        // y las tarjetas sólo toman la primera / la primary. Agrupar acá
+        // multiplicaría el trabajo del Resource sin cambiar nada visible.
         $allUrls = $images->pluck('image_url')
             ->map(fn (mixed $url): string => $this->toProxyUrl((string) $url))
             ->all();
 
-        $objects = $images->map(fn ($img): array => [
-            'url' => $this->toProxyUrl((string) $img->image_url),
-            'altText' => (string) ($img->alt_text ?? ''),
-            'isPrimary' => (bool) $img->is_primary,
-            // variantId nullable: si la imagen no tiene variant asociado
-            // (caso 4/19 multi-variant con finish_slug real pero assets
-            // no presentes en disco), el frontend no puede filtrar y
-            // degrada a mostrar todas.
-            'variantId' => $img->variant_id,
-            'sortOrder' => (int) $img->sort_order,
-        ])->all();
+        $objects = $this->galleryPerRole($images->all());
 
         $primary = $images->firstWhere('is_primary', true);
         $primaryUrl = $primary !== null ? $this->toProxyUrl((string) $primary->image_url) : null;
 
         return ['all' => $allUrls, 'objects' => $objects, 'primary' => $primaryUrl];
+    }
+
+    /**
+     * Colapsa las resoluciones de una misma foto en UNA entrada de galería.
+     *
+     * El árbol de assets guarda cada foto en 4 resoluciones
+     * (`{role}-{400,800,1200,1600}x{...}.webp`) y el seeder persiste las
+     * cuatro como filas de `product_images`. Como el `storage_key` es el
+     * SHA-256 del binario, el rol no viaja en la URL pero SÍ viaja en
+     * `sort_order`: es 1:1 con `CatalogAssetsSeeder::ROLE_ORDER`
+     * (front=1, back=2, body=3, …). El ancho vive en `product_images.width`.
+     *
+     * La unidad de agrupación es (variant, rol): una foto de cada
+     * acabado y cada rol. Ver la nota en la clave de `$byRole`.
+     *
+     * Regla de degradación (deliberada):
+     *
+     *   - Grupo con AL MENOS una fila de ancho conocido → una sola entrada:
+     *     la de mayor `width`, con `srcset` armando las resoluciones
+     *     restantes. Las filas NO se borran: quedan servibles por el
+     *     `srcset`, que es exactamente para lo que existen.
+     *   - Grupo donde NINGUNA fila tiene `width` (filas heredadas de
+     *     seeds previos, sin pasar por `assets:backfill-image-variant`) →
+     *     NO se colapsa. Elegir una fila al azar haría del slide
+     *     principal un thumbnail de 400px, que es peor que mostrar las
+     *     cuatro. `srcset` queda vacío y el browser usa `src` solo.
+     *
+     * @param  array<int, mixed>  $images  Imágenes ordenadas por `sort_order`.
+     * @return list<array<string, mixed>>
+     */
+    private function galleryPerRole(array $images): array
+    {
+        $byRole = [];
+        foreach ($images as $image) {
+            // La clave es (variant, rol) y NO sólo el rol: `sort_order` es
+            // el RANK del rol dentro del catálogo (front=1, back=2, …) y
+            // es el mismo número para los seis acabados de un producto
+            // multi-acabado. Agrupar sólo por `sort_order` colapsa las
+            // fotos de acabados distintos en una entrada y deja la
+            // galería del PDP con las fotos de un solo acabado.
+            $key = $image->variant_id ?? 'unscoped';
+            $byRole[$key.'#'.(int) $image->sort_order][] = $image;
+        }
+
+        $objects = [];
+
+        foreach ($byRole as $roleImages) {
+            $withWidth = array_values(array_filter(
+                $roleImages,
+                static fn (mixed $image): bool => $image->width !== null,
+            ));
+
+            if ($withWidth === []) {
+                foreach ($roleImages as $image) {
+                    $objects[] = $this->galleryEntry(image: $image, srcset: '');
+                }
+
+                continue;
+            }
+
+            usort(
+                $withWidth,
+                static fn (mixed $a, mixed $b): int => [$b->width, $a->id] <=> [$a->width, $b->id],
+            );
+
+            $objects[] = $this->galleryEntry(
+                image: $withWidth[0],
+                srcset: $this->buildSrcset(roleImages: $roleImages),
+            );
+        }
+
+        return $objects;
+    }
+
+    /**
+     * Normaliza una `product_images` a la shape que consume la PDP.
+     *
+     * @param  mixed  $image  Modelo `ProductImage`.
+     * @param  string  $srcset  `srcset` ya construido, o `''` si el rol no tiene resoluciones conocidas.
+     * @return array<string, mixed>
+     */
+    private function galleryEntry(mixed $image, string $srcset): array
+    {
+        return [
+            'url' => $this->toProxyUrl((string) $image->image_url),
+            'altText' => (string) ($image->alt_text ?? ''),
+            'isPrimary' => (bool) $image->is_primary,
+            // variantId nullable: si la imagen no tiene variant asociado
+            // (caso 4/19 multi-variant con finish_slug real pero assets
+            // no presentes en disco), el frontend no puede filtrar y
+            // degrada a mostrar todas.
+            'variantId' => $image->variant_id,
+            'sortOrder' => (int) $image->sort_order,
+            'srcset' => $srcset,
+        ];
+    }
+
+    /**
+     * Arma el `srcset` de un rol con todas sus resoluciones conocidas.
+     *
+     * Los descriptores son `{ancho}w` — sintaxis estándar de srcset, la
+     * que el browser usa para elegir el candidato. Como cada resolución
+     * tiene su propio `storage_key` (hash del binario), el candidato se
+     * construye con la URL del proxy de ESA fila, no con un token de
+     * tamaño en el path.
+     *
+     * @param  array<int, mixed>  $roleImages  Todas las filas del rol.
+     */
+    private function buildSrcset(array $roleImages): string
+    {
+        $candidates = [];
+
+        foreach ($roleImages as $image) {
+            if ($image->width === null || $image->width <= 0) {
+                continue;
+            }
+            $candidates[(int) $image->width] = $this->toProxyUrl((string) $image->image_url);
+        }
+
+        ksort($candidates);
+
+        $parts = [];
+        foreach ($candidates as $width => $url) {
+            $parts[] = "{$url} {$width}w";
+        }
+
+        return implode(', ', $parts);
     }
 
     /**

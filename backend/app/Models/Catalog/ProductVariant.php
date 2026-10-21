@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $condition
  * @property int $stock
  * @property int|null $size_id
+ * @property string|null $handedness
  */
 class ProductVariant extends Model
 {
@@ -53,6 +54,10 @@ class ProductVariant extends Model
         'condition',
         'stock',
         'size_id',
+        // Sin esto, `updateOrCreate()` del seeder descarta la columna en
+        // silencio: el catálogo se cargaba diestro y sólo el backfill
+        // (que usa `forceFill`) dejaba la mano escrita.
+        'handedness',
     ];
 
     protected $casts = [

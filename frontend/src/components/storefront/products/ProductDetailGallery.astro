@@ -30,9 +30,26 @@ export interface ProductDetailGalleryLabels {
   logoText: string;
 }
 
+/**
+ * Una celda de la galería, forma objeto.
+ *
+ * `string` es la forma legacy (callers que ya tenían una lista de URLs);
+ * esta interface es la del catálogo real, donde el `srcset` lo arma el
+ * backend porque cada resolución de una foto tiene su propio
+ * `storage_key` (el key es el SHA-256 del binario) y desde la URL del
+ * cliente no se puede derivar.
+ */
+export interface GalleryImageSource {
+  readonly src: string;
+  readonly srcset?: string;
+}
+
 interface Props {
-  /** URLs de imágenes del variant activo. */
-  images: readonly string[];
+  /**
+   * Imágenes del variant activo. Acepta las dos formas: string legacy
+   * u objeto `{src, srcset?}`.
+   */
+  images: readonly (string | GalleryImageSource)[];
   /** Nombre del producto (alt). */
   productName: string;
   /** Variante del mockup SVG (default: shirt). */
@@ -44,7 +61,24 @@ interface Props {
 
 const { images, productName, mockupVariant = 'shirt', highlyRatedLabel, labels } = Astro.props;
 
-const hasRealImages = images.length > 0 && !images[0]?.startsWith('data:image/svg');
+/**
+ * `src` de la celda. Aplanamos las dos formas del prop acá y en el HTML
+ * sólo se ve un string — el resto del componente no necesita saber de
+ * qué forma vino la imagen.
+ */
+const imageSrc = (image: string | GalleryImageSource): string => (typeof image === 'string' ? image : image.src);
+
+/**
+ * `srcset` de la celda. El que trae el backend manda: es el único que
+ * conoce los `storage_key` de las otras resoluciones. `imageSrcset()` es
+ * el fallback legacy para URLs con el token `-{W}x{H}-` en el nombre
+ * (devuelve `''` si no matchea, y el browser usa `src` solo).
+ */
+const imageSrcsetOf = (image: string | GalleryImageSource): string =>
+  typeof image === 'string' ? imageSrcset(image) : (image.srcset ?? '');
+
+const firstImage = images[0];
+const hasRealImages = firstImage !== undefined && !imageSrc(firstImage).startsWith('data:image/svg');
 const showBadge = highlyRatedLabel !== undefined && highlyRatedLabel !== '' && images.length > 0;
 const showThumbs = images.length > 1;
 
@@ -94,8 +128,8 @@ const showThumbs = images.length > 1;
         >
           {hasRealImages ? (
             <img
-              src={image}
-              srcset={imageSrcset(image)}
+              src={imageSrc(image)}
+              srcset={imageSrcsetOf(image)}
               sizes="(min-width: 1024px) 1160px, 100vw"
               alt={alt}
               loading={isFirst ? 'eager' : 'lazy'}
@@ -151,8 +185,8 @@ const showThumbs = images.length > 1;
             >
               {hasRealImages ? (
                 <img
-                  src={image}
-                  srcset={imageSrcset(image)}
+                  src={imageSrc(image)}
+                  srcset={imageSrcsetOf(image)}
                   sizes="(min-width: 640px) 72px, 64px"
                   alt={alt}
                   loading="lazy"

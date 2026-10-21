@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Catalog\Product;
-use App\Models\Catalog\ProductImage;
-use App\Models\Catalog\ProductVariant;
+use App\Services\Assets\AssetFilenameParser;
 use App\Services\Assets\CatalogAssetsSeeder;
 use App\Services\Assets\StorageKeyDeriver;
+use App\Services\Catalog\VariantHandednessResolver;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -38,6 +38,11 @@ use Illuminate\Support\Facades\Storage;
  *                  false para los demás
  *   sort_order  =  posición en galería (1=front, 2=back, 3=body, ... — ver
  *                  CatalogAssetsSeeder::ROLE_ORDER para el orden completo)
+ *   variant_id  =  variant (acabado) al que pertenece la foto
+ *   width       =  ancho en px de ESTA resolución. Las 4 resoluciones de
+ *                  una misma foto son filas distintas que se distinguen
+ *                  sólo por este número: sin él la PDP las muestra como
+ *                  4 fotos diferentes.
  *
  * Convención del frontend: hover sobre la imagen del PDP alterna entre
  * is_primary y la siguiente imagen con sort_order=2 (típicamente back).
@@ -74,17 +79,18 @@ final class SeedCatalogAssetsCommand extends Command
         $dryRun = (bool) $this->option('dry-run');
         $verifyOnly = (bool) $this->option('verify-only');
 
-        $this->info("=== SeedCatalogAssets ===");
+        $this->info('=== SeedCatalogAssets ===');
         $this->line("Asset base:     {$assetBase}/products/{$tenant}/");
-        $this->line("Backup base:    " . ($backupBase ?: '(none — placeholder descriptions only)'));
+        $this->line('Backup base:    '.($backupBase ?: '(none — placeholder descriptions only)'));
         $this->line("Storage disk:   {$disk}");
-        $this->line("Mode:           " . ($dryRun ? 'DRY-RUN' : ($verifyOnly ? 'VERIFY-ONLY' : 'WRITE')));
-        $this->line("");
+        $this->line('Mode:           '.($dryRun ? 'DRY-RUN' : ($verifyOnly ? 'VERIFY-ONLY' : 'WRITE')));
+        $this->line('');
 
         // Validar que el asset base existe
-        $tenantPath = rtrim($assetBase, '/') . '/products/' . $tenant;
+        $tenantPath = rtrim($assetBase, '/').'/products/'.$tenant;
         if (! is_dir($tenantPath)) {
             $this->error("❌ No existe: {$tenantPath}");
+
             return self::FAILURE;
         }
 
@@ -93,12 +99,15 @@ final class SeedCatalogAssetsCommand extends Command
             tenantSlug: $tenant,
             storageDisk: $disk,
             deriver: $deriver,
+            filenames: new AssetFilenameParser,
+            handedness: new VariantHandednessResolver,
             backupBase: $backupBase,
         );
 
         // VERIFY ONLY
         if ($verifyOnly) {
             $this->info('Running Phase 5 (verify-only)...');
+
             return $this->runVerify($seeder);
         }
 
@@ -126,6 +135,7 @@ final class SeedCatalogAssetsCommand extends Command
 
         // PHASE 5 (verify)
         $this->info('Running Phase 5 (verify end-to-end)...');
+
         return $this->runVerify($seeder);
     }
 
@@ -138,12 +148,14 @@ final class SeedCatalogAssetsCommand extends Command
         }
         if ($result['issues'] === []) {
             $this->info('✅ All products verified.');
+
             return self::SUCCESS;
         }
         $this->error('❌ Issues found:');
         foreach ($result['issues'] as $i) {
             $this->line("  - {$i}");
         }
+
         return self::FAILURE;
     }
 }

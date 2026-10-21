@@ -9,6 +9,7 @@ use App\Models\Catalog\Brand;
 use App\Models\Catalog\Category;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductImage;
+use App\Models\Catalog\ProductVariant;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
 use App\Models\Stores\Store;
@@ -186,18 +187,18 @@ final class StorefrontProductResourceTest extends TestCase
         $resource = (new StorefrontProductResource($product))
             ->resolve(request: $this->app['request']);
 
-// Primary gana aunque no sea la primera por sort_order. El Resource
-    // devuelve la ruta del proxy de assets, no el storage key crudo.
-    $this->assertSame('/api/v1/storefront/assets/images/b.webp', $resource['imageUrl']);
-    // Galería ordenada por sort_order ASC.
-    $this->assertSame(
-        [
-            '/api/v1/storefront/assets/images/a.webp',
-            '/api/v1/storefront/assets/images/b.webp',
-            '/api/v1/storefront/assets/images/c.webp',
-        ],
-        $resource['images'],
-    );
+        // Primary gana aunque no sea la primera por sort_order. El Resource
+        // devuelve la ruta del proxy de assets, no el storage key crudo.
+        $this->assertSame('/api/v1/storefront/assets/images/b.webp', $resource['imageUrl']);
+        // Galería ordenada por sort_order ASC.
+        $this->assertSame(
+            [
+                '/api/v1/storefront/assets/images/a.webp',
+                '/api/v1/storefront/assets/images/b.webp',
+                '/api/v1/storefront/assets/images/c.webp',
+            ],
+            $resource['images'],
+        );
     }
 
     #[Test]
@@ -385,5 +386,192 @@ final class StorefrontProductResourceTest extends TestCase
         // Lista vacía (NO 404): la PDP prefiere empty sobre error al
         // derivar relacionados de una categoría inválida.
         $this->assertSame([], $response->json());
+    }
+
+    // ── Galería: una entrada por ROL, no por resolución ────────────────
+    //
+    // El árbol de assets guarda cada foto en 4 resoluciones y el seeder
+    // persiste las 4 como filas de `product_images`. Como el
+    // `storage_key` es el SHA-256 del binario, el rol no viaja en la URL
+    // pero sí en `sort_order` (1:1 con `CatalogAssetsSeeder::ROLE_ORDER`)
+    // y el ancho viaja en `product_images.width`. Sin colapsar por rol, un
+    // producto de 8 fotos muestra 32 slides.
+
+    /**
+     * Adjunta las 4 resoluciones de un rol (`sort_order` dado).
+     */
+    private function attachResolutions(Product $product, int $sortOrder, string $role): void
+    {
+        foreach ([400, 800, 1200, 1600] as $width) {
+            $this->attachImage($product, [
+                'image_url' => "tenants/fender-store/products/strat/{$role}-{$width}.webp",
+                'alt_text' => "Strat - vista {$role}",
+                'sort_order' => $sortOrder,
+                'width' => $width,
+                'is_primary' => $width === 1600 && $sortOrder === 1,
+            ]);
+        }
+    }
+
+    /**
+     * Resuelve el Resource con `variants` cargada, que es la señal de
+     * que el consumer es el PDP y por lo tanto la shape de `images` es
+     * la de objetos agrupados.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function galleryFor(Product $product): array
+    {
+        $product->load(relations: ['images', 'variants', 'category', 'brand']);
+
+        return (new StorefrontProductResource($product))
+            ->resolve(request: $this->app['request'])['images'];
+    }
+
+    #[Test]
+    public function it_collapses_the_resolutions_of_a_role_into_one_gallery_entry_with_a_srcset(): void
+    {
+        $product = $this->makeProduct();
+        $this->attachResolutions($product, sortOrder: 1, role: 'front');
+
+        $images = $this->galleryFor($product);
+
+        $this->assertCount(1, $images);
+        // El slide principal es la de MAYOR resolución.
+        $this->assertSame(
+            expected: '/api/v1/storefront/assets/tenants/fender-store/products/strat/front-1600.webp',
+            actual: $images[0]['url'],
+        );
+        $this->assertTrue($images[0]['isPrimary']);
+        // Las otras tres NO se pierden: quedan en el srcset, de menor a
+        // mayor, con la URL del proxy de CADA resolución.
+        $this->assertSame(
+            expected: '/api/v1/storefront/assets/tenants/fender-store/products/strat/front-400.webp 400w, '
+                .'/api/v1/storefront/assets/tenants/fender-store/products/strat/front-800.webp 800w, '
+                .'/api/v1/storefront/assets/tenants/fender-store/products/strat/front-1200.webp 1200w, '
+                .'/api/v1/storefront/assets/tenants/fender-store/products/strat/front-1600.webp 1600w',
+            actual: $images[0]['srcset'],
+        );
+    }
+
+    #[Test]
+    public function it_emits_one_entry_per_role_in_gallery_order(): void
+    {
+        $product = $this->makeProduct();
+        $this->attachResolutions($product, sortOrder: 1, role: 'front');
+        $this->attachResolutions($product, sortOrder: 2, role: 'back');
+        $this->attachResolutions($product, sortOrder: 3, role: 'body');
+
+        $images = $this->galleryFor($product);
+
+        $this->assertCount(3, $images);
+        $this->assertSame(expected: [1, 2, 3], actual: array_column($images, 'sortOrder'));
+    }
+
+    #[Test]
+    public function it_does_not_collapse_a_role_whose_resolutions_are_unknown(): void
+    {
+        // Filas heredadas de un seed previo: sin `width` no se sabe cuál
+        // es la mayor resolución. Elegir una al azar pondría un thumbnail
+        // de 400px como slide principal, así que el grupo se deja como
+        // estaba en vez de inventar un orden.
+        $product = $this->makeProduct();
+        $this->attachImage($product, ['image_url' => 'a-1.webp', 'sort_order' => 1, 'width' => null]);
+        $this->attachImage($product, ['image_url' => 'a-2.webp', 'sort_order' => 1, 'width' => null]);
+        $this->attachImage($product, ['image_url' => 'b-1.webp', 'sort_order' => 2, 'width' => null]);
+
+        $images = $this->galleryFor($product);
+
+        $this->assertCount(3, $images);
+        $this->assertSame(expected: '', actual: $images[0]['srcset']);
+    }
+
+    #[Test]
+    public function the_flat_url_branch_of_images_stays_ungrouped(): void
+    {
+        // Rama del Resource sin `variants` eager-loaded: `images` sigue
+        // siendo la lista plana de URLs, sin agrupar ni srcset. Ese
+        // shape es el que consumen los callers que sólo quieren URLs.
+        //
+        // OJO: hoy `ProductController` eager-loadea `variants` en `index()`
+        // igual que en `show()`, así que en HTTP el listado cae en la
+        // rama de objetos. Esta test cubre la rama, no la ruta.
+        $product = $this->makeProduct();
+        $this->attachResolutions($product, sortOrder: 1, role: 'front');
+        $this->attachResolutions($product, sortOrder: 2, role: 'back');
+
+        $product->load(relations: ['images', 'category', 'brand']);
+        $resource = (new StorefrontProductResource($product))->resolve(request: $this->app['request']);
+
+        $this->assertCount(8, $resource['images']);
+        foreach ($resource['images'] as $url) {
+            $this->assertIsString($url);
+        }
+    }
+
+    #[Test]
+    public function it_does_not_collapse_the_same_role_across_two_finishes(): void
+    {
+        // `sort_order` es el RANK del rol y se repite en cada acabado:
+        // los seis finishes de `sg-standard` tienen su `front` en 1.
+        // Agrupar sólo por rol dejaría la galería con las fotos de UN
+        // acabado y el filtro `?finish=` del PDP dejaría de filtrar.
+        $product = $this->makeProduct();
+        $variantA = ProductVariant::query()->create(attributes: [
+            'product_id' => $product->id,
+            'name' => 'Cardinal Red Burst',
+            'sku' => 'SG-CARDINAL',
+            'price_cents' => 150000,
+            'is_active' => true,
+            'finish_slug' => 'cardinal-red-burst',
+            'finish_label' => 'Cardinal Red Burst',
+            'condition' => 'nuevo',
+            'stock' => 0,
+        ]);
+        $variantB = ProductVariant::query()->create(attributes: [
+            'product_id' => $product->id,
+            'name' => 'Ebony',
+            'sku' => 'SG-EBONY',
+            'price_cents' => 150000,
+            'is_active' => true,
+            'finish_slug' => 'ebony',
+            'finish_label' => 'Ebony',
+            'condition' => 'nuevo',
+            'stock' => 0,
+        ]);
+
+        foreach ([400, 800, 1200, 1600] as $width) {
+            $this->attachImage($product, [
+                'image_url' => "tenants/fender-store/products/strat/cardinal-front-{$width}.webp",
+                'sort_order' => 1,
+                'variant_id' => $variantA->id,
+                'width' => $width,
+                'is_primary' => $width === 1600,
+            ]);
+            $this->attachImage($product, [
+                'image_url' => "tenants/fender-store/products/strat/ebony-front-{$width}.webp",
+                'sort_order' => 1,
+                'variant_id' => $variantB->id,
+                'width' => $width,
+                'is_primary' => $width === 1600,
+            ]);
+        }
+
+        $images = $this->galleryFor($product);
+
+        // Dos entradas, una por acabado — no una sola con 8 candidatas.
+        $this->assertCount(2, $images);
+        $this->assertSame(
+            expected: [$variantA->id, $variantB->id],
+            actual: array_column($images, 'variantId'),
+        );
+        $this->assertSame(
+            expected: '/api/v1/storefront/assets/tenants/fender-store/products/strat/cardinal-front-1600.webp',
+            actual: $images[0]['url'],
+        );
+        $this->assertSame(
+            expected: '/api/v1/storefront/assets/tenants/fender-store/products/strat/ebony-front-1600.webp',
+            actual: $images[1]['url'],
+        );
     }
 }

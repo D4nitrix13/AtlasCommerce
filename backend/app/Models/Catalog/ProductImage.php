@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $alt_text
  * @property int $sort_order
  * @property bool $is_primary
+ * @property int|null $width
  */
 class ProductImage extends Model
 {
@@ -33,11 +34,13 @@ class ProductImage extends Model
         'alt_text',
         'sort_order',
         'is_primary',
+        'width',
     ];
 
     protected $casts = [
         'sort_order' => 'integer',
         'is_primary' => 'boolean',
+        'width' => 'integer',
     ];
 
     /**
