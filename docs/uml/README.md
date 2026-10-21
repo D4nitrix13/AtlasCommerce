@@ -1,7 +1,8 @@
-# Diagramas UML — Avance 3
+# Diagramas de Análisis y Diseño — capítulos 8 y 9
 
-Diagramas UML del capítulo 8 "Análisis Orientado a Objetos" de AtlasCommerce
-(Avance 3, Ing. Software I — UNI).
+Diagramas del capítulo 8 "Análisis Orientado a Objetos" (UML) y del capítulo 9
+"Diseño de la Base de Datos" (diagrama entidad-relación y diccionario de
+datos) de AtlasCommerce (Ing. Software I — UNI).
 
 ## Estructura de archivos
 
@@ -50,6 +51,25 @@ Ver `8.1.1-coleman/` — un archivo `.md` por cada caso de uso, más `ALL-COLEMA
 | `8.5.1-estado-pedido.puml` | Entidad Pedido | Pedido |
 | `8.5.2-estado-2fa.puml` | Ciclo de verificación 2FA | Usuario/Credencial2FA |
 
+### 9.1 — Diagrama entidad-relación (2 diagramas)
+
+| Archivo | Subsección | Contenido |
+|---------|------------|-----------|
+| `9.1-diagrama-er.puml` | DER completo del núcleo | 16 entidades y 25 relaciones con todos los atributos (vertical, `build/svg/9.1-diagrama-er.svg`) |
+| `9.1-diagrama-er-simple.puml` | Versión A4 vertical | Mismas 16 entidades y mismas 25 relaciones con multiplicidades, cada entidad reducida a PK y campos clave (`build/svg-simple/9.1-diagrama-er-simple.svg`) |
+
+### 9.2 — Diccionario de datos (2 documentos)
+
+| Archivo | Subsección | Contenido |
+|---------|------------|-----------|
+| `9.2-diccionario-datos.md` | Diccionario completo | Las 16 entidades con campo, tipo SQL, nulo, default, clave y descripción, más convenciones, excepciones de naming, claves foráneas externas y trazabilidad |
+| `9.2-diccionario-datos-simple.md` | Versión resumida | PK, claves foráneas y campos de negocio representativos de cada una de las 16 entidades |
+
+Las 16 entidades del núcleo son `TIENDA`, `TIENDA_DOMINIO`, `USUARIO`, `ROL`,
+`CLIENTE`, `CLIENTE_DIRECCION`, `CATEGORIA`, `MARCA`, `PRODUCTO`,
+`PRODUCTO_VARIANTE`, `PEDIDO`, `DETALLE_PEDIDO`, `PAGO`, `FACTURA`, `ENVIO` e
+`INVENTARIO`.
+
 ## Renderizado
 
 ### Opción Docker (recomendada)
@@ -63,8 +83,25 @@ Ver `8.1.1-coleman/` — un archivo `.md` por cada caso de uso, más `ALL-COLEMA
 
 Salida:
 
-- `build/svg/*.svg` — 16 diagramas vectoriales para insertar en el documento.
-- `build/pdf/*.pdf` — 16 PDFs de respaldo.
+- `build/svg/*.svg` — 18 diagramas vectoriales para insertar en el documento.
+- `build/pdf/*.pdf` — 18 PDFs de respaldo.
+- `build/svg-simple/*.svg` y `build/pdf-simple/*.pdf` — variantes A4 verticales
+  de los archivos `-simple.puml`.
+
+Los diagramas del capítulo 9 usan los mismos dos scripts y los mismos
+directorios de salida que los del capítulo 8 — no hizo falta modificar ningún
+glob, porque los archivos nuevos entran automáticamente:
+
+- `render-uml.sh` expande `docs/uml/*.puml`, así que recoge
+  `9.1-diagrama-er.puml` sin configuración adicional.
+- `render-simple-uml.sh` filtra con `-name '*-simple.puml'`, así que recoge
+  `9.1-diagrama-er-simple.puml` sin configuración adicional.
+
+Teniendo en cuenta que el glob de `render-uml.sh` no excluye los archivos
+`-simple.puml`, `build/svg/` y `build/pdf/` terminan conteniendo también esas
+variantes además de los diagramas completos. Los conteos de las líneas
+anteriores se refieren a los diagramas del entregable —16 del capítulo 8 y 2
+del capítulo 9—, no al total de archivos presentes en `build/`.
 
 ### Opción VS Code
 
@@ -94,6 +131,36 @@ y abrí cualquier `.puml` — preview en vivo y exportás con `Export Current Di
 - `DEVUELTO` y `REEMBOLSADO` son sub-estados modelados vía entidades separadas (`Devolucion` + `Reembolso`).
 - Personalización separada en `opción` (cliente) y `técnica` (taller).
 - 4 estados de Pedido alineados con la implementación real (no 10 académicos).
+
+### Decisiones de modelado del DER (capítulo 9)
+
+El DER de este capítulo es **académico** y cubre un núcleo de 16 entidades. El
+DER técnico completo del sistema, con las 85 tablas reales, se mantiene en
+`docs/database/diagrams/ecommerce-er.mmd` (Mermaid): ese archivo no se modifica
+desde aquí y sigue siendo la fuente de verdad de ingeniería.
+
+- **Claves primarias `BIGSERIAL`, no UUID.** Todas las tablas se crean con
+  `$table->id()`, que en PostgreSQL produce `bigserial`. Los diagramas de clases
+  del capítulo 8 usan `UUID` como convención académica del modelo de objetos;
+  el DER declara `BIGSERIAL` porque es lo que implementa realmente la
+  migración. No es una contradicción entre UML y DER: el primero describe el
+  modelo conceptual, el segundo la base de datos existente.
+- **`CLIENTE` no tiene `store_id`.** Su relación con `TIENDA` es N:N a través
+  de la tabla puente `customer_stores`, porque el mismo cliente puede comprar
+  en más de una tienda.
+- **`ENVIO` no tiene `store_id`.** La tienda se deriva a través de `PEDIDO`.
+- **`PAGO` no se relaciona con `PEDIDO`.** Se vincula con `FACTURA` mediante la
+  tabla puente `invoice_payments`, en relación N:M, de modo que un solo pago
+  puede cubrir varias facturas.
+- **Dinero en centavos.** Los importes se guardan en columnas `*_cents` de tipo
+  `BIGINT`. Detalle técnico: `unsignedBigInteger()` en PostgreSQL genera
+  `BIGINT` sin restricción `CHECK >= 0` —solo MySQL implementa el modificador
+  `unsigned`—, así que la no-negatividad la asegura la capa de aplicación y no
+  la base de datos.
+- **Nomenclatura de claves foráneas.** Se sigue la convención
+  `<tabla_en_singular>_id`, con cuatro excepciones de nombre semántico:
+  `orders.user_creator_id`, `invoices.user_issuer_id`,
+  `order_custom_designs.reviewed_by` y `orders.shipping_address_id`.
 
 ## Nota de trazabilidad con la implementación
 
@@ -141,3 +208,18 @@ y abrí cualquier `.puml` — preview en vivo y exportás con `Export Current Di
 >   `PreguntaProducto`, `ResenaProducto`, `CodigoRecuperacion`, `CuentaSocial`,
 >   `TokenResetContrasena`, `ItemCarritoMayorista`, `DisenoPersonalizado`.
 >   La mayoría están incluidas en los diagramas 8.2.x.
+
+## Trazabilidad del DER con la implementación
+
+El diagrama entidad-relación del capítulo 9 mantiene la equivalencia
+académico ↔ implementación documentada en `docs/database/README.md` (sección
+«DER → Laravel»): cada entidad del modelo conceptual en español corresponde a
+su tabla física real —por ejemplo `TIENDA` ↔ `stores`, `PEDIDO` ↔ `orders`,
+`PAGO` ↔ `payments`—.
+
+Esa correspondencia es legible en el propio `.puml`: cada entidad declara su
+tabla física real como alias de PlantUML (por ejemplo
+`entity "TIENDA" as stores {`), de modo que el diagrama muestra el nombre
+académico y el físico en la misma caja. La tabla de equivalencia completa,
+con la migración de origen de cada tabla, está en las notas de trazabilidad de
+`9.2-diccionario-datos.md`.
