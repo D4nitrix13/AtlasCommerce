@@ -587,9 +587,19 @@ final class CatalogAssetsSeeder
 
         $position = self::ROLE_ORDER[$role] ?? 99;
 
+        // La clave incluye `variant_id`: el `storage_key` es el hash del
+        // BINARIO y el path de FTP no lleva variante, así que dos
+        // acabados que comparten una foto (el caso real de los
+        // left-handed, que reusan las fotos del diestro) colapsaban en
+        // una sola fila y la última escritura se robaba el rol y el
+        // `is_primary` de la otra variante. Con la variante en la clave
+        // cada reclamo del árbol tiene su fila, que es lo que la PDP
+        // filtra. Dentro de una misma variante el comportamiento no
+        // cambia: un binario es una foto.
         ProductImage::query()->updateOrCreate(
             [
                 'product_id' => $product->id,
+                'variant_id' => $variant->id,
                 'image_url' => $storageKey,
             ],
             [

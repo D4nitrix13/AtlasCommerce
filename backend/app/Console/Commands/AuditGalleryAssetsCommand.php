@@ -19,7 +19,7 @@ use Illuminate\Console\Command;
  * no lleva variante, así que un mismo binario produce siempre la misma
  * key y las divergencias se detectan sin heurísticas.
  *
- * Tres hallazgos, en orden de gravedad:
+ * Cuatro hallazgos, en orden de gravedad:
  *
  *   1. ROLE CONFLICT — el mismo binario con dos roles distintos en dos
  *      variantes (`front` en una, `headstock` en otra). Señal de un role
@@ -34,6 +34,10 @@ use Illuminate\Console\Command;
  *      los descarta en silencio, así que esos productos quedan SIN
  *      galería. Ninguna reparación de BD los salva: hay que renombrar el
  *      archivo, y eso es intervención manual.
+ *   4. DIRECTORIO SIN PRODUCTO — la carpeta del producto existe en el
+ *      árbol pero no hay fila en `products`. No hay a qué colgar nada,
+ *      así que ni `--fix` ni un backfill lo resuelven: hay que decidir si
+ *      el producto se importa. Antes esto se descartaba en silencio.
  *
  * LO QUE NO DETECTA: un `front` cuyo contenido es un primer plano del
  * clavijero. El binario es único y la fila dice exactamente lo que el
@@ -129,6 +133,18 @@ final class AuditGalleryAssetsCommand extends Command
             foreach ($report['variants_without_primary'] as $entry) {
                 $this->line("  ⚠️  {$entry['product']} / {$entry['variant']}");
             }
+        }
+
+        $this->info('DIRECTORIOS SIN PRODUCTO EN LA BD (no se puede reparar desde acá)');
+        if ($report['products_without_db_row'] === []) {
+            $this->line('  ✅ ninguno');
+        } else {
+            $total = array_sum(array_column($report['products_without_db_row'], 'claims'));
+            foreach ($report['products_without_db_row'] as $entry) {
+                $this->line("  ⚠️  {$entry['product']}: {$entry['claims']} archivos huérfanos");
+            }
+            $this->line('  total: '.count($report['products_without_db_row'])." directorios, {$total} archivos.");
+            $this->line('     Están en el árbol pero no en `products`: hay que decidir si se importan.');
         }
 
         $this->info('FILAS QUE FALTAN EN product_images');

@@ -72,6 +72,7 @@ final class GalleryRoleAuditor
      *     shared_photos: array<int, array{product: string, storage_key: string, width: int, claims: array<int, array{variant: string, role: string}>}>,
      *     missing_rows: array<int, array{product: string, product_id: int, variant: string, variant_id: int|null, role: string, width: int, storage_key: string}>,
      *     variants_without_primary: array<int, array{product: string, variant: string, variant_id: int|null}>,
+     *     products_without_db_row: array<int, array{product: string, claims: int}>,
      * }
      */
     public function audit(): array
@@ -85,6 +86,7 @@ final class GalleryRoleAuditor
             'shared_photos' => [],
             'missing_rows' => [],
             'variants_without_primary' => [],
+            'products_without_db_row' => [],
         ];
 
         /** Claims por storage_key: qué variante y rol piden ese binario. */
@@ -114,7 +116,7 @@ final class GalleryRoleAuditor
                 }
 
                 $report['parseable_files']++;
-                $storageKey = $this->storageKeyFor(webpPath: $webpPath);
+                $storageKey = $this->storageKeyFor(webpPath: $webpPath, productSlug: $productSlug);
                 $claimsByKey[$storageKey][] = [
                     'product' => $productSlug,
                     'variant' => $variantSlug,
@@ -244,23 +246,28 @@ final class GalleryRoleAuditor
         return $folders;
     }
 
-    private function storageKeyFor(string $webpPath): string
+    /**
+     * El `entity` de la clave de storage es el slug del PRODUCTO, y lo
+     * aporta `variantFolders()` — que ya lo resolvió del árbol — en vez
+     * de recalcularlo desde el path.
+     *
+     * Recalcularlo con offsets no funciona: el layout tiene dos formas
+     * (`{brand}/{product}/{variant}/{file}` y, en productos de una sola
+     * variante, `{brand}/{product}/{file}`), así que cualquier offset
+     * fijo acierta en una y cae en la MARCA en la otra. El seeder siempre
+     * usa `$product->slug`, así que un `entity` de marca produce una
+     * clave que no existe en la BD y el diff marca como faltante una
+     * fila que sí está.
+     */
+    private function storageKeyFor(string $webpPath, string $productSlug): string
     {
         return $this->deriver->derive(
             tenantSlug: $this->tenantSlug,
             collection: 'products',
-            entity: $this->productSlugFor(webpPath: $webpPath),
+            entity: $productSlug,
             content: (string) file_get_contents(filename: $webpPath),
             extension: 'webp',
         );
-    }
-
-    private function productSlugFor(string $webpPath): string
-    {
-        $parts = explode(separator: '/', string: $webpPath);
-
-        // assets/products/{tenant}/{brand}/{product}/{variant}/{file}
-        return $parts[count($parts) - 3] ?? '';
     }
 
     /**
@@ -303,12 +310,33 @@ final class GalleryRoleAuditor
     private function diffAgainstDatabase(array $claimsByKey, array &$report): void
     {
         $variantsWithoutPrimary = [];
+        $productsWithoutDbRow = [];
+
+        /**
+         * El chequeo de primary es por VARIANTE, no por binario: correrlo
+         * una vez por cada `claimsByKey` lo repetía por cada clave de
+         * storage del producto. Con 9.836 filas eso multiplicaba las 11
+         * variantes reales sin primary por ~19 y el reporte imprimía 208
+         * líneas. Se marca el producto ya revisado y se sigue.
+         *
+         * @var array<int, true> $productsChecked
+         */
+        $productsChecked = [];
 
         foreach ($claimsByKey as $claims) {
             $productSlug = $claims[0]['product'];
             $product = Product::query()->where(column: 'slug', operator: '=', value: $productSlug)->first();
 
             if ($product === null) {
+                // Sin fila en `products` no hay a qué colgar nada. Antes
+                // este `continue` descartaba el directorio entero en
+                // silencio: el producto desaparecía del reporte y sus
+                // archivos no contaban ni como faltantes ni como ok. Es
+                // un gap que ninguna reparación de BD cierra — hay que
+                // decidir si el producto se importa — pero callarlo lo
+                // vuelve invisible.
+                $productsWithoutDbRow[$productSlug] = ($productsWithoutDbRow[$productSlug] ?? 0) + count($claims);
+
                 continue;
             }
 
@@ -350,6 +378,11 @@ final class GalleryRoleAuditor
                 ];
             }
 
+            if (isset($productsChecked[(int) $product->id])) {
+                continue;
+            }
+            $productsChecked[(int) $product->id] = true;
+
             foreach ($product->variants()->get() as $variant) {
                 $hasPrimary = ProductImage::query()
                     ->where(column: 'variant_id', operator: '=', value: $variant->id)
@@ -367,6 +400,11 @@ final class GalleryRoleAuditor
         }
 
         $report['variants_without_primary'] = $variantsWithoutPrimary;
+        $report['products_without_db_row'] = array_map(
+            static fn (string $slug, int $claims): array => ['product' => $slug, 'claims' => $claims],
+            array_keys($productsWithoutDbRow),
+            array_values($productsWithoutDbRow),
+        );
     }
 
     /**

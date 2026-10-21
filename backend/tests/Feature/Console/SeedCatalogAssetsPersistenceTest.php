@@ -267,7 +267,26 @@ final class SeedCatalogAssetsPersistenceTest extends TestCase
         $images = $product->images()->get();
 
         $this->assertCount(2, $images, 'Cada variante tiene que conservar su fila aunque el binario sea el mismo.');
-        $this->assertCount(2, $images->pluck('image_url')->unique());
+
+        // El storage es content-addressed: un binario, una key, una sola
+        // copia en disco. Que las dos filas apunten a la MISMA key es lo
+        // correcto y lo que evita subir dos veces el mismo archivo — los
+        // left-handed reusan las fotos del diestro justamente para eso.
+        // Lo que las separa es `variant_id`.
+        //
+        // Exigir dos URLs distintas codificaba la hipótesis de que la key
+        // tenía que desambiguar el binario, que es al revés de lo que
+        // hace `StorageKeyDeriver::derive()`.
+        $this->assertCount(
+            1,
+            $images->pluck('image_url')->unique(),
+            'El binario es uno solo: las dos filas comparten la misma key de storage.',
+        );
+        $this->assertCount(
+            2,
+            $images->pluck('variant_id')->unique(),
+            'Lo que separa las filas es la variante, no la key de storage.',
+        );
 
         // `alt_text` tiene la forma "{nombre} - vista {rol}"; el rol es lo que
         // va después de la última " - vista ".
