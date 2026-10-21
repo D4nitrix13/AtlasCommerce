@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\Storefront;
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Product;
 use App\Services\Catalog\ProductSearchService;
+use Illuminate\Support\Facades\DB;
 use App\Services\Catalog\WholesalePricingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
