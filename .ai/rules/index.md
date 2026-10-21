@@ -18,7 +18,7 @@
 | Path | Cubre |
 |---|---|
 | [`tooling/package-manager.md`](tooling/package-manager.md) | Frontend usa `bun` exclusivamente. NO `pnpm`, NO `npm`. |
-| [`tooling/docker-stack.md`](tooling/docker-stack.md) | Toda operación con containers va por `scripts/docker-stack.sh`. NO `docker compose` directo, NO `bun astro dev` ad-hoc. |
+| [`tooling/docker-stack.md`](tooling/docker-stack.md) | Toda operación con containers va por `scripts/docker-stack.sh`. NO `docker compose` directo, NO `bun astro dev` ad-hoc. **Secuencia de reinicio tras recrear el backend**, caché del dev server y assets. |
 | [`tooling/resource-budget.md`](tooling/resource-budget.md) | Presupuesto de recursos: un comando pesado por bloque, Docker en bloques separados, preflight de carga, higiene de disco. |
 | [`assets-naming-policy.md`](assets-naming-policy.md) | Estructura per-tenant de `assets/products/`, naming legible en repo vs hasheado en FTP, roles de galería, comandos del seeder. |
 | [`workflow/conventions-first.md`](workflow/conventions-first.md) | Antes de cualquier edición, leer las reglas del scope + AGENTS.md + skill load-bearing. |

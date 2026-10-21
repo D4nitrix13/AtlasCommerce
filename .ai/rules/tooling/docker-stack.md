@@ -100,3 +100,83 @@ Ejemplos concretos:
 ```
 
 Si necesitás ver logs en vivo, usa `./scripts/docker-stack.sh logs <stage> <store> <servicio>`. Para exec interactivo, `./scripts/docker-stack.sh exec <stage> <store> <servicio> bash`.
+---
+
+## Secuencia de reinicio tras recrear el backend
+
+> **Esta secuencia no es opcional.** Omitir el paso 2 o el 3 produce
+> HTTP 503 en toda la API con el backend funcionando perfectamente.
+
+`fastcgi_pass backend:9000` resuelve el hostname **al arrancar** y cachea
+la IP. Si recreás el backend, nginx queda apuntando a la IP del container
+anterior y responde 502. Caddy ve el upstream caído y su health check
+activo marca `localhost:14000` como unhealthy, así que el proxy devuelve
+503 con `"no upstreams available"` — aunque el backend esté sano.
+
+### Procedimiento
+
+```bash
+# 1. Recrear el backend
+./scripts/docker-stack.sh up dev <store> backend
+
+# 2. SIEMPRE reiniciar nginx después, para que re-resuelva `backend`
+./scripts/docker-stack.sh restart dev <store> nginx
+
+# 3. Esperar el ciclo del health check activo de Caddy (30s).
+#    `host is up` debe aparecer en el journal antes de probar.
+journalctl -u caddy --no-pager -n 10 | rg "14000|host is up"
+
+# 4. Verificar antes de declarar algo roto
+curl -s -o /dev/null -w "nginx  -> %{http_code}\n" http://localhost:14000/up
+curl -s -o /dev/null -w "api     -> %{http_code}\n" \
+  -H "Accept: application/json" \
+  "http://<dominio>/api/v1/storefront/products?per_page=1"
+```
+
+Un `502` desde nginx con el backend arriba es **siempre** IP cacheada, no
+un problema de la aplicación. Un `503` desde Caddy es **casi siempre** el
+health check todavía en rojo.
+
+## `up <servicio>` reconstruye más de lo que pide
+
+`up` es *build + start*. Con el argumento de servicio **igual reconstruye
+todos los servicios que tienen sección `build:`**, no solo el indicado. Si
+el build de otro servicio falla, el que querías recrear tampoco se recrea.
+
+Para recrear **un solo servicio sin reconstruir imágenes**, cuando el build
+está roto o no hizo falta:
+
+```bash
+cd docker/instances/<stage>/<store>
+docker compose --env-file environment/.env \
+  up -d --no-build --force-recreate <servicio>
+```
+
+**Antes de.applylo, validá el compose** — no toca containers:
+
+```bash
+docker compose --env-file environment/.env config >/dev/null && echo OK
+```
+
+Corré ese comando **desde el directorio de la instancia**: las rutas de
+los `volumes` y `env_file` son relativas a ese cwd.
+
+## Caché del dev server de Astro
+
+Los volúmenes `*_astro_cache` y `*_vite_cache` sirven HTML y config viejos
+aunque el código fuente ya esté actualizado. Si un cambio en `frontend/src`,
+en los paquetes de tema o en variables de entorno no se refleja:
+
+```bash
+docker volume rm <store>_dev_astro_cache <store>_dev_vite_cache
+docker compose --env-file environment/.env \
+  up -d --no-build --force-recreate frontend
+```
+
+## Assets en desarrollo
+
+El `AssetController` sirve desde el disco configurado en
+`ASSETS_DISK`. En desarrollo va `local`, porque el seeder puebla ese disco
+y el FTP queda vacío. Ver `backend/config/assets.php` y el `.env.example`
+de la instancia. Si las imágenes dan 404 y el backend está sano, lo
+primero que hay que mirar es ese valor.
