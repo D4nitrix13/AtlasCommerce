@@ -221,6 +221,15 @@ final class CatalogAssetsSeeder
                 ];
 
                 $variantDirs = glob($productDir . '/*', GLOB_ONLYDIR) ?: [];
+
+                // Un chunk grande del catálogo no tiene subdirectorio de
+                // variante: los .webp cuelgan directo del directorio del
+                // producto. Sin este caso quedaban sin ninguna imagen, porque
+                // el recorrido solo miraba dentro de las variantes.
+                if ($variantDirs === [] && glob($productDir . '/*-*.webp') !== []) {
+                    $variantDirs = [$productDir];
+                }
+
                 foreach ($variantDirs as $variantDir) {
                     $variantSlug = basename($variantDir);
                     $result[$key]['variants'][$variantSlug] = [];
