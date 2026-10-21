@@ -3,60 +3,28 @@
 actor "Operador\nde tienda" as O
 participant "OrderController" as OC
 participant "OrderService" as OS
-participant "PaymentService" as PS
-participant "InventoryService" as IS
-participant "ShippingService" as SS
-participant "EmailService" as ES
 participant "DB" as DB
 participant "Empresa\nde Envío" as EE
 
-== LISTADO DE PEDIDOS ==
+== LISTADO Y DETALLE DEL PEDIDO ==
 O -> OC : GET /api/v1/orders?estado=PAGADO
 OC -> OS : listarPorEstado("PAGADO", tiendaId)
 OS -> DB : SELECT pedidos\nWHERE tiendaId=? AND estado='PAGADO'
-OS --> OC : pedidos[]
 OC --> O : 200 OK {pedidos: [...]}\ntabla de pedidos pendientes
-
-== DETALLE DEL PEDIDO ==
 O -> OC : GET /api/v1/orders/123
 OC -> OS : obtenerDetalle(123)
-OS -> DB : SELECT pedido, cliente, dirección,\nlíneas, pago y envío (pedidoCompleto)
-OS -> PS : verificarEstadoPago(pedidoId)
-PS -> DB : SELECT pago WHERE pedidoId=?\n(pago APROBADO)
-OS --> OC : pedidoCompleto
+OS -> DB : SELECT pedido, líneas, pago y envío\n(verifica pago APROBADO)
 OC --> O : 200 OK {pedido: {...}}\ndetalle del pedido
 
 == MARCAR COMO ENVIADO ==
 O -> OC : POST /api/v1/orders/123/ship\n{empresaEnvioId, numeroGuia}
 OC -> OS : marcarComoEnviado(123, envio)
-OS -> PS : validarPago(123)
-PS -> DB : SELECT pago WHERE pedidoId=123\n(pago APROBADO)
-OS -> DB : BEGIN TRANSACTION
-
-par Acciones paralelas al despachar
-  OS -> DB : UPDATE pedidos SET estado=PROCESANDO
-else
-  OS -> DB : INSERT INTO envios\n(pedido, empresa, guia, estado=EN_TRANSITO)
-else
-  OS -> IS : descontarStock(pedido)
-  IS -> DB : SELECT inventarios + INSERT movimientos_inventario\n(SALIDA) + UPDATE stockActual
-else
-  OS -> SS : notificarRastreo(envio)
-  SS -> EE : POST /api/rastreo/notificar\n{guia, pedidoId}
-else
-  OS -> ES : enviarEmailRastreo(cliente, envio) vía email
-end
-
-OS -> DB : INSERT INTO order_status_histories\n(estadoAnterior, estadoNuevo, usuario, notas)
-OS -> DB : COMMIT
-OS --> OC : {estado: PROCESANDO, envioId}
+OS -> DB : UPDATE pedido a PROCESANDO + INSERT envío\n+ INSERT historial (transacción)
+OS -> DB : descontar stock + notificar rastreo y email
 OC --> O : 200 OK {ok: true}\n"Pedido marcado como enviado"
 
 == CONFIRMACIÓN DE ENTREGA (evento posterior) ==
-EE -> SS : Webhook o polling: entrega confirmada
-SS -> OS : confirmarEntrega(envioId)
-OS -> DB : UPDATE pedidos SET estado=COMPLETADO
-OS -> DB : INSERT INTO order_status_histories\n(PROCESANDO → COMPLETADO)
-OS -> DB : UPDATE envios SET estado=ENTREGADO, entregadoEn
+EE -> OS : Webhook o polling: entrega confirmada
+OS -> DB : UPDATE pedido a COMPLETADO + UPDATE envío ENTREGADO
 
 @enduml

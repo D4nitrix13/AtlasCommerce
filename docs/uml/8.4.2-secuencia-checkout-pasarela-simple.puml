@@ -3,73 +3,30 @@
 actor "Cliente externo" as C
 participant "CartController" as CC
 participant "OrderService" as OS
-participant "InventoryService" as IS
-participant "PaymentController" as PC
 participant "PaymentService" as PS
-participant "WebhookController" as WC
-participant "EmailService" as ES
-participant "DB" as DB
 participant "Pasarela\nde Pago" as PP
+participant "DB" as DB
 
 == INICIO DE CHECKOUT ==
 C -> CC : POST /api/v1/checkout
 CC -> OS : crearPedidoDesdeCarrito(carrito)
-OS -> IS : validarStockDisponible(items)
-IS -> DB : SELECT stockActual FROM inventarios\nWHERE productoId IN (...) FOR UPDATE
-IS --> OS : {disponible: true, items: [...]}
-OS -> DB : BEGIN TRANSACTION
-OS -> DB : INSERT INTO pedidos (estado=PENDIENTE_PAGO)\n+ lineas_pedido (cada item)
-OS -> DB : UPDATE carritos SET estado=CONVERTIDO
-OS -> DB : COMMIT (pedido + líneas)
-OS --> CC : pedido(id, total)
+OS -> DB : SELECT stockActual FOR UPDATE + INSERT pedido y líneas\n+ UPDATE carrito a CONVERTIDO (transacción)
+OS --> CC : {pedidoId, total}
 CC --> C : 200 OK {pedidoId, total}\npantalla de pago
 
 == SOLICITUD DE PAGO ==
-C -> PC : POST /api/v1/payments\n{pedidoId, metodoPagoId, datosPago}
-PC -> PS : iniciarPago(pedido, metodo)
-PS -> DB : INSERT INTO pagos (estado=PENDIENTE)\n+ transaccion_pago (referencia=null)
-PS -> PP : POST /charge (pedidoId, monto, metodo)
-
-alt ¿Requiere 3D Secure?
-  PP --> C : 3DS_REQUIRED\nredirigir a la página 3DS del banco
-  C -> PP : Completa 3DS
-  PP --> PC : 3DS aprobado\n(POST /api/v1/payments/3ds-confirm)
-  PC -> PS : confirmarPago3DS(pedido)
-  PS -> PP : POST /charge/confirm
-end
-
-PP --> PS : {estado: APROBADO, referencia: "..."}
-PS -> DB : UPDATE pagos SET estado=APROBADO\n+ transaccion_pago (referencia, estadoDevuelto)
-PS --> C : 200 OK {pago: APROBADO}\n"Pago procesado, esperando confirmación"
+C -> CC : POST /api/v1/payments\n{pedidoId, metodoPagoId, datosPago}
+CC -> PS : iniciarPago(pedido, metodo)
+PS -> DB : INSERT pago (PENDIENTE) + transaccion_pago
+PS -> PP : POST /charge (pedidoId, monto, metodo)\n3D Secure si el metodo lo requiere
+PP --> PS : {estado: APROBADO, referencia}
+PS -> DB : UPDATE pago a APROBADO + referencia
+CC --> C : 200 OK {pago: APROBADO}\n"Pago procesado, esperando confirmación"
 
 == WEBHOOK ASÍNCRONO DE LA PASARELA (fuente de verdad) ==
-note over PP, WC
-  Ocurre de forma asíncrona: puede llegar antes o
-  después del retorno de la llamada inicial de pago.
-end note
-
-PP -> WC : POST /api/v1/webhooks/pasarela\n(headers, body con evento y firma)
-WC -> PS : procesarWebhook(evento) tras verificarFirma
-PS -> DB : SELECT pago WHERE pedidoId = ?
-PS -> DB : UPDATE pagos SET estado=APROBADO
-PS -> DB : UPDATE pedidos SET estado=PAGADO
-
-par Acciones paralelas tras pago confirmado
-  PS -> IS : descontarStock(pedido)
-  IS -> DB : INSERT movimientos_inventario (SALIDA)\n+ UPDATE inventarios SET stockActual
-else
-  PS -> OS : generarFacturaPDF(pedido)
-  OS -> DB : INSERT INTO facturas
-else
-  PS -> ES : enviarConfirmacionPago(pedido) vía email
-end
-
-PS --> WC : 200 OK
-WC --> PP : 200 OK
-
-== CONFIRMACIÓN VISUAL AL CLIENTE ==
-C -> PC : GET /api/v1/payments/{pagoId}/status\n(polling o notificación WebSocket)
-PC -> DB : SELECT pago (APROBADO)
-PC --> C : 200 OK {estado: APROBADO}\n"¡Pago exitoso! Tu pedido está confirmado"
+PP --> PS : POST /api/v1/webhooks/pasarela\n(evento, firma)
+PS -> OS : procesarWebhook(evento) tras verificarFirma
+PS -> DB : UPDATE pago a APROBADO + UPDATE pedido a PAGADO
+OS -> DB : descontar stock + INSERT factura + enviar email
 
 @enduml

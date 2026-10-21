@@ -3,61 +3,31 @@
 actor "Cliente externo" as C
 participant "AuthController\n(API)" as AC
 participant "AuthService" as AS
-participant "EmailService" as ES
 participant "TwoFactorService" as TF
 participant "DB\n(PostgreSQL 18)" as DB
 
-== REGISTRO ==
+== REGISTRO Y VERIFICACIÓN DE CORREO ==
 C -> AC : POST /api/v1/auth/register\n(correo, contraseña, nombre)
 AC -> AS : crearUsuario(datos)
-AS -> DB : SELECT usuarios WHERE correo = ?\n(no existe)
-AS -> DB : INSERT INTO usuarios\n(usuario(id, correoVerificadoEn=null))
-AS --> AC : usuario
-AC -> ES : enviarCorreoVerificacion(usuario)\nvía email
-AC --> C : 201 Created\n"Revisa tu correo"
-
-== VERIFICACIÓN DE CORREO ==
+AS -> DB : INSERT usuario + enviar correo de verificación
 C -> AC : GET /api/v1/auth/verify-email?token=...
 AC -> AS : verificarCorreo(token)
-AS -> DB : SELECT usuarios WHERE token = ?
-AS -> DB : UPDATE usuarios SET correoVerificadoEn = NOW()
-AS --> AC : usuario verificado
+AS -> DB : UPDATE usuario SET correoVerificadoEn
 AC --> C : 200 OK\n"Correo verificado, ya podés iniciar sesión"
 
-== INICIO DE SESIÓN ==
+== INICIO DE SESIÓN CON 2FA ==
 C -> AC : POST /api/v1/auth/login\n(correo, contraseña)
 AC -> AS : autenticar(correo, contraseña)
-AS -> DB : SELECT usuarios WHERE correo = ?\n(compara hash de contraseña)
-AS --> AC : usuario autenticado
+AS -> DB : SELECT usuario + comparar hash + INSERT session (Sanctum)
+AS --> AC : {token, requiere_2fa}
 
 alt ¿2FA activado?
-  AC --> C : 200 OK {requiere_2fa: true, temp_token}\npantalla de código 2FA
-
-  == VERIFICACIÓN 2FA ==
-  alt ¿Método = TOTP?
-    C -> AC : POST /api/v1/auth/2fa/verify\n{código de la app Authenticator}
-    AC -> TF : validarCodigoTOTP(usuario, codigo)
-    TF -> DB : SELECT credencial_segundo_factor\n(compara con el TOTP actual)
-    TF --> AC : ok
-  else ¿Método = OTP_EMAIL?
-    AC -> TF : generarOTP(usuario)
-    TF -> DB : INSERT OTP temporal
-    TF -> ES : enviarOTP(usuario) vía email
-    AC --> C : "Ingresa el código que enviamos a tu correo"
-    C -> AC : POST /api/v1/auth/2fa/verify\n{código OTP}
-    AC -> TF : validarCodigoOTP(usuario, codigo)
-    TF -> DB : SELECT OTP (compara y valida expiración)
-    TF --> AC : ok
-  end
-
-  AC -> DB : UPDATE credencial_segundo_factor SET verificadoEn
+  AC --> C : 200 OK {requiere_2fa, temp_token}\npantalla de código 2FA
+  C -> AC : POST /api/v1/auth/2fa/verify\n(código TOTP o OTP por email)
+  AC -> TF : validarCodigo(usuario, codigo)
+  TF --> AC : ok\n(verifica la credencial y marca verificadoEn)
 else 2FA NO activado
-  AC --> C : 200 OK {usuario autenticado}
+  AC --> C : 200 OK {token, usuario}\n"Sesión iniciada"
 end
-
-AC -> AS : crearSesion(usuario)
-AS -> DB : INSERT INTO sessions (Sanctum)\n(session)
-AS --> AC : token
-AC --> C : 200 OK {token, usuario}\n"Sesión iniciada"
 
 @enduml
