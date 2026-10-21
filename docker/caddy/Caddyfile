@@ -141,7 +141,10 @@ http:// {
 	# RF-REL-064: health_uri /up + health_interval 30s.
 	# Si el backend no responde 2xx en 5s, Caddy lo marca unhealthy
 	# y deja de rutear tráfico hasta que vuelva a responder.
-	@panda_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@panda_dev_api {
+		host admin.panda-estampados.com www.panda-estampados.com panda-estampados.com admin.kitsune.com www.kitsune.com kitsune.com
+		path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	}
 	@panda_dev host admin.panda-estampados.com www.panda-estampados.com panda-estampados.com admin.kitsune.com www.kitsune.com kitsune.com
 	handle @panda_dev_api {
 		reverse_proxy localhost:9000 {
@@ -156,7 +159,10 @@ http:// {
 	}
 
 	# MM Boutique dev
-	@mm_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@mm_dev_api {
+		host admin.mm-boutique.com www.mm-boutique.com mm-boutique.com
+		path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	}
 	@mm_dev host admin.mm-boutique.com www.mm-boutique.com mm-boutique.com
 	handle @mm_dev_api {
 		reverse_proxy localhost:10000 {
@@ -171,7 +177,10 @@ http:// {
 	}
 
 	# Morales Store dev
-	@morales_dev_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@morales_dev_api {
+		host admin.morales-store.com www.morales-store.com morales-store.com
+		path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	}
 	@morales_dev host admin.morales-store.com www.morales-store.com morales-store.com
 	handle @morales_dev_api {
 		reverse_proxy localhost:11000 {
@@ -191,7 +200,10 @@ http:// {
 	# Solo dev por ahora. Prod se agregara cuando se asigne dominio
 	# publico (actualmente .test para no publicar DNS).
 	# Puerto dev: FRONTEND_PORT=10321 (10321->4321), BACKEND_PORT=14000.
-	@lavoz_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@lavoz_api {
+		host admin.instrumentos-musicales-la-voz.test www.instrumentos-musicales-la-voz.test instrumentos-musicales-la-voz.test
+		path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	}
 	@lavoz host admin.instrumentos-musicales-la-voz.test www.instrumentos-musicales-la-voz.test instrumentos-musicales-la-voz.test
 	handle @lavoz_api {
 		reverse_proxy localhost:14000 {
@@ -210,7 +222,10 @@ http:// {
 	# -----------------------------------------------------------
 
 	# Panda + Kitsune (mismo deploy: red 172.21.0.0/24)
-	@panda_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@panda_api {
+		host panda-estampados.com www.panda-estampados.com admin.panda-estampados.com
+		path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	}
 	@panda host panda-estampados.com www.panda-estampados.com admin.panda-estampados.com
 	handle @panda_api {
 		reverse_proxy 172.21.0.20:8000 {
@@ -230,7 +245,10 @@ http:// {
 	}
 
 	# MM Boutique (instancia propia: red 172.22.0.0/24)
-	@mm_boutique_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@mm_boutique_api {
+		host mm-boutique.com www.mm-boutique.com admin.mm-boutique.com
+		path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	}
 	@mm_boutique host mm-boutique.com www.mm-boutique.com admin.mm-boutique.com
 	handle @mm_boutique_api {
 		reverse_proxy 172.22.0.20:8000 {
@@ -245,7 +263,10 @@ http:// {
 	}
 
 	# Morales Store (instancia propia: red 172.23.0.0/24)
-	@morales_api path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	@morales_api {
+		host morales-store.com www.morales-store.com admin.morales-store.com
+		path /api/* /sanctum/* /livewire/* /broadcasting/auth
+	}
 	@morales host morales-store.com www.morales-store.com admin.morales-store.com
 	handle @morales_api {
 		reverse_proxy 172.23.0.20:8000 {
