@@ -3,6 +3,8 @@ skinparam classAttributeIconSize 0
 skinparam classFontSize 10
 skinparam packageStyle rectangle
 skinparam linetype ortho
+skinparam nodesep 24
+skinparam ranksep 251
 top to bottom direction
 
 ' ============================================================
