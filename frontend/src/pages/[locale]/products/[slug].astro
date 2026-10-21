@@ -919,7 +919,29 @@ const cardLabels = {
                 <div class="flex flex-col gap-2">
                   <dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Acabado</dt>
                   <dd class="flex flex-col gap-3 text-sm font-medium text-slate-900">
-                    <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
+                    <div class="flex items-center gap-3">
+                      {/*
+                        Con un solo acabado no hay nada que elegir, pero la
+                        miniatura sigue siendo información: dice cómo es el
+                        color. Se muestra como imagen fija al lado del texto,
+                        no como enlace, porque un enlace que no cambia nada
+                        es un control muerto.
+                      */}
+                      {!showFinishPicker &&
+                        selectedFinish !== undefined &&
+                        variantFirstImage[selectedFinish.id] !== undefined && (
+                          <img
+                            src={variantFirstImage[selectedFinish.id]}
+                            alt=""
+                            width={48}
+                            height={48}
+                            loading="lazy"
+                            decoding="async"
+                            class="h-12 w-12 shrink-0 rounded-md border border-slate-200 object-cover"
+                          />
+                        )}
+                      <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
+                    </div>
                     {/* Picker de variantes con thumbnails reales (estilo Nike).
                         Cada swatch es un <a> con ?finish=<id> que filtra la galería
                         via query param (sin JS). Thumbnails uniformes ~48×48
