@@ -477,10 +477,30 @@ const COLOR_OPTIONS: readonly VariantOption[] = (() => {
   }
   // Phase 8 (Oct 2026): derivar de `apiVariants` (camino real del PDP).
   if (apiVariants !== undefined && apiVariants.length > 0) {
+    // En detalle la API devuelve objetos con `variantId`; en listado
+    // devuelve strings sueltos. Solo los objetos sirven para acotar.
+    const thumbnails = new Map<number, string>();
+    if (apiImages !== undefined) {
+      for (const image of apiImages) {
+        if (typeof image === 'string') {
+          continue;
+        }
+        if (
+          image.variantId !== null &&
+          !thumbnails.has(image.variantId)
+        ) {
+          thumbnails.set(image.variantId, image.url);
+        }
+      }
+    }
+
     return apiVariants.map((v) => ({
       id: v.finishSlug,
       label: v.finishLabel,
       ...(v.finishHex !== null && { hex: v.finishHex }),
+      // Miniatura real del acabado. Sin esto el swatch cae al hex, que
+      // para acabados complejos (sunburst, fades) no es fiel.
+      ...(thumbnails.has(v.id) && { imageUrl: thumbnails.get(v.id)! }),
     }));
   }
   // Fallback legacy (mock Saber Alter) — preserva el render previo.
