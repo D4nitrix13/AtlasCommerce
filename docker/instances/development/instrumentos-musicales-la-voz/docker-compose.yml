@@ -207,6 +207,11 @@ services:
       - environment/.env
     ports:
       - "10321:4321"
+    # Origen alternativo del API para el fetch SSR del PDP en dev. El
+    # container de Astro no alcanza al host (Caddy en *:80 no responde
+    # desde los bridges de Docker), pero sí a nginx, que está en la misma
+    # red. En producción esta variable NO se define y el fetch usa
+    # Astro.url.origin, que ya resuelve en request time.
     volumes:
       - ../../../../frontend:/app
       - ../../../../frontend/bun.lock:/app/bun.lock:ro
@@ -235,6 +240,12 @@ services:
       # origin actual y Caddy rutee con Host header correcto.
       - PUBLIC_API_URL=/api
       - ASTRO_TELEMETRY_DISABLED=1
+      # Origen alternativo del API para el fetch SSR del PDP en dev. El
+      # container de Astro no alcanza al host (Caddy en *:80 no responde
+      # desde los bridges de Docker), pero sí a nginx, que está en la misma
+      # red. En producción esta variable NO se define y el fetch usa
+      # Astro.url.origin, que ya resuelve en request time.
+      - INTERNAL_API_ORIGIN=http://nginx:8000
     depends_on:
       - backend
     networks:

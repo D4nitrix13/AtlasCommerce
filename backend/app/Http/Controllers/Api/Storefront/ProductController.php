@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Storefront;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Storefront\StorefrontProductResource;
 use App\Models\Catalog\Product;
 use App\Services\Catalog\ProductSearchService;
-use Illuminate\Support\Facades\DB;
 use App\Services\Catalog\WholesalePricingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Endpoints públicos del storefront.
@@ -37,13 +38,25 @@ class ProductController extends Controller
         // 'stores' pero sin el JOIN doble del mismo pivot que causa
         // "Duplicate alias: product_stores" en PostgreSQL.
         $productIds = DB::table('product_stores')
-            ->where('store_id', $store->id)
-            ->where('is_visible', true)
+            ->where(column: 'store_id', operator: '=', value: $store->id)
+            ->where(column: 'is_visible', operator: '=', value: true)
             ->pluck('product_id');
 
-        $products = Product::whereIn('id', $productIds)->get();
+        // Eager-load de las relaciones que el Resource necesita para
+        // emitir su shape completa. Sin with(), category/brand/images
+        // quedan ausentes y dispara N+1 si el Resource los tocara.
+        $products = Product::query()
+            ->whereIn('id', $productIds)
+            ->with(['category', 'brand', 'images', 'variants'])
+            ->get();
 
-        return response()->json($products);
+        // Shape plana (array de productos, NO `{data: [...]}`). El
+        // listado storefront (`StorefrontProductsList.tsx`) consume esa
+        // forma y un cambio de envoltura rompe el contrato. Ver PHPDoc
+        // de `StorefrontProductResource::$wrap = null`.
+        return response()->json(
+            data: StorefrontProductResource::collection($products)->resolve(),
+        );
     }
 
     /**
@@ -119,11 +132,23 @@ class ProductController extends Controller
                 ->where(column: 'slug', operator: '=', value: $slug))
             ->value(column: 'product_id');
 
-        $product = $productId === null
-            ? abort(code: 404)
-            : Product::findOrFail($productId);
+        if ($productId === null) {
+            abort(code: 404);
+        }
 
-        return response()->json($product);
+        // Eager-load de las relaciones que el Resource necesita. Sin
+        // with(), `category`/`brand`/`images` quedan null y los joins
+        // que necesitan el Resource no emiten esa info. findOrFail
+        // respeta el filtro `id` + soft-deletes del modelo.
+        $product = Product::query()
+            ->with(['category', 'brand', 'images', 'variants'])
+            ->findOrFail($productId);
+
+        // Emitimos la shape plana (sin `{data: ...}`) para alinearla
+        // con el contrato del listado y con el consumer del PDP.
+        return response()->json(
+            data: (new StorefrontProductResource($product))->resolve(),
+        );
     }
 
     /**
