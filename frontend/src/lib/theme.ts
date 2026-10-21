@@ -47,7 +47,7 @@ export const DEFAULT_THEME: Theme = {
 
 /**
  * Reescribe paths legacy (`/images/tenants/...`) al formato del refactor
- * de Fase 6 (`/api/storefront/assets/tenants/...`). El backend de La Voz
+ * de Fase 6 (`/api/v1/storefront/assets/tenants/...`). El backend de La Voz
  * tiene datos anteriores al refactor con paths `/images/tenants/...` que
  * el backend sirve en 404. Reescribimos acá para que el backend sirva el
  * asset via su AssetController.
@@ -57,10 +57,10 @@ function rewriteLegacyAssetPath(path: string | null, tenantSlug: string | null):
     return null;
   }
   if (path.startsWith('/images/tenants/')) {
-    return path.replace(/^\/images\/tenants\//, `/api/storefront/assets/tenants/${tenantSlug ?? ''}/`);
+    return path.replace(/^\/images\/tenants\//, `/api/v1/storefront/assets/tenants/${tenantSlug ?? ''}/`);
   }
   if (path.startsWith('/images/')) {
-    return path.replace(/^\/images\//, '/api/storefront/assets/');
+    return path.replace(/^\/images\//, '/api/v1/storefront/assets/');
   }
   return path;
 }

@@ -302,11 +302,7 @@ const baseUrl = `/${locale}/products`;
                   labels={{ viewDetail: dictionary.viewDetail }}
                 />
               </li>
-            )) : (
-              /* SSR fetch fallo (problema operacional del container). El
-                 CSR island hace el fetch real desde el browser, asi que
-                 los productos se renderizan via JS aunque el SSR falle. */
-            )}
+            )) : null}
           </ul>
 
           {/* CSR island: hace fetch al backend desde el browser. Caddy

@@ -112,13 +112,13 @@ export default function ThemeForm({ initialTheme }: Props): ReactElement {
           label="Logo (URL)"
           value={theme.logo_path ?? ''}
           onChange={(v) => update('logo_path', v)}
-          placeholder="/api/storefront/assets/tenants/panda-estampados/branding/logo.webp"
+          placeholder="/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp"
         />
         <Field
           label="Logo de login (URL)"
           value={theme.login_logo_path ?? ''}
           onChange={(v) => update('login_logo_path', v)}
-          placeholder="/api/storefront/assets/tenants/panda-estampados/branding/login-logo.webp"
+          placeholder="/api/v1/storefront/assets/tenants/panda-estampados/branding/login-logo.webp"
         />
       </div>
 

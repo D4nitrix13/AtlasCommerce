@@ -48,7 +48,7 @@ const locale = Astro.locals.locale ?? 'es';
 // legibilidad si no hay brand resuelto.
 const themeRootStyle = `--primary: ${brand.accentColor}; --primary-hover: ${brand.accentHoverColor};`;
 const tenantFavicon = tenantSlug
-  ? `/api/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
+  ? `/api/v1/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
   : '/favicon.svg';
 ---
 
