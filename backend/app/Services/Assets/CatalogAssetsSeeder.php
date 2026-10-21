@@ -300,9 +300,12 @@ final class CatalogAssetsSeeder
             ? $defaultBrand
             : $this->ensureBrand($brandName, $brandSlug);
 
-        $category = $defaultCategory ?? $this->ensureCategory(
-            'Instrumento musical',
-            'instrumento-musical',
+        // El índice del backup está_claveado por el `handle` pelado, no por
+        // la clave de descubrimiento `{brand}/{product}`. El handle combina
+        // marca y producto, así que se prueban las dos formas.
+        $category = $this->resolveCategory(
+            handles: [$brandSlug . '-' . $productSlug, $productSlug],
+            fallback: $defaultCategory,
         );
 
         // Cargar metadata del backup si está disponible
@@ -650,6 +653,50 @@ final class CatalogAssetsSeeder
         return Category::query()->updateOrCreate(
             ['slug' => $slug],
             ['name' => $name, 'is_active' => true],
+        );
+    }
+
+    /**
+     * Resuelve la categoría del producto desde el árbol del backup.
+     *
+     * El backup está organizado como `{backupBase}/{category}/{brand}/...`,
+     * así que la categoría es el primer segmento de la ruta del
+     * `product.json` que el índice tiene asociado al handle.
+     *
+     * Antes toda la instancia caía en una única categoría hardcodeada
+     * ("Instrumento musical"), que dejaba las nueve categorías reales del
+     * catálogo sin modelar. Si el handle no está en el índice, o la ruta no
+     * tiene categoría reconocible, se usa el fallback del llamador.
+     */
+    private function resolveCategory(array $handles, ?Category $fallback): Category
+    {
+        $index = $this->loadBackupIndex();
+        $path = null;
+        foreach ($handles as $handle) {
+            $path = $index[$handle] ?? null;
+            if ($path !== null) {
+                break;
+            }
+        }
+
+        if ($path !== null) {
+            $relative = ltrim(substr(
+                $path,
+                strlen($this->backupBase),
+            ), '/');
+            $categorySlug = explode('/', $relative)[0] ?? '';
+
+            if ($categorySlug !== '' && ! in_array($categorySlug, ['.', '..'], true)) {
+                return $this->ensureCategory(
+                    ucwords(str_replace('-', ' ', $categorySlug)),
+                    $categorySlug,
+                );
+            }
+        }
+
+        return $fallback ?? $this->ensureCategory(
+            'Instrumento musical',
+            'instrumento-musical',
         );
     }
 
