@@ -243,6 +243,57 @@ final class SeedCatalogAssetsPersistenceTest extends TestCase
     }
 
     #[Test]
+    public function it_keeps_both_rows_when_two_variants_share_the_same_binary(): void
+    {
+        // El `storage_key` es el hash del binario y el path no lleva
+        // variante, así que el mismo archivo bajo dos variantes produce
+        // la misma key. Con la clave (product_id, image_url) una fila se
+        // pisaba a la otra y la variante perdedora quedaba sin esa foto
+        // —y sin primary—. Con `variant_id` en la clave cada reclamo
+        // tiene su fila.
+        $shared = 'RIFF'.random_bytes(4).'WEBPVP8 '.random_bytes(24);
+        $this->writeWebp(
+            relativePath: 'gibson/j-45-standard/vintage-burst/headstock-1600x1600.webp',
+            bytes: $shared,
+        );
+        $this->writeWebp(
+            relativePath: 'gibson/j-45-standard/vintage-burst-left-handed/front-1600x1600.webp',
+            bytes: $shared,
+        );
+
+        $this->assertSame(0, $this->runSeeder());
+
+        $product = Product::query()->where(column: 'slug', operator: '=', value: 'j-45-standard')->firstOrFail();
+        $images = $product->images()->get();
+
+        $this->assertCount(2, $images, 'Cada variante tiene que conservar su fila aunque el binario sea el mismo.');
+        $this->assertCount(2, $images->pluck('image_url')->unique());
+
+        // `alt_text` tiene la forma "{nombre} - vista {rol}"; el rol es lo que
+        // va después de la última " - vista ".
+        $roles = $images->pluck('alt_text')->map(
+            static fn (string $alt): string => substr($alt, (int) strrpos($alt, ' ') + 1),
+        )->sort()->values()->all();
+        $this->assertSame(['front', 'headstock'], $roles);
+    }
+
+    /**
+     * Escribe un webp con bytes concretos. Necesario cuando dos archivos
+     * tienen que compartir el MISMO binario.
+     */
+    private function writeWebp(string $relativePath, string $bytes): string
+    {
+        $full = $this->tempAssetBase.'/products/'.self::TENANT.'/'.$relativePath;
+        $dir = dirname($full);
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        file_put_contents($full, $bytes);
+
+        return $full;
+    }
+
+    #[Test]
     public function it_skips_files_whose_name_does_not_follow_the_role_size_convention_without_failing(): void
     {
         // `logo.webp` no matchea `{role}-{WxH}.webp`: se ignora en silencio,
