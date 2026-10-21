@@ -4,6 +4,7 @@ skinparam state {
   BorderColor #333333
   FontStyle bold
 }
+hide empty description
 
 [*] --> SIN_2FA
 
