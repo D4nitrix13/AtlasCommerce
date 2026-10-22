@@ -4,7 +4,22 @@
 > al terminar cada trabajo verificable. Nada se marca hecho sin evidencia
 > observada (comando con salida real, o navegador real).
 
-**Última actualización:** 2026-10-22 · **Etapa actual:** E1.1 — subida de imagen por API
+**Última actualización:** 2026-10-22 · **Etapa actual:** E1.2 — anchos configurables
+
+**E1.1 — ✅ HECHO y verificado.** Commit `c1d9e451`. Subida por multipart →
+WebP en 400/800/1200/1600, aspect preservado, una fila por ancho, `is_primary`
+solo en 1600, sin upscale, reutilizando `StorageKeyDeriver`. Extensión `gd`
+con `--with-webp` agregada a los **7** Dockerfiles del backend (el container no
+la tenía: la feature era código muerto).
+
+Evidencia real (JPEG 1600x1200 por HTTP, **disco real**, sin `Storage::fake`):
+```
+w=400   webp   400x300    11.296 bytes
+w=800   webp   800x600    28.658 bytes
+w=1200  webp   1200x900   46.738 bytes
+w=1600  webp   1600x1200  71.170 bytes
+```
+336 tests verdes en `tests/Feature/Admin` + `tests/Unit/Services/Assets`.
 
 ---
 
