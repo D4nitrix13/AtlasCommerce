@@ -75,6 +75,16 @@ final class CatalogAssetsSeeder
     ];
 
     /**
+     * Límite de `product_variants.sku` (VARCHAR(120) UNIQUE según la
+     * migration `catalog/2026_06_22_032011_create_product_variants_table`).
+     *
+     * Vive acá porque el seeder es quien arma esa cadena: si el schema
+     * cambia, este número deja de ser una constante mágica y pasa a ser
+     * el lugar donde se declara el contrato con la columna.
+     */
+    private const SKU_MAX_LENGTH = 120;
+
+    /**
      * Cache del índice `handle → product.json path` del backup.
      * Lazy-loaded por lookupBackupMetadata().
      *
@@ -326,10 +336,56 @@ final class CatalogAssetsSeeder
         $handedness = $this->handedness->resolveForProduct(product: $product);
 
         foreach ($data['variants'] as $variantSlug => $webps) {
+            $sku = $this->buildVariantSku(
+                brandSlug: $brandSlug,
+                productSlug: $productSlug,
+                variantSlug: $variantSlug,
+            );
+
+            // Se rechaza la variante en vez de truncar el identificador.
+            // Un SKU recortado a 120 caracteres puede cortar en medio de
+            // una palabra y colisionar con otro producto del mismo
+            // `product_variants_sku_unique`: dos filas distintas con el
+            // mismo código es peor que una variante sin sembrar, que el
+            // reporte deja a la vista.
+            if (strlen(string: $sku) > self::SKU_MAX_LENGTH) {
+                $stats['errors'][] = "Producto {$productSlug} variant {$variantSlug}: "
+                    ."el SKU '{$sku}' excede los ".self::SKU_MAX_LENGTH
+                    .' caracteres de `product_variants.sku`.';
+
+                continue;
+            }
+
+            // El nombre del directorio de variante ES el nombre del
+            // producto cuando el producto tiene una sola variante (los
+            // webp cuelgan del directorio del producto).
+            //
+            // Antes se escribía `NULL` en `finish_slug` para ese caso,
+            // con el argumento de que espejar el slug "no aporta
+            // información". Es cierto y aun así es un error: `NULL`
+            // rompe tres consumidores que hoy funcionan.
+            //
+            //  - `StorefrontProductResource::resolveVariants()` filtra
+            //    las variantes sin `finish_slug`, así que el PDP de los
+            //    ~306 productos de una sola variante devolvería `variants: []`.
+            //  - `BackfillVariantFinishCommand` usa como gate
+            //    "finish_slug !== products.slug" para decidir que la
+            //    variante YA tiene acabado real. Con `NULL` ese gate
+            //    nunca pasa y el backfill queda neutralizado para ellas
+            //    — justamente las filas que el comando debería arreglar.
+            //  - `BackfillImageVariantCommand` indexa por `finish_slug`,
+            //    así que contaría esas imágenes como huérfanas.
+            //
+            // Medido: de los 306 espejos actuales, NINGUNO tiene slug de
+            // más de 64 caracteres (el slug más largo del árbol es 69 y
+            // pertenece a un producto cuyo espejo sí entra), o sea que
+            // espejar NO desborda la columna. Se conserva el espejo.
+            // El overflow real venía del slug DUPLICADO en el SKU, que sí
+            // se corrige más abajo.
+            $mirrorsProduct = $variantSlug === $productSlug;
+
             $variant = ProductVariant::query()->updateOrCreate(
-                ['product_id' => $product->id, 'sku' => strtoupper(substr($brandSlug, 0, 4))
-                    .'-'.strtoupper(str_replace('-', '', $productSlug))
-                    .'-'.strtoupper(str_replace('-', '', $variantSlug))],
+                ['product_id' => $product->id, 'sku' => $sku],
                 [
                     'name' => ucwords(str_replace('-', ' ', $variantSlug)),
                     'price_cents' => $meta['base_price_cents'] ?? 0,
@@ -368,6 +424,52 @@ final class CatalogAssetsSeeder
                 );
             }
         }
+    }
+
+    /**
+     * SKU de una variante: `{MARCA4}-{PRODUCTO}-{ACABADO}`, en mayúsculas y
+     * sin guiones.
+     *
+     * ── Por qué el tercer segmento es condicional ────────────────────
+     *
+     * Cuando el producto tiene una sola variante, el "directorio de
+     * variante" ES el directorio del producto (ver el caso single-variant
+     * de `discoverFromFilesystem()`), así que el slug de variante es
+     * idéntico al del producto. Concatenar los dos producía el slug dos
+     * veces —`EPIP-LESP...FRETBOARDS-LESP...FRETBOARDS`— y con slugs
+     * largos el resultado pasaba los 120 caracteres de la columna: 10
+     * productos del árbol abortaban con
+     * `SQLSTATE[22001] value too long`.
+     *
+     * La forma elegida para ese caso es `{MARCA4}-{PRODUCTO}`: el slug
+     * una sola vez y nada más. Es exactamente el `sku` que ya recibe la
+     * fila de `products`, y la unicidad global de
+     * `product_variants.sku` no obliga a un sufijo extra:
+     *
+     *   - Dos productos distintos producen cadenas distintas salvo que
+     *     coincidan marca y producto a la vez. El prefijo de marca son
+     *     los primeros 4 caracteres del directorio de marca, así que dos
+     *     marcas con el mismo prefijo (`gibson` y `gibson-custom` →
+     *     `GIBS`) sólo colisionarían si además compartieran un slug de
+     *     producto: en el árbol actual no comparten ninguno.
+     *   - Un SKU de producto multi-acabado siempre tiene tercer segmento
+     *     no vacío, así que jamás puede ser igual a la forma de dos
+     *     segmentos.
+     *
+     * No se trunca: un SKU recortado puede cortar a mitad de palabra y
+     * generar una colisión con otro producto. Si aun así se pasara del
+     * límite, el llamador rechaza la variante y lo reporta.
+     */
+    private function buildVariantSku(string $brandSlug, string $productSlug, string $variantSlug): string
+    {
+        $productPart = strtoupper(str_replace('-', '', $productSlug));
+
+        if ($variantSlug === $productSlug) {
+            return strtoupper(substr($brandSlug, 0, 4)).'-'.$productPart;
+        }
+
+        return strtoupper(substr($brandSlug, 0, 4)).'-'.$productPart
+            .'-'.strtoupper(str_replace('-', '', $variantSlug));
     }
 
     /**

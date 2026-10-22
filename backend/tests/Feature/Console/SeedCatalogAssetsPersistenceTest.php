@@ -296,6 +296,92 @@ final class SeedCatalogAssetsPersistenceTest extends TestCase
         $this->assertSame(['front', 'headstock'], $roles);
     }
 
+    #[Test]
+    public function it_does_not_duplicate_the_product_slug_in_the_sku_of_a_single_variant_product(): void
+    {
+        // Producto real del catálogo: 68 caracteres de slug y sin
+        // subdirectorio de variante. El seeder usaba el slug del producto
+        // como slug de variante, así que el SKU salía
+        // `EPIP-LESP...FRETBOARDS-LESP...FRETBOARDS` (122 caracteres) y el
+        // INSERT moría con `SQLSTATE[22001] value too long for type
+        // character varying(120)`, lo que abortaba también la fila del
+        // producto y sus imágenes.
+        $slug = 'les-paul-standard-60s-iced-tea-burst-left-handed-rosewood-fretboards';
+        $this->webp("epiphone/{$slug}/front-1600x1600.webp");
+
+        $this->assertSame(0, $this->runSeeder(), 'El SKU duplicado abortaba el seed con un error de longitud.');
+
+        $variant = ProductVariant::query()->firstOrFail();
+
+        $this->assertSame(
+            'EPIP-LESPAULSTANDARD60SICEDTEABURSTLEFTHANDEDROSEWOODFRETBOARDS',
+            $variant->sku,
+        );
+        $this->assertSame(
+            1,
+            substr_count($variant->sku, 'LESPAULSTANDARD60SICEDTEABURSTLEFTHANDEDROSEWOODFRETBOARDS'),
+            'El slug del producto aparece una sola vez en el SKU.',
+        );
+        $this->assertLessThanOrEqual(120, strlen($variant->sku));
+    }
+
+    #[Test]
+    public function it_keeps_the_three_part_sku_when_the_variant_has_its_own_directory(): void
+    {
+        // Con subdirectorio de variante el SKU sí lleva los tres
+        // segmentos: la variante aporta información que el producto no
+        // tiene, y sin ella dos acabados del mismo modelo serían el
+        // mismo código contra el índice único de `product_variants.sku`.
+        $this->webp('gibson/les-paul-standard/ebony/front-1600x1600.webp');
+
+        $this->assertSame(0, $this->runSeeder());
+
+        $variant = ProductVariant::query()->firstOrFail();
+
+        $this->assertSame('GIBS-LESPAULSTANDARD-EBONY', $variant->sku);
+        $this->assertSame('ebony', $variant->finish_slug);
+    }
+
+    #[Test]
+    public function it_keeps_the_mirrored_finish_slug_when_the_variant_directory_reuses_the_product_slug(): void
+    {
+        // Sin subdirectorio de variante, el "slug de variante" es el slug
+        // del producto. Se conserva el espejo en `finish_slug` aunque no
+        // aporte información propia, porque `NULL` rompe tres consumidores
+        // que hoy funcionan:
+        //
+        //  - `StorefrontProductResource::resolveVariants()` filtra las
+        //    variantes sin `finish_slug` -> el PDP devolvería `variants: []`.
+        //  - `BackfillVariantFinishCommand` usa "finish_slug !==
+        //    products.slug" como gate de "ya tiene acabado real"; con
+        //    `NULL` el gate nunca pasa y el backfill queda neutralizado
+        //    justo para las filas que debería arreglar.
+        //  - `BackfillImageVariantCommand` indexa por `finish_slug` y
+        //    contaría esas imágenes como huérfanas.
+        //
+        // Medido: ninguno de los 306 espejos del árbol actual supera los
+        // 64 caracteres de la columna, así que espejar no desborda.
+        $slug = 'les-paul-standard-60s-iced-tea-burst-left-handed-rosewood-fretboards';
+        $this->webp("epiphone/{$slug}/front-1600x1600.webp");
+
+        $this->assertSame(0, $this->runSeeder());
+
+        $variant = ProductVariant::query()->firstOrFail();
+
+        $this->assertSame($slug, $variant->finish_slug);
+        $this->assertSame('Les Paul Standard 60s Iced Tea Burst Left Handed Rosewood Fretboards', $variant->finish_label);
+        // El SKU no duplica el slug aunque el directorio de variante lo
+        // repita: ese era el overflow real del VARCHAR(120). El SKU se
+        // construye en mayúsculas y sin guiones, así que la comparación
+        // se hace contra esa misma forma; lo que importa es que el slug
+        // aparezca UNA vez y que entre en la columna.
+        $slugInSkuForm = strtoupper(str_replace('-', '', $slug));
+        $this->assertSame(1, substr_count((string) $variant->sku, $slugInSkuForm));
+        $this->assertLessThanOrEqual(120, strlen((string) $variant->sku));
+        // El nombre de la variante se conserva: es lo que la PDP muestra.
+        $this->assertSame('Les Paul Standard 60s Iced Tea Burst Left Handed Rosewood Fretboards', $variant->name);
+    }
+
     /**
      * Escribe un webp con bytes concretos. Necesario cuando dos archivos
      * tienen que compartir el MISMO binario.

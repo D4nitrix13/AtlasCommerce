@@ -191,8 +191,13 @@ final class GalleryRoleAuditorTest extends TestCase
     /**
      * Crea una variante para producto single-variant. `finish_slug`
      * se iguala al slug del producto para que el `resolveVariant()`
-     * del auditor la encuentre por slug — es la convención que el
-     * seeder también aplica para los single-variant del catálogo real.
+     * del auditor la encuentre por slug.
+     *
+     * El seeder hoy deja `finish_slug` en NULL en ese caso (el directorio
+     * de variante ES el del producto y no aporta un acabado), así que
+     * estas filas ejercitan el camino del slug; las que llegan del seed
+     * real resuelven por el fallback de variante única de
+     * `resolveVariant()`. Ambas rutas tienen que dar la misma variante.
      */
     private function makeSingleVariant(Product $product): ProductVariant
     {
