@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "Precios manuales para productos que NO existen en data/catalog-meta/.",
+    "Gibson no publica el Mod Collection como entrada de catálogo y su web es",
+    "una SPA sin datos en el HTML, así que no hay fuente de la cual backfillearlos.",
+    "ESTOS VALORES SON PROVISIONALES: Estimates de la línea a la que pertenece",
+    "cada instrumento, NO precios confirmados por el fabricante. Reemplazarlos",
+    "en cuanto haya una lista real — este archivo es el único lugar a tocar.",
+    "El comando catalog:backfill-prices los lee DESPUÉS de catalog-meta, así que",
+    "un precio real en catalog-meta gana siempre sobre uno de acá."
+  ],
+  "_provisional": true,
+  "prices": {
+    "gibson-custom-select-1968-les-paul-custom-reissue-gloss-white-sparkle": 4499.00,
+    "gibson-les-paul-supreme-blueberry-burst": 7499.00,
+    "gibson-mod-collection-es-335-smooth-sepia": 6999.00,
+    "gibson-mod-collection-es-339-green-meme": 7499.00,
+    "gibson-mod-collection-flying-v-80s-boisterous-blue": 5999.00,
+    "gibson-mod-collection-flying-v-80s-flame-job-hot-rod": 5999.00,
+    "gibson-mod-collection-les-paul-custom-70s-nighty-nite-graphite": 6499.00,
+    "gibson-mod-collection-les-paul-junior-tropicalia": 5999.00,
+    "gibson-mod-collection-les-paul-standard-60s-hornet-burst": 5499.00,
+    "gibson-mod-collection-sg-modern-tenacity-blue": 5999.00,
+    "gibson-mod-collection-sg-standard-holy-shift": 4499.00
+  }
+}
