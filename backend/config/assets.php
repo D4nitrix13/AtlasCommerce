@@ -60,4 +60,51 @@ return [
     'path_validation' => [
         'strict' => env(key: 'ASSETS_PATH_VALIDATION_STRICT', default: false),
     ],
+
+    /**
+     * Validación de las imágenes que el admin sube por la API.
+     *
+     * Los tres valores viven acá y no inline en el FormRequest porque son
+     * política operativa: cambiarlos no es un refactor, es cambiar qué
+     * acepta el sistema. La lista de anchos NO está en este bloque a
+     * propósito — es una constante del conversor hasta que exista el
+     * slice 1.2 que la vuelva configurable.
+     */
+    'upload' => [
+
+        /**
+         * MIME types aceptados. Se comparan contra el contenido REAL del
+         * archivo (Symfony lo adivina con fileinfo), no contra el header
+         * `Content-Type` que manda el cliente — si no, un `.php` renamed
+         * a `.jpg` pasa el filtro y después el conversor explota.
+         *
+         * Se excluyen SVG y GIF a propósito: SVG es un formato ejecutable
+         * (scripts embebidos) y GIF no tiene transparencia fiable en el
+         * pipeline WebP de este repo. Los tres formatos restantes son los
+         * que produce cualquier cámara o editor de fotos decente.
+         */
+        'mimes' => ['image/jpeg', 'image/png', 'image/webp'],
+
+        /**
+         * Tope del archivo ORIGINAL subido, en kilobytes.
+         *
+         * 8192 KB (8 MB) es el tamaño típico de foto de catálogo: un JPEG de 1600 px de
+         * este repo pesa 150-400 KB, así que 8 MB deja margen de sobra para
+         * el original de una cámara sin convertir, y a la vez deja el
+         * `upload_max_filesize` del container (64 MB) como red de
+         * seguridad, no como el límite real de negocio.
+         *
+         * El límite protege el disco Y la RAM: convertir 4 anchos abre la
+         * imagen 4 veces, así que el costo escala con el tamaño de entrada.
+         */
+        'max_kilobytes' => (int) env(key: 'ASSETS_UPLOAD_MAX_KB', default: 8192),
+
+        /**
+         * Calidad WebP de salida. 85 es el valor que ya usa el pipeline
+         * del repo (`scripts/migrate-gibson-images.sh`), así que las
+         * imágenes subidas por el admin tienen el mismo peso que las del
+         * catálogo sembrado y no se nota el origen al served.
+         */
+        'quality' => (int) env(key: 'ASSETS_UPLOAD_QUALITY', default: 85),
+    ],
 ];

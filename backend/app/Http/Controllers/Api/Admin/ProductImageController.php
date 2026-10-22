@@ -8,11 +8,16 @@ use App\Http\Concerns\CursorPaginates;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductImageStoreRequest;
 use App\Http\Requests\Admin\ProductImageUpdateRequest;
+use App\Http\Requests\Admin\ProductImageUploadRequest;
 use App\Http\Resources\Catalog\AdminProductImageResource;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductImage;
+use App\Models\Stores\ProductStore;
+use App\Models\Stores\Store;
+use App\Services\Assets\ProductImageUploader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -36,6 +41,8 @@ use Symfony\Component\HttpFoundation\Response;
 class ProductImageController extends Controller
 {
     use CursorPaginates;
+
+    public function __construct(private readonly ProductImageUploader $uploader) {}
 
     /**
      * GET /admin/products/{product}/images
@@ -112,6 +119,72 @@ class ProductImageController extends Controller
     }
 
     /**
+     * POST /admin/products/{product}/images/upload
+     *
+     * Ruta GEMELA de `store()` pero por binario: el admin sube el archivo,
+     * el backend lo convierte a WebP en los anchos de
+     * {@see ProductImageUploader::WIDTHS} y crea UNA fila por ancho.
+     *
+     * No reemplaza al endpoint con `image_url`: aquel sigue siendo el
+     * contrato para cuando la imagen ya vive fuera (CDN de terceros,
+     * material provisto por la marca). Agregar el archivo como campo
+     * opcional del `store()` obligaría a definir cuál de los dos gana
+     * cuando vienen juntos, y partirlo en dos rutas hace que cada
+     * endpoint tenga una forma de entrada y una de salida.
+     *
+     * Todas las filas de una misma subida comparten `sort_order`, `alt_text`
+     * e `is_primary`, y se distinguen sólo por `width` — que es como el
+     * seeder del catálogo ya guarda las 4 resoluciones de una foto.
+     * `is_primary` sólo se marca en la fila del ancho mayor: la convención
+     * del repo es que la primaria es la de 1600.
+     */
+    public function upload(ProductImageUploadRequest $request, Product $product): JsonResponse
+    {
+        $this->assertProductInTenantScope(product: $product);
+
+        $data = $request->validated();
+        $isPrimary = (bool) ($data['is_primary'] ?? false);
+        $store = $this->resolveTenantStore(product: $product);
+
+        $stored = $this->uploader->upload(
+            file: $request->uploadedImage(),
+            product: $product,
+            store: $store,
+        );
+
+        $images = DB::transaction(function () use ($stored, $product, $data, $isPrimary): Collection {
+            if ($isPrimary) {
+                $this->clearPrimaryFlag(productId: $product->id);
+            }
+
+            $sortOrder = $data['sort_order'] ?? $this->nextSortOrder(productId: $product->id);
+            $altText = $data['alt_text'] ?? null;
+
+            // Los anchos llegan ascendentes, así que el último es el mayor.
+            $widestWidth = (int) $stored[array_key_last($stored)]['width'];
+
+            $created = [];
+
+            foreach ($stored as $entry) {
+                $created[] = ProductImage::query()->create(attributes: [
+                    'product_id' => $product->id,
+                    'image_url' => $entry['image_url'],
+                    'alt_text' => $altText,
+                    'is_primary' => $isPrimary && $entry['width'] === $widestWidth,
+                    'sort_order' => $sortOrder,
+                    'width' => $entry['width'],
+                ]);
+            }
+
+            return collect($created);
+        });
+
+        return response()->json(data: [
+            'data' => AdminProductImageResource::collection(resource: $images)->resolve(),
+        ], status: Response::HTTP_CREATED);
+    }
+
+    /**
      * PUT /admin/products/{product}/images/{image}
      */
     public function update(
@@ -152,6 +225,53 @@ class ProductImageController extends Controller
     }
 
     /**
+     * Helper: tienda bajo la que se publica el asset de una imagen.
+     *
+     * El `storage_key` es `tenants/{slug}/products/{product-slug}/{hash}.webp`
+     * y el `AssetController` sólo sirve lo que cuelga del tenant que
+     * resolvió el dominio de la request. Guardar bajo el slug equivocado
+     * produce una imagen que el admin ve creada y el storefront sirve como
+     * 403 — un fallo invisible hasta que se navega el PDP.
+     *
+     * Se resuelve desde el producto y NO desde el Host porque estas rutas
+     * no llevan `store.domain`: el alcance real ya lo fija
+     * `assertProductInTenantScope()` (el producto tiene que estar publicado
+     * en una tienda del admin). Si el producto está en varias de sus
+     * tiendas se toma la de menor id para que el resultado sea
+     * determinista; el repo asume una instancia = un tenant de catálogo,
+     * así que el caso no debería ocurrir, pero "el primero" sin orden sería
+     * una fila distinta por request.
+     */
+    private function resolveTenantStore(Product $product): Store
+    {
+        $user = auth()->user();
+
+        // NO se usa `$product->stores()` para esto. Esa relación declara
+        // `belongsToMany(related: ProductStore::class, table: 'product_stores')`
+        // — devuelve filas del pivot, no tiendas — así que filtrar por
+        // `stores.id` sobre ella arma un self-join que PostgreSQL rechaza
+        // con `Duplicate alias: table name "product_stores" specified more
+        // than once`. Es el mismo camino que ya usa
+        // `ProductController::assertProductInTenantScope()`: pivot por
+        // `store_id`, y recién ahí la tienda.
+        $pivot = ProductStore::query()
+            ->where(column: 'product_id', operator: '=', value: $product->id)
+            ->whereIn(column: 'store_id', values: $user->stores()->pluck('stores.id')->all())
+            ->orderBy(column: 'store_id')
+            ->first();
+
+        $store = $pivot instanceof ProductStore
+            ? Store::query()->find($pivot->store_id)
+            : null;
+
+        if (! $store instanceof Store) {
+            abort(code: 404, message: 'Producto no encontrado en tu tenant.');
+        }
+
+        return $store;
+    }
+
+    /**
      * Helper: desmarca todas las imágenes primarias de un producto.
      * Llamar dentro de una transacción que ya marca la nueva primaria.
      */
@@ -187,7 +307,7 @@ class ProductImageController extends Controller
 
         $accessible = $user->stores()->pluck('stores.id')->all();
 
-        $inScope = \App\Models\Stores\ProductStore::query()
+        $inScope = ProductStore::query()
             ->where(column: 'product_id', operator: '=', value: $product->id)
             ->whereIn(column: 'store_id', values: $accessible)
             ->exists();

@@ -26,6 +26,12 @@ class AdminProductImageResource extends JsonResource
             'alt_text' => $this->resource->alt_text,
             'sort_order' => (int) $this->resource->sort_order,
             'is_primary' => (bool) $this->resource->is_primary,
+            // El ancho es parte de la identidad de la fila desde que el
+            // seeder guarda las 4 resoluciones de una misma foto. Sin
+            // exponerlo, el admin que sube un archivo recibe N filas que
+            // sólo se distinguen por `image_url` y no puede mapearlas a
+            // los tamaños que le devolvió la respuesta.
+            'width' => $this->resource->width,
             'created_at' => $this->resource->created_at?->toIso8601String(),
             'updated_at' => $this->resource->updated_at?->toIso8601String(),
         ];

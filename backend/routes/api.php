@@ -813,6 +813,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->middleware('permission:catalog.manage')
             ->name('admin.products.images.store');
 
+        // Upload por binario: convierte a WebP y crea una fila por ancho.
+        // Separada de `store` a propósito — `store` toma `image_url`
+        // (referencia externa), este toma el archivo.
+        Route::post('products/{product}/images/upload', [ProductImageController::class, 'upload'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.images.upload');
+
         Route::get('products/{product}/images/{image}', [ProductImageController::class, 'show'])
             ->middleware('permission:catalog.manage')
             ->name('admin.products.images.show');
@@ -879,6 +886,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
             Route::post('products/{product}/images', [ProductImageController::class, 'store'])
                 ->name('admin.catalog.product-images.store');
+
+            // Upload por binario — espejo de `admin.products.images.upload`.
+            Route::post('products/{product}/images/upload', [ProductImageController::class, 'upload'])
+                ->name('admin.catalog.product-images.upload');
 
             Route::get('products/{product}/images/{image}', [ProductImageController::class, 'show'])
                 ->name('admin.catalog.product-images.show');
