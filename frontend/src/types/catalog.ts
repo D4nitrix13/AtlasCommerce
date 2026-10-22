@@ -33,6 +33,43 @@ export interface ProductSize {
 }
 
 /**
+ * Imagen del producto en la shape rica que expone
+ * `GET /api/v1/storefront/products` (variantes eager-loaded).
+ *
+ * Para la shape legacy de `images: readonly string[]` (sin metadata
+ * por variant) Product sigue aceptando esa forma en `images`. Ver
+ * `Product.images`.
+ */
+export interface ProductImage {
+  /** URL de la imagen (proxy del asset storage). */
+  url: string;
+  /**
+   * Alt text semántico. En guitarras viene como
+   * "1942 Banner J 45 Reissue Vintage Sunburst (Epiphone) - vista front".
+   * La card usa el último segmento después de " - vista " para extraer
+   * el rol (`front`, `back`, `body`, ...).
+   */
+  altText: string;
+  /** Es la imagen principal del producto (1 por producto). */
+  isPrimary: boolean;
+  /**
+   * Variant al que pertenece la imagen (acabado). `null` cuando la
+   * imagen no se pudo asociar a ninguna variante (assets huérfanos
+   * en el mock data); en ese caso la card cae al fallback genérico.
+   */
+  variantId: string | null;
+  /** Orden estable para el orden de render cuando no hay `isPrimary`. */
+  sortOrder: number;
+  /**
+   * `srcset` armado por el backend (cualquier resolución de la MISMA
+   * foto). Vacío cuando el rol no tiene otras resoluciones → el
+   * browser usa `src` solo. La card no necesita `srcset` agresivo
+   * porque es un thumbnail chico (4/5 del column width del grid).
+   */
+  srcset: string;
+}
+
+/**
  * Variante para la card de catálogo (forma mínima).
  *
  * Cada variante representa un acabado/condición/tamaño específico del
@@ -43,26 +80,54 @@ export interface ProductSize {
  * Usada por `ProductCard` para renderizar swatches de variantes y
  * por el catálogo para mostrar rangos de precio cuando hay variants
  * con precios distintos.
+ *
+ * Alineada con `ProductApiVariant` de `lib/product-variant-selection.ts`
+ * pero con tipos `string`-friendly: el backend manda `id: number` y
+ * `stock: string` para la lista y `id: string` para el detalle, así
+ * que este shape usa `string` y deja `stock` flexible. La card es
+ * presentacional y nunca opera con estos valores, sólo los lee.
  */
 export interface ProductVariant {
-  /** ID estable (típicamente el variant slug del backend). */
+  /** ID estable. En el listado viene numérico; el detalle lo stringifica. */
   id: string;
-  /** SKU de la variant. */
-  sku: string;
+  /** Nombre legible del acabado (Phase 9, viene del backend PDP). */
+  name?: string;
+  /**
+   * SKU de la variant.
+   *
+   * Opcional a propósito: `GET /api/v1/storefront/products` NO lo expone
+   * (`StorefrontProductResource::resolveVariants()` emite id, name,
+   * finishSlug, finishLabel, finishHex, condition, stock y handedness, y
+   * nada más). Las cards de catálogo no leen el SKU; el PDP sí lo muestra,
+   * por eso su mapper coalesce a `''` en vez de inventar un valor.
+   */
+  sku?: string;
   /** Slug del acabado (ej. `rojo`, `negro`, `sunburst`). */
   finishSlug?: string;
   /** Label legible del acabado (ej. `Sunburst`, `Negro`). */
   finishLabel?: string;
-  /** Hex color para swatch visual. */
-  finishHex?: string;
-  /** Condición de la variant (`nuevo`, `usado`, `ambos`). */
-  condition?: ProductCondition;
-  /** Stock de esta variant específica. */
-  stock: number;
+  /**
+   * Hex color para swatch visual. `null` (no `undefined`) cuando el
+   * backend no conoce el color → la card cae a un dot slate.
+   */
+  finishHex?: string | null;
+  /** Condición de venta (free-form string para tolerar nuevos valores). */
+  condition?: string;
+  /**
+   * Stock de esta variant específica. Listado usa `string`
+   * ('in_stock' | 'out_of_stock'), detalle usa `number`.
+   */
+  stock: number | string;
   /** Slug del tamaño asociado (si aplica). */
   sizeSlug?: string;
   /** Precio en cents (override del base_price). */
   priceCents?: number;
+  /**
+   * Mano. `null` = diestro (convención backend). `undefined` cuando
+   * el backend no lo expone. Sólo útil en productos que ofrecen
+   * ambas manos; la card lo ignora.
+   */
+  handedness?: string | null;
 }
 
 /** Condición de venta de un producto/variant. */
@@ -84,10 +149,18 @@ export interface Product {
   /** URL de la imagen principal. */
   imageUrl: string;
   /**
-   * Galería completa de imágenes (variants con sus front images).
-   * Si está vacía o ausente, el PDP cae al fallback genérico.
+   * Galería completa de imágenes del producto.
+   *
+   * Acepta dos formas para tolerar los dos contratos del backend:
+   *   - `readonly string[]` (legacy / listado sin variants eager).
+   *   - `readonly ProductImage[]` (PDP / listado nuevo con
+   *     `variantId` por imagen).
+   *
+   * Las cards que necesitan el `variantId` (para swatch → imagen
+   * matching) filtran a `ProductImage[]`; las que sólo muestran
+   * thumbnails (la card sin swatch) caen al `string[]`.
    */
-  images?: readonly string[];
+  images?: readonly string[] | readonly ProductImage[];
   /** Slug de la categoría. FK lógico a `Category.slug`. */
   category: string;
   /** Nombre del brand (vacío si el backend no expone el join). */
