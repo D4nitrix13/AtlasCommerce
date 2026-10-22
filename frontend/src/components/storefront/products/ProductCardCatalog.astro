@@ -1,70 +1,48 @@
 ---
 /**
- * ProductCardCatalog — tarjeta de producto para el grid del catálogo
- * (vista 04 Bonfire).
+ * ProductCardCatalog — tarjeta de producto para el grid del catálogo.
  *
  * Diferencias con `ProductCard.astro` (que sigue siendo la tarjeta del
  * home y otros listados):
  *
- *  - **Imagen = ProductMockup**: usa el primitive SVG de UI con cuatro
- *    variantes (shirt / hoodie / mug / hat). El mockup Bonfire no
- *    necesita fotos reales: siluetas estampadas con el color del
- *    tenant vía `--primary`.
+ *  - **Imagen real**: la foto del producto (`product.imageUrl` +
+ *    `images[]`), no una ilustración. El `ProductMockup` SVG que se
+ *    usaba acá era un placeholder del sprint sin fotos; hoy la API de
+ *    catálogo sí devuelve galería por variante.
  *  - **Aspect 4/5** (rectangular vertical) en vez del cuadrado 1:1 que
- *    usa ProductCard: las cards del catálogo Bonfire son más altas,
- *    tipo póster.
+ *    usa ProductCard: las cards del catálogo son más altas, tipo póster.
  *  - **Hover Bonfire**: `-translate-y-0.5` + sombra media, no agresivo.
  *    Radius `rounded-2xl` (16px) — más generoso que `rounded-xl`.
  *  - **Sin badges / sin add-to-cart visible**: la card Bonfire sólo
- *    muestra nombre, hint (descripción corta) y precio. El CTA vive
- *    en la página de detalle.
+ *    muestra nombre, hint (descripción corta), precio y los swatches de
+ *    acabado. El CTA vive en la página de detalle.
+ *
+ * Toda la lógica de swatches + image-swap vive en
+ * `lib/product-card-swap.ts` (compartida con `ProductCard` y testeada
+ * aparte): este archivo sólo renderiza, incluidas las clases
+ * `productcard-swap-*` que esa lib emite en sus selectores.
  *
  * El componente es **presentacional puro** — recibe el `product` ya
  * resuelto y la `labels` como prop. No conoce i18n: la página que lo
  * monta (`index.astro`) resuelve `t[key]` y se la pasa. Esto lo hace
  * testeable sin dictionary y reusable client-side si después se hidrata.
  */
-import ProductMockup from '../../ui/ProductMockup.astro';
 import { formatCurrency } from '../../../lib/formatters';
+import {
+  buildStackedImages,
+  buildVariantHoverCss,
+  deriveProductCardSwap,
+  shouldRenderSwatchRow,
+  swatchFallbackHex,
+} from '../../../lib/product-card-swap';
 import type { Product } from '../../../types/catalog';
-
-type MockupVariant = 'shirt' | 'hoodie' | 'mug' | 'hat';
 
 export interface ProductCardCatalogLabels {
   viewDetail: string;
-}
-
-/**
- * Mapa `slug → variante ProductMockup` para los 12 productos mock.
- *
- * Decisión: mapeo explícito por slug (no por categoría) porque las
- * categorías (figures / manga / accessories) son abstractas — un
- * "Llavero Demon Slayer" no es una remera. Mantener un mapa permite
- * que el diseñador ajuste el mockup por producto sin tocar el shape
- * del backend cuando se cambie `Product.category`.
- *
- * Si en el futuro hay >30 productos, esto se reemplaza por un campo
- * `mockupVariant?: MockupVariant` en `Product`. Hoy no vale la pena.
- */
-const MOCKUP_BY_SLUG: Record<string, MockupVariant> = {
-  'saber-alter-figma': 'shirt',
-  'nendoroid-zero-two': 'shirt',
-  'chainsaw-man-t1': 'shirt',
-  'spy-x-family-t1': 'shirt',
-  'jujutsu-kaisen-hoodie': 'hoodie',
-  'totoro-plush': 'mug',
-  'evangelion-unit-01': 'shirt',
-  'demon-slayer-keychain': 'hat',
-  'one-piece-vol-1': 'shirt',
-  'attack-on-titan-cap': 'hat',
-  'kakashi-naruto-plush': 'mug',
-  'studio-ghibli-mug': 'mug',
-};
-
-const FALLBACK_VARIANT: MockupVariant = 'shirt';
-
-function resolveMockupVariant(product: Product): MockupVariant {
-  return MOCKUP_BY_SLUG[product.slug] ?? FALLBACK_VARIANT;
+  /** Label del `role="group"` que envuelve la fila de swatches. Fallback hardcoded si falta. */
+  swatchGroupLabel?: string;
+  /** Template del contador "N colores". Fallback español si falta. */
+  finishCountLabel?: (count: number) => string;
 }
 
 interface Props {
@@ -78,36 +56,198 @@ const { product, locale, labels } = Astro.props;
 const detailHref = `/${locale}/products/${product.slug}`;
 const currencyCode = product.currency ?? 'USD';
 const priceFormatted = formatCurrency(product.priceCents, currencyCode);
-const variant = resolveMockupVariant(product);
+
+const swap = deriveProductCardSwap(product);
+const showSwatches = shouldRenderSwatchRow(swap.swatches);
+const stackedImages = buildStackedImages(product, swap, showSwatches);
+const variantHoverCss = buildVariantHoverCss(swap);
+
+/**
+ * `buildVariantHoverCss` emite las reglas del MOUSE (`:hover`).
+ * Para teclado espejamos los MISMOS selectores con `:focus-visible`, así
+ * el swap por swatch también ocurre al tabular — sin `<script>`.
+ *
+ * El replace es seguro: `cssEscape` sólo escapa `\` y `"`, así que el
+ * literal `:hover)` no puede aparecer dentro de un valor de atributo.
+ */
+const focusVariantCss = variantHoverCss.replaceAll(':hover)', ':focus-visible)');
+
+/** Fallback español para `finishCountLabel` (mismo pattern que `limitedBadge`). */
+const defaultFinishCountLabel = (count: number): string => `${count} colores`;
+
+const finishCountLabelText =
+  labels.finishCountLabel === undefined
+    ? defaultFinishCountLabel(swap.swatches.length)
+    : labels.finishCountLabel(swap.swatches.length);
 ---
 
-<a
-  href={detailHref}
-  class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-  aria-label={`${labels.viewDetail}: ${product.name}`}
+{/*
+  `<article>` y no `<a>`: un `<button>` de swatch dentro de un enlace es
+  HTML inválido (cero nodos interactivos anidables) y el click del swatch
+  dispararía la navegación al PDP. Por eso el link es sólo el área de
+  imagen y el título, y los swatches son `<button>` hermanos. El `<a>`
+  cubre el 100% del área con `absolute inset-0`; los botones van después
+  en el DOM con `z-10`, así que reciben el click y propagan el `:hover`
+  al `<article>` igual que el link.
+*/}
+<article
+  class="productcard-swap-root group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-within:ring-2 focus-within:ring-[var(--primary,#475569)] focus-within:ring-offset-2"
 >
-  <div
-    class="relative flex aspect-[4/5] items-center justify-center overflow-hidden"
-    style="background: var(--primary-soft, #F1F5F9);"
-  >
-    <span class="block transition-transform duration-500 ease-out group-hover:scale-105">
-      <ProductMockup
-        variant={variant}
-        logoText={product.name.split(' ')[0]?.slice(0, 8) ?? ''}
-        class="h-44 w-44 sm:h-52 sm:w-52"
-      />
-    </span>
+  <div class="relative aspect-[4/5] shrink-0 overflow-hidden">
+    <a
+      href={detailHref}
+      class="absolute inset-0 block"
+      style="background: var(--primary-soft, #F1F5F9);"
+      aria-label={`${labels.viewDetail}: ${product.name}`}
+    >
+      {/* Stack cross-fade CSS-only: sólo la primaria visible, las demás
+          `opacity:0` (reglas al final del componente). */}
+      {stackedImages.map((image) => (
+        <img
+          src={image.src}
+          srcset={image.srcset === '' ? undefined : image.srcset}
+          alt={image.role === 'primary' ? image.alt : product.name}
+          loading="lazy"
+          decoding="async"
+          aria-hidden={image.role === 'primary' ? undefined : 'true'}
+          class="productcard-swap-img absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+          data-role={image.role}
+          data-variant-id={image.variantId ?? ''}
+        />
+      ))}
+    </a>
+
+    {/* Swatch row Fender-style (sólo ≥2 variantes — un swatch es un control
+        muerto, mismo umbral que `MIN_FINISHES_FOR_PICKER` del PDP). */}
+    {showSwatches && (
+      <div
+        class="absolute bottom-3 left-3 right-3 z-10 flex items-center gap-1.5"
+        role="group"
+        aria-label={labels.swatchGroupLabel ?? 'Variantes disponibles'}
+      >
+        <div class="flex flex-wrap items-center gap-1.5">
+          {swap.swatches.map((swatch) => {
+            const isActive = swatch.id === swap.primaryVariantId;
+            return (
+              <button
+                type="button"
+                data-swatch-id={swatch.id}
+                data-swatch-active={isActive ? 'true' : undefined}
+                title={swatch.label}
+                aria-label={swatch.label}
+                aria-pressed={isActive ? 'true' : 'false'}
+                class:list={[
+                  'productcard-swap-swatch relative inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full border border-white/80 shadow ring-1 ring-slate-300 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                  isActive ? 'ring-2 ring-[var(--primary,#475569)]' : 'hover:scale-110',
+                ]}
+                style={`background-color: ${swatchFallbackHex(swatch)};`}
+              >
+                {swatch.thumbnailUrl !== null && (
+                  <img
+                    src={swatch.thumbnailUrl}
+                    srcset={swatch.thumbnailSrcset ?? undefined}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    class="absolute inset-0 h-full w-full object-cover"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <span class="ml-auto hidden rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-white sm:inline-block">
+          {finishCountLabelText}
+        </span>
+      </div>
+    )}
   </div>
 
+  {/*
+    Alturas iguales SIN depender del grid. `line-clamp` recorta pero NO
+    rellena, así que un título de 1 línea y otro de 2 producían cards de
+    distinta altura (el bug "hay algunas más altas y otras más cortas").
+    `min-h` reserva 2 líneas en el título y 1 en la descripción, y
+    `mt-auto` ancla el precio abajo. Deliberadamente NO se usa
+    `grid-auto-rows: 1fr`: en las filas implícitas de este grid el `1fr`
+    resuelve contra espacio libre que no existe y no iguala nada. Además
+    así cada card mide lo mismo aunque se use fuera de un grid.
+  */}
   <div class="flex flex-1 flex-col gap-1.5 p-5">
-    <h3 class="text-[15px] font-bold leading-snug text-slate-900 transition group-hover:text-[var(--primary,#475569)]">
-      {product.name}
+    <h3 class="min-h-[2.75rem] text-[15px] font-bold leading-snug text-slate-900">
+      <a
+        href={detailHref}
+        class="line-clamp-2 block transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
+      >
+        {product.name}
+      </a>
     </h3>
 
-    <p class="line-clamp-1 text-[13px] text-slate-400">{product.description}</p>
+    <p class="line-clamp-1 min-h-[1.25rem] text-[13px] text-slate-400">{product.description}</p>
 
-    <div class="mt-4 flex items-end justify-between gap-2">
+    <div class="mt-auto flex items-end justify-between gap-2 pt-4">
       <span class="text-lg font-bold text-slate-900">{priceFormatted}</span>
     </div>
   </div>
-</a>
+</article>
+
+<style>
+  /* Default: sólo la imagen primaria está visible. Las del stack
+     comparten el mismo rect (`absolute inset-0`), por eso `opacity:0`
+     sin display:none — preserva la transición. */
+  .productcard-swap-img { opacity: 0; transition: opacity 220ms ease-out; }
+  .productcard-swap-img[data-role='primary'] { opacity: 1; }
+
+  /* `@media (hover: hover)` evita sticky-hover en touch (un tap puede
+     dejar el :hover pegado y esconder la primary detrás del back). */
+  @media (hover: hover) {
+    /* Card hover SIN swatch hovered → mostrar back. El back lo resuelve
+       `deriveProductCardSwap` y SIEMPRE sale del variant de la imagen
+       primaria: mostrar el dorso de un Sunburst en una card Ebony sería
+       el mismo defecto que usar un headstock como portada. Si el producto
+       no tiene back, la regla no matchea (graceful). */
+    .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover
+      .productcard-swap-img[data-role='primary'] { opacity: 0; }
+    .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover
+      .productcard-swap-img[data-role='back'] { opacity: 1; }
+
+    /* Swatch hovered → ocultar primary/back. Las reglas per-variant
+       inyectadas abajo muestran SOLO la imagen del variant activo. */
+    .productcard-swap-root:has(.productcard-swap-swatch:hover)
+        .productcard-swap-img[data-role='primary'],
+    .productcard-swap-root:has(.productcard-swap-swatch:hover)
+        .productcard-swap-img[data-role='back'] { opacity: 0; }
+  }
+
+  /* Teclado: mismo contrato que el mouse pero con `:focus-visible`, para
+     que tabular a un swatch también cambie la foto. El "ocultar
+     primary/back" va FUERA del `@media (hover: hover)` a propósito — un
+     híbrido touch+teclado no matchea ese media query y quedaría mostrando
+     la primaria encima de la foto del variant. */
+  .productcard-swap-root:has(.productcard-swap-swatch:focus-visible)
+      .productcard-swap-img[data-role='primary'],
+  .productcard-swap-root:has(.productcard-swap-swatch:focus-visible)
+      .productcard-swap-img[data-role='back'] { opacity: 0; }
+
+  /* ── Why: swatch ACTIVO hover/focus ────────────────────────────────
+     El swatch activo apunta por `data-variant-id` a la MISMA imagen que
+     ya es la primaria, así que las dos reglas anteriores la matan:
+     "swatch hover → ocultar primary" gana en especificidad (0,3,4 — el
+     scope de Astro suma un `[data-astro-cid]` por selector) contra el
+     `is:global` que la muestra (0,2,3, sin scope). Resultado medido en
+     Chromium: hover sobre el swatch activo dejaba la card en BLANCO.
+     Estas dos reglas la vuelven a mostrar con 0,3,5 — un punto por
+     encima del selector que la ocultaba. Para los swatches NO activos
+     no matchean, así que su foto sigue mandando sin conflicto. */
+  .productcard-swap-root:has(.productcard-swap-swatch[data-swatch-active]:hover)
+      .productcard-swap-img[data-role='primary'] { opacity: 1; }
+  .productcard-swap-root:has(.productcard-swap-swatch[data-swatch-active]:focus-visible)
+      .productcard-swap-img[data-role='primary'] { opacity: 1; }
+</style>
+
+{/* Reglas per-variant de mouse y de teclado (`:hover` / `:focus-visible`).
+    Sin esto `:has()` no puede resolver qué imagen mostrar: el selector
+    depende del variant ID concreto. `is:global` porque los
+    `[data-swatch-id="..."]` no entran en el scope de Astro. */}
+{variantHoverCss !== '' && <style is:global set:html={variantHoverCss} />}
+{focusVariantCss !== '' && <style is:global set:html={focusVariantCss} />}

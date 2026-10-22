@@ -26,10 +26,22 @@ import {
 
 const PLACEHOLDER_IMAGE = '/images/product-placeholder.png';
 
+/**
+ * Aplana `Product.images` (que ahora puede ser `readonly string[]` o
+ * `readonly ProductImage[]`) a `string[]`. La PDP espera el shape
+ * legacy en `ProductDetailData.images`.
+ */
+function extractImageUrls(images: Product['images']): string[] {
+  if (images === undefined || images.length === 0) return [];
+  return images.map((img) => (typeof img === 'string' ? img : img.url));
+}
+
 export function deriveProductDetail(product: Product): ProductDetailData {
   if (product.slug === SABER_ALTER_DETAIL.slug) {
     return SABER_ALTER_DETAIL;
   }
+
+  const fallbackImageUrl = extractImageUrls(product.images)[0] ?? product.imageUrl ?? PLACEHOLDER_IMAGE;
 
   const variants = (product.variants ?? []).map((v) => {
     const attributes: ProductVariantAttribute[] = [];
@@ -39,7 +51,11 @@ export function deriveProductDetail(product: Product): ProductDetailData {
         id: v.finishSlug,
         label: v.finishLabel,
       };
-      if (v.finishHex !== undefined) {
+      // `ProductVariant.finishHex` acepta `null` (backend explícito)
+      // o `undefined` (variant sin info de color). `ProductVariantAtt
+      // ribute.hex` solo acepta `string | undefined` — coalesce `null`
+      // para evitar el type error sin perder el dato.
+      if (v.finishHex !== undefined && v.finishHex !== null) {
         colorAttr.hex = v.finishHex;
       }
       attributes.push(colorAttr);
@@ -49,14 +65,15 @@ export function deriveProductDetail(product: Product): ProductDetailData {
     }
     return {
       id: v.id,
-      sku: v.sku,
+      // El listado público no expone `sku`; el PDP lo exige como `string`.
+      sku: v.sku ?? '',
       attributes,
       priceCents: v.priceCents ?? product.priceCents,
-      imageUrl: product.images?.[0] ?? product.imageUrl ?? PLACEHOLDER_IMAGE,
-      stock: v.stock,
+      imageUrl: fallbackImageUrl,
+      stock: typeof v.stock === 'string' ? 0 : v.stock,
       finishSlug: v.finishSlug,
       finishLabel: v.finishLabel,
-      finishHex: v.finishHex,
+      finishHex: v.finishHex ?? undefined,
       condition: v.condition,
       sizeSlug: v.sizeSlug,
     };
@@ -93,7 +110,10 @@ export function deriveProductDetail(product: Product): ProductDetailData {
     hasSizes: sizes.length > 0,
     isExclusive: product.isExclusive,
     sizes,
-    images: product.images && product.images.length > 0 ? [...product.images] : [product.imageUrl],
+    images: (() => {
+      const urls = extractImageUrls(product.images);
+      return urls.length > 0 ? urls : [product.imageUrl];
+    })(),
     variantAttributes: [],
     variants,
     specs: [],

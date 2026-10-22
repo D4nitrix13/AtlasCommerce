@@ -73,8 +73,13 @@ export interface ProductVariant {
   finishLabel?: string;
   /** Hex color para swatch visual. */
   finishHex?: string;
-  /** Condición de venta (`nuevo` | `usado` | `ambos`). */
-  condition?: 'nuevo' | 'usado' | 'ambos';
+  /**
+   * Condición de venta. Free-form a propósito: el backend la manda como
+   * string y los tenants pueden emitir valores propios. Debe coincidir con
+   * `ProductVariant.condition` de `types/catalog.ts` — si divergen, el
+   * mapper de `lib/product-detail.ts` deja de compilar.
+   */
+  condition?: string;
   /** Slug del tamaño asociado (si el producto vende por tallas). */
   sizeSlug?: string;
 }

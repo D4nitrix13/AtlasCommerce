@@ -1,20 +1,20 @@
 ---
 /**
  * ProductCard — tarjeta de producto para grids del storefront.
- *
- * Patrón Gibson/Fender para e-commerce de instrumentos:
- *  - Imagen vertical (aspect-[4/5]) para destacar el producto.
- *  - Badges contextuales ("Novedades", "Oferta", "Últimas unidades")
- *    posicionados top-left sobre la imagen.
- *  - Eyebrow con categoría (si está disponible) arriba del título.
- *  - Título + descripción corta + precio (con tachado si hay descuento).
- *  - Botón "Añadir" prominente al fondo.
- *
- * Envuelto en `<article>` semántico y con heading jerárquico para
- * lectores de pantalla (AGENTS §17).
+ * Phase 9: swatch row Fender-style (≥2 variants), image-swap CSS-only
+ * (`:has()` + per-variant `is:global` rules), `min-h` en title/desc
+ * para alturas iguales sin tocar el grid container. Lógica en
+ * `lib/product-card-swap.ts` para testearla aislada del render Astro.
  */
 import Badge from '../../ui/Badge.astro';
 import { formatCurrency } from '../../../lib/formatters';
+import {
+  buildStackedImages,
+  buildVariantHoverCss,
+  deriveProductCardSwap,
+  shouldRenderSwatchRow,
+  swatchFallbackHex,
+} from '../../../lib/product-card-swap';
 import type { Product, ProductBadge } from '../../../types/catalog';
 
 export interface ProductCardLabels {
@@ -24,25 +24,22 @@ export interface ProductCardLabels {
   addToCart: string;
   outOfStock: string;
   viewDetail: string;
-  /**
-   * Label para el badge "Limitado" que aparece cuando
-   * `product.isExclusive === true`. Opcional: si no se pasa, el badge
-   * se renderiza con un fallback hardcoded. Pendiente: migrar todos
-   * los consumidores de ProductCard a pasar esta label via i18n.
-   */
+  /** Label del badge "Limitado" cuando `isExclusive === true`. Fallback hardcoded si falta. */
   limitedBadge?: string;
+  /** Label del `role="group"` que envuelve la fila de swatches. Fallback hardcoded si falta. */
+  swatchGroupLabel?: string;
+  /** Template del contador "N colores". Fallback `${n} colores` español si falta. */
+  finishCountLabel?: (count: number) => string;
 }
 
 interface Props {
   product: Product;
   locale: string;
   labels: ProductCardLabels;
-  /** Mostrar botón "Añadir" como link (true) o deshabilitado (false). */
   showAddToCart?: boolean;
   /** Eyebrow opcional arriba del título (ej. "Bajo eléctrico"). */
   eyebrow?: string;
 }
-
 const { product, locale, labels, showAddToCart = true, eyebrow } = Astro.props;
 
 const detailHref = `/${locale}/products/${product.slug}`;
@@ -57,11 +54,7 @@ const hasDiscount = compareAtFormatted !== null && !isOutOfStock;
 
 const BADGE_STYLES: Record<
   ProductBadge,
-  {
-    variant: 'primary';
-    status: 'pending' | 'processing' | 'shipped';
-    label: keyof ProductCardLabels;
-  }
+  { variant: 'primary'; status: 'pending' | 'processing' | 'shipped'; label: keyof ProductCardLabels }
 > = {
   new: { variant: 'primary', status: 'pending', label: 'newBadge' },
   sale: { variant: 'primary', status: 'processing', label: 'saleBadge' },
@@ -70,23 +63,60 @@ const BADGE_STYLES: Record<
 
 const ariaLabelForBadge = (badge: ProductBadge): string => {
   const key = BADGE_STYLES[badge].label;
-  return labels[key] ?? '';
+  // `labels[key]` puede ser `string | ((count: number) => string) | undefined`
+  // porque `keyof ProductCardLabels` incluye `finishCountLabel` (función).
+  // Filtramos no-strings para que TS no se queje y para que el aria-label
+  // siempre sea un string (los badges no usan el formatter de count).
+  const value = labels[key];
+  return typeof value === 'string' ? value : '';
 };
+
+/** Fallback español para `finishCountLabel` (mismo pattern que `limitedBadge`). */
+const defaultFinishCountLabel = (count: number): string => `${count} colores`;
+
+const swap = deriveProductCardSwap(product);
+const showSwatches = shouldRenderSwatchRow(swap.swatches);
+const stackedImages = buildStackedImages(product, swap, showSwatches);
+const variantHoverCss = buildVariantHoverCss(swap);
+
+/**
+ * `buildVariantHoverCss` emite las reglas del MOUSE (`:hover`).
+ * Para teclado espejamos los MISMOS selectores con `:focus-visible`, así
+ * el swap por swatch también ocurre al tabular — sin `<script>`.
+ *
+ * El replace es seguro: `cssEscape` sólo escapa `\` y `"`, así que el
+ * literal `:hover)` no puede aparecer dentro de un valor de atributo.
+ */
+const focusVariantCss = variantHoverCss.replaceAll(':hover)', ':focus-visible)');
+
+const finishCountLabelText =
+  labels.finishCountLabel === undefined
+    ? defaultFinishCountLabel(swap.swatches.length)
+    : labels.finishCountLabel(swap.swatches.length);
 ---
 
 <article class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-[var(--primary,#475569)] focus-within:ring-offset-2">
   <a
     href={detailHref}
-    class="relative block aspect-[4/5] overflow-hidden bg-slate-50"
+    class="productcard-swap-root relative block aspect-[4/5] overflow-hidden bg-slate-50"
     aria-label={`${labels.viewDetail}: ${product.name}`}
   >
-    <img
-      src={product.imageUrl}
-      alt={product.name}
-      loading="lazy"
-      decoding="async"
-      class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-    />
+    {/* Stack cross-fade CSS-only: primaria visible, las demás
+        `opacity:0` (reglas al final). */}
+    {stackedImages.map((image) => (
+      <img
+        src={image.src}
+        srcset={image.srcset === '' ? undefined : image.srcset}
+        alt={image.role === 'primary' ? image.alt : ''}
+        loading="lazy"
+        decoding="async"
+        aria-hidden={image.role === 'primary' ? undefined : 'true'}
+        class="productcard-swap-img absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+        data-role={image.role}
+        data-variant-id={image.variantId ?? ''}
+      />
+    ))}
+
     {product.badges && product.badges.length > 0 && (
       <div class="absolute left-3 top-3 flex flex-col gap-1.5">
         {product.badges.map((badge) => {
@@ -94,10 +124,7 @@ const ariaLabelForBadge = (badge: ProductBadge): string => {
           const isNew = badge === 'new';
           return (
             <span aria-label={ariaLabelForBadge(badge)}>
-              <Badge
-                variant={isNew ? style.variant : undefined}
-                status={isNew ? undefined : style.status}
-              >
+              <Badge variant={isNew ? style.variant : undefined} status={isNew ? undefined : style.status}>
                 {labels[style.label]}
               </Badge>
             </span>
@@ -110,19 +137,55 @@ const ariaLabelForBadge = (badge: ProductBadge): string => {
         <Badge variant="neutral">{labels.outOfStock}</Badge>
       </div>
     )}
-    {/* Phase 7: badge "Limitado" para productos exclusivos. Posicionado
-        top-right debajo del outOfStock badge si ambos aplican, sino en
-        top-right. Fallback a "Limitado" hardcoded si el consumer no
-        pasa `limitedBadge` via labels — los consumers se migrarán
-        progresivamente. */}
+    {/* Phase 7: badge "Limitado" — debajo del outOfStock badge si ambos aplican. */}
     {product.isExclusive === true && (
-      <div class:list={[
-        'absolute right-3 flex flex-col items-end gap-1.5',
-        isOutOfStock ? 'top-12' : 'top-3',
-      ]}>
+      <div class:list={['absolute right-3 flex flex-col items-end gap-1.5', isOutOfStock ? 'top-12' : 'top-3']}>
         <Badge variant="primary" status="pending">
           {labels.limitedBadge ?? 'Limitado'}
         </Badge>
+      </div>
+    )}
+    {/* Phase 9: swatch row Fender-style (sólo ≥2 variants — un swatch es control muerto). */}
+    {showSwatches && (
+      <div
+        class="absolute bottom-3 left-3 right-3 flex items-center gap-1.5"
+        role="group"
+        aria-label={labels.swatchGroupLabel ?? 'Variantes disponibles'}
+      >
+        <div class="flex flex-wrap items-center gap-1.5">
+          {swap.swatches.map((swatch) => {
+            const isActive = swatch.id === swap.primaryVariantId;
+            return (
+              <button
+                type="button"
+                data-swatch-id={swatch.id}
+                data-swatch-active={isActive ? 'true' : undefined}
+                title={swatch.label}
+                aria-label={swatch.label}
+                aria-pressed={isActive ? 'true' : 'false'}
+                class:list={[
+                  'productcard-swap-swatch relative inline-flex h-5 w-5 items-center justify-center overflow-hidden rounded-full border border-white/80 shadow ring-1 ring-slate-300 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                  isActive ? 'ring-2 ring-[var(--primary,#475569)]' : 'hover:scale-110',
+                ]}
+                style={`background-color: ${swatchFallbackHex(swatch)};`}
+              >
+                {swatch.thumbnailUrl !== null && (
+                  <img
+                    src={swatch.thumbnailUrl}
+                    srcset={swatch.thumbnailSrcset ?? undefined}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    class="absolute inset-0 h-full w-full object-cover"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <span class="ml-auto hidden rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-white sm:inline-block">
+          {finishCountLabelText}
+        </span>
       </div>
     )}
   </a>
@@ -134,7 +197,10 @@ const ariaLabelForBadge = (badge: ProductBadge): string => {
       </p>
     )}
 
-    <h3 class="line-clamp-2 text-sm font-semibold text-slate-900">
+    {/* Phase 9 height fix: `line-clamp-2` recorta pero NO rellena.
+        `min-h-[2.5rem]` = 2 líneas de text-sm / leading-tight
+        (≈ 1.25rem × 2). Garantiza altura cross-card uniforme. */}
+    <h3 class="line-clamp-2 flex min-h-[2.5rem] items-end text-sm font-semibold leading-tight text-slate-900">
       <a
         href={detailHref}
         class="transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
@@ -142,8 +208,9 @@ const ariaLabelForBadge = (badge: ProductBadge): string => {
         {product.name}
       </a>
     </h3>
-
-    <p class="line-clamp-2 text-xs text-slate-500">{product.description}</p>
+    <p class="line-clamp-2 min-h-[2rem] text-xs leading-tight text-slate-500">
+      {product.description}
+    </p>
 
     <div class="mt-auto flex items-end justify-between gap-2 pt-2">
       <div class="flex flex-col gap-0.5">
@@ -155,9 +222,7 @@ const ariaLabelForBadge = (badge: ProductBadge): string => {
         >
           {priceFormatted}
         </span>
-        {hasDiscount && (
-          <span class="text-xs text-slate-400 line-through">{compareAtFormatted}</span>
-        )}
+        {hasDiscount && <span class="text-xs text-slate-400 line-through">{compareAtFormatted}</span>}
       </div>
       {showAddToCart && !isOutOfStock && (
         <a
@@ -170,3 +235,61 @@ const ariaLabelForBadge = (badge: ProductBadge): string => {
     </div>
   </div>
 </article>
+
+<style>
+  /* Default: sólo la imagen primaria está visible. Las del stack
+     comparten el mismo rect (`absolute inset-0`), por eso `opacity:0`
+     sin display:none — preserva la transición. */
+  .productcard-swap-img { opacity: 0; transition: opacity 220ms ease-out; }
+  .productcard-swap-img[data-role='primary'] { opacity: 1; }
+
+  /* `@media (hover: hover)` evita sticky-hover en touch (un tap puede
+     dejar el :hover pegado y esconder la primary detrás del back). */
+  @media (hover: hover) {
+    /* Card hover SIN swatch hovered → mostrar back. Si el producto
+       no tiene back image, las reglas no matchean (graceful). */
+    .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover
+      .productcard-swap-img[data-role='primary'] { opacity: 0; }
+    .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover
+      .productcard-swap-img[data-role='back'] { opacity: 1; }
+
+    /* Swatch hovered → ocultar primary/back. Las reglas per-variant
+       inyectadas abajo muestran SOLO la imagen del variant activo. */
+    .productcard-swap-root:has(.productcard-swap-swatch:hover)
+        .productcard-swap-img[data-role='primary'],
+    .productcard-swap-root:has(.productcard-swap-swatch:hover)
+        .productcard-swap-img[data-role='back'] { opacity: 0; }
+  }
+
+  /* Teclado: mismo contrato que el mouse pero con `:focus-visible`, para
+     que tabular a un swatch también cambie la foto. El "ocultar
+     primary/back" va FUERA del `@media (hover: hover)` a propósito — un
+     híbrido touch+teclado no matchea ese media query y quedaría mostrando
+     la primaria encima de la foto del variant. */
+  .productcard-swap-root:has(.productcard-swap-swatch:focus-visible)
+      .productcard-swap-img[data-role='primary'],
+  .productcard-swap-root:has(.productcard-swap-swatch:focus-visible)
+      .productcard-swap-img[data-role='back'] { opacity: 0; }
+
+  /* ── Why: swatch ACTIVO hover/focus ────────────────────────────────
+     El swatch activo apunta por `data-variant-id` a la MISMA imagen que
+     ya es la primaria, así que las dos reglas anteriores la matan:
+     "swatch hover → ocultar primary" gana en especificidad (0,3,4 — el
+     scope de Astro suma un `[data-astro-cid]` por selector) contra el
+     `is:global` que la muestra (0,2,3, sin scope). Resultado medido en
+     Chromium: hover sobre el swatch activo dejaba la card en BLANCO.
+     Estas dos reglas la vuelven a mostrar con 0,3,5 — un punto por
+     encima del selector que la ocultaba. Para los swatches NO activos
+     no matchean, así que su foto sigue mandando sin conflicto. */
+  .productcard-swap-root:has(.productcard-swap-swatch[data-swatch-active]:hover)
+      .productcard-swap-img[data-role='primary'] { opacity: 1; }
+  .productcard-swap-root:has(.productcard-swap-swatch[data-swatch-active]:focus-visible)
+      .productcard-swap-img[data-role='primary'] { opacity: 1; }
+</style>
+
+{/* Reglas per-variant de mouse y de teclado (`:hover` / `:focus-visible`).
+    Sin esto `:has()` no puede resolver qué imagen mostrar: el selector
+    depende del variant ID concreto. `is:global` porque los
+    `[data-swatch-id="..."]` no entran en el scope de Astro. */}
+{variantHoverCss !== '' && <style is:global set:html={variantHoverCss} />}
+{focusVariantCss !== '' && <style is:global set:html={focusVariantCss} />}
