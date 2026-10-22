@@ -22,6 +22,12 @@
  *   - La shape sigue siendo `RelatedProduct[]` para no tocar el
  *     contrato de `<ProductRelated>`.
  *
+ * OJO — el listado está paginado desde Oct 2026: la respuesta es
+ * `{data, meta}` y trae sólo la primera página (20 filas por default).
+ * Alcanza de sobra para `RELATED_PRODUCTS_LIMIT = 12`, pero si algún día
+ * el límite sube por encima del `per_page` implícito, este carrusel va a
+ * mostrar menos de lo esperado sin avisar.
+ *
  * Si el backend no expone `category` (caso: el join no fue eager-load
  * o la respuesta es parcial), el `RelatedProduct` cae a strings
  * vacíos seguros para que el render no rompa — el banner se oculta
@@ -29,6 +35,7 @@
  */
 import type { Product } from '../types/catalog';
 import type { RelatedProduct } from '../data/product-detail-mock';
+import type { StorefrontPaginationMeta } from './pagination';
 
 /**
  * Cantidad máxima de relacionados a mostrar en el carrusel. El componente
@@ -55,6 +62,20 @@ export interface StorefrontApiProductSummary {
   brand?: string;
   /** Segunda imagen si está presente — útil para hover-swap. */
   images?: readonly string[];
+}
+
+/**
+ * Envoltura paginada de `GET /api/v1/storefront/products` — el mismo
+ * contrato `{data, meta}` que emite `/storefront/products/search`.
+ *
+ * El carrusel de relacionados pide `?category=<slug>` y no pagina: la
+ * primera página del endpoint ya trae más filas que
+ * `RELATED_PRODUCTS_LIMIT`, así que `pickRelatedProducts` aplica el corte
+ * FIFO sobre `data` sin mirar `meta`.
+ */
+export interface StorefrontApiProductsResponse {
+  data: StorefrontApiProductSummary[];
+  meta: StorefrontPaginationMeta;
 }
 
 /**

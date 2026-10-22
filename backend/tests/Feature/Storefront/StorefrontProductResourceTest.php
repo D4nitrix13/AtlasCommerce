@@ -32,9 +32,10 @@ use Tests\TestCase;
  *  - claves opcionales omitidas según contrato: `images`, `isExclusive`.
  *  - `imageUrl` cae al placeholder cuando no hay imágenes en BD.
  *  - `category` es `categories.slug`; `brand` es `brands.name`.
- *  - El listado no se rompe: `index()` devuelve array plano, no
- *    `{data: [...]}`, conservando el contrato del componente
- *    `StorefrontProductsList.tsx`.
+ *  - El listado devuelve la envoltura paginada `{data, meta}` — la misma
+ *    que emite `search()` — y NO un array plano: los consumers (grid del
+ *    catálogo, carrusel de relacionados de la PDP) leen `meta.total` /
+ *    `meta.last_page` para no inventar la paginación desde el array.
  *  - `show()` devuelve 200 con shape correcta y 404 con slug inexistente.
  */
 #[Group('storefront')]
@@ -257,7 +258,7 @@ final class StorefrontProductResourceTest extends TestCase
     }
 
     #[Test]
-    public function index_endpoint_returns_flat_array_with_resource_shape(): void
+    public function index_endpoint_returns_paginated_envelope_with_resource_shape(): void
     {
         // Crea 3 productos en la tienda activa.
         $this->makeProduct(attributes: ['slug' => 'product-a', 'name' => 'Producto A']);
@@ -267,13 +268,14 @@ final class StorefrontProductResourceTest extends TestCase
         $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products');
 
         $response->assertOk();
-        $items = $response->json();
-
-        // Flat array, no `{data: [...]}`.
+        // Envoltura `{data, meta}`, no array plano.
+        $items = $response->json(key: 'data');
         $this->assertIsArray($items);
         $this->assertCount(3, $items);
         $this->assertArrayHasKey('priceCents', $items[0]);
         $this->assertArrayHasKey('category', $items[0]);
+        $response->assertJsonPath(path: 'meta.total', expect: 3);
+        $response->assertJsonPath(path: 'meta.current_page', expect: 1);
     }
 
     #[Test]
@@ -302,9 +304,10 @@ final class StorefrontProductResourceTest extends TestCase
         $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products');
 
         $response->assertOk();
-        $slugs = collect($response->json())->pluck('slug')->all();
+        $slugs = collect($response->json(key: 'data'))->pluck('slug')->all();
         $this->assertContains('mine', $slugs);
         $this->assertNotContains('theirs', $slugs);
+        $response->assertJsonPath(path: 'meta.total', expect: 1);
     }
 
     #[Test]
@@ -336,11 +339,13 @@ final class StorefrontProductResourceTest extends TestCase
         $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products?category=guitarras');
 
         $response->assertOk();
-        $items = $response->json();
+        $items = $response->json(key: 'data');
         $slugs = collect($items)->pluck('slug')->all();
         $this->assertContains('guitar-a', $slugs);
         $this->assertContains('guitar-b', $slugs);
         $this->assertNotContains('amp-z', $slugs);
+        // `total` cuenta SÓLO los productos de la categoría filtrada.
+        $response->assertJsonPath(path: 'meta.total', expect: 2);
     }
 
     #[Test]
@@ -369,23 +374,27 @@ final class StorefrontProductResourceTest extends TestCase
         $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products');
 
         $response->assertOk();
-        $slugs = collect($response->json())->pluck('slug')->all();
+        $slugs = collect($response->json(key: 'data'))->pluck('slug')->all();
         // Sin filtro, el listado expone ambas categorías.
         $this->assertContains('in-category', $slugs);
         $this->assertContains('other-category', $slugs);
     }
 
     #[Test]
-    public function index_returns_empty_array_for_unknown_category_slug(): void
+    public function index_returns_paginated_envelope_for_unknown_category_slug(): void
     {
         $this->makeProduct(attributes: ['slug' => 'exists', 'name' => 'Existe']);
 
         $response = $this->getJson(uri: 'http://fender-store.test/api/v1/storefront/products?category=does-not-exist');
 
         $response->assertOk();
-        // Lista vacía (NO 404): la PDP prefiere empty sobre error al
-        // derivar relacionados de una categoría inválida.
-        $this->assertSame([], $response->json());
+        // Catálogo vacío (NO 404): la PDP prefiere empty sobre error al
+        // derivar relacionados de una categoría inválida. Misma
+        // envoltura que el happy path para que el consumer no tenga que
+        // ramificar por el caso "categoría inexistente".
+        $response->assertJsonPath(path: 'data', expect: []);
+        $response->assertJsonPath(path: 'meta.total', expect: 0);
+        $response->assertJsonPath(path: 'meta.last_page', expect: 1);
     }
 
     // ── Galería: una entrada por ROL, no por resolución ────────────────

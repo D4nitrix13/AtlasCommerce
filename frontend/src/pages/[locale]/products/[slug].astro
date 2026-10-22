@@ -82,7 +82,7 @@ import { deriveProductDetail } from '../../../lib/product-detail';
 // `data/product-detail-mock.ts` por compat con quien lo consuma fuera de acá.
 import {
   pickRelatedProducts,
-  type StorefrontApiProductSummary,
+  type StorefrontApiProductsResponse,
 } from '../../../lib/related-products';
 import {
   HANDEDNESS_LEFT,
@@ -361,11 +361,13 @@ if (product !== null && relatedCategory !== '') {
       signal: relatedController.signal,
     });
     if (relatedResponse.ok) {
-      const data = (await relatedResponse.json()) as StorefrontApiProductSummary[];
-      relatedProducts = pickRelatedProducts(product.id, data);
+      // El listado responde `{data, meta}` (mismo contrato que
+      // `/storefront/products/search`); el carrusel sólo necesita `data`.
+      const payload = (await relatedResponse.json()) as StorefrontApiProductsResponse;
+      relatedProducts = pickRelatedProducts(product.id, payload.data);
     } else if (relatedResponse.status !== 404) {
       // 404 sería "categoría sin productos" pero el controller devuelve
-      // [] para ese caso; cualquier otro status sí es error.
+      // `{data: [], meta}` para ese caso; cualquier otro status sí es error.
       relatedError = `HTTP ${relatedResponse.status}`;
     }
   } catch (err) {

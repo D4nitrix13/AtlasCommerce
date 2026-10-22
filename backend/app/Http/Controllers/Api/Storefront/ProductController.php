@@ -10,6 +10,7 @@ use App\Models\Catalog\Category;
 use App\Models\Catalog\Product;
 use App\Services\Catalog\ProductSearchService;
 use App\Services\Catalog\WholesalePricingService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,15 @@ class ProductController extends Controller
      *     cuya `category_id` apunte a una categoría con ese slug. Útil
      *     para derivar "productos relacionados por categoría" en la PDP
      *     sin necesitar un endpoint dedicado.
+     *   - page:     int >= 1 (default 1).
+     *   - per_page: int entre 1 y `ProductSearchService::MAX_PER_PAGE`
+     *     (default `ProductSearchService::DEFAULT_PER_PAGE`).
+     *
+     * Response (misma envoltura que `search()`):
+     *   {
+     *     "data": [Product, ...],
+     *     "meta": { "current_page", "per_page", "total", "last_page" }
+     *   }
      */
     public function index(Request $request): JsonResponse
     {
@@ -42,12 +52,26 @@ class ProductController extends Controller
 
         $validated = $request->validate(rules: [
             'category' => ['nullable', 'string', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:'.ProductSearchService::MAX_PER_PAGE],
         ]);
         $categorySlugRaw = $validated['category'] ?? null;
         $categorySlug = $categorySlugRaw !== null ? trim($categorySlugRaw) : null;
         if ($categorySlug === '') {
             $categorySlug = null;
         }
+
+        // Default de `per_page`: el MISMO que usa `search()`
+        // (ProductSearchService::DEFAULT_PER_PAGE), no el cap. Motivo —
+        // antes este endpoint devolvía el catálogo completo del tenant
+        // (346 filas / ~2.3 MB para un grid de 24 cards). Cualquier
+        // consumer que omita `per_page` debe recibir una página acotada
+        // y no el catálogo entero; 20 items alcanzan para el caso que hoy
+        // lo usa sin pedir tamaño (los relacionados de la PDP, que
+        // descarta todo pasado `RELATED_PRODUCTS_LIMIT`), mientras que
+        // el cap de 50 sólo multiplicaría el payload de ese mismo fetch.
+        $page = (int) ($validated['page'] ?? 1);
+        $perPage = (int) ($validated['per_page'] ?? ProductSearchService::DEFAULT_PER_PAGE);
 
         // Filtra primero los product_ids visibles del tenant (en la pivot
         // product_stores), después hace el whereIn. Equivalente a whereHas
@@ -63,31 +87,43 @@ class ProductController extends Controller
         // quedan ausentes y dispara N+1 si el Resource los tocara.
         $query = Product::query()
             ->whereIn('id', $productIds)
-            ->with(['category', 'brand', 'images', 'variants']);
+            ->with(['category', 'brand', 'images', 'variants'])
+            // Orden total y determinista. Sin un ORDER BY explícito
+            // PostgreSQL no garantiza un orden estable entre consultas,
+            // así que con paginación offset una fila puede caer en dos
+            // páginas distintas y otra no aparecer nunca. Inofensivo
+            // con `get()` (una sola respuesta), obligatorio con
+            // `paginate()`.
+            ->orderBy(column: 'id');
 
         if ($categorySlug !== null) {
             // Lookup directo por slug; el modelo respeta soft-deletes.
-            // Si la categoría no existe, devolvemos lista vacía (misma
-            // shape plana) en vez de 404 — la PDP consume este endpoint
-            // para derivar relacionados y prefiere empty sobre error.
             $category = Category::query()
                 ->where(column: 'slug', operator: '=', value: $categorySlug)
                 ->first();
 
             if ($category === null) {
-                return response()->json(data: []);
+                // Categoría inexistente → catálogo vacío, NO 404: la PDP
+                // consume este endpoint para derivar relacionados y
+                // prefiere empty sobre error.
+                //
+                // Se fuerza el set a cero con `1 = 0` en vez de hacer
+                // early-return: así la respuesta conserva la envoltura
+                // paginada (`meta.total = 0`, `meta.last_page = 1`) sin
+                // duplicar el armado de la respuesta ni tener que
+                // instanciar un paginator vacío a mano.
+                $query->whereRaw(sql: '1 = 0');
+            } else {
+                $query->where(column: 'category_id', operator: '=', value: $category->id);
             }
-
-            $query->where(column: 'category_id', operator: '=', value: $category->id);
         }
 
-        // Shape plana (array de productos, NO `{data: [...]}`). El
-        // listado storefront (`StorefrontProductsList.tsx`) consume esa
-        // forma y un cambio de envoltura rompe el contrato. Ver PHPDoc
-        // de `StorefrontProductResource::$wrap = null`.
-        return response()->json(
-            data: StorefrontProductResource::collection($query->get())->resolve(),
-        );
+        $paginator = $query->paginate(perPage: $perPage, page: $page);
+
+        return response()->json(data: $this->paginationEnvelope(
+            paginator: $paginator,
+            items: StorefrontProductResource::collection($paginator->items())->resolve(),
+        ));
     }
 
     /**
@@ -130,16 +166,54 @@ class ProductController extends Controller
             perPage: $perPage,
         );
 
-        return response()->json(data: [
-            'data' => $paginator->items(),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-                'query' => trim($query),
-            ],
-        ]);
+        return response()->json(data: $this->paginationEnvelope(
+            paginator: $paginator,
+            items: $paginator->items(),
+            query: trim($query),
+        ));
+    }
+
+    /**
+     * Envoltura paginada compartida por `index()` y `search()`.
+     *
+     * Vive acá — y no duplicada en cada método — para que los dos
+     * endpoints del controller hablen el mismo idioma y un cambio futuro
+     * de la envoltura no los desincronice.
+     *
+     * `query` sólo lo emite `search()`: el listado no tiene texto de
+     * búsqueda, y mandar `"query": null` al consumidor del catálogo sería
+     * ruido en el contrato.
+     *
+     * `mixed` en `$items` es a propósito: cada endpoint serializa sus
+     * filas con su propia representación (`index()` pasa el resultado de
+     * `StorefrontProductResource::collection()->resolve()`, `search()`
+     * pasa los modelos del paginator). La envoltura no debe imponer qué
+     * hay dentro de `data`.
+     *
+     * @param  LengthAwarePaginator<int, Product>  $paginator  Fuente de `meta`.
+     * @param  array<int, mixed>  $items  Filas de la página actual.
+     * @return array{data: array<int, mixed>, meta: array<string, int|string>}
+     */
+    private function paginationEnvelope(
+        LengthAwarePaginator $paginator,
+        array $items,
+        ?string $query = null,
+    ): array {
+        $meta = [
+            'current_page' => $paginator->currentPage(),
+            'per_page' => $paginator->perPage(),
+            'total' => $paginator->total(),
+            'last_page' => $paginator->lastPage(),
+        ];
+
+        if ($query !== null) {
+            $meta['query'] = $query;
+        }
+
+        return [
+            'data' => $items,
+            'meta' => $meta,
+        ];
     }
 
     /**

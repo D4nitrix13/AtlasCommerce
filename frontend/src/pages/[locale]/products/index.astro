@@ -19,16 +19,21 @@
  *
  * Decisiones:
  *  - **Sin handler de filtros**: la página es presentacional pura. Los
- *    inputs están wireados visualmente (checked/pressed/active) pero
- *    no se hidratan — el handler real queda para F4.x cuando exista
- *    backend paginado. Esto evita un componente React island sólo
- *    para cambiar el query string.
+ *    inputs están wireados visualmente (checked/pressed/active) pero no
+ *    se hidratan. La paginación SÍ es real y va por links `?page=N`
+ *    renderizados en SSR (`components/ui/Pagination.astro`), así que no
+ *    necesita estado en el cliente — por eso sigue sin haber una island
+ *    React sólo para cambiar el query string.
  *  - **Sin `productGrid.*` legacy**: el código previo usaba keys
  *    `productGrid.heading` (todos los productos) con un link-based
  *    filter por categoría. Las nuevas keys son `products.v3.*`,
  *    namespace dedicado para no colisionar.
- *  - **Mock counts**: los counts por filtro vienen del propio mock
- *    PRODUCTS (cálculo client-side). Esto evita un fetch extra.
+ *  - **Counts de filtro derivados de la página actual**: el backend
+ *    pagina, así que agrupar por categoría sobre las 24 filas de la
+ *    página da un conteo PARCIAL por categoría. La opción "todas" sí usa
+ *    el total real (`meta.total`). Los counts por categoría quedan como
+ *    aproximación visual hasta que exista un endpoint de facetas; no se
+ *    inventan números.
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import ProductCardCatalog from '../../../components/storefront/products/ProductCardCatalog.astro';
@@ -38,6 +43,12 @@ import Pagination from '../../../components/ui/Pagination.astro';
 import { getServerDictionary } from '../../../i18n/server';
 import { apiFetch } from '../../../lib/api';
 import { API_ENDPOINTS } from '../../../lib/endpoints';
+import {
+  clampPage,
+  FIRST_PAGE,
+  parsePageParam,
+  type StorefrontPaginationMeta,
+} from '../../../lib/pagination';
 import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
 import type { ProductImage, ProductVariant } from '../../../types/catalog';
 
@@ -46,19 +57,18 @@ const t = getServerDictionary(locale);
 
 const cartCount = 0;
 
-// Fetch real del backend: SSR trae la lista de productos visibles
-// del tenant actual. El tenant se resuelve via middleware store.domain
-// (no se pasa explicitamente). Filtra por is_visible via el controller.
+// Fetch real del backend: SSR trae la página de productos visibles del
+// tenant actual. El tenant se resuelve via middleware store.domain (no se
+// pasa explicitamente). Filtra por is_visible via el controller.
 //
-// El backend retorna el modelo Eloquent Product (snake_case: image_url,
-// base_price_cents, etc). Mapeamos al shape del ProductCardCatalog
-// (camelCase + tipos narrowed) para que el render funcione sin tocar
-// el componente.
+// El backend retorna el Resource con envoltura paginada `{data, meta}` —
+// el mismo contrato de `GET /storefront/products/search`. Mapeamos cada
+// fila al shape del ProductCardCatalog (camelCase + tipos narrowed) para
+// que el render funcione sin tocar el componente.
 //
 // Fase 5 plan v3: storage keys hasheadas via StorageKeyDeriver.
 // El frontend las consume via `assetUrl(storage_key)` (lib/asset.ts).
 const PAGE_SIZE = 24;
-const currentPage = 1;
 // Imagen de la galería. OJO: el resource de storefront ya emite estos
 // campos en camelCase (`altText`, `isPrimary`, `variantId`, `sortOrder`,
 // `srcset`) aunque el product-level venga en snake_case — ver
@@ -106,37 +116,91 @@ interface BackendProduct {
   images?: BackendProductImage[];
   variants?: BackendProductVariant[];
 }
-type StorefrontProductsResponse = BackendProduct[];
 
-let apiProducts: BackendProduct[] = [];
-try {
-  apiProducts = await apiFetch<StorefrontProductsResponse>(
-    API_ENDPOINTS.storefront.products + '?per_page=200',
-    {
-      headers: { 'Accept': 'application/json' },
-      // Fallback de URL origin (ya no es el camino feliz — ver
-      // INTERNAL_API_ORIGIN en lib/api.ts). Se mantiene para que la
-      // página siga funcionando si por algún motivo se levanta el
-      // stack dev sin la env var (ej. tests locales, override temporal).
-      origin: Astro.url.origin,
-      // Override del `Host` header para que el backend pueda resolver
-      // el tenant vía middleware `store.domain` cuando el SSR fetch
-      // va por el sidecar nginx. Sin esto el backend responde 404
-      // "Store not found or inactive". Ver `host?` en lib/api.ts.
-      host: Astro.url.host,
-    },
-  );
-} catch (e) {
-  // Si el backend no responde, devolvemos lista vacía y el empty state
-  // del ProductGrid se renderiza. Log para debugging.
-  console.error('[products/index] apiFetch failed:', e);
+/**
+ * Envoltura paginada de `GET /api/v1/storefront/products`.
+ *
+ * `meta` es la fuente de verdad de la paginación: `total` y `last_page`
+ * los calcula el backend sobre TODOS los productos del tenant. Calcularlos
+ * a partir del array recibido (como hacía la versión anterior con
+ * `slice(0, 24)`) daba siempre 1 página: el array ya venía recortado.
+ */
+interface StorefrontProductsResponse {
+  data: BackendProduct[];
+  meta: StorefrontPaginationMeta;
 }
 
-const allProducts = apiProducts.slice(0, PAGE_SIZE);
-const lastPage = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
-const totalProducts = allProducts.length;
-const from = totalProducts === 0 ? 0 : 1;
-const to = Math.min(PAGE_SIZE, totalProducts);
+/** Catálogo vacío cuando el backend no responde: dispara el empty state. */
+const EMPTY_CATALOG_META: StorefrontPaginationMeta = {
+  current_page: FIRST_PAGE,
+  per_page: PAGE_SIZE,
+  total: 0,
+  last_page: FIRST_PAGE,
+};
+
+/**
+ * Trae UNA página del catálogo. El backend ya pagina, así que la
+ * respuesta trae `PAGE_SIZE` filas y no el catálogo entero.
+ *
+ * `origin` / `host` no son opcionales: son lo que permite que el SSR
+ * resuelva el tenant (ver docstring de `apiFetch`).
+ */
+async function loadCatalogPage(page: number): Promise<StorefrontProductsResponse> {
+  const query = new URLSearchParams({
+    page: String(page),
+    per_page: String(PAGE_SIZE),
+  });
+
+  try {
+    return await apiFetch<StorefrontProductsResponse>(
+      `${API_ENDPOINTS.storefront.products}?${query.toString()}`,
+      {
+        headers: { 'Accept': 'application/json' },
+        // Fallback de URL origin (ya no es el camino feliz — ver
+        // INTERNAL_API_ORIGIN en lib/api.ts). Se mantiene para que la
+        // página siga funcionando si por algún motivo se levanta el
+        // stack dev sin la env var (ej. tests locales, override temporal).
+        origin: Astro.url.origin,
+        // Override del `Host` header para que el backend pueda resolver
+        // el tenant vía middleware `store.domain` cuando el SSR fetch
+        // va por el sidecar nginx. Sin esto el backend responde 404
+        // "Store not found or inactive". Ver `host?` en lib/api.ts.
+        host: Astro.url.host,
+      },
+    );
+  } catch (error) {
+    // Si el backend no responde, devolvemos catálogo vacío y el empty
+    // state se renderiza. Log para debugging.
+    console.error(`[products/index] apiFetch failed (page=${page}):`, error);
+    return { data: [], meta: EMPTY_CATALOG_META };
+  }
+}
+
+const requestedPage = parsePageParam(Astro.url.searchParams.get('page'));
+
+let catalog = await loadCatalogPage(requestedPage);
+
+// `?page=9999` (link viejo, crawler, typo) responde `data: []` con un
+// `meta.last_page` real. Se CLAMPA en vez de responder 404 — el catálogo
+// es navegación pública y el contenido de la última página existe, así
+// que un 404 convertiría un link compartible en página rota. El clamp
+// necesita un segundo fetch porque la respuesta fuera de rango vino
+// vacía: no trae las filas de la última página.
+const clampedPage = clampPage(requestedPage, catalog.meta.last_page);
+let currentPage = requestedPage;
+if (clampedPage !== requestedPage) {
+  currentPage = clampedPage;
+  catalog = await loadCatalogPage(currentPage);
+}
+
+const apiProducts = catalog.data;
+const lastPage = Math.max(FIRST_PAGE, catalog.meta.last_page);
+const totalProducts = catalog.meta.total;
+// `meta.per_page` es el tamaño real de página que el server aplicó; el
+// fallback a PAGE_SIZE cubre un backend que no lo mande.
+const perPage = catalog.meta.per_page > 0 ? catalog.meta.per_page : PAGE_SIZE;
+const from = totalProducts === 0 ? 0 : (currentPage - 1) * perPage + 1;
+const to = Math.min(currentPage * perPage, totalProducts);
 
 // Normaliza el id de variante a string. El backend lo emite como int
 // tanto en `images[].variantId` como en `variants[].id`, y
@@ -218,7 +282,7 @@ function mapBackendToProduct(b: BackendProduct) {
   };
 }
 
-const productsForUi = allProducts.map(mapBackendToProduct);
+const productsForUi = apiProducts.map(mapBackendToProduct);
 
 // Diccionario para los subcomponentes
 const dictionary = {
@@ -250,6 +314,11 @@ const dictionary = {
 // (que leía del mock PRODUCTS), construimos de apiProducts agrupando
 // por category.slug con count. El shape coincide con CategoryFilterOption
 // (que requiere `label`, no `name`).
+//
+// LÍMITE CONOCIDO: `apiProducts` es la página actual, no el catálogo
+// entero, así que cada `count` cuenta sólo lo visible en esta página. La
+// opción "todas" sí usa `meta.total`. Para counts exactos por categoría
+// hace falta un endpoint de facetas en el backend.
 const categoryCounts = apiProducts.reduce<Record<string, { slug: string; label: string; count: number }>>(
   (acc, p) => {
     const catSlug = p.category || 'unknown';
@@ -265,7 +334,7 @@ const filterCategoryOptions = [
   {
     slug: 'all',
     label: t['storefront.products.v3.filter.categoriaAll'],
-    count: apiProducts.length,
+    count: totalProducts,
   },
   ...Object.values(categoryCounts),
 ];
@@ -309,13 +378,19 @@ const filterSizeOptions = [
   { slug: 'xg', label: 'XG', count: 8 },
 ];
 
-const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(apiProducts.length));
+// Los tres conteos salen de `meta` (o del slice real de la página), nunca
+// de `apiProducts.length`: ese array sólo tiene `per_page` filas y
+// reportarlo como "total" hacía que la página dijera "24 de 24".
+const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(totalProducts));
 
 const countRange = t['storefront.products.v3.countRange']
   .replace('{from}', String(from))
   .replace('{to}', String(to))
-  .replace('{total}', String(apiProducts.length));
+  .replace('{total}', String(totalProducts));
 
+// La primitive `Pagination.astro` ya emite `?page=N` sobre este baseUrl
+// (`pageParam` default 'page'), así que no hay que construir los links a
+// mano ni mantener estado de página en el cliente.
 const baseUrl = `/${locale}/products`;
 ---
 
@@ -390,6 +465,10 @@ const baseUrl = `/${locale}/products`;
                 aparece cuando el usuario scrollea — pésimo para el
                 contenido primario de la página. El grid tiene que estar
                 visible ya desde el primer paint.
+              - La paginación tampoco necesita island: `?page=N` es estado
+                en la URL y `<Pagination>` lo resuelve con `<a href>`
+                planos. Un island para eso sería reimplementar el botón
+                "atrás" del browser con state de React.
               - Los filtros (`FiltersSidebar`) y el orden (`SortDropdown`)
                 siguen presentacionales puros — `activeCategory` está
                 hardcodeado a `null` y no hay handler que filtre la
