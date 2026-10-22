@@ -12,12 +12,14 @@
  *
  * Multi-tenancy:
  *   - Tenant via `Astro.props.store` (resuelto por middleware store.domain)
- *   - Favicon per-tenant desde public/favicon-{slug}.ico
+ *   - Favicon per-tenant declarado por el brand (`StoreBrand.faviconPath`)
  *   - Brand color aplica a:focus-visible + submit button
  *
  * **AGENTS.md §16**: shell — siempre via este layout para /auth/* y /admin/auth/*.
  */
 import '../styles/global.css';
+import { getBrandBySlug } from '../config/stores';
+import { resolveTenantFavicon } from '../lib/tenant-favicon';
 
 interface Props {
   title?: string;
@@ -25,21 +27,21 @@ interface Props {
 
 const { title = 'Login' } = Astro.props;
 
-// Favicon per-tenant: derivado del slug del tenant detectado por el
-// middleware. Convention: /api/v1/storefront/assets/tenants/{slug}/branding/favicon.webp.
-// Si el tenant no está detectado (ej. dev local sin /etc/hosts),
-// cae al favicon genérico del repo en /favicon.svg.
+// Favicon per-tenant: lo DECLARA el brand (`StoreBrand.faviconPath`), no
+// se construye por convención desde el slug. Antes este layout pedía un
+// `.webp` de branding con `type="image/svg+xml"` para todo tenant, incluso
+// para los que todavía no subieron branding (404 en cada carga de página).
+// Ver `lib/tenant-favicon.ts`. Sin tenant detectado `getBrandBySlug` cae al
+// DEFAULT_BRAND y el resolver al favicon del repo.
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
-const tenantFavicon = tenantSlug
-  ? `/api/v1/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
-  : '/favicon.svg';
+const favicon = resolveTenantFavicon(getBrandBySlug(tenantSlug));
 ---
 
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href={tenantFavicon} />
+    <link rel="icon" type={favicon.type} href={favicon.href} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

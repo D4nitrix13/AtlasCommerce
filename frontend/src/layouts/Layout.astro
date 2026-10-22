@@ -1,12 +1,15 @@
 ---
-// Favicon per-tenant: derivado del slug del tenant detectado por el
-// middleware. Convention: /api/v1/storefront/assets/tenants/{slug}/branding/favicon.webp.
+import { getBrandBySlug } from '../config/stores';
+import { resolveTenantFavicon } from '../lib/tenant-favicon';
+
+// Favicon per-tenant: lo DECLARA el brand (`StoreBrand.faviconPath`).
+// Antes este layout armaba la URL por convención desde el slug y
+// afirmaba que todo tenant tiene branding subido — para los que no lo
+// tienen eso era un 404 por carga de página. Ver `lib/tenant-favicon.ts`.
 // Si el tenant no está detectado (ej. dev local sin /etc/hosts),
-// cae al favicon genérico del repo.
+// `getBrandBySlug` cae al DEFAULT_BRAND y el resolver al favicon del repo.
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
-const tenantFavicon = tenantSlug
-  ? `/api/v1/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
-  : '/favicon.svg';
+const favicon = resolveTenantFavicon(getBrandBySlug(tenantSlug));
 
 interface Props {
   title?: string;
@@ -20,7 +23,7 @@ const { title = 'AtlasCommerce' } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href={tenantFavicon} />
+    <link rel="icon" type={favicon.type} href={favicon.href} />
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

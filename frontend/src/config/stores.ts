@@ -55,6 +55,16 @@ export interface StoreBrand {
   adminDomains: readonly string[];
   logoPath: string;
   loginLogoPath: string;
+  /**
+   * Favicon del tenant (ruta pública del asset de branding). Opcional a
+   * propósito: la mayoría de los tenants todavía no subió branding, y
+   * construir la URL por convención en el layout dispara un 404 en cada
+   * carga de página cuando el archivo no existe.
+   *
+   * Cuando está ausente, `lib/tenant-favicon.ts` cae al `/favicon.svg`
+   * estático del repo, que sí existe siempre.
+   */
+  faviconPath?: string;
   accentColor: string;
   accentHoverColor: string;
   supportEmail: string;

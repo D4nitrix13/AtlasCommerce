@@ -28,6 +28,7 @@
 import '../styles/global.css';
 import '../styles/scroll-fx.css';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
+import { resolveTenantFavicon } from '../lib/tenant-favicon';
 import StorefrontHeader from '../components/storefront/layout/StorefrontHeader.astro';
 import StorefrontFooter from '../components/storefront/layout/StorefrontFooter.astro';
 
@@ -47,16 +48,18 @@ const locale = Astro.locals.locale ?? 'es';
 // `bg-[var(--primary)]`. El default fallback (`#475569`) mantiene
 // legibilidad si no hay brand resuelto.
 const themeRootStyle = `--primary: ${brand.accentColor}; --primary-hover: ${brand.accentHoverColor};`;
-const tenantFavicon = tenantSlug
-  ? `/api/v1/storefront/assets/tenants/${tenantSlug}/branding/favicon.webp`
-  : '/favicon.svg';
+
+// El favicon lo DECLARA el brand. Antes se armaba la URL por convención
+// desde el slug, lo que pedía un asset de branding que este tenant todavía
+// no tiene (404 por carga de página). Ver `lib/tenant-favicon.ts`.
+const favicon = resolveTenantFavicon(brand);
 ---
 
 <html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href={tenantFavicon} />
+    <link rel="icon" type={favicon.type} href={favicon.href} />
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
