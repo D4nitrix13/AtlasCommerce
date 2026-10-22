@@ -197,13 +197,29 @@ const finishCountLabelText =
       </p>
     )}
 
-    {/* Phase 9 height fix: `line-clamp-2` recorta pero NO rellena.
+    {/* Phase 9 height fix: el `line-clamp-2` va en el `<a>`, NO en el
+        `<h3>`, y el `<h3>` NO lleva utility de `display`.
+
+        `line-clamp-*` necesita `display: -webkit-box` para que
+        `-webkit-line-clamp` haga algo. Cualquier utility de display en el
+        mismo elemento lo pisa en la cascada y el clamp queda inerte sin
+        error visible: `-webkit-line-clamp` sigue declarado en el estilo
+        computado pero no recorta nada. Medido en Chromium: con
+        `line-clamp-2 flex` en el mismo elemento el título llegaba a 4
+        líneas (82.5px) y las cards variaban 20.6px de alto.
+
+        `flex` + `items-end` sí se quedan en el `<h3>`: existen para
+        anclar el texto abajo dentro del `min-h`, y no compiten con el
+        clamp porque viven en otro elemento.
+
         `min-h-[2.5rem]` = 2 líneas de text-sm / leading-tight
-        (≈ 1.25rem × 2). Garantiza altura cross-card uniforme. */}
-    <h3 class="line-clamp-2 flex min-h-[2.5rem] items-end text-sm font-semibold leading-tight text-slate-900">
+        (≈ 1.25rem × 2). Con el clamp activo todo título mide ≤2 líneas, así
+        que el `min-h` iguala las de 1 línea con las de 2 y la altura queda
+        uniforme entre cards. */}
+    <h3 class="flex min-h-[2.5rem] items-end text-sm font-semibold leading-tight text-slate-900">
       <a
         href={detailHref}
-        class="transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
+        class="line-clamp-2 transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
       >
         {product.name}
       </a>

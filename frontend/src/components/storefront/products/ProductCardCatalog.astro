@@ -172,12 +172,20 @@ const finishCountLabelText =
     `grid-auto-rows: 1fr`: en las filas implícitas de este grid el `1fr`
     resuelve contra espacio libre que no existe y no iguala nada. Además
     así cada card mide lo mismo aunque se use fuera de un grid.
+
+    El `<a>` del título NO lleva utility de `display` a propósito:
+    `line-clamp-*` necesita `display: -webkit-box`, y un `block` en la misma
+    lista de clases lo pisa en la cascada. El clamp queda inerte SIN ERROR
+    VISIBLE — `-webkit-line-clamp` sigue declarado en el estilo computado
+    pero no recorta. Medido en Chromium: con `line-clamp-2 block` el título
+    llegaba a 4 líneas (82.5px) y las cards variaban 20.6px de alto
+    (452.4 vs 473). Sin el `block`, todas miden 434.5px.
   */}
   <div class="flex flex-1 flex-col gap-1.5 p-5">
     <h3 class="min-h-[2.75rem] text-[15px] font-bold leading-snug text-slate-900">
       <a
         href={detailHref}
-        class="line-clamp-2 block transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
+        class="line-clamp-2 transition hover:text-[var(--primary,#475569)] focus:outline-none focus-visible:underline"
       >
         {product.name}
       </a>
