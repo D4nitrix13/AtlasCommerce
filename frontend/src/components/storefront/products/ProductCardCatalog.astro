@@ -60,15 +60,25 @@ const priceFormatted = formatCurrency(product.priceCents, currencyCode);
 const swap = deriveProductCardSwap(product);
 const showSwatches = shouldRenderSwatchRow(swap.swatches);
 const stackedImages = buildStackedImages(product, swap, showSwatches);
-const variantHoverCss = buildVariantHoverCss(swap);
+// El CSS se arma sobre `stackedImages`, no sobre `swap.variantImages`: un
+// swatch cuyo archivo fue deduplicado (dos variants con la misma foto)
+// tiene entrada en el mapa pero ninguna `<img>` en el DOM, y su regla de
+// swap no matchearía nada.
+const variantHoverCss = buildVariantHoverCss(swap, stackedImages);
 
 /**
- * `buildVariantHoverCss` emite las reglas del MOUSE (`:hover`).
- * Para teclado espejamos los MISMOS selectores con `:focus-visible`, así
- * el swap por swatch también ocurre al tabular — sin `<script>`.
+ * `buildVariantHoverCss` emite las reglas del MOUSE (`:hover`). Para
+ * teclado espejamos los MISMOS selectores con `:focus-visible`, así el
+ * swap por swatch también ocurre al tabular — sin `<script>`.
  *
- * El replace es seguro: `cssEscape` sólo escapa `\` y `"`, así que el
- * literal `:hover)` no puede aparecer dentro de un valor de atributo.
+ * El replace cubre las dos familias de reglas que emite la lib (swap y
+ * escape de la primaria) porque ambas se disparan con `:hover)` dentro
+ * del `:has()`: tabular a un swatch sin foto propia también tiene que
+ * dejar la foto a la vista, igual que con el mouse.
+ *
+ * El replace es seguro: `cssEscape` escapa `\`, `"`, `(` y `)`, así que
+ * el literal `:hover)` no puede aparecer dentro de un valor de atributo
+ * (el `)` siempre va escapado y el replace no encuentra nada que tocar).
  */
 const focusVariantCss = variantHoverCss.replaceAll(':hover)', ':focus-visible)');
 
@@ -126,6 +136,25 @@ const finishCountLabelText =
         aria-label={labels.swatchGroupLabel ?? 'Variantes disponibles'}
       >
         <div class="flex flex-wrap items-center gap-1.5">
+          {/*
+            Se renderiza TODO swatch, incluso el que no aporta una foto
+            propia al stack (su archivo fue deduplicado porque otra
+            variant usa la misma foto — caso real: la versión zurda y la
+            diestra de un mismo acabado).
+
+            Decisión: se muestra igual, sólo que sin cambio de imagen al
+            hover (las reglas de escape de `buildVariantHoverCss` dejan
+            la primaria a la vista). Ocultarlo sería peor por dos motivos:
+            (1) el swatch NO es decorativo, comunica que ese acabado existe
+            y es comprable, y el badge "N colores" cuenta los finishes
+            reales — filtrar la fila dejaría el badge mintiendo; (2) la
+            fila de la card debe anunciar los mismos acabados que el
+            picker del PDP, que no filtra por fotografía.
+
+            El hover de un swatch sin foto propia sólo hace un cross-fade
+            a la misma imagen: nunca hay un estado en blanco ni un
+            click que haga otra cosa que el que ya hacía.
+          */}
           {swap.swatches.map((swatch) => {
             const isActive = swatch.id === swap.primaryVariantId;
             return (
@@ -220,7 +249,9 @@ const finishCountLabelText =
       .productcard-swap-img[data-role='back'] { opacity: 1; }
 
     /* Swatch hovered → ocultar primary/back. Las reglas per-variant
-       inyectadas abajo muestran SOLO la imagen del variant activo. */
+       inyectadas abajo muestran la foto de ESE variant, o — si no tiene
+       foto propia en el stack — devuelven la primaria a la vista, así
+       que ningún hover puede dejar la card en blanco. */
     .productcard-swap-root:has(.productcard-swap-swatch:hover)
         .productcard-swap-img[data-role='primary'],
     .productcard-swap-root:has(.productcard-swap-swatch:hover)

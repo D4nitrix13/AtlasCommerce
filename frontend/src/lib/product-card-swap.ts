@@ -23,6 +23,10 @@
  *   - `backImage`: shown on card hover (no swatch focus).
  *   - `variantImages`: `Map<variantId, ProductImage>` of the
  *     primary image per variant — shown when THAT swatch is hovered.
+ *     OJO: es insumo de `buildStackedImages`, NO la fuente de verdad
+ *     para "¿este swatch tiene foto propia?". El mapa puede tener un
+ *     variant cuyo archivo fue deduplicado y nunca llega al DOM
+ *     (ver `collectVariantIdsInStack`).
  *   - `variantSwatches`: one entry per `Product.variants` for the
  *     swatch row (Fender-style ~20px circles).
  *
@@ -171,9 +175,10 @@ export interface ProductCardSwapData {
    */
   swatches: readonly VariantSwatch[];
   /**
-   * Map `variantId → image` para el CSS hover-target. Cada regla
-   * `card:has([data-swatch-id=X]:hover) img[data-variant-id=X]`
-   * necesita que exista la imagen en el DOM para el cross-fade.
+   * Map `variantId → image` que alimenta `buildStackedImages`. Cada regla
+   * `card:has([data-swatch-id=X]:hover) img[data-variant-id=X]` necesita
+   * que exista la imagen en el DOM para el cross-fade, y el DOM se arma
+   * desde acá — por eso el CSS decide sobre el stack, no sobre este mapa.
    */
   variantImages: ReadonlyMap<string, ProductImage>;
   /** ID del variant activo (elegido por la imagen principal). */
@@ -279,36 +284,106 @@ export function buildStackedImages(
 }
 
 /**
- * Genera las reglas CSS per-variant para el `<style is:global>` al
- * final de `ProductCard.astro`.
+ * Set de `variantId` que tienen una `<img>` REAL en el stack renderizado.
  *
- * Por qué no Tailwind: cada selector depende del `variantId` del
- * producto concreto (no se puede parametrizar con utilities). La
- * regla canónica es `card:has([data-swatch-id="X"]:hover) img[data-
- * variant-id="X"]` — una por cada variant que tenga imagen.
+ * Por qué el stack y no `swap.variantImages`: `buildStackedImages`
+ * deduplica por `src`, así que un variant puede tener entrada en el mapa
+ * y aun así ninguna imagen en el DOM (su archivo ya está en el stack
+ * bajo otro `data-variant-id`). Datos legítimos del catálogo producen
+ * esto: la versión zurda y la diestra de un mismo acabado comparten la
+ * misma fotografía.
  *
- * Devuelve string vacío si no hay swatches o si ninguno tiene
- * imagen propia (en ese caso la card no necesita las reglas
- * per-variant, sólo las del `:hover` general).
+ * Los `variantId` nulos no entran al set: la imagen legacy sin galería
+ * rica no representa a ningún variant.
  */
-export function buildVariantHoverCss(swap: ProductCardSwapData): string {
-  return swap.swatches
-    .filter((swatch) => swap.variantImages.has(swatch.id))
-    .map(
-      (swatch) =>
-        `.productcard-swap-root:has([data-swatch-id="${cssEscape(swatch.id)}"]:hover) .productcard-swap-img[data-variant-id="${cssEscape(swatch.id)}"]{opacity:1;}`,
-    )
-    .join('');
+export function collectVariantIdsInStack(
+  stackedImages: readonly StackedImage[],
+): ReadonlySet<string> {
+  const idsInStack = new Set<string>();
+  for (const image of stackedImages) {
+    if (image.variantId === null) continue;
+    idsInStack.add(image.variantId);
+  }
+  return idsInStack;
+}
+
+/**
+ * Genera el CSS per-variant del `<style is:global>` al final de
+ * `ProductCard.astro` y `ProductCardCatalog.astro`.
+ *
+ * Por qué no Tailwind: cada selector depende del `variantId` del producto
+ * concreto (no se puede parametrizar con utilities).
+ *
+ * Emite DOS familias de reglas, una por swatch:
+ *
+ *  1. **Swap** (el swatch tiene `<img>` propia en el stack) —
+ *     `card:has([data-swatch-id="X"]:hover) img[data-variant-id="X"]`.
+ *  2. **Escape** (el swatch NO tiene foto propia) — mantiene visible la
+ *     primaria mientras ese swatch está activo.
+ *
+ * Por qué la 2 es obligatoria: la regla "swatch hover → ocultar
+ * primaria/back" matchea para TODOS los swatches, pero la de swap necesita
+ * que exista el `data-variant-id` en el DOM. Un swatch sin imagen deja su
+ * regla de swap sin matchear y la de ocultar activa → card EN BLANCO
+ * (medido en Chromium sobre `usa-texan`).
+ *
+ * Ambas familias son disjuntas y cubren todos los swatches: el activo
+ * siempre tiene su `data-variant-id` en el stack (es el de la primaria) y
+ * lo resuelve la regla `data-swatch-active` del `<style>` scoped del
+ * componente, no la de escape.
+ *
+ * `stackedImages` es la fuente de verdad de "¿quién tiene foto propia?",
+ * por lo que hace falta pasarlo: `swap.variantImages` puede traer
+ * variants ya deduplicados, que nunca llegan al DOM.
+ *
+ * Especificidad del escape: la regla que oculta la primaria vive en el
+ * `<style>` SCOPED del componente, donde Astro suma `[data-astro-cid]` a
+ * cada compound (0,7,0). Estas reglas van en un `<style is:global>` sin
+ * ese scope (0,6,0), así que el escape necesita el mismo +1 que usan las
+ * reglas `data-swatch-active`: una clase más (`.productcard-swap-swatch`)
+ * dentro del `:has()` y, en el target, el tipo `img` + el atributo
+ * `data-variant-id`, que las cards siempre renderizan (vacío incluido).
+ */
+export function buildVariantHoverCss(
+  swap: ProductCardSwapData,
+  stackedImages: readonly StackedImage[],
+): string {
+  const idsInStack = collectVariantIdsInStack(stackedImages);
+  const rules: string[] = [];
+  for (const swatch of swap.swatches) {
+    const id = cssEscape(swatch.id);
+    if (idsInStack.has(swatch.id)) {
+      rules.push(
+        `.productcard-swap-root:has([data-swatch-id="${id}"]:hover) .productcard-swap-img[data-variant-id="${id}"]{opacity:1;}`,
+      );
+      continue;
+    }
+    rules.push(
+      `.productcard-swap-root:has(.productcard-swap-swatch[data-swatch-id="${id}"]:hover) img.productcard-swap-img[data-role="primary"][data-variant-id]{opacity:1;}`,
+    );
+  }
+  return rules.join('');
 }
 
 /**
  * Escapa caracteres que romperían un selector CSS (id con ".", "/",
  * etc). Backend slugs son kebab-case pero el `variantId` puede traer
- * cualquier caracter — resguardamos el selector. Sólo escapa `\` y
- * `"` (caracteres especiales válidos en `[attr="value"]`).
+ * cualquier caracter — resguardamos el selector.
+ *
+ * Escapa `\` y `"` para que el valor no pueda cerrar el atributo, y `(` y
+ * `)` porque los componentes espejan las reglas con un
+ * `replaceAll(':hover)', ':focus-visible)')`: sin escapar el paréntesis de
+ * cierre, un id que contenga el literal `:hover)` (p. ej.
+ * `x"):hover)[data-y="z`) sería reescrito por dentro del valor de atributo
+ * y la regla quedaría inservible. Con `\)` el valor sigue siendo el mismo
+ * para el navegador y el replace no encuentra nada que tocar.
  */
 function cssEscape(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
 }
 
 /**
