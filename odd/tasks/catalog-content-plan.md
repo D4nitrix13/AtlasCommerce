@@ -4,7 +4,29 @@
 > al terminar cada trabajo verificable. Nada se marca hecho sin evidencia
 > observada (comando con salida real, o navegador real).
 
-**Última actualización:** 2026-10-22 · **Etapa actual:** E1.2 — anchos configurables
+**Última actualización:** 2026-10-22 · **Etapa actual:** E1.4 — campos de acabado en variantes
+
+**E1.2 — ✅ HECHO.** Anchos en `config/assets.upload.widths`. Config inválida se
+**rechaza al leer** (no se sanitiza, no se valida en el boot, lista vacía =
+rechazo). `ProductImageUploader::WIDTHS` eliminado: una sola fuente de verdad.
+
+**E1.3 — ✅ HECHO.** `variant_id` en los tres endpoints, validado con que la
+variante pertenezca al producto **de la ruta**, nunca del body. Regla en un
+trait para que los tres FormRequests la apliquen por estructura.
+
+Sin esa regla la galería miente en las dos direcciones: el PDP muestra la foto
+cuando no hay acabado seleccionado, y el panel la etiqueta con un acabado que
+nunca se cumple. El storefront **no necesitó cambios**: `galleryPerRole()` ya
+agrupaba por `(variant_id, sort_order)`.
+
+Commits `413cf9f4`. 453 tests verdes (265 admin + 188 assets/storefront).
+
+Evidencia real de 1.3 (JPEG real, producto con 2 variantes, disco real):
+```
+producto 98 · variante 12 (heritage-cherry) · la otra variante 13 sin imágenes
+  variant_id=12  w=400 / 800 / 1200 / 1600  →  4 WebP
+0 filas con variant_id = 13
+```
 
 **E1.1 — ✅ HECHO y verificado.** Commit `c1d9e451`. Subida por multipart →
 WebP en 400/800/1200/1600, aspect preservado, una fila por ancho, `is_primary`
