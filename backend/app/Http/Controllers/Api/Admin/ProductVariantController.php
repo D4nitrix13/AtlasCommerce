@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\VariantCondition;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductVariantStoreRequest;
 use App\Http\Requests\Admin\ProductVariantUpdateRequest;
@@ -125,6 +126,15 @@ class ProductVariantController extends Controller
                 'cost_cents' => $data['cost_cents'] ?? 0,
                 'barcode' => $data['barcode'] ?? null,
                 'is_active' => $data['is_active'] ?? true,
+                'finish_slug' => $data['finish_slug'] ?? null,
+                'finish_label' => $data['finish_label'] ?? null,
+                'finish_hex' => $data['finish_hex'] ?? null,
+                // Mismo default que la columna en BD (`DEFAULT 'nuevo'`),
+                // escrito explícito para que la respuesta sea la misma
+                // llegue o no el campo.
+                'condition' => $data['condition'] ?? VariantCondition::Nuevo->value,
+                'stock' => $data['stock'] ?? 0,
+                'handedness' => $data['handedness'] ?? null,
             ]);
         });
 
