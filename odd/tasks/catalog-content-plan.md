@@ -4,7 +4,31 @@
 > al terminar cada trabajo verificable. Nada se marca hecho sin evidencia
 > observada (comando con salida real, o navegador real).
 
-**Última actualización:** 2026-10-22 · **Etapa actual:** E1.4 — campos de acabado en variantes
+**Última actualización:** 2026-10-23 · **Etapa actual:** E1.5 — `is_hover` + orden de galería
+
+**E1.4 — ✅ HECHO.** `finish_slug`, `finish_label`, `finish_hex`, `condition`,
+`stock`, `handedness` escribibles por API. Commit `57766e0c`. 586 tests verdes.
+
+Decisión de dominio: `finish_slug` **obligatorio** en categorías finishables
+(`VariantFinishDeriver::isFinishableCategory()`: guitars, basses) y opcional en
+el resto, donde el color es atributo del producto y no acabado. El criterio ya
+existía en el repo; no se duplicó la lista de slugs.
+
+**Por qué importa:** `StorefrontProductResource::resolveVariants()` descarta
+toda variante sin `finish_slug`. Con la API able de crear variantes, eso era
+una bomba: una variante sin acabado desaparecía del PDP sin error en ninguna
+parte. El fix va en el borde de escritura, **no** en el storefront — cambiarlo
+no movería ninguna de las 421 variantes actuales y obligaría a revisar el
+picker de la PDP.
+
+Enums reutilizados, no inventados: `condition` ∈ {nuevo, usado, ambos} según la
+migración; `handedness` reutiliza `VariantHandednessResolver::LEFT_HANDED`, con
+`NULL` = diestro. Sin cast al modelo: el resource hace `(string) $condition` y
+castear a `BackedEnum` lo rompería.
+
+Añadido índice único parcial `(product_id, finish_slug) WHERE finish_slug IS NOT
+NULL AND deleted_at IS NULL`: la unicidad la garantizaba sólo la validación, que
+deja pasar SQL directo y carreras. 0 duplicados antes de aplicar.
 
 **E1.2 — ✅ HECHO.** Anchos en `config/assets.upload.widths`. Config inválida se
 **rechaza al leer** (no se sanitiza, no se valida en el boot, lista vacía =
