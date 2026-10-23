@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\ValidatesVariantOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -15,16 +16,22 @@ use Illuminate\Foundation\Http\FormRequest;
  *  - is_primary: bool opcional.
  *  - sort_order: int opcional >= 0. Si no se pasa, se asigna automáticamente
  *    al final (max + 1).
+ *  - variant_id: int opcional. La variante tiene que ser DEL producto de
+ *    la ruta — ver {@see ValidatesVariantOwnership}. Es la misma regla que
+ *    aplica el upload por binario: las dos formas de crear la fila
+ *    admiten la misma metadata.
  */
 class ProductImageStoreRequest extends FormRequest
 {
+    use ValidatesVariantOwnership;
+
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, string|\Illuminate\Validation\Rules\Exists>>
      */
     public function rules(): array
     {
@@ -33,6 +40,7 @@ class ProductImageStoreRequest extends FormRequest
             'alt_text' => ['nullable', 'string', 'max:160'],
             'is_primary' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
+            'variant_id' => $this->variantIdRules(),
         ];
     }
 
@@ -44,6 +52,7 @@ class ProductImageStoreRequest extends FormRequest
         return [
             'image_url.required' => 'Tenés que indicar una URL de imagen.',
             'image_url.max' => 'La URL de la imagen no puede superar 500 caracteres.',
+            ...$this->variantIdMessages(),
         ];
     }
 }

@@ -15,6 +15,7 @@ use App\Models\Catalog\ProductImage;
 use App\Models\Stores\ProductStore;
 use App\Models\Stores\Store;
 use App\Services\Assets\ProductImageUploader;
+use App\Services\Assets\UploadWidthResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -35,6 +36,10 @@ use Symfony\Component\HttpFoundation\Response;
  *    desmarcan las demás del mismo producto (solo una principal
  *    por producto).
  *  - sort_order auto-asignado al final (max + 1) si no se pasa.
+ *  - variant_id, si viene, tiene que ser una variante del producto de
+ *    la ruta. La regla vive en los FormRequests (ver
+ *    ValidatesVariantOwnership), no acá: los tres endpoints que escriben
+ *    la columna la declaran y el controller sólo la copia.
  *
  * Permiso: `catalog.manage`.
  */
@@ -110,6 +115,9 @@ class ProductImageController extends Controller
                 'alt_text' => $data['alt_text'] ?? null,
                 'is_primary' => $isPrimary,
                 'sort_order' => $sortOrder,
+                // Ya validada contra el producto de la ruta: una variante
+                // ajena nunca llega acá (ver ValidatesVariantOwnership).
+                'variant_id' => $data['variant_id'] ?? null,
             ]);
         });
 
@@ -123,7 +131,8 @@ class ProductImageController extends Controller
      *
      * Ruta GEMELA de `store()` pero por binario: el admin sube el archivo,
      * el backend lo convierte a WebP en los anchos de
-     * {@see ProductImageUploader::WIDTHS} y crea UNA fila por ancho.
+     * `assets.upload.widths` ({@see UploadWidthResolver}) y crea UNA fila
+     * por ancho.
      *
      * No reemplaza al endpoint con `image_url`: aquel sigue siendo el
      * contrato para cuando la imagen ya vive fuera (CDN de terceros,
@@ -132,9 +141,9 @@ class ProductImageController extends Controller
      * cuando vienen juntos, y partirlo en dos rutas hace que cada
      * endpoint tenga una forma de entrada y una de salida.
      *
-     * Todas las filas de una misma subida comparten `sort_order`, `alt_text`
-     * e `is_primary`, y se distinguen sólo por `width` — que es como el
-     * seeder del catálogo ya guarda las 4 resoluciones de una foto.
+     * Todas las filas de una misma subida comparten `sort_order`, `alt_text`,
+     * `variant_id` e `is_primary`, y se distinguen sólo por `width` — que es
+     * como el seeder del catálogo ya guarda las 4 resoluciones de una foto.
      * `is_primary` sólo se marca en la fila del ancho mayor: la convención
      * del repo es que la primaria es la de 1600.
      */
@@ -159,6 +168,9 @@ class ProductImageController extends Controller
 
             $sortOrder = $data['sort_order'] ?? $this->nextSortOrder(productId: $product->id);
             $altText = $data['alt_text'] ?? null;
+            // Las resoluciones de UNA foto son la misma foto: la variante
+            // se replica en las N filas, no se elige para una sola.
+            $variantId = $data['variant_id'] ?? null;
 
             // Los anchos llegan ascendentes, así que el último es el mayor.
             $widestWidth = (int) $stored[array_key_last($stored)]['width'];
@@ -173,6 +185,7 @@ class ProductImageController extends Controller
                     'is_primary' => $isPrimary && $entry['width'] === $widestWidth,
                     'sort_order' => $sortOrder,
                     'width' => $entry['width'],
+                    'variant_id' => $variantId,
                 ]);
             }
 

@@ -22,6 +22,11 @@ class AdminProductImageResource extends JsonResource
         return [
             'id' => $this->resource->id,
             'product_id' => $this->resource->product_id,
+            // Variante (acabado) a la que pertenece la foto. `null` es un
+            // valor legítimo y frecuente (foto genérica del producto), así
+            // que se castea a `int|null` explícito: el panel admin necesita
+            // distinguir "sin variante" de "con variante 0".
+            'variant_id' => $this->resource->variant_id === null ? null : (int) $this->resource->variant_id,
             'image_url' => $this->resource->image_url,
             'alt_text' => $this->resource->alt_text,
             'sort_order' => (int) $this->resource->sort_order,

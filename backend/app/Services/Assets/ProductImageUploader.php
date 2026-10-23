@@ -8,6 +8,7 @@ use App\Models\Catalog\Product;
 use App\Models\Stores\Store;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 use Spatie\Image\Enums\Constraint;
 use Spatie\Image\Exceptions\CouldNotLoadImage;
 use Spatie\Image\Image;
@@ -25,8 +26,16 @@ use Symfony\Component\HttpFoundation\Response;
  * "sin el ancho persistido, las 4 resoluciones de una misma foto son filas
  * indistinguibles y la galería muestra la misma foto 4 veces". Por eso
  * `upload()` devuelve un registro por ancho y el controller crea una fila
- * por cada uno: los 4 WebP comparten `image_url`-shape, `alt_text` y
+ * por cada uno: los WebP comparten `image_url`-shape, `alt_text` y
  * `sort_order`, y se distinguen sólo por `width`.
+ *
+ * ── De dónde salen los anchos ─────────────────────────────────────────
+ *
+ * De `assets.upload.widths` (`config/assets.php`), resueltos y validados
+ * por {@see UploadWidthResolver}. Esta clase ya no tiene constante de
+ * anchos: con la lista en config, una constante sería una segunda fuente
+ * de verdad capaz de contradecir al archivo de configuración sin que nada
+ * lo reportara.
  *
  * ── Por qué no se upscalea ────────────────────────────────────────────
  *
@@ -47,23 +56,10 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class ProductImageUploader
 {
-    /**
-     * Anchos generados por cada subida, en px.
-     *
-     * Los mismos cuatro que produce `scripts/migrate-gibson-images.sh`
-     * para el catálogo sembrado, y los mismos que la PDP espera: 1600 es
-     * la full y 400 la miniatura de tarjeta.
-     *
-     * ⏳ Se vuelve configurable (vía `config/assets.php`) en el slice 1.2.
-     * Hasta entonces es una constante a propósito: mientras el valor sea
-     * el mismo para todo el catálogo, exponerlo como config sólo abre la
-     * puerta a que cada instancia termine con un set distinto.
-     *
-     * @var array<int, int>
-     */
-    public const WIDTHS = [400, 800, 1200, 1600];
-
-    public function __construct(private readonly StorageKeyDeriver $deriver) {}
+    public function __construct(
+        private readonly StorageKeyDeriver $deriver,
+        private readonly UploadWidthResolver $widths,
+    ) {}
 
     /**
      * Convierte, publica y devuelve una entrada por ancho generado.
@@ -74,11 +70,21 @@ final class ProductImageUploader
      * @return array<int, array{width: int, image_url: string}>
      *
      * @throws CouldNotLoadImage Si el archivo no se puede decodificar.
+     * @throws InvalidArgumentException Si `assets.upload.widths` está mal
+     *                                  configurada. Es un error de despliegue,
+     *                                  no del archivo: se propaga para que el
+     *                                  request quede en 5xx con el detalle en
+     *                                  el log en lugar de devolver un 201 con
+     *                                  una galería que nadie pidió.
      */
     public function upload(UploadedFile $file, Product $product, Store $store): array
     {
         $disk = Storage::disk(name: (string) config(key: 'assets.disk', default: 'ftp'));
         $quality = (int) config(key: 'assets.upload.quality', default: 85);
+
+        // Antes de tocar el archivo: si la lista de anchos está rota, el
+        // resultado sería el mismo de todas formas.
+        $widths = $this->widths->resolve();
 
         $sourcePath = $file->getRealPath();
         if ($sourcePath === false) {
@@ -93,14 +99,14 @@ final class ProductImageUploader
         // Se descartan los anchos que no entran: ver la nota de no-upscale
         // en el docblock de la clase.
         $targetWidths = array_values(array_filter(
-            self::WIDTHS,
+            $widths,
             static fn (int $width): bool => $width <= $sourceWidth,
         ));
 
         if ($targetWidths === []) {
             abort(
                 code: Response::HTTP_UNPROCESSABLE_ENTITY,
-                message: 'La imagen es más angosta que el tamaño mínimo soportado (400 px).',
+                message: 'La imagen es más angosta que el tamaño mínimo soportado ('.min($widths).' px).',
             );
         }
 

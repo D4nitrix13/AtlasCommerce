@@ -9,11 +9,13 @@ use App\Models\Auth\User;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Category;
 use App\Models\Catalog\Product;
+use App\Models\Catalog\ProductImage;
+use App\Models\Catalog\ProductVariant;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
-use App\Services\Assets\ProductImageUploader;
+use App\Services\Assets\UploadWidthResolver;
 use Database\Seeders\PermissionsCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -29,6 +31,12 @@ use Tests\TestCase;
  *
  * Sirve para demostrar que la conversión a WebP funciona dentro del
  * container — que es donde vive la API — y no sólo en el host.
+ *
+ * El segundo caso sube el MISMO archivo real con un `variant_id` válido
+ * contra un producto de dos variantes, y comprueba que las 4 filas
+ * quedan atadas al acabado elegido: es el camino completo que hoy no
+ * podía ejercitarse porque el admin no tenía forma de decir "esta foto
+ * es el acabado Cereza".
  */
 class ProductImageUploadRealTest extends TestCase
 {
@@ -94,10 +102,20 @@ class ProductImageUploadRealTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Limpieza de lo que se escribió de verdad.
+        // Borra SÓLO lo que escribió este test. La versión anterior
+        // hacía `delete()` sobre `allFiles()`, que vacía el disco
+        // configurado entero: inocuo con ASSETS_DISK=local en
+        // desarrollo, pero contra `ftp` —el valor de otro entorno—
+        // borraría el catálogo entero desde una suite de tests.
+        $storeSlug = $this->store->slug;
+        $prefix = "tenants/{$storeSlug}/products/";
+
         foreach (Storage::disk($this->disk)->allFiles() as $file) {
-            Storage::disk($this->disk)->delete($file);
+            if (str_starts_with($file, $prefix)) {
+                Storage::disk($this->disk)->delete($file);
+            }
         }
+
         if (is_dir($this->scratch)) {
             foreach ((array) glob($this->scratch.'/*') as $f) {
                 @unlink((string) $f);
@@ -132,7 +150,7 @@ class ProductImageUploadRealTest extends TestCase
         $response->assertCreated();
 
         $rows = $response->json(key: 'data');
-        $this->assertCount(expectedCount: count(ProductImageUploader::WIDTHS), haystack: $rows);
+        $this->assertCount(expectedCount: count(UploadWidthResolver::DEFAULT_WIDTHS), haystack: $rows);
 
         $widths = [];
         foreach ($rows as $row) {
@@ -157,7 +175,7 @@ class ProductImageUploadRealTest extends TestCase
         }
 
         sort($widths);
-        $this->assertSame(expected: ProductImageUploader::WIDTHS, actual: $widths);
+        $this->assertSame(expected: UploadWidthResolver::DEFAULT_WIDTHS, actual: $widths);
 
         // 4) El aspect ratio del ORIGINAL se preserva. Se compara contra
         // el del archivo subido, no contra un valor fijo: si mañana la
@@ -174,7 +192,7 @@ class ProductImageUploadRealTest extends TestCase
         }
 
         // 5) Solo la fila del ancho mayor queda como primaria.
-        $primaries = \App\Models\Catalog\ProductImage::query()
+        $primaries = ProductImage::query()
             ->where(column: 'product_id', operator: '=', value: $this->product->id)
             ->where(column: 'is_primary', operator: '=', value: true)
             ->get();
@@ -193,6 +211,95 @@ class ProductImageUploadRealTest extends TestCase
                 $size[1],
                 Storage::disk($this->disk)->size(path: $row['image_url']),
                 $row['image_url'],
+            ));
+        }
+        fwrite(STDERR, "=== fin ===\n");
+    }
+
+    #[Test]
+    public function it_attaches_a_real_upload_to_the_requested_variant(): void
+    {
+        $sourcePath = base_path('tests/Fixtures/guitarra-1600x1200.jpg');
+        if (! is_file($sourcePath)) {
+            $this->markTestSkipped('fixture real ausente');
+        }
+
+        // Producto de DOS acabados: el caso donde `variant_id` deja de ser
+        // decorativo y la galería del PDP puede filtrar de verdad.
+        $cherry = ProductVariant::factory()->for($this->product, 'product')->create(attributes: [
+            'name' => 'Heritage Cherry',
+            'finish_slug' => 'heritage-cherry',
+            'finish_label' => 'Heritage Cherry',
+            'is_active' => true,
+        ]);
+        $sunburst = ProductVariant::factory()->for($this->product, 'product')->create(attributes: [
+            'name' => 'Sunburst',
+            'finish_slug' => 'sunburst',
+            'finish_label' => 'Sunburst',
+            'is_active' => true,
+        ]);
+
+        $real = new UploadedFile(
+            path: $sourcePath,
+            originalName: 'sg-standard-heritage-cherry.jpg',
+            mimeType: 'image/jpeg',
+            error: null,
+            test: true,
+        );
+
+        $response = $this->post(
+            uri: "/api/v1/admin/products/{$this->product->id}/images/upload",
+            data: [
+                'image' => $real,
+                'alt_text' => 'SG Standard - Heritage Cherry',
+                'is_primary' => true,
+                'variant_id' => $cherry->id,
+            ],
+        );
+
+        $response->assertCreated();
+
+        // Las 4 resoluciones de la MISMA foto quedan en la variante pedida:
+        // no se reparte, porque no hay a cuál elegir.
+        $stored = ProductImage::query()
+            ->where(column: 'product_id', operator: '=', value: $this->product->id)
+            ->ordered()
+            ->get();
+
+        $this->assertCount(expectedCount: count(UploadWidthResolver::DEFAULT_WIDTHS), haystack: $stored);
+        $this->assertSame(
+            expected: array_fill(0, count(UploadWidthResolver::DEFAULT_WIDTHS), $cherry->id),
+            actual: $stored->map(fn (ProductImage $row): ?int => $row->variant_id === null ? null : (int) $row->variant_id)->all(),
+        );
+
+        // Y la otra variante NO quedó con nada colgando.
+        $this->assertSame(expected: 0, actual: ProductImage::query()
+            ->where(column: 'variant_id', operator: '=', value: $sunburst->id)
+            ->count());
+
+        // El recurso admin lo expone: el panel tiene que poder leer lo que
+        // el panel acaba de escribir.
+        $this->assertSame(
+            expected: $cherry->id,
+            actual: $response->json(key: 'data.0.variant_id'),
+        );
+
+        fwrite(STDERR, "\n=== EVIDENCIA REAL (variant_id) ===\n");
+        fwrite(STDERR, sprintf(
+            "producto %d · variante %d (%s) · la otra variante %d (%s) sin imágenes\n",
+            $this->product->id,
+            $cherry->id,
+            (string) $cherry->finish_slug,
+            $sunburst->id,
+            (string) $sunburst->finish_slug,
+        ));
+        foreach ($stored as $row) {
+            fwrite(STDERR, sprintf(
+                "  variant_id=%-5d w=%-5d %-9s %s\n",
+                (int) $row->variant_id,
+                (int) $row->width,
+                pathinfo((string) $row->image_url, PATHINFO_EXTENSION),
+                $row->image_url,
             ));
         }
         fwrite(STDERR, "=== fin ===\n");

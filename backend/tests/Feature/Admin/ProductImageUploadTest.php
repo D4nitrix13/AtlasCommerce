@@ -10,17 +10,20 @@ use App\Models\Catalog\Brand;
 use App\Models\Catalog\Category;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductImage;
+use App\Models\Catalog\ProductVariant;
 use App\Models\Settings\Currency;
 use App\Models\Stores\ProductStore;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
-use App\Services\Assets\ProductImageUploader;
 use App\Services\Assets\StorageKeyDeriver;
+use App\Services\Assets\UploadWidthResolver;
 use Database\Seeders\PermissionsCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -37,6 +40,12 @@ use Tests\TestCase;
  *    `AssetController` (mismo criterio que usa `validate()`).
  *  - `is_primary` sólo queda en la fila del ancho mayor.
  *  - No-upscale: un original angosto no genera filas de anchos mayores.
+ *  - Anchos configurables (`assets.upload.widths`): default intacto,
+ *    lista propia respetada, no-upscale con lista propia, y lista
+ *    inválida rechazada con error explícito en vez de un 201 mudo.
+ *  - `variant_id`: se persiste y vuelve en la respuesta, tiene que ser
+ *    una variante DEL producto de la ruta (422 si es de otro), y su
+ *    ausencia sigue siendo válida.
  *  - MIME fuera de la allow-list (PDF renombrado a .jpg) → 422.
  *  - Archivo sobre `assets.upload.max_kilobytes` → 422.
  *  - Archivo vacío → 422.
@@ -148,6 +157,43 @@ final class ProductImageUploadTest extends TestCase
     }
 
     /**
+     * Variante con `finish_slug` real: es lo que el PDP usa para elegir
+     * acabado, así que es la que la galería tiene que poder referenciar.
+     */
+    private function makeVariant(Product $product, string $finish): ProductVariant
+    {
+        return ProductVariant::factory()->for($product, 'product')->create(attributes: [
+            'finish_slug' => $finish,
+            'finish_label' => ucfirst($finish),
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * @return Collection<int, ProductImage>
+     */
+    private function primaries(): Collection
+    {
+        return ProductImage::query()
+            ->where(column: 'is_primary', operator: '=', value: true)
+            ->get();
+    }
+
+    /**
+     * `variant_id` de cada fila, en el mismo orden que `storedWidths()`.
+     *
+     * @return array<int, int|null>
+     */
+    private function storedVariantIds(): array
+    {
+        return ProductImage::query()
+            ->ordered()
+            ->get()
+            ->map(fn (ProductImage $row): ?int => $row->variant_id === null ? null : (int) $row->variant_id)
+            ->all();
+    }
+
+    /**
      * JPEG sintético del ancho pedido.
      *
      * Requiere `ext-gd`: la construye el propio `UploadedFile::fake()`.
@@ -227,7 +273,7 @@ final class ProductImageUploadTest extends TestCase
         $response->assertCreated();
 
         $this->assertSame(
-            expected: ProductImageUploader::WIDTHS,
+            expected: UploadWidthResolver::DEFAULT_WIDTHS,
             actual: $this->storedWidths(),
         );
 
@@ -321,6 +367,247 @@ final class ProductImageUploadTest extends TestCase
             ]);
 
         $response->assertStatus(status: 422);
+        $this->assertSame(expected: 0, actual: ProductImage::query()->count());
+    }
+
+    // -----------------------------------------------------------------------
+    // Anchos configurables (assets.upload.widths)
+    // -----------------------------------------------------------------------
+
+    #[Test]
+    public function upload_uses_the_default_widths_when_the_config_key_is_absent(): void
+    {
+        config()->offsetUnset(UploadWidthResolver::CONFIG_KEY);
+
+        $this->asAdmin();
+
+        $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 1600, height: 1200),
+            ])->assertCreated();
+
+        // Sin la clave, el comportamiento es el de antes del slice 1.2.
+        $this->assertSame(
+            expected: [400, 800, 1200, 1600],
+            actual: $this->storedWidths(),
+        );
+    }
+
+    #[Test]
+    public function upload_honours_a_configured_width_list(): void
+    {
+        config()->set(key: UploadWidthResolver::CONFIG_KEY, value: [300, 900]);
+
+        $this->asAdmin();
+
+        $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 1600, height: 1200),
+                'is_primary' => true,
+            ])->assertCreated();
+
+        $this->assertSame(expected: [300, 900], actual: $this->storedWidths());
+
+        // La primaria sigue siendo la del ancho MAYOR configurado, no 1600.
+        $this->assertSame(expected: 900, actual: (int) $this->primaries()->first()?->width);
+    }
+
+    #[Test]
+    public function upload_does_not_upscale_with_a_configured_width_list(): void
+    {
+        config()->set(key: UploadWidthResolver::CONFIG_KEY, value: [600, 1200]);
+
+        $this->asAdmin();
+
+        // 500 px de original: con la lista [600, 1200] no entra ninguno.
+        $rejected = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 500, height: 400),
+            ]);
+
+        // El mensaje del piso mínimo ya no dice "400": dice el de la lista.
+        $rejected->assertStatus(status: 422);
+        $this->assertStringContainsString(
+            needle: 'tamaño mínimo soportado (600 px)',
+            haystack: (string) $rejected->json(key: 'message'),
+        );
+        $this->assertSame(expected: 0, actual: ProductImage::query()->count());
+
+        // 800 px sí habilita el de 600 pero no el de 1200: no hay upscale.
+        $accepted = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 800, height: 600),
+            ]);
+
+        $accepted->assertCreated();
+        $this->assertSame(expected: [600], actual: $this->storedWidths());
+    }
+
+    #[Test]
+    public function upload_fails_loudly_when_the_width_list_is_misconfigured(): void
+    {
+        config()->set(key: UploadWidthResolver::CONFIG_KEY, value: []);
+
+        $this->asAdmin();
+
+        // Sin lista de anchos no hay ni archivos ni filas: un 201 acá
+        // sería un "subí la foto" que no subió nada.
+        $this->withoutExceptionHandling();
+
+        try {
+            $this->withHeaders(headers: ['Accept' => 'application/json'])
+                ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                    'image' => $this->fakeImage(width: 1600, height: 1200),
+                ]);
+        } catch (InvalidArgumentException $exception) {
+            $this->assertStringContainsString(
+                needle: UploadWidthResolver::CONFIG_KEY,
+                haystack: $exception->getMessage(),
+            );
+            $this->assertSame(expected: 0, actual: ProductImage::query()->count());
+            $this->assertSame(expected: [], actual: Storage::disk(name: $this->disk)->allFiles());
+
+            return;
+        }
+
+        $this->fail('Una lista de anchos vacía tiene que fallar, no responder 201.');
+    }
+
+    #[Test]
+    public function upload_fails_loudly_when_the_width_list_is_not_ascending(): void
+    {
+        config()->set(key: UploadWidthResolver::CONFIG_KEY, value: [1600, 400]);
+
+        $this->asAdmin();
+        $this->withoutExceptionHandling();
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 1600, height: 1200),
+            ]);
+    }
+
+    // -----------------------------------------------------------------------
+    // variant_id
+    // -----------------------------------------------------------------------
+
+    #[Test]
+    public function upload_persists_a_variant_owned_by_the_product(): void
+    {
+        $variant = $this->makeVariant(product: $this->product, finish: 'heritage-cherry');
+
+        $this->asAdmin();
+
+        $response = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 1600, height: 1200),
+                'variant_id' => $variant->id,
+            ]);
+
+        $response->assertCreated();
+
+        // Las 4 resoluciones son LA MISMA foto: todas llevan la variante.
+        $this->assertSame(
+            expected: array_fill(0, count(UploadWidthResolver::DEFAULT_WIDTHS), (int) $variant->id),
+            actual: $this->storedVariantIds(),
+        );
+        $this->assertSame(
+            expected: $variant->id,
+            actual: $response->json(key: 'data.0.variant_id'),
+        );
+    }
+
+    #[Test]
+    public function upload_without_variant_id_keeps_working_and_stores_null(): void
+    {
+        $this->asAdmin();
+
+        $response = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 1600, height: 1200),
+            ]);
+
+        $response->assertCreated();
+        $this->assertSame(expected: [null, null, null, null], actual: $this->storedVariantIds());
+        $this->assertNull($response->json(key: 'data.0.variant_id'));
+    }
+
+    #[Test]
+    public function upload_rejects_a_variant_that_belongs_to_another_product(): void
+    {
+        $foreign = $this->makeVariant(product: $this->otherProduct, finish: 'sunburst');
+
+        $this->asAdmin();
+
+        $response = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 1600, height: 1200),
+                'variant_id' => $foreign->id,
+            ]);
+
+        // 422 y no un attach silencioso: la galería del PDP filtra por
+        // variant_id y una foto con la variante ajena miente en las dos
+        // direcciones.
+        $response->assertStatus(status: 422);
+        $response->assertJsonValidationErrors(errors: ['variant_id']);
+        $this->assertStringContainsString(
+            needle: 'no pertenece a este producto',
+            haystack: (string) $response->json(key: 'errors.variant_id.0'),
+        );
+        $this->assertSame(expected: 0, actual: ProductImage::query()->count());
+    }
+
+    #[Test]
+    public function upload_rejects_a_nonexistent_variant(): void
+    {
+        $this->asAdmin();
+
+        $response = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(width: 1600, height: 1200),
+                'variant_id' => 999_999,
+            ]);
+
+        $response->assertStatus(status: 422);
+        $response->assertJsonValidationErrors(errors: ['variant_id']);
+        $this->assertSame(expected: 0, actual: ProductImage::query()->count());
+    }
+
+    #[Test]
+    public function the_url_based_endpoint_accepts_a_variant_of_the_product_too(): void
+    {
+        $variant = $this->makeVariant(product: $this->product, finish: 'heritage-cherry');
+
+        $this->asAdmin();
+
+        $response = $this->postJson(self::ENDPOINT.$this->product->id.'/images', data: [
+            'image_url' => 'https://cdn.example.com/cherry.jpg',
+            'variant_id' => $variant->id,
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonPath(path: 'data.variant_id', expect: $variant->id);
+
+        $row = ProductImage::query()->firstOrFail();
+        $this->assertSame(expected: $variant->id, actual: (int) $row->variant_id);
+    }
+
+    #[Test]
+    public function the_url_based_endpoint_rejects_a_variant_of_another_product(): void
+    {
+        $foreign = $this->makeVariant(product: $this->otherProduct, finish: 'sunburst');
+
+        $this->asAdmin();
+
+        $response = $this->postJson(self::ENDPOINT.$this->product->id.'/images', data: [
+            'image_url' => 'https://cdn.example.com/x.jpg',
+            'variant_id' => $foreign->id,
+        ]);
+
+        $response->assertStatus(status: 422);
+        $response->assertJsonValidationErrors(errors: ['variant_id']);
         $this->assertSame(expected: 0, actual: ProductImage::query()->count());
     }
 

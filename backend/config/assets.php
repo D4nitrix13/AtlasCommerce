@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Services\Assets\UploadWidthResolver;
+
 return [
 
     /**
@@ -64,11 +66,9 @@ return [
     /**
      * Validación de las imágenes que el admin sube por la API.
      *
-     * Los tres valores viven acá y no inline en el FormRequest porque son
+     * Los cuatro valores viven acá y no inline en el FormRequest porque son
      * política operativa: cambiarlos no es un refactor, es cambiar qué
-     * acepta el sistema. La lista de anchos NO está en este bloque a
-     * propósito — es una constante del conversor hasta que exista el
-     * slice 1.2 que la vuelva configurable.
+     * acepta el sistema y qué guarda en disco.
      */
     'upload' => [
 
@@ -106,5 +106,29 @@ return [
          * catálogo sembrado y no se nota el origen al served.
          */
         'quality' => (int) env(key: 'ASSETS_UPLOAD_QUALITY', default: 85),
+
+        /**
+         * Anchos que se generan por cada imagen subida, en px.
+         *
+         * Override por entorno con CSV ascendente: `ASSETS_UPLOAD_WIDTHS`.
+         * El default sale de {@see UploadWidthResolver::DEFAULT_WIDTHS}
+         * para que la lista esté escrita una sola vez en el repo.
+         *
+         * Contrato que {@see UploadWidthResolver::resolve()} valida y hace
+         * cumplir: enteros positivos, sin repetidos y en orden ascendente.
+         * Una lista que no lo cumpla se RECHAZA con un error explícito en
+         * vez de corregirse en silencio — ver el docblock de esa clase para
+         * por qué (y para qué pasa con la lista vacía).
+         *
+         * Anchos mayores que el original se descartan: el conversor no
+         * hace upscale, así que un JPEG de 800 px con esta lista produce
+         * dos archivos (400 y 800), no cuatro.
+         */
+        'widths' => UploadWidthResolver::fromEnvList(
+            list: (string) env(
+                key: 'ASSETS_UPLOAD_WIDTHS',
+                default: implode(separator: ',', array: UploadWidthResolver::DEFAULT_WIDTHS),
+            ),
+        ),
     ],
 ];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\ValidatesVariantOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 
@@ -26,16 +27,22 @@ use Illuminate\Http\UploadedFile;
  *  - is_primary: bool opcional.
  *  - sort_order: int opcional >= 0. Si no se pasa, se asigna automáticamente
  *    al final (max + 1) del producto.
+ *  - variant_id: int opcional, y tiene que ser una variante DEL producto
+ *    de la ruta — ver {@see ValidatesVariantOwnership}. Las filas que crea
+ *    este endpoint son las 4 resoluciones de UNA foto, así que la variante
+ *    se aplica a todas por igual (no hay a cuál elegir).
  */
 class ProductImageUploadRequest extends FormRequest
 {
+    use ValidatesVariantOwnership;
+
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, string|\Illuminate\Validation\Rules\Exists>>
      */
     public function rules(): array
     {
@@ -66,6 +73,7 @@ class ProductImageUploadRequest extends FormRequest
             'alt_text' => ['nullable', 'string', 'max:160'],
             'is_primary' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
+            'variant_id' => $this->variantIdRules(),
         ];
     }
 
@@ -83,6 +91,7 @@ class ProductImageUploadRequest extends FormRequest
             'image.min' => 'La imagen está vacía.',
             'image.mimetypes' => 'El formato de la imagen no está permitido. Aceptamos: '.$mimes.'.',
             'image.max' => 'La imagen no puede superar los '.$maxKilobytes.' KB.',
+            ...$this->variantIdMessages(),
         ];
     }
 

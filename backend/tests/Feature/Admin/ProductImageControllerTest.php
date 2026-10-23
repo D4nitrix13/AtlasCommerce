@@ -10,6 +10,7 @@ use App\Models\Catalog\Brand;
 use App\Models\Catalog\Category;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductImage;
+use App\Models\Catalog\ProductVariant;
 use App\Models\Stores\ProductStore;
 use App\Models\Stores\Store;
 use App\Models\Stores\StoreDomain;
@@ -32,6 +33,8 @@ use Tests\TestCase;
  *  - Store primary=true desmarca otras primarias.
  *  - sort_order auto-asignado si no se pasa.
  *  - Update + cross-product validation.
+ *  - variant_id: se persiste, se puede re-apuntar y quitar, y una variante
+ *    de otro producto es 422 en store y en update.
  *  - Destroy.
  */
 #[Group('admin')]
@@ -143,6 +146,15 @@ final class ProductImageControllerTest extends TestCase
             'is_primary' => false,
             'sort_order' => 0,
         ], $attrs));
+    }
+
+    private function makeVariant(Product $product, string $finish): ProductVariant
+    {
+        return ProductVariant::factory()->for($product, 'product')->create(attributes: [
+            'finish_slug' => $finish,
+            'finish_label' => ucfirst($finish),
+            'is_active' => true,
+        ]);
     }
 
     #[Test]
@@ -327,6 +339,139 @@ final class ProductImageControllerTest extends TestCase
         $new->refresh();
         $this->assertFalse($old->is_primary);
         $this->assertTrue($new->is_primary);
+    }
+
+    // -----------------------------------------------------------------------
+    // variant_id — propiedad y corrección de la association
+    // -----------------------------------------------------------------------
+
+    #[Test]
+    public function store_persists_a_variant_owned_by_the_product(): void
+    {
+        $variant = $this->makeVariant(product: $this->product, finish: 'heritage-cherry');
+
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: [
+            'image_url' => 'https://cdn.example.com/cherry.jpg',
+            'variant_id' => $variant->id,
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonPath(path: 'data.variant_id', expect: $variant->id);
+
+        $row = ProductImage::query()->firstOrFail();
+        $this->assertSame(expected: $variant->id, actual: (int) $row->variant_id);
+    }
+
+    #[Test]
+    public function store_without_variant_id_stores_null(): void
+    {
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: [
+            'image_url' => 'https://cdn.example.com/x.jpg',
+        ]);
+
+        $response->assertCreated();
+        $this->assertNull($response->json(key: 'data.variant_id'));
+        $this->assertNull(ProductImage::query()->firstOrFail()->variant_id);
+    }
+
+    #[Test]
+    public function store_rejects_a_variant_of_another_product(): void
+    {
+        $foreign = $this->makeVariant(product: $this->otherProduct, finish: 'sunburst');
+
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: [
+            'image_url' => 'https://cdn.example.com/x.jpg',
+            'variant_id' => $foreign->id,
+        ]);
+
+        $response->assertStatus(status: 422);
+        $response->assertJsonValidationErrors(errors: ['variant_id']);
+        $this->assertSame(expected: 0, actual: ProductImage::query()->count());
+    }
+
+    #[Test]
+    public function update_repoints_the_image_to_a_variant_of_the_same_product(): void
+    {
+        $cherry = $this->makeVariant(product: $this->product, finish: 'heritage-cherry');
+        $sunburst = $this->makeVariant(product: $this->product, finish: 'sunburst');
+        $image = $this->makeImage($this->product, ['variant_id' => $cherry->id]);
+
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id, data: [
+            'variant_id' => $sunburst->id,
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath(path: 'data.variant_id', expect: $sunburst->id);
+
+        $image->refresh();
+        $this->assertSame(expected: $sunburst->id, actual: (int) $image->variant_id);
+    }
+
+    #[Test]
+    public function update_can_detach_the_variant(): void
+    {
+        $variant = $this->makeVariant(product: $this->product, finish: 'heritage-cherry');
+        $image = $this->makeImage($this->product, ['variant_id' => $variant->id]);
+
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id, data: [
+            'variant_id' => null,
+        ]);
+
+        $response->assertOk();
+        $this->assertNull($response->json(key: 'data.variant_id'));
+
+        $image->refresh();
+        $this->assertNull($image->variant_id);
+    }
+
+    #[Test]
+    public function update_rejects_repointing_the_image_to_a_foreign_variant(): void
+    {
+        $cherry = $this->makeVariant(product: $this->product, finish: 'heritage-cherry');
+        $foreign = $this->makeVariant(product: $this->otherProduct, finish: 'sunburst');
+        $image = $this->makeImage($this->product, ['variant_id' => $cherry->id]);
+
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->putJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id, data: [
+            'variant_id' => $foreign->id,
+        ]);
+
+        // 422 y la fila intacta: sin esto, una foto del producto A queda
+        // etiquetada con un acabado del producto B y el filtro de galería
+        // del PDP miente.
+        $response->assertStatus(status: 422);
+        $response->assertJsonValidationErrors(errors: ['variant_id']);
+
+        $image->refresh();
+        $this->assertSame(expected: $cherry->id, actual: (int) $image->variant_id);
+    }
+
+    #[Test]
+    public function the_resource_exposes_variant_id_even_when_it_is_null(): void
+    {
+        $image = $this->makeImage($this->product);
+
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->getJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images/'.$image->id);
+
+        $response->assertOk();
+        // El campo está siempre: el panel necesita distinguir "sin
+        // variante" de "el endpoint no lo manda".
+        $this->assertTrue($response->json(key: 'data') !== null);
+        $this->assertArrayHasKey(key: 'variant_id', array: $response->json(key: 'data'));
+        $this->assertNull($response->json(key: 'data.variant_id'));
     }
 
     #[Test]
