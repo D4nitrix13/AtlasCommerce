@@ -40,7 +40,9 @@ frente a los servicios Docker, ver
 
 ### Caddyfile de dev (multi-tienda local)
 
-Ubicación: `Caddyfile` en la raíz del proyecto.
+Ubicación: [`docker/caddy/Caddyfile`](../../docker/caddy/Caddyfile).
+Caddy corre en el host (`systemd`); ese archivo es la fuente. No hay
+`Caddyfile` en la raíz del repo.
 
 ```caddyfile
 # ============================================================
