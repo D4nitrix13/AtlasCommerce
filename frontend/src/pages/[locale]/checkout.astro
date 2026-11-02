@@ -26,6 +26,7 @@
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import CheckoutStepperV3 from '../../components/storefront/checkout/CheckoutStepperV3.astro';
 import CheckoutSummaryV3 from '../../components/storefront/checkout/CheckoutSummaryV3.astro';
+import CheckoutSuccess from '../../components/storefront/checkout/CheckoutSuccess.astro';
 import TrustSignalsCompact from '../../components/storefront/cart/TrustSignalsCompact.astro';
 import CheckoutFormV3, {
   type CheckoutV3StepId,
@@ -39,11 +40,17 @@ const t = getServerDictionary(locale);
 
 const checkoutBaseHref = `/${locale}/checkout`;
 const cartHref = `/${locale}/cart`;
+const catalogHref = `/${locale}/products`;
+const orderHref = `/${locale}/account/orders`;
+const helpHref = `/${locale}/account`;
 
 // ─── Step actual desde query param `?step=`. Default = 'shipping'.
+// `success` no es un step del stepper: es la confirmación terminal que
+// sigue a "Realizar pedido" (CheckoutFormV3 navega a ?step=success).
 const VALID_STEPS: readonly CheckoutV3StepId[] = ['shipping', 'payment', 'review'];
 const url = new URL(Astro.request.url);
 const rawStep = url.searchParams.get('step') ?? 'shipping';
+const isSuccess = rawStep === 'success';
 const currentStepId: CheckoutV3StepId = (VALID_STEPS as readonly string[]).includes(rawStep)
   ? (rawStep as CheckoutV3StepId)
   : 'shipping';
@@ -76,8 +83,9 @@ const cartItems = demoCart
   })
   .filter((item): item is NonNullable<typeof item> => item !== null);
 
-// ─── Empty-safe: si no hay items, redirigimos a /cart.
-if (cartItems.length === 0) {
+// ─── Empty-safe: si no hay items, redirigimos a /cart. La confirmación
+// no redirige: el pedido ya se hizo y el carrito puede estar vacío.
+if (!isSuccess && cartItems.length === 0) {
   return Astro.redirect(cartHref);
 }
 
@@ -140,6 +148,19 @@ const summaryLabels = {
   termsHint: t['storefront.checkout.v3.termsHint'],
 };
 
+// ─── Labels del success (confirmación post-pedido).
+const successLabels = {
+  title: t['storefront.checkout.success.title'],
+  subtitle: t['storefront.checkout.success.subtitle'],
+  orderNumber: t['storefront.checkout.success.orderNumber'],
+  confirmationEmail: t['storefront.checkout.success.confirmationEmail'],
+  continueShopping: t['storefront.checkout.success.continueShopping'],
+  viewOrder: t['storefront.checkout.success.viewOrder'],
+  help: t['storefront.checkout.success.help'],
+};
+// Placeholder hasta que el backend asigne el número real de pedido.
+const orderNumber = `PE-${Date.now().toString(36).toUpperCase()}`;
+
 // ─── Totales (single source of truth en el padre).
 const subtotalCents = cartItems.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 const currencyCode = cartItems[0]?.currency ?? 'USD';
@@ -155,58 +176,70 @@ const taxCents = Math.round(subtotalCents * TAX_RATE);
 
 <StorefrontLayout title={t['storefront.checkout.v3.title']}>
   <main>
-    <section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-      <header class="mb-6 sm:mb-10">
-        <h1 class="text-4xl sm:text-5xl">
-          {t['storefront.checkout.v3.title']}
-        </h1>
-      </header>
+    {isSuccess ? (
+      <section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+        <CheckoutSuccess
+          labels={successLabels}
+          orderNumber={orderNumber}
+          catalogHref={catalogHref}
+          orderHref={orderHref}
+          helpHref={helpHref}
+        />
+      </section>
+    ) : (
+      <section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+        <header class="mb-6 sm:mb-10">
+          <h1 class="text-4xl sm:text-5xl">
+            {t['storefront.checkout.v3.title']}
+          </h1>
+        </header>
 
-      <CheckoutStepperV3
-        steps={stepperSteps}
-        currentStepId={currentStepId}
-        stepHrefBase={checkoutBaseHref}
-      />
+        <CheckoutStepperV3
+          steps={stepperSteps}
+          currentStepId={currentStepId}
+          stepHrefBase={checkoutBaseHref}
+        />
 
-      <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
-        <div class="order-2 lg:order-1">
-          <CheckoutFormV3
-            currentStepId={currentStepId}
-            stepHrefBase={checkoutBaseHref}
-            items={cartItems}
-            currencyCode={currencyCode}
-            labels={formLabels}
-          />
-        </div>
-
-        <div class="order-1 lg:order-2">
-          <div class="flex flex-col gap-5">
-            <CheckoutSummaryV3
+        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
+          <div class="order-2 lg:order-1">
+            <CheckoutFormV3
+              currentStepId={currentStepId}
+              stepHrefBase={checkoutBaseHref}
               items={cartItems}
-              subtotalCents={subtotalCents}
               currencyCode={currencyCode}
-              shippingCents={shippingCents}
-              taxCents={taxCents}
-              labels={summaryLabels}
-              ctaHref={`${checkoutBaseHref}?step=success`}
-            />
-
-            {/* Trust signals compactos (patron Nike + guitargear). El
-                resumen del checkout esta sticky a la derecha; debajo
-                suyo, los trust signals confirman al usuario que el
-                paso final (pago) es seguro. Variante horizontal en
-                desktop, wrap a multi-linea en mobile. */}
-            <TrustSignalsCompact
-              signals={[
-                { iconKey: 'lock', label: 'Pago 100% seguro' },
-                { iconKey: 'shield-check', label: 'Garantia oficial' },
-                { iconKey: 'rotate-ccw', label: 'Devolucion 30 dias' },
-                { iconKey: 'truck', label: 'Envio gratis sobre $50' },
-              ]}
+              labels={formLabels}
             />
           </div>
+
+          <div class="order-1 lg:order-2">
+            <div class="flex flex-col gap-5">
+              <CheckoutSummaryV3
+                items={cartItems}
+                subtotalCents={subtotalCents}
+                currencyCode={currencyCode}
+                shippingCents={shippingCents}
+                taxCents={taxCents}
+                labels={summaryLabels}
+                ctaHref={`${checkoutBaseHref}?step=success`}
+              />
+
+              {/* Trust signals compactos (patron Nike + guitargear). El
+                  resumen del checkout esta sticky a la derecha; debajo
+                  suyo, los trust signals confirman al usuario que el
+                  paso final (pago) es seguro. Variante horizontal en
+                  desktop, wrap a multi-linea en mobile. */}
+              <TrustSignalsCompact
+                signals={[
+                  { iconKey: 'lock', label: 'Pago 100% seguro' },
+                  { iconKey: 'shield-check', label: 'Garantia oficial' },
+                  { iconKey: 'rotate-ccw', label: 'Devolucion 30 dias' },
+                  { iconKey: 'truck', label: 'Envio gratis sobre $50' },
+                ]}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    )}
   </main>
 </StorefrontLayout>
