@@ -37,11 +37,26 @@
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import RFQStepper from '../../../components/storefront/b2b/RFQStepper.astro';
 import { getServerDictionary } from '../../../i18n/server';
+import { PANDA_PRODUCTS } from '../../../data/panda-catalog';
+import { bulkTotalCents } from '../../../lib/bulk-estimate';
+import { formatCurrency } from '../../../lib/formatters';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
 const homeHref = `/${locale}`;
+const requestedSlug = Astro.url.searchParams.get('product');
+const requestedQty = Number.parseInt(Astro.url.searchParams.get('cantidad') ?? '', 10);
+const selectedPiece =
+  PANDA_PRODUCTS.find((product) => product.slug === requestedSlug) ?? PANDA_PRODUCTS[0];
+const initialQuantity = Number.isNaN(requestedQty) ? 100 : Math.min(1000, Math.max(1, requestedQty));
+const initialTotal =
+  selectedPiece === undefined
+    ? '—'
+    : formatCurrency(
+        bulkTotalCents(selectedPiece.priceCents, initialQuantity),
+        selectedPiece.currency ?? 'USD',
+      );
 
 const stepperLabels = [
   t['storefront.b2b.rfq.v3.step1.label'],
@@ -51,7 +66,7 @@ const stepperLabels = [
 ---
 
 <StorefrontLayout title={`${t['storefront.b2b.rfq.v3.title']} | AtlasCommerce`} cartCount={0}>
-  <main class="min-h-screen bg-slate-50">
+  <main class="min-h-screen">
     <section class="relative mx-auto w-full max-w-6xl px-4 pb-20 pt-12 sm:px-6">
       <header class="relative mb-10 max-w-3xl">
         <span
@@ -60,7 +75,7 @@ const stepperLabels = [
         >
           {t['storefront.b2b.rfq.v3.b2bOnly']}
         </span>
-        <h1 class="text-4xl font-bold text-slate-900 sm:text-5xl">
+        <h1 class="text-4xl sm:text-5xl">
           {t['storefront.b2b.rfq.v3.title']}
         </h1>
         <p class="mt-4 text-base leading-relaxed text-slate-500 sm:text-lg">
@@ -88,13 +103,23 @@ const stepperLabels = [
                   <span class="mb-1 block text-sm font-medium text-slate-700">
                     {t['storefront.b2b.rfq.v3.step1.tipoProducto']}
                   </span>
-                  <input
-                    type="text"
+                  <select
                     name="tipoProducto"
                     required
-                    class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                    class="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
                     data-testid="rfq-tipo-producto"
-                  />
+                  >
+                    {PANDA_PRODUCTS.map((product) => (
+                      <option
+                        value={product.slug}
+                        data-price={product.priceCents}
+                        data-currency={product.currency ?? 'USD'}
+                        selected={product.slug === selectedPiece?.slug}
+                      >
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
                 <label class="block">
@@ -107,6 +132,7 @@ const stepperLabels = [
                     min="1"
                     required
                     placeholder="100"
+                    value={initialQuantity}
                     class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
                     data-testid="rfq-cantidad"
                   />
@@ -265,19 +291,19 @@ const stepperLabels = [
             <div class="flex items-center justify-between gap-2">
               <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.cantidad']}</dt>
               <dd class="font-semibold text-slate-900" data-testid="rfq-summary-cantidad">
-                —
+                {initialQuantity} und.
               </dd>
             </div>
             <div class="flex items-center justify-between gap-2">
               <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.tecnica']}</dt>
               <dd class="font-semibold text-slate-900" data-testid="rfq-summary-tecnica">
-                —
+                {t['storefront.b2b.rfq.v3.step1.tecnica.serigrafia']}
               </dd>
             </div>
             <div class="flex items-center justify-between gap-2">
               <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.tipoProducto']}</dt>
               <dd class="font-semibold text-slate-900" data-testid="rfq-summary-producto">
-                —
+                {selectedPiece?.name ?? '—'}
               </dd>
             </div>
           </dl>
@@ -287,7 +313,7 @@ const stepperLabels = [
           <div class="flex items-baseline justify-between gap-2">
             <span class="text-sm text-slate-500">{t['storefront.b2b.rfq.v3.totalLabel']}</span>
             <span class="text-2xl font-bold text-slate-900" data-testid="rfq-summary-total">
-              —
+              {initialTotal}
             </span>
           </div>
 
@@ -309,50 +335,78 @@ const stepperLabels = [
 </StorefrontLayout>
 
 <script>
+  import { bulkTotalCents } from '../../../lib/bulk-estimate';
+
   /**
-   * RFQ form submit handler — mock submission v3.
-   *
-   * Mantiene el comportamiento del flujo F3.2: genera un ticket ID
-   * determinístico a partir del timestamp y navega a la página de
-   * confirmación. Cuando el endpoint backend exista
-   * (`POST /api/storefront/rfq`), reemplazar este handler por un fetch
-   * real con manejo de errores.
+   * Cotización de prototipo: el resumen sigue al formulario y el envío
+   * abre el ticket. El total usa los mismos cortes de volumen que la
+   * calculadora. Cuando exista POST /api/storefront/rfq, este handler
+   * pasa a ser un fetch.
    */
   const form = document.getElementById('rfq-form') as HTMLFormElement | null;
   const summaryProducto = document.querySelector('[data-testid="rfq-summary-producto"]');
   const summaryCantidad = document.querySelector('[data-testid="rfq-summary-cantidad"]');
   const summaryTecnica = document.querySelector('[data-testid="rfq-summary-tecnica"]');
+  const summaryTotal = document.querySelector('[data-testid="rfq-summary-total"]');
 
-  function readValue(form: HTMLFormElement, name: string): string {
-    const element = form.elements.namedItem(name);
+  function readControl(source: HTMLFormElement, name: string): HTMLElement | null {
+    const element = source.elements.namedItem(name);
     if (
       element instanceof HTMLInputElement ||
       element instanceof HTMLTextAreaElement ||
       element instanceof HTMLSelectElement
     ) {
-      return element.value;
+      return element;
     }
+    return null;
+  }
+
+  function selectedLabel(control: HTMLElement | null): string {
+    if (control instanceof HTMLSelectElement) {
+      return control.selectedOptions[0]?.textContent?.trim() ?? '';
+    }
+    if (control instanceof HTMLInputElement) return control.value.trim();
     return '';
   }
 
-  function updateSummary(form: HTMLFormElement): void {
-    const tipo = readValue(form, 'tipoProducto').trim();
-    const cantidad = readValue(form, 'cantidad').trim();
-    const tecnica = readValue(form, 'tecnica').trim();
-
-    if (summaryProducto instanceof HTMLElement) {
-      summaryProducto.textContent = tipo === '' ? '—' : tipo;
-    }
-    if (summaryCantidad instanceof HTMLElement) {
-      summaryCantidad.textContent = cantidad === '' ? '—' : `${cantidad} und.`;
-    }
-    if (summaryTecnica instanceof HTMLElement) {
-      summaryTecnica.textContent = tecnica === '' ? '—' : tecnica;
+  function money(cents: number, currency: string): string {
+    try {
+      return new Intl.NumberFormat('es-NI', { style: 'currency', currency }).format(cents / 100);
+    } catch {
+      return `${(cents / 100).toFixed(2)} ${currency}`;
     }
   }
 
+  function writeSummary(source: HTMLFormElement): void {
+    const product = readControl(source, 'tipoProducto');
+    const quantityControl = readControl(source, 'cantidad');
+    const technique = readControl(source, 'tecnica');
+    const productName = selectedLabel(product);
+    const quantity = quantityControl instanceof HTMLInputElement ? quantityControl.value.trim() : '';
+    const techniqueName = selectedLabel(technique);
+
+    if (summaryProducto instanceof HTMLElement) {
+      summaryProducto.textContent = productName === '' ? '—' : productName;
+    }
+    if (summaryCantidad instanceof HTMLElement) {
+      summaryCantidad.textContent = quantity === '' ? '—' : `${quantity} und.`;
+    }
+    if (summaryTecnica instanceof HTMLElement) {
+      summaryTecnica.textContent = techniqueName === '' ? '—' : techniqueName;
+    }
+    if (!(summaryTotal instanceof HTMLElement) || !(product instanceof HTMLSelectElement)) return;
+    const price = Number.parseInt(product.selectedOptions[0]?.dataset.price ?? '', 10);
+    const units = Number.parseInt(quantity, 10);
+    const currency = product.selectedOptions[0]?.dataset.currency ?? 'USD';
+    if (Number.isNaN(price) || Number.isNaN(units) || units < 1) {
+      summaryTotal.textContent = '—';
+      return;
+    }
+    summaryTotal.textContent = money(bulkTotalCents(price, units), currency);
+  }
+
   if (form !== null) {
-    form.addEventListener('input', () => updateSummary(form));
+    form.addEventListener('input', () => writeSummary(form));
     form.addEventListener('submit', (event: Event) => {
       event.preventDefault();
       if (!form.checkValidity()) {
@@ -360,7 +414,16 @@ const stepperLabels = [
         return;
       }
       const ticketNumber = `RFQ-${Date.now().toString(36).toUpperCase()}`;
+      const product = readControl(form, 'tipoProducto');
+      const quantityControl = readControl(form, 'cantidad');
       const params = new URLSearchParams({ ticket: ticketNumber });
+      if (product instanceof HTMLSelectElement && product.value !== '') {
+        params.set('product', product.value);
+        params.set('producto', selectedLabel(product));
+      }
+      if (quantityControl instanceof HTMLInputElement && quantityControl.value !== '') {
+        params.set('cantidad', quantityControl.value);
+      }
       window.location.href = `${window.location.pathname.replace(/\/$/, '')}/confirmation?${params.toString()}`;
     });
   }

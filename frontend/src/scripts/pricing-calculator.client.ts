@@ -119,6 +119,15 @@ function initPricingCalculator(form: HTMLFormElement): void {
       .replace('{range}', rangeLabel)
       .replace('{discount}', discountLabel);
 
+    const quoteLink = form.querySelector('a');
+    if (quoteLink instanceof HTMLAnchorElement) {
+      const next = new URL(quoteLink.getAttribute('href') ?? quoteLink.href, window.location.origin);
+      const slug = selectedOption?.value ?? '';
+      if (slug !== '') next.searchParams.set('product', slug);
+      next.searchParams.set('cantidad', String(safeQuantity));
+      quoteLink.href = `${next.pathname}${next.search}`;
+    }
+
     slider.setAttribute('aria-valuenow', String(safeQuantity));
     liveNode.textContent = `${quantityLabelText}: ${safeQuantity}. ${unitLabelText}: ${formatCents(
       basePriceCents,

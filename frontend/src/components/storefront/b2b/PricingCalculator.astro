@@ -64,6 +64,8 @@ interface Props {
   tiers?: readonly TierDiscount[];
   /** Cantidad inicial mostrada al cargar. */
   initialQuantity?: number;
+  /** Catálogo a cotizar. Si falta, usa el mock B2B histórico. */
+  products?: readonly BulkOrderProduct[];
 }
 
 const DEFAULT_TIERS: readonly TierDiscount[] = [
@@ -105,9 +107,8 @@ const {
   ctaHref,
   tiers = DEFAULT_TIERS,
   initialQuantity = 50,
+  products = BULK_PRODUCTS,
 } = Astro.props;
-
-const products = BULK_PRODUCTS;
 const firstProduct: BulkOrderProduct | undefined = products[0];
 if (firstProduct === undefined) {
   throw new Error('PricingCalculator requires at least one BULK_PRODUCTS entry.');
@@ -154,10 +155,10 @@ const initialTierBadgeText = tierLabelTemplate
       >
         {products.map((product) => (
           <option
-            value={product.id}
+            value={product.slug}
             data-base-price={product.basePriceCents}
             data-currency={product.currency}
-            selected={product.id === firstProduct.id}
+            selected={product.slug === firstProduct.slug}
           >
             {product.name} — {formatCurrency(product.basePriceCents, product.currency)}
           </option>
