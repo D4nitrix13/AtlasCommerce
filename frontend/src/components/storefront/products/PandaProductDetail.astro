@@ -8,6 +8,7 @@
  */
 import type { Product } from '../../../types/catalog';
 import { formatCurrency } from '../../../lib/formatters';
+import AddToCart from '../cart/AddToCart';
 
 interface Props {
   product: Product;
@@ -29,7 +30,6 @@ const {
   product,
   locale,
   catalogHref,
-  cartHref,
   bulkHref,
   breadcrumbHome,
   breadcrumbCatalog,
@@ -44,7 +44,6 @@ const {
 const finishes = (product.variants ?? []).filter(
   (variant) => variant.finishHex !== null && variant.finishHex !== undefined && variant.finishHex !== '',
 );
-const showColors = finishes.length >= 2;
 const price = formatCurrency(product.priceCents, product.currency ?? 'USD');
 const cover = product.imageUrl;
 const imageByVariant = new Map(
@@ -52,6 +51,15 @@ const imageByVariant = new Map(
     .filter((image): image is Extract<typeof image, { url: string }> => typeof image !== 'string')
     .map((image) => [image.variantId, image.url]),
 );
+
+// Acabados para la isla: `image` alimenta `data-panda-finish`, el atributo
+// que el script de preview de portada necesita para cambiar la foto.
+const islandFinishes = finishes.map((finish) => ({
+  slug: finish.finishSlug ?? finish.id,
+  label: finish.finishLabel ?? finish.name ?? finish.finishSlug ?? finish.id,
+  hex: finish.finishHex ?? '#cccccc',
+  image: imageByVariant.get(finish.id) ?? cover,
+}));
 ---
 
 <main class="bg-[var(--paper,#f3efe8)]">
@@ -81,49 +89,23 @@ const imageByVariant = new Map(
         <p class="max-w-md text-sm leading-relaxed text-[var(--ink-soft,#57534e)]">{product.description}</p>
       </header>
 
-      {showColors && (
-        <fieldset class="flex flex-col gap-3">
-          <legend class="text-sm font-semibold text-[var(--ink,#1c1917)]">{colorLabel}</legend>
-          <div class="flex flex-wrap gap-2">
-            {finishes.map((finish, index) => (
-              <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[var(--line,#e7e5e4)] bg-white px-3 py-1.5 text-sm">
-                <input
-                  type="radio"
-                  name="finish"
-                  value={finish.finishSlug}
-                  checked={index === 0}
-                  data-panda-finish={imageByVariant.get(finish.id) ?? cover}
-                  class="accent-[var(--primary,#1c6b63)]"
-                />
-                <span
-                  class="h-4 w-4 rounded-full border border-black/10"
-                  style={`background:${finish.finishHex};`}
-                  aria-hidden="true"
-                ></span>
-                {finish.finishLabel}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      )}
-
-      <label class="flex max-w-[8rem] flex-col gap-2 text-sm font-semibold text-[var(--ink,#1c1917)]">
-        {quantityLabel}
-        <input
-          type="number"
-          name="quantity"
-          min="1"
-          value="12"
-          class="rounded-xl border border-[var(--line,#e7e5e4)] bg-white px-3 py-2 text-base font-normal"
-        />
-      </label>
-
-      <a
-        href={cartHref}
-        class="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary,#1c6b63)] px-6 text-sm font-semibold text-white transition hover:opacity-90"
-      >
-        {addToCartLabel}
-      </a>
+      {/*
+        La isla reemplaza los radios de acabado, el input de cantidad y el
+        botón de compra. Los swatches conservan `data-panda-finish` con la
+        foto del acabado para que el script de abajo siga cambiando la
+        portada al elegir un color.
+      */}
+      <AddToCart
+        client:visible
+        mode="full"
+        productSlug={product.slug}
+        name={product.name}
+        imageUrl={cover}
+        priceCents={product.priceCents}
+        currency={product.currency ?? 'USD'}
+        finishes={islandFinishes}
+        labels={{ add: addToCartLabel, added: 'Agregado', qty: quantityLabel, variant: colorLabel }}
+      />
 
       <p class="text-sm text-[var(--ink-soft,#57534e)]">
         {volumeNote}{' '}
@@ -138,13 +120,18 @@ const imageByVariant = new Map(
   function bindFinishPreview(): void {
     const cover = document.querySelector('[data-panda-cover]');
     if (!(cover instanceof HTMLImageElement)) return;
-    document.querySelectorAll('[data-panda-finish]').forEach((input) => {
-      input.addEventListener('change', () => {
-        if (!(input instanceof HTMLInputElement) || !input.checked) return;
-        const next = input.dataset.pandaFinish;
-        if (next !== undefined && next !== '') cover.src = next;
-      });
-    });
+    // Delegación en document: la isla AddToCart hidrata tarde
+    // (client:visible), así sus swatches no existen cuando este módulo
+    // corre. Un listener por evento los alcanza aunque aparezcan después.
+    const applyFinish = (target: EventTarget | null): void => {
+      if (!(target instanceof Element)) return;
+      const source = target.closest('[data-panda-finish]');
+      if (source === null) return;
+      const next = source.getAttribute('data-panda-finish');
+      if (next !== null && next !== '') cover.src = next;
+    };
+    document.addEventListener('click', (event) => applyFinish(event.target));
+    document.addEventListener('change', (event) => applyFinish(event.target));
   }
   bindFinishPreview();
 </script>

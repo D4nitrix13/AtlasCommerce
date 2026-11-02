@@ -36,6 +36,7 @@ import {
   swatchFallbackHex,
 } from '../../../lib/product-card-swap';
 import type { Product } from '../../../types/catalog';
+import AddToCart from '../cart/AddToCart';
 
 export interface ProductCardCatalogLabels {
   viewDetail: string;
@@ -43,6 +44,10 @@ export interface ProductCardCatalogLabels {
   swatchGroupLabel?: string;
   /** Template del contador "N colores". Fallback español si falta. */
   finishCountLabel?: (count: number) => string;
+  /** Label aria del botón "+" de agregar al carrito. Fallback español si falta. */
+  addToCartLabel?: string;
+  /** Label de feedback tras agregar. Fallback español si falta. */
+  addedToCartLabel?: string;
 }
 
 interface Props {
@@ -89,6 +94,16 @@ const finishCountLabelText =
   labels.finishCountLabel === undefined
     ? defaultFinishCountLabel(swap.swatches.length)
     : labels.finishCountLabel(swap.swatches.length);
+
+/** Mismos swatches visibles de la card: el `+` agrega el primero. */
+const cardFinishes = swap.swatches.map((swatch) => ({
+  slug: swatch.id,
+  label: swatch.label,
+  hex: swatchFallbackHex(swatch),
+}));
+
+const addToCartLabelText = labels.addToCartLabel ?? 'Agregar al carrito';
+const addedToCartLabelText = labels.addedToCartLabel ?? 'Agregado';
 ---
 
 {/*
@@ -224,6 +239,17 @@ const finishCountLabelText =
 
     <div class="mt-auto flex items-end justify-between gap-2 pt-4">
       <span class="text-lg font-bold text-slate-900">{priceFormatted}</span>
+      <AddToCart
+        client:visible
+        mode="compact"
+        productSlug={product.slug}
+        name={product.name}
+        imageUrl={product.imageUrl}
+        priceCents={product.priceCents}
+        currency={currencyCode}
+        finishes={cardFinishes}
+        labels={{ add: addToCartLabelText, added: addedToCartLabelText, qty: 'Cantidad' }}
+      />
     </div>
   </div>
 </article>
