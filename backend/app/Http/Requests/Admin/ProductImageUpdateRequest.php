@@ -35,6 +35,9 @@ class ProductImageUpdateRequest extends FormRequest
             'image_url' => ['sometimes', 'string', 'min:1', 'max:500'],
             'alt_text' => ['sometimes', 'nullable', 'string', 'max:160'],
             'is_primary' => ['sometimes', 'boolean'],
+            // `sometimes` + `nullable`: el admin puede promover una foto a
+            // hover, bajarla de hover (`false`) o no tocar el campo.
+            'is_hover' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],
             'variant_id' => ['sometimes', ...$this->variantIdRules()],
         ];

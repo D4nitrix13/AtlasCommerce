@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources\Storefront;
 
 use App\Models\Catalog\Product;
+use App\Services\Catalog\ProductPhotoGrouper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,11 +33,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *  - `images`: array con shape dependiente del contexto (ver
  *    `resolveImages()` para el detalle):
  *      - PDP (variants eager-loaded): objetos
- *        `{url, altText, isPrimary, variantId, sortOrder, srcset}`. Una
- *        entrada POR ROL de galería (`sort_order` es 1:1 con
+ *        `{url, altText, isPrimary, isHover, variantId, sortOrder, srcset}`.
+ *        Una entrada POR FOTO de galería (`sort_order` es 1:1 con
  *        `CatalogAssetsSeeder::ROLE_ORDER`): la de mayor resolución, con
- *        `srcset` apuntando a las demás resoluciones del mismo rol.
- *        `variantId` permite a la PDP filtrar la galería por acabado.
+ *        `srcset` apuntando a las demás resoluciones de la misma foto.
+ *        `variantId` permite a la PDP filtrar la galería por acabado, e
+ *        `isHover` le dice a la card cuál de esas entradas cambia al
+ *        pasar el cursor. `isHover` viaja JUNTO al `srcset` de la misma
+ *        entrada, que es lo que la card necesita para pintar el hover en
+ *        cualquier ancho: no hay que reconstruir el srcset en el cliente.
  *      - Listado (variants NO eager-loaded): lista plana de URLs, sin
  *        agrupar — el contrato del listado no cambia.
  *    Se OMITE del payload cuando `images` no fue eager-loaded.
@@ -105,6 +110,18 @@ class StorefrontProductResource extends JsonResource
      * arrays planos en `index()` y shapes planas en `show()`.
      */
     public static $wrap = null;
+
+    /**
+     * @param  ProductPhotoGrouper  $photos  Definición compartida de qué
+     *                                       es una foto dentro de
+     *                                       `product_images`.
+     */
+    public function __construct(
+        $resource,
+        private readonly ProductPhotoGrouper $photos = new ProductPhotoGrouper,
+    ) {
+        parent::__construct($resource);
+    }
 
     /**
      * @return array<string, mixed>
@@ -185,9 +202,12 @@ class StorefrontProductResource extends JsonResource
      *   - `all`  — lista de URLs (sin metadata) para endpoints que solo
      *              necesitan URLs (listado, sitemap, etc.).
      *   - `objects` — lista de objetos `{url, altText, isPrimary,
-     *                  variantId, sortOrder, srcset}` para el PDP. Una
-     *                  entrada POR ROL (la de mayor resolución) con el
-     *                  `srcset` de las demás resoluciones de ese rol.
+     *                  isHover, variantId, sortOrder, srcset}` para el
+     *                  PDP. Una entrada POR FOTO (la de mayor resolución)
+     *                  con el `srcset` de las demás resoluciones de esa
+     *                  foto. `isHover` y el `srcset` viajan juntos, así que
+     *                  el cliente no tiene que reconstruir nada para pintar
+     *                  el swap al pasar el cursor.
      *                  Solo se popula cuando la relación `variants`
      *                  también fue eager-loadada (señal de que el
      *                  consumer es el detalle). En el listado emitimos
@@ -230,7 +250,9 @@ class StorefrontProductResource extends JsonResource
      * (front=1, back=2, body=3, …). El ancho vive en `product_images.width`.
      *
      * La unidad de agrupación es (variant, rol): una foto de cada
-     * acabado y cada rol. Ver la nota en la clave de `$byRole`.
+     * acabado y cada rol. La clave vive en
+     * {@see ProductPhotoGrouper::keyOf()}, que es la misma que usan el
+     * backfill de `is_hover` y el reordenamiento de la galería.
      *
      * Regla de degradación (deliberada):
      *
@@ -249,42 +271,42 @@ class StorefrontProductResource extends JsonResource
      */
     private function galleryPerRole(array $images): array
     {
-        $byRole = [];
-        foreach ($images as $image) {
-            // La clave es (variant, rol) y NO sólo el rol: `sort_order` es
-            // el RANK del rol dentro del catálogo (front=1, back=2, …) y
-            // es el mismo número para los seis acabados de un producto
-            // multi-acabado. Agrupar sólo por `sort_order` colapsa las
-            // fotos de acabados distintos en una entrada y deja la
-            // galería del PDP con las fotos de un solo acabado.
-            $key = $image->variant_id ?? 'unscoped';
-            $byRole[$key.'#'.(int) $image->sort_order][] = $image;
-        }
-
+        // El agrupamiento es el MISMO de {@see ProductPhotoGrouper}: una
+        // foto es la terna (variant_id, sort_order). El grouper se comparte
+        // con el backfill de `is_hover` (que marca por foto) y con
+        // `ProductImageController::reorder()` (que reescribe por foto).
+        // Divergir entre los tres es la receta para que el storefront y el
+        // panel admin hablen de fotos distintas sin que nada lo delate.
+        //
+        // La clave incluye la variante y NO sólo el `sort_order`: el
+        // `sort_order` es el RANK del rol dentro del catálogo (front=1,
+        // back=2, …) y es el mismo número para los seis acabados de un
+        // producto multi-acabado. Agrupar sólo por `sort_order` colapsa las
+        // fotos de acabados distintos en una entrada y deja la galería del
+        // PDP con las fotos de un solo acabado.
         $objects = [];
 
-        foreach ($byRole as $roleImages) {
-            $withWidth = array_values(array_filter(
-                $roleImages,
-                static fn (mixed $image): bool => $image->width !== null,
-            ));
+        foreach ($this->photos->group(images: $images) as $photo) {
+            $rows = $photo['rows'];
 
-            if ($withWidth === []) {
-                foreach ($roleImages as $image) {
+            if (! $this->photos->hasKnownWidths(rows: $rows)) {
+                foreach ($rows as $image) {
                     $objects[] = $this->galleryEntry(image: $image, srcset: '');
                 }
 
                 continue;
             }
 
-            usort(
-                $withWidth,
-                static fn (mixed $a, mixed $b): int => [$b->width, $a->id] <=> [$a->width, $b->id],
-            );
+            $representative = $this->photos->representative(rows: $rows);
+            // No-null por construcción: `hasKnownWidths` garantiza al
+            // menos una fila con `width`, y `representative` nunca devuelve
+            // null para un grupo no vacío. El assert documenta el invariante
+            // para quien lea, y falla ruidoso si el grouper cambia.
+            assert($representative !== null);
 
             $objects[] = $this->galleryEntry(
-                image: $withWidth[0],
-                srcset: $this->buildSrcset(roleImages: $roleImages),
+                image: $representative,
+                srcset: $this->buildSrcset(roleImages: $rows),
             );
         }
 
@@ -304,6 +326,14 @@ class StorefrontProductResource extends JsonResource
             'url' => $this->toProxyUrl((string) $image->image_url),
             'altText' => (string) ($image->alt_text ?? ''),
             'isPrimary' => (bool) $image->is_primary,
+            // `isHover` viaja en la entrada representante de la foto, que
+            // es la que la card matchea con el `<img data-role="back">`.
+            // El `srcset` de ESTA MISMA entrada es el de la foto de hover,
+            // así que el cliente puede pintar el swap en cualquier ancho sin
+            // reconstruir nada. La bandera está replicada en las N
+            // resoluciones: el storefront contrae la foto a una entrada y
+            // por eso el cliente nunca ve N flags en `true`.
+            'isHover' => (bool) $image->is_hover,
             // variantId nullable: si la imagen no tiene variant asociado
             // (caso 4/19 multi-variant con finish_slug real pero assets
             // no presentes en disco), el frontend no puede filtrar y
@@ -323,7 +353,7 @@ class StorefrontProductResource extends JsonResource
      * construye con la URL del proxy de ESA fila, no con un token de
      * tamaño en el path.
      *
-     * @param  array<int, mixed>  $roleImages  Todas las filas del rol.
+     * @param  array<int, mixed>  $roleImages  Todas las filas de la foto.
      */
     private function buildSrcset(array $roleImages): string
     {

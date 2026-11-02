@@ -25,6 +25,9 @@ use Illuminate\Http\UploadedFile;
  *    El peso se valida contra `assets.upload.max_kilobytes`.
  *  - alt_text: opcional, max 160 (texto alternativo para a11y).
  *  - is_primary: bool opcional.
+ *  - is_hover: bool opcional. Se aplica a TODAS las resoluciones que crea
+ *    este endpoint: las N filas son la misma foto, y la card la cambia
+ *    completa al pasar el cursor.
  *  - sort_order: int opcional >= 0. Si no se pasa, se asigna automáticamente
  *    al final (max + 1) del producto.
  *  - variant_id: int opcional, y tiene que ser una variante DEL producto
@@ -72,6 +75,7 @@ class ProductImageUploadRequest extends FormRequest
             'image' => ['required', 'file', 'min:1', 'mimetypes:'.$mimes, 'max:'.$maxKilobytes],
             'alt_text' => ['nullable', 'string', 'max:160'],
             'is_primary' => ['nullable', 'boolean'],
+            'is_hover' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'variant_id' => $this->variantIdRules(),
         ];

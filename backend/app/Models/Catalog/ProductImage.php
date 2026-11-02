@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $alt_text
  * @property int $sort_order
  * @property bool $is_primary
+ * @property bool $is_hover
  * @property int|null $width
  */
 class ProductImage extends Model
@@ -34,12 +35,14 @@ class ProductImage extends Model
         'alt_text',
         'sort_order',
         'is_primary',
+        'is_hover',
         'width',
     ];
 
     protected $casts = [
         'sort_order' => 'integer',
         'is_primary' => 'boolean',
+        'is_hover' => 'boolean',
         'width' => 'integer',
     ];
 
@@ -74,6 +77,22 @@ class ProductImage extends Model
     {
         // Args posicionales: ver note en Promotion::scopeActive.
         return $query->where('is_primary', true);
+    }
+
+    /**
+     * Filtra las filas marcadas como foto de hover.
+     *
+     * Devuelve N filas, no una: la bandera se replica en todas las
+     * resoluciones de la foto (400/800/1200/1600). Quien quiera "la" foto
+     * de hover tiene que colapsar por `(variant_id, sort_order)` — ver
+     * {@see \App\Services\Catalog\ProductPhotoGrouper}.
+     *
+     * @param  Builder<ProductImage>  $query  Consulta del modelo.
+     * @return Builder<ProductImage>
+     */
+    public function scopeHover(Builder $query): Builder
+    {
+        return $query->where('is_hover', true);
     }
 
     /**

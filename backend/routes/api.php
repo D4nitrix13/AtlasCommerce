@@ -820,6 +820,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->middleware('permission:catalog.manage')
             ->name('admin.products.images.upload');
 
+        // Reordenamiento de la galería. Va ANTES de `images/{image}`: las
+        // rutas se matchean en orden de registro, así que si el binding
+        // ganara, un `images/order` se resolvería como una imagen
+        // llamada "order" y devolvería un 404 en vez de reordenar.
+        Route::put('products/{product}/images/order', [ProductImageController::class, 'reorder'])
+            ->middleware('permission:catalog.manage')
+            ->name('admin.products.images.reorder');
+
         Route::get('products/{product}/images/{image}', [ProductImageController::class, 'show'])
             ->middleware('permission:catalog.manage')
             ->name('admin.products.images.show');
@@ -890,6 +898,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
             // Upload por binario — espejo de `admin.products.images.upload`.
             Route::post('products/{product}/images/upload', [ProductImageController::class, 'upload'])
                 ->name('admin.catalog.product-images.upload');
+
+            // Reordenamiento de la galería — espejo de
+            // `admin.products.images.reorder`, y también declarado antes
+            // del binding de `{image}`.
+            Route::put('products/{product}/images/order', [ProductImageController::class, 'reorder'])
+                ->name('admin.catalog.product-images.reorder');
 
             Route::get('products/{product}/images/{image}', [ProductImageController::class, 'show'])
                 ->name('admin.catalog.product-images.show');

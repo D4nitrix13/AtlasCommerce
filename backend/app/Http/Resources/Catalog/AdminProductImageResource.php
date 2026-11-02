@@ -31,6 +31,11 @@ class AdminProductImageResource extends JsonResource
             'alt_text' => $this->resource->alt_text,
             'sort_order' => (int) $this->resource->sort_order,
             'is_primary' => (bool) $this->resource->is_primary,
+            // La ranura de hover. Comes en todas las resoluciones de la
+            // foto, así que el panel ve las 4 filas con `is_hover: true`
+            // cuando una sola foto está marcada: es el reflejo de cómo
+            // está el dato, no 4 fotos de hover distintas.
+            'is_hover' => (bool) $this->resource->is_hover,
             // El ancho es parte de la identidad de la fila desde que el
             // seeder guarda las 4 resoluciones de una misma foto. Sin
             // exponerlo, el admin que sube un archivo recibe N filas que

@@ -14,6 +14,11 @@ use Illuminate\Foundation\Http\FormRequest;
  *  - image_url: requerido, max 500 (URL de la imagen).
  *  - alt_text: opcional, max 160 (texto alternativo para a11y).
  *  - is_primary: bool opcional.
+ *  - is_hover: bool opcional. Como máximo UNA foto de hover por
+ *    producto: al marcar una, el controller desmarca la que hubiera
+ *    (`clearHoverFlag()`). Una foto que ya es primaria no puede pasar a
+ *    ser de hover (409) — la portada y el hover son ranuras distintas y
+ *    el administrador decide, no la validación.
  *  - sort_order: int opcional >= 0. Si no se pasa, se asigna automáticamente
  *    al final (max + 1).
  *  - variant_id: int opcional. La variante tiene que ser DEL producto de
@@ -39,6 +44,7 @@ class ProductImageStoreRequest extends FormRequest
             'image_url' => ['required', 'string', 'min:1', 'max:500'],
             'alt_text' => ['nullable', 'string', 'max:160'],
             'is_primary' => ['nullable', 'boolean'],
+            'is_hover' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'variant_id' => $this->variantIdRules(),
         ];
