@@ -9,31 +9,27 @@
  *    completado con check.
  *  - 2-col grid desktop (form izquierda · summary sticky derecha).
  *  - Background `bg-slate-50` en `<main>`.
- *  - Empty cart → redirect a `/cart` con locale preservado.
+ *  - Empty cart → redirect a `/cart` con locale preservado (client-side:
+ *    el carrito vive en localStorage y el SSR no ve las líneas).
  *
  * Decisiones:
- *  - El carrito es MOCK (mismo demo de `cart.astro` v3). Cuando exista
- *    el cart store global, `cartItems` se hidrata del store.
+ *  - Las líneas y los totales los lee el cart store (`stores/cart.ts`)
+ *    desde las islas `CheckoutOrderSummary` / `CheckoutReviewItems`.
  *  - Los pasos se navegan por GET (sin JS): cada step es un `?step=`
  *    alias; steps futuros se ocultan vía `<fieldset hidden>` para que
  *    no aparezcan en el AT.
  *  - Submit final es un `<button type="submit">` que navega a
  *    `?step=success` (placeholder sin backend real).
- *  - Single source of truth de totales: pre-computamos acá y los
- *    pasamos al summary; cuando exista el backend, esto se hidrata
- *    de la misma forma.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import CheckoutStepperV3 from '../../components/storefront/checkout/CheckoutStepperV3.astro';
-import CheckoutSummaryV3 from '../../components/storefront/checkout/CheckoutSummaryV3.astro';
+import CheckoutOrderSummary from '../../components/storefront/checkout/CheckoutOrderSummary';
 import CheckoutSuccess from '../../components/storefront/checkout/CheckoutSuccess.astro';
 import TrustSignalsCompact from '../../components/storefront/cart/TrustSignalsCompact.astro';
 import CheckoutFormV3, {
   type CheckoutV3StepId,
 } from '../../components/storefront/checkout/CheckoutFormV3.astro';
 import { getServerDictionary } from '../../i18n/server';
-import { findPandaProduct, PANDA_DEMO_LINES, isPandaStore } from '../../data/panda-catalog';
-import { PRODUCTS, findProductBySlug } from '../../data/products';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -55,39 +51,9 @@ const currentStepId: CheckoutV3StepId = (VALID_STEPS as readonly string[]).inclu
   ? (rawStep as CheckoutV3StepId)
   : 'shipping';
 
-const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
-const isPanda = isPandaStore(tenantSlug);
-const demoCart = isPanda
-  ? [...PANDA_DEMO_LINES]
-  : [
-      { productSlug: PRODUCTS[0].slug, quantity: 2 },
-      { productSlug: PRODUCTS[2].slug, quantity: 1 },
-    ];
-
-const cartItems = demoCart
-  .map((entry) => {
-    const product = isPanda
-      ? findPandaProduct(entry.productSlug)
-      : findProductBySlug(entry.productSlug);
-    if (product === null) {
-      return null;
-    }
-    return {
-      id: product.id,
-      name: product.name,
-      imageUrl: product.imageUrl,
-      priceCents: product.priceCents,
-      currency: product.currency ?? 'USD',
-      quantity: entry.quantity,
-    };
-  })
-  .filter((item): item is NonNullable<typeof item> => item !== null);
-
-// ─── Empty-safe: si no hay items, redirigimos a /cart. La confirmación
-// no redirige: el pedido ya se hizo y el carrito puede estar vacío.
-if (!isSuccess && cartItems.length === 0) {
-  return Astro.redirect(cartHref);
-}
+// El carrito vive en el cart store (localStorage) y el SSR ya no conoce
+// las líneas: el redirect por carrito vacío es client-side (script del
+// final de la página), y las islas leen el store al hidratar.
 
 // ─── Labels del stepper.
 const stepperSteps = [
@@ -160,22 +126,10 @@ const successLabels = {
 };
 // Placeholder hasta que el backend asigne el número real de pedido.
 const orderNumber = `PE-${Date.now().toString(36).toUpperCase()}`;
-
-// ─── Totales (single source of truth en el padre).
-const subtotalCents = cartItems.reduce((total, item) => total + item.priceCents * item.quantity, 0);
-const currencyCode = cartItems[0]?.currency ?? 'USD';
-
-// Free shipping sobre $50 (mismo umbral que cart.astro v3).
-const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
-const shippingCents: number | null = subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : 400;
-
-// Tax placeholder: 15% del subtotal.
-const TAX_RATE = 0.15;
-const taxCents = Math.round(subtotalCents * TAX_RATE);
 ---
 
 <StorefrontLayout title={t['storefront.checkout.v3.title']}>
-  <main>
+  <main data-cart-href={cartHref}>
     {isSuccess ? (
       <section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <CheckoutSuccess
@@ -205,20 +159,14 @@ const taxCents = Math.round(subtotalCents * TAX_RATE);
             <CheckoutFormV3
               currentStepId={currentStepId}
               stepHrefBase={checkoutBaseHref}
-              items={cartItems}
-              currencyCode={currencyCode}
               labels={formLabels}
             />
           </div>
 
           <div class="order-1 lg:order-2">
             <div class="flex flex-col gap-5">
-              <CheckoutSummaryV3
-                items={cartItems}
-                subtotalCents={subtotalCents}
-                currencyCode={currencyCode}
-                shippingCents={shippingCents}
-                taxCents={taxCents}
+              <CheckoutOrderSummary
+                client:visible
                 labels={summaryLabels}
                 ctaHref={`${checkoutBaseHref}?step=success`}
               />
@@ -243,3 +191,18 @@ const taxCents = Math.round(subtotalCents * TAX_RATE);
     )}
   </main>
 </StorefrontLayout>
+
+<script>
+  // Redirect por carrito vacío. Antes era un Astro.redirect en el SSR,
+  // pero el store vive en localStorage: la verdad está en el cliente.
+  import { cartStore } from '../../stores/cart';
+
+  const root = document.querySelector<HTMLElement>('[data-cart-href]');
+  const cartHref = root?.dataset.cartHref ?? '/cart';
+  const params = new URLSearchParams(window.location.search);
+  // `?step=success` no redirige: el pedido ya se hizo y el carrito puede
+  // estar vacío.
+  if (params.get('step') !== 'success' && cartStore.getSnapshot().lines.length === 0) {
+    window.location.assign(cartHref);
+  }
+</script>

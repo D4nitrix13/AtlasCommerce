@@ -17,7 +17,7 @@
  * Composición:
  *  - Step 1 → CheckoutShippingStepV3
  *  - Step 2 → CheckoutPaymentStepV3
- *  - Step 3 → CheckoutReviewStepV3
+ *  - Step 3 → CheckoutReviewItems (isla React: lee el cart store)
  */
 import CheckoutShippingStepV3, {
   type CheckoutShippingStepV3Labels,
@@ -25,10 +25,9 @@ import CheckoutShippingStepV3, {
 import CheckoutPaymentStepV3, {
   type CheckoutPaymentStepV3Labels,
 } from './CheckoutPaymentStepV3.astro';
-import CheckoutReviewStepV3, {
-  type CheckoutReviewStepV3Labels,
-} from './CheckoutReviewStepV3.astro';
-import type { CheckoutSummaryV3Item } from './CheckoutSummaryV3.astro';
+import CheckoutReviewItems, {
+  type CheckoutReviewItemsLabels,
+} from './CheckoutReviewItems';
 
 export type CheckoutV3StepId = 'shipping' | 'payment' | 'review';
 
@@ -42,19 +41,17 @@ export interface CheckoutFormV3Labels {
   placeOrder: string;
   shipping: CheckoutShippingStepV3Labels;
   payment: CheckoutPaymentStepV3Labels;
-  review: CheckoutReviewStepV3Labels;
+  review: CheckoutReviewItemsLabels;
 }
 
 interface Props {
   currentStepId: CheckoutV3StepId;
   /** Locale-prefixed base (ej. `/${locale}/checkout`). */
   stepHrefBase: string;
-  items: readonly CheckoutSummaryV3Item[];
-  currencyCode: string;
   labels: CheckoutFormV3Labels;
 }
 
-const { currentStepId, stepHrefBase, items, currencyCode, labels } = Astro.props;
+const { currentStepId, stepHrefBase, labels } = Astro.props;
 
 const hrefFor = (stepId: CheckoutV3StepId): string => `${stepHrefBase}?step=${stepId}`;
 const stepOrder: CheckoutV3StepId[] = ['shipping', 'payment', 'review'];
@@ -120,7 +117,8 @@ const nextStep = hasNext ? stepOrder[currentIndex + 1] : null;
       {labels.reviewHeading}
     </legend>
     <p class="text-sm text-slate-500">{labels.reviewHint}</p>
-    <CheckoutReviewStepV3 labels={labels.review} items={items} currencyCode={currencyCode} />
+    {/* Isla que lee el cart store: el SSR ya no conoce las líneas. */}
+    <CheckoutReviewItems client:visible labels={labels.review} />
   </fieldset>
 
   {/* ─── Step nav (Anterior / Siguiente) ─────────────────────────── */}
