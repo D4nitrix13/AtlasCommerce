@@ -81,7 +81,7 @@ Fuera de scope (explícito):
       (add, remove, updateQty, clear, totales con envío gratis > $50 e
       impuesto). Test RED primero (`tests/unit/stores/cart.test.ts`).
       Ruta: `inline` (dos archivos ya entendidos, sin investigación).
-- [ ] T2. `CartView.tsx` (island) + wiring de `cart.astro`: que el carrito
+- [x] T2. `CartView.tsx` (island) + wiring de `cart.astro`: que el carrito
       lea el store y muestre lo acumulado, con empty state y CTA.
       Ruta: `delegated` (2+ archivos no triviales).
 - [ ] T3. Add-to-cart en `PandaProductDetail.astro` y `ProductCardCatalog.astro`
@@ -93,15 +93,18 @@ Fuera de scope (explícito):
       testeable) + `products/index.astro` lee query params + `FiltersSidebar`
       como links/form GET. Tenant-aware: Panda y Kitsune sin marcas ni
       tallas. Test RED primero. Ruta: `delegated`.
-- [ ] T6. Montar `CheckoutSuccess` en checkout (`?step=success` en
+- [x] T6. Montar `CheckoutSuccess` en checkout (`?step=success` en
       `VALID_STEPS`). Ruta: `inline` (edición mecánica de 1 archivo).
-- [ ] T7. RFQ (`rfq/index.astro`) y bulk-order tenant-aware: catálogo
+      `success` no es step del stepper: es la vista terminal. El redirect
+      por carrito vacío ya no aplica sobre la confirmación.
+- [x] T7. RFQ (`rfq/index.astro`) y bulk-order tenant-aware: catálogo
       Panda en Panda, `data/products.ts` en Kitsune/otros. Ruta: `inline`
       (2 ediciones mecánicas ya entendidas).
-- [ ] T8. Verificación de host/Caddy: `http://panda-estampados.com` con
-      `/etc/hosts` + Caddy del host. Si `sudo` pide contraseña, dejar los
-      comandos documentados para Daniel y cerrar la tarea como bloqueada
-      en el entorno, no como código.
+- [x] T8. Verificación de host/Caddy: `http://panda-estampados.com` con
+      `/etc/hosts` + Caddy del host. **Verificado OK** — la sesión previa
+      lo había dejado pendiente, pero Caddy ya estaba activo con el
+      Caddyfile del repo y `/etc/hosts` ya tenía las entradas de Panda y
+      Kitsune. Sin `sudo` disponible en esta sesión; no hizo falta.
 
 ## Criterios de aceptación
 
@@ -131,16 +134,51 @@ Fuera de scope (explícito):
   el servidor Engram no está conectado en esta sesión. Resincronizar
   cuando esté disponible.
 - T1 (2026-11-02): store de carrito + 18 tests. TDD: RED observado
-  (18 failed) → GREEN (18 passed).
+  (18 failed) → GREEN (18 passed). Commit `126d4c18`.
+- Fix de T1 (2026-11-02): hidratación sin mismatch + constante sin usar.
+  Commit `8168bbf9`.
+- T2 (2026-11-02): `CartView.tsx` + wiring de `cart.astro`. TDD: RED →
+  GREEN (8 tests). Commit `be42710b`. Ruta: `delegated` (writer acotado).
+- T6 (2026-11-02): confirmación de pedido montada en checkout. Commit
+  `81eb10a0`. Ruta: `inline`.
+- T7 (2026-11-02): RFQ y volumen tenant-aware. Commit `f348d687`.
+  Ruta: `inline`.
+- T8 (2026-11-02): host verificado. `curl http://panda-estampados.com/`
+  → 302, `/es/products` → 200, `/es/cart` → 200; `curl http://kitsune.com/`
+  → 302, `/es/products` → 200. `caddy.service` active, puerto 80
+  escuchando, `/etc/hosts` con las 6 entradas (3 Panda + 3 Kitsune).
+  La configuración ya estaba hecha por Daniel entre sesiones.
 
 ## Evidencia
 
 - `bun run test -- tests/unit/stores/cart.test.ts`: 18 tests, 18 passed (0.76s)
   — RED previo: 18 failed (`clearCart is not a function`).
+- `bun run test -- tests/unit/components/storefront/cart/CartView.test.tsx`:
+  8 tests, 8 passed (284ms) — RED previo: suite sin resolver.
+- Spot check del parent tras el fix de hidratación:
+  `bun run test -- tests/unit/stores/cart.test.ts tests/unit/components/storefront/cart/CartView.test.tsx`:
+  26 tests, 26 passed (1.24s).
+- `bun run typecheck` (writer, T2): 0 errors, 0 warnings, 41 hints
+  preexistentes (ninguno en archivos nuevos).
+- `bun run lint` (writer, T2): exit 1 — 259 problemas **preexistentes**
+  (65 errors de base del repo). Los archivos de esta feature: 0 errors,
+  4 warnings `max-lines-per-function` (misma clase que `CouponInput.tsx`).
+  No es gate limpio del repo; no se corrigió lo preexistente.
 - Nota de entorno: `bun` no está en el PATH del shell; se invoca como
   `~/.bun/bin/bun`. El PATH debería incluir `~/.bun/bin` (regla
   `tooling/package-manager.md`).
+- **RDD inoperable en este runtime.** `gentle-ai review assess --agent
+  mimocode` responde `unassessable` + `review_due: true (high_risk)`.
+  Motivo: "the active runtime is not eligible for immutable receipt
+  review; supported immutable review runtimes: claude-code, opencode,
+  codex". El switch `gentle-ai review mode` está **on** (default) y no
+  se toca: es del usuario. Verificación de esta sesión = self-verification
+  del writer + spot check del parent; el review nativo queda pendiente
+  de correrse desde un runtime elegible (o el usuario desactiva RDD con
+  `gentle-ai review mode disable --scope clone`).
 
 ## Próximo paso
 
-T2 — `CartView.tsx` + wiring de `cart.astro` al store.
+T5 — filtros del PLP que recortan la grilla (`lib/catalog-filters.ts` +
+`products/index.astro` + `FiltersSidebar`). Luego T3 (add-to-cart en
+PDP y card) y T4 (checkout lee el store).
