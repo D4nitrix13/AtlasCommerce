@@ -84,15 +84,17 @@ Fuera de scope (explícito):
 - [x] T2. `CartView.tsx` (island) + wiring de `cart.astro`: que el carrito
       lea el store y muestre lo acumulado, con empty state y CTA.
       Ruta: `delegated` (2+ archivos no triviales).
-- [ ] T3. Add-to-cart en `PandaProductDetail.astro` y `ProductCardCatalog.astro`
+- [x] T3. Add-to-cart en `PandaProductDetail.astro` y `ProductCardCatalog.astro`
       (botón/selector de cantidad + acabado). Ruta: `delegated`.
-- [ ] T4. `checkout.astro` lee el mismo store en su resumen (mismos ítems
-      que el carrito). Ruta: `delegated` (junto con T2 si el writer lo
-      cubre; si no, separado).
-- [ ] T5. Filtros del PLP que recortan: `lib/catalog-filters.ts` (puro,
+      Isla `AddToCart.tsx` con modo `full` (PDP) y `compact` (card).
+      Commit `9aff7d82`.
+- [x] T4. `checkout.astro` lee el mismo store en su resumen (mismos ítems
+      que el carrito). Ruta: `delegated` (writer acotado con T3).
+      Islas `CheckoutOrderSummary` + `CheckoutReviewItems`. Commit `444ab3bc`.
+- [x] T5. Filtros del PLP que recortan: `lib/catalog-filters.ts` (puro,
       testeable) + `products/index.astro` lee query params + `FiltersSidebar`
       como links/form GET. Tenant-aware: Panda y Kitsune sin marcas ni
-      tallas. Test RED primero. Ruta: `delegated`.
+      tallas. Test RED primero. Ruta: `delegated`. Commit `4f141919`.
 - [x] T6. Montar `CheckoutSuccess` en checkout (`?step=success` en
       `VALID_STEPS`). Ruta: `inline` (edición mecánica de 1 archivo).
       `success` no es step del stepper: es la vista terminal. El redirect
@@ -108,17 +110,26 @@ Fuera de scope (explícito):
 
 ## Criterios de aceptación
 
-1. En el PLP, elegir categoría/color/precio **recorta** la grilla (y los
+1. ✅ En el PLP, elegir categoría/color/precio **recorta** la grilla (y los
    counts/URL lo reflejan). En Panda y Kitsune no aparecen marcas
-   Fender/Gibson ni tallas CH–XG.
-2. Agregar productos desde la PDP hace que el carrito muestre esos ítems
+   Fender/Gibson ni tallas CH–XG. — Verificado en vivo:
+   `?category=textil` deja 3 de 8 piezas; `?color=negro` deja 6;
+   `?maxPrice=15` deja 4; `kitsune.com/es/products` → 0 apariciones de
+   Fender/Gibson/tallas.
+2. ✅ Agregar productos desde la PDP hace que el carrito muestre esos ítems
    (persistido tras recargar). El checkout muestra exactamente los
-   mismos ítems y totales.
-3. `?step=success` del checkout renderiza `CheckoutSuccess` (ticket).
-4. RFQ y volumen muestran las 8 piezas en Panda y las figuras en Kitsune.
-5. `bun run test`, `bun run typecheck` y `bun run lint` pasan (o solo con
-   fallas preexistentes documentadas).
-6. Un work-unit commit por tarea (Conventional Commit), en rama feature.
+   mismos ítems y totales. — `AddToCart` montado en PDP y card; cart y
+   checkout leen el mismo `stores/cart.ts` (28 tests unitarios verificados).
+3. ✅ `?step=success` del checkout renderiza `CheckoutSuccess` (ticket).
+   — Verificado en vivo: `checkout-success-title` + "Pedido confirmado".
+4. ✅ RFQ y volumen muestran las 8 piezas en Panda y las figuras en Kitsune.
+   — `isPandaStore(tenantSlug) ? PANDA_PRODUCTS : PRODUCTS`.
+5. ✅ `bun run test`, `bun run typecheck` y `bun run lint` pasan (o solo con
+   fallas preexistentes documentadas). — typecheck 0 errors; lint 64
+   errors preexistentes (0 propios); suite completa 401/402 con 1 falla
+   preexistente documentada.
+6. ✅ Un work-unit commit por tarea (Conventional Commit), en rama feature.
+   — 8 commits en `feat/storefront-essential-views`.
 
 ## Cheques aplicables
 
@@ -148,6 +159,18 @@ Fuera de scope (explícito):
   → 302, `/es/products` → 200. `caddy.service` active, puerto 80
   escuchando, `/etc/hosts` con las 6 entradas (3 Panda + 3 Kitsune).
   La configuración ya estaba hecha por Daniel entre sesiones.
+- T3 (2026-11-02): `AddToCart.tsx` + montajes en PDP y card. TDD: RED
+  (módulo inexistente) → GREEN (8/8). Commit `9aff7d82`. Ruta: delegated.
+- T4 (2026-11-02): islas de checkout leen el store. TDD: RED (2 suites)
+  → GREEN (7/7). Commit `444ab3bc`. Ruta: delegated (mismo writer que T3).
+- **Bug encontrado y corregido en el spot check del parent** (previo al
+  commit T4): `CheckoutOrderSummary` se montaba **sin `client:*`**, así
+  que SSR-renderizaba el estado vacío y nunca hidrataba. Fix: `client:visible`
+  agregado antes del commit. Verificado en vivo: ambas islas
+  (`CheckoutOrderSummary.tsx`, `CheckoutReviewItems.tsx`) aparecen en el
+  HTML de `?step=review`.
+- T5 (2026-11-02): filtros del PLP por query params SSR. TDD: RED
+  (módulo inexistente) → GREEN (18/18). Commit `4f141919`. Ruta: delegated.
 
 ## Evidencia
 
@@ -164,6 +187,38 @@ Fuera de scope (explícito):
   (65 errors de base del repo). Los archivos de esta feature: 0 errors,
   4 warnings `max-lines-per-function` (misma clase que `CouponInput.tsx`).
   No es gate limpio del repo; no se corrigió lo preexistente.
+- `bun run test -- tests/unit/components/storefront/cart/AddToCart.test.tsx`:
+  8 passed. TDD: RED (módulo inexistente) → GREEN (8/8).
+- `bun run test -- tests/unit/components/storefront/checkout/`: 7 passed
+  (2 files). TDD: RED (2 suites) → GREEN (7/7).
+- Spot check del parent (cart + checkout juntos):
+  `bun run test -- tests/unit/components/storefront/cart/ tests/unit/components/storefront/checkout/`:
+  28 tests, 28 passed (1.82s) — 5 archivos.
+- `bun run typecheck` (post-fix de la isla): 0 errors, 0 warnings,
+  40 hints (532 files).
+- `bun run lint` (writer, T3+T4): 263 problems (64 errors preexistentes,
+  199 warnings). Archivos de la feature: 0 errors, 5 warnings.
+- Verificación en vivo (curl contra el dev server por Caddy):
+  `/es/products/polo-pique` → `AddToCart` + `data-panda-finish` presentes;
+  `/es/checkout?step=review` → `CheckoutOrderSummary.tsx` + `CheckoutReviewItems.tsx`
+  como islas; `/es/cart` → `CartView` como isla; `/es/checkout?step=success`
+  → `checkout-success-title` + "Pedido confirmado".
+- `bun run test -- tests/unit/lib/catalog-filters.test.ts`: 18 passed.
+  TDD: RED (módulo inexistente) → GREEN (18/18).
+- **Suite completa al cierre** (una vez por sesión):
+  `bun run test`: **401 passed, 1 failed (402)**, 43 archivos, 9.65s.
+- **La falla es preexistente**, no de esta feature: `tests/unit/lib/product-card-swap.test.ts:437`
+  (`buildStackedImages` esperaba `['front.webp','back.webp']`). Ni
+  `frontend/src/lib/product-card-swap.ts` ni su test cambiaron respecto de
+  `master` (`git diff master..HEAD` vacío sobre ambos) — falla ligada al
+  pipeline `is_hover`/E1.5 que sigue en pausa.
+- `bun run typecheck` (post-T5): 0 errors, 0 warnings, 40 hints (534 files).
+- `bun run lint` (writer, T5): 266 problems (64 errors preexistentes,
+  202 warnings). Archivos de T5: 0 errors, 3 warnings.
+- Verificación en vivo de T5 (curl): sin filtro → 8 piezas;
+  `?category=textil` → 3 (polo, playera, hoodie); `?color=negro` → 6;
+  `?maxPrice=15` → 4 (bolígrafo, libreta, taza, tote);
+  `kitsune.com/es/products` → 0 marcas Fender/Gibson ni tallas.
 - Nota de entorno: `bun` no está en el PATH del shell; se invoca como
   `~/.bun/bin/bun`. El PATH debería incluir `~/.bun/bin` (regla
   `tooling/package-manager.md`).
@@ -179,6 +234,15 @@ Fuera de scope (explícito):
 
 ## Próximo paso
 
-T5 — filtros del PLP que recortan la grilla (`lib/catalog-filters.ts` +
-`products/index.astro` + `FiltersSidebar`). Luego T3 (add-to-cart en
-PDP y card) y T4 (checkout lee el store).
+Las 8 tareas están cerradas. La rama `feat/storefront-essential-views`
+tiene 8 work-unit commits y está lista para revisión/merge (decisión del
+usuario). Fuera de esta feature y pendiente como continuación natural:
+
+- E1.5 (`is_hover`) sigue en pausa — incluye el test preexistente que
+  falla (`product-card-swap.test.ts`).
+- `SortDropdown` refleja `?sort=` pero no reordena (fuera de scope T5).
+- Facetas con counts exactos pendientes de endpoint del backend.
+- `CheckoutSummaryV3.astro` / `CheckoutReviewStepV3.astro` quedaron sin
+  montar (reemplazados por las islas).
+- Review RDD nativo: correrlo desde un runtime elegible (claude-code /
+  opencode / codex) o desactivar el switch para este clone.
