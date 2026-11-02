@@ -20,7 +20,7 @@
  * ── Outputs ───────────────────────────────────────────────────────
  *
  *   - `primaryImage`: shown when the card is idle.
- *   - `backImage`: shown on card hover (no swatch focus).
+ *   - `hoverImage`: shown on card hover (no swatch focus).
  *   - `variantImages`: `Map<variantId, ProductImage>` of the
  *     primary image per variant — shown when THAT swatch is hovered.
  *     OJO: es insumo de `buildStackedImages`, NO la fuente de verdad
@@ -30,28 +30,28 @@
  *   - `variantSwatches`: one entry per `Product.variants` for the
  *     swatch row (Fender-style ~20px circles).
  *
- * ── Roles / "vista" extraction ─────────────────────────────────────
+ * ── La ranura de hover ────────────────────────────────────────────
  *
- * Backend `altText` ends with " - vista <role>". Roles present in the
- * catalog (probed Oct 2026): `front`, `back`, `body`, `backbody`,
- * `headstock`, `back-headstock`, `pickup`, `knobs`, `side`, `beauty`,
- * `case`, `binding`, `fingerboard`.
+ * La foto de hover la marca el administrador (`is_hover` en
+ * `product_images`), no el vocabulario del `altText`.
  *
- * Card-level "back view on hover" picks the role in this priority:
- *   1. `back`            → standard rear shot of the instrument.
- *   2. `backbody`        → body's back, fallback when no `back`.
- *   3. `body`            → generic body shot, last resort.
- *   4. nothing → keep the primary image.
+ * Antes esta lib derivaba el hover del texto: buscaba el sufijo
+ * " - vista back" y, si no estaba, probaba " - vista backbody" y
+ * " - vista body". Ese vocabulario lo escribía el scraper del
+ * fabricante, no el catálogo, y por eso la card terminaba
+ * interpretando metadata de importación. Peor: el administrador no
+ * tenía forma de decir "esta foto es la del hover" sin mentir en ese
+ * vocabulario.
  *
- * Detail-shot roles (`headstock`, `pickup`, `knobs`, `case`) are
- * never used for the back-hover fallback — they're detail crops the
- * user finds in the PDP gallery, not a stand-in for "back view".
+ * `BACK_ROLES` y `resolveBackImage()` se eliminaron del runtime en el
+ * slice 1.5. El vocabulario de procedencia sigue existiendo, pero
+ * únicamente entre el importador y el auditor
+ * (`CatalogAssetsSeeder::ROLE_ORDER`, `GalleryRoleAuditor`) y en
+ * `HoverImageBackfiller`, que es donde se tradujo UNA vez a la bandera
+ * que el storefront consume.
  */
 
 import type { Product, ProductImage, ProductVariant } from '../types/catalog';
-
-/** Roles considered a valid stand-in for "back view" on hover. Order = priority. */
-const BACK_ROLES: readonly string[] = ['back', 'backbody', 'body'];
 
 /**
  * Color slate-400 usado como fallback cuando la variant no tiene
@@ -60,20 +60,6 @@ const BACK_ROLES: readonly string[] = ['back', 'backbody', 'body'];
  * de estilos, no del bundle JS).
  */
 const FALLBACK_SWATCH_COLOR = '#94a3b8';
-
-/**
- * Extrae el rol (`front`, `back`, ...) del último segmento de un
- * altText del backend. Acepta tanto " - vista back" como
- * " - vista back-headstock". `null` si el altText no matchea el
- * formato esperado.
- */
-function extractRole(altText: string): string | null {
-  const marker = ' - vista ';
-  const idx = altText.lastIndexOf(marker);
-  if (idx === -1) return null;
-  const role = altText.slice(idx + marker.length).trim().toLowerCase();
-  return role.length > 0 ? role : null;
-}
 
 /**
  * Type guard: el array es de `ProductImage` (no legacy strings).
@@ -108,22 +94,20 @@ function resolvePrimaryImage(richImages: readonly ProductImage[]): ProductImage 
 }
 
 /**
- * Imagen "back" del variant principal, en orden de preferencia de
- * rol. Si el variant activo no tiene back, busca el mismo rol en
- * otros variants — la guitarra es esencialmente la misma forma, la
- * diferencia de color no cambia qué tan reconocible es un "back"
- * vs un "front".
+ * Foto de hover: la entrada con `isHover: true`.
  *
- * `null` si ninguna imagen de la galería tiene un rol válido.
+ * El backend garantiza "como máximo una foto de hover por producto" y la
+ * replica en todas las resoluciones de esa foto, así que el array de
+ * galería (una entrada por foto) tiene a lo sumo un flag en `true`. Por
+ * eso `find` alcanza y no hace falta un desempate.
+ *
+ * `null` cuando el producto no tiene foto de hover marcada — el caso de
+ * un producto con una sola foto. La card degrada a no-intercambiar: el
+ * `<img data-role="back">` no llega al DOM, la regla de hover no matchea
+ * nada y la portada queda a la vista. NUNCA a una card en blanco.
  */
-function resolveBackImage(richImages: readonly ProductImage[], primaryVariantId: string | null): ProductImage | null {
-  const primarys = richImages.filter((img) => img.variantId === primaryVariantId);
-  const fallbackSource = primarys.length > 0 ? primarys : richImages;
-  for (const role of BACK_ROLES) {
-    const match = fallbackSource.find((img) => extractRole(img.altText) === role);
-    if (match !== undefined) return match;
-  }
-  return null;
+function resolveHoverImage(richImages: readonly ProductImage[]): ProductImage | null {
+  return richImages.find((image) => image.isHover) ?? null;
 }
 
 /**
@@ -167,8 +151,14 @@ export interface StackedImage {
 export interface ProductCardSwapData {
   /** Imagen mostrada por default (idle). `null` → la card no hace swap. */
   primaryImage: ProductImage | null;
-  /** Imagen que aparece en hover cuando no hay swatch focus. */
-  backImage: ProductImage | null;
+  /**
+   * Foto que aparece en hover cuando no hay swatch focus.
+   *
+   * `null` cuando el producto no tiene foto de hover marcada. No es un
+   * error ni un estado que la card tenga que pintar: significa "esta card
+   * no hace swap", que es un producto con una sola foto.
+   */
+  hoverImage: ProductImage | null;
   /**
    * Swatch row de variantes, con su thumbnail y color. Vacío = la
    * card no renderiza la fila (sigue mostrando 1 sola imagen).
@@ -200,7 +190,7 @@ export function deriveProductCardSwap(product: Product): ProductCardSwapData {
 
   const primaryImage = resolvePrimaryImage(richImages);
   const primaryVariantId = primaryImage?.variantId ?? null;
-  const backImage = resolveBackImage(richImages, primaryVariantId);
+  const hoverImage = resolveHoverImage(richImages);
   const variantImages = buildVariantImageMap(richImages);
 
   const swatches: VariantSwatch[] = variants.map((variant) => {
@@ -218,7 +208,7 @@ export function deriveProductCardSwap(product: Product): ProductCardSwapData {
 
   return {
     primaryImage,
-    backImage,
+    hoverImage,
     swatches,
     variantImages,
     primaryVariantId,
@@ -259,13 +249,17 @@ export function buildStackedImages(
       variantId: null,
     });
   }
-  if (swap.backImage !== null && swap.backImage.url !== images[0]?.src) {
+  // La foto de hover viaja con su propio `srcset`: el cross-fade es un
+  // `<img>` más en el mismo rect, y el browser necesita poder pedir la
+  // resolución que corresponde al ancho de la card en cada momento
+  // (incluido el `scale(105%)` del hover).
+  if (swap.hoverImage !== null && swap.hoverImage.url !== images[0]?.src) {
     images.push({
-      src: swap.backImage.url,
-      srcset: swap.backImage.srcset,
-      alt: swap.backImage.altText,
+      src: swap.hoverImage.url,
+      srcset: swap.hoverImage.srcset,
+      alt: swap.hoverImage.altText,
       role: 'back',
-      variantId: swap.backImage.variantId,
+      variantId: swap.hoverImage.variantId,
     });
   }
   if (hasSwatchRow) {

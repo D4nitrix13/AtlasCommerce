@@ -238,11 +238,13 @@ const finishCountLabelText =
   /* `@media (hover: hover)` evita sticky-hover en touch (un tap puede
      dejar el :hover pegado y esconder la primary detrás del back). */
   @media (hover: hover) {
-    /* Card hover SIN swatch hovered → mostrar back. El back lo resuelve
-       `deriveProductCardSwap` y SIEMPRE sale del variant de la imagen
-       primaria: mostrar el dorso de un Sunburst en una card Ebony sería
-       el mismo defecto que usar un headstock como portada. Si el producto
-       no tiene back, la regla no matchea (graceful). */
+    /* Card hover SIN swatch hovered → mostrar la foto de hover. La elige
+       el administrador (`is_hover`), no el `altText`; el backfill que
+       derivó la bandera la eligió DENTRO de la variante de la portada, así
+       que no puede ser el dorso de un Sunburst en una card Ebony. Si el
+       producto no tiene foto de hover marcada, no hay
+       `<img data-role="back">` en el DOM y la regla no matchea: la
+       portada queda a la vista (nunca una card en blanco). */
     .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover
       .productcard-swap-img[data-role='primary'] { opacity: 0; }
     .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover

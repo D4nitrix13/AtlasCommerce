@@ -150,15 +150,18 @@ function buildImageGallery(
         url: productImage(variant.label, variant.hex ?? '#cbd5e1'),
         altText: `${variant.label} - vista front`,
         isPrimary: true,
+        isHover: false,
         variantId: variant.id,
         sortOrder: 0,
         srcset: '',
       });
-      // El back vive atado al primary (mismo variantId) en el backend.
+      // La foto de hover vive atada a la portada (mismo variantId) en el
+      // backend, y es la única con `isHover: true`.
       gallery.push({
         url: productBack(variant.label, variant.hex ?? '#a3b3c0'),
         altText: `${variant.label} - vista back`,
         isPrimary: false,
+        isHover: true,
         variantId: variant.id,
         sortOrder: 1,
         srcset: '',
@@ -169,6 +172,7 @@ function buildImageGallery(
         url: productImage(variant.label, variant.hex ?? '#cbd5e1'),
         altText: `${variant.label} - vista front`,
         isPrimary: false,
+        isHover: false,
         variantId: variant.id,
         sortOrder: ++sortOrder,
         srcset: '',
@@ -286,6 +290,7 @@ export const SingleVariantIsExclusive: Story = {
           url: productImage('Les Paul', '#3B241C'),
           altText: '1959 Les Paul Reissue - vista front',
           isPrimary: true,
+          isHover: false,
           variantId: '1',
           sortOrder: 0,
           srcset: '',

@@ -284,8 +284,11 @@ const finishCountLabelText =
   /* `@media (hover: hover)` evita sticky-hover en touch (un tap puede
      dejar el :hover pegado y esconder la primary detrás del back). */
   @media (hover: hover) {
-    /* Card hover SIN swatch hovered → mostrar back. Si el producto
-       no tiene back image, las reglas no matchean (graceful). */
+    /* Card hover SIN swatch hovered → mostrar la foto de hover. La elige
+       el administrador (`is_hover`); `deriveProductCardSwap` la lee de la
+       galería. Si el producto no tiene foto de hover marcada no hay
+       `<img data-role="back">` en el DOM y la regla no matchea: la
+       portada queda a la vista. */
     .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover
       .productcard-swap-img[data-role='primary'] { opacity: 0; }
     .productcard-swap-root:not(:has(.productcard-swap-swatch:hover)):hover

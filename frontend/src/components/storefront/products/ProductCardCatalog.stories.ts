@@ -72,10 +72,14 @@ interface FinishStub {
 }
 
 /**
- * Galería con `front` + `back` del variant primario y `front` del resto.
- * Reproduce el contrato real de `StorefrontProductResource`: el rol viaja
- * en el texto después de `" - vista "` y la imagen atada al variant
- * primario es la única que trae `isPrimary: true`.
+ * Galería con la foto de portada + la de hover del variant primario, y
+ * portada del resto. Reproduce el contrato real de
+ * `StorefrontProductResource`: la imagen atada al variant primario es la
+ * única con `isPrimary: true`, y la de hover es la única con
+ * `isHover: true`.
+ *
+ * El `altText` sigue llevando " - vista <rol>" porque así viene del
+ * catálogo, pero NO decide nada: la ranura de hover la marca el flag.
  */
 function buildGallery(
   finishes: readonly FinishStub[],
@@ -90,6 +94,7 @@ function buildGallery(
       url: productImage(finish.label, finish.hex ?? '#cbd5e1'),
       altText: `${finish.label} - vista front`,
       isPrimary,
+      isHover: false,
       variantId: finish.id,
       sortOrder,
       srcset: '',
@@ -100,6 +105,7 @@ function buildGallery(
       url: productBack(finish.label, finish.hex ?? '#a3b3c0'),
       altText: `${finish.label} - vista back`,
       isPrimary: false,
+      isHover: true,
       variantId: finish.id,
       sortOrder,
       srcset: '',

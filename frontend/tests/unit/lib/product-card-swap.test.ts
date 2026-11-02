@@ -3,12 +3,13 @@
  * `ProductCard.astro` consume para renderizar swatches y cross-fade.
  *
  * Cobertura:
- *   - `extractRole` (indirecto vía `deriveProductCardSwap`).
  *   - Resolución de primary: `isPrimary: true` tiene prioridad sobre
  *     `sortOrder`.
- *   - Resolución de back: cascada `back` → `backbody` → `body`, y
- *     fallback a la galería completa cuando el variant activo no
- *     tiene la imagen buscada.
+ *   - Resolución de hover: por el flag `isHover`, y degradación a
+ *     "no hay swap" cuando ninguna foto lo tiene. La cascada de roles
+ *     (`back` → `backbody` → `body`) ya NO vive acá: se transladó al
+ *     flag en la API (slice 1.5) y su equivalencia se prueba del lado
+ *     backend contra catálogo sembrado.
  *   - Swatch row: ≥2 variants → renderiza; 1 variant → no renderiza.
  *   - `VariantSwatch.hex` null → fallback slate-400 (sin error).
  *   - `buildStackedImages`: stack incluye primary + back + variantes
@@ -40,6 +41,10 @@ function imageWith(
 ): ProductImage {
   return {
     isPrimary: false,
+    // Por defecto NINGUNA foto es de hover, así que cada test tiene que
+    // marcarlo explícitamente. Con el default en `true` el "no hay hover"
+    // sería imposible de expresar.
+    isHover: false,
     variantId: '1',
     sortOrder: 0,
     srcset: '',
@@ -107,7 +112,7 @@ function cssFor(product: Product): { css: string; swap: ProductCardSwapData; sta
   return { css: buildVariantHoverCss(swap, stack), swap, stack };
 }
 
-describe('deriveProductCardSwap — primary & back resolution', () => {
+describe('deriveProductCardSwap — primary & hover resolution', () => {
   it('elige la imagen con isPrimary=true sobre cualquier otro criterio', () => {
     const product: Product = {
       id: 1,
@@ -120,14 +125,14 @@ describe('deriveProductCardSwap — primary & back resolution', () => {
       stock: 1,
       variants: [variantWith({ id: 'v1' })],
       images: [
-        imageWith({ url: 'front-1.webp', altText: 'SG - vista front', isPrimary: true, variantId: 'v1', sortOrder: 5 }),
-        imageWith({ url: 'back-1.webp', altText: 'SG - vista back', isPrimary: false, variantId: 'v1', sortOrder: 0 }),
+        imageWith({ url: 'front-1.webp', altText: 'SG - vista front', isPrimary: true, isHover: false, variantId: 'v1', sortOrder: 5 }),
+        imageWith({ url: 'hover-1.webp', altText: 'SG - vista back', isPrimary: false, isHover: true, variantId: 'v1', sortOrder: 0 }),
       ],
     };
 
     const swap = deriveProductCardSwap(product);
     expect(swap.primaryImage?.url).toBe('front-1.webp');
-    expect(swap.backImage?.url).toBe('back-1.webp');
+    expect(swap.hoverImage?.url).toBe('hover-1.webp');
     expect(swap.primaryVariantId).toBe('v1');
   });
 
@@ -151,7 +156,10 @@ describe('deriveProductCardSwap — primary & back resolution', () => {
     expect(swap.primaryImage?.url).toBe('b.webp');
   });
 
-  it('resuelve back por cascada back → backbody → body', () => {
+  it('toma la foto marcada con isHover, sea cual sea su posición', () => {
+    // La posición en la galería no dice nada: la ranura la marca el flag.
+    // Antes la cascada de roles elegía por `sort_order` implícito y la
+    // foto de hover podía caer antes o después de la portada.
     const product: Product = {
       id: 1,
       slug: 'sg',
@@ -162,21 +170,20 @@ describe('deriveProductCardSwap — primary & back resolution', () => {
       category: 'guitars',
       stock: 1,
       images: [
-        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, variantId: 'v1' }),
-        imageWith({ url: 'pickup.webp', altText: 'SG - vista pickup', isPrimary: false, variantId: 'v1' }),
-        imageWith({ url: 'body.webp', altText: 'SG - vista body', isPrimary: false, variantId: 'v1' }),
-        imageWith({ url: 'backbody.webp', altText: 'SG - vista backbody', isPrimary: false, variantId: 'v1' }),
-        imageWith({ url: 'back.webp', altText: 'SG - vista back', isPrimary: false, variantId: 'v1' }),
+        imageWith({ url: 'beauty.webp', altText: 'SG - vista beauty', isPrimary: false, isHover: false, variantId: 'v1', sortOrder: 0 }),
+        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, isHover: false, variantId: 'v1', sortOrder: 1 }),
+        imageWith({ url: 'body.webp', altText: 'SG - vista body', isPrimary: false, isHover: true, variantId: 'v1', sortOrder: 2 }),
+        imageWith({ url: 'pickup.webp', altText: 'SG - vista pickup', isPrimary: false, isHover: false, variantId: 'v1', sortOrder: 3 }),
       ],
     };
 
     const swap = deriveProductCardSwap(product);
-    // El primer match de la cascada gana: `back` antes de `backbody`
-    // antes de `body`. Los roles detail (`pickup`, etc.) se ignoran.
-    expect(swap.backImage?.url).toBe('back.webp');
+    expect(swap.hoverImage?.url).toBe('body.webp');
   });
 
-  it('cae al rol siguiente de la cascada cuando back falta', () => {
+  it('ignora por completo el altText cuando el flag está en otro lado', () => {
+    // El caso que la cascada de roles resolvía distinto: dos candidatas,
+    // y el texto dice una cosa mientras el flag dice otra. Manda el flag.
     const product: Product = {
       id: 1,
       slug: 'sg',
@@ -187,17 +194,21 @@ describe('deriveProductCardSwap — primary & back resolution', () => {
       category: 'guitars',
       stock: 1,
       images: [
-        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, variantId: 'v1' }),
-        imageWith({ url: 'backbody.webp', altText: 'SG - vista backbody', isPrimary: false, variantId: 'v1' }),
-        imageWith({ url: 'pickup.webp', altText: 'SG - vista pickup', isPrimary: false, variantId: 'v1' }),
+        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, isHover: false, variantId: 'v1', sortOrder: 0 }),
+        imageWith({ url: 'back.webp', altText: 'SG - vista back', isPrimary: false, isHover: false, variantId: 'v1', sortOrder: 1 }),
+        imageWith({ url: 'body.webp', altText: 'SG - vista body', isPrimary: false, isHover: true, variantId: 'v1', sortOrder: 2 }),
       ],
     };
 
     const swap = deriveProductCardSwap(product);
-    expect(swap.backImage?.url).toBe('backbody.webp');
+    expect(swap.hoverImage?.url).toBe('body.webp');
   });
 
-  it('devuelve null para back si ningún rol es válido', () => {
+  it('degrada a NO swap cuando ninguna foto tiene isHover', () => {
+    // Producto con una sola foto: es lo que pasa con un producto nuevo
+    // subido por la API sin marcar hover. Lo que NO puede pasar es una
+    // card en blanco (el bug que ya arreglamos una vez): la portada
+    // queda a la vista y no entra ningún `<img data-role="back">` al DOM.
     const product: Product = {
       id: 1,
       slug: 'sg',
@@ -208,28 +219,25 @@ describe('deriveProductCardSwap — primary & back resolution', () => {
       category: 'guitars',
       stock: 1,
       images: [
-        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, variantId: 'v1' }),
-        imageWith({ url: 'pickup.webp', altText: 'SG - vista pickup', isPrimary: false, variantId: 'v1' }),
+        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, isHover: false, variantId: 'v1', sortOrder: 0 }),
+        imageWith({ url: 'pickup.webp', altText: 'SG - vista pickup', isPrimary: false, isHover: false, variantId: 'v1', sortOrder: 1 }),
       ],
     };
 
     const swap = deriveProductCardSwap(product);
-    expect(swap.backImage).toBeNull();
+    expect(swap.hoverImage).toBeNull();
+
+    const stack = buildStackedImages(product, swap, false);
+    expect(stack).toHaveLength(1);
+    expect(stack[0]?.role).toBe('primary');
+    expect(stack[0]?.src).toBe('front.webp');
+    expect(stack.some((image) => image.role === 'back')).toBe(false);
   });
 
-  it('NO toma el back de otro acabado si el primary variant tiene sus propias fotos', () => {
-    // Caso: la variante activa (v1) sólo tiene front; otra variante (v2)
-    // tiene back. No se usa el back de v2.
-    //
-    // En una tienda de instruments el acabado ES la identidad del SKU:
-    // si la carta anuncia Ébony y al hover aparece la espalda de
-    // Sunburst, se está mostrando otro producto del que el que se vende.
-    // Es el mismo error que usar un primer plano del clavijero como
-    // portada, sólo que en la dirección contraria.
-    //
-    // Cuando la variante principal no trae ninguna foto el gallery es
-    // del producto entero y sí se usa como fuente — ese caso lo cubre
-    // el test de arriba.
+  it('toma la foto de hover aunque tenga el mismo texto de alt que otra', () => {
+    // El backend replica la marca en todas las resoluciones, y el
+    // storefront las contrae a una entrada. Cuando dos entradas
+    // comparten `altText`, sólo el flag las distingue.
     const product: Product = {
       id: 1,
       slug: 'sg',
@@ -240,13 +248,14 @@ describe('deriveProductCardSwap — primary & back resolution', () => {
       category: 'guitars',
       stock: 1,
       images: [
-        imageWith({ url: 'front-v1.webp', altText: 'SG - vista front', isPrimary: true, variantId: 'v1' }),
-        imageWith({ url: 'back-v2.webp', altText: 'SG - vista back', isPrimary: false, variantId: 'v2' }),
+        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, isHover: false, variantId: 'v1', sortOrder: 0 }),
+        imageWith({ url: 'back-400.webp', altText: 'SG - vista back', isPrimary: false, isHover: true, variantId: 'v1', sortOrder: 1, srcset: '/a.webp 400w, /b.webp 1600w' }),
+        imageWith({ url: 'back-1600.webp', altText: 'SG - vista back', isPrimary: false, isHover: false, variantId: 'v1', sortOrder: 1 }),
       ],
     };
 
     const swap = deriveProductCardSwap(product);
-    expect(swap.backImage).toBeNull();
+    expect(swap.hoverImage?.url).toBe('back-400.webp');
   });
 });
 

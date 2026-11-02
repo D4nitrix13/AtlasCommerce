@@ -46,12 +46,26 @@ export interface ProductImage {
   /**
    * Alt text semántico. En guitarras viene como
    * "1942 Banner J 45 Reissue Vintage Sunburst (Epiphone) - vista front".
-   * La card usa el último segmento después de " - vista " para extraer
-   * el rol (`front`, `back`, `body`, ...).
+   *
+   * YA NO DECIDE NADA: hasta el slice 1.5 la card deducía de acá la foto de
+   * hover parseando el sufijo (" - vista back"). Esa era la etiqueta del
+   * scraper, no una decisión del administrador. Ahora la ranura de hover
+   * viaja explícita en `isHover` y el `altText` es sólo texto accesible.
    */
   altText: string;
   /** Es la imagen principal del producto (1 por producto). */
   isPrimary: boolean;
+  /**
+   * Es la foto de hover del producto: la que aparece al pasar el cursor
+   * sobre la card (1 por producto, y nunca la misma que `isPrimary`).
+   *
+   * El backend replica la marca en todas las resoluciones de la foto, pero
+   * el storefront contrae cada foto a UNA entrada de galería —la de mayor
+   * `width`, con el `srcset` de las demás—, así que el cliente ve
+   * exactamente una entrada con el flag en `true`, y su `srcset` es el de
+   * esa foto. No hace falta reconstruir nada para pintar el swap.
+   */
+  isHover: boolean;
   /**
    * Variant al que pertenece la imagen (acabado). `null` cuando la
    * imagen no se pudo asociar a ninguna variante (assets huérfanos
