@@ -18,12 +18,13 @@
  * SSR; ningún literal hardcoded en la UI.
  *
  * Decisiones:
- *  - **Sin handler de filtros**: la página es presentacional pura. Los
- *    inputs están wireados visualmente (checked/pressed/active) pero no
- *    se hidratan. La paginación SÍ es real y va por links `?page=N`
- *    renderizados en SSR (`components/ui/Pagination.astro`), así que no
- *    necesita estado en el cliente — por eso sigue sin haber una island
- *    React sólo para cambiar el query string.
+ *  - **Filtros SSR por query params** (`lib/catalog-filters.ts`): los
+ *    links del sidebar arman `?category=&color=&minPrice=&maxPrice=`,
+ *    esta página los parsea y aplica sobre el listado antes de render.
+ *    Funciona sin JS (es navegación pura) y comparte URL filtrable. El
+ *    sidebar marca el activo desde la misma URL. La paginación sigue en
+ *    links `?page=N` (`components/ui/Pagination.astro`) y conserva los
+ *    filtros activos en la query.
  *  - **Sin `productGrid.*` legacy**: el código previo usaba keys
  *    `productGrid.heading` (todos los productos) con un link-based
  *    filter por categoría. Las nuevas keys son `products.v3.*`,
@@ -46,9 +47,13 @@ import { API_ENDPOINTS } from '../../../lib/endpoints';
 import {
   clampPage,
   FIRST_PAGE,
-  parsePageParam,
   type StorefrontPaginationMeta,
 } from '../../../lib/pagination';
+import {
+  applyCatalogFilters,
+  buildCatalogHref,
+  parseCatalogFilters,
+} from '../../../lib/catalog-filters';
 import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
 import {
   PANDA_PRODUCTS,
@@ -189,7 +194,11 @@ async function loadCatalogPage(page: number): Promise<StorefrontProductsResponse
   }
 }
 
-const requestedPage = parsePageParam(Astro.url.searchParams.get('page'));
+// Único lector de la query string del catálogo (filtros + `?page=N`).
+// La paginación y los filtros comparten mecanismo: `filters.page` es la
+// página pedida.
+const filters = parseCatalogFilters(Astro.url.searchParams);
+const requestedPage = filters.page ?? FIRST_PAGE;
 
 let catalog = await loadCatalogPage(requestedPage);
 
@@ -212,8 +221,6 @@ const totalProducts = catalog.meta.total;
 // `meta.per_page` es el tamaño real de página que el server aplicó; el
 // fallback a PAGE_SIZE cubre un backend que no lo mande.
 const perPage = catalog.meta.per_page > 0 ? catalog.meta.per_page : PAGE_SIZE;
-const from = totalProducts === 0 ? 0 : (currentPage - 1) * perPage + 1;
-const to = Math.min(currentPage * perPage, totalProducts);
 
 // Normaliza el id de variante a string. El backend lo emite como int
 // tanto en `images[].variantId` como en `variants[].id`, y
@@ -299,9 +306,32 @@ function mapBackendToProduct(b: BackendProduct) {
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const usePandaPrototype =
   isPandaStore(tenantSlug) && catalog.meta.total === 0;
+// Marcas (Fender/Gibson) y tallas (CH–XG) sólo en tenants de
+// instrumentos (La Voz). Panda y Kitsune muestran categoría/color/precio.
+const showBrandsAndSizes = !isPandaStore(tenantSlug) && tenantSlug !== 'kitsune';
 const productsForUi = usePandaPrototype
   ? [...PANDA_PRODUCTS]
   : apiProducts.map(mapBackendToProduct);
+
+// Filtrado SSR (lib/catalog-filters.ts): la URL manda. Aplica en los dos
+// orígenes de datos — el backend del prototipo devuelve vacío, así que el
+// filtrado local es el que garantiza que elegir un filtro recorte.
+const filteredProducts = applyCatalogFilters(productsForUi, filters);
+
+// Paginación unificada sobre `filters.page` (un solo mecanismo para
+// `?page=N`). El fallback Panda pagina el listado filtrado en local; el
+// path del backend ya viene paginado del server y sólo se recorta en
+// display.
+const filteredTotal = filteredProducts.length;
+const localLastPage = Math.max(FIRST_PAGE, Math.ceil(filteredTotal / PAGE_SIZE));
+if (usePandaPrototype) {
+  currentPage = clampPage(currentPage, localLastPage);
+}
+const effectiveLastPage = usePandaPrototype ? localLastPage : lastPage;
+const pageSliceStart = (currentPage - 1) * perPage;
+const displayProducts = usePandaPrototype
+  ? filteredProducts.slice(pageSliceStart, pageSliceStart + perPage)
+  : filteredProducts;
 
 // Diccionario para los subcomponentes
 const dictionary = {
@@ -358,36 +388,45 @@ const categoryCounts = categorySource.reduce<Record<string, { slug: string; labe
   },
   {},
 );
+// Base de links del catálogo: filtros y paginación se arman sobre ella.
+const baseUrl = `/${locale}/products`;
+
 const filterCategoryOptions = [
   {
     slug: 'all',
     label: t['storefront.products.v3.filter.categoriaAll'],
     count: usePandaPrototype ? PANDA_PRODUCTS.length : totalProducts,
+    href: buildCatalogHref(baseUrl, filters, { category: undefined }),
   },
-  ...Object.values(categoryCounts),
+  ...Object.values(categoryCounts).map((category) => ({
+    ...category,
+    href: buildCatalogHref(baseUrl, filters, { category: category.slug }),
+  })),
 ];
 
-// Marcas de instrumentos solo cuando el catálogo no es el de estampado.
-const filterBrandOptions = usePandaPrototype
-  ? []
-  : LA_VOZ_BRANDS.map((brand) => ({
+// Marcas de instrumentos solo en tenants que las necesitan (La Voz):
+// Panda y Kitsune muestran categoría/color/precio, sin marcas ni tallas.
+const filterBrandOptions = showBrandsAndSizes
+  ? LA_VOZ_BRANDS.map((brand) => ({
       slug: brand.slug,
       label: brand.label,
       count: LA_VOZ_CATEGORIES.length > 0 ? 0 : 0,
-    }));
+    }))
+  : [];
 
-// Rangos de precio (en USD cents). Mockup Bonfire propone 4 buckets.
+// Buckets de precio del mockup Bonfire (labels en USD, límites en cents).
+// Cada bucket es un link que setea el rango; el activo se limpia (toggle).
 const PRICE_RANGES = [
-  { slug: '0-30', label: t['storefront.products.v3.range.0-30'] },
-  { slug: '30-60', label: t['storefront.products.v3.range.30-60'] },
-  { slug: '60-100', label: t['storefront.products.v3.range.60-100'] },
-  { slug: '100+', label: t['storefront.products.v3.range.100+'] },
+  { slug: '0-30', label: t['storefront.products.v3.range.0-30'], minPriceCents: 0, maxPriceCents: 3000 },
+  { slug: '30-60', label: t['storefront.products.v3.range.30-60'], minPriceCents: 3000, maxPriceCents: 6000 },
+  { slug: '60-100', label: t['storefront.products.v3.range.60-100'], minPriceCents: 6000, maxPriceCents: 10000 },
+  { slug: '100+', label: t['storefront.products.v3.range.100+'], minPriceCents: 10000, maxPriceCents: undefined },
 ] as const;
 
 // Paleta de colores Bonfire-safe (sin rust #951318, sin verde primary).
-// Los slugs son kebab-case para poder usarlos en URLs cuando los
-// filtros sean reales.
-const filterColorOptions = usePandaPrototype
+// Los slugs viajan en la URL (`?color=`). Cada swatch es un link toggle:
+// el activo limpia el color.
+const filterColorOptions = (usePandaPrototype
   ? [...pandaColorOptions()]
   : [
       { slug: 'black', label: 'Negro', hex: '#132028', count: 4 },
@@ -396,25 +435,63 @@ const filterColorOptions = usePandaPrototype
       { slug: 'pink', label: 'Rosa', hex: '#DB2777', count: 2 },
       { slug: 'amber', label: 'Mostaza', hex: '#EAB24B', count: 2 },
       { slug: 'purple', label: 'Violeta', hex: '#7C3AED', count: 2 },
-    ];
+    ]
+).map((color) => ({
+  ...color,
+  href: buildCatalogHref(
+    baseUrl,
+    filters,
+    filters.color === color.slug ? { color: undefined } : { color: color.slug },
+  ),
+}));
 
-// Tallas: 4 buckets estilo Bonfire. Los counts son placeholders
-// razonables para la demo (suma arbitraria, no cálculo real).
-const filterSizeOptions = usePandaPrototype
-  ? []
-  : [
+// Buckets de precio con su href de SSR. El bucket cuyo rango coincide con
+// la URL es el activo; volver a clickearlo lo limpia (toggle).
+const activePriceSlug =
+  PRICE_RANGES.find(
+    (range) =>
+      range.minPriceCents === filters.minPriceCents &&
+      range.maxPriceCents === filters.maxPriceCents,
+  )?.slug ?? null;
+const filterPriceOptions = PRICE_RANGES.map((range) => {
+  const isActive = activePriceSlug === range.slug;
+  return {
+    slug: range.slug,
+    label: range.label,
+    href: buildCatalogHref(
+      baseUrl,
+      filters,
+      isActive
+        ? { minPriceCents: undefined, maxPriceCents: undefined }
+        : { minPriceCents: range.minPriceCents, maxPriceCents: range.maxPriceCents },
+    ),
+  };
+});
+
+// Tallas: 4 buckets estilo Bonfire (solo tenants de instrumentos). Los
+// counts son placeholders razonables para la demo (suma arbitraria, no
+// cálculo real).
+const filterSizeOptions = showBrandsAndSizes
+  ? [
       { slug: 'ch', label: 'CH', count: 12 },
       { slug: 'm', label: 'M', count: 24 },
       { slug: 'g', label: 'G', count: 18 },
       { slug: 'xg', label: 'XG', count: 8 },
-    ];
+    ]
+  : [];
 
-// Los tres conteos salen de `meta` (o del slice real de la página), nunca
-// de `apiProducts.length`: ese array sólo tiene `per_page` filas y
-// reportarlo como "total" hacía que la página dijera "24 de 24".
-const visibleTotal = usePandaPrototype ? PANDA_PRODUCTS.length : totalProducts;
-const visibleFrom = visibleTotal === 0 ? 0 : usePandaPrototype ? 1 : from;
-const visibleTo = usePandaPrototype ? PANDA_PRODUCTS.length : to;
+// Los conteos reflejan el listado YA FILTRADO en el fallback Panda (el
+// caso real del prototipo). En el path del backend siguen saliendo de
+// `meta`: el server pagina y no expone facetas, así que con filtros
+// activos son aproximados (límite ya documentado — ver counts de
+// categoría). Nunca de `apiProducts.length`: ese array sólo tiene
+// `per_page` filas y reportarlo como "total" decía "24 de 24".
+const visibleTotal = usePandaPrototype ? filteredTotal : totalProducts;
+const visibleFrom =
+  visibleTotal === 0 ? 0 : usePandaPrototype ? pageSliceStart + 1 : (currentPage - 1) * perPage + 1;
+const visibleTo = usePandaPrototype
+  ? Math.min(pageSliceStart + perPage, visibleTotal)
+  : Math.min(currentPage * perPage, visibleTotal);
 const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(visibleTotal));
 
 const countRange = t['storefront.products.v3.countRange']
@@ -422,10 +499,22 @@ const countRange = t['storefront.products.v3.countRange']
   .replace('{to}', String(visibleTo))
   .replace('{total}', String(visibleTotal));
 
-// La primitive `Pagination.astro` ya emite `?page=N` sobre este baseUrl
-// (`pageParam` default 'page'), así que no hay que construir los links a
-// mano ni mantener estado de página en el cliente.
-const baseUrl = `/${locale}/products`;
+// La primitive `Pagination.astro` emite `?page=N` sobre esta base, que
+// conserva los filtros activos de la URL (sin el propio `page`, que el
+// patch limpia explícitamente). Así los links de página no pierden el
+// filtrado y sigue sin necesitar estado en el cliente.
+const paginationBaseUrl = buildCatalogHref(baseUrl, filters, { page: undefined });
+
+// El dropdown de orden muestra el `sort` de la URL (sigue siendo
+// presentacional; el orden real lo aplica `applyCatalogFilters`).
+const sortValue =
+  filters.sort === 'price-asc'
+    ? 'precioAsc'
+    : filters.sort === 'price-desc'
+      ? 'precioDesc'
+      : filters.sort === 'name-asc'
+        ? 'nombre'
+        : 'relevancia';
 ---
 
 <StorefrontLayout
@@ -464,7 +553,7 @@ const baseUrl = `/${locale}/products`;
           </h1>
           <p class="mt-2 text-sm text-slate-500">{subtitle}</p>
         </div>
-        <SortDropdown labels={dictionary.sort} value="relevancia" />
+        <SortDropdown labels={dictionary.sort} value={sortValue} />
       </header>
 
       <div class="grid gap-10 pb-12 lg:grid-cols-[264px_1fr]">
@@ -474,10 +563,13 @@ const baseUrl = `/${locale}/products`;
               labels={dictionary.filters}
               categories={filterCategoryOptions}
               brands={filterBrandOptions}
-              prices={PRICE_RANGES.map(({ slug, label }) => ({ slug, label }))}
+              prices={filterPriceOptions}
               colors={filterColorOptions}
               sizes={filterSizeOptions}
-              activeCategory={null}
+              clearHref={baseUrl}
+              activeCategory={filters.category ?? 'all'}
+              activePrice={activePriceSlug}
+              activeColors={filters.color ? [filters.color] : []}
             />
           </div>
         </div>
@@ -503,29 +595,32 @@ const baseUrl = `/${locale}/products`;
                 en la URL y `<Pagination>` lo resuelve con `<a href>`
                 planos. Un island para eso sería reimplementar el botón
                 "atrás" del browser con state de React.
-              - Los filtros (`FiltersSidebar`) y el orden (`SortDropdown`)
-                siguen presentacionales puros — `activeCategory` está
-                hardcodeado a `null` y no hay handler que filtre la
-                lista. La island no aporta nada que el SSR no aporte;
-                removerla no rompe interacción.
+              - Los filtros (`FiltersSidebar`) son links SSR que arman la
+                query string (`buildCatalogHref`); esta página la parsea y
+                recorta el listado (`applyCatalogFilters`). Estado en la
+                URL, no en el cliente — funciona sin JS. El `sort` viaja
+                igual: `SortDropdown` lo muestra y el mismo pipeline lo
+                aplica. Ninguno necesita island.
               - El fetch SSR funciona vía `INTERNAL_API_ORIGIN` para
                 resolver el lado nginx del docker network cuando
                 `PUBLIC_API_URL` es relativo (`/api`). Ver `lib/api.ts`.
 
-            Si más adelante se wirean los filtros/orden, la solución NO
-            es re-introducir esta island acá: hay que mover el render
-            del grid a un componente React único (algo como
+            Filtros, orden y paginación son todo estado de URL resuelto
+            en SSR. Si algún día se necesitan filtros que no entran en la
+            query (facetas combinadas, rango libre con slider), la
+            solución NO es re-introducir esta island acá: hay que mover
+            el render del grid a un componente React único (algo como
             `<CatalogGrid client:load>`) que reciba filtros como props y
             haga su propio fetch + sort + paginación. Mantener dos
             fuentes de verdad (SSR + island) es exactamente la fuente del
-            bug actual.
+            bug de render duplicado.
           */}
           <ul
             data-reveal-stagger
             class="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 xl:grid-cols-4"
             aria-label={t['storefront.products.v3.title']}
           >
-            {productsForUi.length > 0 ? productsForUi.map((product) => (
+            {displayProducts.length > 0 ? displayProducts.map((product) => (
               <li class="list-none">
                 <ProductCardCatalog
                   product={product}
@@ -547,8 +642,8 @@ const baseUrl = `/${locale}/products`;
 
           <Pagination
             currentPage={currentPage}
-            lastPage={lastPage}
-            baseUrl={baseUrl}
+            lastPage={effectiveLastPage}
+            baseUrl={paginationBaseUrl}
             pageLabel={t['storefront.products.v3.pagination.page']}
             ofLabel={t['storefront.products.v3.pagination.of']}
             previousLabel={t['storefront.products.v3.pagination.previous']}

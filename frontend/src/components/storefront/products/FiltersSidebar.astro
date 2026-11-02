@@ -2,34 +2,38 @@
 /**
  * FiltersSidebar — barra de filtros lateral para la página de catálogo.
  *
- * Compone los cuatro grupos de filtro que pide el mockup Bonfire (vista
- * 04): Categoría · Precio · Color · Talla. Es presentacional puro:
- * recibe las opciones como props (counts, slug, label, etc.) y emite
- * los cambios vía callbacks. NO interactúa con la URL — esa
- * responsabilidad queda en la página (`index.astro`).
+ * Compone los grupos de filtro del mockup Bonfire (vista 04): Categoría ·
+ * Precio · Color · (Marca · Talla sólo en tenants de instrumentos).
+ * Los filtros que recortan la grilla (categoría, precio, color) son
+ * **links**: cada uno apunta a un href ya armado por la página con
+ * `buildCatalogHref` (query string SSR). La página lee la URL, aplica los
+ * filtros y marca el activo — sin JS y sin estado en este componente.
  *
  * Decisiones:
- *  - **Categorías y precios**: checkboxes nativos con label a la derecha
- *    + count a la derecha (`<label>` wrappea el input → click-anywhere).
- *    Accesible por defecto, sin JS.
- *  - **Colores**: swatches (botones redondos con color de fondo). El
- *    activamiento es visual (anillo primary) — sin toggle de estado
- *    real hasta que la página lo conecte.
- *  - **Talla**: botones cuadrados (`w-11 h-11`) estilo chip. Aislados
- *    con `role="group"` para lectores de pantalla.
+ *  - **Links en vez de inputs**: navegan como corresponde (botón atrás,
+ *    link compartible) y funcionan sin hidratar nada. El activo se marca
+ *    con `aria-current="true"` + el estilo que ya existía.
+ *  - **Marca y talla quedan presentacionales**: `CatalogFilters` no las
+ *    contempla (el listado mock no expone brand/size por producto), así
+ *    que no generan hrefs ni recortan. Se muestran sólo en los tenants
+ *    que los necesitan (La Voz) — el caller decide.
+ *  - **Swatches y chips**: siguen siendo links redondos/cuadrados; el
+ *    swatch sin texto conserva su `aria-label`.
  *  - **Sin animaciones costosas**: el sidebar es siempre visible a
  *    partir de `lg`. En mobile, la página debería esconderlo tras
  *    un toggle (`<details>` o hamburger); por ahora lo dejamos en
  *    `hidden lg:block` desde el caller para mantener este componente
  *    agnóstico al contexto responsive.
  *
- * Layout: una `<aside>` con `<h2>` "Filtros" + botón "Limpiar", seguido
- * de 4 grupos envueltos en `<section aria-labelledby="...">`.
+ * Layout: una `<aside>` con `<h2>` "Filtros" + link "Limpiar", seguido
+ * de los grupos envueltos en `<section aria-labelledby="...">`.
  */
 export interface CategoryFilterOption {
   slug: string;
   label: string;
   count: number;
+  /** Href de SSR (`buildCatalogHref`) que activa este filtro. */
+  href: string;
 }
 
 export interface BrandFilterOption {
@@ -41,6 +45,8 @@ export interface BrandFilterOption {
 export interface PriceFilterOption {
   slug: string;
   label: string;
+  /** Href de SSR (`buildCatalogHref`) que activa este bucket de precio. */
+  href: string;
 }
 
 export interface ColorFilterOption {
@@ -48,6 +54,8 @@ export interface ColorFilterOption {
   label: string;
   hex: string;
   count: number;
+  /** Href de SSR (`buildCatalogHref`) que activa (o desactiva) el color. */
+  href: string;
 }
 
 export interface SizeFilterOption {
@@ -74,11 +82,13 @@ interface Props {
   prices: readonly PriceFilterOption[];
   colors: readonly ColorFilterOption[];
   sizes: readonly SizeFilterOption[];
-  /** Slugs actualmente activos (categoría). */
+  /** Href que limpia todos los filtros (link "Limpiar"). */
+  clearHref: string;
+  /** Slug actualmente activo (categoría). */
   activeCategory?: string | null;
   /** Slugs actualmente activos (marca). */
   activeBrands?: readonly string[];
-  /** Slugs actualmente activos (precio). */
+  /** Slug actualmente activo (precio). */
   activePrice?: string | null;
   /** Slugs actualmente activos (color). */
   activeColors?: readonly string[];
@@ -93,6 +103,7 @@ const {
   prices,
   colors,
   sizes,
+  clearHref,
   activeCategory = null,
   activeBrands = [],
   activePrice = null,
@@ -110,12 +121,12 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
 <aside class="flex flex-col gap-6" aria-label={labels.heading}>
   <header class="flex items-center justify-between">
     <h2 class="text-xl font-bold text-slate-900">{labels.heading}</h2>
-    <button
-      type="button"
+    <a
+      href={clearHref}
       class="text-[13px] font-semibold text-[var(--primary,#475569)] transition hover:underline focus:outline-none focus-visible:underline"
     >
       {labels.clear}
-    </button>
+    </a>
   </header>
 
   <section
@@ -128,22 +139,17 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
     <ul class="flex flex-col gap-2.5">
       {categories.map((category) => (
         <li>
-          <label
+          <a
+            href={category.href}
+            aria-current={isCategoryActive(category.slug) ? 'true' : undefined}
             class:list={[
-              'flex cursor-pointer items-center gap-2.5 text-sm transition hover:text-slate-900',
+              'flex items-center gap-2.5 text-sm transition hover:text-slate-900',
               isCategoryActive(category.slug) ? 'font-semibold text-slate-900' : 'text-slate-600',
             ]}
           >
-            <input
-              type="radio"
-              name="filter-category"
-              value={category.slug}
-              checked={isCategoryActive(category.slug)}
-              class="h-4 w-4 cursor-pointer accent-[var(--primary,#475569)]"
-            />
             <span class="flex-1">{category.label}</span>
             <span class="text-[13px] text-slate-400">{category.count}</span>
-          </label>
+          </a>
         </li>
       ))}
     </ul>
@@ -192,21 +198,16 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
     <ul class="flex flex-col gap-2.5">
       {prices.map((price) => (
         <li>
-          <label
+          <a
+            href={price.href}
+            aria-current={isPriceActive(price.slug) ? 'true' : undefined}
             class:list={[
-              'flex cursor-pointer items-center gap-2.5 text-sm transition hover:text-slate-900',
+              'flex items-center gap-2.5 text-sm transition hover:text-slate-900',
               isPriceActive(price.slug) ? 'font-semibold text-slate-900' : 'text-slate-600',
             ]}
           >
-            <input
-              type="radio"
-              name="filter-price"
-              value={price.slug}
-              checked={isPriceActive(price.slug)}
-              class="h-4 w-4 cursor-pointer accent-[var(--primary,#475569)]"
-            />
             <span class="flex-1">{price.label}</span>
-          </label>
+          </a>
         </li>
       ))}
     </ul>
@@ -221,10 +222,10 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
     </h3>
     <div role="group" aria-label={labels.colorHeading} class="flex flex-wrap gap-2">
       {colors.map((color) => (
-        <button
-          type="button"
+        <a
+          href={color.href}
           aria-label={labels.colorSwatchAltTemplate.replace('{name}', color.label)}
-          aria-pressed={isColorActive(color.slug)}
+          aria-current={isColorActive(color.slug) ? 'true' : undefined}
           class:list={[
             'h-8 w-8 rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
             isColorActive(color.slug)
