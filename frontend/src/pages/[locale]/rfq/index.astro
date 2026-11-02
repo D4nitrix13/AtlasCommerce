@@ -37,7 +37,8 @@
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import RFQStepper from '../../../components/storefront/b2b/RFQStepper.astro';
 import { getServerDictionary } from '../../../i18n/server';
-import { PANDA_PRODUCTS } from '../../../data/panda-catalog';
+import { isPandaStore, PANDA_PRODUCTS } from '../../../data/panda-catalog';
+import { PRODUCTS } from '../../../data/products';
 import { bulkTotalCents } from '../../../lib/bulk-estimate';
 import { formatCurrency } from '../../../lib/formatters';
 
@@ -45,10 +46,12 @@ const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
 const homeHref = `/${locale}`;
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const catalog = isPandaStore(tenantSlug) ? PANDA_PRODUCTS : PRODUCTS;
 const requestedSlug = Astro.url.searchParams.get('product');
 const requestedQty = Number.parseInt(Astro.url.searchParams.get('cantidad') ?? '', 10);
 const selectedPiece =
-  PANDA_PRODUCTS.find((product) => product.slug === requestedSlug) ?? PANDA_PRODUCTS[0];
+  catalog.find((product) => product.slug === requestedSlug) ?? catalog[0];
 const initialQuantity = Number.isNaN(requestedQty) ? 100 : Math.min(1000, Math.max(1, requestedQty));
 const initialTotal =
   selectedPiece === undefined
@@ -109,7 +112,7 @@ const stepperLabels = [
                     class="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
                     data-testid="rfq-tipo-producto"
                   >
-                    {PANDA_PRODUCTS.map((product) => (
+                    {catalog.map((product) => (
                       <option
                         value={product.slug}
                         data-price={product.priceCents}

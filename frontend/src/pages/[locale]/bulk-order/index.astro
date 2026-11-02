@@ -25,7 +25,8 @@ import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import TierComparator from '../../../components/storefront/b2b/TierComparator.astro';
 import PricingCalculator from '../../../components/storefront/b2b/PricingCalculator.astro';
 import { getServerDictionary } from '../../../i18n/server';
-import { PANDA_PRODUCTS } from '../../../data/panda-catalog';
+import { isPandaStore, PANDA_PRODUCTS } from '../../../data/panda-catalog';
+import { PRODUCTS } from '../../../data/products';
 import type { BulkOrderProduct } from '../../../data/b2b-mock';
 
 const locale = Astro.locals.locale ?? 'es';
@@ -33,7 +34,9 @@ const t = getServerDictionary(locale);
 
 const rfqHref = `/${locale}/rfq`;
 
-const catalogForVolume: readonly BulkOrderProduct[] = PANDA_PRODUCTS.map((product) => ({
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const catalog = isPandaStore(tenantSlug) ? PANDA_PRODUCTS : PRODUCTS;
+const catalogForVolume: readonly BulkOrderProduct[] = catalog.map((product) => ({
   id: product.id,
   slug: product.slug,
   name: product.name,
