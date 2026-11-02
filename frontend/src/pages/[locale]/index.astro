@@ -45,8 +45,10 @@ import FaqAccordion from '../../components/storefront/FaqAccordion.astro';
 import MaterialsCard from '../../components/storefront/b2b/MaterialsCard.astro';
 import DarkHeroCard from '../../components/storefront/b2b/DarkHeroCard.astro';
 import CtaFinal from '../../components/storefront/b2b/CtaFinal.astro';
+import { getBrandBySlug } from '../../config/stores';
 import { getServerDictionary } from '../../i18n/server';
 import { CATEGORIES, getFeaturedProducts } from '../../data/products';
+import { getPandaFeaturedProducts } from '../../data/panda-catalog';
 import { B2B_CATEGORIES } from '../../data/b2b-mock';
 import { getUseCasesForTenant } from '../../data/tenants';
 
@@ -54,7 +56,8 @@ const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
-const isPandaB2B = tenantSlug === 'panda-estampados';
+const brand = getBrandBySlug(tenantSlug);
+const isPandaB2B = brand.slug === 'panda-estampados';
 
 const cartCount = 0;
 
@@ -234,7 +237,10 @@ const b2bFaqItems = [
 ];
 ---
 
-<StorefrontLayout title={t['storefront.search.title']} cartCount={cartCount}>
+<StorefrontLayout
+  title={isPandaB2B ? t['storefront.b2b.home.hero.title'] : t['storefront.home.hero.title']}
+  cartCount={cartCount}
+>
   {isPandaB2B ? (
     <>
       <TenantHero
@@ -274,6 +280,18 @@ const b2bFaqItems = [
             tone: 'emerald',
           },
         }}
+      />
+
+      <FeaturedProducts
+        products={getPandaFeaturedProducts(4)}
+        locale={locale}
+        heading={t['storefront.home.featuredProducts.heading']}
+        viewAllLabel={t['storefront.home.featuredProducts.viewAll']}
+        viewAllHref={productsHref}
+        cardLabels={cardLabels}
+        loadingLabel={t['storefront.productGrid.loading']}
+        emptyLabel={t['storefront.productGrid.empty']}
+        emptyHint={t['storefront.productGrid.emptyHint']}
       />
 
       <ProcessSteps

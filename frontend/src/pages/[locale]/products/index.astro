@@ -50,6 +50,12 @@ import {
   type StorefrontPaginationMeta,
 } from '../../../lib/pagination';
 import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
+import {
+  PANDA_PRODUCTS,
+  isPandaStore,
+  pandaCategoryLabel,
+  pandaColorOptions,
+} from '../../../data/panda-catalog';
 import type { ProductImage, ProductVariant } from '../../../types/catalog';
 
 const locale = Astro.locals.locale ?? 'es';
@@ -70,14 +76,21 @@ const cartCount = 0;
 // El frontend las consume via `assetUrl(storage_key)` (lib/asset.ts).
 const PAGE_SIZE = 24;
 // Imagen de la galería. OJO: el resource de storefront ya emite estos
-// campos en camelCase (`altText`, `isPrimary`, `variantId`, `sortOrder`,
-// `srcset`) aunque el product-level venga en snake_case — ver
+// campos en camelCase (`altText`, `isPrimary`, `isHover`, `variantId`,
+// `sortOrder`, `srcset`) aunque el product-level venga en snake_case — ver
 // `StorefrontProductResource::galleryEntry()`. Sólo hace falta adaptarlos
 // al shape de `types/catalog.ts`.
 interface BackendProductImage {
   url: string;
   altText: string;
   isPrimary: boolean;
+  /**
+   * Ranura de hover, decidida por el admin en la API. Antes de esta
+   * columna la card la deducía del sufijo del `altText` (" - vista back");
+   * el listado tiene que seguir trayéndola o todas las cards del catálogo
+   * pierden el cambio de imagen al pasar el cursor.
+   */
+  isHover: boolean;
   /** El backend lo emite como int; la card lo compara contra `variants[].id`. */
   variantId: number | string | null;
   sortOrder: number;
@@ -217,6 +230,7 @@ function mapBackendImage(image: BackendProductImage): ProductImage {
     url: image.url,
     altText: image.altText,
     isPrimary: image.isPrimary,
+    isHover: image.isHover,
     variantId: normalizeVariantId(image.variantId),
     sortOrder: image.sortOrder,
     srcset: image.srcset,
@@ -282,7 +296,12 @@ function mapBackendToProduct(b: BackendProduct) {
   };
 }
 
-const productsForUi = apiProducts.map(mapBackendToProduct);
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const usePandaPrototype =
+  isPandaStore(tenantSlug) && catalog.meta.total === 0;
+const productsForUi = usePandaPrototype
+  ? [...PANDA_PRODUCTS]
+  : apiProducts.map(mapBackendToProduct);
 
 // Diccionario para los subcomponentes
 const dictionary = {
@@ -319,11 +338,20 @@ const dictionary = {
 // entero, así que cada `count` cuenta sólo lo visible en esta página. La
 // opción "todas" sí usa `meta.total`. Para counts exactos por categoría
 // hace falta un endpoint de facetas en el backend.
-const categoryCounts = apiProducts.reduce<Record<string, { slug: string; label: string; count: number }>>(
-  (acc, p) => {
-    const catSlug = p.category || 'unknown';
+const categorySource = usePandaPrototype
+  ? PANDA_PRODUCTS.map((product) => ({
+      category: product.category,
+      label: pandaCategoryLabel(product.category),
+    }))
+  : apiProducts.map((product) => ({
+      category: product.category,
+      label: product.category,
+    }));
+const categoryCounts = categorySource.reduce<Record<string, { slug: string; label: string; count: number }>>(
+  (acc, product) => {
+    const catSlug = product.category || 'unknown';
     if (!acc[catSlug]) {
-      acc[catSlug] = { slug: catSlug, label: catSlug, count: 0 };
+      acc[catSlug] = { slug: catSlug, label: product.label || catSlug, count: 0 };
     }
     acc[catSlug].count += 1;
     return acc;
@@ -334,20 +362,19 @@ const filterCategoryOptions = [
   {
     slug: 'all',
     label: t['storefront.products.v3.filter.categoriaAll'],
-    count: totalProducts,
+    count: usePandaPrototype ? PANDA_PRODUCTS.length : totalProducts,
   },
   ...Object.values(categoryCounts),
 ];
 
-// Marcas: combinamos la lista canonica de La Voz (instrumentos
-// musicales) con counts placeholder. Solo se muestra si hay al menos
-// 1 producto visible — cuando la pagina integre el data layer real
-// de cada tenant, este switch se generaliza via getBrandsForTenant.
-const filterBrandOptions = LA_VOZ_BRANDS.map((brand) => ({
-  slug: brand.slug,
-  label: brand.label,
-  count: LA_VOZ_CATEGORIES.length > 0 ? 0 : 0,
-}));
+// Marcas de instrumentos solo cuando el catálogo no es el de estampado.
+const filterBrandOptions = usePandaPrototype
+  ? []
+  : LA_VOZ_BRANDS.map((brand) => ({
+      slug: brand.slug,
+      label: brand.label,
+      count: LA_VOZ_CATEGORIES.length > 0 ? 0 : 0,
+    }));
 
 // Rangos de precio (en USD cents). Mockup Bonfire propone 4 buckets.
 const PRICE_RANGES = [
@@ -360,33 +387,40 @@ const PRICE_RANGES = [
 // Paleta de colores Bonfire-safe (sin rust #951318, sin verde primary).
 // Los slugs son kebab-case para poder usarlos en URLs cuando los
 // filtros sean reales.
-const filterColorOptions = [
-  { slug: 'black', label: 'Negro', hex: '#132028', count: 4 },
-  { slug: 'navy', label: 'Azul marino', hex: '#1E3A8A', count: 3 },
-  { slug: 'cream', label: 'Crema', hex: '#F2EDE4', count: 2 },
-  { slug: 'pink', label: 'Rosa', hex: '#DB2777', count: 2 },
-  { slug: 'amber', label: 'Mostaza', hex: '#EAB24B', count: 2 },
-  { slug: 'purple', label: 'Violeta', hex: '#7C3AED', count: 2 },
-];
+const filterColorOptions = usePandaPrototype
+  ? [...pandaColorOptions()]
+  : [
+      { slug: 'black', label: 'Negro', hex: '#132028', count: 4 },
+      { slug: 'navy', label: 'Azul marino', hex: '#1E3A8A', count: 3 },
+      { slug: 'cream', label: 'Crema', hex: '#F2EDE4', count: 2 },
+      { slug: 'pink', label: 'Rosa', hex: '#DB2777', count: 2 },
+      { slug: 'amber', label: 'Mostaza', hex: '#EAB24B', count: 2 },
+      { slug: 'purple', label: 'Violeta', hex: '#7C3AED', count: 2 },
+    ];
 
 // Tallas: 4 buckets estilo Bonfire. Los counts son placeholders
 // razonables para la demo (suma arbitraria, no cálculo real).
-const filterSizeOptions = [
-  { slug: 'ch', label: 'CH', count: 12 },
-  { slug: 'm', label: 'M', count: 24 },
-  { slug: 'g', label: 'G', count: 18 },
-  { slug: 'xg', label: 'XG', count: 8 },
-];
+const filterSizeOptions = usePandaPrototype
+  ? []
+  : [
+      { slug: 'ch', label: 'CH', count: 12 },
+      { slug: 'm', label: 'M', count: 24 },
+      { slug: 'g', label: 'G', count: 18 },
+      { slug: 'xg', label: 'XG', count: 8 },
+    ];
 
 // Los tres conteos salen de `meta` (o del slice real de la página), nunca
 // de `apiProducts.length`: ese array sólo tiene `per_page` filas y
 // reportarlo como "total" hacía que la página dijera "24 de 24".
-const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(totalProducts));
+const visibleTotal = usePandaPrototype ? PANDA_PRODUCTS.length : totalProducts;
+const visibleFrom = visibleTotal === 0 ? 0 : usePandaPrototype ? 1 : from;
+const visibleTo = usePandaPrototype ? PANDA_PRODUCTS.length : to;
+const subtitle = t['storefront.products.v3.subtitle'].replace('{count}', String(visibleTotal));
 
 const countRange = t['storefront.products.v3.countRange']
-  .replace('{from}', String(from))
-  .replace('{to}', String(to))
-  .replace('{total}', String(totalProducts));
+  .replace('{from}', String(visibleFrom))
+  .replace('{to}', String(visibleTo))
+  .replace('{total}', String(visibleTotal));
 
 // La primitive `Pagination.astro` ya emite `?page=N` sobre este baseUrl
 // (`pageParam` default 'page'), así que no hay que construir los links a
@@ -398,7 +432,7 @@ const baseUrl = `/${locale}/products`;
   title={`${t['storefront.products.v3.title']} · AtlasCommerce`}
   cartCount={cartCount}
 >
-  <main class="min-h-screen bg-slate-50">
+  <main class="min-h-screen">
     <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
       <!-- Breadcrumb visible (patron guitargear) — el usuario lo espera
            en cualquier pagina de catalogo. -->
@@ -425,7 +459,7 @@ const baseUrl = `/${locale}/products`;
           <span class="inline-block rounded-full bg-[var(--primary-soft,#F1F5F9)] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--primary,#475569)]">
             {dictionary.eyebrow}
           </span>
-          <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+          <h1 class="mt-3 text-4xl sm:text-5xl md:text-6xl">
             {t['storefront.products.v3.title']}
           </h1>
           <p class="mt-2 text-sm text-slate-500">{subtitle}</p>
@@ -499,7 +533,16 @@ const baseUrl = `/${locale}/products`;
                   labels={{ viewDetail: dictionary.viewDetail }}
                 />
               </li>
-            )) : null}
+            )) : (
+              <li class="col-span-full list-none rounded-2xl border border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)] p-10 text-center">
+                <p class="text-base font-semibold text-[var(--ink,#1c1917)]">
+                  {t['storefront.products.v3.empty']}
+                </p>
+                <p class="mt-2 text-sm text-[var(--ink-soft,#57534e)]">
+                  {t['storefront.productGrid.emptyHint']}
+                </p>
+              </li>
+            )}
           </ul>
 
           <Pagination

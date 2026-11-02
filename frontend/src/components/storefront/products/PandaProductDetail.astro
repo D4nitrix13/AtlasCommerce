@@ -1,0 +1,150 @@
+---
+/**
+ * Ficha corta del prototipo Panda.
+ *
+ * Foto grande, color, cantidad y un enlace al pedido por volumen.
+ * No reutiliza la ficha de instrumentos: esa pide mano, tienda y
+ * financiamiento, y acá no aplican.
+ */
+import type { Product } from '../../../types/catalog';
+import { formatCurrency } from '../../../lib/formatters';
+
+interface Props {
+  product: Product;
+  locale: string;
+  catalogHref: string;
+  cartHref: string;
+  bulkHref: string;
+  breadcrumbHome: string;
+  breadcrumbCatalog: string;
+  colorLabel: string;
+  quantityLabel: string;
+  addToCartLabel: string;
+  volumeNote: string;
+  volumeCta: string;
+  categoryLabel: string;
+}
+
+const {
+  product,
+  locale,
+  catalogHref,
+  cartHref,
+  bulkHref,
+  breadcrumbHome,
+  breadcrumbCatalog,
+  colorLabel,
+  quantityLabel,
+  addToCartLabel,
+  volumeNote,
+  volumeCta,
+  categoryLabel,
+} = Astro.props;
+
+const finishes = (product.variants ?? []).filter(
+  (variant) => variant.finishHex !== null && variant.finishHex !== undefined && variant.finishHex !== '',
+);
+const showColors = finishes.length >= 2;
+const price = formatCurrency(product.priceCents, product.currency ?? 'USD');
+const cover = product.imageUrl;
+const imageByVariant = new Map(
+  (Array.isArray(product.images) ? product.images : [])
+    .filter((image): image is Extract<typeof image, { url: string }> => typeof image !== 'string')
+    .map((image) => [image.variantId, image.url]),
+);
+---
+
+<main class="bg-[var(--paper,#f3efe8)]">
+  <div class="mx-auto grid w-full max-w-6xl gap-10 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:py-14">
+    <div>
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap items-center gap-1.5 text-[13px] text-[var(--ink-soft,#57534e)]">
+          <li><a href={`/${locale}`} class="hover:text-[var(--ink,#1c1917)]">{breadcrumbHome}</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a href={catalogHref} class="hover:text-[var(--ink,#1c1917)]">{breadcrumbCatalog}</a></li>
+          <li aria-hidden="true">/</li>
+          <li><span aria-current="page" class="font-semibold text-[var(--ink,#1c1917)]">{product.name}</span></li>
+        </ol>
+      </nav>
+      <div class="overflow-hidden rounded-3xl border border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)]">
+        <img data-panda-cover src={cover} alt={product.name} class="aspect-[4/5] w-full object-contain" />
+      </div>
+    </div>
+
+    <aside class="flex flex-col gap-6 lg:pt-14">
+      <header class="flex flex-col gap-2">
+        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--primary,#1c6b63)]">
+          {categoryLabel}
+        </p>
+        <h1 class="text-4xl text-[var(--ink,#1c1917)] sm:text-5xl">{product.name}</h1>
+        <p class="text-2xl font-semibold text-[var(--ink,#1c1917)]">{price}</p>
+        <p class="max-w-md text-sm leading-relaxed text-[var(--ink-soft,#57534e)]">{product.description}</p>
+      </header>
+
+      {showColors && (
+        <fieldset class="flex flex-col gap-3">
+          <legend class="text-sm font-semibold text-[var(--ink,#1c1917)]">{colorLabel}</legend>
+          <div class="flex flex-wrap gap-2">
+            {finishes.map((finish, index) => (
+              <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[var(--line,#e7e5e4)] bg-white px-3 py-1.5 text-sm">
+                <input
+                  type="radio"
+                  name="finish"
+                  value={finish.finishSlug}
+                  checked={index === 0}
+                  data-panda-finish={imageByVariant.get(finish.id) ?? cover}
+                  class="accent-[var(--primary,#1c6b63)]"
+                />
+                <span
+                  class="h-4 w-4 rounded-full border border-black/10"
+                  style={`background:${finish.finishHex};`}
+                  aria-hidden="true"
+                ></span>
+                {finish.finishLabel}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+
+      <label class="flex max-w-[8rem] flex-col gap-2 text-sm font-semibold text-[var(--ink,#1c1917)]">
+        {quantityLabel}
+        <input
+          type="number"
+          name="quantity"
+          min="1"
+          value="12"
+          class="rounded-xl border border-[var(--line,#e7e5e4)] bg-white px-3 py-2 text-base font-normal"
+        />
+      </label>
+
+      <a
+        href={cartHref}
+        class="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary,#1c6b63)] px-6 text-sm font-semibold text-white transition hover:opacity-90"
+      >
+        {addToCartLabel}
+      </a>
+
+      <p class="text-sm text-[var(--ink-soft,#57534e)]">
+        {volumeNote}{' '}
+        <a href={`${bulkHref}?product=${product.slug}`} class="font-semibold text-[var(--primary,#1c6b63)] underline-offset-2 hover:underline">
+          {volumeCta}
+        </a>
+      </p>
+    </aside>
+  </div>
+</main>
+<script>
+  function bindFinishPreview(): void {
+    const cover = document.querySelector('[data-panda-cover]');
+    if (!(cover instanceof HTMLImageElement)) return;
+    document.querySelectorAll('[data-panda-finish]').forEach((input) => {
+      input.addEventListener('change', () => {
+        if (!(input instanceof HTMLInputElement) || !input.checked) return;
+        const next = input.dataset.pandaFinish;
+        if (next !== undefined && next !== '') cover.src = next;
+      });
+    });
+  }
+  bindFinishPreview();
+</script>

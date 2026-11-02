@@ -669,6 +669,10 @@ const es: Translations = {
   'storefront.productDetail.notFound': 'Producto no encontrado.',
   'storefront.productDetail.notFoundHint':
     'El producto que buscás no existe o fue removido del catálogo.',
+  'storefront.panda.detail.color': 'Color',
+  'storefront.panda.detail.quantity': 'Cantidad',
+  'storefront.panda.detail.volumeNote': '¿Más de 12 piezas?',
+  'storefront.panda.detail.volumeCta': 'Pedido por volumen',
 
   // ─── storefront: B2B Panda Estampados (F3.1) ──────────────────────
   'storefront.b2b.home.hero.eyebrow': 'Estampados personalizados B2B',

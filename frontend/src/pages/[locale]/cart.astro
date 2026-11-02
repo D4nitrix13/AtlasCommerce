@@ -25,7 +25,8 @@ import CartItem from '../../components/storefront/cart/CartItem.astro';
 import CartSummary from '../../components/storefront/cart/CartSummary.astro';
 import TrustSignalsCompact from '../../components/storefront/cart/TrustSignalsCompact.astro';
 import { getServerDictionary } from '../../i18n/server';
-import { PRODUCTS, findProductBySlug } from '../../data/products';
+import { findPandaProduct, PANDA_DEMO_LINES, isPandaStore } from '../../data/panda-catalog';
+import { findProductBySlug, PRODUCTS } from '../../data/products';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -33,17 +34,21 @@ const t = getServerDictionary(locale);
 const checkoutHref = `/${locale}/checkout`;
 const productsHref = `/${locale}/products`;
 
-// TODO F1.4: cart store — leer de un store Zustand o endpoint backend.
-// Demo: 3 items para que la composición se vea completa.
-const demoItems = [
-  { productSlug: PRODUCTS[0].slug, quantity: 1 }, // saber-alter-figma
-  { productSlug: PRODUCTS[2].slug, quantity: 2 }, // chainsaw-man-t1
-  { productSlug: PRODUCTS[6].slug, quantity: 1 }, // evangelion-unit-01
-];
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const isPanda = isPandaStore(tenantSlug);
+const demoItems = isPanda
+  ? [...PANDA_DEMO_LINES]
+  : [
+      { productSlug: PRODUCTS[0].slug, quantity: 1 },
+      { productSlug: PRODUCTS[2].slug, quantity: 2 },
+      { productSlug: PRODUCTS[6].slug, quantity: 1 },
+    ];
 
 const cartItems = demoItems
   .map((entry) => {
-    const product = findProductBySlug(entry.productSlug);
+    const product = isPanda
+      ? findPandaProduct(entry.productSlug)
+      : findProductBySlug(entry.productSlug);
     if (product === null) {
       return null;
     }
@@ -100,10 +105,10 @@ const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 ---
 
 <StorefrontLayout title={t['storefront.cart.v3.title']}>
-  <main class="mx-auto w-full max-w-6xl bg-slate-50 px-4 py-8 sm:px-6 sm:py-12">
+  <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
     <header class="mb-8 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 class="text-4xl sm:text-5xl">
           {t['storefront.cart.v3.title']}
         </h1>
         {!isEmpty && (

@@ -667,6 +667,10 @@ const en: Translations = {
   'storefront.productDetail.notFound': 'Product not found.',
   'storefront.productDetail.notFoundHint':
     'The product you are looking for does not exist or was removed from the catalog.',
+  'storefront.panda.detail.color': 'Color',
+  'storefront.panda.detail.quantity': 'Quantity',
+  'storefront.panda.detail.volumeNote': 'Need more than 12?',
+  'storefront.panda.detail.volumeCta': 'Volume order',
 
   // ─── storefront: B2B Panda Estampados (F3.1) ──────────────────────
   'storefront.b2b.home.hero.eyebrow': 'Custom B2B prints',

@@ -94,11 +94,16 @@ import {
   resolveSelectedFinishId,
   type ProductApiVariant,
 } from '../../../lib/product-variant-selection';
+import PandaProductDetail from '../../../components/storefront/products/PandaProductDetail.astro';
+import { findPandaProduct, isPandaStore, pandaCategoryLabel } from '../../../data/panda-catalog';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
 
 const { slug } = Astro.params;
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const prototypePiece =
+  isPandaStore(tenantSlug) && typeof slug === 'string' ? findPandaProduct(slug) : null;
 
 // URL actual — para query params (`?color=`, `?image=`).
 const url = new URL(Astro.request.url);
@@ -302,6 +307,12 @@ if (typeof slug !== 'string' || slug.length === 0) {
   } finally {
     clearTimeout(timeoutHandle);
   }
+}
+
+const pandaPiece = product === null && prototypePiece !== null ? prototypePiece : null;
+if (pandaPiece !== null) {
+  notFound = false;
+  fetchError = null;
 }
 
 if (notFound) {
@@ -792,8 +803,25 @@ const cardLabels = {
 };
 ---
 
-<StorefrontLayout title={product?.name ?? t['storefront.productDetail.notFound']}>
-  <main class="bg-slate-50" data-product-slug={product?.slug ?? 'unknown'}>
+<StorefrontLayout title={pandaPiece?.name ?? product?.name ?? t['storefront.productDetail.notFound']}>
+  {pandaPiece !== null ? (
+    <PandaProductDetail
+      product={pandaPiece}
+      locale={locale}
+      catalogHref={`/${locale}/products`}
+      cartHref={`/${locale}/cart`}
+      bulkHref={`/${locale}/bulk-order`}
+      breadcrumbHome={t['storefront.products.v3.breadcrumb.home']}
+      breadcrumbCatalog={t['storefront.products.v3.breadcrumb.catalog']}
+      colorLabel={t['storefront.panda.detail.color']}
+      quantityLabel={t['storefront.panda.detail.quantity']}
+      addToCartLabel={t['storefront.productDetail.addToCart']}
+      volumeNote={t['storefront.panda.detail.volumeNote']}
+      volumeCta={t['storefront.panda.detail.volumeCta']}
+      categoryLabel={pandaCategoryLabel(pandaPiece.category)}
+    />
+  ) : (
+  <main data-product-slug={product?.slug ?? 'unknown'}>
     {/* Script de scroll restoration al INICIO del <main>, antes del
         primer paint del contenido. <script is:inline> bloquea el
         parsing hasta ejecutar, así que corre antes del primer paint. */}
@@ -884,7 +912,7 @@ const cardLabels = {
           data-product-status={notFound ? 'not-found' : 'unavailable'}
           role={fetchError !== null ? 'alert' : undefined}
         >
-          <h1 class="text-2xl font-bold text-slate-900">
+          <h1 class="text-3xl">
             {fetchError !== null
               ? 'No pudimos cargar el producto'
               : t['storefront.productDetail.notFound']}
@@ -917,7 +945,7 @@ const cardLabels = {
             <aside class="flex flex-col gap-5 lg:sticky lg:top-20 lg:self-start">
               <ProductDetailRatingRow rating={AVG_RATING} count={RATING_COUNT} />
 
-              <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              <h1 class="text-3xl sm:text-4xl">
                 {product.name}
               </h1>
 
@@ -1305,4 +1333,5 @@ const cardLabels = {
       );
     })();
   </script>
+  )}
 </StorefrontLayout>

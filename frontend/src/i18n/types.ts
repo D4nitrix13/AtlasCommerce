@@ -1434,6 +1434,10 @@ export type TranslationKey =
   | 'storefront.productDetail.category'
   | 'storefront.productDetail.notFound'
   | 'storefront.productDetail.notFoundHint'
+  | 'storefront.panda.detail.color'
+  | 'storefront.panda.detail.quantity'
+  | 'storefront.panda.detail.volumeNote'
+  | 'storefront.panda.detail.volumeCta'
 
   // ─── storefront: B2B Panda Estampados (F3.1) ─────────────────────────
   | 'storefront.b2b.home.hero.eyebrow'

@@ -237,6 +237,7 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
     </div>
   </section>
 
+  {sizes.length > 0 && (
   <section aria-labelledby="filter-size-heading" class="flex flex-col gap-3 pb-2">
     <h3 id="filter-size-heading" class="text-sm font-bold text-slate-900">
       {labels.sizeHeading}
@@ -258,4 +259,5 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
       ))}
     </div>
   </section>
+  )}
 </aside>
