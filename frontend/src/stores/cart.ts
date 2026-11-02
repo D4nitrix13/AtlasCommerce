@@ -48,6 +48,7 @@ export const TAX_RATE = 0.15;
 
 const STORAGE_KEY = 'cart.lines';
 
+/** Snapshot estable para SSR/hidratación: el store vive en el browser. */
 const EMPTY_STATE: CartState = { lines: [] };
 
 function readLinesFromStorage(): CartLine[] {
@@ -194,5 +195,9 @@ export const cartStore = {
 };
 
 export function useCart(): CartState {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  // getServerSnapshot devuelve el estado vacío: la isla renderiza vacía
+  // en el servidor y en el primer paint de la hidratación, y recién ahí
+  // React re-renderiza con las líneas de localStorage. Sin esto, la
+  // hidratación mismatchea contra el HTML del servidor.
+  return useSyncExternalStore(subscribe, getSnapshot, () => EMPTY_STATE);
 }
