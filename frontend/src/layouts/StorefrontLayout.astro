@@ -27,6 +27,7 @@
  */
 import '../styles/global.css';
 import '../styles/scroll-fx.css';
+import { SHOP_FONT_STYLESHEET, shopThemeStyle } from '../lib/shop-canvas';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
 import { resolveTenantFavicon } from '../lib/tenant-favicon';
 import StorefrontHeader from '../components/storefront/layout/StorefrontHeader.astro';
@@ -47,7 +48,7 @@ const locale = Astro.locals.locale ?? 'es';
 // cualquier componente puede consumir vía `var(--primary)` o
 // `bg-[var(--primary)]`. El default fallback (`#475569`) mantiene
 // legibilidad si no hay brand resuelto.
-const themeRootStyle = `--primary: ${brand.accentColor}; --primary-hover: ${brand.accentHoverColor};`;
+const themeRootStyle = shopThemeStyle(brand.accentColor, brand.accentHoverColor);
 
 // El favicon lo DECLARA el brand. Antes se armaba la URL por convención
 // desde el slug, lo que pedía un asset de branding que este tenant todavía
@@ -64,7 +65,7 @@ const favicon = resolveTenantFavicon(brand);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href={SHOP_FONT_STYLESHEET}
       rel="stylesheet"
     />
     <title>{title}</title>
@@ -91,7 +92,7 @@ const favicon = resolveTenantFavicon(brand);
   </head>
 
   <body
-    class="flex min-h-screen flex-col bg-white font-sans text-slate-900 antialiased"
+    class="shop-canvas flex min-h-screen flex-col font-sans antialiased"
     style={themeRootStyle}
   >
     <StorefrontHeader brand={brand} locale={locale} cartCount={cartCount} />

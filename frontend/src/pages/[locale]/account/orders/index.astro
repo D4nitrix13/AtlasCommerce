@@ -85,7 +85,7 @@ const ordersToRender = showEmpty ? [] : [...ALL_ORDERS];
       <div>
         <h1
           id="my-orders-heading"
-          class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+          class="text-3xl sm:text-4xl"
         >
           {t['storefront.account.orders.v3.title']}
         </h1>
@@ -117,10 +117,10 @@ const ordersToRender = showEmpty ? [] : [...ALL_ORDERS];
     {showEmpty ? (
       <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl"
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-white"
           aria-hidden="true"
         >
-          📦
+          <span class="h-2 w-2 rounded-full bg-[var(--primary)]"></span>
         </div>
         <p class="text-base font-semibold text-slate-900">
           {t['storefront.account.orders.v3.empty']}

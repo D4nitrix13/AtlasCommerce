@@ -1,5 +1,27 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Figtree', system-ui, sans-serif;
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+}
+
+@layer base {
+  .shop-canvas {
+    background-color: var(--paper, #f3efe8);
+    color: var(--ink, #1c1917);
+  }
+
+  .shop-canvas h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    color: var(--ink, #1c1917);
+  }
+
+  .shop-hero {
+    background:
+      radial-gradient(ellipse 72% 80% at 100% 0%, var(--primary-soft, #f1f5f9), transparent 58%),
+      var(--paper, #f3efe8);
+  }
 }

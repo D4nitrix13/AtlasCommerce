@@ -18,6 +18,7 @@
  * **AGENTS.md §16**: shell — siempre via este layout para /auth/* y /admin/auth/*.
  */
 import '../styles/global.css';
+import { SHOP_FONT_STYLESHEET } from '../lib/shop-canvas';
 import { getBrandBySlug } from '../config/stores';
 import { resolveTenantFavicon } from '../lib/tenant-favicon';
 
@@ -45,7 +46,7 @@ const favicon = resolveTenantFavicon(getBrandBySlug(tenantSlug));
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href={SHOP_FONT_STYLESHEET}
       rel="stylesheet"
     />
     <title>{title}</title>

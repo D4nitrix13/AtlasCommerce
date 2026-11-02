@@ -24,6 +24,7 @@
  * forgot-password usan `AuthLayout` + `AuthShell`).
  */
 import '../styles/global.css';
+import { SHOP_FONT_STYLESHEET, shopThemeStyle } from '../lib/shop-canvas';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
 import { themeToBrand } from '../lib/theme';
 import { getServerDictionary, getServerLocale } from '../i18n/server';
@@ -43,7 +44,7 @@ const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const fallbackBrand = getBrandBySlug(tenantSlug);
 const brand: StoreBrand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
-const themeRootStyle = `--primary: ${brand.accentColor}; --primary-hover: ${brand.accentHoverColor};`;
+const themeRootStyle = shopThemeStyle(brand.accentColor, brand.accentHoverColor);
 
 const localePrefix = `/${locale}`;
 const currentPath = Astro.url.pathname;
@@ -114,14 +115,14 @@ const navItems = [
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href={SHOP_FONT_STYLESHEET}
       rel="stylesheet"
     />
     <title>{title} · {brand.name}</title>
   </head>
 
   <body
-    class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased"
+    class="shop-canvas min-h-screen font-sans antialiased"
     style={themeRootStyle}
   >
     <AccountAuthGuard client:load />
