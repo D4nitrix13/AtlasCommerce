@@ -87,7 +87,7 @@ class ProductController extends Controller
         // quedan ausentes y dispara N+1 si el Resource los tocara.
         $query = Product::query()
             ->whereIn('id', $productIds)
-            ->with(['category', 'brand', 'images', 'variants'])
+            ->with(['category', 'brand', 'images', 'variants', 'variants.size', 'sizes', 'attributeValues', 'attributeValues.attribute'])
             // Orden total y determinista. Sin un ORDER BY explícito
             // PostgreSQL no garantiza un orden estable entre consultas,
             // así que con paginación offset una fila puede caer en dos
@@ -246,7 +246,7 @@ class ProductController extends Controller
         // que necesitan el Resource no emiten esa info. findOrFail
         // respeta el filtro `id` + soft-deletes del modelo.
         $product = Product::query()
-            ->with(['category', 'brand', 'images', 'variants'])
+            ->with(['category', 'brand', 'images', 'variants', 'variants.size', 'sizes', 'attributeValues', 'attributeValues.attribute'])
             ->findOrFail($productId);
 
         // Emitimos la shape plana (sin `{data: ...}`) para alinearla

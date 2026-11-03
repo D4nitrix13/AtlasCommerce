@@ -87,6 +87,13 @@ class PandaKitsuneCatalogSeeder extends Seeder
             $sizeIds = $this->seedSizes($product, $data['sizes'] ?? []);
             $this->seedVariants($product, $data, $sizeIds, $currency);
             $this->seedAttributes($product, $data['attributes'] ?? []);
+
+            // Sin esta fila el producto no pertenece a la tienda y el
+            // storefront (que filtra por `product_stores`) no lo sirve.
+            \App\Models\Stores\ProductStore::query()->firstOrCreate(
+                attributes: ['product_id' => $product->id, 'store_id' => $store->id],
+                values: ['slug' => $product->slug, 'is_visible' => true],
+            );
         }
     }
 

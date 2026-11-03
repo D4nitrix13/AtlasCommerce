@@ -112,15 +112,23 @@ class StorefrontProductResource extends JsonResource
     public static $wrap = null;
 
     /**
-     * @param  ProductPhotoGrouper  $photos  Definición compartida de qué
-     *                                       es una foto dentro de
-     *                                       `product_images`.
+     * Definición compartida de qué es una foto dentro de `product_images`.
+     *
+     * Se resuelve de forma perezosa en vez de inyectarse por constructor:
+     * `Resource::collection()` instancia vía `mapInto`, que pasa la clave
+     * de la colección como segundo argumento y rompía el constructor
+     * tipado.
      */
-    public function __construct(
-        $resource,
-        private readonly ProductPhotoGrouper $photos = new ProductPhotoGrouper,
-    ) {
+    private ?ProductPhotoGrouper $photos = null;
+
+    public function __construct($resource)
+    {
         parent::__construct($resource);
+    }
+
+    private function photoGrouper(): ProductPhotoGrouper
+    {
+        return $this->photos ??= new ProductPhotoGrouper;
     }
 
     /**
@@ -185,6 +193,40 @@ class StorefrontProductResource extends JsonResource
         // documentado en cada campo de resolveVariants().
         if ($hasVariantContext) {
             $payload['variants'] = $this->resolveVariants();
+        }
+
+        // Tallas o capacidades del producto. Cada una puede llevar
+        // valor numérico + unidad: la taza de 11 oz es `value: 11,
+        // unit: 'oz'`; la talla M de ropa no mide nada y deja ambos
+        // en null. NULL cuando el producto no vende por tallas.
+        if ($this->resource->relationLoaded('sizes')) {
+            $payload['sizes'] = $this->resource->sizes
+                ->sortBy('position')
+                ->values()
+                ->map(fn ($size): array => [
+                    'slug' => $size->slug,
+                    'label' => $size->label,
+                    'value' => $size->value,
+                    'unit' => $size->unit,
+                ])
+                ->all();
+        }
+
+        // Atributos EAV del producto (material, cuidados, peso…).
+        if ($this->resource->relationLoaded('attributeValues')) {
+            $payload['attributes'] = $this->resource->attributeValues
+                ->map(fn ($value): array => [
+                    'slug' => $value->attribute?->slug,
+                    'label' => $value->attribute?->name,
+                    'type' => $value->attribute?->type,
+                    'unit' => $value->attribute?->unit,
+                    'value' => $value->value,
+                    'valueNumber' => $value->value_number,
+                    'valueBoolean' => $value->value_boolean,
+                ])
+                ->filter(fn (array $row): bool => $row['slug'] !== null)
+                ->values()
+                ->all();
         }
 
         return $payload;
@@ -286,10 +328,10 @@ class StorefrontProductResource extends JsonResource
         // PDP con las fotos de un solo acabado.
         $objects = [];
 
-        foreach ($this->photos->group(images: $images) as $photo) {
+        foreach ($this->photoGrouper()->group(images: $images) as $photo) {
             $rows = $photo['rows'];
 
-            if (! $this->photos->hasKnownWidths(rows: $rows)) {
+            if (! $this->photoGrouper()->hasKnownWidths(rows: $rows)) {
                 foreach ($rows as $image) {
                     $objects[] = $this->galleryEntry(image: $image, srcset: '');
                 }
@@ -297,7 +339,7 @@ class StorefrontProductResource extends JsonResource
                 continue;
             }
 
-            $representative = $this->photos->representative(rows: $rows);
+            $representative = $this->photoGrouper()->representative(rows: $rows);
             // No-null por construcción: `hasKnownWidths` garantiza al
             // menos una fila con `width`, y `representative` nunca devuelve
             // null para un grupo no vacío. El assert documenta el invariante
@@ -420,6 +462,12 @@ class StorefrontProductResource extends JsonResource
                 'condition' => (string) ($variant->condition ?? 'nuevo'),
                 'stock' => (int) ($variant->stock ?? 0),
                 'handedness' => $variant->handedness,
+                // Talla o capacidad de la variante — NULL cuando el
+                // producto no vende por tallas (guitarras, figuras).
+                'sizeSlug' => $variant->size?->slug,
+                'sizeLabel' => $variant->size?->label,
+                'sizeValue' => $variant->size?->value,
+                'sizeUnit' => $variant->size?->unit,
             ];
         }
 

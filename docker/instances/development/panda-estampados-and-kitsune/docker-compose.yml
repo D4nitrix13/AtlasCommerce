@@ -260,6 +260,11 @@ services:
       # localhost, el browser lo reemplaza y el backend no puede
       # resolver la tienda via ResolveStoreFromDomain middleware.
       - PUBLIC_API_URL=/api
+      # El SSR del frontend no puede alcanzar /api vía el origin público
+      # (Astro no proxyea al backend). Sin esta var, apiFetch cae al
+      # fallback y el PLP muestra el catálogo mock aunque la API tenga
+      # productos. Apunta al sidecar nginx por la red interna de compose.
+      - INTERNAL_API_ORIGIN=http://nginx:8000
       - ASTRO_TELEMETRY_DISABLED=1
       # Bun opera sobre node_modules/.bun; no necesita CI=true ya que su
       # en estado inválido (ej. residuos de un run anterior con owner
