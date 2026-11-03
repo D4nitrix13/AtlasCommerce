@@ -29,6 +29,37 @@ Cuando termines: `SEED=true ./scripts/ingest-product-images.sh`
 
 ---
 
+## VERSIÓN CORTA — mínimo viable (usar esta)
+
+**12 productos · 14 variantes · 26 fotos.** El resto del checklist de
+abajo queda como plan de crecimiento.
+
+### Panda Estampados — 6 piezas (14 fotos)
+
+| Producto | Variante(s) | Qué buscar | Fotos |
+|---|---|---|---|
+| `playera-manga-corta` | `negro`, `blanco` | "blank t-shirt product photo" | 4 |
+| `taza-11-oz` | `blanco` | "white ceramic mug product photo" | 2 |
+| `hoodie` | `negro` | "blank hoodie product photo" | 2 |
+| `tote-bag` | `crudo` | "canvas tote bag product photo" | 2 |
+| `gorra-trucker` | `negro` | "trucker cap blank product" | 2 |
+| `libreta` | `kraft` | "notebook journal product photo" | 2 |
+
+### Kitsune — 6 productos (12 fotos)
+
+| Producto | Marca (carpeta) | Qué buscar | Fotos |
+|---|---|---|---|
+| `figura-escala-1-7` | `good-smile` | "1/7 scale anime figure product" | 2 |
+| `nendoroid` | `good-smile` | "nendoroid product photo" | 2 |
+| `mango-tomo` | `shueisha` | "manga volume book product" | 2 |
+| `llavero-acrylic` | `kitsune` | "acrylic keychain product photo" | 2 |
+| `playera-anime` | `kitsune` | "graphic anime t-shirt product" | 2 |
+| `taza-tematica` | `kitsune` | "printed ceramic mug product" | 2 |
+
+---
+
+## Plan de crecimiento — 48 piezas (versión completa)
+
 ## PANDA ESTAMPADOS — 20 piezas
 
 Rutas bajo `incoming/panda-estampados/panda/{producto}/{variante}/`
