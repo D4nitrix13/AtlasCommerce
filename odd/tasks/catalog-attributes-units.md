@@ -85,3 +85,21 @@ pendiente es que la UI lo respete — es trabajo de frontend, no de BD).
 Migraciones listas. Pendiente natural: poblar `attributes` /
 `product_sizes` con los datos reales de cada tipo de producto (capacidad
 de tazas, tallas de ropa) y que el admin los edite.
+
+## Extensión — diccionario sembrado (2026-11-03)
+
+- `AttributeDefinitionSeeder` (commit `7656a7f5`) siembra el vocabulario:
+  `capacity` (number, `oz`, drinkware), `size` (select, CH/M/G/XG),
+  `material` (select), `weight` (number, `kg`), `microwave_safe` y
+  `dishwasher_safe` (boolean, drinkware). Idempotente, enganchado a
+  `DatabaseSeeder`.
+- Tests: `AttributeDefinitionSeederTest` 7 passed (14 assertions).
+  Pool completo catálogo: 21 passed (34 assertions).
+
+## Pendiente
+
+- Poblar `product_sizes` / `attribute_product` con los datos reales de
+  las piezas de Panda y Kitsune — eso requiere que esos productos
+  existan en la BD (hoy viven como mocks en el frontend; la BD de dev
+  está sin migrar).
+- Admin para editar atributos y tallas.
