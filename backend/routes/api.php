@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\Admin\ProductAttributeValueController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductImageController;
 use App\Http\Controllers\Api\Admin\ProductReviewController as AdminProductReviewController;
+use App\Http\Controllers\Api\Admin\ProductSizeController;
 use App\Http\Controllers\Api\Admin\ProductVariantController;
 use App\Http\Controllers\Api\Admin\PromotionController;
 use App\Http\Controllers\Api\Admin\PromotionProductController;
@@ -885,6 +886,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
             // ProductAttributeValues — CRUD estándar.
             Route::apiResource('product-attribute-values', ProductAttributeValueController::class)
                 ->names('admin.catalog.product-attribute-values');
+
+            // ProductSizes — tallas/capacidades de producto. CRUD estándar.
+            Route::apiResource('product-sizes', ProductSizeController::class)
+                ->names('admin.catalog.product-sizes');
 
             // ProductImages — el controller requiere Product $product en
             // route-model-binding, así que NO se puede usar apiResource
