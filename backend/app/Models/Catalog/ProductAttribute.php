@@ -32,6 +32,9 @@ class ProductAttribute extends Model
         'name',
         'slug',
         'type',
+        'unit',
+        'options',
+        'applies_to',
         'is_filterable',
         'is_required',
     ];
@@ -39,6 +42,8 @@ class ProductAttribute extends Model
     protected $casts = [
         'is_filterable' => 'boolean',
         'is_required' => 'boolean',
+        'options' => 'array',
+        'applies_to' => 'array',
     ];
 
     /**

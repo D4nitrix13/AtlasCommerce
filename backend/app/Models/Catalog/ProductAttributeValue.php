@@ -25,6 +25,13 @@ class ProductAttributeValue extends Model
         'product_id',
         'attribute_id',
         'value',
+        'value_number',
+        'value_boolean',
+    ];
+
+    protected $casts = [
+        'value_number' => 'float',
+        'value_boolean' => 'boolean',
     ];
 
     /**

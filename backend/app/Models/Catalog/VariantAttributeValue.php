@@ -26,6 +26,13 @@ class VariantAttributeValue extends Model
         'product_variant_id',
         'attribute_id',
         'value',
+        'value_number',
+        'value_boolean',
+    ];
+
+    protected $casts = [
+        'value_number' => 'float',
+        'value_boolean' => 'boolean',
     ];
 
     /**

@@ -38,11 +38,14 @@ class ProductSize extends Model
         'product_id',
         'slug',
         'label',
+        'value',
+        'unit',
         'position',
     ];
 
     protected $casts = [
         'position' => 'integer',
+        'value' => 'float',
     ];
 
     public function product(): BelongsTo
