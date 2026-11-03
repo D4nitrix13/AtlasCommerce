@@ -2,9 +2,10 @@
 /**
  * ProductForm — Form multi-sección para crear/editar producto.
  *
- * 5 secciones con tabs (Baymard / Shopify Admin pattern):
+ * 6 secciones con tabs (Baymard / Shopify Admin pattern):
  *  - basics: nombre, descripción, categoría, marca, SKU, status
  *  - variants: lista de variantes (color/tamaño/stock/precio)
+ *  - specs: ficha técnica (tallas/capacidades + atributos)
  *  - media: uploader múltiple con drag-drop
  *  - pricing: precio, compare-at, costo, peso
  *  - seo: título SEO, descripción SEO, slug
@@ -15,8 +16,9 @@
  * el backend, el padre hidrata tabs client-side para mejor UX.
  *
  * AGENTS.md §1: este archivo orquesta los sub-componentes (basics /
- * variants / media / pricing / seo). Variants vive en
- * `ProductVariantsSection.astro` para mantener el archivo ~150 líneas.
+ * variants / specs / media / pricing / seo). Variants vive en
+ * `ProductVariantsSection.astro` y specs en `ProductSpecsSection.astro`
+ * para mantener el archivo ~150 líneas.
  */
 import Input from '../../ui/Input.astro';
 import Textarea from '../../ui/Textarea.astro';
@@ -24,11 +26,14 @@ import Select from '../../ui/Select.astro';
 import Button from '../../ui/Button.astro';
 import MediaUploader from './MediaUploader.astro';
 import ProductVariantsSection from './ProductVariantsSection.astro';
+import ProductSpecsSection from './ProductSpecsSection.astro';
 import {
   type ProductMock,
   type ProductStatus,
   BRANDS_MOCK,
   CATEGORIES_MOCK,
+  getAttributeValuesByProductId,
+  getSizesByProductId,
   getVariantsByProductId,
 } from '../../../data/catalog-mock';
 import { getServerDictionary } from '../../../i18n/server';
@@ -37,7 +42,7 @@ interface Props {
   /** Cuando se edita, el producto a popular. `null` para crear. */
   product?: ProductMock | null;
   /** Tab activo al renderizar (default: basics). */
-  activeTab?: 'basics' | 'variants' | 'media' | 'pricing' | 'seo';
+  activeTab?: 'basics' | 'variants' | 'specs' | 'media' | 'pricing' | 'seo';
   /** Submit label (varía entre "Crear" y "Guardar cambios"). */
   submitLabel?: string;
 }
@@ -48,10 +53,13 @@ const t = getServerDictionary(Astro.locals.locale);
 
 const isEdit = product !== null;
 const productVariants = isEdit ? getVariantsByProductId(product.id) : [];
+const productSizes = isEdit ? getSizesByProductId(product.id) : [];
+const productAttributeValues = isEdit ? getAttributeValuesByProductId(product.id) : [];
 
 const TABS = [
   { id: 'basics', label: t['admin.catalog.products.detail.tabs.basics'] },
   { id: 'variants', label: t['admin.catalog.products.detail.tabs.variants'] },
+  { id: 'specs', label: t['admin.catalog.products.detail.tabs.specs'] },
   { id: 'media', label: t['admin.catalog.products.detail.tabs.media'] },
   { id: 'pricing', label: t['admin.catalog.products.detail.tabs.pricing'] },
   { id: 'seo', label: t['admin.catalog.products.detail.tabs.seo'] },
@@ -162,6 +170,10 @@ function formatCents(cents: number): string {
   )}
 
   {activeTab === 'variants' && <ProductVariantsSection variants={productVariants} />}
+
+  {activeTab === 'specs' && (
+    <ProductSpecsSection sizes={productSizes} attributeValues={productAttributeValues} />
+  )}
 
   {activeTab === 'media' && (
     <section aria-labelledby="tab-media">

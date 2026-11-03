@@ -58,6 +58,36 @@ export interface VariantMock {
   status: ProductStatus;
 }
 
+/**
+ * Fila de `product_sizes`: talla de ropa (value/unit null) o capacidad
+ * numérica (p. ej. `11-oz` → value 11, unit `oz`).
+ */
+export interface ProductSizeMock {
+  id: number;
+  productId: number;
+  slug: string;
+  label: string;
+  value: number | null;
+  unit: string | null;
+  position: number;
+}
+
+/** Tipo del valor EAV: de él depende qué campo se renderiza. */
+export type AttributeValueType = 'text' | 'number' | 'select' | 'boolean';
+
+/** Valor EAV de un atributo. Solo el campo según `type` viene poblado. */
+export interface AttributeValueMock {
+  id: number;
+  productId: number;
+  slug: string;
+  label: string;
+  type: AttributeValueType;
+  unit: string | null;
+  value: string | null;
+  valueNumber: number | null;
+  valueBoolean: boolean | null;
+}
+
 export interface ProductMock {
   id: number;
   slug: string;
@@ -540,6 +570,87 @@ export const VARIANTS_MOCK: readonly VariantMock[] = [
  * VARIANTS_MOCK. Para mantener la coherencia sin un ORM, las
  * funciones helper al final recalculan estos aggregates.
  */
+/**
+ * Ficha técnica de ejemplo (product_sizes + valores EAV).
+ *
+ * `PRODUCTS_MOCK_RAW` está vacío (el catálogo público lee de la API),
+ * así que las asociaciones usan los `productId` presentes en
+ * `VARIANTS_MOCK`. Los datos cubren ambos shapes de talla (capacidad
+ * numérica `11-oz` y talla de ropa `m` sin valor) y los 4 tipos de
+ * atributo (text / number / select / boolean).
+ */
+export const SIZES_MOCK: readonly ProductSizeMock[] = [
+  // Producto 1: tallas de ropa (sin valor numérico ni unidad)
+  { id: 1, productId: 1, slug: 's', label: 'S', value: null, unit: null, position: 1 },
+  { id: 2, productId: 1, slug: 'm', label: 'M', value: null, unit: null, position: 2 },
+  { id: 3, productId: 1, slug: 'l', label: 'L', value: null, unit: null, position: 3 },
+  { id: 4, productId: 1, slug: 'xl', label: 'XL', value: null, unit: null, position: 4 },
+  // Producto 2: capacidad numérica (taza 11 oz)
+  { id: 5, productId: 2, slug: '11-oz', label: '11 oz', value: 11, unit: 'oz', position: 1 },
+  // Producto 3: sin tallas (cubre el estado vacío)
+];
+
+export const ATTRIBUTE_VALUES_MOCK: readonly AttributeValueMock[] = [
+  // Producto 1: text
+  {
+    id: 1,
+    productId: 1,
+    slug: 'material',
+    label: 'Material',
+    type: 'text',
+    unit: null,
+    value: 'Poliéster',
+    valueNumber: null,
+    valueBoolean: null,
+  },
+  // Producto 2: text + boolean (taza)
+  {
+    id: 2,
+    productId: 2,
+    slug: 'material',
+    label: 'Material',
+    type: 'text',
+    unit: null,
+    value: 'Cerámica',
+    valueNumber: null,
+    valueBoolean: null,
+  },
+  {
+    id: 3,
+    productId: 2,
+    slug: 'microwave_safe',
+    label: 'Apto microondas',
+    type: 'boolean',
+    unit: null,
+    value: null,
+    valueNumber: null,
+    valueBoolean: true,
+  },
+  // Producto 3: number + select
+  {
+    id: 4,
+    productId: 3,
+    slug: 'weight_g',
+    label: 'Peso',
+    type: 'number',
+    unit: 'g',
+    value: null,
+    valueNumber: 350,
+    valueBoolean: null,
+  },
+  {
+    id: 5,
+    productId: 3,
+    slug: 'finish',
+    label: 'Acabado',
+    type: 'select',
+    unit: null,
+    value: 'Mate',
+    valueNumber: null,
+    valueBoolean: null,
+  },
+];
+
 export const PRODUCTS_MOCK_RAW: readonly ProductMock[] = [
   // Instrumentos musicales unicamente. Productos de merchandising removidos
   // (Evangelion, Chainsaw Man, Naruto, Totoro, etc). El catalogo publico
@@ -601,6 +712,14 @@ export function getProductById(id: number): ProductMock | undefined {
 
 export function getVariantsByProductId(productId: number): readonly VariantMock[] {
   return VARIANTS_MOCK.filter((variant) => variant.productId === productId);
+}
+
+export function getSizesByProductId(productId: number): readonly ProductSizeMock[] {
+  return SIZES_MOCK.filter((size) => size.productId === productId);
+}
+
+export function getAttributeValuesByProductId(productId: number): readonly AttributeValueMock[] {
+  return ATTRIBUTE_VALUES_MOCK.filter((attr) => attr.productId === productId);
 }
 
 /**
