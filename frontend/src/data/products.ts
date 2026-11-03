@@ -12,14 +12,17 @@
  *  - Categorías alineadas al nicho kitsune (Figma / Nendoroid /
  *    Manga / Apparel / Accessories) — referencia design-refs §3.1
  *    (edición limitada, drops, fandom).
- *  - Imágenes: placeholders SVG inline (data URI) — no hace falta
- *    asset binario y el bundle funciona offline. TODO: reemplazar
- *    por assets reales en F4 cuando exista CDN de storefront.
- *  - Bilingüe (nameEs / nameEn): refleja cómo el backend probablemente
- *    devolverá traducciones en columnas separadas. El consumer elige
- *    según locale.
+ *  - Imágenes: SVG generados (data URI) front+back por acabado vía
+ *    `lib/catalog-product-factory` — mismo molde que La Voz para que
+ *    hover-swap y swatches funcionen sin assets binarios. TODO:
+ *    reemplazar por assets reales en F4 cuando exista CDN de storefront.
+ *  - Acabados: color del personaje/serie (figuras, plush, apparel y
+ *    accesorios llevan 2; el manga es monovariante porque un tomo no
+ *    tiene colorways). El stock del seed se reparte entre los acabados
+ *    para conservar el total por producto del mock anterior.
  */
 import type { Category, Product } from '../types/catalog';
+import { createCatalogProducts, type ProductSeed } from '../lib/catalog-product-factory';
 import { LA_VOZ_PRODUCTS, type LaVozProduct } from './la-voz-mock';
 
 /**
@@ -128,7 +131,13 @@ export const CATEGORIES: readonly Category[] = [
   },
 ] as const;
 
-export const PRODUCTS: readonly Product[] = [
+/**
+ * Seeds de las 12 figuras Kitsune. `brand` es la serie/marca del
+ * juguete (Good Smile para Figma/Nendoroid, la editorial del tomo para
+ * manga, el estudio para merch). El stock por acabado suma el stock
+ * total que tenía el mock anterior (p. ej. 8 → 4+4).
+ */
+const KITSUNE_SEEDS: readonly ProductSeed[] = [
   {
     id: 1,
     slug: 'saber-alter-figma',
@@ -137,11 +146,14 @@ export const PRODUCTS: readonly Product[] = [
       'Figma articulada de Saber Alter (Fate/Stay Night). 14cm, incluye base y manos intercambiables.',
     priceCents: 14500,
     compareAtPriceCents: 16900,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'figures',
-    stock: 8,
+    kind: 'figure',
+    brand: 'Good Smile Company',
+    finishes: [
+      { slug: 'negro-armadura', label: 'Negro armadura', hex: '#1C1917', stock: 4 },
+      { slug: 'violeta-magico', label: 'Violeta mágico', hex: '#4C1D95', stock: 4 },
+    ],
     badges: ['new', 'sale'],
-    currency: 'USD',
   },
   {
     id: 2,
@@ -149,11 +161,14 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Nendoroid Zero Two',
     description: 'Nendoroid de Zero Two (Darling in the Franxx). 10cm, tres expresiones faciales.',
     priceCents: 7900,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'figures',
-    stock: 3,
+    kind: 'figure',
+    brand: 'Good Smile Company',
+    finishes: [
+      { slug: 'rosa', label: 'Rosa', hex: '#EC4899', stock: 2 },
+      { slug: 'rojo', label: 'Rojo', hex: '#DC2626', stock: 1 },
+    ],
     badges: ['low_stock'],
-    currency: 'USD',
   },
   {
     id: 3,
@@ -161,11 +176,11 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Chainsaw Man Tomo 1',
     description: 'Manga tankōbon, edición japonés con sobrecubierta. Idioma: japonés.',
     priceCents: 1900,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'manga',
-    stock: 24,
+    kind: 'manga',
+    brand: 'Shueisha',
+    finishes: [{ slug: 'estandar', label: 'Estándar', hex: '#EA580C', stock: 24 }],
     badges: ['new'],
-    currency: 'USD',
   },
   {
     id: 4,
@@ -173,10 +188,10 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Spy x Family Tomo 1',
     description: 'Manga tankōbon, edición español. Recomendado 13+.',
     priceCents: 1499,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'manga',
-    stock: 30,
-    currency: 'USD',
+    kind: 'manga',
+    brand: 'Shueisha',
+    finishes: [{ slug: 'estandar', label: 'Estándar', hex: '#F59E0B', stock: 30 }],
   },
   {
     id: 5,
@@ -184,10 +199,13 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Hoodie Jujutsu Kaisen',
     description: 'Sudadera con capucha negra, logo Gojo bordado. 80% algodón, 20% polyester.',
     priceCents: 4900,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'apparel',
-    stock: 12,
-    currency: 'USD',
+    kind: 'hoodie',
+    brand: 'MAPPA',
+    finishes: [
+      { slug: 'negro', label: 'Negro', hex: '#1C1917', stock: 6 },
+      { slug: 'morado', label: 'Morado', hex: '#7C3AED', stock: 6 },
+    ],
   },
   {
     id: 6,
@@ -195,11 +213,14 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Peluche Totoro mediano',
     description: 'Peluche de Totoro (Mi Vecino Totoro). 30cm, suave al tacto. Edición oficial.',
     priceCents: 3500,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'accessories',
-    stock: 18,
+    kind: 'plush',
+    brand: 'Studio Ghibli',
+    finishes: [
+      { slug: 'gris', label: 'Gris', hex: '#6B7280', stock: 9 },
+      { slug: 'azul-cielo', label: 'Azul cielo', hex: '#2563EB', stock: 9 },
+    ],
     badges: ['new'],
-    currency: 'USD',
   },
   {
     id: 7,
@@ -209,11 +230,14 @@ export const PRODUCTS: readonly Product[] = [
       'Figura escala 1/6 del Eva-01. 30cm, piezas articuladas, base con luz LED opcional.',
     priceCents: 22500,
     compareAtPriceCents: 24900,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'figures',
-    stock: 2,
+    kind: 'figure',
+    brand: 'Kotobukiya',
+    finishes: [
+      { slug: 'violeta', label: 'Violeta', hex: '#7C3AED', stock: 1 },
+      { slug: 'verde-neon', label: 'Verde neón', hex: '#84CC16', stock: 1 },
+    ],
     badges: ['sale', 'low_stock'],
-    currency: 'USD',
   },
   {
     id: 8,
@@ -221,10 +245,13 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Llavero Demon Slayer',
     description: 'Llavero metálico con el logo del cuerpo de cazadores. 4cm.',
     priceCents: 800,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'accessories',
-    stock: 45,
-    currency: 'USD',
+    kind: 'keychain',
+    brand: 'Bandai',
+    finishes: [
+      { slug: 'dorado', label: 'Dorado', hex: '#CA8A04', stock: 23 },
+      { slug: 'negro', label: 'Negro', hex: '#1C1917', stock: 22 },
+    ],
   },
   {
     id: 9,
@@ -232,10 +259,10 @@ export const PRODUCTS: readonly Product[] = [
     name: 'One Piece Tomo 1',
     description: 'Reedición aniversario del manga. Sobrecubierta con efecto metálico.',
     priceCents: 2100,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'manga',
-    stock: 22,
-    currency: 'USD',
+    kind: 'manga',
+    brand: 'Shueisha',
+    finishes: [{ slug: 'estandar', label: 'Estándar', hex: '#DC2626', stock: 22 }],
   },
   {
     id: 10,
@@ -243,10 +270,13 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Gorra Attack on Titan',
     description: 'Gorra negra con bordado del emblema Scout Regiment. Ajustable.',
     priceCents: 2200,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'apparel',
-    stock: 16,
-    currency: 'USD',
+    kind: 'cap',
+    brand: 'Kodansha',
+    finishes: [
+      { slug: 'negro', label: 'Negro', hex: '#1C1917', stock: 8 },
+      { slug: 'verde', label: 'Verde', hex: '#166534', stock: 8 },
+    ],
   },
   {
     id: 11,
@@ -254,11 +284,14 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Peluche Kakashi Hatake',
     description: 'Peluche del Copy Ninja. 25cm, máscara y bandana incluidas.',
     priceCents: 2900,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'accessories',
-    stock: 5,
+    kind: 'plush',
+    brand: 'Bandai',
+    finishes: [
+      { slug: 'verde-konoha', label: 'Verde Konoha', hex: '#16A34A', stock: 3 },
+      { slug: 'gris', label: 'Gris', hex: '#6B7280', stock: 2 },
+    ],
     badges: ['low_stock'],
-    currency: 'USD',
   },
   {
     id: 12,
@@ -266,13 +299,18 @@ export const PRODUCTS: readonly Product[] = [
     name: 'Taza Studio Ghibli',
     description: 'Taza de cerámica 350ml. Estampado Totoro/No-Face a elección.',
     priceCents: 1800,
-    imageUrl: PLACEHOLDER_IMAGE,
     category: 'accessories',
-    stock: 20,
+    kind: 'mug',
+    brand: 'Studio Ghibli',
+    finishes: [
+      { slug: 'blanco', label: 'Blanco', hex: '#F7F4EF', stock: 10 },
+      { slug: 'negro', label: 'Negro', hex: '#1C1917', stock: 10 },
+    ],
     badges: ['new'],
-    currency: 'USD',
   },
-] as const;
+];
+
+export const PRODUCTS: readonly Product[] = createCatalogProducts(KITSUNE_SEEDS);
 
 /**
  * Helper: devuelve los productos destacados para la home (los primeros 4
