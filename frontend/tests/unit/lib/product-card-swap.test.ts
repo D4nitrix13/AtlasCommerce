@@ -428,8 +428,8 @@ describe('buildStackedImages', () => {
       category: 'guitars',
       stock: 1,
       images: [
-        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, variantId: 'v1' }),
-        imageWith({ url: 'back.webp', altText: 'SG - vista back', isPrimary: false, variantId: 'v1' }),
+        imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, isHover: false, variantId: 'v1' }),
+        imageWith({ url: 'back.webp', altText: 'SG - vista back', isPrimary: false, isHover: true, variantId: 'v1' }),
       ],
     };
     const swap = deriveProductCardSwap(product);
