@@ -78,6 +78,14 @@ export const API_ENDPOINTS = {
     orders: {
       recent: '/v1/admin/orders/recent',
     },
+    catalog: {
+      productSizes: '/v1/admin/catalog/product-sizes',
+      productSize: (id: number | string) => `/v1/admin/catalog/product-sizes/${id}`,
+      productAttributeValues: '/v1/admin/catalog/product-attribute-values',
+      productAttributeValue: (id: number | string) =>
+        `/v1/admin/catalog/product-attribute-values/${id}`,
+      attributes: '/v1/admin/attributes',
+    },
   },
 
   customers: {

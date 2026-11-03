@@ -172,7 +172,11 @@ function formatCents(cents: number): string {
   {activeTab === 'variants' && <ProductVariantsSection variants={productVariants} />}
 
   {activeTab === 'specs' && (
-    <ProductSpecsSection sizes={productSizes} attributeValues={productAttributeValues} />
+    <ProductSpecsSection
+      productId={isEdit ? product.id : null}
+      sizes={productSizes}
+      attributeValues={productAttributeValues}
+    />
   )}
 
   {activeTab === 'media' && (
