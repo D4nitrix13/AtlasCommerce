@@ -113,7 +113,7 @@ while IFS= read -r src; do
   run mkdir -p "${out_dir}"
   normalize "${src}" "${out_dir}" "${role}"
   count=$((count + 1))
-done < <(find "${INCOMING}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | sort)
+done < <(find "${INCOMING}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.avif' -o -iname '*.heic' \) | sort)
 
 echo ""
 log "Ingeridas: ${count} · salteadas: ${skipped}"
