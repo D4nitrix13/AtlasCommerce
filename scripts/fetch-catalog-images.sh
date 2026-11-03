@@ -32,6 +32,10 @@ DEST_BASE="assets/products"
 COMMONS_API="https://commons.wikimedia.org/w/api.php"
 USER_AGENT="AtlasCommerceCatalogBot/1.0 (dev prototype)"
 MAX_PER_PRODUCT=2
+# Wikimedia pide pacing entre requests; sin esto responde 429 y el
+# lote se cae. Pausa entre búsquedas y retries con backoff.
+SEARCH_DELAY="${SEARCH_DELAY:-1.5}"
+MAX_RETRIES=4
 
 die() {
   echo "Error: ${1}" >&2
@@ -70,15 +74,15 @@ download_image() {
 }
 
 # ── convierte un source a los tamaños de la convención, con rol e índice ──
-# Crop cuadrado centrado (igual que las fotos scrapeadas de La Voz:
-# `01-body-1600x1600.webp`), para que el nombre sea predecible y la
-# factory del frontend pueda armar la URL sin leer un manifest.
+# Naming canónico (`.ai/rules/assets-naming-policy.md` §1):
+#   assets/products/{tenant}/{brand}/{product}/{variant}/{role}-{WxH}.webp
+# Crop cuadrado centrado a 1600/1200/800/400, idéntico al árbol de La Voz.
 convert_to_webp() {
-  local src="${1}" out_dir="${2}" base="${3}" role="${4}" index="${5}"
+  local src="${1}" out_dir="${2}" role="${3}"
   local w out tmp
   tmp=$(mktemp -d)
   for w in "${MIN_WIDTHS[@]}"; do
-    out="${out_dir}/${base}-${role}-${w}x${w}-${index}.webp"
+    out="${out_dir}/${role}-${w}x${w}.webp"
     run magick "${src}" \
       -resize "${w}x${w}^" -gravity center -extent "${w}x${w}" \
       -quality "${QUALITY}" "${tmp}/sq.webp" || {
@@ -90,27 +94,39 @@ convert_to_webp() {
   rm -rf "${tmp}"
 }
 
-# ── busca candidatos libres en Wikimedia Commons ──
+# ── busca candidatos libres en Wikimedia Commons, con retry por 429 ──
 search_commons() {
   local terms="${1}" limit="${2}"
-  curl -sS --fail --max-time 20 -A "${USER_AGENT}" --get "${COMMONS_API}" \
-    --data-urlencode "action=query" \
-    --data-urlencode "format=json" \
-    --data-urlencode "generator=search" \
-    --data-urlencode "gsrsearch=${terms}" \
-    --data-urlencode "gsrnamespace=6" \
-    --data-urlencode "gsrlimit=${limit}" \
-    --data-urlencode "prop=imageinfo" \
-    --data-urlencode "iiprop=url|mime" \
-    --data-urlencode "iiurlwidth=1600" \
-    | jq -r '
-        (.query.pages // {})
-        | to_entries[]
-        | .value.imageinfo[0]
-        | select(. != null)
-        | select(.mime == "image/jpeg" or .mime == "image/png")
-        | .thumburl // .url
-      '
+  local attempt=1 backoff=2
+  local body
+  while (( attempt <= MAX_RETRIES )); do
+    if body=$(curl -sS --fail --max-time 20 -A "${USER_AGENT}" --get "${COMMONS_API}" \
+      --data-urlencode "action=query" \
+      --data-urlencode "format=json" \
+      --data-urlencode "generator=search" \
+      --data-urlencode "gsrsearch=${terms}" \
+      --data-urlencode "gsrnamespace=6" \
+      --data-urlencode "gsrlimit=${limit}" \
+      --data-urlencode "prop=imageinfo" \
+      --data-urlencode "iiprop=url|mime" \
+      --data-urlencode "iiurlwidth=1600" 2>/dev/null); then
+      break
+    fi
+    echo "  ⚠ búsqueda falló (intento ${attempt}/${MAX_RETRIES}), backoff ${backoff}s: ${terms}" >&2
+    sleep "${backoff}"
+    backoff=$((backoff * 2))
+    attempt=$((attempt + 1))
+  done
+  [[ -n "${body:-}" ]] || return 1
+
+  jq -r '
+      (.query.pages // {})
+      | to_entries[]
+      | .value.imageinfo[0]
+      | select(. != null)
+      | select(.mime == "image/jpeg" or .mime == "image/png")
+      | .thumburl // .url
+    ' <<<"${body}"
 }
 
 TOTAL=0
@@ -141,16 +157,19 @@ while IFS= read -r product; do
     [[ -z "${finish}" ]] && continue
     [[ "${per_product}" -ge "${MAX_PER_PRODUCT}" ]] && break
 
+    variant_slug=$(jq -r '.slug' <<<"${finish}")
     finish_terms=$(jq -r '.searchTerms // [] | join(" ")' <<<"${finish}")
     query="${base_terms} ${finish_terms}"
 
     mapfile -t urls < <(search_commons "${query}" 4)
+    sleep "${SEARCH_DELAY}"
     if [[ "${#urls[@]}" -eq 0 ]]; then
       echo "  ✗ sin resultados: ${query}" >&2
       FAILED=$((FAILED + 1))
       continue
     fi
 
+    variant_dir="${out_dir}/${variant_slug}"
     tmp=$(mktemp -d)
     got=0
     for url in "${urls[@]}"; do
@@ -159,12 +178,11 @@ while IFS= read -r product; do
       if download_image "${url}" "${src}"; then
         role="front"
         [[ "${index}" -gt 1 ]] && role="back"
-        idx=$(printf "%02d" "${index}")
-        run mkdir -p "${out_dir}"
+        run mkdir -p "${variant_dir}"
         if [[ "${DRY_RUN}" != "true" ]]; then
-          convert_to_webp "${src}" "${out_dir}" "${slug}" "${role}" "${idx}" || true
+          convert_to_webp "${src}" "${variant_dir}" "${role}" || true
         else
-          echo "  [dry-run] convert ${url} → ${out_dir}/${slug}-${role}-*-${idx}.webp" >&2
+          echo "  [dry-run] convert ${url} → ${variant_dir}/${role}-*x*.webp" >&2
         fi
         got=1
         DOWNLOADED=$((DOWNLOADED + 1))
