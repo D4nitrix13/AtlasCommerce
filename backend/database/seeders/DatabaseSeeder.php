@@ -47,6 +47,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->ensureBaseCurrencies();
         $this->call(class: PermissionsCatalogSeeder::class);
+        // Vocabulario de atributos por tipo de producto (capacidad en
+        // onzas, talla de ropa, material, cuidados). Idempotente.
+        $this->call(class: AttributeDefinitionSeeder::class);
         $this->call(class: RecoveryCodesTestSeeder::class);
         // CA.5 follow-up — customer con orders de ejemplo para que
         // el Account dashboard del frontend tenga data real al
