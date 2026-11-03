@@ -8,6 +8,11 @@
  * de dominio (`relevancia`, `precioAsc`, etc.) sin filtrar la shape
  * del primitive.
  *
+ * Cada opción lleva su `href` resuelto en el servidor (misma mecánica
+ * que `FiltersSidebar`): el cambio navega a esa URL y el orden queda en
+ * el query string, preservando los filtros activos. Sin estado en el
+ * cliente y sin depender de un fetch.
+ *
  * Etiqueta "Ordenar por" — sólo visible a partir de `sm` para que en
  * mobile el selector ocupe todo el ancho sin duplicar el contexto.
  */
@@ -31,11 +36,19 @@ interface SortOption {
 interface Props {
   labels: SortDropdownLabels;
   value?: SortKey;
+  /** Href por opción, con los filtros activos ya resueltos. */
+  hrefs: Record<SortKey, string>;
   name?: string;
   id?: string;
 }
 
-const { labels, value = 'relevancia', name = 'sort', id = 'products-sort' } = Astro.props;
+const {
+  labels,
+  value = 'relevancia',
+  hrefs,
+  name = 'sort',
+  id = 'products-sort',
+} = Astro.props;
 
 const localizedOptions: SortOption[] = [
   { value: 'relevancia', label: labels.relevancia },
@@ -45,15 +58,38 @@ const localizedOptions: SortOption[] = [
 ];
 ---
 
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-3" data-sort-dropdown>
   <label for={id} class="hidden text-[13px] font-medium text-slate-500 sm:block">
     {labels.label}
   </label>
   <Select
     name={name}
     id={id}
-    options={localizedOptions}
+    options={[]}
     value={value}
     class="!w-auto min-w-[180px] text-sm font-medium"
-  />
+  >
+    {localizedOptions.map((opt) => (
+      <option value={opt.value} data-href={hrefs[opt.value]} selected={opt.value === value}>
+        {opt.label}
+      </option>
+    ))}
+  </Select>
 </div>
+
+<script>
+  // Navegación del selector: el href viene resuelto en el servidor, así
+  // que el cliente sólo cambia de página. Sin JS el select queda inerte
+  // (igual que antes), y los links de filtros siguen funcionando.
+  for (const root of document.querySelectorAll<HTMLElement>('[data-sort-dropdown]')) {
+    const select = root.querySelector('select');
+    if (select === null) continue;
+    select.addEventListener('change', () => {
+      const selected = select.selectedOptions[0];
+      const href = selected?.getAttribute('data-href');
+      if (href) {
+        window.location.assign(href);
+      }
+    });
+  }
+</script>

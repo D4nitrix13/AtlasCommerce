@@ -505,8 +505,9 @@ const countRange = t['storefront.products.v3.countRange']
 // filtrado y sigue sin necesitar estado en el cliente.
 const paginationBaseUrl = buildCatalogHref(baseUrl, filters, { page: undefined });
 
-// El dropdown de orden muestra el `sort` de la URL (sigue siendo
-// presentacional; el orden real lo aplica `applyCatalogFilters`).
+// El dropdown de orden navega por hrefs resueltos acá (con los filtros
+// activos preservados, igual que los links del sidebar). El orden real
+// lo aplica `applyCatalogFilters` sobre la query string.
 const sortValue =
   filters.sort === 'price-asc'
     ? 'precioAsc'
@@ -515,6 +516,12 @@ const sortValue =
       : filters.sort === 'name-asc'
         ? 'nombre'
         : 'relevancia';
+const sortHrefs = {
+  relevancia: buildCatalogHref(baseUrl, filters, { sort: 'relevancia' }),
+  precioAsc: buildCatalogHref(baseUrl, filters, { sort: 'price-asc' }),
+  precioDesc: buildCatalogHref(baseUrl, filters, { sort: 'price-desc' }),
+  nombre: buildCatalogHref(baseUrl, filters, { sort: 'name-asc' }),
+};
 ---
 
 <StorefrontLayout
@@ -553,7 +560,7 @@ const sortValue =
           </h1>
           <p class="mt-2 text-sm text-slate-500">{subtitle}</p>
         </div>
-        <SortDropdown labels={dictionary.sort} value={sortValue} />
+        <SortDropdown labels={dictionary.sort} value={sortValue} hrefs={sortHrefs} />
       </header>
 
       <div class="grid gap-10 pb-12 lg:grid-cols-[264px_1fr]">

@@ -16,6 +16,12 @@ const meta: Meta<typeof SortDropdown> = {
   args: {
     labels: LABELS,
     value: 'relevancia',
+    hrefs: {
+      relevancia: '/es/products',
+      precioAsc: '/es/products?sort=price-asc',
+      precioDesc: '/es/products?sort=price-desc',
+      nombre: '/es/products?sort=name-asc',
+    },
   },
 };
 
