@@ -5,9 +5,21 @@
  * todavía no tiene productos; home, catálogo, ficha, carrito y checkout
  * leen este módulo cuando el host es Panda y el backend responde vacío.
  * Kitsune y La Voz no lo usan.
+ *
+ * Sale de `lib/catalog-product-factory`: cada pieza es un `ProductSeed`
+ * y la factory arma la galería front+back por acabado, variants y stock.
+ * Badges/compareAt con criterio de escaparate:
+ *   - `sale` + precio tachado en taza y tote (las dos piezas de mayor
+ *     rotación de demo, una de drinkware y una de accesorio).
+ *   - `new` en libreta y gorra (lo más reciente del catálogo).
  */
-import type { Product, ProductImage, ProductVariant } from '../types/catalog';
+import type { Product } from '../types/catalog';
 import { getBrandBySlug } from '../config/stores';
+import {
+  createCatalogProducts,
+  type CatalogSilhouetteKind,
+  type ProductSeed,
+} from '../lib/catalog-product-factory';
 
 export const PANDA_TENANT_SLUG = 'panda-estampados';
 
@@ -16,16 +28,16 @@ export function isPandaStore(tenantSlug: string | null): boolean {
   return getBrandBySlug(tenantSlug).slug === PANDA_TENANT_SLUG;
 }
 
-const PAPER = '#F3EFE8';
-const DARK_FILLS = new Set(['#1C1917', '#1E3A5F', '#8A8580']);
-
 export const PANDA_CATEGORIES = [
   { slug: 'textil', label: 'Textil' },
   { slug: 'drinkware', label: 'Drinkware' },
   { slug: 'accesorio', label: 'Accesorio' },
 ] as const;
 
-type GarmentKind = 'polo' | 'shirt' | 'hoodie' | 'mug' | 'tote' | 'cap' | 'pen' | 'notebook';
+type GarmentKind = Extract<
+  CatalogSilhouetteKind,
+  'polo' | 'shirt' | 'hoodie' | 'mug' | 'tote' | 'cap' | 'pen' | 'notebook'
+>;
 
 interface PandaFinish {
   slug: string;
@@ -39,9 +51,11 @@ interface PandaPiece {
   name: string;
   description: string;
   priceCents: number;
+  compareAtPriceCents?: number;
   category: (typeof PANDA_CATEGORIES)[number]['slug'];
   kind: GarmentKind;
   finishes: readonly PandaFinish[];
+  badges?: ProductSeed['badges'];
 }
 
 const PIECES: readonly PandaPiece[] = [
@@ -90,12 +104,14 @@ const PIECES: readonly PandaPiece[] = [
     name: 'Taza 11 oz',
     description: 'Taza de cerámica de 11 oz. El estampado envuelve el frente.',
     priceCents: 1200,
+    compareAtPriceCents: 1500,
     category: 'drinkware',
     kind: 'mug',
     finishes: [
       { slug: 'blanco', label: 'Blanco', hex: '#F7F4EF' },
       { slug: 'negro', label: 'Negro', hex: '#1C1917' },
     ],
+    badges: ['sale'],
   },
   {
     id: 9105,
@@ -103,12 +119,14 @@ const PIECES: readonly PandaPiece[] = [
     name: 'Tote',
     description: 'Bolsa de lona con asas largas. Un estampado por cara.',
     priceCents: 1500,
+    compareAtPriceCents: 1800,
     category: 'accesorio',
     kind: 'tote',
     finishes: [
       { slug: 'crudo', label: 'Crudo', hex: '#E7D7C1' },
       { slug: 'negro', label: 'Negro', hex: '#1C1917' },
     ],
+    badges: ['sale'],
   },
   {
     id: 9106,
@@ -122,6 +140,7 @@ const PIECES: readonly PandaPiece[] = [
       { slug: 'negro', label: 'Negro', hex: '#1C1917' },
       { slug: 'marino', label: 'Marino', hex: '#1E3A5F' },
     ],
+    badges: ['new'],
   },
   {
     id: 9107,
@@ -142,6 +161,7 @@ const PIECES: readonly PandaPiece[] = [
     category: 'accesorio',
     kind: 'notebook',
     finishes: [{ slug: 'kraft', label: 'Kraft', hex: '#C4A574' }],
+    badges: ['new'],
   },
 ];
 
@@ -151,80 +171,31 @@ export const PANDA_DEMO_LINES = [
   { productSlug: 'taza-11-oz', quantity: 24 },
 ] as const;
 
-const GARMENT_PATHS: Record<GarmentKind, string> = {
-  polo: 'M78 72 L98 52 Q120 70 142 52 L162 72 L152 104 L142 96 L142 248 L98 248 L98 96 L88 104 Z',
-  shirt: 'M72 78 L96 56 Q120 74 144 56 L168 78 L156 108 L146 100 L146 250 L94 250 L94 100 L84 108 Z',
-  hoodie: 'M70 86 Q90 48 108 70 Q120 52 132 70 Q150 48 170 86 L158 112 L146 102 L146 250 L94 250 L94 102 L82 112 Z',
-  mug: 'M86 78 L86 230 Q86 246 102 246 L150 246 Q166 246 166 230 L166 78 Z M166 108 Q198 108 198 148 Q198 188 166 188',
-  tote: 'M78 108 L78 246 L162 246 L162 108 Z M96 108 Q96 72 120 72 Q144 72 144 108',
-  cap: 'M52 168 L188 168 L176 156 Q168 96 120 96 Q72 96 64 156 Z',
-  pen: 'M108 48 L132 48 L128 236 Q120 250 112 236 Z',
-  notebook: 'M72 64 L156 64 L168 248 L84 248 Z',
-};
-
-function markFill(garmentHex: string): string {
-  return DARK_FILLS.has(garmentHex.toUpperCase()) ? PAPER : '#1C6B63';
-}
-
-function previewUrl(kind: GarmentKind, garmentHex: string): string {
-  const svg = [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 300">`,
-    `<rect width="240" height="300" fill="${PAPER}"/>`,
-    `<path d="${GARMENT_PATHS[kind]}" fill="${garmentHex}" stroke="#1C1917" stroke-width="2" stroke-linejoin="round"/>`,
-    `<text x="120" y="168" text-anchor="middle" font-family="Georgia,serif" font-size="16" fill="${markFill(garmentHex)}">Panda</text>`,
-    `</svg>`,
-  ].join('');
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-}
-
-function toVariant(piece: PandaPiece, finish: PandaFinish, index: number): ProductVariant {
-  return {
-    id: `${piece.id}-${index + 1}`,
-    name: finish.label,
-    finishSlug: finish.slug,
-    finishLabel: finish.label,
-    finishHex: finish.hex,
-    condition: 'nuevo',
-    stock: 40,
-    handedness: null,
-  };
-}
-
-function toImage(piece: PandaPiece, finish: PandaFinish, variantId: string, index: number): ProductImage {
-  return {
-    url: previewUrl(piece.kind, finish.hex),
-    altText: `${piece.name}, ${finish.label}`,
-    isPrimary: index === 0,
-    isHover: false,
-    variantId,
-    sortOrder: index,
-    srcset: '',
-  };
-}
-
-function toProduct(piece: PandaPiece): Product {
-  const variants = piece.finishes.map((finish, index) => toVariant(piece, finish, index));
-  const images = piece.finishes.map((finish, index) =>
-    toImage(piece, finish, variants[index]?.id ?? '', index),
-  );
-  const cover = images[0];
+/**
+ * Stock por acabado: 20 en piezas de dos colores y 40 en las de un
+ * solo color, para que el total por producto siga siendo 40 como en el
+ * mock anterior.
+ */
+function toSeed(piece: PandaPiece): ProductSeed {
+  const perFinishStock = 40 / piece.finishes.length;
   return {
     id: piece.id,
     slug: piece.slug,
     name: piece.name,
     description: piece.description,
     priceCents: piece.priceCents,
-    imageUrl: cover?.url ?? '',
-    images,
-    variants,
     category: piece.category,
-    brand: '',
-    stock: 40,
-    currency: 'USD',
+    kind: piece.kind,
+    brand: 'Panda Estampados',
+    finishes: piece.finishes.map((finish) => ({ ...finish, stock: perFinishStock })),
+    ...(piece.badges !== undefined && { badges: piece.badges }),
+    ...(piece.compareAtPriceCents !== undefined && {
+      compareAtPriceCents: piece.compareAtPriceCents,
+    }),
   };
 }
 
-export const PANDA_PRODUCTS: readonly Product[] = PIECES.map(toProduct);
+export const PANDA_PRODUCTS: readonly Product[] = createCatalogProducts(PIECES.map(toSeed));
 
 export function findPandaProduct(slug: string): Product | null {
   return PANDA_PRODUCTS.find((product) => product.slug === slug) ?? null;
