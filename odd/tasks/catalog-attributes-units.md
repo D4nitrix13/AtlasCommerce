@@ -47,12 +47,12 @@ pendiente es que la UI lo respete — es trabajo de frontend, no de BD).
 
 ## Tareas
 
-- [ ] T1. Tests RED del contrato nuevo (units, options, applies_to,
+- [x] T1. Tests RED del contrato nuevo (units, options, applies_to,
       valores tipados, size con value+unit). Ruta: `inline`.
-- [ ] T2. Migración `alter_attributes_add_unit_options_applies_to`.
-- [ ] T3. Migración `alter_product_sizes_add_value_and_unit`.
-- [ ] T4. Migraciones `alter_attribute_{product,variant}_add_typed_values`.
-- [ ] T5. Suite verde + commit por work unit.
+- [x] T2. Migración `alter_attributes_add_unit_options_applies_to`.
+- [x] T3. Migración `alter_product_sizes_add_value_and_unit`.
+- [x] T4. Migraciones `alter_attribute_{product,variant}_add_typed_values`.
+- [x] T5. Suite verde + commit por work unit.
 
 ## Criterios de aceptación
 
@@ -65,12 +65,23 @@ pendiente es que la UI lo respete — es trabajo de frontend, no de BD).
 
 ## Progreso
 
-(nada aún)
+- T1-T5 (2026-11-03): 4 migraciones + modelos + tests. Commit `57033241`.
+  Ruta: inline (schema ya explorado, patrón de migraciones del repo).
 
 ## Evidencia
 
-(nada aún)
+- `php artisan test --compact --filter=AttributeUnitsTest`: **10 passed**
+  (15 assertions). TDD: RED observado (`column "unit" does not exist`,
+  `column "value_number" does not exist`) → GREEN.
+- `php artisan test --compact tests/Feature/Catalog/{ProductSizeTest,AttributeUnitsTest,ProductExclusiveTest}.php`:
+  **18 passed** (26 assertions) — sin regresiones.
+- Nota de entorno: los tests del backend necesitan
+  `DB_USERNAME=panda-estampados-and-kitsune DB_PASSWORD=devpass`; el
+  `.env` del container de Panda apunta por error a la BD de La Voz.
+  Se crearon rol + `panda-estampados-and-kitsune_test` en Postgres.
 
 ## Próximo paso
 
-T1 — tests RED.
+Migraciones listas. Pendiente natural: poblar `attributes` /
+`product_sizes` con los datos reales de cada tipo de producto (capacidad
+de tazas, tallas de ropa) y que el admin los edite.
