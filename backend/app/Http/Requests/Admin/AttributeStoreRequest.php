@@ -33,6 +33,15 @@ class AttributeStoreRequest extends FormRequest
             'name' => ['required', 'string', 'min:2', 'max:100'],
             'slug' => ['required', 'string', 'min:2', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:attributes,slug'],
             'type' => ['required', 'string', 'min:1', 'max:50'],
+            // Unidad de medida ('oz', 'lb', 'ml', 'kg', 'cm'). NULL cuando
+            // el atributo no se mide (material, color).
+            'unit' => ['nullable', 'string', 'max:16', 'in:oz,lb,ml,kg,cm,un'],
+            // Opciones válidas cuando `type = 'select'` (JSON array).
+            'options' => ['nullable', 'array', 'max:50'],
+            'options.*' => ['string', 'max:120'],
+            // Categorías donde aplica (JSON array de slugs). NULL = todas.
+            'applies_to' => ['nullable', 'array', 'max:20'],
+            'applies_to.*' => ['string', 'max:120'],
             'description' => ['nullable', 'string', 'max:5000'],
             'is_filterable' => ['nullable', 'boolean'],
             'is_required' => ['nullable', 'boolean'],

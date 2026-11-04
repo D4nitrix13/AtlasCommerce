@@ -24,6 +24,13 @@ class AdminAttributeResource extends JsonResource
             'name' => $this->resource->name,
             'slug' => $this->resource->slug,
             'type' => $this->resource->type,
+            // Unidad de medida ('oz', 'lb', 'ml', 'kg', 'cm') o null
+            // cuando el atributo no se mide.
+            'unit' => $this->resource->unit,
+            // Opciones válidas cuando `type = 'select'` (JSON array).
+            'options' => $this->resource->options,
+            // Categorías donde aplica el atributo (JSON array de slugs).
+            'applies_to' => $this->resource->applies_to,
             'description' => $this->resource->description,
             'is_filterable' => (bool) $this->resource->is_filterable,
             'is_required' => (bool) $this->resource->is_required,
