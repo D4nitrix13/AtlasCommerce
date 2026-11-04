@@ -98,6 +98,9 @@ class AttributeController extends Controller
             'slug' => $data['slug'],
             'type' => $data['type'],
             'description' => $data['description'] ?? null,
+            'unit' => $data['unit'] ?? null,
+            'options' => $data['options'] ?? null,
+            'applies_to' => $data['applies_to'] ?? null,
             'is_filterable' => $data['is_filterable'] ?? false,
             'is_required' => $data['is_required'] ?? false,
         ]);

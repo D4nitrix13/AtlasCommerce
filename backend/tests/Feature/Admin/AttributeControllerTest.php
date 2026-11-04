@@ -158,6 +158,59 @@ final class AttributeControllerTest extends TestCase
     }
 
     #[Test]
+    public function store_persists_dictionary_fields(): void
+    {
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/attributes', data: [
+            'name' => 'Material',
+            'slug' => 'material',
+            'type' => 'select',
+            'options' => ['Algodón', 'Poliéster'],
+            'unit' => null,
+            'applies_to' => ['textil'],
+            'description' => 'Tejido del producto',
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonPath(path: 'data.options', expect: ['Algodón', 'Poliéster']);
+        $response->assertJsonPath(path: 'data.applies_to', expect: ['textil']);
+        $response->assertJsonPath(path: 'data.description', expect: 'Tejido del producto');
+        $response->assertJsonPath(path: 'data.unit', expect: null);
+
+        $stored = ProductAttribute::query()
+            ->where(column: 'slug', operator: '=', value: 'material')
+            ->firstOrFail();
+
+        $this->assertSame(expected: ['Algodón', 'Poliéster'], actual: $stored->options);
+        $this->assertSame(expected: ['textil'], actual: $stored->applies_to);
+        $this->assertSame(expected: 'Tejido del producto', actual: $stored->description);
+        $this->assertNull($stored->unit);
+    }
+
+    #[Test]
+    public function store_persists_unit_for_number_attributes(): void
+    {
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/attributes', data: [
+            'name' => 'Peso',
+            'slug' => 'peso',
+            'type' => 'number',
+            'unit' => 'oz',
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonPath(path: 'data.unit', expect: 'oz');
+
+        $stored = ProductAttribute::query()
+            ->where(column: 'slug', operator: '=', value: 'peso')
+            ->firstOrFail();
+
+        $this->assertSame(expected: 'oz', actual: $stored->unit);
+    }
+
+    #[Test]
     public function store_rejects_invalid_slug_format(): void
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);

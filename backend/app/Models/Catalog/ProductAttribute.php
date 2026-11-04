@@ -32,6 +32,7 @@ class ProductAttribute extends Model
         'name',
         'slug',
         'type',
+        'description',
         'unit',
         'options',
         'applies_to',
