@@ -39,6 +39,9 @@ use Tests\TestCase;
  *  - La `storage_key` sale del `StorageKeyDeriver` y es servible por el
  *    `AssetController` (mismo criterio que usa `validate()`).
  *  - `is_primary` sólo queda en la fila del ancho mayor.
+ *  - `is_hover` se replica en las cuatro filas de la subida, con el
+ *    mismo `sort_order`, limpia la foto hover previa del producto, y no
+ *    convive con `is_primary` en la misma petición (422).
  *  - No-upscale: un original angosto no genera filas de anchos mayores.
  *  - Anchos configurables (`assets.upload.widths`): default intacto,
  *    lista propia respetada, no-upscale con lista propia, y lista
@@ -487,6 +490,100 @@ final class ProductImageUploadTest extends TestCase
             ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
                 'image' => $this->fakeImage(width: 1600, height: 1200),
             ]);
+    }
+
+    // -----------------------------------------------------------------------
+    // is_hover
+    // -----------------------------------------------------------------------
+
+    #[Test]
+    public function it_replicates_is_hover_across_every_resolution_of_the_upload(): void
+    {
+        $this->asAdmin();
+
+        $response = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(),
+                'is_hover' => true,
+                'sort_order' => 7,
+            ]);
+
+        $response->assertCreated();
+
+        $rows = ProductImage::query()->get();
+
+        // La marca describe la FOTO, no una fila: si sólo la de 1600
+        // quedara marcada, una lectura que no colapse por rol devolvería
+        // una sola resolución de las cuatro.
+        $this->assertCount(expectedCount: count(UploadWidthResolver::DEFAULT_WIDTHS), haystack: $rows);
+        $this->assertSame(
+            expected: array_fill(0, count(UploadWidthResolver::DEFAULT_WIDTHS), true),
+            actual: $rows->map(static fn (ProductImage $row): bool => (bool) $row->is_hover)->all(),
+        );
+        $this->assertSame(
+            expected: array_fill(0, count(UploadWidthResolver::DEFAULT_WIDTHS), 7),
+            actual: $rows->map(static fn (ProductImage $row): int => (int) $row->sort_order)->all(),
+        );
+    }
+
+    #[Test]
+    public function it_unmarks_the_previous_hover_photo_when_the_upload_becomes_the_new_hover(): void
+    {
+        $previous = $this->makeHoverPhoto(rows: 2);
+
+        $this->asAdmin();
+
+        $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(),
+                'is_hover' => true,
+            ])->assertCreated();
+
+        // clearHoverFlag() desmarca TODAS las filas de la foto previa.
+        foreach ($previous as $row) {
+            $this->assertFalse($row->fresh()->is_hover);
+        }
+    }
+
+    #[Test]
+    public function it_rejects_an_upload_that_marks_the_photo_as_primary_and_hover(): void
+    {
+        $this->asAdmin();
+
+        $response = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => $this->fakeImage(),
+                'is_primary' => true,
+                'is_hover' => true,
+            ]);
+
+        // 422 antes de convertir y sin filas: una foto no ocupa las dos
+        // ranuras de la card a la vez.
+        $response->assertStatus(status: 422);
+        $this->assertSame(expected: 0, actual: ProductImage::query()->count());
+    }
+
+    /**
+     * Foto hover previa de N filas, como las deja el upload (mismo
+     * `sort_order`, marca replicada).
+     *
+     * @return list<ProductImage>
+     */
+    private function makeHoverPhoto(int $rows = 2): array
+    {
+        $created = [];
+
+        foreach (range(1, $rows) as $position) {
+            $created[] = ProductImage::query()->create(attributes: [
+                'product_id' => $this->product->id,
+                'image_url' => 'https://cdn.example.com/prev-'.$position.'.webp',
+                'is_hover' => true,
+                'sort_order' => 0,
+                'width' => 400 * $position,
+            ]);
+        }
+
+        return $created;
     }
 
     // -----------------------------------------------------------------------
