@@ -1,0 +1,26 @@
+---
+/**
+ * /admin/catalog/attributes — diccionario de atributos del catálogo.
+ *
+ * Lista (nombre, tipo, unit, # opciones) + alta/edición/baja vía la
+ * isla `AttributeDictionaryEditor`, que consume /v1/admin/attributes.
+ *
+ * AGENTS.md §1: página ≤400 líneas.
+ */
+import AdminLayout from '../../../../../layouts/AdminLayout.astro';
+import AttributeDictionaryEditor from '../../../../../components/admin/catalog/AttributeDictionaryEditor';
+import { getServerDictionary } from '../../../../../i18n/server';
+
+const t = getServerDictionary(Astro.locals.locale);
+---
+
+<AdminLayout title={t['admin.catalog.attributes.title']}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950">
+      {t['admin.catalog.attributes.title']}
+    </h1>
+    <p class="mt-1 text-sm text-slate-500">{t['admin.catalog.attributes.subtitle']}</p>
+  </div>
+
+  <AttributeDictionaryEditor client:load />
+</AdminLayout>

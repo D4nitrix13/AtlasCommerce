@@ -139,6 +139,14 @@ export default function ProductSpecsEditor({
     no: t(`${K}.no`),
   };
 
+  // Opciones del diccionario para `type=select`; sin opciones se cae
+  // al input de texto con hint.
+  const selectedDefinition =
+    attrForm === null
+      ? undefined
+      : attributes.find((attr) => String(attr.id) === attrForm.attributeId);
+  const selectOptions: readonly string[] = selectedDefinition?.options ?? [];
+
   const loadAll = useCallback(async (): Promise<void> => {
     if (productId === null) return;
     try {
@@ -596,6 +604,24 @@ export default function ProductSpecsEditor({
                   />
                   {t(`${K}.value`)}
                 </label>
+              ) : attrForm.type === 'select' && selectOptions.length > 0 ? (
+                <label className="space-y-1 text-xs font-medium text-slate-600">
+                  {t(`${K}.value`)}
+                  <select
+                    value={attrForm.rawValue}
+                    onChange={(event) =>
+                      setAttrForm({ ...attrForm, rawValue: event.target.value })
+                    }
+                    className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900"
+                  >
+                    <option value="">{t(`${K}.selectAttributeValue`)}</option>
+                    {selectOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               ) : (
                 <label className="space-y-1 text-xs font-medium text-slate-600">
                   {t(`${K}.value`)}
@@ -608,6 +634,11 @@ export default function ProductSpecsEditor({
                     }
                     className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900"
                   />
+                  {attrForm.type === 'select' ? (
+                    <span className="block text-[11px] font-normal text-slate-500">
+                      {t(`${K}.noOptionsHint`)}
+                    </span>
+                  ) : null}
                 </label>
               )}
             </div>
