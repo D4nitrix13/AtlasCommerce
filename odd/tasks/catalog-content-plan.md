@@ -4,7 +4,20 @@
 > al terminar cada trabajo verificable. Nada se marca hecho sin evidencia
 > observada (comando con salida real, o navegador real).
 
-**Última actualización:** 2026-10-23 · **Etapa actual:** E1.5 — `is_hover` + orden de galería
+**Última actualización:** 2026-11-03 · **Etapa actual:** E1.5 cerrado —
+sigue E1.6 (idempotencia) o E2 (UI admin), a elección.
+
+**E1.5 — ✅ HECHO.** `is_hover` + orden de galería. Runtime completo
+desde las tandas previas (migración `2026_10_23_210000`,
+`ProductImageController` con store/upload/update/reorder,
+`clearHoverFlag`, exclusividad primary↔hover 422,
+`HoverImageBackfiller`, `ProductPhotoGrouper`; storefront emite
+`isHover` y la card lo consume). Esta sesión cerró la cobertura que
+faltaba: 37 tests (22 unit + 15 feature) sobre exclusividad, réplica
+del upload en 4 resoluciones, reorder por grupos `(variant_id,
+sort_order)` y backfiller. Commit `df18752c`. 76 passed / 295
+assertions. **Queda fuera de E1.5:** la UI admin de subida/hover/
+drag-drop — eso es E2.
 
 **E1.4 — ✅ HECHO.** `finish_slug`, `finish_label`, `finish_hex`, `condition`,
 `stock`, `handedness` escribibles por API. Commit `57766e0c`. 586 tests verdes.
@@ -301,9 +314,13 @@ Hoy la API admin existe pero está hueca. Medido:
 - [ ] Conversión a WebP en la subida (400/800/1200/1600) + `srcset`
 - [ ] `variant_id` en imágenes, para que la galería filtre por acabado
 - [ ] Variantes aceptan `finish_slug`, `finish_label`, `finish_hex`, `condition`, `stock`, `handedness`
-- [ ] `is_hover` + orden explícito de galería
+- [x] `is_hover` + orden explícito de galería — ✅ 2026-11-03 (runtime +
+      37 tests, commit `df18752c`; ver cabecera E1.5)
 - [ ] Idempotencia: re-subir la misma imagen no duplica
-- [ ] Tests de API para cada campo nuevo
+- [ ] Tests de API para cada campo nuevo — los de `is_hover`/`sort_order`
+      ✅ (`df18752c`); el resto de esta lista puede estar desactualizado
+      (varios ítems de arriba se dieron en E1.1-E1.4, refrescar al
+      retomar)
 
 **Herramienta de conversión:** `spatie/image` ya está instalada (vía
 `spatie/laravel-medialibrary`) con **0 usos**. No hace falta dependencia nueva.
