@@ -24,6 +24,17 @@ const MAX_SLUG_LENGTH = 64;
 const MAX_LABEL_LENGTH = 64;
 const MAX_ATTRIBUTE_VALUE_LENGTH = 255;
 
+export const ATTRIBUTE_DICTIONARY_TYPES = ['text', 'number', 'boolean', 'select'] as const;
+export type AttributeDictionaryType = (typeof ATTRIBUTE_DICTIONARY_TYPES)[number];
+
+const MIN_ATTRIBUTE_NAME_LENGTH = 2;
+const MAX_ATTRIBUTE_NAME_LENGTH = 100;
+const MIN_ATTRIBUTE_SLUG_LENGTH = 2;
+const MAX_ATTRIBUTE_SLUG_LENGTH = 120;
+const MAX_ATTRIBUTE_OPTIONS = 50;
+const MAX_ATTRIBUTE_OPTION_LENGTH = 120;
+const MAX_ATTRIBUTE_DESCRIPTION_LENGTH = 5000;
+
 export type SpecsErrorCode =
   | 'slugRequired'
   | 'slugInvalid'
@@ -38,14 +49,30 @@ export type SpecsErrorCode =
   | 'positionInvalid'
   | 'attributeRequired';
 
-export interface SpecsFormError {
+export type AttributeDictionaryErrorCode =
+  | 'nameRequired'
+  | 'nameTooShort'
+  | 'nameTooLong'
+  | 'slugRequired'
+  | 'slugInvalid'
+  | 'slugTooShort'
+  | 'slugTooLong'
+  | 'typeInvalid'
+  | 'unitInvalid'
+  | 'optionsTooMany'
+  | 'optionEmpty'
+  | 'optionTooLong'
+  | 'optionDuplicated'
+  | 'descriptionTooLong';
+
+export interface SpecsFormError<Code extends string = SpecsErrorCode> {
   field: string;
-  code: SpecsErrorCode;
+  code: Code;
 }
 
-export type SpecsResult<T> =
+export type SpecsResult<T, Code extends string = SpecsErrorCode> =
   | { ok: true; payload: T }
-  | { ok: false; errors: SpecsFormError[] };
+  | { ok: false; errors: SpecsFormError<Code>[] };
 
 export interface SizeFormInput {
   productId: number;
@@ -102,6 +129,42 @@ export interface AttributeValueApiBody {
   value_boolean: boolean | null;
 }
 
+/** Form del diccionario de atributos (POST/PUT /admin/attributes). */
+export interface AttributeDictionaryFormInput {
+  name: string;
+  /** '' → se deriva del name vía slugify; el builder valida el resultado. */
+  slug: string;
+  type: string;
+  /** Crudo del select: '' → null; si no, debe estar en SPECS_SIZE_UNITS. */
+  unit: string;
+  options: readonly string[];
+  description: string;
+  isFilterable: boolean;
+  isRequired: boolean;
+}
+
+export interface AttributeDictionaryPayload {
+  name: string;
+  slug: string;
+  type: AttributeDictionaryType;
+  unit: SizeUnit | null;
+  options: string[] | null;
+  description: string | null;
+  isFilterable: boolean;
+  isRequired: boolean;
+}
+
+export interface AttributeDictionaryApiBody {
+  name: string;
+  slug: string;
+  type: string;
+  unit: string | null;
+  options: string[] | null;
+  description: string | null;
+  is_filterable: boolean;
+  is_required: boolean;
+}
+
 /** Fila del GET /admin/catalog/product-sizes (AdminProductSizeResource). */
 export interface SizeApiRow {
   id: number;
@@ -120,6 +183,11 @@ export interface AttributeApiRow {
   slug: string;
   type: string;
   unit?: string | null;
+  options?: string[] | null;
+  applies_to?: string[] | null;
+  description?: string | null;
+  is_filterable?: boolean;
+  is_required?: boolean;
 }
 
 /** Fila del GET /admin/catalog/product-attribute-values (snake_case). */
@@ -132,7 +200,7 @@ export interface AttributeValueApiRow {
   value_boolean?: boolean | null;
 }
 
-function fail(field: string, code: SpecsErrorCode): SpecsFormError[] {
+function fail<Code extends string>(field: string, code: Code): SpecsFormError<Code>[] {
   return [{ field, code }];
 }
 
@@ -358,5 +426,127 @@ export function attributeValueFromApi(
     value: type === 'text' || type === 'select' ? row.value : null,
     valueNumber,
     valueBoolean,
+  };
+}
+
+/**
+ * Normaliza un nombre a slug kebab-case: minúsculas, sin acentos,
+ * separadores colapsados. Devuelve '' si no queda nada usable.
+ */
+export function slugify(raw: string): string {
+  return raw
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Valida el form del diccionario de atributos con las reglas del
+ * FormRequest del backend (name/slug/type/unit/options/description)
+ * más la unicidad y no-vaciedad de options, que el backend no exige
+ * pero el editor sí garantiza.
+ */
+export function attributeDictionaryPayloadFromForm(
+  input: AttributeDictionaryFormInput
+): SpecsResult<AttributeDictionaryPayload, AttributeDictionaryErrorCode> {
+  const errors: SpecsFormError<AttributeDictionaryErrorCode>[] = [];
+
+  const name = input.name.trim();
+  if (name === '') {
+    errors.push(...fail('name', 'nameRequired'));
+  } else if (name.length < MIN_ATTRIBUTE_NAME_LENGTH) {
+    errors.push(...fail('name', 'nameTooShort'));
+  } else if (name.length > MAX_ATTRIBUTE_NAME_LENGTH) {
+    errors.push(...fail('name', 'nameTooLong'));
+  }
+
+  const slug = input.slug.trim() !== '' ? input.slug.trim() : slugify(input.name);
+  if (slug === '') {
+    errors.push(...fail('slug', 'slugRequired'));
+  } else if (!SLUG_PATTERN.test(slug)) {
+    errors.push(...fail('slug', 'slugInvalid'));
+  } else if (slug.length < MIN_ATTRIBUTE_SLUG_LENGTH) {
+    errors.push(...fail('slug', 'slugTooShort'));
+  } else if (slug.length > MAX_ATTRIBUTE_SLUG_LENGTH) {
+    errors.push(...fail('slug', 'slugTooLong'));
+  }
+
+  let type: AttributeDictionaryType = 'text';
+  if ((ATTRIBUTE_DICTIONARY_TYPES as readonly string[]).includes(input.type)) {
+    type = input.type as AttributeDictionaryType;
+  } else {
+    errors.push(...fail('type', 'typeInvalid'));
+  }
+
+  let unit: SizeUnit | null = null;
+  const rawUnit = input.unit.trim();
+  if (rawUnit !== '') {
+    if ((SPECS_SIZE_UNITS as readonly string[]).includes(rawUnit)) {
+      unit = rawUnit as SizeUnit;
+    } else {
+      errors.push(...fail('unit', 'unitInvalid'));
+    }
+  }
+
+  if (input.options.length > MAX_ATTRIBUTE_OPTIONS) {
+    errors.push(...fail('options', 'optionsTooMany'));
+  }
+  const normalizedOptions: string[] = [];
+  const seenOptions = new Set<string>();
+  input.options.forEach((rawOption, index) => {
+    const option = rawOption.trim();
+    if (option === '') {
+      errors.push(...fail(`options.${index}`, 'optionEmpty'));
+      return;
+    }
+    if (option.length > MAX_ATTRIBUTE_OPTION_LENGTH) {
+      errors.push(...fail(`options.${index}`, 'optionTooLong'));
+      return;
+    }
+    if (seenOptions.has(option)) {
+      errors.push(...fail(`options.${index}`, 'optionDuplicated'));
+      return;
+    }
+    seenOptions.add(option);
+    normalizedOptions.push(option);
+  });
+
+  const trimmedDescription = input.description.trim();
+  const description = trimmedDescription === '' ? null : trimmedDescription;
+  if (description !== null && description.length > MAX_ATTRIBUTE_DESCRIPTION_LENGTH) {
+    errors.push(...fail('description', 'descriptionTooLong'));
+  }
+
+  if (errors.length > 0) return { ok: false, errors };
+
+  return {
+    ok: true,
+    payload: {
+      name,
+      slug,
+      type,
+      unit,
+      options: normalizedOptions.length > 0 ? normalizedOptions : null,
+      description,
+      isFilterable: input.isFilterable,
+      isRequired: input.isRequired,
+    },
+  };
+}
+
+export function attributeDictionaryToApiBody(
+  payload: AttributeDictionaryPayload
+): AttributeDictionaryApiBody {
+  return {
+    name: payload.name,
+    slug: payload.slug,
+    type: payload.type,
+    unit: payload.unit,
+    options: payload.options,
+    description: payload.description,
+    is_filterable: payload.isFilterable,
+    is_required: payload.isRequired,
   };
 }
