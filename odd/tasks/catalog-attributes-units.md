@@ -103,3 +103,38 @@ de tazas, tallas de ropa) y que el admin los edite.
   existan en la BD (hoy viven como mocks en el frontend; la BD de dev
   está sin migrar).
 - Admin para editar atributos y tallas.
+
+## Extensión — API y seeding (2026-11-03)
+
+- Entorno reparado: `backend/.env` apuntaba a la BD de La Voz; alineado
+  al instance. `docker-stack.sh setup` → 88 tablas migradas +
+  `tenants:bootstrap` (2 tenants, 6 dominios, admin user).
+- `PandaKitsuneCatalogSeeder` + migración del unique de variantes
+  `(product_id, finish_slug, size_id) NULLS NOT DISTINCT` — el unique
+  anterior impedía el diseño A. Commit `2455a8d2`.
+- BD real: **14 productos, 27 variantes, 15 tallas, 16 atributos**.
+- **Storefront API** sirve tallas con `value`+`unit`, contexto de talla
+  por variante y atributos EAV. Fix: `StorefrontProductResource` revienta
+  con `::collection()` porque `mapInto` pasa la clave al constructor
+  tipado → `ProductPhotoGrouper` ahora es perezoso. `INTERNAL_API_ORIGIN`
+  agregado al compose (sin eso el SSR caía al mock). Commit `597c5e37`.
+- Verificado en vivo: `/es/products` de Panda y Kitsune sirve los
+  productos de la BD (sin mocks). `taza-ceramica` expone
+  `sizes: [{slug: 11-oz, value: 11, unit: oz}, ...]` y los atributos.
+
+## Pendiente
+
+- Admin: exponer tallas y atributos en `ProductForm` (en curso).
+
+## Extensión — admin read-only (2026-11-03)
+
+- Tab `specs` (Ficha técnica) en `ProductForm`: tablas de tallas con
+  valor+unidad y de atributos EAV con valor tipado. `product-specs.ts`
+  formatea el valor por tipo, testeado TDD (10/10). Commit `68b7adc6`.
+- Suite frontend: 423 passed. typecheck: 0 errors.
+
+## En curso
+
+- CRUD admin de tallas (`ProductSizeController`) + formularios editables
+  en el admin para tallas y atributos (los endpoints de atributos ya
+  existen: `apiResource('product-attribute-values', ...)`).
