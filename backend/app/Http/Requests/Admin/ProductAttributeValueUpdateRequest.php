@@ -25,7 +25,11 @@ class ProductAttributeValueUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'value' => ['required', 'string', 'min:1', 'max:255'],
+            // `sometimes` permite patches parciales: cambiar solo el
+            // valor numérico sin tocar el texto legible.
+            'value' => ['sometimes', 'nullable', 'string', 'min:1', 'max:255'],
+            'value_number' => ['sometimes', 'nullable', 'numeric'],
+            'value_boolean' => ['sometimes', 'nullable', 'boolean'],
         ];
     }
 }

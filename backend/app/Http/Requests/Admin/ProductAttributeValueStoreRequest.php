@@ -33,7 +33,12 @@ class ProductAttributeValueStoreRequest extends FormRequest
         return [
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'attribute_id' => ['required', 'integer', 'exists:attributes,id'],
-            'value' => ['required', 'string', 'min:1', 'max:255'],
+            // `value` es el texto legible; las columnas tipadas conviven
+            // con él. Un atributo numérico puede guardar solo
+            // `value_number` (la fuente de verdad para filtrar/ordenar).
+            'value' => ['nullable', 'string', 'min:1', 'max:255'],
+            'value_number' => ['nullable', 'numeric'],
+            'value_boolean' => ['nullable', 'boolean'],
         ];
     }
 
@@ -45,7 +50,8 @@ class ProductAttributeValueStoreRequest extends FormRequest
         return [
             'product_id.exists' => 'El producto indicado no existe.',
             'attribute_id.exists' => 'El atributo indicado no existe.',
-            'value.required' => 'Tenés que indicar un valor para el atributo.',
+            'value_number.numeric' => 'El valor numérico del atributo no es válido.',
+            'value_boolean.boolean' => 'El valor booleano del atributo no es válido.',
         ];
     }
 }

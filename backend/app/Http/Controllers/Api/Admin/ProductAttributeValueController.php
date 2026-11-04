@@ -74,12 +74,12 @@ class ProductAttributeValueController extends Controller
     /**
      * GET /admin/attribute-values/{attributeValue}
      */
-    public function show(ProductAttributeValue $attributeValue): JsonResponse
+    public function show(ProductAttributeValue $productAttributeValue): JsonResponse
     {
-        $this->assertProductInTenantScope(productId: (int) $attributeValue->product_id);
+        $this->assertProductInTenantScope(productId: (int) $productAttributeValue->product_id);
 
         return response()->json(data: [
-            'data' => (new AdminProductAttributeValueResource(resource: $attributeValue))->resolve(),
+            'data' => (new AdminProductAttributeValueResource(resource: $productAttributeValue))->resolve(),
         ]);
     }
 
@@ -96,7 +96,9 @@ class ProductAttributeValueController extends Controller
                 return ProductAttributeValue::query()->create(attributes: [
                     'product_id' => $data['product_id'],
                     'attribute_id' => $data['attribute_id'],
-                    'value' => $data['value'],
+                    'value' => $data['value'] ?? null,
+                    'value_number' => $data['value_number'] ?? null,
+                    'value_boolean' => $data['value_boolean'] ?? null,
                 ]);
             });
         } catch (\Illuminate\Database\UniqueConstraintViolationException) {
@@ -111,28 +113,28 @@ class ProductAttributeValueController extends Controller
     /**
      * PUT /admin/attribute-values/{attributeValue}
      */
-    public function update(ProductAttributeValueUpdateRequest $request, ProductAttributeValue $attributeValue): JsonResponse
+    public function update(ProductAttributeValueUpdateRequest $request, ProductAttributeValue $productAttributeValue): JsonResponse
     {
-        $this->assertProductInTenantScope(productId: (int) $attributeValue->product_id);
+        $this->assertProductInTenantScope(productId: (int) $productAttributeValue->product_id);
 
-        $attributeValue = DB::transaction(function () use ($request, $attributeValue): ProductAttributeValue {
-            $attributeValue->update(attributes: $request->validated());
+        $productAttributeValue = DB::transaction(function () use ($request, $productAttributeValue): ProductAttributeValue {
+            $productAttributeValue->update(attributes: $request->validated());
 
-            return $attributeValue;
+            return $productAttributeValue;
         });
 
         return response()->json(data: [
-            'data' => (new AdminProductAttributeValueResource(resource: $attributeValue))->resolve(),
+            'data' => (new AdminProductAttributeValueResource(resource: $productAttributeValue))->resolve(),
         ]);
     }
 
     /**
      * DELETE /admin/attribute-values/{attributeValue}
      */
-    public function destroy(ProductAttributeValue $attributeValue): JsonResponse
+    public function destroy(ProductAttributeValue $productAttributeValue): JsonResponse
     {
-        $this->assertProductInTenantScope(productId: (int) $attributeValue->product_id);
-        $attributeValue->delete();
+        $this->assertProductInTenantScope(productId: (int) $productAttributeValue->product_id);
+        $productAttributeValue->delete();
 
         return response()->json(data: null, status: Response::HTTP_NO_CONTENT);
     }

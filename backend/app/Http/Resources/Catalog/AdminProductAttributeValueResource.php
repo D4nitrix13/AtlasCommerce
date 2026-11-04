@@ -24,6 +24,11 @@ class AdminProductAttributeValueResource extends JsonResource
             'product_id' => $this->resource->product_id,
             'attribute_id' => $this->resource->attribute_id,
             'value' => $this->resource->value,
+            // Columnas tipadas: `value_number` para filtrar/ordenar por
+            // magnitud, `value_boolean` para flags como "apto para
+            // microondas". NULL cuando el valor es de otro tipo.
+            'value_number' => $this->resource->value_number,
+            'value_boolean' => $this->resource->value_boolean,
             'created_at' => $this->resource->created_at?->toIso8601String(),
             'updated_at' => $this->resource->updated_at?->toIso8601String(),
         ];
