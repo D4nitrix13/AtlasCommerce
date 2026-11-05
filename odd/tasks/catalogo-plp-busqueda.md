@@ -77,7 +77,7 @@ la página actual de 24 filas).
 ## Checklist (work-units)
 
 - [x] **WU1** — Chips de filtros activos (links para quitar, sin JS) + `category` al API + i18n aditivo + tests — commits `91b438f2` + `92ab5eac`; spot check parent: 37 tests verdes
-- [ ] **WU2** — Estados PLP: error (API caída ≠ vacío), empty, categoría inexistente
+- [x] **WU2** — Estados PLP: error (API caída ≠ vacío), empty, categoría inexistente — commit `69da5496`; **loading N/A** (PLP SSR, sin gap de fetch)
 - [ ] **WU3** — Drawer de filtros en móvil (sidebar → drawer < lg)
 - [ ] **WU4** — Sort extra + rating en cards: solo si los datos existen; si no, cerrar H-1/H-4 sin código
 - [ ] **WU5** — Búsqueda `/search`: query, resultados, sin resultados (verificar/ajustar)
@@ -107,10 +107,27 @@ la página actual de 24 filas).
   Spot check del parent: `bun run test -- tests/unit/lib/catalog-filters.test.ts
   tests/unit/components/storefront/products/FilterChips.test.ts tests/unit/i18n/catalog-chips.test.ts`
   → 37 passed. Hallazgo nuevo: H-1b (facetas del sidebar).
+- **WU2 cerrado** (commit `69da5496`; 348 ins / 23 del en 8 archivos): `loadCatalogPage`
+  devuelve resultado discriminado (`{ ok: true, data, meta }` / `{ ok: false }`) — el
+  catch ya no devuelve `EMPTY_CATALOG_META`, así un API caído renderiza el estado
+  ERROR (mensaje i18n + retry `<a href>` a la misma URL, sin JS) y no el empty state.
+  El re-fetch del clamp de página también cuenta: fallo en cualquiera de los dos
+  fetches = estado de error. Variante "categoría sin resultados" (empty + categoría
+  activa): link que limpia la categoría vía `buildCatalogHref` (mecanismo de los
+  chips, sin JS) — cubre categoría inexistente Y categoría con 0 productos porque el
+  API no distingue ambos casos (comentado en el template). Componente nuevo
+  `CatalogStateMessage.astro` (paleta paper/ink/line del empty state existente).
+  El fallback Panda ya no enmascara errores del API. **Loading: N/A** — el PLP es
+  SSR puro (no hay gap de fetch que renderizar): el estado "cargando" del brief no
+  aplica y no se escribió código para ello. TDD RED→GREEN observado por ciclo
+  (i18n 3 rojas → 3 verdes; componente ENOENT → 4 verdes; error≠empty 6 rojas →
+  6 verdes; categoría vacía 3 rojas → 10 verdes del archivo). Verificación:
+  54 tests verdes (37 WU1 + 17 nuevas); `bunx eslint` sobre los 8 archivos
+  tocados: 0 problemas.
 
 ## Siguiente paso
 
-WU2 — estados del PLP (error ≠ empty, categoría vacía) — writer delegado.
+WU3 — drawer de filtros en móvil (sidebar → drawer < lg) — writer delegado.
 
 ## Ruta de ejecución
 
