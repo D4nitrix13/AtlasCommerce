@@ -106,6 +106,22 @@ interface CustomerLoginResponse {
 }
 
 /**
+ * Respuesta de /auth/login cuando el usuario tiene 2FA activo: no trae
+ * token ni user, trae un challenge TOTP a resolver en
+ * `/es/account/2fa?token=<challengeId>`.
+ */
+interface TwoFactorChallengeResponse {
+  status: '2fa_required';
+  challenge_token: number;
+  method: string;
+  expires_at: string;
+}
+
+export type CustomerLoginOutcome =
+  | { kind: 'success'; user: User; customer: Customer | null }
+  | { kind: '2fa_required'; challengeId: number };
+
+/**
  * CA.4 — hidrata el customer desde /me. Si la respuesta no incluye
  * customer (data inconsistency — el user es role='customer' pero no
  * tiene Customer profile), el campo queda null y el AccountAuthGuard
@@ -166,12 +182,22 @@ async function register(payload: RegisterCustomerPayload): Promise<CustomerAuthR
  * que register: Sanctum stateful setea la cookie, también devolvemos
  * el token en la response para compat.
  */
-async function login(email: string, password: string): Promise<CustomerLoginResponse> {
-  const response = await apiFetch<CustomerLoginResponse>(API_ENDPOINTS.auth.login, {
-    method: 'POST',
-    body: { email, password },
-    credentials: 'include',
-  });
+async function login(email: string, password: string): Promise<CustomerLoginOutcome> {
+  const response = await apiFetch<CustomerLoginResponse & Partial<TwoFactorChallengeResponse>>(
+    API_ENDPOINTS.auth.login,
+    {
+      method: 'POST',
+      body: { email, password },
+      credentials: 'include',
+    },
+  );
+
+  // Un usuario con 2FA (p. ej. el admin) no puede "loguearse" acá: el
+  // caller debe mandar el challenge a /es/account/2fa. Antes este caso
+  // se tragaba y el redirect caía al login otra vez sin error visible.
+  if (response.status === '2fa_required') {
+    return { kind: '2fa_required', challengeId: response.challenge_token ?? 0 };
+  }
 
   state = {
     ...state,
@@ -180,7 +206,7 @@ async function login(email: string, password: string): Promise<CustomerLoginResp
   };
   emit();
 
-  return response;
+  return { kind: 'success', user: response.user, customer: response.customer };
 }
 
 /**
@@ -219,7 +245,7 @@ export function useCustomerAuth(): {
   isHydrating: boolean;
   isAuthenticated: boolean;
   register: (payload: RegisterCustomerPayload) => Promise<CustomerAuthResponse>;
-  login: (email: string, password: string) => Promise<CustomerLoginResponse>;
+  login: (email: string, password: string) => Promise<CustomerLoginOutcome>;
   logout: () => Promise<void>;
 } {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);

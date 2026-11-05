@@ -166,7 +166,13 @@ function resolveApiUrl(endpoint: string, origin?: string): string {
         ? API_INTERNAL_URL
         : origin !== undefined && origin !== ''
           ? origin
-          : null;
+          : // Browser: el mismo origin de la página (con el proxy dev de
+            // /api en Astro, y en prod detrás del mismo origin). Sin este
+            // fallback todo apiFetch del cliente (login, galería admin)
+            // revienta con "no origin was available".
+            typeof window !== 'undefined' && window.location?.origin !== ''
+            ? window.location.origin
+            : null;
     if (resolvedOrigin === null) {
       throw new Error(
         'PUBLIC_API_URL is relative and no origin was available: it can only be ' +

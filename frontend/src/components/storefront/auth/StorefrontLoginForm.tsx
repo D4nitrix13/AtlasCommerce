@@ -79,7 +79,21 @@ export default function StorefrontLoginForm({
     setIsSubmitting(true);
 
     try {
-      await customerLogin(email, password);
+      const outcome = await customerLogin(email, password);
+
+      // 2FA (admin y usuarios con TOTP): el challenge se resuelve en
+      // /es/account/2fa. El token viaja en la query porque esa página
+      // lo recibe como prop (ver account/2fa.astro).
+      if (outcome.kind === '2fa_required') {
+        const params = new URLSearchParams(window.location.search);
+        const requested = params.get('redirect') ?? '';
+        const isAdminPath = /^\/(?:[a-z]{2}\/)?admin\//i.test(requested);
+        const target = requested !== '' && !isAdminPath ? requested : callbackPath;
+        window.location.href =
+          `/es/account/2fa?token=${outcome.challengeId}` +
+          `&redirect=${encodeURIComponent(target)}`;
+        return;
+      }
 
       // Login success: redirect al Account del customer.
       // CRÍTICO: el `?redirect=` no debe apuntar a /admin/* — un

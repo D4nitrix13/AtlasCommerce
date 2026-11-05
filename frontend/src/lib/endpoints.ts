@@ -40,6 +40,11 @@ export const API_ENDPOINTS = {
       totp: {
         setup: '/v1/auth/2fa/totp/setup',
         verify: '/v1/auth/2fa/totp/verify',
+        // Verificación del challenge emitido por /auth/login cuando
+        // responde 2fa_required. Distinto del verify autenticado de
+        // arriba (gestión del setup): este es público y devuelve el
+        // token de sesión.
+        verifyLogin: '/v1/auth/2fa/verify-totp-login',
       },
 
       passkeys: {

@@ -248,7 +248,7 @@ async function login(payload: LoginPayload): Promise<LoginResult> {
  */
 async function verifyTotpChallenge(payload: TwoFactorVerifyPayload): Promise<LoginResult> {
   const response = await apiFetch<LoginResponse & Partial<TwoFactorChallenge>>(
-    API_ENDPOINTS.auth.twoFactor.totp.verify as never,
+    API_ENDPOINTS.auth.twoFactor.totp.verifyLogin as never,
     {
       method: 'POST',
       body: {

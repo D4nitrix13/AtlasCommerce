@@ -70,6 +70,12 @@ export default defineConfig({
           // backend resuelve por store_domains.domain == host.
           changeOrigin: false,
         },
+        // /sanctum/csrf-cookie vive fuera de /api: sin proxy, el
+        // bootstrap CSRF del browser da 404 y los POST terminan 419.
+        "/sanctum": {
+          target: process.env.INTERNAL_API_ORIGIN ?? "http://localhost:9000",
+          changeOrigin: false,
+        },
       },
     },
   },
