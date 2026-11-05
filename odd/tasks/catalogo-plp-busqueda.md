@@ -78,9 +78,9 @@ la página actual de 24 filas).
 
 - [x] **WU1** — Chips de filtros activos (links para quitar, sin JS) + `category` al API + i18n aditivo + tests — commits `91b438f2` + `92ab5eac`; spot check parent: 37 tests verdes
 - [x] **WU2** — Estados PLP: error (API caída ≠ vacío), empty, categoría inexistente — commit `69da5496`; **loading N/A** (PLP SSR, sin gap de fetch)
-- [ ] **WU3** — Drawer de filtros en móvil (sidebar → drawer < lg)
-- [ ] **WU4** — Sort extra + rating en cards: solo si los datos existen; si no, cerrar H-1/H-4 sin código
-- [ ] **WU5** — Búsqueda `/search`: query, resultados, sin resultados (verificar/ajustar)
+- [x] **WU3** — Filtros accesibles en móvil (disclosure nativo `<details>`, sin JS) + i18n + tests — commit `09dca3e0`; spot check parent: 70 tests verdes
+- [x] **WU4** — Sort extra + rating en cards: **cerrado sin código** — `BackendProduct`/`Product` no traen rating ni fechas (verificado en `backend-product-mapper.ts` y `types/catalog.ts`); H-1/H-4 confirmados
+- [x] **WU5** — Búsqueda `/search`: **verificado sin cambios** — estados completos (loading/error/empty/results + `useUrlStateSync` de query/page)
 - [ ] **WU6** — Cierre: checks comunes + capturas playwright 1440/390 + reporte
 
 ## Criterios de aceptación
@@ -107,6 +107,18 @@ la página actual de 24 filas).
   Spot check del parent: `bun run test -- tests/unit/lib/catalog-filters.test.ts
   tests/unit/components/storefront/products/FilterChips.test.ts tests/unit/i18n/catalog-chips.test.ts`
   → 37 passed. Hallazgo nuevo: H-1b (facetas del sidebar).
+- **WU2 cerrado** (commits `69da5496` estados + `8cd28877` doc; 348 ins / 23 del): RED→GREEN
+  observado; spot check parent 54 tests. Error ≠ empty (unión discriminada en `loadCatalogPage`),
+  variante categoría vacía con link de limpieza, guard `!hasCatalogError` en el fallback Panda.
+  Lint 0 problemas; `astro check` 0 errores/warnings.
+- **WU3 cerrado** (commit `09dca3e0`; 341 ins / 31 del): disclosure nativo `<details>/<summary>`
+  en `< lg` con el `FiltersSidebar` intacto, doble render (mobile/desktop) + `idPrefix` por
+  instancia; RED→GREEN observado; spot check parent 70 tests (9 archivos). Lint 0; `astro check` OK.
+- **WU4 cerrado sin código** (verificación inline): `BackendProduct` y `Product` no exponen
+  rating ni `published_at`/fechas → "Mejor calificados", "Más recientes" y ★ en cards son
+  imposibles frontend-only (H-1/H-4).
+- **WU5 verificado sin cambios**: `search/` tiene `SearchLoadingState`, `SearchErrorState`,
+  `SearchEmptyState`, `SearchResultsList`, `Pagination`, `useUrlStateSync` (query/page).
 - **WU2 cerrado** (commit `69da5496`; 348 ins / 23 del en 8 archivos): `loadCatalogPage`
   devuelve resultado discriminado (`{ ok: true, data, meta }` / `{ ok: false }`) — el
   catch ya no devuelve `EMPTY_CATALOG_META`, así un API caído renderiza el estado
@@ -127,7 +139,8 @@ la página actual de 24 filas).
 
 ## Siguiente paso
 
-WU3 — drawer de filtros en móvil (sidebar → drawer < lg) — writer delegado.
+WU6 — cierre de sesión: suite completa · `astro check` · `build` · capturas playwright
+(1440/390, firefox, Host del tenant contra `:5321`) · reporte final.
 
 ## Ruta de ejecución
 
