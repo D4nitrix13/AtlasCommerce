@@ -3,18 +3,21 @@
  * /admin/catalog/products/[id] — Detalle + edit producto (F5.3).
  *
  * El tab activo viene de `?tab=` (default: basics). El form
- * multipropósito se renderiza con ProductForm. Los handlers de
- * submit (POST/PUT) se hacen en F5.4 cuando exista el endpoint
- * `PUT /api/v1/admin/catalog/products/{id}`.
+ * multipropósito se renderiza con ProductForm.
  *
- * Por ahora el id se resuelve desde la URL (Astro.params) y se busca
- * en PRODUCTS_MOCK. Si no existe → notFound state.
+ * El producto se trae del API admin (`GET /v1/admin/products/{id}`).
+ * SSR: el fetch reenvía la cookie de sesión del request porque las
+ * rutas admin son autenticadas y el backend no ve el navegador.
+ * Las relaciones (variantes/tallas/atributos/galería) las cargan las
+ * islas por su cuenta con datos reales — el form recibe solo la data
+ * del producto.
  *
  * AGENTS.md §1: ~80 líneas.
  */
 import AdminLayout from '../../../../../layouts/AdminLayout.astro';
 import ProductForm from '../../../../../components/admin/catalog/ProductForm.astro';
-import { getProductById } from '../../../../../data/catalog-mock';
+import type { ProductMock, ProductStatus } from '../../../../../data/catalog-mock';
+import { apiFetch } from '../../../../../lib/api';
 import { getServerDictionary } from '../../../../../i18n/server';
 import { adminUrl } from '../../../../../lib/path-helpers';
 import { getServerLocale } from '../../../../../i18n/server';
@@ -22,11 +25,64 @@ import { getServerLocale } from '../../../../../i18n/server';
 const t = getServerDictionary(Astro.locals.locale);
 const locale = getServerLocale(Astro.locals.locale);
 
-// TODO: replace with GET /api/v1/admin/catalog/products/{id} cuando
-// el endpoint exista. Hoy se busca en PRODUCTS_MOCK.
+interface AdminProductApiResponse {
+  data: {
+    id: number;
+    name: string;
+    slug: string;
+    sku: string;
+    description: string | null;
+    category_id: number | null;
+    brand_id: number | null;
+    base_price_cents: number;
+    cost_cents: number;
+    is_active: boolean;
+  };
+}
+
 const idParam = Astro.params.id;
 const productId = idParam !== undefined ? Number.parseInt(idParam, 10) : NaN;
-const product = Number.isFinite(productId) ? getProductById(productId) : undefined;
+
+async function loadProduct(id: number): Promise<ProductMock | null> {
+  try {
+    const response = await apiFetch<AdminProductApiResponse>(`/v1/admin/products/${id}`, {
+      origin: Astro.url.origin,
+      host: Astro.url.host,
+      // Rutas admin autenticadas: el SSR debe reenviar la cookie de
+      // sesión Y un Origin "frontend" (Sanctum solo arranca sesión para
+      // requests con Origin/Referer en SANCTUM_STATEFUL_DOMAINS). Sin
+      // ambos, el backend responde 401 y el form cae a "no encontrado".
+      headers: {
+        Cookie: Astro.request.headers.get('cookie') ?? '',
+        Origin: Astro.url.origin,
+      },
+    });
+    const row = response.data;
+    return {
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      description: row.description ?? '',
+      sku: row.sku,
+      categoryId: row.category_id ?? 0,
+      brandId: row.brand_id ?? 0,
+      priceCents: row.base_price_cents,
+      costCents: row.cost_cents,
+      stock: 0,
+      status: (row.is_active ? 'active' : 'draft') as ProductStatus,
+      imageUrl: '/images/product-placeholder.png',
+      weightKg: 0,
+      updatedAt: new Date().toISOString(),
+      seoTitle: '',
+      seoDescription: '',
+      variantIds: [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+const product = Number.isFinite(productId) ? await loadProduct(productId) : null;
 
 const tabParam = Astro.url.searchParams.get('tab');
 const validTabs = ['basics', 'variants', 'media', 'pricing', 'seo'] as const;
@@ -36,7 +92,7 @@ const activeTab = (validTabs as readonly string[]).includes(tabParam ?? '')
 ---
 
 <AdminLayout title={t['admin.catalog.products.detail.title']}>
-  {product === undefined ? (
+  {product === null ? (
     <div class="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
       <h1 class="text-xl font-semibold text-slate-900">
         {t['admin.catalog.products.detail.notFound']}
