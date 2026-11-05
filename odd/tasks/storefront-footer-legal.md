@@ -1,6 +1,7 @@
 # Footer full-width, redes sociales desde BD y páginas legales
 
-> **Rama**: `feat/storefront-footer-legal` · **Estado**: en progreso
+> **Rama**: `feat/storefront-footer-legal` · **Estado**: completado
+> (6/6 tareas, 5 commits). Ver «Evidencia de progreso».
 > **Relación**: trabajo previo a Sesión 1 (Home) de
 > [`vistas-cliente-sessions.md`](vistas-cliente-sessions.md) — header/footer
 > viven en `layouts/StorefrontLayout.astro`, compartidos por todas las vistas.
@@ -133,7 +134,7 @@ _(se completa por tarea)_
 | T3 | hecha | `c5343593` | TDD: RED 7 failed (404 ruta inexistente) → GREEN `php artisan test --filter=StorefrontSocialLink`: 7 passed (43 assertions) |
 | T4 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · e2e con fila real en BD (captura `t4-footer-with-link-1440.png`) revertido después |
 | T5 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: 0 errors (7 warnings `max-lines-per-function` en contenido legal) · las 5 rutas responden 200 · captura `t5-terms-1440.png` |
-| T6 | pendiente | — | — |
+| T6 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · paridad i18n es/en: 2564 claves, 0 diferencias · capturas `t6-footer-1440.png` y `t6-footer-390.png` |
 
 ### Notas T1
 
@@ -254,6 +255,27 @@ _(se completa por tarea)_
   páginas, corrigió claves i18n duplicadas (el writer y el orquestador las
   agregaron por separado) y corrió la verificación.
 
+### Notas T6
+
+- Cierre común corrido completo: `bun run test` 525 OK · `astro check`
+  0 errors/0 warnings · `build` OK · paridad i18n verificada
+  (2564 claves es/en, 0 diferencias).
+- Capturas finales en `frontend/output/playwright/t6-footer-{1440,390}.png`
+  (no se trackean: `/output/` está en `.gitignore`).
+- **Fuera de scope / pendiente para después**:
+  - Pantalla admin de redes sociales (el CRUD API de RF-STOR-133 ya existe;
+    la UI es otro plan).
+  - Marcar con `[completar: …]` los datos fiscales reales del negocio
+    (CUIT, domicilio legal, horarios) en `terms.ts` / `privacy.ts` / `contact.ts`.
+  - `pint`/`phpstan` sobre los archivos backend de T3 (no corrieron en T3).
+  - 24 fallos **preexistentes** de la suite backend completa
+    (`ProductAttributeValueControllerTest`, `ProductSeederTest`,
+    `BackfillVariantFinishCommandTest`) — no son de esta feature.
+
 ## Próximo paso
 
-T6 — i18n completo + cierre de sesión (checks, capturas 1440/390, reporte).
+Trabajo entregado. El merge queda a decisión del usuario (no se pusheó
+ni se abrió PR). Próxima sesión de vistas: **Sesión 1 — Home** en su
+propio worktree `~/Code/AtlasCommerce-worktrees/home` con rama
+`feat/views/home`, según la convención de
+[`vistas-cliente-sessions.md`](vistas-cliente-sessions.md).
