@@ -1438,6 +1438,15 @@ export type TranslationKey =
   | 'storefront.cart.v3.continueShopping'
   | 'storefront.cart.v3.remove'
   | 'storefront.cart.v3.quantity'
+  | 'storefront.cart.v3.freeShippingProgress'
+  | 'storefront.cart.v3.freeShippingReached'
+  | 'storefront.cart.v3.steps.bag'
+  | 'storefront.cart.v3.steps.checkout'
+  | 'storefront.cart.v3.steps.done'
+  | 'storefront.cart.v3.trust.shipping'
+  | 'storefront.cart.v3.trust.guarantee'
+  | 'storefront.cart.v3.trust.returns'
+  | 'storefront.cart.v3.trust.secure'
 
   // ─── storefront: account orders v3 (Bonfire mockup 10) ─────────────
   | 'storefront.account.orders.v3.title'
