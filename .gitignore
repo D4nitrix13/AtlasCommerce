@@ -62,3 +62,9 @@ node_modules/
 # binary bun.lockb is for tooling cache and is regenerable).
 bun.lockb
 **/bun.lockb
+
+# Fuentes de imágenes del usuario y salidas de herramientas — trabajo,
+# no fuente. Los WebP canónicos viven en assets/products/ (commiteado).
+/imagenes-random-para-catalogo/
+/incoming/
+/output/
