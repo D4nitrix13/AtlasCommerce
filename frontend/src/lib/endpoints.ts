@@ -85,6 +85,15 @@ export const API_ENDPOINTS = {
       productAttributeValue: (id: number | string) =>
         `/v1/admin/catalog/product-attribute-values/${id}`,
       attributes: '/v1/admin/attributes',
+      // Imágenes de producto (RF-CAT-022), anidadas bajo el producto.
+      productImages: (productId: number | string) =>
+        `/v1/admin/catalog/products/${productId}/images`,
+      productImage: (productId: number | string, imageId: number | string) =>
+        `/v1/admin/catalog/products/${productId}/images/${imageId}`,
+      productImagesOrder: (productId: number | string) =>
+        `/v1/admin/catalog/products/${productId}/images/order`,
+      productImageUpload: (productId: number | string) =>
+        `/v1/admin/catalog/products/${productId}/images/upload`,
     },
   },
 

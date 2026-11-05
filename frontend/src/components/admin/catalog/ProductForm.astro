@@ -24,7 +24,7 @@ import Input from '../../ui/Input.astro';
 import Textarea from '../../ui/Textarea.astro';
 import Select from '../../ui/Select.astro';
 import Button from '../../ui/Button.astro';
-import MediaUploader from './MediaUploader.astro';
+import ProductGalleryEditor from './ProductGalleryEditor';
 import ProductVariantsSection from './ProductVariantsSection.astro';
 import ProductSpecsSection from './ProductSpecsSection.astro';
 import {
@@ -184,7 +184,7 @@ function formatCents(cents: number): string {
       <h2 id="tab-media" class="sr-only">
         {t['admin.catalog.products.detail.tabs.media']}
       </h2>
-      <MediaUploader initialImages={isEdit ? [product!.imageUrl] : []} />
+      <ProductGalleryEditor client:visible productId={isEdit ? product.id : null} />
     </section>
   )}
 
