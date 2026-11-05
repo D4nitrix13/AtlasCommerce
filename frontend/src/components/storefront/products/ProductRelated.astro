@@ -156,10 +156,10 @@ const items: RenderableItem[] = products.map((product) => {
       data-related-scroller
     >
       {items.map(({ product, variantsText, variantImages }) => (
-        <li class="w-[260px] shrink-0 snap-start sm:w-[300px]">
+        <li class="w-[260px] h-full shrink-0 snap-start sm:w-[300px]">
           <article
             data-product-id={product.id}
-            class="group flex flex-col rounded-2xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md"
+            class="group flex h-full flex-col rounded-2xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md"
           >
             <a
               href={`/${locale}/products/${product.slug}`}
@@ -174,7 +174,7 @@ const items: RenderableItem[] = products.map((product) => {
                 loading="lazy"
                 decoding="async"
                 data-variant-id="default"
-                class="card__img card__img--default absolute inset-0 h-full w-full object-contain"
+                class="card__img card__img--default absolute inset-0 h-full w-full object-cover"
               />
               {/* Variants siguientes como imágenes ocultas que se
                                 muestran vía CSS cuando data-active-variant
@@ -187,7 +187,7 @@ const items: RenderableItem[] = products.map((product) => {
                   decoding="async"
                   aria-hidden="true"
                   data-variant-id={img.id}
-                  class="card__img card__img--variant absolute inset-0 h-full w-full object-contain"
+                  class="card__img card__img--variant absolute inset-0 h-full w-full object-cover"
                 />
               ))}
             </a>

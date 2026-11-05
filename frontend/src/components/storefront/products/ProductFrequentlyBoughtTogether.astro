@@ -77,16 +77,16 @@ const bundleLines = items.map((item) => ({
   </header>
 
   <ul
-    class="flex flex-wrap items-center justify-center gap-4 sm:gap-6"
+    class="flex flex-wrap items-stretch justify-center gap-4 sm:gap-6"
     role="list"
     aria-label={itemsAriaLabel}
   >
     {items.map((item, idx) => (
       <Fragment>
-        <li class="flex w-32 flex-col items-center gap-2 sm:w-40">
+        <li class="flex h-full w-32 flex-col items-center gap-2 sm:w-40">
           <a
             href={`/${locale}/products/${item.product.slug}`}
-            class="group flex w-full flex-col items-center gap-2 text-center"
+            class="group flex h-full w-full flex-col items-center gap-2 text-center"
             aria-label={`${item.product.name} — posición ${item.position} del bundle`}
           >
             <span class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition group-hover:border-[var(--primary,#475569)]">
@@ -99,7 +99,7 @@ const bundleLines = items.map((item) => ({
               />
             </span>
             <span class="text-xs font-medium text-slate-900 sm:text-sm">{item.product.name}</span>
-            <span class="text-xs font-bold tabular-nums text-slate-900">
+            <span class="mt-auto text-xs font-bold tabular-nums text-slate-900">
               {formatCurrency(item.product.priceCents, item.product.currency ?? 'USD')}
             </span>
           </a>
@@ -107,7 +107,7 @@ const bundleLines = items.map((item) => ({
         {idx < items.length - 1 && (
           <li
             aria-hidden="true"
-            class="flex h-12 w-8 items-center justify-center text-2xl font-light text-slate-400"
+            class="flex h-12 w-8 items-center justify-center self-center text-2xl font-light text-slate-400"
           >
             +
           </li>
