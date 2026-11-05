@@ -665,6 +665,9 @@ const es: Translations = {
   'storefront.productDetail.addingToCart': 'Añadiendo...',
   'storefront.productDetail.addToCartHint':
     'El carrito se habilitará en la próxima fase (cart store).',
+  'storefront.productDetail.quantity': 'Cantidad',
+  'storefront.productDetail.buyNow': 'Comprar ya',
+  'storefront.productDetail.added': 'Agregado',
   'storefront.productDetail.category': 'Categoría',
   'storefront.productDetail.notFound': 'Producto no encontrado.',
   'storefront.productDetail.notFoundHint':
@@ -997,7 +1000,7 @@ const es: Translations = {
   'storefront.productDetail.reviews.empty': 'Este producto todavía no tiene reseñas.',
   'storefront.productDetail.reviews.verified': 'Compra verificada',
   'storefront.productDetail.reviews.starAlt': '{count} estrellas',
-  'storefront.productDetail.related.heading': 'También te puede interesar',
+  'storefront.productDetail.related.heading': 'También Te Puede Gustar',
   'storefront.productDetail.related.empty': 'Sin productos relacionados.',
   'storefront.productDetail.related.prev': 'Anterior',
   'storefront.productDetail.related.next': 'Siguiente',
@@ -1077,6 +1080,21 @@ const es: Translations = {
   'storefront.products.detail.v4.financing.shopPay': 'Desde $721.98/mes con Shop Pay. ?',
   'storefront.products.detail.v4.financing.learnMore': 'Saber más',
   'storefront.products.detail.v4.featuredArticle.cta': 'Leer artículo',
+  // Tabs del PDP — labels propios; specs/reviews/faq reutilizan
+  // `details.specsHeading`, `productDetail.reviews.heading` y
+  // `faq.heading`.
+  'storefront.products.detail.v4.tabs.description': 'Descripción',
+  'storefront.products.detail.v4.tabs.shipping': 'Envíos',
+  'storefront.products.detail.v4.tabs.emptySpecs':
+    'Este producto todavía no publica especificaciones técnicas.',
+  'storefront.products.detail.v4.tabs.legend': 'Información del producto',
+  'storefront.products.detail.v4.fbt.heading': 'Frecuentemente Comprados Juntos',
+  'storefront.products.detail.v4.fbt.subtitle':
+    'Clientes que compraron este producto también agregaron estos artículos a su carrito.',
+  'storefront.products.detail.v4.fbt.addAll': 'Agregar todo al carrito',
+  'storefront.products.detail.v4.fbt.total': 'Total del bundle',
+  'storefront.products.detail.v4.fbt.itemsAria': 'Artículos frecuentemente comprados juntos',
+  'storefront.products.detail.v4.recentlyViewed.heading': 'Visto recientemente',
 
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   'storefront.checkout.title': 'Finalizar compra',

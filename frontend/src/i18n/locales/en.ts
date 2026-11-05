@@ -663,6 +663,9 @@ const en: Translations = {
   'storefront.productDetail.addToCart': 'Add to cart',
   'storefront.productDetail.addingToCart': 'Adding...',
   'storefront.productDetail.addToCartHint': 'Cart will be enabled in the next phase (cart store).',
+  'storefront.productDetail.quantity': 'Quantity',
+  'storefront.productDetail.buyNow': 'Buy now',
+  'storefront.productDetail.added': 'Added',
   'storefront.productDetail.category': 'Category',
   'storefront.productDetail.notFound': 'Product not found.',
   'storefront.productDetail.notFoundHint':
@@ -992,7 +995,7 @@ const en: Translations = {
   'storefront.productDetail.reviews.empty': 'This product has no reviews yet.',
   'storefront.productDetail.reviews.verified': 'Verified purchase',
   'storefront.productDetail.reviews.starAlt': '{count} stars',
-  'storefront.productDetail.related.heading': 'You may also like',
+  'storefront.productDetail.related.heading': 'You May Also Like',
   'storefront.productDetail.related.empty': 'No related products.',
   'storefront.productDetail.related.prev': 'Previous',
   'storefront.productDetail.related.next': 'Next',
@@ -1071,6 +1074,21 @@ const en: Translations = {
   'storefront.products.detail.v4.financing.shopPay': 'From $721.98/mo with Shop Pay. ?',
   'storefront.products.detail.v4.financing.learnMore': 'Learn how',
   'storefront.products.detail.v4.featuredArticle.cta': 'Read article',
+  // PDP tabs — own labels; specs/reviews/faq reuse
+  // `details.specsHeading`, `productDetail.reviews.heading` and
+  // `faq.heading`.
+  'storefront.products.detail.v4.tabs.description': 'Description',
+  'storefront.products.detail.v4.tabs.shipping': 'Shipping',
+  'storefront.products.detail.v4.tabs.emptySpecs':
+    'This product has no technical specifications yet.',
+  'storefront.products.detail.v4.tabs.legend': 'Product information',
+  'storefront.products.detail.v4.fbt.heading': 'Frequently Bought Together',
+  'storefront.products.detail.v4.fbt.subtitle':
+    'Customers who bought this product also added these items to their cart.',
+  'storefront.products.detail.v4.fbt.addAll': 'Add all to cart',
+  'storefront.products.detail.v4.fbt.total': 'Bundle total',
+  'storefront.products.detail.v4.fbt.itemsAria': 'Items frequently bought together',
+  'storefront.products.detail.v4.recentlyViewed.heading': 'Recently viewed',
 
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   'storefront.checkout.title': 'Checkout',

@@ -9,9 +9,13 @@
  *   - Botón "Agregar todo al carrito" con precio total
  *
  * Decisiones:
- *   - Sin JS: es puramente visual + link a la página del bundle.
+ *   - El CTA del footer es una isla React chica (`client:visible`) que
+ *     agrega cada línea del bundle al cart store y navega al carrito.
+ *     Sin JS el `<a>` sigue funcionando como link al carrito.
  *   - "+" visual entre items indica que se suman al bundle.
  *   - Cada item es un mini-card vertical con imagen, nombre y precio.
+ *   - Labels por props (i18n en el caller), mismo patrón que
+ *     `<ProductRelated>`: el componente no importa el diccionario.
  */
 import type { Product } from '../../../types/catalog';
 
@@ -24,22 +28,38 @@ interface BundleItem {
 interface Props {
   /** Heading del bundle. */
   heading: string;
+  /** Subtítulo bajo el heading. */
+  subtitle: string;
   /** Items del bundle — incluye el producto principal + accesorios. */
   items: readonly BundleItem[];
-  /** URL para agregar todo al carrito (o ir al bundle). */
+  /** URL del carrito locale-prefixed (fallback sin JS del CTA). */
   addAllHref: string;
   /** Label del botón "Agregar todo". */
   addAllLabel: string;
+  /** Label "Total del bundle". */
+  totalLabel: string;
+  /** Aria-label de la lista de items del bundle. */
+  itemsAriaLabel: string;
   /** Locale para formatear precios. */
   locale: string;
 }
 
-const { heading, items, addAllHref, addAllLabel, locale } = Astro.props;
+const { heading, subtitle, items, addAllHref, addAllLabel, totalLabel, itemsAriaLabel, locale } =
+  Astro.props;
 
 import { formatCurrency } from '../../../lib/formatters';
+import FbtAddAllButton from './FbtAddAllButton';
 
 const totalCents = items.reduce((sum, item) => sum + item.product.priceCents, 0);
-const totalLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD');
+const totalAmountLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD');
+/** Líneas del bundle para el cart store (sin cantidad ni variantLabel). */
+const bundleLines = items.map((item) => ({
+  productSlug: item.product.slug,
+  name: item.product.name,
+  imageUrl: item.product.imageUrl,
+  priceCents: item.product.priceCents,
+  currency: item.product.currency ?? 'USD',
+}));
 ---
 
 <section
@@ -52,14 +72,14 @@ const totalLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD
       {heading}
     </h2>
     <p class="text-sm text-slate-600">
-      Clientes que compraron este bajo también agregaron estos artículos a su carrito.
+      {subtitle}
     </p>
   </header>
 
   <ul
     class="flex flex-wrap items-center justify-center gap-4 sm:gap-6"
     role="list"
-    aria-label="Artículos frecuentemente comprados juntos"
+    aria-label={itemsAriaLabel}
   >
     {items.map((item, idx) => (
       <Fragment>
@@ -98,14 +118,9 @@ const totalLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD
 
   <footer class="mt-6 flex flex-col items-center gap-4 border-t border-slate-100 pt-6 sm:flex-row sm:justify-between">
     <div class="flex flex-col gap-1 text-center sm:text-left">
-      <span class="text-xs uppercase tracking-wider text-slate-500">Total del bundle</span>
-      <span class="text-2xl font-bold tabular-nums text-slate-900">{totalLabel}</span>
+      <span class="text-xs uppercase tracking-wider text-slate-500">{totalLabel}</span>
+      <span class="text-2xl font-bold tabular-nums text-slate-900">{totalAmountLabel}</span>
     </div>
-    <a
-      href={addAllHref}
-      class="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary,#475569)] px-6 text-sm font-bold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
-    >
-      {addAllLabel}
-    </a>
+    <FbtAddAllButton client:visible lines={bundleLines} cartHref={addAllHref} label={addAllLabel} />
   </footer>
 </section>

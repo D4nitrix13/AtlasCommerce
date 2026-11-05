@@ -14,6 +14,7 @@ const meta: Meta<typeof ProductCTAs> = {
     inStock: { control: 'boolean' },
     isFavorite: { control: 'boolean' },
     showFavorite: { control: 'boolean' },
+    showAddToBag: { control: 'boolean' },
   },
   args: {
     addToCartLabel: 'Agregar al carrito',
@@ -46,6 +47,10 @@ export const OutOfStock: Story = {
 
 export const WithoutFavorite: Story = {
   args: { showFavorite: false },
+};
+
+export const WithoutAddToBag: Story = {
+  args: { showAddToBag: false },
 };
 
 export const Loading: Story = {

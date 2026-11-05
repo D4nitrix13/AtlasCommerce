@@ -65,6 +65,12 @@ class DatabaseSeeder extends Seeder
         // convenciones (indexed vs keyword) que conviven en el recon
         // pipeline. Idempotente. Ver `ProductSeeder.php`.
         $this->call(class: ProductSeeder::class);
+
+        // Rieles de recomendación de la PDP (comprados juntos / también
+        // te puede gustar). Idempotente; se salta los slugs de productos
+        // que todavía no existen (el catálogo de la instancia se siembra
+        // aparte, ver ProductRelationsSeeder).
+        $this->call(class: ProductRelationsSeeder::class);
     }
 
     /**

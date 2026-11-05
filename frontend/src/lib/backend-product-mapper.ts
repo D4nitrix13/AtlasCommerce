@@ -49,6 +49,10 @@ export interface BackendProduct {
   description: string;
   priceCents: number;
   imageUrl: string | null;
+  /** Precio anterior en cents. Sólo presente si el producto está en oferta. */
+  compareAtPriceCents?: number;
+  /** Código ISO 4217. Ausente cuando el resource no eager-loadeó `currency`. */
+  currency?: string;
   isExclusive?: boolean;
   stock: number;
   category: string;
@@ -135,6 +139,10 @@ export function mapBackendToProduct(b: BackendProduct): Product {
     description: b.description ?? '',
     priceCents: b.priceCents,
     imageUrl: b.imageUrl ?? '/images/product-placeholder.png',
+    ...(b.compareAtPriceCents !== undefined && {
+      compareAtPriceCents: b.compareAtPriceCents,
+    }),
+    ...(b.currency !== undefined && { currency: b.currency }),
     images: mapBackendImages(b.images),
     variants: mapBackendVariants(b.variants),
     category: b.category,

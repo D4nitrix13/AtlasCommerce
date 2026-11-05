@@ -1,16 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Imagen no disponible">
-  <rect width="800" height="800" fill="#f1f5f9" />
-  <g fill="none" stroke="#cbd5e1" stroke-width="12" stroke-linejoin="round">
-    <rect x="150" y="230" width="500" height="340" rx="24" />
-    <path d="M150 470l130-120 110 100 90-80 165 150" stroke-linecap="round" />
-  </g>
-  <circle cx="270" cy="330" r="34" fill="#cbd5e1" />
-  <text
-    x="400"
-    y="640"
-    text-anchor="middle"
-    font-family="ui-sans-serif, system-ui, sans-serif"
-    font-size="42"
-    fill="#94a3b8"
-  >Imagen no disponible</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" aria-label="Imagen no disponible" viewBox="0 0 800 800"><path fill="#f1f5f9" d="M0 0h800v800H0z"/><g fill="none" stroke="#cbd5e1" stroke-linejoin="round" stroke-width="12"><rect width="500" height="340" x="150" y="230" rx="24"/><path stroke-linecap="round" d="m150 470 130-120 110 100 90-80 165 150"/></g><circle cx="270" cy="330" r="34" fill="#cbd5e1"/><text x="400" y="640" fill="#94a3b8" font-family="ui-sans-serif, system-ui, sans-serif" font-size="42" text-anchor="middle">Imagen no disponible</text></svg>
