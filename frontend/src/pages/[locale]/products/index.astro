@@ -39,6 +39,7 @@
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import ProductCardCatalog from '../../../components/storefront/products/ProductCardCatalog.astro';
 import FiltersSidebar from '../../../components/storefront/products/FiltersSidebar.astro';
+import FilterChips from '../../../components/storefront/products/FilterChips.astro';
 import SortDropdown from '../../../components/storefront/products/SortDropdown.astro';
 import Pagination from '../../../components/ui/Pagination.astro';
 import { getServerDictionary } from '../../../i18n/server';
@@ -51,6 +52,7 @@ import {
 } from '../../../lib/pagination';
 import {
   applyCatalogFilters,
+  buildActiveFilterChips,
   buildCatalogHref,
   parseCatalogFilters,
 } from '../../../lib/catalog-filters';
@@ -323,6 +325,20 @@ const filterPriceOptions = PRICE_RANGES.map((range) => {
   };
 });
 
+// Chips de filtros activos (links de remoción sin JS, FilterChips).
+// Uno por filtro: categoría, color y precio (min+max = UN chip);
+// `sort`/`page` no generan chip. Labels desde los mismos mapas que el
+// sidebar; plantillas i18n `storefront.catalog.chips.*`.
+const activeFilterChips = buildActiveFilterChips(baseUrl, filters, {
+  priceBoth: t['storefront.catalog.chips.priceBoth'],
+  priceMin: t['storefront.catalog.chips.priceMin'],
+  priceMax: t['storefront.catalog.chips.priceMax'],
+  categories: Object.fromEntries(
+    Object.values(categoryCounts).map((category) => [category.slug, category.label]),
+  ),
+  colors: Object.fromEntries(filterColorOptions.map((color) => [color.slug, color.label])),
+});
+
 // Tallas: 4 buckets estilo Bonfire (solo tenants de instrumentos). Los
 // counts son placeholders razonables para la demo (suma arbitraria, no
 // cálculo real).
@@ -437,6 +453,11 @@ const sortHrefs = {
         </div>
 
         <div class="flex flex-col gap-6">
+          <FilterChips
+            chips={activeFilterChips}
+            removeAriaLabel={t['storefront.catalog.chips.removeAriaLabel']}
+          />
+
           <div class="flex flex-wrap items-center justify-between gap-3">
             <p class="text-[13px] text-slate-500">{countRange}</p>
           </div>

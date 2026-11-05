@@ -1547,6 +1547,14 @@ export type TranslationKey =
   | 'storefront.products.v3.breadcrumb.home'
   | 'storefront.products.v3.breadcrumb.catalog'
   | 'storefront.products.v3.filter.marca'
+
+  // ─── storefront: catalog chips (filtros activos del PLP) ──────────
+  // Chips removibles de filtros activos (`FilterChips.astro`, WU1 de
+  // catalogo-plp-busqueda). Keys aditivas bajo `storefront.catalog.*`.
+  | 'storefront.catalog.chips.removeAriaLabel'
+  | 'storefront.catalog.chips.priceBoth'
+  | 'storefront.catalog.chips.priceMin'
+  | 'storefront.catalog.chips.priceMax'
   | 'storefront.productDetail.breadcrumb'
   | 'storefront.productDetail.outOfStock'
   | 'storefront.productDetail.inStock'
