@@ -47,12 +47,40 @@ import DarkHeroCard from '../../components/storefront/b2b/DarkHeroCard.astro';
 import CtaFinal from '../../components/storefront/b2b/CtaFinal.astro';
 import { getBrandBySlug } from '../../config/stores';
 import { getServerDictionary } from '../../i18n/server';
+import { apiFetch } from '../../lib/api';
+import { API_ENDPOINTS } from '../../lib/endpoints';
+import {
+  mapBackendToProduct,
+  type StorefrontProductsResponse,
+} from '../../lib/backend-product-mapper';
 import { CATEGORIES, getFeaturedProducts } from '../../data/products';
 import { getPandaFeaturedProducts } from '../../data/panda-catalog';
 import { B2B_CATEGORIES } from '../../data/b2b-mock';
 import { getUseCasesForTenant } from '../../data/tenants';
 
 const locale = Astro.locals.locale ?? 'es';
+
+// Destacados reales desde el API (tenant por host). Si el backend no
+// responde, las secciones caen a los mocks locales para que el home
+// nunca quede vacío.
+async function loadFeaturedProducts(): Promise<ReturnType<typeof mapBackendToProduct>[]> {
+  try {
+    const response = await apiFetch<StorefrontProductsResponse>(
+      `${API_ENDPOINTS.storefront.products}?per_page=8`,
+      {
+        headers: { Accept: 'application/json' },
+        origin: Astro.url.origin,
+        host: Astro.url.host,
+      },
+    );
+    return response.data.map(mapBackendToProduct);
+  } catch (error) {
+    console.error('[home] apiFetch featured failed:', error);
+    return [];
+  }
+}
+
+const featuredFromApi = await loadFeaturedProducts();
 const t = getServerDictionary(locale);
 
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
@@ -283,7 +311,7 @@ const b2bFaqItems = [
       />
 
       <FeaturedProducts
-        products={getPandaFeaturedProducts(4)}
+        products={featuredFromApi.length > 0 ? featuredFromApi.slice(0, 4) : getPandaFeaturedProducts(4)}
         locale={locale}
         heading={t['storefront.home.featuredProducts.heading']}
         viewAllLabel={t['storefront.home.featuredProducts.viewAll']}
@@ -364,7 +392,7 @@ const b2bFaqItems = [
       />
 
       <FeaturedProducts
-        products={getFeaturedProducts(4)}
+        products={featuredFromApi.length > 0 ? featuredFromApi.slice(0, 4) : getFeaturedProducts(4)}
         locale={locale}
         heading={t['storefront.home.featuredProducts.heading']}
         viewAllLabel={t['storefront.home.featuredProducts.viewAll']}

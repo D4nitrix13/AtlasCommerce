@@ -61,7 +61,11 @@ import {
   pandaCategoryLabel,
   pandaColorOptions,
 } from '../../../data/panda-catalog';
-import type { ProductImage, ProductVariant } from '../../../types/catalog';
+import {
+  mapBackendToProduct,
+  type BackendProduct,
+  type StorefrontProductsResponse,
+} from '../../../lib/backend-product-mapper';
 
 const locale = Astro.locals.locale ?? 'es';
 const t = getServerDictionary(locale);
@@ -80,74 +84,6 @@ const cartCount = 0;
 // Fase 5 plan v3: storage keys hasheadas via StorageKeyDeriver.
 // El frontend las consume via `assetUrl(storage_key)` (lib/asset.ts).
 const PAGE_SIZE = 24;
-// Imagen de la galería. OJO: el resource de storefront ya emite estos
-// campos en camelCase (`altText`, `isPrimary`, `isHover`, `variantId`,
-// `sortOrder`, `srcset`) aunque el product-level venga en snake_case — ver
-// `StorefrontProductResource::galleryEntry()`. Sólo hace falta adaptarlos
-// al shape de `types/catalog.ts`.
-interface BackendProductImage {
-  url: string;
-  altText: string;
-  isPrimary: boolean;
-  /**
-   * Ranura de hover, decidida por el admin en la API. Antes de esta
-   * columna la card la deducía del sufijo del `altText` (" - vista back");
-   * el listado tiene que seguir trayéndola o todas las cards del catálogo
-   * pierden el cambio de imagen al pasar el cursor.
-   */
-  isHover: boolean;
-  /** El backend lo emite como int; la card lo compara contra `variants[].id`. */
-  variantId: number | string | null;
-  sortOrder: number;
-  srcset: string;
-}
-
-// Variante de acabado. El resource NO expone `sku` (por eso
-// `ProductVariant.sku` es opcional en `types/catalog.ts`).
-interface BackendProductVariant {
-  id: number | string;
-  name: string;
-  finishSlug: string;
-  finishLabel: string;
-  finishHex: string | null;
-  condition: string;
-  stock: number;
-  handedness: string | null;
-}
-// Shape de `StorefrontProductResource` (backend/app/Http/Resources/
-// Storefront/StorefrontProductResource.php). OJO: la API emite **camelCase**
-// y `category`/`brand` vienen como **string**, no como objeto anidado. Una
-// versión anterior de esta interface declaraba snake_case con objetos
-// (`base_price_cents`, `category: {slug}`), así que todos esos campos
-// llegaban `undefined` y la carta renderizaba `USDNaN` con filtros vacíos.
-interface BackendProduct {
-  id: number;
-  slug: string;
-  name: string;
-  description: string;
-  priceCents: number;
-  imageUrl: string | null;
-  isExclusive?: boolean;
-  stock: number;
-  category: string;
-  brand?: string;
-  images?: BackendProductImage[];
-  variants?: BackendProductVariant[];
-}
-
-/**
- * Envoltura paginada de `GET /api/v1/storefront/products`.
- *
- * `meta` es la fuente de verdad de la paginación: `total` y `last_page`
- * los calcula el backend sobre TODOS los productos del tenant. Calcularlos
- * a partir del array recibido (como hacía la versión anterior con
- * `slice(0, 24)`) daba siempre 1 página: el array ya venía recortado.
- */
-interface StorefrontProductsResponse {
-  data: BackendProduct[];
-  meta: StorefrontPaginationMeta;
-}
-
 /** Catálogo vacío cuando el backend no responde: dispara el empty state. */
 const EMPTY_CATALOG_META: StorefrontPaginationMeta = {
   current_page: FIRST_PAGE,
@@ -221,87 +157,6 @@ const totalProducts = catalog.meta.total;
 // `meta.per_page` es el tamaño real de página que el server aplicó; el
 // fallback a PAGE_SIZE cubre un backend que no lo mande.
 const perPage = catalog.meta.per_page > 0 ? catalog.meta.per_page : PAGE_SIZE;
-
-// Normaliza el id de variante a string. El backend lo emite como int
-// tanto en `images[].variantId` como en `variants[].id`, y
-// `deriveProductCardSwap` matchea swatch ↔ foto por igualdad estricta
-// (Map<string, ...>). Si uno queda number y el otro string, el lookup
-// falla en silencio: el swatch pierde su miniatura Y su image-swap.
-function normalizeVariantId(raw: number | string | null): string | null {
-  if (raw === null) return null;
-  return String(raw);
-}
-
-function mapBackendImage(image: BackendProductImage): ProductImage {
-  return {
-    url: image.url,
-    altText: image.altText,
-    isPrimary: image.isPrimary,
-    isHover: image.isHover,
-    variantId: normalizeVariantId(image.variantId),
-    sortOrder: image.sortOrder,
-    srcset: image.srcset,
-  };
-}
-
-function mapBackendVariant(variant: BackendProductVariant): ProductVariant {
-  return {
-    // `normalizeVariantId` nunca devuelve null acá (`id` es required),
-    // pero el shape lo pide `string`: coalesce explícito, no `as string`.
-    id: normalizeVariantId(variant.id) ?? '',
-    name: variant.name,
-    finishSlug: variant.finishSlug,
-    finishLabel: variant.finishLabel,
-    finishHex: variant.finishHex,
-    condition: variant.condition,
-    stock: variant.stock,
-    handedness: variant.handedness,
-  };
-}
-
-// El listado público puede mandar `images` / `variants` ausentes (producto
-// recién publicado, todavía sin fotos). El default a array vacío vive acá
-// y no en `mapBackendToProduct` para no sumar ramas a una función que ya
-// roza el umbral de complejidad.
-function mapBackendImages(images: readonly BackendProductImage[] | undefined): ProductImage[] {
-  return (images ?? []).map(mapBackendImage);
-}
-
-function mapBackendVariants(
-  variants: readonly BackendProductVariant[] | undefined,
-): ProductVariant[] {
-  return (variants ?? []).map(mapBackendVariant);
-}
-
-// Adapter backend (snake_case Eloquent) -> frontend (camelCase Product).
-// Mapea solo campos que ProductCardCatalog requiere. Si el backend agrega
-// campos, este adapter los ignora (mejor que el frontend truene).
-// `stock` lo inferimos de `is_active` por ahora (el backend no lo
-// expone en /products publico — solo is_visible). Si el backend expone
-// stock en una iteración futura, agregar al BackendProduct type.
-//
-// `images` y `variants` SÍ se propagan: sin ellos la card no puede
-// mostrar la foto real ni los swatches de acabado (cae al
-// `imageUrl` único y no hace swap).
-function mapBackendToProduct(b: BackendProduct) {
-  return {
-    id: b.id,
-    slug: b.slug,
-    name: b.name,
-    description: b.description ?? '',
-    priceCents: b.priceCents,
-    imageUrl: b.imageUrl ?? '/images/product-placeholder.png',
-    images: mapBackendImages(b.images),
-    variants: mapBackendVariants(b.variants),
-    category: b.category,
-    brand: b.brand ?? '',
-    isExclusive: b.isExclusive ?? false,
-    inStock: b.stock > 0,
-    stock: b.stock,
-    badges: [] as ('new' | 'sale' | 'low_stock')[],
-    updatedAt: new Date().toISOString(),
-  };
-}
 
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const usePandaPrototype =
