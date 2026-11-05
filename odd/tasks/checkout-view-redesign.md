@@ -168,10 +168,16 @@ preview/place/confirm) exige auth + `cart_id` servidor +
   · i18n 5). Verificación: `bun run test` 58 files / 569 tests green ·
   `bun run astro check` 0 errors · `bun run build` OK · `bunx eslint`
   0 errores (11 warnings `max-lines-per-function`, mismo baseline que
-  `CartView`/`CartLineRow`). Pendiente C8: capturas playwright
-  1440/390 + spot-check parent.
+  `CartView`/`CartLineRow`).
+- C8 observado (ver checkbox): capturas revisadas, fix de orden
+  mobile (form primero), spot-check parent 569 tests verde.
+- **Commit work-unit**: `0d50bad4` en `feat/views/compra` (38 archivos,
+  +2032/−3008; entrega single-pr con size:exception, como #180).
+- Push/PR: pendientes de pedido del usuario.
 
 ## Próximo paso
 
-C2–C7 con writer delegado; luego C8 (verificación + capturas) y commit
-work-unit.
+Nada pendiente de implementación. Push + PR del checkout a pedido del
+usuario; hallazgo reportado: integración real de
+`CheckoutController` (auth + direcciones + pagos) queda fuera de este
+feature.
