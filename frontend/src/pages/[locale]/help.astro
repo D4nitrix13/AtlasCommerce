@@ -1,0 +1,32 @@
+---
+/**
+ * Página «Ayuda» — FAQ de compra, envíos, pagos y devoluciones.
+ *
+ * Cascarón fino: el cuerpo vive en `i18n/legal/help.ts` (es/en). Las
+ * preguntas se renderizan como `h2` para que cada una sea un destino de
+ * ancla y el lector de pantalla pueda saltar entre respuestas.
+ */
+import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
+import LegalContent from '../../components/storefront/legal/LegalContent.astro';
+import { getHelpContent } from '../../i18n/legal';
+import { getBrandBySlug } from '../../config/stores';
+import { getServerDictionary } from '../../i18n/server';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+const brand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null);
+
+const content = getHelpContent(locale, {
+  brandName: brand.name,
+  supportEmail: brand.supportEmail,
+});
+
+const heading = t['storefront.legal.help.title'];
+---
+
+<StorefrontLayout title={`${heading} — ${brand.name}`}>
+  <div class="w-full px-4 py-10 sm:px-6 lg:px-10">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{heading}</h1>
+    <LegalContent content={content} />
+  </div>
+</StorefrontLayout>

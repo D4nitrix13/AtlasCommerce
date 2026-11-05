@@ -1264,8 +1264,7 @@ const es: Translations = {
   // ─── storefront: layout (header/footer) ───────────────────────────
   'storefront.header.nav.home': 'Inicio',
   'storefront.header.nav.products': 'Productos',
-  'storefront.header.nav.search': 'Buscar',
-  'storefront.header.nav.cases': 'Casos',
+  'storefront.header.nav.cases': 'Casos de uso',
   'storefront.header.nav.account': 'Mi cuenta',
   'storefront.header.nav.cart': 'Carrito',
   'storefront.header.cartBadge': '{count} en el carrito',
@@ -1282,7 +1281,18 @@ const es: Translations = {
   'storefront.footer.privacy': 'Privacidad',
   'storefront.footer.help': 'Ayuda',
   'storefront.footer.contact': 'Contacto',
+  'storefront.footer.socialLabel': 'Redes sociales',
   'storefront.footer.copyright': '© {year} {brand}. Todos los derechos reservados.',
+
+  // ─── storefront: legal (chrome de las 5 páginas legales) ───────────
+  'storefront.legal.breadcrumbLabel': 'Miga de pan',
+  'storefront.legal.about.title': 'Acerca de nosotros',
+  'storefront.legal.terms.title': 'Términos y condiciones',
+  'storefront.legal.privacy.title': 'Privacidad y datos personales',
+  'storefront.legal.help.title': 'Ayuda y preguntas frecuentes',
+  'storefront.legal.contact.title': 'Contacto',
+  'storefront.legal.contact.emailLabel': 'Correo de soporte',
+  'storefront.legal.contact.whatsappLabel': 'WhatsApp',
 
   // ─── account: addresses ────────────────────────────────────────
   'account.addresses.title': 'Mis direcciones',

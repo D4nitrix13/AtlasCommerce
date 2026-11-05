@@ -1,0 +1,33 @@
+---
+/**
+ * Página legal «Acerca de» — texto de marca del tenant.
+ *
+ * Cascarón fino: resuelve el contenido localizado desde
+ * `i18n/legal/about.ts` (es/en) y lo renderiza con `LegalContent`.
+ * El h1 y el título del documento salen del chrome i18n
+ * (`storefront.legal.*`); el cuerpo es contenido, no UI.
+ */
+import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
+import LegalContent from '../../components/storefront/legal/LegalContent.astro';
+import { getAboutContent } from '../../i18n/legal';
+import { getBrandBySlug } from '../../config/stores';
+import { getServerDictionary } from '../../i18n/server';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+const brand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null);
+
+const content = getAboutContent(locale, {
+  brandName: brand.name,
+  supportEmail: brand.supportEmail,
+});
+
+const heading = t['storefront.legal.about.title'];
+---
+
+<StorefrontLayout title={`${heading} — ${brand.name}`}>
+  <div class="w-full px-4 py-10 sm:px-6 lg:px-10">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{heading}</h1>
+    <LegalContent content={content} />
+  </div>
+</StorefrontLayout>

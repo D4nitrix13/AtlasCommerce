@@ -1,10 +1,14 @@
 ---
 /**
- * StorefrontFooterLegal — bloque legal del footer.
+ * StorefrontFooterLegal — bloque legal inferior del footer.
  *
- * Copyright + email de soporte. El año se computa en SSR (`new Date()`)
- * para que sea estable entre el server render y el client render (sin
- * mismatch de hidratación).
+ * Copyright. El email de soporte vive en la columna de contacto del
+ * footer; acá queda solo la línea legal. El año se computa en SSR
+ * (`new Date()`) para que sea estable entre el server render y el
+ * client render (sin mismatch de hidratación).
+ *
+ * El borde superior lo pone el contenedor del footer (`mt-8 border-t`),
+ * no este componente, para no dibujar dos líneas seguidas.
  */
 import type { StoreBrand } from '../../../config/stores';
 import { getServerDictionary } from '../../../i18n/server';
@@ -23,12 +27,4 @@ const copyright = t['storefront.footer.copyright']
   .replace('{brand}', brand.name);
 ---
 
-<div class="flex flex-col items-start justify-between gap-2 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
-  <p class="text-xs text-slate-500">{copyright}</p>
-  <a
-    href={`mailto:${brand.supportEmail}`}
-    class="text-xs text-slate-500 transition hover:text-[var(--primary,#1e293b)]"
-  >
-    {brand.supportEmail}
-  </a>
-</div>
+<p class="text-xs text-slate-500">{copyright}</p>
