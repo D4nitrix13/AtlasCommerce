@@ -156,7 +156,13 @@ quiera cambiar en ella.
 2. Revisión visual fina de las capturas existentes (1440 + 390) y de lo
    que el usuario señale.
 3. Pulir interacción talla/acabado ↔ galería si los detalles lo piden.
-4. Cierre común.
+4. **Portar el backend Fase 8** (PR #169 cerrado por conflicto; código
+   portable: migraciones + modelos + seeders de `product_faqs` y
+   `product_extended_descriptions`, y `product_highlights`) para que los
+   tabs Preguntas frecuentes / Descripción extendida tengan datos reales.
+   `product_grouped_specs`/`product_spec_values` requieren decisión de
+   diseño vs atributos EAV (la Ficha técnica hoy se alimenta de EAV).
+5. Cierre común.
 
 **Aceptación**: sin regresiones (525 tests siguen verdes), detalles del
 usuario aplicados, capturas nuevas.
