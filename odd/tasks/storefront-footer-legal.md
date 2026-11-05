@@ -132,7 +132,7 @@ _(se completa por tarea)_
 | T2 | hecha | `f24202f3` | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · capturas 1440/390 en `output/playwright/t2-footer-*` |
 | T3 | hecha | `c5343593` | TDD: RED 7 failed (404 ruta inexistente) → GREEN `php artisan test --filter=StorefrontSocialLink`: 7 passed (43 assertions) |
 | T4 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · e2e con fila real en BD (captura `t4-footer-with-link-1440.png`) revertido después |
-| T5 | pendiente | — | — |
+| T5 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: 0 errors (7 warnings `max-lines-per-function` en contenido legal) · las 5 rutas responden 200 · captura `t5-terms-1440.png` |
 | T6 | pendiente | — | — |
 
 ### Notas T1
@@ -226,6 +226,34 @@ _(se completa por tarea)_
 - El writer T4 se estancó (76 turnos sin cerrar) y fue cancelado; el
   orquestador corrió la verificación completa y la e2e.
 
+### Notas T5
+
+- 5 páginas bajo `pages/[locale]/` (`about`, `terms`, `privacy`, `help`,
+  `contact`) — cascarones finos que renderizan `LegalContent`.
+- El contenido legal vivo en `src/i18n/legal/` (módulo tipado por locale,
+  no el diccionario plano): son párrafos extensos que cambian por
+  legislación, no por traducción de UI. `LegalContext` interpola
+  `brandName`/`supportEmail` — nunca se hardcodean datos de la marca.
+- Legislación Argentina cubierta: Ley 24.240 (desistimiento 10 días
+  corridos art. 34, garantía legal, fuero del consumidor), Decreto 424/98,
+  Ley 25.326 (derechos ARCO, AAIP), Ley 11.723 / 22.426 (propiedad
+  intelectual), excepción de productos personalizados.
+- Datos fiscales del negocio que faltan quedan como `[completar: …]` —
+  no inventados. Ver en `terms.ts` y `privacy.ts`.
+- Chrome i18n `storefront.legal.*` (títulos, breadcrumb, labels de
+  contacto) en es/en/types.
+- Links del footer ahora apuntan a `/{locale}/{about,terms,privacy,help,contact}`.
+- **Hallazgo operativo**: el container frontend no veía los archivos nuevos
+  pese al bind mount `../../../../frontend:/app`. `restart` no alcanza
+  (preserva el mount viejo); hizo falta `down` + `up` del servicio frontend
+  para recrear el container. Aplica cuando se crean directorios/archivos
+  nuevos: recrear, no solo reiniciar.
+- El writer T5 murió otra vez con `ContentFilterError` (filtro del provider
+  sobre texto legal) tras dejar completo el contenido (~840 líneas en
+  `i18n/legal/`) y los links del footer. El orquestador escribió las 5
+  páginas, corrigió claves i18n duplicadas (el writer y el orquestador las
+  agregaron por separado) y corrió la verificación.
+
 ## Próximo paso
 
-T5 — 5 páginas legales (Argentina).
+T6 — i18n completo + cierre de sesión (checks, capturas 1440/390, reporte).

@@ -7,8 +7,9 @@
  * 4, donde un `flex-wrap` horizontal no entra y obliga a cortes de
  * línea arbitrarios. Vive en `<nav aria-label="Secundaria">`.
  *
- * Los hrefs son placeholders (`#`) — los consumers (pages F1.4) los
- * ajustarán cuando existan las páginas reales.
+ * Los hrefs llegan por props y apuntan a las páginas reales
+ * (`/{locale}/about`, `/terms`, …) — los defaults viven en
+ * `StorefrontFooter.astro`.
  */
 import { getServerDictionary } from '../../../i18n/server';
 

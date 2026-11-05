@@ -49,11 +49,11 @@ interface Props {
 const { brand, locale, links, socialLinks = [] } = Astro.props;
 
 const defaultLinks: FooterLink[] = [
-  { labelKey: 'storefront.footer.about', href: '#' },
-  { labelKey: 'storefront.footer.terms', href: '#' },
-  { labelKey: 'storefront.footer.privacy', href: '#' },
-  { labelKey: 'storefront.footer.help', href: '#' },
-  { labelKey: 'storefront.footer.contact', href: '#' },
+  { labelKey: 'storefront.footer.about', href: `/${locale}/about` },
+  { labelKey: 'storefront.footer.terms', href: `/${locale}/terms` },
+  { labelKey: 'storefront.footer.privacy', href: `/${locale}/privacy` },
+  { labelKey: 'storefront.footer.help', href: `/${locale}/help` },
+  { labelKey: 'storefront.footer.contact', href: `/${locale}/contact` },
 ];
 
 const navLinks = links ?? defaultLinks;

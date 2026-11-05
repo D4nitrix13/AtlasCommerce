@@ -1259,6 +1259,16 @@ const en: Translations = {
   'storefront.footer.socialLabel': 'Social media',
   'storefront.footer.copyright': '© {year} {brand}. All rights reserved.',
 
+  // ─── storefront: legal (chrome of the 5 legal pages) ───────────────
+  'storefront.legal.breadcrumbLabel': 'Breadcrumb',
+  'storefront.legal.about.title': 'About us',
+  'storefront.legal.terms.title': 'Terms and conditions',
+  'storefront.legal.privacy.title': 'Privacy and personal data',
+  'storefront.legal.help.title': 'Help and FAQ',
+  'storefront.legal.contact.title': 'Contact',
+  'storefront.legal.contact.emailLabel': 'Support email',
+  'storefront.legal.contact.whatsappLabel': 'WhatsApp',
+
   // ─── account: addresses ────────────────────────────────────────
   'account.addresses.title': 'My addresses',
   'account.addresses.subtitle': 'Manage your shipping and billing addresses.',

@@ -1384,6 +1384,17 @@ export type TranslationKey =
   | 'storefront.footer.socialLabel'
   | 'storefront.footer.copyright'
 
+
+  // ─── storefront: legal (chrome de las 5 páginas legales) ─────────────
+  | 'storefront.legal.breadcrumbLabel'
+  | 'storefront.legal.about.title'
+  | 'storefront.legal.terms.title'
+  | 'storefront.legal.privacy.title'
+  | 'storefront.legal.help.title'
+  | 'storefront.legal.contact.title'
+  | 'storefront.legal.contact.emailLabel'
+  | 'storefront.legal.contact.whatsappLabel'
+
   // ─── storefront: search ─────────────────────────────────────────────
   | 'storefront.search.title'
   | 'storefront.search.subtitle'

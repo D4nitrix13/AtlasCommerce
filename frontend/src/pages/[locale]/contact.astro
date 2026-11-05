@@ -1,0 +1,34 @@
+---
+/**
+ * Página «Contacto» — canales de soporte del tenant.
+ *
+ * Cascarón fino: el cuerpo vive en `i18n/legal/contact.ts` (es/en) y
+ * sale del `brand.supportEmail` de `config/stores.ts`. No hay formulario
+ * de contacto: no existe backend para eso, y un formulario muerto es
+ * peor que un mailto honesto. Los horarios de atención que falten
+ * quedan como `[completar: …]` en el contenido.
+ */
+import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
+import LegalContent from '../../components/storefront/legal/LegalContent.astro';
+import { getContactContent } from '../../i18n/legal';
+import { getBrandBySlug } from '../../config/stores';
+import { getServerDictionary } from '../../i18n/server';
+
+const locale = Astro.locals.locale ?? 'es';
+const t = getServerDictionary(locale);
+const brand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null);
+
+const content = getContactContent(locale, {
+  brandName: brand.name,
+  supportEmail: brand.supportEmail,
+});
+
+const heading = t['storefront.legal.contact.title'];
+---
+
+<StorefrontLayout title={`${heading} — ${brand.name}`}>
+  <div class="w-full px-4 py-10 sm:px-6 lg:px-10">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{heading}</h1>
+    <LegalContent content={content} />
+  </div>
+</StorefrontLayout>
