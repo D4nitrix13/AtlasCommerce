@@ -182,10 +182,18 @@ layout se valida con tests de clases (estilo `catalog-grid-css.test.ts`)
    Assess: medium, `under_budget` (561 líneas; slice pendiente).
    Desviación resuelta: semántica real de tallas = `role="radio"` /
    `aria-checked` (no `aria-pressed`) — preservada como estaba.
-3. **Cards de rieles parejas** — `ProductRelated.astro` (y FBT /
+3. ✅ **Cards de rieles parejas** — `ProductRelated.astro` (y FBT /
    RecentlyViewed por consistencia): `h-full` + footer `mt-auto` y media
    `aspect-square` con `object-cover` (hoy `object-contain` deja
    huecos). Sin estirar ni deformar imágenes. [inline si 1 archivo]
+   → `c3a2388f`: stretch chain `h-full` en `li`/`article` de los 3
+   rieles (patrón `ProductCard.astro:108`), `object-contain` →
+   `object-cover` en ProductRelated, `items-stretch` + `self-center`
+   del separador `+` en FBT; `pdp-rail-card-heights.test.ts` (11 tests,
+   RED→GREEN). 552 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (715 líneas; slice pendiente).
+   Nota: `ProductRelated.astro` llegó a 398 líneas (sobre límite) —
+   T3.4/T3.5 deben extraer el body de la card a subcomponente.
 4. **Acabados: color real + hover cambia imagen** — selector ACABADO
    (`[slug].astro:1115-1190`): swatches hex en vez de thumbnails
    (hoy "parecen imágenes repetidas"); hover/focus del swatch cambia la
