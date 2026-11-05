@@ -84,7 +84,7 @@ la página actual de 24 filas).
 - [x] **WU6** — Cierre: checks comunes + capturas playwright + reporte — **cerrado con capturas
   parciales** (decisión del usuario 2026-11-05: "B, cerrá con las capturas parciales y
   re-capturá cuando libere el stack"); checks completos en verde; re-captura de la UI nueva
-  como follow-up
+  **completada** el 2026-11-05 (ver Siguiente paso)
 
 ## Criterios de aceptación
 
@@ -154,13 +154,15 @@ la página actual de 24 filas).
 
 ## Siguiente paso
 
-**Follow-up pendiente**: re-capturar la UI nueva (chips de filtros activos + disclosure móvil)
-cuando la sesión `compra` libere el stack dev compartido — recrear el frontend desde este
-worktree (`docker-stack.sh up dev panda-estampados-and-kitsune`, previo `.env` de instancia en
-`docker/instances/development/panda-estampados-and-kitsune/environment/`) y tomar
-`catalogo-plp-*` y `catalogo-plp-mobile-390-filtros.png`. Ver H-6.
+**Follow-up completado** (2026-11-05): UI nueva re-capturada sobre código `catalogo` (DOM
+verificado antes de capturar: trigger `Filtros` + chips `a[aria-label^="Quitar filtro"]`).
+Las 6 capturas viven en `output/playwright/catalogo-*` (gitignored).
 
 Hallazgos de backend (H-1/H-1b/H-4) aguardan confirmación del usuario para un plan aparte.
+
+**Aviso a sesiones paralelas**: el stack compartido quedó sirviendo `catalogo`; los worktrees
+`cuenta-auth` y `compra` deben re-ejecutar `docker-stack.sh up development
+panda-estampados-and-kitsune all` desde su propio worktree para previsualizar su código.
 
 ## Ruta de ejecución
 
