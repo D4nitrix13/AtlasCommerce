@@ -21,7 +21,7 @@
   "scripts": {
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
-    "storybook:test": "pnpm storybook:build --quiet"
+    "storybook:test": "bun run storybook:build --quiet"
   },
   "devDependencies": {
     "storybook": "^10.6.0",
@@ -33,11 +33,11 @@
 }
 ```
 
-`.npmrc` incluye `public-hoist-pattern[]=*storybook*` para
-que `pnpm` hoiste las dependencias internas de Storybook
-(strict pnpm workspaces choca con su resolución por
-defecto — ver [Storybook FAQ]
-[storybook-faq]).
+Storybook internamente requiere dependencias hoisteadas.
+Bun aplica el patrón `hoist` por defecto (similar al nodo flat de
+pnpm), por lo que no hace falta `.npmrc` ni configuración
+adicional. Ver [Storybook FAQ]
+[storybook-faq].
 
 [storybook-faq]: https://storybook.js.org/docs/react/faq#using-strict-pnpm-workspaces "Storybook FAQ"
 
@@ -76,15 +76,15 @@ Define la Preview global (parámetros, decorators, theme).
 
 ```bash
 cd frontend
-pnpm install                  # primera vez
-pnpm storybook                # http://localhost:6006
+bun install                   # primera vez (o cuando cambian deps)
+bun run storybook             # http://localhost:6006
 ```
 
 Para CI:
 
 ```bash
-pnpm storybook:build          # genera storybook-static/
-pnpm storybook:test           # smoke test (build silencioso)
+bun run storybook:build       # genera storybook-static/
+bun run storybook:test        # smoke test (build silencioso)
 ```
 
 El build estático se sirve en
