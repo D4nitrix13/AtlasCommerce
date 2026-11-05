@@ -10,6 +10,8 @@
  *   - `buildCatalogHref`: mergea el patch sobre los filtros actuales,
  *     limpia params vacíos y resetea `page` a 1 salvo que el patch traiga
  *     su propio `page`.
+ *   - `buildCatalogQuery`: params del fetch al API del catálogo
+ *     (`page`/`per_page` siempre, `category` sólo cuando viene).
  *   - `buildActiveFilterChips`: un chip por filtro activo (categoría,
  *     color, precio min+max = UNO), sin chip de sort ni page; cada href
  *     remueve su filtro y resetea `page` a 1.
@@ -22,6 +24,7 @@ import {
   applyCatalogFilters,
   buildActiveFilterChips,
   buildCatalogHref,
+  buildCatalogQuery,
   parseCatalogFilters,
 } from '../../../src/lib/catalog-filters';
 
@@ -180,6 +183,30 @@ describe('buildCatalogHref', () => {
     expect(
       buildCatalogHref('/es/products', { category: 'textil', page: 4 }, { page: undefined }),
     ).toBe('/es/products?category=textil');
+  });
+});
+
+describe('buildCatalogQuery', () => {
+  it('arma page + per_page siempre', () => {
+    const query = buildCatalogQuery(3, 24);
+
+    expect(query.get('page')).toBe('3');
+    expect(query.get('per_page')).toBe('24');
+    expect(query.has('category')).toBe(false);
+  });
+
+  it('incluye category sólo cuando viene presente', () => {
+    const query = buildCatalogQuery(1, 24, 'textil');
+
+    expect(query.get('category')).toBe('textil');
+    expect(query.get('page')).toBe('1');
+    expect(query.get('per_page')).toBe('24');
+  });
+
+  it('omite category ausente o en blanco', () => {
+    expect(buildCatalogQuery(1, 24).has('category')).toBe(false);
+    expect(buildCatalogQuery(1, 24, '').has('category')).toBe(false);
+    expect(buildCatalogQuery(1, 24, '   ').has('category')).toBe(false);
   });
 });
 

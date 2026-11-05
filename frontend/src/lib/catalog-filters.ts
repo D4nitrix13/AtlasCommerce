@@ -133,6 +133,28 @@ export function applyCatalogFilters<T extends CatalogFilterable>(
 }
 
 /**
+ * Arma la query del fetch al API del catálogo (`GET /storefront/products`):
+ * `page`/`per_page` siempre, `category` sólo cuando viene presente (el
+ * backend la acepta en `ProductController.index` y así el `meta.total` y
+ * la paginación salen ya filtrados por categoría). Los demás filtros
+ * (color/precio/sort) siguen siendo locales — ver hallazgo H-1 del
+ * feature doc: el backend todavía no los acepta.
+ */
+export function buildCatalogQuery(
+  page: number,
+  perPage: number,
+  category?: string,
+): URLSearchParams {
+  const query = new URLSearchParams({
+    page: String(page),
+    per_page: String(perPage),
+  });
+  const categoryValue = category?.trim();
+  if (categoryValue) query.set('category', categoryValue);
+  return query;
+}
+
+/**
  * Arma el href de un link de filtro: `current` con el `patch` encima, sin
  * params vacíos y con `page` reseteado a 1 (elegir un filtro vuelve a la
  * primera página) salvo que el patch traiga su propio `page`.

@@ -54,6 +54,7 @@ import {
   applyCatalogFilters,
   buildActiveFilterChips,
   buildCatalogHref,
+  buildCatalogQuery,
   parseCatalogFilters,
 } from '../../../lib/catalog-filters';
 import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
@@ -98,14 +99,19 @@ const EMPTY_CATALOG_META: StorefrontPaginationMeta = {
  * Trae UNA página del catálogo. El backend ya pagina, así que la
  * respuesta trae `PAGE_SIZE` filas y no el catálogo entero.
  *
+ * `category` viaja al API cuando está activa (soportada por
+ * `ProductController.index`) para que `meta.total` y la paginación
+ * salgan ya filtrados por categoría. Los demás filtros (color/precio/
+ * sort) siguen locales hasta que el backend los acepte — hallazgo H-1.
+ *
  * `origin` / `host` no son opcionales: son lo que permite que el SSR
  * resuelva el tenant (ver docstring de `apiFetch`).
  */
-async function loadCatalogPage(page: number): Promise<StorefrontProductsResponse> {
-  const query = new URLSearchParams({
-    page: String(page),
-    per_page: String(PAGE_SIZE),
-  });
+async function loadCatalogPage(
+  page: number,
+  category?: string,
+): Promise<StorefrontProductsResponse> {
+  const query = buildCatalogQuery(page, PAGE_SIZE, category);
 
   try {
     return await apiFetch<StorefrontProductsResponse>(
@@ -138,7 +144,7 @@ async function loadCatalogPage(page: number): Promise<StorefrontProductsResponse
 const filters = parseCatalogFilters(Astro.url.searchParams);
 const requestedPage = filters.page ?? FIRST_PAGE;
 
-let catalog = await loadCatalogPage(requestedPage);
+let catalog = await loadCatalogPage(requestedPage, filters.category);
 
 // `?page=9999` (link viejo, crawler, typo) responde `data: []` con un
 // `meta.last_page` real. Se CLAMPA en vez de responder 404 — el catálogo
@@ -150,7 +156,7 @@ const clampedPage = clampPage(requestedPage, catalog.meta.last_page);
 let currentPage = requestedPage;
 if (clampedPage !== requestedPage) {
   currentPage = clampedPage;
-  catalog = await loadCatalogPage(currentPage);
+  catalog = await loadCatalogPage(currentPage, filters.category);
 }
 
 const apiProducts = catalog.data;
