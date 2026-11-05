@@ -89,9 +89,11 @@ import {
   collectHandednessOptions,
   hasFinishPicker,
   hasHandednessPicker,
+  resolveFinishPreviewImage,
   resolveSelectedFinishId,
   type ProductApiVariant,
 } from '../../../lib/product-variant-selection';
+import { swatchFallbackHex } from '../../../lib/product-card-swap';
 import PandaProductDetail from '../../../components/storefront/products/PandaProductDetail.astro';
 import { findPandaProduct, isPandaStore, pandaCategoryLabel } from '../../../data/panda-catalog';
 
@@ -1114,42 +1116,29 @@ const fbtLabels = {
                   <dd class="flex flex-col gap-3 text-sm font-medium text-slate-900">
                     <div class="flex flex-col items-start gap-2">
                       {/*
-                        Con un solo acabado no hay nada que elegir, pero el
-                        chip de color (o la miniatura si el acabado no tiene
-                        hex) sigue siendo información: dice cómo es el color.
-                        Se muestra fijo bajo la etiqueta, no como enlace,
-                        porque un enlace que no cambia nada es un control muerto.
+                        Con un solo acabado no hay nada que elegir: el dato
+                        de texto alcanza. El punto de color lo complementa
+                        (dice cómo es el color) sin repetir la foto de la
+                        galería — un enlace que no cambia nada es un control
+                        muerto.
                       */}
                       <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
-                      {!showFinishPicker && selectedFinish !== undefined && selectedFinish.hex !== undefined && (
+                      {!showFinishPicker && selectedFinish !== undefined && (
                         <span
                           aria-hidden="true"
-                          class="h-12 w-12 shrink-0 rounded-md border border-slate-200"
-                          style={`background-color: ${selectedFinish.hex};`}
+                          class="block h-12 w-12 shrink-0 rounded-full border border-slate-200 shadow"
+                          style={`background-color: ${swatchFallbackHex({ hex: selectedFinish.hex ?? null })};`}
                         />
                       )}
-                      {!showFinishPicker &&
-                        selectedFinish !== undefined &&
-                        selectedFinish.hex === undefined &&
-                        variantFirstImage[selectedFinish.id] !== undefined && (
-                          <img
-                            src={variantFirstImage[selectedFinish.id]}
-                            alt=""
-                            width={48}
-                            height={48}
-                            loading="lazy"
-                            decoding="async"
-                            class="h-12 w-12 shrink-0 rounded-md border border-slate-200 object-cover"
-                          />
-                        )}
                     </div>
-                    {/* Picker de variantes: chip de color hex por acabado —
+                    {/* Picker de variantes: punto de color hex por acabado —
                         una miniatura fotográfica por finish a 48px se lee
-                        como "imágenes repetidas". La miniatura queda sólo
-                        como fallback para acabados sin hex (fades, sunburst).
-                        Cada swatch es un <a> con ?finish=<id> que filtra la
-                        galería via query param (sin JS). Hover/focus muestra
-                        la foto de la variante vía data-finish-preview.
+                        como "imágenes repetidas". Sin hex del backend, el
+                        color de fallback mantiene los dots visualmente
+                        distintos. Cada swatch es un <a> con ?finish=<id> que
+                        filtra la galería via query param (el click navega,
+                        sin JS). Hover/focus previsualiza la foto de la
+                        variante en la galería vía data-finish-preview.
 
                         `showFinishPicker` oculta el control cuando el producto
                         ofrece un solo acabado: el dato de arriba alcanza y un
@@ -1162,7 +1151,7 @@ const fbtLabels = {
                       >
                         {finishesForHand.map((option) => {
                           const isActive = option.id === SELECTED_COLOR;
-                          const thumbSrc = variantFirstImage[option.id];
+                          const previewSrc = resolveFinishPreviewImage(option.id, variantFirstImage);
                           return (
                             <li>
                               <a
@@ -1170,35 +1159,19 @@ const fbtLabels = {
                                 title={option.label}
                                 aria-label={`Cambiar a ${option.label}`}
                                 aria-current={isActive ? 'true' : undefined}
-                                data-finish-preview={thumbSrc}
+                                data-finish-preview={previewSrc}
                                 class:list={[
-                                  'block h-12 w-12 overflow-hidden rounded-md border-2 bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
+                                  'block h-12 w-12 shrink-0 rounded-full border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
                                   isActive
-                                    ? 'border-slate-900'
-                                    : 'border-slate-200 opacity-70 hover:opacity-100',
+                                    ? 'border-slate-900 ring-2 ring-slate-900 ring-offset-1'
+                                    : 'border-slate-200 opacity-70 hover:opacity-100 hover:ring-2 hover:ring-slate-900 hover:ring-offset-1',
                                 ]}
                               >
-                                {option.hex !== undefined ? (
-                                  <span
-                                    aria-hidden="true"
-                                    class="block h-full w-full rounded-md"
-                                    style={`background-color: ${option.hex};`}
-                                  />
-                                ) : thumbSrc !== undefined ? (
-                                  <img
-                                    src={thumbSrc}
-                                    alt=""
-                                    loading="lazy"
-                                    decoding="async"
-                                    class="h-full w-full rounded-md object-cover"
-                                  />
-                                ) : (
-                                  <span
-                                    aria-hidden="true"
-                                    class="block h-full w-full rounded-md"
-                                    style="background-color: #e2e8f0;"
-                                  />
-                                )}
+                                <span
+                                  aria-hidden="true"
+                                  class="block h-full w-full rounded-full"
+                                  style={`background-color: ${swatchFallbackHex({ hex: option.hex ?? null })};`}
+                                />
                               </a>
                             </li>
                           );
@@ -1210,33 +1183,46 @@ const fbtLabels = {
                       // Preview de acabado: hover/focus del swatch muestra la
                       // foto de la variante en la galería sin navegar; al
                       // salir se restaura la imagen que estaba visible.
+                      function setupFinishPreview(link: HTMLAnchorElement): void {
+                        const previewSrc = link.dataset.finishPreview;
+                        if (previewSrc === undefined || previewSrc === '') return;
+                        const slideImg = document.querySelector<HTMLImageElement>(
+                          '[data-gallery-slide] img',
+                        );
+                        if (slideImg === null) return;
+
+                        const originalSrc = slideImg.getAttribute('src') ?? '';
+                        // La imagen de la galería lleva srcset: con srcset
+                        // presente el browser elige la resolución del srcset e
+                        // ignora el cambio de src (el preview no se veía).
+                        // Se quita durante el preview y se restaura al salir.
+                        const originalSrcset = slideImg.getAttribute('srcset') ?? '';
+                        let isActive = false;
+
+                        const activate = (): void => {
+                          if (isActive) return;
+                          isActive = true;
+                          slideImg.setAttribute('src', previewSrc);
+                          slideImg.removeAttribute('srcset');
+                        };
+                        const deactivate = (): void => {
+                          if (!isActive) return;
+                          isActive = false;
+                          slideImg.setAttribute('src', originalSrc);
+                          if (originalSrcset !== '') {
+                            slideImg.setAttribute('srcset', originalSrcset);
+                          }
+                        };
+
+                        link.addEventListener('mouseenter', activate);
+                        link.addEventListener('mouseleave', deactivate);
+                        link.addEventListener('focus', activate);
+                        link.addEventListener('blur', deactivate);
+                      }
+
                       document
                         .querySelectorAll<HTMLAnchorElement>('a[data-finish-preview]')
-                        .forEach((link) => {
-                          const previewSrc = link.dataset.finishPreview;
-                          if (previewSrc === undefined || previewSrc === '') return;
-                          const slideImg = document.querySelector<HTMLImageElement>(
-                            '[data-gallery-slide] img',
-                          );
-                          if (slideImg === null) return;
-
-                          let originalSrc = '';
-                          const activate = (): void => {
-                            originalSrc = slideImg.src;
-                            slideImg.src = previewSrc;
-                          };
-                          const deactivate = (): void => {
-                            if (originalSrc !== '') {
-                              slideImg.src = originalSrc;
-                              originalSrc = '';
-                            }
-                          };
-
-                          link.addEventListener('mouseenter', activate);
-                          link.addEventListener('mouseleave', deactivate);
-                          link.addEventListener('focus', activate);
-                          link.addEventListener('blur', deactivate);
-                        });
+                        .forEach((link) => setupFinishPreview(link));
                     </script>
 
                     {/* Mano — dos ramas, porque el catálogo actual ofrece
