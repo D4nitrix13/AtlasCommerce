@@ -1381,6 +1381,7 @@ export type TranslationKey =
   | 'storefront.footer.privacy'
   | 'storefront.footer.help'
   | 'storefront.footer.contact'
+  | 'storefront.footer.socialLabel'
   | 'storefront.footer.copyright'
 
   // ─── storefront: search ─────────────────────────────────────────────

@@ -1263,6 +1263,7 @@ const es: Translations = {
   'storefront.footer.privacy': 'Privacidad',
   'storefront.footer.help': 'Ayuda',
   'storefront.footer.contact': 'Contacto',
+  'storefront.footer.socialLabel': 'Redes sociales',
   'storefront.footer.copyright': '© {year} {brand}. Todos los derechos reservados.',
 
   // ─── account: addresses ────────────────────────────────────────

@@ -1256,6 +1256,7 @@ const en: Translations = {
   'storefront.footer.privacy': 'Privacy',
   'storefront.footer.help': 'Help',
   'storefront.footer.contact': 'Contact',
+  'storefront.footer.socialLabel': 'Social media',
   'storefront.footer.copyright': '© {year} {brand}. All rights reserved.',
 
   // ─── account: addresses ────────────────────────────────────────

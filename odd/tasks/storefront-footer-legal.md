@@ -85,11 +85,11 @@ legales/informativas que hoy apuntan a `#`.
 - [ ] Checks: `php artisan test` filtrado, lint PHP.
 
 ### T4 — Footer consume redes desde BD
-- [ ] `StorefrontLayout.astro` resuelve las redes activas (SSR) y las pasa al footer.
-- [ ] Fallback: si no hay filas configuradas, renderizar Facebook, Instagram,
+- [x] `StorefrontLayout.astro` resuelve las redes activas (SSR) y las pasa al footer.
+- [x] Fallback: si no hay filas configuradas, renderizar Facebook, Instagram,
       TikTok y WhatsApp **decorativos sin href** (no redirigen).
-- [ ] Con URL asignada → `<a target="_blank" rel="noopener noreferrer">`.
-- [ ] Checks: `bun run test`, `astro check`, `build`.
+- [x] Con URL asignada → `<a target="_blank" rel="noopener noreferrer">`.
+- [x] Checks: `bun run test`, `astro check`, `build`.
 
 ### T5 — 5 páginas legales (Argentina)
 - [ ] `frontend/src/pages/[locale]/{about,terms,privacy,help,contact}.astro`.
@@ -129,9 +129,9 @@ _(se completa por tarea)_
 | Tarea | Estado | Commit | Verificación |
 |---|---|---|---|
 | T1 | hecha | `8e259118` | `bun run test`: 525 tests OK · `astro check`: 0 errors · `eslint` 3 archivos: exit 0 |
-| T2 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · capturas 1440/390 en `output/playwright/t2-footer-*` |
-| T3 | hecha | (este) | TDD: RED 7 failed (404 ruta inexistente) → GREEN `php artisan test --filter=StorefrontSocialLink`: 7 passed (43 assertions) |
-| T4 | pendiente | — | — |
+| T2 | hecha | `f24202f3` | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · capturas 1440/390 en `output/playwright/t2-footer-*` |
+| T3 | hecha | `c5343593` | TDD: RED 7 failed (404 ruta inexistente) → GREEN `php artisan test --filter=StorefrontSocialLink`: 7 passed (43 assertions) |
+| T4 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · e2e con fila real en BD (captura `t4-footer-with-link-1440.png`) revertido después |
 | T5 | pendiente | — | — |
 | T6 | pendiente | — | — |
 
@@ -186,6 +186,46 @@ _(se completa por tarea)_
   `BackfillVariantFinishCommandTest`) y no tocan esta feature.
 - Pendiente: pint/phpstan sobre los archivos tocados (T6).
 
+### Notas T4
+
+- Fetch SSR siguiendo la convención de `pages/[locale]/index.astro`:
+  `apiFetch` + `API_ENDPOINTS.storefront.socialLinks` (nuevo en
+  `lib/endpoints.ts`) con `origin`/`host` de `Astro.url`, try/catch
+  fail-soft → `[]`. El footer aplica el fallback cuando la lista
+  mapeada queda vacía (fetch falló, 0 filas, o plataformas inválidas).
+- Bloque de redes ahora es `<ul aria-label={t['storefront.footer.socialLabel']}>`
+  con `<li>` por icono — corrige el bug de a11y del `<div>` sin `role`.
+  Clave nueva `storefront.footer.socialLabel` en es/en/types.
+- Mapeo `platform` → variante con guard `value in SOCIAL_ICON_PATHS`
+  (lee el mismo mapa de `social-icon-paths.ts`): plataformas desconocidas
+  se ignoran sin romper. Orden = `sort_order` del backend, sin reordenar.
+- Verificación con datos: fila `instagram` activa (store 1) → el icono
+  pasó a `<a target="_blank" rel="noopener noreferrer">` con la URL
+  (snapshot + `t4-footer-social-from-db.png`); fila eliminada después
+  (0 filas restantes) y el fallback volvió a renderizar los 4 spans.
+- `bunx eslint` exige `T[]` y no `Array<T>` (`@typescript-eslint/array-type`).
+
+### Notas T4
+
+- `StorefrontLayout.astro` resuelve las redes via `apiFetch(API_ENDPOINTS.storefront.socialLinks)`
+  (misma convención que el resto del frontend) y se las pasa a `StorefrontFooter`.
+  **Fail-soft**: si el fetch falla, devuelve `[]` y el footer cae al fallback —
+  el footer nunca tumba la página.
+- `StorefrontFooter.astro` mappea `platform` → variante de `SocialIcon` ignorando
+  con gracia plataformas fuera del enum. Si hay filas, muestra SOLO esas (que es
+  lo pedido: el admin decide qué redes se exponen). Sin filas → las 4 por defecto
+  (facebook, instagram, tiktok, whatsapp) decorativas, sin href.
+- A11y corregido: el bloque de redes ahora es `<ul aria-label={t['storefront.footer.socialLabel']}>`
+  con `<li>` por icono (antes era `<div>` sin `role`, y el label lo ignoraban los
+  lectores de pantalla). Clave i18n nueva `storefront.footer.socialLabel` en
+  es/en/types.
+- **Verificación e2e**: se insertó una fila `store_social_links` (instagram con
+  URL) via `psql`, el footer la renderizó como `<a href="https://instagram.com/...">`
+  (confirmado en el snapshot de playwright), y la fila se revirtió después
+  (tabla quedó en 0 filas).
+- El writer T4 se estancó (76 turnos sin cerrar) y fue cancelado; el
+  orquestador corrió la verificación completa y la e2e.
+
 ## Próximo paso
 
-T4 — Footer consume redes desde BD.
+T5 — 5 páginas legales (Argentina).
