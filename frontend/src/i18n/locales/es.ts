@@ -541,6 +541,15 @@ const es: Translations = {
   'storefront.cart.v3.continueShopping': 'Continuar comprando',
   'storefront.cart.v3.remove': 'Quitar',
   'storefront.cart.v3.quantity': 'Cantidad',
+  'storefront.cart.v3.freeShippingProgress': 'Te faltan {amount} para envío gratis',
+  'storefront.cart.v3.freeShippingReached': 'Tenés envío gratis',
+  'storefront.cart.v3.steps.bag': 'Bolsa',
+  'storefront.cart.v3.steps.checkout': 'Checkout',
+  'storefront.cart.v3.steps.done': 'Listo',
+  'storefront.cart.v3.trust.shipping': 'Envío gratis sobre $50',
+  'storefront.cart.v3.trust.guarantee': 'Garantía oficial',
+  'storefront.cart.v3.trust.returns': 'Devolución 30 días',
+  'storefront.cart.v3.trust.secure': 'Pago 100% seguro',
 
   // ─── storefront: account orders v3 (Bonfire mockup 10) ─────────────
   'storefront.account.orders.v3.title': 'Mis órdenes',

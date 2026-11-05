@@ -20,9 +20,12 @@ const labels = {
   total: 'Total',
   checkout: 'Ir al checkout',
   empty: 'Tu carrito está vacío.',
+  emptyHint: 'Explorá el catálogo y agregá productos.',
   emptyCta: 'Explorar productos',
   continueShopping: 'Continuar comprando',
   itemsCount: '{count} productos en tu carrito',
+  freeShippingProgress: 'Te faltan {amount} para envío gratis',
+  freeShippingReached: 'Tenés envío gratis',
 };
 
 const baseProps = {
@@ -138,7 +141,11 @@ describe('CartView', (): void => {
     seedLine(1);
     render(<CartView {...baseProps} />);
 
-    const checkoutCta = screen.getByRole('link', { name: labels.checkout });
-    expect(checkoutCta.getAttribute('href')).toBe('/es/checkout');
+    // Resumen + barra sticky mobile comparten el mismo destino.
+    const checkoutCtas = screen.getAllByRole('link', { name: labels.checkout });
+    expect(checkoutCtas.length).toBeGreaterThan(0);
+    for (const cta of checkoutCtas) {
+      expect(cta.getAttribute('href')).toBe('/es/checkout');
+    }
   });
 });
