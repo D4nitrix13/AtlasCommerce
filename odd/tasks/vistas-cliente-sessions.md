@@ -11,8 +11,9 @@
 > modelo de ejecución de ese plan (PRs por vista en 3 sprints) por el
 > modelo sesión-por-vista.
 >
-> **Estado**: definido. Detalles del usuario: **pendientes** (sección
-> `Detalles del usuario` al final de cada sesión).
+> **Estado**: definido. Detalles del usuario: sesión 3 **recibidos**
+> (2026-11-05); resto pendientes (sección `Detalles del usuario` al
+> final de cada sesión).
 
 ## Antes de editar cualquier archivo (todas las sesiones)
 
@@ -151,18 +152,44 @@ quiera cambiar en ella.
 - 525 tests frontend verdes · backend 25 tests verdes · build OK ·
   capturas en `output/playwright/pdp-*`.
 
-**Tareas**
-1. Aplicar los **detalles del usuario** sobre esta vista.
-2. Revisión visual fina de las capturas existentes (1440 + 390) y de lo
-   que el usuario señale.
-3. Pulir interacción talla/acabado ↔ galería si los detalles lo piden.
-4. **Portar el backend Fase 8** (PR #169 cerrado por conflicto; código
-   portable: migraciones + modelos + seeders de `product_faqs` y
-   `product_extended_descriptions`, y `product_highlights`) para que los
-   tabs Preguntas frecuentes / Descripción extendida tengan datos reales.
-   `product_grouped_specs`/`product_spec_values` requieren decisión de
-   diseño vs atributos EAV (la Ficha técnica hoy se alimenta de EAV).
-5. Cierre común.
+**Plan del lote 2 (2026-11-05 — detalles del usuario, ver sección final)**
+Worktree `~/Code/AtlasCommerce-worktrees/pdp` · rama `feat/views/pdp`.
+Una work-unit commit por tarea (convencional en español, sin push/merge
+sin pedido del usuario). TDD estricto (config global), runner
+`bun test` (frontend): RED previo en lógica (swap/preview/quantity);
+layout se valida con tests de clases (estilo `catalog-grid-css.test.ts`)
++ capturas. Guía ~400 líneas autoreadas por work-unit.
+
+1. **Tabs a la sección de datos** — mover `ProductDetailTabs` del
+   bloque aparte (`[slug].astro:1348`, bajo el grid) a la sección de
+   datos del producto (columna derecha), reemplazando la descripción
+   suelta; tab bar compacta. [delegated writer — 2 archivos]
+2. **Talla + Cantidad** — `ProductSizeGrid.astro` (botones grandes en
+   grilla) → pills compactas inline; `<select>` nativo de
+   `ProductPurchaseBar.tsx` → stepper − / + (semántica de
+   `purchase-quantity.ts`, patrón de `ProductQuantitySelector.astro`).
+   Respetar `aria-pressed`, hidden input y `?size=`. [delegated]
+3. **Cards de rieles parejas** — `ProductRelated.astro` (y FBT /
+   RecentlyViewed por consistencia): `h-full` + footer `mt-auto` y media
+   `aspect-square` con `object-cover` (hoy `object-contain` deja
+   huecos). Sin estirar ni deformar imágenes. [inline si 1 archivo]
+4. **Acabados: color real + hover cambia imagen** — selector ACABADO
+   (`[slug].astro:1115-1190`): swatches hex en vez de thumbnails
+   (hoy "parecen imágenes repetidas"); hover/focus del swatch cambia la
+   imagen (cards: `setupVariantPreview` existe pero no se percibe —
+   fix; galería: preview de la variante). i18n de "Acabado"/"Precio"
+   si se tocan esas líneas. [delegated]
+5. **Hover imagen → trasera en cards de rieles** — cablear
+   `product-card-swap` (`deriveProductCardSwap`, `imageUrlSecondary`,
+   CSS `img[data-role='back']` como `ProductCard.astro`) en
+   ProductRelated / FBT / RecentlyViewed (hoy no lo usan). [delegated]
+6. **Cierre común** — `bun run test`, `astro check`, `build`, lint por
+   archivo (0 errores nuevos vs HEAD), capturas 1440/390.
+
+**Diferido (fuera de este lote)**: port del backend Fase 8
+(`product_faqs`, `product_extended_descriptions`, `product_highlights`;
+PR #169 cerrado por conflicto) — `product_grouped_specs`/
+`product_spec_values` requieren decisión de diseño vs atributos EAV.
 
 **Aceptación**: sin regresiones (525 tests siguen verdes), detalles del
 usuario aplicados, capturas nuevas.
@@ -264,7 +291,22 @@ Panda (features B2B del tenant).
 
 - **Sesión 1 (Home)**: _pendiente_
 - **Sesión 2 (Catálogo + Búsqueda)**: _pendiente_
-- **Sesión 3 (PDP)**: _pendiente_
+- **Sesión 3 (PDP)**: **recibidos 2026-11-05** (worktree
+  `~/Code/AtlasCommerce-worktrees/pdp`, rama `feat/views/pdp`):
+  1. Las tabs (Descripción | Ficha técnica | Envíos) van en la **misma
+     sección donde están los datos del producto** — hoy están aparte y
+     "es horrible". Objetivo general: **"aprovechar cada espacio"**.
+  2. Rediseñar el componente de **Tamaño/talla** ("representa su
+     información de otra manera") y el de **Cantidad** ("se ve horrible").
+  3. En **"También Te Puede Gustar"** una card se ve más alta que otra:
+     corregir alturas — "evita estirar o redimensionar la imagen ya que
+     eso generaría huecos".
+  4. **Acabados**: "parecen imágenes repetidas"; además, al poner el
+     cursor sobre el circulito del acabado **no se cambia la imagen**
+     (debe cambiar).
+  5. "cuando pongo el cursor sobre una imagen de producto debe mostrarse
+     ese mismo producto pero **la imagen trasera**" (semántica
+     `isHover`/`back` ya existente en catálogo).
 - **Sesión 4 (Carrito + Checkout)**: _pendiente_
 - **Sesión 5 (Cuenta + Auth)**: _pendiente_
 - **Sesión 6 (B2B, opcional)**: _pendiente_
