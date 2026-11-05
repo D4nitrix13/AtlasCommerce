@@ -160,7 +160,7 @@ services:
       # 401 porque Sanctum no reconoce el host como stateful. Lista
       # espejo de docker/caddy/Caddyfile @panda_dev handle (mismos
       # hosts que el dev Caddyfile enruta a esta instancia).
-      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000,localhost:4321,panda-estampados.com,www.panda-estampados.com,admin.panda-estampados.com,kitsune.com,www.kitsune.com,admin.kitsune.com,127.0.0.1,127.0.0.1:8000
+      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000,localhost:4321,localhost:5321,127.0.0.1,127.0.0.1:8000,127.0.0.1:5321,panda-estampados.com,www.panda-estampados.com,admin.panda-estampados.com,kitsune.com,www.kitsune.com,admin.kitsune.com,panda-estampados.com:5321,www.panda-estampados.com:5321,admin.panda-estampados.com:5321,kitsune.com:5321,www.kitsune.com:5321,admin.kitsune.com:5321
     extra_hosts:
       - "host.docker.internal:host-gateway"
       # F0.x follow-up: el SSR del frontend hace fetch a `${Astro.url.origin}/api/*`
