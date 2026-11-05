@@ -131,9 +131,15 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
       `astro check` 0 errores · lint 0 errores nuevos. Nota: la ficha técnica
       enchufó `attributes`/`sizes` EAV que el PDP descartaba; accordions de
       garantía/estuche/ajuste movidos al tab Envíos.
-- [ ] **T4** Backend `product_relations`: migración, modelo, endpoint
+- [x] **T4** Backend `product_relations`: migración, modelo, endpoint
       storefront, `ProductRelationsSeeder` (FBT + you_may_also_like). TDD.
-      _Route: delegated writer._
+      _Route: inline — la delegación falló 2 veces (`general-3`
+      ContentFilterError del proveedor; `general-4` hang en el turno 28
+      sin escrituras)._ _Commit `0ff4b199`._ Checks: RED 7 failed → GREEN
+      7 passed (17 assertions) via `artisan test --filter=StorefrontProductRelationsTest`;
+      migración aplicada en dev; seeder idempotente → 14 bought_together +
+      15 you_may_also_like. Bug corregido durante la siembra: el `whereIn`
+      solo cargaba slugs origen (los destinos sin fila propia se perdían).
 - [ ] **T5** Backend `recently_viewed_products`: migración, modelo, endpoints
       POST/GET con cap 20 + move-to-front, identidad user/guest. TDD.
       _Route: delegated writer._
