@@ -5,13 +5,12 @@
  * Composición:
  *   - Top: grid 2-col con gallery uniforme (2-col image grid) +
  *     aside pegajoso de info (sticky top-20). Aside acomoda título,
- *     tag "Limitado" condicional, dl 2-col Precio/Acabado, shipping
- *     inline, selectores (condición, tamaño, acabado), CTA grande,
- *     3 accordions de inclusión y link "Buscar una tienda".
- *   - Debajo: reseñas full-width → ficha técnica (ProductDetailsBlock)
- *     → highlights (ProductHighlights) → specs por categoría
- *     (ProductSpecificationsByCategory) → features carousel →
- *     productos relacionados.
+ *     tag "Limitado" condicional, dl 2-col Precio/Acabado/mano,
+ *     selectores (condición, tamaño), CTA grande, link "Buscar una
+ *     tienda" y, al pie de la misma sección, las tabs de detalle
+ *     (Descripción · Ficha técnica · Reseñas · Preguntas · Envíos).
+ *   - Debajo del grid: rieles (comprados juntos, relacionados,
+ *     vistos recientemente).
  *
  * Decisiones:
  *  - Variants estáticas hasta cart store: conditionOptions y
@@ -55,7 +54,6 @@ import ProductFitSelector from '../../../components/storefront/products/ProductF
 import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
 import ProductCTAs from '../../../components/storefront/products/ProductCTAs.astro';
 import ProductPurchaseBar from '../../../components/storefront/products/ProductPurchaseBar';
-import ProductDetailsBlock from '../../../components/storefront/products/ProductDetailsBlock.astro';
 import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
 import ProductDetailTabs from '../../../components/storefront/products/ProductDetailTabs.astro';
 import { getServerDictionary } from '../../../i18n/server';
@@ -1242,17 +1240,6 @@ const fbtLabels = {
                 </div>
               </dl>
 
-              <ProductDetailsBlock
-                variant="inline"
-                intro={detail.description}
-                moreLabel={t['storefront.products.detail.v4.details.more']}
-                lessLabel={t['storefront.products.detail.v4.details.less']}
-              />
-
-              <p class="text-xs text-slate-500">
-                {t['storefront.products.detail.v4.shippingInline']}
-              </p>
-
               {detail.hasCondition === true && (
                 <ProductFitSelector
                   legend={t['storefront.products.detail.v4.condition.legend']}
@@ -1338,37 +1325,37 @@ const fbtLabels = {
                   <path d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </a>
+
+              {/* Tabs de detalle (Descripción · Ficha técnica · Reseñas ·
+                  Preguntas · Envíos) al pie de la sección de datos: el
+                  usuario pidió las tabs junto a los datos del producto,
+                  no como bloque aparte bajo el grid. */}
+              <ProductDetailTabs
+                labels={tabLabels}
+                description={detail.description}
+                highlights={detail.highlights}
+                extendedDescriptions={detail.extendedDescriptions}
+                featuredArticle={detail.featuredArticle}
+                groupedSpecs={detail.groupedSpecs}
+                expandedSpecs={expandedSpecs}
+                attributes={product.attributes}
+                sizes={product.sizes}
+                booleanLabels={{
+                  yes: t['admin.catalog.products.detail.specs.yes'],
+                  no: t['admin.catalog.products.detail.specs.no'],
+                }}
+                reviews={REVIEWS}
+                reviewsLabels={reviewsLabels}
+                viewAllHref={VIEW_ALL_HREF}
+                writeHref={WRITE_REVIEW_HREF}
+                apiBaseUrl="/api/v1"
+                loginHref={`/${locale}/login`}
+                faqs={detail.faqs}
+                shippingInline={t['storefront.products.detail.v4.shippingInline']}
+                inclusionAccordions={INCLUSION_ACCORDIONS}
+              />
             </aside>
           </section>
-
-          {/* Tabs de información (Descripción · Ficha técnica · Reseñas ·
-              Preguntas frecuentes · Envíos). Reemplaza los bloques apilados
-              de la PDP: descripción, artículo destacado, highlights, specs,
-              descripción extendida, FAQ y reseñas. */}
-          <ProductDetailTabs
-            labels={tabLabels}
-            description={detail.description}
-            highlights={detail.highlights}
-            extendedDescriptions={detail.extendedDescriptions}
-            featuredArticle={detail.featuredArticle}
-            groupedSpecs={detail.groupedSpecs}
-            expandedSpecs={expandedSpecs}
-            attributes={product.attributes}
-            sizes={product.sizes}
-            booleanLabels={{
-              yes: t['admin.catalog.products.detail.specs.yes'],
-              no: t['admin.catalog.products.detail.specs.no'],
-            }}
-            reviews={REVIEWS}
-            reviewsLabels={reviewsLabels}
-            viewAllHref={VIEW_ALL_HREF}
-            writeHref={WRITE_REVIEW_HREF}
-            apiBaseUrl="/api/v1"
-            loginHref={`/${locale}/login`}
-            faqs={detail.faqs}
-            shippingInline={t['storefront.products.detail.v4.shippingInline']}
-            inclusionAccordions={INCLUSION_ACCORDIONS}
-          />
 
           {/* Features carousel — removido: sección redundante con Highlights. */}
 
