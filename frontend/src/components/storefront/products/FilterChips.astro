@@ -1,0 +1,43 @@
+---
+/**
+ * Chips de filtros activos del PLP (`/[locale]/products`, vista 04).
+ *
+ * Un chip removible por filtro activo (categoría, color, precio — este
+ * último con min+max en UN solo chip). `sort` y `page` no generan chip:
+ * orden y paginación no son filtros. Cada chip es un `<a href>` nativo
+ * (armado por `buildActiveFilterChips` vía `buildCatalogHref`) que
+ * remueve SU filtro y resetea `page` — navegación pura, sin JS, mismo
+ * patrón que FiltersSidebar. Sin filtros activos no se renderiza nada.
+ */
+import type { ActiveFilterChip } from '../../../lib/catalog-filters';
+
+interface Props {
+  chips: ActiveFilterChip[];
+  /** Plantilla i18n con `{label}` (ej. "Quitar filtro: {label}"). */
+  removeAriaLabel: string;
+}
+
+const { chips, removeAriaLabel } = Astro.props;
+const hasChips = chips.length > 0;
+---
+
+{
+  hasChips && (
+    <ul class="flex flex-wrap gap-2">
+      {chips.map((chip) => (
+        <li class="list-none">
+          <a
+            href={chip.href}
+            aria-label={removeAriaLabel.replace('{label}', chip.label)}
+            class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+          >
+            <span>{chip.label}</span>
+            <span aria-hidden="true" class="text-[14px] leading-none text-slate-400">
+              ×
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}

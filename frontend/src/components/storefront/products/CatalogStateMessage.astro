@@ -1,0 +1,39 @@
+---
+/**
+ * Tarjeta de estado del PLP (`/[locale]/products`, vista 04): error
+ * del API, catálogo vacío y variante "categoría sin resultados".
+ *
+ * Presentacional pura — recibe strings ya resueltas del i18n y, para
+ * los estados con salida, un `linkHref` armado por la página (retry de
+ * la misma URL, o `buildCatalogHref` para limpiar la categoría). El
+ * link es un `<a href>` nativo: los estados funcionan sin JS, igual
+ * que el resto del catálogo (SSR por query params).
+ */
+interface Props {
+  /** Mensaje principal del estado. */
+  title: string;
+  /** Hint opcional bajo el título (sólo el empty state genérico lo usa). */
+  hint?: string;
+  /** Href del link de salida (retry / limpiar filtro). Sin link si se omite. */
+  linkHref?: string;
+  /** Label del link de salida. */
+  linkLabel?: string;
+}
+
+const { title, hint, linkHref, linkLabel } = Astro.props;
+---
+
+<div class="rounded-2xl border border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)] p-10 text-center">
+  <p class="text-base font-semibold text-[var(--ink,#1c1917)]">{title}</p>
+  {hint && (
+    <p class="mt-2 text-sm text-[var(--ink-soft,#57534e)]">{hint}</p>
+  )}
+  {linkHref && linkLabel && (
+    <a
+      href={linkHref}
+      class="mt-4 inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+    >
+      {linkLabel}
+    </a>
+  )}
+</div>

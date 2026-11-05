@@ -133,6 +133,28 @@ export function applyCatalogFilters<T extends CatalogFilterable>(
 }
 
 /**
+ * Arma la query del fetch al API del catálogo (`GET /storefront/products`):
+ * `page`/`per_page` siempre, `category` sólo cuando viene presente (el
+ * backend la acepta en `ProductController.index` y así el `meta.total` y
+ * la paginación salen ya filtrados por categoría). Los demás filtros
+ * (color/precio/sort) siguen siendo locales — ver hallazgo H-1 del
+ * feature doc: el backend todavía no los acepta.
+ */
+export function buildCatalogQuery(
+  page: number,
+  perPage: number,
+  category?: string,
+): URLSearchParams {
+  const query = new URLSearchParams({
+    page: String(page),
+    per_page: String(perPage),
+  });
+  const categoryValue = category?.trim();
+  if (categoryValue) query.set('category', categoryValue);
+  return query;
+}
+
+/**
  * Arma el href de un link de filtro: `current` con el `patch` encima, sin
  * params vacíos y con `page` reseteado a 1 (elegir un filtro vuelve a la
  * primera página) salvo que el patch traiga su propio `page`.
@@ -161,4 +183,83 @@ export function buildCatalogHref(
   const query = params.toString();
   if (!query) return base;
   return `${base}${base.includes('?') ? '&' : '?'}${query}`;
+}
+
+/** Chip de filtro activo listo para renderizar (label ya resuelto). */
+export interface ActiveFilterChip {
+  label: string;
+  /** Href que remueve ESTE filtro y resetea `page` a 1 (sin JS). */
+  href: string;
+}
+
+/**
+ * Insumos de label para `buildActiveFilterChips`: plantillas del i18n
+ * resueltas por la página (`{min}`/`{max}` se interpolan en USD) y
+ * mapas slug → label humano (fallback: el slug).
+ */
+export interface ActiveFilterChipLabels {
+  priceBoth: string;
+  priceMin: string;
+  priceMax: string;
+  categories?: Record<string, string>;
+  colors?: Record<string, string>;
+}
+
+/** Cents → USD de display para los labels ("$30"). */
+function usdLabel(cents: number): string {
+  return `$${cents / 100}`;
+}
+
+/** Label del chip de precio según qué extremos del rango vienen cargados. */
+function priceChipLabel(filters: CatalogFilters, labels: ActiveFilterChipLabels): string {
+  const min = filters.minPriceCents;
+  const max = filters.maxPriceCents;
+  if (min !== undefined && max !== undefined) {
+    return labels.priceBoth.replace('{min}', usdLabel(min)).replace('{max}', usdLabel(max));
+  }
+  if (min !== undefined) return labels.priceMin.replace('{min}', usdLabel(min));
+  if (max !== undefined) return labels.priceMax.replace('{max}', usdLabel(max));
+  return '';
+}
+
+/**
+ * Chips de los filtros ACTIVOS de la URL: uno por categoría, uno por
+ * color y UNO por precio (min+max juntos). `sort` y `page` no generan
+ * chip — orden y paginación no son filtros. Cada chip trae el href que
+ * remueve su filtro y resetea `page` a 1 (mismo mecanismo de links que
+ * el sidebar; ver `buildCatalogHref`).
+ */
+export function buildActiveFilterChips(
+  base: string,
+  filters: CatalogFilters,
+  labels: ActiveFilterChipLabels,
+): ActiveFilterChip[] {
+  const chips: ActiveFilterChip[] = [];
+
+  if (filters.category) {
+    chips.push({
+      label: labels.categories?.[filters.category] ?? filters.category,
+      href: buildCatalogHref(base, filters, { category: undefined }),
+    });
+  }
+
+  if (filters.color) {
+    chips.push({
+      label: labels.colors?.[filters.color] ?? filters.color,
+      href: buildCatalogHref(base, filters, { color: undefined }),
+    });
+  }
+
+  const hasPrice = filters.minPriceCents !== undefined || filters.maxPriceCents !== undefined;
+  if (hasPrice) {
+    chips.push({
+      label: priceChipLabel(filters, labels),
+      href: buildCatalogHref(base, filters, {
+        minPriceCents: undefined,
+        maxPriceCents: undefined,
+      }),
+    });
+  }
+
+  return chips;
 }

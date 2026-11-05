@@ -9,7 +9,8 @@
  * Compone:
  *  - Header: H1 + subtítulo (conteo) a la izquierda, SortDropdown a la derecha.
  *  - Layout lg+ en 2 columnas (sidebar 264px + grid flexible).
- *  - Sidebar: FiltersSidebar con 4 grupos (Categoría, Precio, Color, Talla).
+ *  - Sidebar: FiltersDisclosure (drawer < lg + panel estático ≥ lg)
+ *    sobre FiltersSidebar con 4 grupos (Categoría, Precio, Color, Talla).
  *  - Grid: 8 ProductCardCatalog con `data-reveal-stagger` para la animación
  *    Bonfire de scroll-driven (script scroll-fx.ts).
  *  - Pagination: Pagination primitive al pie (links SSR-friendly).
@@ -38,7 +39,9 @@
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import ProductCardCatalog from '../../../components/storefront/products/ProductCardCatalog.astro';
-import FiltersSidebar from '../../../components/storefront/products/FiltersSidebar.astro';
+import FiltersDisclosure from '../../../components/storefront/products/FiltersDisclosure.astro';
+import FilterChips from '../../../components/storefront/products/FilterChips.astro';
+import CatalogStateMessage from '../../../components/storefront/products/CatalogStateMessage.astro';
 import SortDropdown from '../../../components/storefront/products/SortDropdown.astro';
 import Pagination from '../../../components/ui/Pagination.astro';
 import { getServerDictionary } from '../../../i18n/server';
@@ -51,7 +54,9 @@ import {
 } from '../../../lib/pagination';
 import {
   applyCatalogFilters,
+  buildActiveFilterChips,
   buildCatalogHref,
+  buildCatalogQuery,
   parseCatalogFilters,
 } from '../../../lib/catalog-filters';
 import { LA_VOZ_BRANDS, LA_VOZ_CATEGORIES } from '../../../data/la-voz-mock';
@@ -84,7 +89,12 @@ const cartCount = 0;
 // Fase 5 plan v3: storage keys hasheadas via StorageKeyDeriver.
 // El frontend las consume via `assetUrl(storage_key)` (lib/asset.ts).
 const PAGE_SIZE = 24;
-/** Catálogo vacío cuando el backend no responde: dispara el empty state. */
+/**
+ * Meta neutra para las derivaciones cuando el API falló (`ok: false`).
+ * NO dispara el empty state: el render del error vive en el template
+ * (`hasCatalogError`) y el empty state exige un fetch exitoso con 0
+ * resultados reales.
+ */
 const EMPTY_CATALOG_META: StorefrontPaginationMeta = {
   current_page: FIRST_PAGE,
   per_page: PAGE_SIZE,
@@ -93,20 +103,40 @@ const EMPTY_CATALOG_META: StorefrontPaginationMeta = {
 };
 
 /**
+ * Resultado del fetch del catálogo: éxito con la página pedida, o
+ * fallo del API. Discriminado para que el render separe el estado
+ * ERROR (API caída) del estado VACÍO (catálogo sin productos) — antes
+ * el catch devolvía `EMPTY_CATALOG_META` y los mezclaba en el mismo
+ * empty state.
+ */
+type CatalogPageResult =
+  | { ok: true; data: BackendProduct[]; meta: StorefrontPaginationMeta }
+  | { ok: false };
+
+/**
  * Trae UNA página del catálogo. El backend ya pagina, así que la
  * respuesta trae `PAGE_SIZE` filas y no el catálogo entero.
+ *
+ * `category` viaja al API cuando está activa (soportada por
+ * `ProductController.index`) para que `meta.total` y la paginación
+ * salgan ya filtrados por categoría. Los demás filtros (color/precio/
+ * sort) siguen locales hasta que el backend los acepte — hallazgo H-1.
+ *
+ * Si el API falla devuelve `{ ok: false }`: la página renderiza el
+ * estado de error con retry, nunca el empty state ("0 productos" es
+ * otra cosa).
  *
  * `origin` / `host` no son opcionales: son lo que permite que el SSR
  * resuelva el tenant (ver docstring de `apiFetch`).
  */
-async function loadCatalogPage(page: number): Promise<StorefrontProductsResponse> {
-  const query = new URLSearchParams({
-    page: String(page),
-    per_page: String(PAGE_SIZE),
-  });
+async function loadCatalogPage(
+  page: number,
+  category?: string,
+): Promise<CatalogPageResult> {
+  const query = buildCatalogQuery(page, PAGE_SIZE, category);
 
   try {
-    return await apiFetch<StorefrontProductsResponse>(
+    const response = await apiFetch<StorefrontProductsResponse>(
       `${API_ENDPOINTS.storefront.products}?${query.toString()}`,
       {
         headers: { 'Accept': 'application/json' },
@@ -122,11 +152,12 @@ async function loadCatalogPage(page: number): Promise<StorefrontProductsResponse
         host: Astro.url.host,
       },
     );
+    return { ok: true, data: response.data, meta: response.meta };
   } catch (error) {
-    // Si el backend no responde, devolvemos catálogo vacío y el empty
-    // state se renderiza. Log para debugging.
+    // El API falló: `ok: false` → estado de error en el template. Log
+    // para debugging.
     console.error(`[products/index] apiFetch failed (page=${page}):`, error);
-    return { data: [], meta: EMPTY_CATALOG_META };
+    return { ok: false };
   }
 }
 
@@ -136,20 +167,35 @@ async function loadCatalogPage(page: number): Promise<StorefrontProductsResponse
 const filters = parseCatalogFilters(Astro.url.searchParams);
 const requestedPage = filters.page ?? FIRST_PAGE;
 
-let catalog = await loadCatalogPage(requestedPage);
+let catalogResult = await loadCatalogPage(requestedPage, filters.category);
+let currentPage = requestedPage;
 
 // `?page=9999` (link viejo, crawler, typo) responde `data: []` con un
 // `meta.last_page` real. Se CLAMPA en vez de responder 404 — el catálogo
 // es navegación pública y el contenido de la última página existe, así
 // que un 404 convertiría un link compartible en página rota. El clamp
 // necesita un segundo fetch porque la respuesta fuera de rango vino
-// vacía: no trae las filas de la última página.
-const clampedPage = clampPage(requestedPage, catalog.meta.last_page);
-let currentPage = requestedPage;
-if (clampedPage !== requestedPage) {
-  currentPage = clampedPage;
-  catalog = await loadCatalogPage(currentPage);
+// vacía: no trae las filas de la última página. Un fallo en cualquiera
+// de los dos fetches resulta en estado de error.
+if (catalogResult.ok) {
+  const clampedPage = clampPage(requestedPage, catalogResult.meta.last_page);
+  if (clampedPage !== requestedPage) {
+    currentPage = clampedPage;
+    catalogResult = await loadCatalogPage(currentPage, filters.category);
+  }
 }
+
+// Estado ERROR ≠ estado VACÍO: `ok: false` significa que el API falló
+// (caída, timeout, 5xx) y el template renderiza el mensaje de error con
+// retry; el empty state se reserva para un fetch exitoso con 0 filas.
+const hasCatalogError = !catalogResult.ok;
+
+// Derivaciones sobre el resultado final. Con error viajan arrays vacíos
+// neutros para no romper el pipeline de filtros — el render del error lo
+// decide `hasCatalogError`, nunca la falta de filas.
+const catalog = catalogResult.ok
+  ? catalogResult
+  : { data: [] as BackendProduct[], meta: EMPTY_CATALOG_META };
 
 const apiProducts = catalog.data;
 const lastPage = Math.max(FIRST_PAGE, catalog.meta.last_page);
@@ -159,8 +205,14 @@ const totalProducts = catalog.meta.total;
 const perPage = catalog.meta.per_page > 0 ? catalog.meta.per_page : PAGE_SIZE;
 
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+// Retry del estado de error: la MISMA URL (conserva filtros y página).
+// Link plano — el SSR re-intenta el fetch al navegar, sin JS.
+const retryHref = `${Astro.url.pathname}${Astro.url.search}`;
+// El fallback Panda responde a un catálogo GENUINAMENTE vacío (el
+// backend del prototipo devuelve 0 filas), no a un API caído: con error
+// manda `hasCatalogError` y su estado de retry.
 const usePandaPrototype =
-  isPandaStore(tenantSlug) && catalog.meta.total === 0;
+  isPandaStore(tenantSlug) && !hasCatalogError && catalog.meta.total === 0;
 // Marcas (Fender/Gibson) y tallas (CH–XG) sólo en tenants de
 // instrumentos (La Voz). Panda y Kitsune muestran categoría/color/precio.
 const showBrandsAndSizes = !isPandaStore(tenantSlug) && tenantSlug !== 'kitsune';
@@ -246,6 +298,10 @@ const categoryCounts = categorySource.reduce<Record<string, { slug: string; labe
 // Base de links del catálogo: filtros y paginación se arman sobre ella.
 const baseUrl = `/${locale}/products`;
 
+// Link que limpia SOLO la categoría activa (variante "categoría sin
+// resultados") — mismo mecanismo de remoción que los chips.
+const clearCategoryHref = buildCatalogHref(baseUrl, filters, { category: undefined });
+
 const filterCategoryOptions = [
   {
     slug: 'all',
@@ -321,6 +377,20 @@ const filterPriceOptions = PRICE_RANGES.map((range) => {
         : { minPriceCents: range.minPriceCents, maxPriceCents: range.maxPriceCents },
     ),
   };
+});
+
+// Chips de filtros activos (links de remoción sin JS, FilterChips).
+// Uno por filtro: categoría, color y precio (min+max = UN chip);
+// `sort`/`page` no generan chip. Labels desde los mismos mapas que el
+// sidebar; plantillas i18n `storefront.catalog.chips.*`.
+const activeFilterChips = buildActiveFilterChips(baseUrl, filters, {
+  priceBoth: t['storefront.catalog.chips.priceBoth'],
+  priceMin: t['storefront.catalog.chips.priceMin'],
+  priceMax: t['storefront.catalog.chips.priceMax'],
+  categories: Object.fromEntries(
+    Object.values(categoryCounts).map((category) => [category.slug, category.label]),
+  ),
+  colors: Object.fromEntries(filterColorOptions.map((color) => [color.slug, color.label])),
 });
 
 // Tallas: 4 buckets estilo Bonfire (solo tenants de instrumentos). Los
@@ -413,30 +483,47 @@ const sortHrefs = {
           <h1 class="mt-3 text-4xl sm:text-5xl md:text-6xl">
             {t['storefront.products.v3.title']}
           </h1>
-          <p class="mt-2 text-sm text-slate-500">{subtitle}</p>
+          {!hasCatalogError && <p class="mt-2 text-sm text-slate-500">{subtitle}</p>}
         </div>
-        <SortDropdown labels={dictionary.sort} value={sortValue} hrefs={sortHrefs} />
+        {!hasCatalogError && (
+          <SortDropdown labels={dictionary.sort} value={sortValue} hrefs={sortHrefs} />
+        )}
       </header>
 
+      {hasCatalogError && (
+        <CatalogStateMessage
+          title={t['storefront.catalog.states.error']}
+          linkHref={retryHref}
+          linkLabel={t['storefront.catalog.states.errorRetry']}
+        />
+      )}
+
+      {!hasCatalogError && (
       <div class="grid gap-10 pb-12 lg:grid-cols-[264px_1fr]">
-        <div class="hidden lg:block">
-          <div class="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6">
-            <FiltersSidebar
-              labels={dictionary.filters}
-              categories={filterCategoryOptions}
-              brands={filterBrandOptions}
-              prices={filterPriceOptions}
-              colors={filterColorOptions}
-              sizes={filterSizeOptions}
-              clearHref={baseUrl}
-              activeCategory={filters.category ?? 'all'}
-              activePrice={activePriceSlug}
-              activeColors={filters.color ? [filters.color] : []}
-            />
-          </div>
-        </div>
+        {/* El wrapper trae el disclosure móvil (`<details>`, < lg) y el
+            panel estático desktop (≥ lg) con el mismo FiltersSidebar. */}
+        <FiltersDisclosure
+          labels={dictionary.filters}
+          triggerLabel={t['storefront.catalog.filters.trigger']}
+          triggerCountTemplate={t['storefront.catalog.filters.triggerCount']}
+          activeCount={activeFilterChips.length}
+          categories={filterCategoryOptions}
+          brands={filterBrandOptions}
+          prices={filterPriceOptions}
+          colors={filterColorOptions}
+          sizes={filterSizeOptions}
+          clearHref={baseUrl}
+          activeCategory={filters.category ?? 'all'}
+          activePrice={activePriceSlug}
+          activeColors={filters.color ? [filters.color] : []}
+        />
 
         <div class="flex flex-col gap-6">
+          <FilterChips
+            chips={activeFilterChips}
+            removeAriaLabel={t['storefront.catalog.chips.removeAriaLabel']}
+          />
+
           <div class="flex flex-wrap items-center justify-between gap-3">
             <p class="text-[13px] text-slate-500">{countRange}</p>
           </div>
@@ -491,13 +578,27 @@ const sortHrefs = {
                 />
               </li>
             )) : (
-              <li class="col-span-full list-none rounded-2xl border border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)] p-10 text-center">
-                <p class="text-base font-semibold text-[var(--ink,#1c1917)]">
-                  {t['storefront.products.v3.empty']}
-                </p>
-                <p class="mt-2 text-sm text-[var(--ink-soft,#57534e)]">
-                  {t['storefront.productGrid.emptyHint']}
-                </p>
+              <li class="col-span-full list-none">
+                {/*
+                  Estado vacío contextual: con categoría activa y 0
+                  resultados se ofrece limpiarla con un link plano (mismo
+                  mecanismo que los chips — `buildCatalogHref` resetea
+                  `page`). El API no distingue "categoría inexistente" de
+                  "categoría con 0 productos": esta variante cubre ambos
+                  casos con el mismo mensaje.
+                */}
+                {filters.category ? (
+                  <CatalogStateMessage
+                    title={t['storefront.catalog.states.emptyCategory']}
+                    linkHref={clearCategoryHref}
+                    linkLabel={t['storefront.catalog.states.emptyCategoryClear']}
+                  />
+                ) : (
+                  <CatalogStateMessage
+                    title={t['storefront.products.v3.empty']}
+                    hint={t['storefront.productGrid.emptyHint']}
+                  />
+                )}
               </li>
             )}
           </ul>
@@ -513,6 +614,7 @@ const sortHrefs = {
           />
         </div>
       </div>
+      )}
     </div>
   </main>
 </StorefrontLayout>

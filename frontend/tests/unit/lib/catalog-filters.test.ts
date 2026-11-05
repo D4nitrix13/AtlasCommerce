@@ -10,6 +10,11 @@
  *   - `buildCatalogHref`: mergea el patch sobre los filtros actuales,
  *     limpia params vacíos y resetea `page` a 1 salvo que el patch traiga
  *     su propio `page`.
+ *   - `buildCatalogQuery`: params del fetch al API del catálogo
+ *     (`page`/`per_page` siempre, `category` sólo cuando viene).
+ *   - `buildActiveFilterChips`: un chip por filtro activo (categoría,
+ *     color, precio min+max = UNO), sin chip de sort ni page; cada href
+ *     remueve su filtro y resetea `page` a 1.
  *
  * Unidades: los params de URL `minPrice`/`maxPrice` viajan en USD (los
  * labels del sidebar son "$0 – $30"); el dominio trabaja en cents.
@@ -17,7 +22,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyCatalogFilters,
+  buildActiveFilterChips,
   buildCatalogHref,
+  buildCatalogQuery,
   parseCatalogFilters,
 } from '../../../src/lib/catalog-filters';
 
@@ -176,5 +183,114 @@ describe('buildCatalogHref', () => {
     expect(
       buildCatalogHref('/es/products', { category: 'textil', page: 4 }, { page: undefined }),
     ).toBe('/es/products?category=textil');
+  });
+});
+
+describe('buildCatalogQuery', () => {
+  it('arma page + per_page siempre', () => {
+    const query = buildCatalogQuery(3, 24);
+
+    expect(query.get('page')).toBe('3');
+    expect(query.get('per_page')).toBe('24');
+    expect(query.has('category')).toBe(false);
+  });
+
+  it('incluye category sólo cuando viene presente', () => {
+    const query = buildCatalogQuery(1, 24, 'textil');
+
+    expect(query.get('category')).toBe('textil');
+    expect(query.get('page')).toBe('1');
+    expect(query.get('per_page')).toBe('24');
+  });
+
+  it('omite category ausente o en blanco', () => {
+    expect(buildCatalogQuery(1, 24).has('category')).toBe(false);
+    expect(buildCatalogQuery(1, 24, '').has('category')).toBe(false);
+    expect(buildCatalogQuery(1, 24, '   ').has('category')).toBe(false);
+  });
+});
+
+const CHIP_LABELS = {
+  priceBoth: 'Precio: {min} – {max}',
+  priceMin: 'Precio: desde {min}',
+  priceMax: 'Precio: hasta {max}',
+  categories: { textil: 'Textil' },
+  colors: { negro: 'Negro' },
+};
+
+describe('buildActiveFilterChips — qué filtros generan chip', () => {
+  it('devuelve vacío sin filtros activos — ni chips de sort ni de page', () => {
+    expect(buildActiveFilterChips('/es/products', {}, CHIP_LABELS)).toEqual([]);
+    expect(
+      buildActiveFilterChips('/es/products', { sort: 'price-asc', page: 3 }, CHIP_LABELS),
+    ).toEqual([]);
+  });
+
+  it('chip de categoría: label del mapa y href que remueve el filtro y resetea page', () => {
+    expect(
+      buildActiveFilterChips('/es/products', { category: 'textil', page: 3 }, CHIP_LABELS),
+    ).toEqual([{ label: 'Textil', href: '/es/products?page=1' }]);
+  });
+
+  it('chip de color: label del mapa y href que lo remueve', () => {
+    expect(buildActiveFilterChips('/es/products', { color: 'negro' }, CHIP_LABELS)).toEqual([
+      { label: 'Negro', href: '/es/products?page=1' },
+    ]);
+  });
+
+  it('min+max de precio = UN solo chip con la plantilla both', () => {
+    expect(
+      buildActiveFilterChips(
+        '/es/products',
+        { minPriceCents: 1000, maxPriceCents: 10000, page: 2 },
+        CHIP_LABELS,
+      ),
+    ).toEqual([{ label: 'Precio: $10 – $100', href: '/es/products?page=1' }]);
+  });
+});
+
+describe('buildActiveFilterChips — labels y hrefs', () => {
+  it('usa el slug como fallback cuando el mapa no trae label', () => {
+    expect(
+      buildActiveFilterChips('/es/products', { category: 'drinkware' }, CHIP_LABELS)[0].label,
+    ).toBe('drinkware');
+  });
+
+  it('precio con solo min / solo max usan sus plantillas', () => {
+    expect(
+      buildActiveFilterChips('/es/products', { minPriceCents: 3000 }, CHIP_LABELS),
+    ).toEqual([{ label: 'Precio: desde $30', href: '/es/products?page=1' }]);
+    expect(
+      buildActiveFilterChips('/es/products', { maxPriceCents: 6000 }, CHIP_LABELS),
+    ).toEqual([{ label: 'Precio: hasta $60', href: '/es/products?page=1' }]);
+  });
+
+  it('varios filtros activos: un chip cada uno, en orden categoría/color/precio', () => {
+    const chips = buildActiveFilterChips(
+      '/es/products',
+      {
+        category: 'textil',
+        color: 'negro',
+        minPriceCents: 0,
+        maxPriceCents: 3000,
+        sort: 'price-asc',
+        page: 4,
+      },
+      CHIP_LABELS,
+    );
+
+    expect(chips.map((chip) => chip.label)).toEqual([
+      'Textil',
+      'Negro',
+      'Precio: $0 – $30',
+    ]);
+  });
+
+  it('cada href conserva los demás filtros activos', () => {
+    const filters = { category: 'textil', color: 'negro' };
+    const chips = buildActiveFilterChips('/es/products', filters, CHIP_LABELS);
+
+    expect(chips[0].href).toBe('/es/products?color=negro&page=1');
+    expect(chips[1].href).toBe('/es/products?category=textil&page=1');
   });
 });
