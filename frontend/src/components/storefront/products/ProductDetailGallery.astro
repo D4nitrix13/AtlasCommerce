@@ -11,8 +11,8 @@
  *
  * Decisiones:
  *   - Container flex horizontal con `overflow-x-auto` + `snap-x snap-mandatory`.
- *   - Cada celda con `aspect-[22/10]` (landscape, ~1600:730 = 2.19:1)
- *     para imágenes de productos que vienen en formato horizontal.
+ *   - Cada celda con `aspect-square` (el catálogo siembra fotos 1600x1600;
+ *     un marco apaisado pillarboxeaba esas fotos dejando ~55% de ancho vacío).
  *   - Sin framework JS: un `<script>` inline compartido (Astro dedupe)
  *     lee todos los `[data-gallery-scroller]` y conecta:
  *       1. thumbnails (click → scrollIntoView)
@@ -130,25 +130,23 @@ const showThumbs = images.length > 1;
             <img
               src={imageSrc(image)}
               srcset={imageSrcsetOf(image)}
-              sizes="(min-width: 1024px) 1160px, 100vw"
+              sizes="(min-width: 1024px) 52vw, 100vw"
               alt={alt}
               loading={isFirst ? 'eager' : 'lazy'}
               decoding={isFirst ? 'sync' : 'async'}
               fetchpriority={isFirst ? 'high' : undefined}
-              class="aspect-[22/10] h-full w-full object-contain"
+              class="aspect-square h-full w-full object-contain"
               onerror="this.onerror=null;this.parentElement?.classList.add('bg-slate-100');this.remove()"
             />
           /*
-           * Las imágenes del catálogo son cuadradas (1600x1600) y el marco
-           * de la galería es horizontal 22:10. Con `object-cover` una
-           * cuadrada pierde cerca del 63% del alto y el instrumento queda
-           * cortado. `object-contain` conserva el marco: las cuadradas se
-           * ven completas con aire a los lados, y las panorámicas del flujo
-           * antiguo, que sí están pensadas para ese ratio, siguen llenando.
-           * Ninguna imagen se recorta.
+           * El marco es cuadrado porque el catálogo lo es (fotos 1600x1600).
+           * El marco 22:10 anterior pillarboxeaba esas fotos: ~55% del ancho
+           * quedaba vacío a los lados. `object-contain` se mantiene para no
+           * recortar panorámicas heredadas (esas ahora dejan aire arriba/abajo,
+           * nunca a los lados de la foto principal).
            */
           ) : (
-            <div class="flex aspect-[22/10] h-full w-full items-center justify-center bg-slate-50 p-6 sm:p-10">
+            <div class="flex aspect-square h-full w-full items-center justify-center bg-slate-50 p-6 sm:p-10">
               <ProductMockup
                 variant={mockupVariant}
                 logoText={labels.logoText}

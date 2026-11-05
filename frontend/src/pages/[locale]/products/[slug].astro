@@ -934,7 +934,7 @@ const cardLabels = {
       {product !== null && detail !== null && (
         <article class="flex flex-col gap-16">
           {/* Top: gallery uniforme + aside pegajoso */}
-          <section class="grid gap-6 lg:grid-cols-[1.8fr_minmax(0,420px)] lg:gap-8">
+          <section class="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10">
             <ProductDetailGallery
               images={displayedImages}
               productName={product.name}
