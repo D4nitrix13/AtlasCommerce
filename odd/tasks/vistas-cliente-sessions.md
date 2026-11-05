@@ -160,15 +160,28 @@ sin pedido del usuario). TDD estricto (config global), runner
 layout se valida con tests de clases (estilo `catalog-grid-css.test.ts`)
 + capturas. Guía ~400 líneas autoreadas por work-unit.
 
-1. **Tabs a la sección de datos** — mover `ProductDetailTabs` del
+1. ✅ **Tabs a la sección de datos** — mover `ProductDetailTabs` del
    bloque aparte (`[slug].astro:1348`, bajo el grid) a la sección de
    datos del producto (columna derecha), reemplazando la descripción
    suelta; tab bar compacta. [delegated writer — 2 archivos]
-2. **Talla + Cantidad** — `ProductSizeGrid.astro` (botones grandes en
+   → `4630a6f7`: tabs al final del `<aside>`, bloque suelto y párrafos
+   duplicados eliminados; `pdp-tabs-placement.test.ts` (4 tests,
+   RED→GREEN). 529 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (230 líneas; slice pendiente).
+   Nota abierta: el `<aside>` `lg:sticky` queda alto con los paneles
+   adentro — revisar reachabilidad del sticky en work-unit de layout.
+2. ✅ **Talla + Cantidad** — `ProductSizeGrid.astro` (botones grandes en
    grilla) → pills compactas inline; `<select>` nativo de
    `ProductPurchaseBar.tsx` → stepper − / + (semántica de
    `purchase-quantity.ts`, patrón de `ProductQuantitySelector.astro`).
    Respetar `aria-pressed`, hidden input y `?size=`. [delegated]
+   → `beef67b8`: pills `h-9 rounded-full` en flex-wrap (sin grilla) y
+   stepper −/+ con `tabular-nums` y clamp 1..stock; `quantityStepperState`
+   en `purchase-quantity.ts` + `pdp-purchase-controls.test.ts` (12 tests
+   nuevos, RED→GREEN). 541 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (561 líneas; slice pendiente).
+   Desviación resuelta: semántica real de tallas = `role="radio"` /
+   `aria-checked` (no `aria-pressed`) — preservada como estaba.
 3. **Cards de rieles parejas** — `ProductRelated.astro` (y FBT /
    RecentlyViewed por consistencia): `h-full` + footer `mt-auto` y media
    `aspect-square` con `object-cover` (hoy `object-contain` deja
