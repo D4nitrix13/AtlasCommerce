@@ -119,6 +119,18 @@ la página actual de 24 filas).
   imposibles frontend-only (H-1/H-4).
 - **WU5 verificado sin cambios**: `search/` tiene `SearchLoadingState`, `SearchErrorState`,
   `SearchEmptyState`, `SearchResultsList`, `Pagination`, `useUrlStateSync` (query/page).
+- **WU6 parcial** (checks completos, capturas incompletas): `bun run test` (suite completa)
+  → **577 tests / 60 archivos, todos verdes** (21.2s); `bun run astro check` → **0 errores,
+  0 warnings** (40 hints preexistentes); `bun run build` → OK, sin churn SVGO; árbol limpio.
+  Captures en `output/playwright/catalogo-*` (gitignored — no se commitean): search resultados
+  y vacío **válidas**; las 3 del PLP sirven código del worktree `compra` (ver H-6) por lo que
+  NO certifican chips ni disclosure móvil; `catalogo-plp-mobile-390-filtros.png` fue imposible.
+- **H-6 (bloqueante de capturas)**: el stack dev compartido `panda-estampados-and-kitsune`
+  (:5321) usa `container_name` fijos y su frontend monta el worktree desde el que se hizo el
+  último `docker-stack.sh up` — hoy `compra`. Para servir `catalogo` hay que recrear el
+  contenedor compartido desde este worktree (afecta a la sesión paralela `compra`); además
+  falta `docker/instances/development/panda-estampados-and-kitsune/environment/.env` en este
+  worktree (`FTP_PASSWORD es obligatorio`). Decisión pendiente del usuario.
 - **WU2 cerrado** (commit `69da5496`; 348 ins / 23 del en 8 archivos): `loadCatalogPage`
   devuelve resultado discriminado (`{ ok: true, data, meta }` / `{ ok: false }`) — el
   catch ya no devuelve `EMPTY_CATALOG_META`, así un API caído renderiza el estado
