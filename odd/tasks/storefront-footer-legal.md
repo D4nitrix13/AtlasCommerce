@@ -128,13 +128,37 @@ _(se completa por tarea)_
 
 | Tarea | Estado | Commit | Verificación |
 |---|---|---|---|
-| T1 | pendiente | — | — |
-| T2 | pendiente | — | — |
+| T1 | hecha | `8e259118` | `bun run test`: 525 tests OK · `astro check`: 0 errors · `eslint` 3 archivos: exit 0 |
+| T2 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · capturas 1440/390 en `output/playwright/t2-footer-*` |
 | T3 | pendiente | — | — |
 | T4 | pendiente | — | — |
 | T5 | pendiente | — | — |
 | T6 | pendiente | — | — |
 
+### Notas T1
+
+- El path de Facebook del footer (glifo circular Material) reemplazó al del
+  login (glifo cuadrado simple-icons): `FacebookIcon` cambió de glifo, mismo
+  color/props/aria. Si se prefiere el cuadrado, es una línea en
+  `social-icon-paths.ts`.
+- El path de Instagram heredado estaba **corrupto** (había perdido los
+  comandos de arco `a`/`Z` y renderizaba como un blob). Detectado en la
+  captura visual de T2 y saneado con el glifo canónico.
+
+### Notas T2
+
+- Footer full-bleed: 4 columnas en `lg:` (brand | nav legal | contacto |
+  redes + locale), 2 en `md:`, stack en mobile. Email de soporte movido a la
+  columna de contacto; `StorefrontFooterLegal` queda solo con copyright.
+- El bloque de locale pasó de texto estático ("ESPAÑOL") a un
+  `LanguageSwitcher client:visible` (ya hidratado en el header, costo marginal).
+- Huérfanos vacíos eliminados: `components/storefront/footer/` y
+  `components/storefront/header/` (ambos `Storefront*.astro` de 0 bytes).
+- Los hrefs de la nav legal siguen apuntando a `#` — T5 los conecta.
+- El writer T2 murió con `ContentFilterError` (fallo de runtime, sin handoff
+  según contrato) después de editar pero antes de reportar; la verificación
+  funcional y visual la corrió el orquestador.
+
 ## Próximo paso
 
-T1 — paths SVG compartidos + `SocialIcon` escalable.
+T2 — Footer full-width + header en coherencia.
