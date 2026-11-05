@@ -81,7 +81,10 @@ la página actual de 24 filas).
 - [x] **WU3** — Filtros accesibles en móvil (disclosure nativo `<details>`, sin JS) + i18n + tests — commit `09dca3e0`; spot check parent: 70 tests verdes
 - [x] **WU4** — Sort extra + rating en cards: **cerrado sin código** — `BackendProduct`/`Product` no traen rating ni fechas (verificado en `backend-product-mapper.ts` y `types/catalog.ts`); H-1/H-4 confirmados
 - [x] **WU5** — Búsqueda `/search`: **verificado sin cambios** — estados completos (loading/error/empty/results + `useUrlStateSync` de query/page)
-- [ ] **WU6** — Cierre: checks comunes + capturas playwright 1440/390 + reporte
+- [x] **WU6** — Cierre: checks comunes + capturas playwright + reporte — **cerrado con capturas
+  parciales** (decisión del usuario 2026-11-05: "B, cerrá con las capturas parciales y
+  re-capturá cuando libere el stack"); checks completos en verde; re-captura de la UI nueva
+  como follow-up
 
 ## Criterios de aceptación
 
@@ -151,8 +154,13 @@ la página actual de 24 filas).
 
 ## Siguiente paso
 
-WU6 — cierre de sesión: suite completa · `astro check` · `build` · capturas playwright
-(1440/390, firefox, Host del tenant contra `:5321`) · reporte final.
+**Follow-up pendiente**: re-capturar la UI nueva (chips de filtros activos + disclosure móvil)
+cuando la sesión `compra` libere el stack dev compartido — recrear el frontend desde este
+worktree (`docker-stack.sh up dev panda-estampados-and-kitsune`, previo `.env` de instancia en
+`docker/instances/development/panda-estampados-and-kitsune/environment/`) y tomar
+`catalogo-plp-*` y `catalogo-plp-mobile-390-filtros.png`. Ver H-6.
+
+Hallazgos de backend (H-1/H-1b/H-4) aguardan confirmación del usuario para un plan aparte.
 
 ## Ruta de ejecución
 
