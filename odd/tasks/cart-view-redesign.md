@@ -160,6 +160,6 @@ vista.
 
 C7 y C8 observados (ver checkboxes; capturas en
 `output/playwright/cart-redesign-*.png`, revisadas visualmente).
-Pendiente: commit work-unit en `feat/views/compra` — running count
-~800 líneas autoralas supera la guía ~400 → decisión de entrega
-(preguntada al usuario).
+Pendiente: nada — **commit work-unit `c1554cb4`** en
+`feat/views/compra` (14 archivos, +904/−245; entrega single-pr
+elegida por el usuario). Push/PR a pedido del usuario.
