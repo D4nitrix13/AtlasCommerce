@@ -1,139 +1,106 @@
 ---
 /**
- * RecentOrdersTable — Tabla de últimas 5 órdenes (v3, Bonfire).
+ * RecentOrdersTable — ledger de últimos trabajos (rediseño job-ticket).
  *
- * Reemplaza al viejo `OrderStatusCard` (que mostraba cards 1-por-orden
- * en grid 3 cols) por una `<table>` semántica con scroll horizontal
- * en mobile. El mockup 03-account-dashboard v3 pide 4 columnas:
- * orden / fecha / estado (pill) / total.
+ * Checkpoint de diseño:
+ *   Intent:   "qué pasó últimamente" en un ledger de taller: tickets,
+ *             fechas, etapas con chips de tinta, piezas y totales.
+ *   Hierarchy: tier 2 — debajo de la tira de producción; el heading
+ *             es quieto y la tabla es densa (no cards).
+ *   Palette:  papel levantado; chips de tinta semánticos; total en
+ *             ink, no en color.
+ *   Depth:    una hoja `paper-card` (sombras en capas, sin bordes
+ *             duros); filas separadas por `--edge-soft`.
+ *   Type:     micro-labels para columnas (11px tracked), 14px body,
+ *             totales tabular-nums/600.
+ *   Spacing:  denso: 16px celdas, 24px en el header de la sección.
  *
- * Diferencia con la v1:
- *   - Era 3 cards en grid, una por orden (limitación: la card "ganaba"
- *     mucho espacio y mostraba info redundante). La v3 es 1 tabla
- *     compacta de 5 órdenes → más densidad de información, mejor
- *     escaneabilidad de "qué pasó recientemente" (Baymard §2.6).
- *
- * Tokens:
- *   - Header row: `bg-[var(--primary-soft)]` para que la fila destaque
- *     contra el resto (mockup §3).
- *   - Body rows: hover con `bg-cream-100/60` (cream = fondo editorial
- *     del mockup, no slate).
- *   - Borders: `border-cream-300` (más cálido que slate-200, match con
- *     el resto del dashboard).
- *   - Status pill: reutilizamos los mismos tonos que `OrderStatusCard`
- *     para que el lenguaje sea consistente entre vistas.
- *
- * Empty-safe: si `orders` está vacío, no se renderiza la tabla; se
- * renderiza un mensaje de empty state.
+ * Empty-safe: sin tickets la sección entera no se renderiza (el vacío
+ * diseñado vive en `StudioEmptyState`, dentro de ProductionStrip).
  */
-import type { OrderStatus, RecentOrderMock } from '../../../data/account-mock';
+import type { ProductionTicket } from '../../../types/dashboard-kpis';
 import type { TranslationKey } from '../../../i18n/types';
-import { formatCurrency, formatDate } from '../../../lib/formatters';
+import { formatDate } from '../../../lib/formatters';
+import InkChip from './InkChip.astro';
 
 interface Props {
-  orders: RecentOrderMock[];
+  tickets: ProductionTicket[];
   localePrefix: string;
-  currencyCode: string | null;
   t: Record<TranslationKey, string>;
 }
 
-const { orders, localePrefix, currencyCode, t } = Astro.props;
+const { tickets, localePrefix, t } = Astro.props;
 
-// Mostramos hasta 5 órdenes (spec v3). El padre puede pasar más — la
-// tabla se recorta acá para mantener el contrato visual estable.
-const RECENT_ORDERS_LIMIT = 5;
-const visibleOrders = orders.slice(0, RECENT_ORDERS_LIMIT);
-
-const hasOrders = visibleOrders.length > 0;
-
-const statusColor: Record<OrderStatus, string> = {
-  pending: 'bg-amber-50 text-amber-600',
-  processing: 'bg-violet-100 text-violet-800',
-  shipped: 'bg-cyan-100 text-cyan-800',
-  delivered: 'bg-emerald-50 text-emerald-700',
-  cancelled: 'bg-red-50 text-red-700',
-};
-
-const statusLabelKey: Record<OrderStatus, TranslationKey> = {
-  pending: 'account.orderStatus.pending',
-  processing: 'account.orderStatus.processing',
-  shipped: 'account.orderStatus.shipped',
-  delivered: 'account.orderStatus.delivered',
-  cancelled: 'account.orderStatus.cancelled',
-};
+const RECENT_LIMIT = 5;
+const visibleTickets = tickets.slice(0, RECENT_LIMIT);
+const hasTickets = visibleTickets.length > 0;
 ---
 
-<section
-  aria-labelledby="recent-orders-heading"
-  data-testid="recent-orders-section"
-  class="flex flex-col gap-4"
->
-  <div class="flex items-end justify-between gap-4">
-    <h2 id="recent-orders-heading" class="text-2xl font-bold tracking-tight text-slate-900">
-      {t['account.dashboard.v3.recentOrders.heading']}
-    </h2>
-    {hasOrders && (
+{hasTickets && (
+  <section aria-labelledby="recent-orders-heading" data-testid="recent-orders-section">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 id="recent-orders-heading" class="text-[22px]">
+        {t['account.dashboard.ledger.heading']}
+      </h2>
       <a
         href={`${localePrefix}/account/orders`}
-        class="text-sm font-semibold text-[var(--primary,#2D9D8E)] hover:underline"
+        class="pressable inline-flex min-h-10 items-center gap-1.5 px-1 text-sm font-semibold text-[var(--primary)] hover:underline"
         data-testid="recent-orders-view-all"
       >
-        {t['account.dashboard.v3.recentOrders.viewAll']}
+        {t['account.dashboard.ledger.viewAll']}
+        <span aria-hidden="true">→</span>
       </a>
-    )}
-  </div>
+    </div>
 
-  {hasOrders ? (
-    <div
-      data-reveal-stagger
-      class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-    >
+    <div class="paper-card mt-4 overflow-hidden" data-reveal>
       <div class="overflow-x-auto">
-        <table class="w-full min-w-[640px] text-left text-sm" data-testid="recent-orders-table">
-          <thead style="background:var(--primary-soft,#E6F7F4)">
-            <tr>
-              <th class="px-4 py-3 text-[12px] font-bold uppercase tracking-wide text-slate-600">
-                {t['account.dashboard.recentOrdersTable.column.order']}
+        <table class="w-full min-w-[640px] text-left" data-testid="recent-orders-table">
+          <thead>
+            <tr class="border-b" style="border-color:var(--edge)">
+              <th class="micro-label px-5 py-3.5 font-medium">
+                {t['account.dashboard.ledger.column.ticket']}
               </th>
-              <th class="px-4 py-3 text-[12px] font-bold uppercase tracking-wide text-slate-600">
-                {t['account.dashboard.recentOrdersTable.column.date']}
+              <th class="micro-label px-5 py-3.5 font-medium">
+                {t['account.dashboard.ledger.column.date']}
               </th>
-              <th class="px-4 py-3 text-[12px] font-bold uppercase tracking-wide text-slate-600">
-                {t['account.dashboard.recentOrdersTable.column.status']}
+              <th class="micro-label px-5 py-3.5 font-medium">
+                {t['account.dashboard.ledger.column.stage']}
               </th>
-              <th class="px-4 py-3 text-right text-[12px] font-bold uppercase tracking-wide text-slate-600">
-                {t['account.dashboard.recentOrdersTable.column.total']}
+              <th class="micro-label px-5 py-3.5 text-right font-medium">
+                {t['account.dashboard.ledger.column.pieces']}
+              </th>
+              <th class="micro-label px-5 py-3.5 text-right font-medium">
+                {t['account.dashboard.ledger.column.total']}
               </th>
             </tr>
           </thead>
           <tbody>
-            {visibleOrders.map((order) => (
+            {visibleTickets.map((ticket) => (
               <tr
-                class="border-t border-slate-200 transition hover:bg-slate-50"
-                data-order-id={order.id}
+                class="border-b transition-colors last:border-b-0 hover:bg-[var(--paper-sunken)]"
+                style="border-color:var(--edge-soft)"
+                data-order-id={ticket.orderId}
                 data-testid="recent-orders-row"
               >
-                <td class="whitespace-nowrap px-4 py-4 font-semibold text-slate-900">
+                <td class="px-5 py-4">
                   <a
-                    href={`${localePrefix}/account/orders/${order.id}`}
-                    class="hover:text-[var(--primary,#2D9D8E)] hover:underline"
+                    href={`${localePrefix}/account/orders/${ticket.orderId}`}
+                    class="pressable inline-flex min-h-10 items-center text-sm font-semibold text-[var(--ink)] hover:text-[var(--primary)] hover:underline"
                   >
-                    #{order.id}
+                    #{ticket.orderId}
                   </a>
                 </td>
-                <td class="whitespace-nowrap px-4 py-4 text-slate-500">{formatDate(order.date)}</td>
-                <td class="whitespace-nowrap px-4 py-4">
-                  <span
-                    class:list={[
-                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
-                      statusColor[order.status],
-                    ]}
-                  >
-                    {t[statusLabelKey[order.status]]}
-                  </span>
+                <td class="whitespace-nowrap px-5 py-4 text-sm text-[var(--ink-muted)]">
+                  {formatDate(ticket.placedAt)}
                 </td>
-                <td class="whitespace-nowrap px-4 py-4 text-right font-bold text-slate-900">
-                  {formatCurrency(order.total, currencyCode)}
+                <td class="whitespace-nowrap px-5 py-4">
+                  <InkChip status={ticket.status} t={t} />
+                </td>
+                <td class="whitespace-nowrap px-5 py-4 text-right text-sm tabular-nums text-[var(--ink-muted)]">
+                  {ticket.pieces}
+                </td>
+                <td class="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums">
+                  {ticket.totalLabel}
                 </td>
               </tr>
             ))}
@@ -141,12 +108,5 @@ const statusLabelKey: Record<OrderStatus, TranslationKey> = {
         </table>
       </div>
     </div>
-  ) : (
-    <p
-      class="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500"
-      data-testid="recent-orders-empty"
-    >
-      {t['account.dashboard.v3.recentOrders.empty']}
-    </p>
-  )}
-</section>
+  </section>
+)}

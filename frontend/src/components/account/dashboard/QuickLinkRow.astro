@@ -1,0 +1,74 @@
+---
+/**
+ * QuickLinkRow — fila compacta de acciones (NO 4 cards iguales).
+ *
+ * Checkpoint de diseño:
+ *   Intent:   atajos de reorden/cotización/perfil en un vistazo, sin
+ *             robarle protagonismo al job ticket.
+ *   Hierarchy: toolbar quieta, tier 3 — 14px/500, sin superficie.
+ *   Palette:  ink-muted → `--primary` en hover (único acento).
+ *   Depth:    plano; separadores por espacio, no por líneas.
+ *   Type:     14px/500 Figtree + icono 18px.
+ *   Spacing:  hit-area ≥40px (py-2.5 + min-h-10), gap-1 entre links.
+ *
+ * Estados: default / hover (color + flecha que corre 2px) / active
+ * (pressable scale) / focus-visible (anillo global del canvas).
+ */
+import Icon from '../../ui/Icon.astro';
+import type { TranslationKey } from '../../../i18n/types';
+
+interface Props {
+  locale: 'es' | 'en';
+  t: Record<TranslationKey, string>;
+}
+
+const { locale, t } = Astro.props;
+
+const localePrefix = `/${locale}`;
+
+const links: { key: TranslationKey; href: string; icon: string }[] = [
+  {
+    key: 'account.dashboard.quickLinks.quote',
+    href: `${localePrefix}/rfq/new`,
+    icon: 'document-text',
+  },
+  {
+    key: 'account.dashboard.quickLinks.addresses',
+    href: `${localePrefix}/account/addresses`,
+    icon: 'building-office',
+  },
+  {
+    key: 'account.dashboard.quickLinks.help',
+    href: `${localePrefix}/account/tickets`,
+    icon: 'question-mark-circle',
+  },
+  {
+    key: 'account.dashboard.quickLinks.profile',
+    href: `${localePrefix}/account/profile`,
+    icon: 'user',
+  },
+];
+---
+
+<nav aria-label={t['account.dashboard.quickLinks.label']} data-testid="quick-links">
+  <ul class="flex flex-wrap items-center gap-x-1 gap-y-1">
+    {links.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class="pressable group inline-flex min-h-10 items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium text-[var(--ink-muted)] hover:text-[var(--primary)]"
+          data-testid={`quick-link-${link.icon}`}
+        >
+          <Icon name={link.icon} class="h-[18px] w-[18px]" />
+          <span>{t[link.key]}</span>
+          <span
+            aria-hidden="true"
+            class="text-[var(--ink-faint)] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[var(--primary)]"
+          >
+            →
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

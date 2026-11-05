@@ -1,0 +1,64 @@
+---
+/**
+ * RegistrationMarks — cruces de registro de imprenta en las esquinas.
+ *
+ * Checkpoint de diseño:
+ *   Intent:   identidad de taller de estampados: la hoja del job ticket
+ *             se "monta" con marcas de registro, no con decoración SaaS.
+ *   Hierarchy: decorativo silencioso (ink-faint); nunca estructural.
+ *   Palette:  `--ink-faint` sobre la hoja de papel.
+ *   Depth:    plano, `pointer-events-none`.
+ *   Type:     —
+ *   Spacing:  10px desde cada esquina; la marca mide 14px.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const mark = 'absolute h-3.5 w-3.5 text-[var(--ink-faint)]';
+---
+
+<div class:list={['pointer-events-none absolute inset-0', className]} aria-hidden="true">
+  <svg
+    class:list={[mark, 'left-2 top-2']}
+    viewBox="0 0 14 14"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1"
+  >
+    <path d="M7 0v14M0 7h14" />
+    <circle cx="7" cy="7" r="3.5" />
+  </svg>
+  <svg
+    class:list={[mark, 'right-2 top-2']}
+    viewBox="0 0 14 14"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1"
+  >
+    <path d="M7 0v14M0 7h14" />
+    <circle cx="7" cy="7" r="3.5" />
+  </svg>
+  <svg
+    class:list={[mark, 'bottom-2 left-2']}
+    viewBox="0 0 14 14"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1"
+  >
+    <path d="M7 0v14M0 7h14" />
+    <circle cx="7" cy="7" r="3.5" />
+  </svg>
+  <svg
+    class:list={[mark, 'bottom-2 right-2']}
+    viewBox="0 0 14 14"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1"
+  >
+    <path d="M7 0v14M0 7h14" />
+    <circle cx="7" cy="7" r="3.5" />
+  </svg>
+</div>

@@ -1,0 +1,131 @@
+---
+/**
+ * ProductionRail — rail de etapas de producción (parte de la tira).
+ *
+ * Checkpoint de diseño:
+ *   Intent:   responder "¿dónde está mi stuff?" de un vistazo: la
+ *             progresión se siente como un press-pass de imprenta.
+ *   Hierarchy: dentro del hero, el rail gana por ancho; el estado
+ *             actual se marca con anillo `--primary`, lo hecho con
+ *             tinta sólida, lo futuro apenas insinuado.
+ *   Palette:  tintas semánticas por etapa + anillo del tenant.
+ *   Depth:    plano sobre la hoja elevada; sin sombras propias.
+ *   Type:     micro-labels 11px tracked para etapas, 12px para hints.
+ *   Spacing:  4 columnas iguales, ritmo denso (8px interno).
+ *
+ * Estados: cada etapa tiene hecha / actual / futura. La etapa actual
+ * muestra el hint saborizado ("Tintas cargadas…") + la fecha.
+ */
+import type { TranslationKey } from '../../../i18n/types';
+import { formatDate } from '../../../lib/formatters';
+
+interface Props {
+  /** Índice 0..3 de la etapa actual. */
+  stageIndex: number;
+  /** ISO — fecha del pedido (ancla "desde {date}"). */
+  placedAt: string;
+  t: Record<TranslationKey, string>;
+}
+
+const { stageIndex, placedAt, t } = Astro.props;
+
+const STAGES: { labelKey: TranslationKey; hintKey: TranslationKey; ink: string }[] = [
+  {
+    labelKey: 'account.dashboard.ticket.stage.received',
+    hintKey: 'account.dashboard.ticket.stageHint.received',
+    ink: 'var(--ink-received)',
+  },
+  {
+    labelKey: 'account.dashboard.ticket.stage.press',
+    hintKey: 'account.dashboard.ticket.stageHint.press',
+    ink: 'var(--ink-press)',
+  },
+  {
+    labelKey: 'account.dashboard.ticket.stage.transit',
+    hintKey: 'account.dashboard.ticket.stageHint.transit',
+    ink: 'var(--ink-transit)',
+  },
+  {
+    labelKey: 'account.dashboard.ticket.stage.done',
+    hintKey: 'account.dashboard.ticket.stageHint.done',
+    ink: 'var(--ink-done)',
+  },
+];
+
+const currentHintKey = STAGES[stageIndex]?.hintKey ?? STAGES[0].hintKey;
+const sinceLabel = t['account.dashboard.ticket.since'].replace('{date}', formatDate(placedAt));
+---
+
+<div class="flex flex-col gap-4" data-testid="production-rail">
+  <ol class="grid grid-cols-4 gap-x-3" aria-label={t['account.dashboard.ticket.railLabel']}>
+    {STAGES.map((stage, index) => {
+      const isDone = index < stageIndex;
+      const isCurrent = index === stageIndex;
+      const isFuture = index > stageIndex;
+
+      return (
+        <li
+          class="flex flex-col gap-2"
+          data-stage-state={isDone ? 'done' : isCurrent ? 'current' : 'future'}
+        >
+          <div class="flex items-center">
+            <span
+              class="relative flex h-3.5 w-3.5 flex-none items-center justify-center rounded-[3px]"
+              style={
+                isFuture
+                  ? 'background:var(--paper-sunken);box-shadow:inset 0 0 0 1px var(--edge-strong)'
+                  : `background:${stage.ink}`
+              }
+            >
+              {isCurrent && (
+                <span
+                  class="absolute -inset-[3px] rounded-[6px]"
+                  style="box-shadow:0 0 0 2px var(--primary)"
+                ></span>
+              )}
+            </span>
+            {index < STAGES.length - 1 && (
+              <span
+                class="mx-2 h-[2px] flex-1 rounded-full"
+                style={
+                  isFuture
+                    ? 'background:var(--edge)'
+                    : isCurrent
+                      ? 'background:color-mix(in srgb, var(--primary) 40%, transparent)'
+                      : `background:${stage.ink}`
+                }
+              ></span>
+            )}
+          </div>
+          <p
+            class="micro-label"
+            style={[
+              isFuture
+                ? 'color:var(--ink-faint)'
+                : isCurrent
+                  ? 'color:var(--ink)'
+                  : 'color:var(--ink-muted)',
+              isCurrent ? 'font-weight:600' : '',
+            ]
+              .filter(Boolean)
+              .join(';')}
+          >
+            {t[stage.labelKey]}
+          </p>
+        </li>
+      );
+    })}
+  </ol>
+
+  <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--ink-muted)]">
+    <span
+      class="ink-swatch"
+      style={`background:${STAGES[stageIndex]?.ink ?? 'var(--ink-received)'}`}
+    ></span>
+    <span>{t[currentHintKey]}</span>
+    <span aria-hidden="true" class="text-[var(--ink-faint)]">
+      ·
+    </span>
+    <span>{sinceLabel}</span>
+  </p>
+</div>

@@ -1,0 +1,31 @@
+---
+/**
+ * GreetingHeader — saludo quieto + slot de acciones.
+ *
+ * Checkpoint de diseño:
+ *   Intent:   saludar sin gritar: el nombre del cliente como ancla
+ *             humana, el resto del espacio se lo queda el trabajo.
+ *   Hierarchy: DEMOTED — eyebrow 11px + h1 mediano; el focal es la
+ *             tira de producción, no este header.
+ *   Palette:  ink sobre papel; sin acentos (el color vive abajo).
+ *   Depth:    plano — sin card, sobre el canvas.
+ *   Type:     Fraunces 30-36px/500/-0.03em para el nombre.
+ *   Spacing:  ritmo abierto (8px eyebrow→h1), header compacto.
+ */
+interface Props {
+  eyebrow: string;
+  greeting: string;
+}
+
+const { eyebrow, greeting } = Astro.props;
+---
+
+<header class="flex flex-wrap items-end justify-between gap-x-8 gap-y-4" data-reveal>
+  <div>
+    <p class="micro-label">{eyebrow}</p>
+    <h1 class="mt-2 text-3xl leading-tight lg:text-4xl" data-testid="dashboard-greeting">
+      {greeting}
+    </h1>
+  </div>
+  <slot />
+</header>

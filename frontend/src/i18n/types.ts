@@ -530,6 +530,67 @@ export type TranslationKey =
   | 'account.dashboard.v3.recentOrders.viewAll'
   | 'account.dashboard.v3.recentOrders.empty'
 
+  // ─── account: dashboard v4 (job-ticket redesign, estampados) ──────
+  // Greeting + quick links rail.
+  | 'account.dashboard.eyebrow'
+  | 'account.dashboard.quickLinks.label'
+  | 'account.dashboard.quickLinks.quote'
+  | 'account.dashboard.quickLinks.addresses'
+  | 'account.dashboard.quickLinks.help'
+  | 'account.dashboard.quickLinks.profile'
+
+  // Production strip — the signature job-ticket rail.
+  | 'account.dashboard.ticket.eyebrow'
+  | 'account.dashboard.ticket.open'
+  | 'account.dashboard.ticket.pieces'
+  | 'account.dashboard.ticket.placedOn'
+  | 'account.dashboard.ticket.view'
+  | 'account.dashboard.ticket.reorder'
+  | 'account.dashboard.ticket.more'
+  | 'account.dashboard.ticket.railLabel'
+  | 'account.dashboard.ticket.since'
+  | 'account.dashboard.ticket.stage.received'
+  | 'account.dashboard.ticket.stage.press'
+  | 'account.dashboard.ticket.stage.transit'
+  | 'account.dashboard.ticket.stage.done'
+  | 'account.dashboard.ticket.stage.void'
+  | 'account.dashboard.ticket.stageHint.received'
+  | 'account.dashboard.ticket.stageHint.press'
+  | 'account.dashboard.ticket.stageHint.transit'
+  | 'account.dashboard.ticket.stageHint.done'
+  | 'account.dashboard.ticket.stageHint.void'
+
+  // Empty / idle states for the production strip.
+  | 'account.dashboard.empty.eyebrow'
+  | 'account.dashboard.empty.title'
+  | 'account.dashboard.empty.body'
+  | 'account.dashboard.empty.ctaCatalog'
+  | 'account.dashboard.empty.ctaQuote'
+  | 'account.dashboard.idle.title'
+  | 'account.dashboard.idle.body'
+  | 'account.dashboard.idle.cta'
+
+  // Stat rail — one hero metric + supporting stats.
+  | 'account.dashboard.stats.active'
+  | 'account.dashboard.stats.activeHint'
+  | 'account.dashboard.stats.idleHint'
+  | 'account.dashboard.stats.spent'
+  | 'account.dashboard.stats.spentHint'
+  | 'account.dashboard.stats.pieces'
+  | 'account.dashboard.stats.piecesHint'
+  | 'account.dashboard.stats.quotes'
+  | 'account.dashboard.stats.quotesHint'
+
+  // Recent jobs ledger.
+  | 'account.dashboard.ledger.heading'
+  | 'account.dashboard.ledger.viewAll'
+  | 'account.dashboard.ledger.column.ticket'
+  | 'account.dashboard.ledger.column.date'
+  | 'account.dashboard.ledger.column.stage'
+  | 'account.dashboard.ledger.column.pieces'
+  | 'account.dashboard.ledger.column.total'
+  | 'account.dashboard.ledger.empty'
+
   // ─── account: dashboard order status pills (mirrors Badge status) ────
   | 'account.orderStatus.pending'
   | 'account.orderStatus.processing'

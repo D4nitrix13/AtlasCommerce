@@ -24,6 +24,7 @@
  * forgot-password usan `AuthLayout` + `AuthShell`).
  */
 import '../styles/global.css';
+import '../styles/scroll-fx.css';
 import { SHOP_FONT_STYLESHEET, shopThemeStyle } from '../lib/shop-canvas';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
 import { themeToBrand } from '../lib/theme';
@@ -114,22 +115,16 @@ const navItems = [
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href={SHOP_FONT_STYLESHEET}
-      rel="stylesheet"
-    />
+    <link href={SHOP_FONT_STYLESHEET} rel="stylesheet" />
     <title>{title} · {brand.name}</title>
   </head>
 
-  <body
-    class="shop-canvas min-h-screen font-sans antialiased"
-    style={themeRootStyle}
-  >
+  <body class="shop-canvas min-h-screen font-sans antialiased" style={themeRootStyle}>
     <AccountAuthGuard client:load />
 
     <main
       id="main-content"
-      class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:gap-8 lg:px-8 lg:py-10"
+      class="flex w-full flex-col gap-6 px-5 py-6 sm:px-8 lg:flex-row lg:gap-10 lg:px-10 lg:py-10"
     >
       <AccountSidebar
         title={t['account.sidebar.title']}
@@ -144,5 +139,10 @@ const navItems = [
         <slot />
       </div>
     </main>
+
+    {/* Fallback IntersectionObserver para data-reveal (Safari/Firefox). */}
+    <script>
+      import '../scripts/scroll-fx.ts';
+    </script>
   </body>
 </html>
