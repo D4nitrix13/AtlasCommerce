@@ -1,34 +1,23 @@
 ---
 /**
- * `/[locale]/checkout` — flujo multi-step V3 estilo Bonfire.
+ * `/[locale]/checkout` — flujo multi-step del checkout.
  *
- * Replica el IA mockup `09-checkout.html`:
- *  - H1 "Finalizar compra".
- *  - Stepper horizontal de 3 pasos (Envío / Pago / Revisión) con
- *    círculos numerados conectados por líneas; activo en `--primary`,
- *    completado con check.
- *  - 2-col grid desktop (form izquierda · summary sticky derecha).
- *  - Background `bg-slate-50` en `<main>`.
- *  - Empty cart → redirect a `/cart` con locale preservado (client-side:
- *    el carrito vive en localStorage y el SSR no ve las líneas).
+ * La isla `CheckoutFlow` (client:visible) es dueña del flujo: estado de
+ * paso en React, sin recargas GET entre pasos, borrador en
+ * sessionStorage y validación por paso (RHF + Zod). El deep-link
+ * `?step=` sigue funcionando: el paso inicial se resuelve en SSR y
+ * `history.replaceState` lo mantiene sincronizado.
  *
- * Decisiones:
- *  - Las líneas y los totales los lee el cart store (`stores/cart.ts`)
- *    desde las islas `CheckoutOrderSummary` / `CheckoutReviewItems`.
- *  - Los pasos se navegan por GET (sin JS): cada step es un `?step=`
- *    alias; steps futuros se ocultan vía `<fieldset hidden>` para que
- *    no aparezcan en el AT.
- *  - Submit final es un `<button type="submit">` que navega a
- *    `?step=success` (placeholder sin backend real).
+ * Contratos preservados:
+ *  - `?step=shipping|payment|review|success` (out-of-range → shipping).
+ *  - `?step=success` → CheckoutSuccess SSR con número de pedido mock.
+ *  - `data-cart-href` + script de redirect por carrito vacío (se saltea
+ *    en success).
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
-import CheckoutStepperV3 from '../../components/storefront/checkout/CheckoutStepperV3.astro';
-import CheckoutOrderSummary from '../../components/storefront/checkout/CheckoutOrderSummary';
+import CheckoutFlow from '../../components/storefront/checkout/CheckoutFlow';
 import CheckoutSuccess from '../../components/storefront/checkout/CheckoutSuccess.astro';
-import TrustSignalsCompact from '../../components/storefront/cart/TrustSignalsCompact.astro';
-import CheckoutFormV3, {
-  type CheckoutV3StepId,
-} from '../../components/storefront/checkout/CheckoutFormV3.astro';
+import type { CheckoutStepId } from '../../components/storefront/checkout/checkoutSchemas';
 import { getServerDictionary } from '../../i18n/server';
 
 const locale = Astro.locals.locale ?? 'es';
@@ -41,38 +30,29 @@ const orderHref = `/${locale}/account/orders`;
 const helpHref = `/${locale}/account`;
 
 // ─── Step actual desde query param `?step=`. Default = 'shipping'.
-// `success` no es un step del stepper: es la confirmación terminal que
-// sigue a "Realizar pedido" (CheckoutFormV3 navega a ?step=success).
-const VALID_STEPS: readonly CheckoutV3StepId[] = ['shipping', 'payment', 'review'];
+// `success` no es un step del stepper: es la confirmación terminal.
+const VALID_STEPS: readonly CheckoutStepId[] = ['shipping', 'payment', 'review'];
 const url = new URL(Astro.request.url);
 const rawStep = url.searchParams.get('step') ?? 'shipping';
 const isSuccess = rawStep === 'success';
-const currentStepId: CheckoutV3StepId = (VALID_STEPS as readonly string[]).includes(rawStep)
-  ? (rawStep as CheckoutV3StepId)
+const currentStepId: CheckoutStepId = (VALID_STEPS as readonly string[]).includes(rawStep)
+  ? (rawStep as CheckoutStepId)
   : 'shipping';
 
-// El carrito vive en el cart store (localStorage) y el SSR ya no conoce
-// las líneas: el redirect por carrito vacío es client-side (script del
-// final de la página), y las islas leen el store al hidratar.
-
-// ─── Labels del stepper.
-const stepperSteps = [
-  { id: 'shipping', label: t['storefront.checkout.v3.step1'] },
-  { id: 'payment', label: t['storefront.checkout.v3.step2'] },
-  { id: 'review', label: t['storefront.checkout.v3.step3'] },
-];
-
-// ─── Labels del form.
-const formLabels = {
-  shippingHeading: t['storefront.checkout.v3.shippingHeading'],
-  paymentHeading: t['storefront.checkout.v3.paymentHeading'],
-  reviewHeading: t['storefront.checkout.v3.reviewHeading'],
-  reviewHint: t['storefront.checkout.v3.reviewHint'],
-  previous: t['storefront.checkout.v3.previous'],
-  next: t['storefront.checkout.v3.next'],
-  placeOrder: t['storefront.checkout.v3.placeOrder'],
+// ─── Labels de la isla (resueltos desde i18n; incluye trust signals
+// compartidos con el carrito — `storefront.cart.v3.trust.*`).
+const flowLabels = {
+  stepper: {
+    stepOf: t['storefront.checkout.v3.stepOf'],
+    stepperLabel: t['storefront.checkout.v3.stepperLabel'],
+  },
+  stepLabels: {
+    shipping: t['storefront.checkout.v3.step1'],
+    payment: t['storefront.checkout.v3.step2'],
+    review: t['storefront.checkout.v3.step3'],
+  },
   shipping: {
-    shippingHeading: t['storefront.checkout.v3.shippingHeading'],
+    heading: t['storefront.checkout.v3.shippingHeading'],
     name: t['storefront.checkout.v3.shipping.name'],
     email: t['storefront.checkout.v3.shipping.email'],
     phone: t['storefront.checkout.v3.shipping.phone'],
@@ -84,34 +64,61 @@ const formLabels = {
     country: t['storefront.checkout.v3.shipping.country'],
   },
   payment: {
-    paymentHeading: t['storefront.checkout.v3.paymentHeading'],
-    paymentMethod: t['storefront.checkout.v3.payment.method'],
+    heading: t['storefront.checkout.v3.paymentHeading'],
+    methodLegend: t['storefront.checkout.v3.payment.method'],
     card: t['storefront.checkout.v3.payment.card'],
     transfer: t['storefront.checkout.v3.payment.transfer'],
     cod: t['storefront.checkout.v3.payment.cod'],
+    cardDesc: t['storefront.checkout.v3.payment.cardDesc'],
+    transferDesc: t['storefront.checkout.v3.payment.transferDesc'],
+    codDesc: t['storefront.checkout.v3.payment.codDesc'],
     cardDetails: t['storefront.checkout.v3.cardDetails'],
+    cardName: t['storefront.checkout.v3.payment.cardName'],
     cardNumber: t['storefront.checkout.v3.payment.cardNumber'],
     expiry: t['storefront.checkout.v3.payment.expiry'],
     cvv: t['storefront.checkout.v3.payment.cvv'],
-    cardName: t['storefront.checkout.v3.payment.cardName'],
   },
   review: {
+    heading: t['storefront.checkout.v3.reviewHeading'],
+    hint: t['storefront.checkout.v3.reviewHint'],
+    edit: t['storefront.checkout.v3.edit'],
     qty: t['storefront.checkout.v3.qty'],
     subtotal: t['storefront.checkout.v3.subtotal'],
+    emptyItems: t['storefront.checkout.v3.empty'],
+    shippingStep: t['storefront.checkout.v3.step1'],
+    paymentStep: t['storefront.checkout.v3.step2'],
   },
-};
-
-// ─── Labels del summary.
-const summaryLabels = {
-  summary: t['storefront.checkout.v3.summary'],
-  emptyItems: t['storefront.checkout.v3.empty'],
-  subtotal: t['storefront.checkout.v3.subtotal'],
-  shippingCost: t['storefront.checkout.v3.shippingCost'],
-  shippingFree: t['storefront.checkout.v3.shippingFree'],
-  tax: t['storefront.checkout.v3.tax'],
-  total: t['storefront.checkout.v3.total'],
-  cta: t['storefront.checkout.v3.placeOrder'],
+  summary: {
+    summary: t['storefront.checkout.v3.summary'],
+    emptyItems: t['storefront.checkout.v3.empty'],
+    subtotal: t['storefront.checkout.v3.subtotal'],
+    shippingCost: t['storefront.checkout.v3.shippingCost'],
+    shippingFree: t['storefront.checkout.v3.shippingFree'],
+    tax: t['storefront.checkout.v3.tax'],
+    total: t['storefront.checkout.v3.total'],
+    freeShippingProgress: t['storefront.cart.v3.freeShippingProgress'],
+    freeShippingReached: t['storefront.cart.v3.freeShippingReached'],
+    trust: {
+      shipping: t['storefront.cart.v3.trust.shipping'],
+      guarantee: t['storefront.cart.v3.trust.guarantee'],
+      returns: t['storefront.cart.v3.trust.returns'],
+      secure: t['storefront.cart.v3.trust.secure'],
+    },
+  },
+  continueToPayment: t['storefront.checkout.v3.continueToPayment'],
+  continueToReview: t['storefront.checkout.v3.continueToReview'],
+  placeOrder: t['storefront.checkout.v3.placeOrder'],
+  previous: t['storefront.checkout.v3.previous'],
   termsHint: t['storefront.checkout.v3.termsHint'],
+  validation: {
+    required: t['storefront.checkout.v3.validation.required'],
+    email: t['storefront.checkout.v3.validation.email'],
+    postal: t['storefront.checkout.v3.validation.postal'],
+  },
+  error: {
+    title: t['storefront.checkout.v3.error.title'],
+    message: t['storefront.checkout.v3.error.message'],
+  },
 };
 
 // ─── Labels del success (confirmación post-pedido).
@@ -148,45 +155,12 @@ const orderNumber = `PE-${Date.now().toString(36).toUpperCase()}`;
           </h1>
         </header>
 
-        <CheckoutStepperV3
-          steps={stepperSteps}
-          currentStepId={currentStepId}
-          stepHrefBase={checkoutBaseHref}
+        <CheckoutFlow
+          client:visible
+          initialStep={currentStepId}
+          checkoutBaseHref={checkoutBaseHref}
+          labels={flowLabels}
         />
-
-        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
-          <div class="order-2 lg:order-1">
-            <CheckoutFormV3
-              currentStepId={currentStepId}
-              stepHrefBase={checkoutBaseHref}
-              labels={formLabels}
-            />
-          </div>
-
-          <div class="order-1 lg:order-2">
-            <div class="flex flex-col gap-5">
-              <CheckoutOrderSummary
-                client:visible
-                labels={summaryLabels}
-                ctaHref={`${checkoutBaseHref}?step=success`}
-              />
-
-              {/* Trust signals compactos (patron Nike + guitargear). El
-                  resumen del checkout esta sticky a la derecha; debajo
-                  suyo, los trust signals confirman al usuario que el
-                  paso final (pago) es seguro. Variante horizontal en
-                  desktop, wrap a multi-linea en mobile. */}
-              <TrustSignalsCompact
-                signals={[
-                  { iconKey: 'lock', label: 'Pago 100% seguro' },
-                  { iconKey: 'shield-check', label: 'Garantia oficial' },
-                  { iconKey: 'rotate-ccw', label: 'Devolucion 30 dias' },
-                  { iconKey: 'truck', label: 'Envio gratis sobre $50' },
-                ]}
-              />
-            </div>
-          </div>
-        </div>
       </section>
     )}
   </main>
