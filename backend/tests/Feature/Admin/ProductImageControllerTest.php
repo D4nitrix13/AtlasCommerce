@@ -248,6 +248,27 @@ final class ProductImageControllerTest extends TestCase
     }
 
     #[Test]
+    public function store_does_not_duplicate_the_same_image_url(): void
+    {
+        Sanctum::actingAs(user: $this->admin, abilities: ['*']);
+
+        $payload = [
+            'image_url' => 'https://cdn.example.com/repetida.jpg',
+            'alt_text' => 'Repetida',
+        ];
+
+        $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: $payload)
+            ->assertCreated();
+
+        // E1.6: registrar otra vez la misma imagen devuelve la fila
+        // existente, no una segunda.
+        $response = $this->postJson(uri: 'http://panda-estampados.com/api/v1/admin/products/'.$this->product->id.'/images', data: $payload);
+
+        $response->assertOk();
+        $this->assertCount(expectedCount: 1, haystack: ProductImage::query()->get());
+    }
+
+    #[Test]
     public function store_with_explicit_sort_order(): void
     {
         Sanctum::actingAs(user: $this->admin, abilities: ['*']);

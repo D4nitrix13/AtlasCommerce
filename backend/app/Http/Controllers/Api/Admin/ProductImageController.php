@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\ProductImageStoreRequest;
 use App\Http\Requests\Admin\ProductImageUpdateRequest;
 use App\Http\Requests\Admin\ProductImageUploadRequest;
 use App\Http\Resources\Catalog\AdminProductImageResource;
+use App\Models\Auth\User;
 use App\Models\Catalog\Product;
 use App\Models\Catalog\ProductImage;
 use App\Models\Stores\ProductStore;
@@ -125,6 +126,19 @@ class ProductImageController extends Controller
 
             $sortOrder = $data['sort_order'] ?? $this->nextSortOrder(productId: $product->id);
 
+            $variantId = $data['variant_id'] ?? null;
+
+            // E1.6: registrar otra vez la misma imagen no duplica filas.
+            $existing = $this->findImageRow(
+                productId: $product->id,
+                variantId: $variantId,
+                imageUrl: $data['image_url'],
+            );
+
+            if ($existing !== null) {
+                return $existing;
+            }
+
             return ProductImage::query()->create(attributes: [
                 'product_id' => $product->id,
                 'image_url' => $data['image_url'],
@@ -134,13 +148,15 @@ class ProductImageController extends Controller
                 'sort_order' => $sortOrder,
                 // Ya validada contra el producto de la ruta: una variante
                 // ajena nunca llega acá (ver ValidatesVariantOwnership).
-                'variant_id' => $data['variant_id'] ?? null,
+                'variant_id' => $variantId,
             ]);
         });
 
+        // 201 cuando la fila es nueva; 200 cuando era la misma imagen
+        // ya registrada (E1.6: re-registrar no duplica).
         return response()->json(data: [
             'data' => (new AdminProductImageResource(resource: $image))->resolve(),
-        ], status: Response::HTTP_CREATED);
+        ], status: $image->wasRecentlyCreated ? Response::HTTP_CREATED : Response::HTTP_OK);
     }
 
     /**
@@ -207,6 +223,30 @@ class ProductImageController extends Controller
             $created = [];
 
             foreach ($stored as $entry) {
+                // E1.6: la misma foto re-subida no duplica filas ni la
+                // mueve de posición en la galería — solo se le reaplican
+                // los flags pedidos (clearPrimary/clearHover ya corrieron).
+                $existing = $this->findImageRow(
+                    productId: $product->id,
+                    variantId: $variantId,
+                    imageUrl: $entry['image_url'],
+                );
+
+                if ($existing !== null) {
+                    if ($isPrimary && $entry['width'] === $widestWidth) {
+                        $existing->is_primary = true;
+                    }
+
+                    if ($isHover) {
+                        $existing->is_hover = true;
+                    }
+
+                    $existing->save();
+                    $created[] = $existing;
+
+                    continue;
+                }
+
                 $created[] = ProductImage::query()->create(attributes: [
                     'product_id' => $product->id,
                     'image_url' => $entry['image_url'],
@@ -443,6 +483,25 @@ class ProductImageController extends Controller
      * Helper: desmarca todas las imágenes primarias de un producto.
      * Llamar dentro de una transacción que ya marca la nueva primaria.
      */
+    /**
+     * Fila existente de una foto: la identidad de una imagen es
+     * (product_id, variant_id, image_url) — misma convención que usa
+     * CatalogProductImageSeeder. `image_url` es el storage key del
+     * contenido, así que el mismo binario resuelve a la misma clave.
+     */
+    private function findImageRow(int $productId, ?int $variantId, string $imageUrl): ?ProductImage
+    {
+        return ProductImage::query()
+            ->where('product_id', $productId)
+            ->where('image_url', $imageUrl)
+            ->when(
+                $variantId === null,
+                fn ($query) => $query->whereNull('variant_id'),
+                fn ($query) => $query->where('variant_id', $variantId),
+            )
+            ->first();
+    }
+
     private function clearPrimaryFlag(int $productId): void
     {
         ProductImage::query()
@@ -551,7 +610,7 @@ class ProductImageController extends Controller
     private function assertProductInTenantScope(Product $product): void
     {
         $user = auth()->user();
-        if (! $user instanceof \App\Models\Auth\User) {
+        if (! $user instanceof User) {
             abort(code: 401);
         }
 

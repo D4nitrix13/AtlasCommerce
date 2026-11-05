@@ -297,6 +297,57 @@ final class ProductImageUploadTest extends TestCase
     }
 
     #[Test]
+    public function upload_does_not_duplicate_rows_when_the_same_image_is_uploaded_twice(): void
+    {
+        $this->asAdmin();
+
+        // Mismo binario fuente byte a byte: el conversor genera los mismos
+        // WebP y por ende las mismas storage keys (hash de contenido).
+        $bytes = $this->fixedJpegBytes();
+
+        $first = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => UploadedFile::fake()->createWithContent(name: 'foto.jpg', content: $bytes),
+            ]);
+        $first->assertCreated();
+        $firstUrls = collect($first->json(key: 'data'))->pluck('image_url')->sort()->values()->all();
+
+        $second = $this->withHeaders(headers: ['Accept' => 'application/json'])
+            ->post(self::ENDPOINT.$this->product->id.'/images/upload', [
+                'image' => UploadedFile::fake()->createWithContent(name: 'foto.jpg', content: $bytes),
+            ]);
+        $second->assertCreated();
+
+        // E1.6: re-subir la misma imagen no duplica la foto — las 4
+        // resoluciones ya existen y conservan su posición en la galería.
+        $this->assertCount(expectedCount: 4, haystack: ProductImage::query()->get());
+        $this->assertCount(expectedCount: 4, haystack: $second->json(key: 'data'));
+
+        $secondUrls = collect($second->json(key: 'data'))->pluck('image_url')->sort()->values()->all();
+        $this->assertSame(expected: $firstUrls, actual: $secondUrls);
+
+        $sortOrders = ProductImage::query()->pluck('sort_order')->unique()->values()->all();
+        $this->assertCount(expectedCount: 1, haystack: $sortOrders);
+    }
+
+    /**
+     * JPEG determinista (mismos píxeles → mismos bytes) para poder
+     * "re-subir" exactamente el mismo archivo en dos requests.
+     */
+    private function fixedJpegBytes(): string
+    {
+        // 1600x1200: ≥400px (el uploader aborta por debajo) y ancho
+        // suficiente para que se generen las 4 resoluciones.
+        $image = imagecreatetruecolor(width: 1600, height: 1200);
+        $fill = imagecolorallocate($image, 210, 40, 40);
+        imagefilledrectangle($image, 0, 0, 1599, 1199, $fill);
+        ob_start();
+        imagejpeg($image, quality: 90);
+
+        return (string) ob_get_clean();
+    }
+
+    #[Test]
     public function upload_writes_real_webp_binaries_that_keep_the_source_aspect_ratio(): void
     {
         $this->asAdmin();
