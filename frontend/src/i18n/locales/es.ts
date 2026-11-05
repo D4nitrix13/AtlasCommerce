@@ -1000,7 +1000,7 @@ const es: Translations = {
   'storefront.productDetail.reviews.empty': 'Este producto todavía no tiene reseñas.',
   'storefront.productDetail.reviews.verified': 'Compra verificada',
   'storefront.productDetail.reviews.starAlt': '{count} estrellas',
-  'storefront.productDetail.related.heading': 'También te puede interesar',
+  'storefront.productDetail.related.heading': 'También Te Puede Gustar',
   'storefront.productDetail.related.empty': 'Sin productos relacionados.',
   'storefront.productDetail.related.prev': 'Anterior',
   'storefront.productDetail.related.next': 'Siguiente',
@@ -1088,6 +1088,13 @@ const es: Translations = {
   'storefront.products.detail.v4.tabs.emptySpecs':
     'Este producto todavía no publica especificaciones técnicas.',
   'storefront.products.detail.v4.tabs.legend': 'Información del producto',
+  'storefront.products.detail.v4.fbt.heading': 'Frecuentemente Comprados Juntos',
+  'storefront.products.detail.v4.fbt.subtitle':
+    'Clientes que compraron este producto también agregaron estos artículos a su carrito.',
+  'storefront.products.detail.v4.fbt.addAll': 'Agregar todo al carrito',
+  'storefront.products.detail.v4.fbt.total': 'Total del bundle',
+  'storefront.products.detail.v4.fbt.itemsAria': 'Artículos frecuentemente comprados juntos',
+  'storefront.products.detail.v4.recentlyViewed.heading': 'Visto recientemente',
 
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   'storefront.checkout.title': 'Finalizar compra',

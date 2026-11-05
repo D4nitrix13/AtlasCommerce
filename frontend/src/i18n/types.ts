@@ -1930,6 +1930,12 @@ export type TranslationKey =
   | 'storefront.products.detail.v4.tabs.shipping'
   | 'storefront.products.detail.v4.tabs.emptySpecs'
   | 'storefront.products.detail.v4.tabs.legend'
+  | 'storefront.products.detail.v4.fbt.heading'
+  | 'storefront.products.detail.v4.fbt.subtitle'
+  | 'storefront.products.detail.v4.fbt.addAll'
+  | 'storefront.products.detail.v4.fbt.total'
+  | 'storefront.products.detail.v4.fbt.itemsAria'
+  | 'storefront.products.detail.v4.recentlyViewed.heading'
 
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   | 'storefront.checkout.title'

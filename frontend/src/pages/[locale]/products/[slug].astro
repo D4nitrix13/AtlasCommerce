@@ -47,10 +47,9 @@ import ProductDetailRatingRow from '../../../components/storefront/products/Prod
 import ProductDetailFinancingBlock from '../../../components/storefront/products/ProductDetailFinancingBlock.astro';
 // FENDER_PLAYER_FUSION_BASS_DETAIL fue removido en el refactor
 // seeders/mocks brand-agnostic (Oct 2026). El bundle "comprados juntos
-// frecuentemente" que vivía acá se restaurará cuando exista data real
-// para otros productos. El componente ProductFrequentlyBoughtTogether
-// queda en `components/storefront/products/` para reuso futuro.
-// import ProductFrequentlyBoughtTogether from '../../../components/storefront/products/ProductFrequentlyBoughtTogether.astro';
+// frecuentemente" ahora se arma desde relaciones curadas del backend
+// (`GET /storefront/products/{slug}/relations` → `bought_together`).
+import ProductFrequentlyBoughtTogether from '../../../components/storefront/products/ProductFrequentlyBoughtTogether.astro';
 import ProductRecentlyViewed from '../../../components/storefront/products/ProductRecentlyViewed.astro';
 import ProductFitSelector from '../../../components/storefront/products/ProductFitSelector.astro';
 import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
@@ -76,8 +75,15 @@ import { PLACEHOLDER_IMAGE, deriveProductDetail } from '../../../lib/product-det
 // `data/product-detail-mock.ts` por compat con quien lo consuma fuera de acá.
 import {
   pickRelatedProducts,
+  RELATED_PRODUCTS_LIMIT,
   type StorefrontApiProductsResponse,
 } from '../../../lib/related-products';
+import { mergeAlikeProducts, toRelatedProductCard } from '../../../lib/product-relations';
+import { resolveGuestToken } from '../../../lib/guest-token';
+import {
+  fetchRecommendationRails,
+  recordProductView,
+} from '../../../lib/server/product-recommendations';
 import {
   HANDEDNESS_LEFT,
   HANDEDNESS_RIGHT,
@@ -214,10 +220,19 @@ const apiOrigin =
  * El middleware `store.domain` resuelve el tenant por cabecera `Host`.
  * Con el origin interno hay que mandarla explícitamente; sin ella el
  * backend no sabe qué tienda es y responde 404.
+ *
+ * `Origin` + `Cookie` viajan SIEMPRE (invariante de sesión del repo):
+ * sin ellos Sanctum stateful no acepta la cookie de sesión y el
+ * historial "Visto recientemente" no se persistiría por usuario.
  */
 const apiRequestHeaders: Record<string, string> = {
   Accept: 'application/json',
+  Origin: Astro.url.origin,
 };
+const requestCookie = Astro.request.headers.get('cookie');
+if (requestCookie !== null && requestCookie !== '') {
+  apiRequestHeaders.Cookie = requestCookie;
+}
 if (apiOrigin !== Astro.url.origin) {
   apiRequestHeaders.Host = Astro.url.host;
 }
@@ -390,6 +405,71 @@ if (product !== null && relatedCategory !== '') {
     clearTimeout(relatedTimeout);
   }
 }
+
+// ─── Rieles de recomendación (FBT · También · Visto recientemente) ──
+//
+// Tres rieles sobre los endpoints nuevos del storefront:
+//   - `POST /storefront/recently-viewed` registra la visita (best-effort:
+//     un fallo NO rompe el render del PDP).
+//   - `GET  /storefront/products/{slug}/relations` trae los curados de
+//     "Frecuentemente Comprados Juntos" (`bought_together`) y de
+//     "También Te Puede Gustar" (`you_may_also_like`), ordenados por
+//     `position`.
+//   - `GET  /storefront/recently-viewed` trae el historial del usuario
+//     (o del guest token `rv_guest`), newest-first y sin el producto
+//     actual.
+//
+// Los tres calls reenvían las cookies del request + Host/Origin (misma
+// `apiRequestHeaders` que el fetch del producto). Si el GET de vistos
+// falla, el rail cae al fallback localStorage del componente.
+const guestToken = resolveGuestToken(Astro.cookies);
+let boughtTogetherProducts: Product[] = [];
+let youMayAlsoLikeProducts: Product[] = [];
+let recentlyViewedProducts: Product[] = [];
+let recentlyViewedFallback = false;
+
+if (product !== null) {
+  await recordProductView({
+    apiOrigin,
+    headers: apiRequestHeaders,
+    productId: product.id,
+    guestToken,
+  });
+
+  const rails = await fetchRecommendationRails({
+    apiOrigin,
+    headers: apiRequestHeaders,
+    slug: product.slug,
+    currentProductId: product.id,
+    guestToken,
+  });
+  boughtTogetherProducts = rails.boughtTogether;
+  youMayAlsoLikeProducts = rails.youMayAlsoLike;
+  recentlyViewedProducts = rails.recentlyViewed;
+  recentlyViewedFallback = rails.recentlyViewedFallback;
+}
+
+/**
+ * "También Te Puede Gustar": curados primero; si no alcanzan, rellena
+ * con los relacionados por categoría (fetch de arriba). Sin duplicados.
+ */
+const alikeProducts = mergeAlikeProducts(
+  youMayAlsoLikeProducts.map(toRelatedProductCard),
+  relatedProducts,
+  RELATED_PRODUCTS_LIMIT,
+);
+
+/**
+ * Bundle "Frecuentemente Comprados Juntos": producto principal primero
+ * (posición 1) + accesorios curados. Sin accesorios, el rail no existe.
+ */
+const fbtItems =
+  product !== null && boughtTogetherProducts.length > 0
+    ? [
+        { product, position: 1 },
+        ...boughtTogetherProducts.map((item, index) => ({ product: item, position: index + 2 })),
+      ]
+    : [];
 
 // Detalle enriquecido: el helper deriveProductDetail decide si usar
 // SABER_ALTER_DETAIL directamente (cuando el slug matchea) o derivar
@@ -859,6 +939,15 @@ const cardLabels = {
   outOfStock: t['storefront.productCard.outOfStock'],
   viewDetail: t['storefront.productCard.viewDetail'],
 };
+
+// Labels del bundle "Frecuentemente Comprados Juntos" (ProductFrequentlyBoughtTogether).
+const fbtLabels = {
+  heading: t['storefront.products.detail.v4.fbt.heading'],
+  subtitle: t['storefront.products.detail.v4.fbt.subtitle'],
+  addAll: t['storefront.products.detail.v4.fbt.addAll'],
+  total: t['storefront.products.detail.v4.fbt.total'],
+  itemsAria: t['storefront.products.detail.v4.fbt.itemsAria'],
+};
 ---
 
 <StorefrontLayout title={pandaPiece?.name ?? product?.name ?? t['storefront.productDetail.notFound']}>
@@ -1283,19 +1372,44 @@ const cardLabels = {
 
           {/* Features carousel — removido: sección redundante con Highlights. */}
 
-          {/* Related products — "You May Also Like"
-              Derivados del catálogo real del tenant, filtrados por la
-              categoría del producto actual (ver fetch SSR arriba).
-              Si el backend devolvió error o la categoría sólo contiene el
-              producto actual, la sección se oculta. `relatedError` se ignora
-              a propósito: el PDP no expone el error al cliente (sólo en
-              logs del server) y la sección vacía es suficiente. */}
-          {relatedProducts.length > 0 && (
-            <ProductRelated labels={cardLabels} products={relatedProducts} locale={locale} />
+          {/* Frequently bought together — bundle del producto actual +
+              accesorios curados (`bought_together` del endpoint de
+              relations). Sin accesorios curados, el rail se oculta. */}
+          {fbtItems.length > 0 && (
+            <ProductFrequentlyBoughtTogether
+              heading={fbtLabels.heading}
+              subtitle={fbtLabels.subtitle}
+              items={fbtItems}
+              addAllHref={`/${locale}/cart`}
+              addAllLabel={fbtLabels.addAll}
+              totalLabel={fbtLabels.total}
+              itemsAriaLabel={fbtLabels.itemsAria}
+              locale={locale}
+            />
           )}
 
-          {/* Recently viewed (client-side via localStorage) */}
-          <ProductRecentlyViewed />
+          {/* Related products — "También Te Puede Gustar"
+              Curados (`you_may_also_like`) primero; relleno con los
+              relacionados por categoría del tenant (fetch SSR arriba),
+              sin duplicados. Si no hay ninguno, la sección se oculta.
+              `relatedError` se ignora a propósito: el PDP no expone el
+              error al cliente (sólo en logs del server) y la sección
+              vacía es suficiente. */}
+          {alikeProducts.length > 0 && (
+            <ProductRelated labels={cardLabels} products={alikeProducts} locale={locale} />
+          )}
+
+          {/* Recently viewed — SSR desde el historial del backend; si el
+              fetch falló, el componente cae al fallback localStorage. */}
+          {(recentlyViewedProducts.length > 0 || recentlyViewedFallback) && (
+            <ProductRecentlyViewed
+              heading={t['storefront.products.detail.v4.recentlyViewed.heading']}
+              locale={locale}
+              products={recentlyViewedProducts}
+              currentSlug={product.slug}
+              useFallback={recentlyViewedFallback}
+            />
+          )}
         </article>
       )}
     </section>

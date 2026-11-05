@@ -140,9 +140,12 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
       migración aplicada en dev; seeder idempotente → 14 bought_together +
       15 you_may_also_like. Bug corregido durante la siembra: el `whereIn`
       solo cargaba slugs origen (los destinos sin fila propia se perdían).
-- [ ] **T5** Backend `recently_viewed_products`: migración, modelo, endpoints
+- [x] **T5** Backend `recently_viewed_products`: migración, modelo, endpoints
       POST/GET con cap 20 + move-to-front, identidad user/guest. TDD.
-      _Route: delegated writer._
+      _Route: delegated writer (`general-5`, 45 turnos, reportó verde)._ _Commit
+      `69e60903`._ Checks: RED 8 failed → GREEN 8 passed (servicio) + RED 8
+      failed → GREEN 10 passed (endpoints) via `artisan test --filter`;
+      migración aplicada en dev; spot check parent 8/8.
 - [ ] **T6** Frontend secciones: FBT con datos reales + "Agregar todo",
       "También Te Puede Gustar" con fallbacks, "Visto recientemente" SSR/BD.
       _Route: delegated writer._
