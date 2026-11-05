@@ -1,0 +1,76 @@
+---
+/**
+ * StatRail — rail de stats de soporte (NO cajas KPI iguales).
+ *
+ * Checkpoint de diseño:
+ *   Intent:   contexto rápido "¿cómo viene mi cuenta?" sin competir
+ *             con el job ticket: UNA stat hero + soportes con
+ *             significado real (pistas, no "—").
+ *   Hierarchy: la stat hero gana por tamaño (40px vs 24px) y peso;
+ *             las soportes son un rail denso en una sola superficie.
+ *   Palette:  papel levantado; tintas semánticas solo en las pistas
+ *             (positive → primary, warning → ocre, neutral → muted).
+ *   Depth:    una hoja `paper-card` compartida — no 4 tarjetas.
+ *   Type:     labels micro-label 11px tracked; números 24-40px/600
+ *             con `tabular-nums` (sin layout shift).
+ *   Spacing:  8px base; 24px padding; divisores a baja opacidad.
+ */
+import type { DashboardStat } from '../../../types/dashboard-kpis';
+import type { TranslationKey } from '../../../i18n/types';
+
+interface Props {
+  stats: DashboardStat[];
+  t: Record<TranslationKey, string>;
+}
+
+const { stats, t } = Astro.props;
+
+const TONE_COLOR: Record<DashboardStat['tone'], string> = {
+  positive: 'color:var(--primary)',
+  neutral: 'color:var(--ink-muted)',
+  warning: 'color:var(--ink-received)',
+};
+
+function renderHint(stat: DashboardStat, dictionary: Record<TranslationKey, string>): string {
+  if (stat.hintKey === null) return '';
+  let hint = dictionary[stat.hintKey];
+  for (const [param, value] of Object.entries(stat.hintParams)) {
+    hint = hint.replace(`{${param}}`, value);
+  }
+  return hint;
+}
+
+const hasStats = stats.length > 0;
+---
+
+{hasStats && (
+  <section aria-label={t['account.dashboard.stats.active']} data-testid="stat-rail">
+    <div class="paper-card flex flex-wrap" data-reveal-stagger>
+      {stats.map((stat, index) => (
+        <div
+          class:list={[
+            'flex min-w-[180px] flex-1 flex-col gap-1.5 px-6 py-6 lg:px-8',
+            index > 0 ? 'border-l' : '',
+          ]}
+          style={index > 0 ? 'border-color:var(--edge-soft)' : ''}
+          data-testid={`stat-${stat.labelKey.replace(/\./g, '-')}`}
+        >
+          <p class="micro-label">{t[stat.labelKey]}</p>
+          <p
+            class:list={[
+              'font-semibold tabular-nums leading-none',
+              stat.emphasis === 'hero' ? 'text-[36px] lg:text-[40px]' : 'text-[24px]',
+            ]}
+          >
+            {stat.value}
+          </p>
+          {stat.hintKey !== null && (
+            <p class="text-[12px]" style={TONE_COLOR[stat.tone]}>
+              {renderHint(stat, t)}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+)}

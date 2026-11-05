@@ -30,7 +30,12 @@
 
 import type { AccountDashboardData } from '../lib/server/account';
 import { formatCurrency } from '../lib/formatters';
-import type { DashboardKpi, DashboardKpiTone } from '../types/dashboard-kpis';
+import type {
+  DashboardKpi,
+  DashboardKpiTone,
+  DashboardStat,
+  ProductionTicket,
+} from '../types/dashboard-kpis';
 
 /**
  * Construye las 4 KPIs del dashboard.
@@ -133,86 +138,109 @@ export function buildDashboardKpis(
 }
 
 /**
- * v3 KPI set — task-oriented, Bonfire adaptation.
+ * v4 — job-ticket redesign (estampados).
  *
- * A diferencia de `buildDashboardKpis` (que refleja literalmente los
- * labels del mockup Bonfire v1: Pedidos totales / En producción / Tasa
- * de aprobación / Saldo pendiente), este helper expone un set
- * "orientado a la siguiente acción" que coincide con la spec del
- * dashboard v3:
- *   1. Pedidos activos    → count de órdenes en estados activos.
- *   2. Cotizaciones       → rfqPendingCount (cuando el endpoint responde).
- *   3. Gastado (mes)      → suma de totales de órdenes del mes en curso.
- *   4. Favoritos          → count de wishlist (mock hasta que
- *                            `account.wishlist.count` esté en el payload).
+ * La composición v3 (4 KPI cards iguales con "—") se reemplaza por:
+ *   - `buildProductionTickets` → las órdenes normalizadas para la tira
+ *     de producción (el FOCAL del dashboard): orden de trabajo + rail
+ *     de etapas + chips de tinta.
+ *   - `buildDashboardStats` → UNA stat hero (trabajos en curso) + un
+ *     rail de stats de soporte con significado real. Stats sin dato no
+ *     se construyen (empty-safe, sin "—" inventado).
  *
- * Decisión: cuando el endpoint correspondiente no responde o devuelve
- * null, el KPI queda con `value: '—'` y sin delta/hint — el renderer
- * (`KpiCard.astro`) lo pinta en gris para que se vea intencional, no
- * roto. Mismo contrato que el helper v1.
+ * Los textos NO se componen acá: cada stat devuelve `hintKey` +
+ * `hintParams` y el renderer interpola desde el diccionario i18n.
+ * El formateo de moneda/números es locale-aware (`formatCurrency`),
+ * igual que el resto del repo.
  *
- * Por qué los datos vienen mockeados hoy: el backend todavía no expone
- * `wishlist.count` ni desglose por mes en `/api/v1/orders`. La spec del
- * dashboard v3 está adelantada al contrato de datos. Cuando el backend
- * exponga esos campos, este helper pasa a leerlos de `data` sin
- * cambiar la firma ni los `labelKey`.
+ * Los mocks de favoritos/gastado-mes de la v3 se eliminan: preferimos
+ * derivar métricas reales del payload actual (piezas estampadas,
+ * gastado total) antes que pintar números inventados.
  */
-export function buildDashboardKpisV3(
-  data: AccountDashboardData,
-  locale: 'es' | 'en' = 'es'
-): DashboardKpi[] {
-  const activeOrders = data.orders.filter(
-    (o) => o.status === 'pending' || o.status === 'processing' || o.status === 'shipped'
-  );
 
-  // Mock values used until the backend exposes the underlying counts.
-  // Documented in the spec so reviewers can swap them for real data
-  // without grepping the repo.
-  const FAVORITES_MOCK_COUNT = 12;
-  const SPENT_THIS_MONTH_MOCK_CENTS = 124_000; // $1,240.00
+const STAGE_INDEX: Record<ProductionTicket['status'], number> = {
+  pending: 0,
+  processing: 1,
+  shipped: 2,
+  delivered: 3,
+  cancelled: -1,
+};
 
-  void locale;
+const isActiveStatus = (status: ProductionTicket['status']): boolean =>
+  status === 'pending' || status === 'processing' || status === 'shipped';
 
-  const ordersKpi: DashboardKpi = {
-    labelKey: 'account.dashboard.v3.kpi.orders',
-    value: activeOrders.length === 0 ? '—' : String(activeOrders.length),
-    delta: null,
+/**
+ * Normaliza las órdenes del dashboard a tickets de producción,
+ * ordenadas por fecha de pedido (más recientes primero).
+ */
+export function buildProductionTickets(data: AccountDashboardData): ProductionTicket[] {
+  return data.orders
+    .map((order): ProductionTicket => {
+      return {
+        orderId: order.id,
+        placedAt: order.date,
+        status: order.status,
+        stageIndex: STAGE_INDEX[order.status],
+        pieces: order.items,
+        totalLabel: formatCurrency(order.total, null),
+      };
+    })
+    .sort((a, b) => Date.parse(b.placedAt) - Date.parse(a.placedAt));
+}
+
+/**
+ * Rail de stats: 1 hero + soportes. `rfqPendingCount === null` omite la
+ * stat de cotizaciones por completo (el endpoint no respondió).
+ */
+export function buildDashboardStats(data: AccountDashboardData): DashboardStat[] {
+  const activeOrders = data.orders.filter((o) => isActiveStatus(o.status));
+  const inPress = data.orders.filter((o) => o.status === 'processing').length;
+  const inTransit = data.orders.filter((o) => o.status === 'shipped').length;
+  const totalPieces = data.orders.reduce((sum, o) => sum + o.items, 0);
+  const totalCents = data.orders.reduce((sum, o) => sum + o.total, 0);
+
+  const heroStat: DashboardStat = {
+    labelKey: 'account.dashboard.stats.active',
+    value: String(activeOrders.length),
+    hintKey:
+      activeOrders.length === 0
+        ? 'account.dashboard.stats.idleHint'
+        : 'account.dashboard.stats.activeHint',
+    hintParams: { press: String(inPress), transit: String(inTransit) },
     tone: activeOrders.length > 0 ? 'positive' : 'neutral',
-    hint: null,
+    emphasis: 'hero',
   };
 
-  const rfqsKpi: DashboardKpi =
-    data.rfqPendingCount === null
-      ? {
-          labelKey: 'account.dashboard.v3.kpi.rfqs',
-          value: '—',
-          delta: null,
-          tone: 'neutral',
-          hint: null,
-        }
-      : {
-          labelKey: 'account.dashboard.v3.kpi.rfqs',
-          value: String(data.rfqPendingCount),
-          delta: null,
-          tone: 'warning',
-          hint: null,
-        };
-
-  const spentKpi: DashboardKpi = {
-    labelKey: 'account.dashboard.v3.kpi.spent',
-    value: formatCurrency(SPENT_THIS_MONTH_MOCK_CENTS, null),
-    delta: null,
-    tone: 'positive',
-    hint: null,
-  };
-
-  const favoritesKpi: DashboardKpi = {
-    labelKey: 'account.dashboard.v3.kpi.favorites',
-    value: String(FAVORITES_MOCK_COUNT),
-    delta: null,
+  const spentStat: DashboardStat = {
+    labelKey: 'account.dashboard.stats.spent',
+    value: formatCurrency(totalCents, null),
+    hintKey: 'account.dashboard.stats.spentHint',
+    hintParams: { count: String(data.orders.length) },
     tone: 'neutral',
-    hint: null,
+    emphasis: 'support',
   };
 
-  return [ordersKpi, rfqsKpi, spentKpi, favoritesKpi];
+  const piecesStat: DashboardStat = {
+    labelKey: 'account.dashboard.stats.pieces',
+    value: String(totalPieces),
+    hintKey: 'account.dashboard.stats.piecesHint',
+    hintParams: {},
+    tone: 'neutral',
+    emphasis: 'support',
+  };
+
+  const stats = [heroStat, spentStat, piecesStat];
+
+  if (data.rfqPendingCount !== null) {
+    stats.push({
+      labelKey: 'account.dashboard.stats.quotes',
+      value: String(data.rfqPendingCount),
+      hintKey: 'account.dashboard.stats.quotesHint',
+      hintParams: {},
+      tone: data.rfqPendingCount > 0 ? 'warning' : 'neutral',
+      emphasis: 'support',
+    });
+  }
+
+  return stats;
 }

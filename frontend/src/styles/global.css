@@ -9,19 +9,175 @@
   .shop-canvas {
     background-color: var(--paper, #f3efe8);
     color: var(--ink, #1c1917);
+
+    /* Superficies de papel — escalera de elevación susurro. */
+    --paper-raised: color-mix(in srgb, var(--paper, #f3efe8) 86%, white);
+    --paper-sunken: color-mix(in srgb, var(--paper, #f3efe8) 93%, var(--ink, #1c1917));
+    --kraft: color-mix(in srgb, var(--paper, #f3efe8) 74%, #b48a52);
+    --kraft-soft: color-mix(in srgb, var(--paper, #f3efe8) 90%, #b48a52);
+
+    /* Jerarquía de texto en tinta (4 niveles). */
+    --ink-soft: color-mix(in srgb, var(--ink, #1c1917) 78%, var(--paper, #f3efe8));
+    --ink-muted: color-mix(in srgb, var(--ink, #1c1917) 56%, var(--paper, #f3efe8));
+    --ink-faint: color-mix(in srgb, var(--ink, #1c1917) 34%, var(--paper, #f3efe8));
+
+    /* Bordes a baja opacidad — estructura que se encuentra, no se ve. */
+    --edge: color-mix(in srgb, var(--ink, #1c1917) 9%, transparent);
+    --edge-soft: color-mix(in srgb, var(--ink, #1c1917) 5%, transparent);
+    --edge-strong: color-mix(in srgb, var(--ink, #1c1917) 15%, transparent);
+
+    /* Tintas semánticas (chips de tinta del taller). */
+    --ink-received: #8a5f22;
+    --ink-press: #2a5175;
+    --ink-transit: #6a4f86;
+    --ink-done: #48602f;
+    --ink-void: #8e3a2e;
+    --ink-received-soft: color-mix(in srgb, var(--ink-received) 11%, var(--paper, #f3efe8));
+    --ink-press-soft: color-mix(in srgb, var(--ink-press) 11%, var(--paper, #f3efe8));
+    --ink-transit-soft: color-mix(in srgb, var(--ink-transit) 11%, var(--paper, #f3efe8));
+    --ink-done-soft: color-mix(in srgb, var(--ink-done) 11%, var(--paper, #f3efe8));
+    --ink-void-soft: color-mix(in srgb, var(--ink-void) 11%, var(--paper, #f3efe8));
+
+    /* Profundidad: una sola estrategia — sombras en capas. */
+    --lift-1:
+      0 1px 2px -1px rgb(28 25 23 / 0.06), 0 2px 4px -2px rgb(28 25 23 / 0.05),
+      0 0 0 1px rgb(28 25 23 / 0.05);
+    --lift-2:
+      0 2px 4px -2px rgb(28 25 23 / 0.07), 0 10px 24px -10px rgb(28 25 23 / 0.12),
+      0 0 0 1px rgb(28 25 23 / 0.05);
   }
 
-  .shop-canvas h1 {
+  .shop-canvas {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .shop-canvas h1,
+  .shop-canvas h2,
+  .shop-canvas h3 {
     font-family: var(--font-display);
     font-weight: 500;
     letter-spacing: -0.03em;
     text-wrap: balance;
     color: var(--ink, #1c1917);
+    font-optical-sizing: auto;
+  }
+
+  .shop-canvas :focus-visible {
+    outline: 2px solid var(--primary, #2a5175);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
   .shop-hero {
     background:
       radial-gradient(ellipse 72% 80% at 100% 0%, var(--primary-soft, #f1f5f9), transparent 58%),
       var(--paper, #f3efe8);
+  }
+}
+
+@layer components {
+  /* Hoja de papel: tarjeta base que se levanta del escritorio. */
+  .paper-card {
+    background-color: var(--paper-raised);
+    border-radius: 16px;
+    box-shadow: var(--lift-1);
+  }
+
+  /* Hoja dominante — el focal se levanta un paso más. */
+  .paper-card-hero {
+    background-color: var(--paper-raised);
+    border-radius: 20px;
+    box-shadow: var(--lift-2);
+  }
+
+  /* Banda kraft: cabecera de orden de trabajo / superficie secundaria. */
+  .kraft-band {
+    background-color: var(--kraft-soft);
+    border-bottom: 1px solid var(--edge);
+    border-radius: 20px 20px 0 0;
+  }
+
+  /* Micro-label: 11px/500/muted/upper tracked. */
+  .micro-label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    text-wrap: balance;
+  }
+
+  /* Chip de tinta — estado con swatch (ficha Pantone del taller). */
+  .ink-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px 3px 6px;
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .ink-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex: none;
+  }
+
+  .chip-received {
+    background-color: var(--ink-received-soft);
+    color: var(--ink-received);
+  }
+  .chip-press {
+    background-color: var(--ink-press-soft);
+    color: var(--ink-press);
+  }
+  .chip-transit {
+    background-color: var(--ink-transit-soft);
+    color: var(--ink-transit);
+  }
+  .chip-done {
+    background-color: var(--ink-done-soft);
+    color: var(--ink-done);
+  }
+  .chip-void {
+    background-color: var(--ink-void-soft);
+    color: var(--ink-void);
+  }
+
+  /* Presión táctil + hover corto para controles interactivos. */
+  .pressable {
+    transition:
+      transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
+      color 140ms ease,
+      background-color 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .pressable:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-canvas *,
+  .shop-canvas *::before,
+  .shop-canvas *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pressable:active {
+    transform: none;
   }
 }

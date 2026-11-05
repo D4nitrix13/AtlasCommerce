@@ -40,3 +40,49 @@ export interface DashboardKpi {
   tone: DashboardKpiTone;
   hint: string | null;
 }
+
+/**
+ * Stat del rail de soporte del dashboard v4 (job-ticket redesign).
+ *
+ * A diferencia de `DashboardKpi` (grid de 4 tarjetas iguales), un stat
+ * pertenece a un rail horizontal donde SOLO el primero lleva `emphasis:
+ * 'hero'` (número dominante). Los stats sin dato significativo no se
+ * construyen (empty-safe: la stat no existe, no se pinta "—").
+ */
+export interface DashboardStat {
+  labelKey: TranslationKey;
+  /** Ya formateado para mostrar (tabular-nums en el renderer). */
+  value: string;
+  /** Pista con significado real; los textos viven en i18n. */
+  hintKey: TranslationKey | null;
+  /** Parámetros para interpolar en la pista (`{press}`, `{count}`, ...). */
+  hintParams: Record<string, string>;
+  tone: 'positive' | 'neutral' | 'warning';
+  emphasis: 'hero' | 'support';
+}
+
+/**
+ * Etapas del rail de producción (tira de orden de trabajo).
+ *
+ * Mapea 1:1 sobre `OrderStatus` (menos `cancelled`, que vive fuera del
+ * rail como estado terminal). El vocabulario es de taller de estampados:
+ * recibido → en prensa → despacho → entrega.
+ */
+export type ProductionStage = 'received' | 'press' | 'transit' | 'done';
+
+/**
+ * Una orden activa (o histórica) ya normalizada para la tira de
+ * producción. El renderer decide cuál es el hero; los datos no.
+ */
+export interface ProductionTicket {
+  orderId: string;
+  /** ISO 8601 — fecha del pedido. */
+  placedAt: string;
+  /** Estado crudo de la orden (incluye `cancelled`). */
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  /** Índice 0..3 dentro del rail; `-1` cuando está cancelada. */
+  stageIndex: number;
+  pieces: number;
+  /** Total ya formateado (moneda). */
+  totalLabel: string;
+}

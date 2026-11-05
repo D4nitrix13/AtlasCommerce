@@ -1,76 +1,59 @@
 ---
 /**
- * Dashboard del cliente — composición Bonfire v3.
+ * Dashboard del cliente — composición job-ticket (estampados).
  *
- * Reemplaza el layout task-oriented de F2.2 por la composición
- * del mockup `03-account-dashboard.html` (Bonfire v1 adaptado):
+ * Reemplaza la composición Bonfire v3 (grid de KPI cards + acciones
+ * en cards + tabla plana) por la metáfora del taller:
  *
- *   1. H1 saludo (HOLA, ANA)
- *   2. KpiGrid 4 cards (Pedidos activos / Cotizaciones / Gastado (mes) / Favoritos)
- *   3. QuickActionsCards (4 cards: Cotizar / Direcciones / Ayuda / Perfil)
- *   4. RecentOrdersTable (tabla 5 órdenes, 4 columnas)
+ *   1. GreetingHeader quieto (eyebrow + nombre) + QuickLinkRow.
+ *   2. ProductionStrip — FOCAL: orden de trabajo con rail de etapas
+ *      y chips de tinta (o estado vacío diseñado del taller).
+ *   3. StatRail — UNA stat hero + soportes con significado real.
+ *   4. RecentOrdersTable — ledger de últimos trabajos.
  *
- * Decisiones locked-in (ver `odd/tasks/bonfire-visual-fidelity.md`):
- *   - Tenant-aware: cada acento sale de `var(--primary)`. El shell
- *     visual lo seteá `AccountLayout.astro` en el `<body style="...">`,
- *     así que acá no toco hexes.
- *   - Empty-safe: si una sección no tiene datos, la sección no se
- *     renderiza (no mostramos cards vacías, Baymard §2.6 #4).
- *   - data-reveal-stagger en cada grid para el sistema de
- *     animaciones de scroll (scroll-fx.ts).
- *   - No emojis, no fotos de personas, no logos reales. AvatarCircle
- *     para user, ProductMockup si hicera falta una foto de producto.
+ * Decisiones locked-in:
+ *   - Tenant-aware: todo acento sale de `var(--primary)` / `--primary-hover`
+ *     (shell en AccountLayout). Sin hex de tenant hardcodeados.
+ *   - Empty-safe: sin datos, las secciones no se renderizan o se
+ *     muestra el empty diseñado de ProductionStrip.
+ *   - data-reveal / data-reveal-stagger con el sistema scroll-fx.
+ *   - Sin emojis, sin fotos de personas, sin logos reales.
  */
 import AccountLayout from '../../../layouts/AccountLayout.astro';
-import KpiGrid from '../../../components/account/dashboard/KpiGrid.astro';
-import QuickActionsCards from '../../../components/account/dashboard/QuickActionsCards.astro';
+import GreetingHeader from '../../../components/account/dashboard/GreetingHeader.astro';
+import QuickLinkRow from '../../../components/account/dashboard/QuickLinkRow.astro';
+import ProductionStrip from '../../../components/account/dashboard/ProductionStrip.astro';
+import StatRail from '../../../components/account/dashboard/StatRail.astro';
 import RecentOrdersTable from '../../../components/account/dashboard/RecentOrdersTable.astro';
 import { getServerDictionary, getServerLocale } from '../../../i18n/server';
 import { getAccountDashboardData } from '../../../lib/server/account';
-import { buildDashboardKpisV3 } from '../../../data/dashboard-kpis';
+import { buildDashboardStats, buildProductionTickets } from '../../../data/dashboard-kpis';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
 
 const cookieHeader = Astro.request.headers.get('Cookie') ?? '';
-// Pedimos 5 órdenes para la tabla (la sección más ancha del dashboard).
-// Otros endpoints del helper no se usan en v3 pero los seguimos trayendo
-// por si en el futuro queremos re-introducir una sección que los consuma
-// (ej: tarjetas de seguridad/notificaciones).
 const dashboard = await getAccountDashboardData(Astro.url.origin, cookieHeader, { limit: 5 });
 
-// Saludo. Si no hay user, fallback al idioma actual.
 const fallbackFirstName = locale === 'en' ? 'Customer' : 'Cliente';
 const firstName = dashboard.user?.full_name?.split(' ')[0] ?? fallbackFirstName;
-const greeting = locale === 'en' ? `Hello, ${firstName}` : `Hola, ${firstName}`;
+const greeting = t['account.dashboard.greetingFallback'].replace('{name}', firstName);
 
 const localePrefix = `/${locale}`;
-
-// KPIs v3 (Bonfire adaptation). El helper ya devuelve 4 elementos con
-// los labelKey del namespace v3.
-const kpis = buildDashboardKpisV3(dashboard, locale);
+const tickets = buildProductionTickets(dashboard);
+const stats = buildDashboardStats(dashboard);
 ---
 
 <AccountLayout title={t['account.layout.title']}>
-  <div class="flex flex-col gap-10">
-    <header class="flex flex-col gap-2">
-      <h1
-        class="text-4xl md:text-6xl"
-        data-testid="dashboard-greeting"
-      >
-        {greeting}
-      </h1>
-    </header>
+  <div class="flex flex-col gap-12">
+    <GreetingHeader eyebrow={t['account.dashboard.eyebrow']} greeting={greeting}>
+      <QuickLinkRow locale={locale} t={t} />
+    </GreetingHeader>
 
-    <KpiGrid kpis={kpis} t={t} />
+    <ProductionStrip tickets={tickets} localePrefix={localePrefix} t={t} />
 
-    <QuickActionsCards locale={locale} t={t} />
+    <StatRail stats={stats} t={t} />
 
-    <RecentOrdersTable
-      orders={dashboard.orders}
-      localePrefix={localePrefix}
-      currencyCode={null}
-      t={t}
-    />
+    <RecentOrdersTable tickets={tickets} localePrefix={localePrefix} t={t} />
   </div>
 </AccountLayout>

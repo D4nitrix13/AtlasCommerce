@@ -1,0 +1,117 @@
+---
+/**
+ * StudioEmptyState — estado vacío/del taller, diseñado.
+ *
+ * Checkpoint de diseño:
+ *   Intent:   un estado vacío que se siente hoja de taller lista para
+ *             el primer trabajo (no un "No tenés pedidos." genérico).
+ *   Hierarchy: título Fraunces gana; el step-wedge de densidad es
+ *             firma decorativa, nunca contenido.
+ *   Palette:  papel + tinta pura (`--ink` en pasos de densidad) +
+ *             `--primary` solo en el CTA principal.
+ *   Depth:    hoja elevada (`paper-card-hero` / `paper-card`).
+ *   Type:     display 32-40px para títulos, body 15px medida corta.
+ *   Spacing:  32px padding en first, 24px en idle; ritmo abierto.
+ *
+ * El step-wedge replica el control de densidad de imprenta: barras de
+ * la misma tinta en pasos — identidad de dominio sin fotos.
+ */
+import type { TranslationKey } from '../../../i18n/types';
+import RegistrationMarks from './RegistrationMarks.astro';
+
+interface Props {
+  variant: 'first' | 'idle';
+  t: Record<TranslationKey, string>;
+  catalogHref: string;
+  quoteHref: string;
+  /** Label ya interpolado para el idle ("tu último trabajo fue #12"). */
+  lastOrderLabel?: string;
+  reorderHref?: string;
+}
+
+const {
+  variant,
+  t,
+  catalogHref,
+  quoteHref,
+  lastOrderLabel,
+  reorderHref = catalogHref,
+} = Astro.props;
+
+const wedgeSteps = [0.12, 0.22, 0.34, 0.48, 0.64, 0.82, 1];
+const wedgeHeights = [20, 28, 36, 44, 52, 60, 68];
+const idleBody = t['account.dashboard.idle.body'].replace('{order}', lastOrderLabel ?? '—');
+---
+
+{variant === 'first' ? (
+  <section
+    class="paper-card-hero relative overflow-hidden px-6 py-12 lg:px-12 lg:py-16"
+    data-testid="dashboard-empty"
+  >
+    <RegistrationMarks />
+    <div class="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
+      <div class="max-w-xl">
+        <p class="micro-label">{t['account.dashboard.empty.eyebrow']}</p>
+        <h2 class="mt-3 font-display text-3xl leading-tight lg:text-[40px]">
+          {t['account.dashboard.empty.title']}
+        </h2>
+        <p class="mt-4 text-[15px] leading-relaxed text-[var(--ink-muted)]">
+          {t['account.dashboard.empty.body']}
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <a
+            href={catalogHref}
+            class="pressable inline-flex min-h-10 items-center rounded-[10px] px-5 py-2.5 text-sm font-semibold text-white"
+            style="background:var(--primary)"
+            data-testid="dashboard-empty-catalog"
+          >
+            {t['account.dashboard.empty.ctaCatalog']}
+          </a>
+          <a
+            href={quoteHref}
+            class="pressable inline-flex min-h-10 items-center rounded-[10px] border px-5 py-2.5 text-sm font-semibold text-[var(--ink)]"
+            style="border-color:var(--edge-strong);background:var(--paper-raised)"
+            data-testid="dashboard-empty-quote"
+          >
+            {t['account.dashboard.empty.ctaQuote']}
+          </a>
+        </div>
+      </div>
+
+      {/* Step-wedge: control de densidad de imprenta. */}
+      <div
+        class="flex items-end gap-1.5 rounded-[12px] border px-6 py-6"
+        style="border-color:var(--edge);background:var(--paper-sunken)"
+        aria-hidden="true"
+      >
+        {wedgeSteps.map((opacity, index) => (
+          <span
+            class="w-4 rounded-[3px]"
+            style={`height:${wedgeHeights[index]}px;background:var(--ink);opacity:${opacity}`}
+          ></span>
+        ))}
+      </div>
+    </div>
+  </section>
+) : (
+  <section
+    class="paper-card relative overflow-hidden px-6 py-8 lg:px-10"
+    data-testid="dashboard-idle"
+  >
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <div class="max-w-lg">
+        <h2 class="font-display text-2xl">{t['account.dashboard.idle.title']}</h2>
+        <p class="mt-2 text-[15px] leading-relaxed text-[var(--ink-muted)]">{idleBody}</p>
+      </div>
+      <a
+        href={reorderHref}
+        class="pressable inline-flex min-h-10 items-center gap-2 rounded-[10px] border px-5 py-2.5 text-sm font-semibold text-[var(--ink)]"
+        style="border-color:var(--edge-strong);background:var(--paper-raised)"
+        data-testid="dashboard-idle-reorder"
+      >
+        {t['account.dashboard.idle.cta']}
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+)}

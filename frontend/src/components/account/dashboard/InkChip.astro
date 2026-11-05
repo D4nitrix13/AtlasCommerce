@@ -1,0 +1,50 @@
+---
+/**
+ * InkChip — chip de tinta: estado del trabajo con swatch.
+ *
+ * Checkpoint de diseño:
+ *   Intent:   el cliente escanea la etapa de un trabajo como se lee una
+ *             ficha de tinta — color + palabra, sin interpretar iconos.
+ *   Hierarchy: mini-sello; nunca compite con el hero, siempre acompaña.
+ *   Palette:  tintas semánticas del taller (`--ink-*`), sin hex random.
+ *   Depth:    plano (sin sombra) — vive dentro de hojas que ya elevan.
+ *   Type:     11px/600, tracking suave; el swatch lleva la jerarquía.
+ *   Spacing:  3px 9px con swatch 8px — chip compacto, hit-area no
+ *             aplica (no es interactivo).
+ */
+import type { TranslationKey } from '../../../i18n/types';
+
+export type InkChipStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+
+interface Props {
+  status: InkChipStatus;
+  t: Record<TranslationKey, string>;
+}
+
+const { status, t } = Astro.props;
+
+const CHIP_CLASS: Record<InkChipStatus, string> = {
+  pending: 'chip-received',
+  processing: 'chip-press',
+  shipped: 'chip-transit',
+  delivered: 'chip-done',
+  cancelled: 'chip-void',
+};
+
+const CHIP_LABEL_KEY: Record<InkChipStatus, TranslationKey> = {
+  pending: 'account.dashboard.ticket.stage.received',
+  processing: 'account.dashboard.ticket.stage.press',
+  shipped: 'account.dashboard.ticket.stage.transit',
+  delivered: 'account.dashboard.ticket.stage.done',
+  cancelled: 'account.dashboard.ticket.stage.void',
+};
+---
+
+<span
+  class:list={['ink-chip', CHIP_CLASS[status]]}
+  data-testid="ink-chip"
+  data-chip-status={status}
+>
+  <span class="ink-swatch" style="background:currentColor" aria-hidden="true"></span>
+  {t[CHIP_LABEL_KEY[status]]}
+</span>
