@@ -179,3 +179,19 @@ export function buildFinishOptions(
 export function hasFinishPicker(options: readonly FinishOption[]): boolean {
   return options.length >= MIN_FINISHES_FOR_PICKER;
 }
+
+/**
+ * Imagen de preview de un acabado para el hover/focus del swatch del PDP.
+ *
+ * El mapa es `finishSlug → primera imagen del variant` (la misma fuente
+ * que usa el thumbnail del picker). Un acabado sin imagen (camino
+ * legacy, o variant sin fotos asociadas) devuelve `undefined` y el
+ * swatch no ofrece preview — la navegación `?finish=` sigue funcionando.
+ */
+export function resolveFinishPreviewImage(
+  finishId: string,
+  previewImages: Readonly<Record<string, string | undefined>>,
+): string | undefined {
+  const url = previewImages[finishId];
+  return url !== undefined && url !== '' ? url : undefined;
+}

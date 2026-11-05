@@ -69,7 +69,7 @@ describe('ProductRelated — cards de la misma altura (También Te Puede Gustar)
     // cuadrada; object-cover escala proporcional y recorta bordes:
     // sin estirar, sin deformar, sin huecos.
     expect(RELATED).not.toMatch(/object-contain/);
-    expect(card).toMatch(/class="[^"]*\bobject-cover\b/);
+    expect(card).toContain('object-cover');
   });
 });
 

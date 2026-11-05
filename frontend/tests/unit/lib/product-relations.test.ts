@@ -188,3 +188,80 @@ describe('toRelatedProductCard (variantes e imágenes)', () => {
     expect(card.imageUrlSecondary).toBe('/img/back.webp');
   });
 });
+
+/** 2 acabados × 2 tallas = 4 variantes, fotos por acabado. */
+function buildSizeMatrixProduct(): Product {
+  return buildProduct({
+    variants: [
+      buildVariant({ id: '1', sizeSlug: 'm' }),
+      buildVariant({ id: '2', sizeSlug: 'g' }),
+      buildVariant({
+        id: '3',
+        name: 'Halo',
+        finishSlug: 'halo',
+        finishLabel: 'Halo Metallic',
+        finishHex: '#abcdef',
+        sizeSlug: 'm',
+      }),
+      buildVariant({
+        id: '4',
+        name: 'Halo',
+        finishSlug: 'halo',
+        finishLabel: 'Halo Metallic',
+        finishHex: '#abcdef',
+        sizeSlug: 'g',
+      }),
+    ],
+    images: [
+      buildImage({ url: '/img/front.webp', variantId: '1' }),
+      buildImage({
+        url: '/img/halo.webp',
+        altText: 'halo',
+        isPrimary: false,
+        variantId: '3',
+        sortOrder: 2,
+      }),
+    ],
+  });
+}
+
+describe('toRelatedProductCard (un swatch por acabado)', () => {
+  it('colapsa variantes del mismo acabado a un solo swatch', () => {
+    const card = toRelatedProductCard(buildSizeMatrixProduct());
+
+    expect(card.variantsCount).toBe(2);
+    expect(card.variants).toHaveLength(2);
+    expect(card.variants?.map((v) => v.id)).toEqual(['1', '3']);
+  });
+
+  it('prefiere la variante del acabado que tiene foto propia', () => {
+    const product = buildProduct({
+      variants: [
+        buildVariant({ id: '1', sizeSlug: 'm' }),
+        buildVariant({ id: '2', sizeSlug: 'g' }),
+        buildVariant({
+          id: '3',
+          name: 'Halo',
+          finishSlug: 'halo',
+          finishLabel: 'Halo Metallic',
+          finishHex: '#abcdef',
+        }),
+      ],
+      images: [
+        buildImage({ url: '/img/front.webp', variantId: '2' }),
+        buildImage({
+          url: '/img/halo.webp',
+          altText: 'halo',
+          isPrimary: false,
+          variantId: '3',
+          sortOrder: 2,
+        }),
+      ],
+    });
+    const card = toRelatedProductCard(product);
+
+    expect(card.variants).toHaveLength(2);
+    expect(card.variants?.[0]?.id).toBe('2');
+    expect(card.variants?.[0]?.imageUrl).toBe('/img/front.webp');
+  });
+});

@@ -1114,15 +1114,23 @@ const fbtLabels = {
                   <dd class="flex flex-col gap-3 text-sm font-medium text-slate-900">
                     <div class="flex flex-col items-start gap-2">
                       {/*
-                        Con un solo acabado no hay nada que elegir, pero la
-                        miniatura sigue siendo información: dice cómo es el
-                        color. Se muestra como imagen fija bajo la etiqueta,
-                        no como enlace, porque un enlace que no cambia nada
-                        es un control muerto.
+                        Con un solo acabado no hay nada que elegir, pero el
+                        chip de color (o la miniatura si el acabado no tiene
+                        hex) sigue siendo información: dice cómo es el color.
+                        Se muestra fijo bajo la etiqueta, no como enlace,
+                        porque un enlace que no cambia nada es un control muerto.
                       */}
                       <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
+                      {!showFinishPicker && selectedFinish !== undefined && selectedFinish.hex !== undefined && (
+                        <span
+                          aria-hidden="true"
+                          class="h-12 w-12 shrink-0 rounded-md border border-slate-200"
+                          style={`background-color: ${selectedFinish.hex};`}
+                        />
+                      )}
                       {!showFinishPicker &&
                         selectedFinish !== undefined &&
+                        selectedFinish.hex === undefined &&
                         variantFirstImage[selectedFinish.id] !== undefined && (
                           <img
                             src={variantFirstImage[selectedFinish.id]}
@@ -1135,10 +1143,13 @@ const fbtLabels = {
                           />
                         )}
                     </div>
-                    {/* Picker de variantes con thumbnails reales (estilo Nike).
-                        Cada swatch es un <a> con ?finish=<id> que filtra la galería
-                        via query param (sin JS). Thumbnails uniformes ~48×48
-                        con object-cover para mantener el aspect ratio.
+                    {/* Picker de variantes: chip de color hex por acabado —
+                        una miniatura fotográfica por finish a 48px se lee
+                        como "imágenes repetidas". La miniatura queda sólo
+                        como fallback para acabados sin hex (fades, sunburst).
+                        Cada swatch es un <a> con ?finish=<id> que filtra la
+                        galería via query param (sin JS). Hover/focus muestra
+                        la foto de la variante vía data-finish-preview.
 
                         `showFinishPicker` oculta el control cuando el producto
                         ofrece un solo acabado: el dato de arriba alcanza y un
@@ -1159,6 +1170,7 @@ const fbtLabels = {
                                 title={option.label}
                                 aria-label={`Cambiar a ${option.label}`}
                                 aria-current={isActive ? 'true' : undefined}
+                                data-finish-preview={thumbSrc}
                                 class:list={[
                                   'block h-12 w-12 overflow-hidden rounded-md border-2 bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
                                   isActive
@@ -1166,7 +1178,13 @@ const fbtLabels = {
                                     : 'border-slate-200 opacity-70 hover:opacity-100',
                                 ]}
                               >
-                                {thumbSrc !== undefined ? (
+                                {option.hex !== undefined ? (
+                                  <span
+                                    aria-hidden="true"
+                                    class="block h-full w-full rounded-md"
+                                    style={`background-color: ${option.hex};`}
+                                  />
+                                ) : thumbSrc !== undefined ? (
                                   <img
                                     src={thumbSrc}
                                     alt=""
@@ -1178,7 +1196,7 @@ const fbtLabels = {
                                   <span
                                     aria-hidden="true"
                                     class="block h-full w-full rounded-md"
-                                    style={`background-color: ${option.hex ?? '#e2e8f0'};`}
+                                    style="background-color: #e2e8f0;"
                                   />
                                 )}
                               </a>
@@ -1187,6 +1205,39 @@ const fbtLabels = {
                         })}
                       </ul>
                     )}
+
+                    <script>
+                      // Preview de acabado: hover/focus del swatch muestra la
+                      // foto de la variante en la galería sin navegar; al
+                      // salir se restaura la imagen que estaba visible.
+                      document
+                        .querySelectorAll<HTMLAnchorElement>('a[data-finish-preview]')
+                        .forEach((link) => {
+                          const previewSrc = link.dataset.finishPreview;
+                          if (previewSrc === undefined || previewSrc === '') return;
+                          const slideImg = document.querySelector<HTMLImageElement>(
+                            '[data-gallery-slide] img',
+                          );
+                          if (slideImg === null) return;
+
+                          let originalSrc = '';
+                          const activate = (): void => {
+                            originalSrc = slideImg.src;
+                            slideImg.src = previewSrc;
+                          };
+                          const deactivate = (): void => {
+                            if (originalSrc !== '') {
+                              slideImg.src = originalSrc;
+                              originalSrc = '';
+                            }
+                          };
+
+                          link.addEventListener('mouseenter', activate);
+                          link.addEventListener('mouseleave', deactivate);
+                          link.addEventListener('focus', activate);
+                          link.addEventListener('blur', deactivate);
+                        });
+                    </script>
 
                     {/* Mano — dos ramas, porque el catálogo actual ofrece
                         una sola mano por producto:
