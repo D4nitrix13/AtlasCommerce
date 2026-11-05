@@ -1,16 +1,18 @@
 ---
 /**
- * StorefrontHeaderNav — bloque de navegación principal del header.
+ * StorefrontHeaderNav — navegación principal del header.
  *
- * Compone la lista de links principales (Inicio, Productos, Buscar) en
- * desktop, y provee un `<details>` colapsable en mobile (toggle via
- * `<summary>`). La nav vive en `<nav aria-label="Principal">` para
- * lectores de pantalla.
+ * Desktop (md+): links de texto limpios, centrados, sin carets ni
+ * dropdowns. Hover y estado activo en el accent del tenant.
+ * Mobile (< md): hamburguesa (`<details>` + `<summary>`) con los
+ * mismos links; los ítems secundarios (cuenta, wishlist, idioma, CTA)
+ * se proyectan vía el slot `mobile-extras`.
  *
  * El estado activo se marca comparando `Astro.url.pathname` con el
  * `href` del link (prefijo para secciones tipo /products/*).
  */
 import { getServerDictionary } from '../../../i18n/server';
+import Icon from '../../ui/Icon.astro';
 
 interface NavLink {
   labelKey:
@@ -25,10 +27,9 @@ interface NavLink {
 interface Props {
   links: NavLink[];
   openMenuLabel: string;
-  // Aceptado por compatibilidad con StorefrontHeader, pero el menu mobile
-  // ya no necesita un label accesible para "cerrar" — el `<details>`
-  // se cierra via click handler sobre el link. Mantener el prop evita
-  // romper el contrato de la API hasta que se limpie la i18n key.
+  // Aceptado por compatibilidad con StorefrontHeader; el menú mobile
+  // se cierra vía click handler sobre el link. Mantener el prop evita
+  // romper el contrato hasta que se limpie la i18n key.
   closeMenuLabel?: string;
 }
 
@@ -42,55 +43,9 @@ const isActive = (link: NavLink): boolean => {
 };
 ---
 
-<nav aria-label="Principal" class="hidden md:block">
-  <ul class="flex items-center gap-1">
-    {links.map((link) => {
-      const active = isActive(link);
-      return (
-        <li>
-          <a
-            href={link.href}
-            aria-current={active ? 'page' : undefined}
-            class:list={[
-              'inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-base font-medium transition',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)]',
-              active
-                ? 'bg-slate-100 text-[var(--primary,#1e293b)]'
-                : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900',
-            ]}
-          >
-            <span>{t[link.labelKey]}</span>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 20 20"
-              class="h-4 w-4 shrink-0 opacity-60"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M5 7.5l5 5 5-5" />
-            </svg>
-          </a>
-        </li>
-      );
-    })}
-  </ul>
-</nav>
-
-<details class="md:hidden relative">
-  <summary class="flex cursor-pointer list-none items-center justify-center rounded-md p-2 text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] [&::-webkit-details-marker]:hidden">
-    <span class="sr-only">{openMenuLabel}</span>
-    <span aria-hidden="true" class="text-lg">
-      ☰
-    </span>
-  </summary>
-  <nav
-    aria-label="Principal (móvil)"
-    class="absolute left-0 right-0 z-30 mt-2 rounded-lg border border-slate-200 bg-white p-2 shadow-lg"
-  >
-    <ul class="flex flex-col gap-1">
+<div class="flex flex-1 items-center justify-end md:justify-center">
+  <nav aria-label="Principal" class="hidden md:block">
+    <ul class="flex items-center gap-1">
       {links.map((link) => {
         const active = isActive(link);
         return (
@@ -99,10 +54,11 @@ const isActive = (link: NavLink): boolean => {
               href={link.href}
               aria-current={active ? 'page' : undefined}
               class:list={[
-                'block rounded-md px-3 py-2 text-sm font-medium transition',
+                'inline-flex h-10 items-center whitespace-nowrap rounded-full px-3 text-sm font-medium transition',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)]',
                 active
-                  ? 'bg-slate-100 text-[var(--primary,#1e293b)]'
-                  : 'text-slate-700 hover:bg-slate-100',
+                  ? 'text-[var(--primary,#2D9D8E)]'
+                  : 'text-slate-700 hover:text-[var(--primary,#2D9D8E)]',
               ]}
             >
               {t[link.labelKey]}
@@ -112,7 +68,43 @@ const isActive = (link: NavLink): boolean => {
       })}
     </ul>
   </nav>
-</details>
+
+  <details class="relative md:hidden">
+    <summary
+      class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 hover:text-[var(--primary,#2D9D8E)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] [&::-webkit-details-marker]:hidden"
+    >
+      <span class="sr-only">{openMenuLabel}</span>
+      <Icon name="bars-3" class="h-5 w-5" />
+    </summary>
+    <nav
+      aria-label="Principal (móvil)"
+      class="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)] p-2 shadow-lg"
+    >
+      <ul class="flex flex-col gap-1">
+        {links.map((link) => {
+          const active = isActive(link);
+          return (
+            <li>
+              <a
+                href={link.href}
+                aria-current={active ? 'page' : undefined}
+                class:list={[
+                  'block rounded-md px-3 py-2.5 text-sm font-medium transition',
+                  active
+                    ? 'text-[var(--primary,#2D9D8E)]'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-[var(--primary,#2D9D8E)]',
+                ]}
+              >
+                {t[link.labelKey]}
+              </a>
+            </li>
+          );
+        })}
+        <slot name="mobile-extras" />
+      </ul>
+    </nav>
+  </details>
+</div>
 
 <script is:inline>
   // Cuando el usuario abre el menú mobile y luego toca un link, el

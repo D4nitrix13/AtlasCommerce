@@ -1354,6 +1354,8 @@ export type TranslationKey =
   | 'storefront.header.searchPlaceholder'
   | 'storefront.header.searchLabel'
   | 'storefront.header.ctaCotizar'
+  | 'storefront.header.wishlistLabel'
+  | 'storefront.header.localeLabel'
   | 'storefront.footer.about'
   | 'storefront.footer.terms'
   | 'storefront.footer.privacy'

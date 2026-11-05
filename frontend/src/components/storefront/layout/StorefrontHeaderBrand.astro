@@ -2,9 +2,8 @@
 /**
  * StorefrontHeaderBrand — bloque de marca (logo + nombre) del header.
  *
- * Es el sub-componente "más a la izquierda" del header: muestra el
- * logo del tenant y el nombre corto. El link envuelve todo para que
- * el área clickeable sea generosa (mobile-friendly).
+ * Versión compacta: logo + shortName en una línea, sin tagline. El
+ * link envuelve todo para un hit area generoso (≥ 40px de alto).
  *
  * El logo se sirve desde `/api/v1/storefront/assets/tenants/{slug}/branding/`
  * siguiendo la convención del resto del repo.
@@ -21,7 +20,7 @@ const { brand, homeHref } = Astro.props;
 
 <a
   href={homeHref}
-  class="flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+  class="flex h-10 shrink-0 items-center gap-2 rounded-md pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)]"
 >
   <span
     class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200"
@@ -35,7 +34,7 @@ const { brand, homeHref } = Astro.props;
       onerror="this.onerror=null;this.style.display='none'"
     />
   </span>
-  <span class="flex flex-col leading-tight">
-    <span class="text-base font-bold tracking-tight text-slate-900">{brand.shortName}</span>
+  <span class="whitespace-nowrap text-base font-bold tracking-tight text-slate-900">
+    {brand.shortName}
   </span>
 </a>

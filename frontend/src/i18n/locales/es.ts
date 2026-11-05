@@ -1238,6 +1238,8 @@ const es: Translations = {
   'storefront.header.searchPlaceholder': 'Buscar productos',
   'storefront.header.searchLabel': 'Buscar',
   'storefront.header.ctaCotizar': 'Cotizar',
+  'storefront.header.wishlistLabel': 'Lista de deseos',
+  'storefront.header.localeLabel': 'Cambiar idioma',
   'storefront.footer.about': 'Acerca de',
   'storefront.footer.terms': 'Términos',
   'storefront.footer.privacy': 'Privacidad',

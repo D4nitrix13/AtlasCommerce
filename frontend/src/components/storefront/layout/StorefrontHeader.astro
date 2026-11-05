@@ -1,34 +1,27 @@
 ---
 /**
- * StorefrontHeader — header principal de la tienda.
+ * StorefrontHeader — header principal de la tienda, estilo Nike.
  *
- * Composición: brand (izquierda) + nav (centro) + search pill (en
- * desktop) + CTA Cotizar (en desktop) + actions (derecha, login + cart
- * + locale switcher). Es sticky para mantener la nav visible al hacer
- * scroll y aplica un borde sutil inferior para separarse del contenido.
+ * Fila única full-bleed (`w-full`, sin `max-w-*`): brand a la
+ * izquierda, links de nav limpios al centro, y a la derecha search
+ * pill + iconos (wishlist, cuenta, carrito) + toggle de locale.
+ * Sticky, con borde inferior sutil. El accent del tenant (Panda teal,
+ * Kitsune violeta, …) llega vía `var(--primary)` setteado por
+ * StorefrontLayout.
  *
- * El header es tenant-aware: recibe `brand` del layout padre y expone
- * el accent del tenant (Panda teal #2D9D8E, Kitsune violeta, etc) vía
- * `var(--primary)` setteado por StorefrontLayout. El search pill apunta
- * a /search?q=... y el CTA Cotizar apunta a /rfq — ambas rutas ya
- * existen para los flujos B2B de Panda.
- *
- * Patrón Bonfire (design-references-bonfire §5): nav blanco 64px con
- * search pill prominente en el centro y CTA verde a la derecha, igual
- * que bonfire.com. En mobile/tablet el search pill y el CTA se ocultan
- * para preservar el menú hamburguesa + acciones de la derecha; en
- * desktop ambos aparecen inline.
+ * Mobile (< md): hamburguesa + iconos esenciales (search, carrito);
+ * el resto (cuenta, wishlist, Cotizar, idioma) colapsa al menú.
  *
  * Accesibilidad:
  *  - <header> semántico.
  *  - Nav con aria-label="Principal".
- *  - Search input con <label class="sr-only"> para lectores.
- *  - Cart link con aria-label descriptivo cuando hay items.
- *  - Focus ring global con var(--primary) para coherencia con CTA.
+ *  - Search input con <label class="sr-only">.
+ *  - Icon-only links con aria-label descriptivo; badge del carrito
+ *    anunciado vía `storefront.header.cartBadge` en el link.
  */
 import type { StoreBrand } from '../../../config/stores';
 import { getServerDictionary } from '../../../i18n/server';
-import Icon from '../../ui/Icon.astro';
+import LanguageSwitcher from '../../ui/LanguageSwitcher';
 import StorefrontHeaderBrand from './StorefrontHeaderBrand.astro';
 import StorefrontHeaderNav from './StorefrontHeaderNav.astro';
 import StorefrontHeaderActions from './StorefrontHeaderActions.astro';
@@ -47,6 +40,7 @@ const productsHref = `/${locale}/products`;
 const searchHref = `/${locale}/search`;
 const rfqHref = `/${locale}/rfq`;
 const accountHref = `/${locale}/account`;
+const wishlistHref = `/${locale}/account/wishlist`;
 const cartHref = `/${locale}/cart`;
 
 const navLinks = [
@@ -56,71 +50,72 @@ const navLinks = [
     href: productsHref,
     matchPrefix: productsHref,
   },
-  // La búsqueda se representa como search pill en el centro del header,
-  // no como item del nav. Mantengo "search" en la lista para mantener
-  // la nav completa como fallback y para contextos donde la search pill
-  // no aplica (mobile/tablet).
   { labelKey: 'storefront.header.nav.search' as const, href: searchHref, matchPrefix: searchHref },
   { labelKey: 'storefront.header.nav.cases' as const, href: searchHref },
 ];
 
-const searchPlaceholder = t['storefront.header.searchPlaceholder'];
-const searchLabel = t['storefront.header.searchLabel'];
-const ctaLabel = t['storefront.header.ctaCotizar'];
 const showQuote = brand.slug === 'panda-estampados';
 ---
 
-<header class="sticky top-0 z-30 w-full border-b border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)]/90 backdrop-blur supports-[backdrop-filter]:bg-[var(--paper,#f3efe8)]/80">
-  <div class="mx-auto flex h-20 w-full max-w-[1280px] items-center gap-3 px-4 sm:px-6 lg:gap-8 lg:px-10">
+<header
+  class="sticky top-0 z-30 w-full border-b border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)]/90 backdrop-blur supports-[backdrop-filter]:bg-[var(--paper,#f3efe8)]/80"
+>
+  <div class="flex h-16 w-full flex-nowrap items-center gap-2 px-4 sm:px-6 lg:gap-6 lg:px-10">
     <StorefrontHeaderBrand brand={brand} homeHref={homeHref} />
 
-    <div class="hidden flex-1 md:flex">
-      <StorefrontHeaderNav
-        links={navLinks}
-        openMenuLabel={t['storefront.header.openMenu']}
-        closeMenuLabel={t['storefront.header.closeMenu']}
-      />
-    </div>
-
-    {/* Search pill patrón Bonfire: input redondeado con lupa a la
-        izquierda. flex-1 + max-w-md para llenar el espacio entre nav
-        y CTA sin romper el layout en anchos intermedios. Oculto en
-        mobile/tablet donde el toggle del nav cubre la búsqueda. */}
-    <form
-      action={searchHref}
-      method="get"
-      role="search"
-      class="hidden lg:flex max-w-md flex-1 mx-4"
+    <StorefrontHeaderNav
+      links={navLinks}
+      openMenuLabel={t['storefront.header.openMenu']}
+      closeMenuLabel={t['storefront.header.closeMenu']}
     >
-      <label class="relative w-full">
-        <span class="sr-only">{searchLabel}</span>
-        <Icon
-          name="magnifying-glass"
-          class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
-        />
-        <input
-          name="q"
-          type="search"
-          autocomplete="off"
-          placeholder={searchPlaceholder}
-          class="h-12 w-full rounded-full border border-[var(--line,#e7e5e4)] bg-white/70 pl-12 pr-5 text-base text-[var(--ink,#1c1917)] placeholder:text-stone-400 transition focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2D9D8E)]"
-        />
-      </label>
-    </form>
+      <Fragment slot="mobile-extras">
+        <li class="mt-1 border-t border-[var(--line,#e7e5e4)] pt-1">
+          <a
+            href={accountHref}
+            class="block rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-[var(--primary,#2D9D8E)]"
+          >
+            {t['storefront.header.nav.account']}
+          </a>
+        </li>
+        <li>
+          <a
+            href={wishlistHref}
+            class="block rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-[var(--primary,#2D9D8E)]"
+          >
+            {t['storefront.header.wishlistLabel']}
+          </a>
+        </li>
+        {showQuote && (
+          <li>
+            <a
+              href={rfqHref}
+              class="block rounded-md px-3 py-2.5 text-sm font-semibold text-[var(--primary,#2D9D8E)] transition hover:bg-slate-100"
+            >
+              {t['storefront.header.ctaCotizar']}
+            </a>
+          </li>
+        )}
+        <li class="mt-1 border-t border-[var(--line,#e7e5e4)] px-3 py-2">
+          <div role="group" aria-label={t['storefront.header.localeLabel']}>
+            <LanguageSwitcher client:load variant="compact" theme="light" />
+          </div>
+        </li>
+      </Fragment>
+    </StorefrontHeaderNav>
 
-    {/* CTA prominente estilo Bonfire: botón verde teal del tenant.
-        Antes de las acciones existentes (login + cart + lang) para
-        ser el último llamado a la acción visible antes del carrito. */}
-    {showQuote && (
-      <a
-        href={rfqHref}
-        class="hidden h-12 items-center justify-center rounded-full bg-[var(--primary,#2D9D8E)] px-6 text-base font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2 lg:inline-flex"
-      >
-        {ctaLabel}
-      </a>
-    )}
-
-    <StorefrontHeaderActions cartHref={cartHref} accountHref={accountHref} cartCount={cartCount} />
+    <StorefrontHeaderActions
+      searchHref={searchHref}
+      searchLabel={t['storefront.header.searchLabel']}
+      searchPlaceholder={t['storefront.header.searchPlaceholder']}
+      accountHref={accountHref}
+      wishlistHref={wishlistHref}
+      wishlistLabel={t['storefront.header.wishlistLabel']}
+      cartHref={cartHref}
+      cartCount={cartCount}
+      rfqHref={rfqHref}
+      rfqLabel={t['storefront.header.ctaCotizar']}
+      localeLabel={t['storefront.header.localeLabel']}
+      showQuote={showQuote}
+    />
   </div>
-  <div aria-hidden="true" class="h-0.5 w-full bg-[var(--primary)]"></div>
 </header>

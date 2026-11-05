@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react';
+import { Fragment, useState, type ReactElement } from 'react';
 import { ChevronDown } from 'lucide-react';
 import {
   LOCALE_FLAGS,
@@ -50,8 +50,8 @@ const LIGHT_THEME: LanguageSwitcherTheme = {
 
 interface LanguageSwitcherProps {
   theme?: 'dark' | 'light' | LanguageSwitcherTheme;
-  /** Layout: "dropdown" (default) | "inline" (botones planos ES/EN). */
-  variant?: 'dropdown' | 'inline';
+  /** Layout: "dropdown" (default) | "inline" (botones planos) | "compact" (toggle ES | EN sin banderas). */
+  variant?: 'dropdown' | 'inline' | 'compact';
 }
 
 const THEME_MAP = {
@@ -77,6 +77,36 @@ export default function LanguageSwitcher({
     setOpen(false);
     setLocale(next);
   };
+
+  if (variant === 'compact') {
+    return (
+      <div className="flex items-center">
+        {SUPPORTED_LOCALES.map((candidate, index) => (
+          <Fragment key={candidate}>
+            {index > 0 && (
+              <span aria-hidden="true" className="px-0.5 text-xs text-slate-300">
+                |
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                handleSelect(candidate);
+              }}
+              aria-pressed={candidate === locale}
+              aria-label={LOCALE_LABELS[candidate]}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-semibold transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-accent-ring,#2D9D8E40)] active:bg-slate-200"
+              style={{
+                color: candidate === locale ? resolvedTheme.activeText : resolvedTheme.text,
+              }}
+            >
+              {candidate.toUpperCase()}
+            </button>
+          </Fragment>
+        ))}
+      </div>
+    );
+  }
 
   if (variant === 'inline') {
     return (

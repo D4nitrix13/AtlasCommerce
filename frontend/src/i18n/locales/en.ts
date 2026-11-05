@@ -1231,6 +1231,8 @@ const en: Translations = {
   'storefront.header.searchPlaceholder': 'Search products',
   'storefront.header.searchLabel': 'Search',
   'storefront.header.ctaCotizar': 'Get a quote',
+  'storefront.header.wishlistLabel': 'Wishlist',
+  'storefront.header.localeLabel': 'Change language',
   'storefront.footer.about': 'About',
   'storefront.footer.terms': 'Terms',
   'storefront.footer.privacy': 'Privacy',
