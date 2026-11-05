@@ -9,7 +9,8 @@
  * Compone:
  *  - Header: H1 + subtítulo (conteo) a la izquierda, SortDropdown a la derecha.
  *  - Layout lg+ en 2 columnas (sidebar 264px + grid flexible).
- *  - Sidebar: FiltersSidebar con 4 grupos (Categoría, Precio, Color, Talla).
+ *  - Sidebar: FiltersDisclosure (drawer < lg + panel estático ≥ lg)
+ *    sobre FiltersSidebar con 4 grupos (Categoría, Precio, Color, Talla).
  *  - Grid: 8 ProductCardCatalog con `data-reveal-stagger` para la animación
  *    Bonfire de scroll-driven (script scroll-fx.ts).
  *  - Pagination: Pagination primitive al pie (links SSR-friendly).
@@ -38,7 +39,7 @@
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import ProductCardCatalog from '../../../components/storefront/products/ProductCardCatalog.astro';
-import FiltersSidebar from '../../../components/storefront/products/FiltersSidebar.astro';
+import FiltersDisclosure from '../../../components/storefront/products/FiltersDisclosure.astro';
 import FilterChips from '../../../components/storefront/products/FilterChips.astro';
 import CatalogStateMessage from '../../../components/storefront/products/CatalogStateMessage.astro';
 import SortDropdown from '../../../components/storefront/products/SortDropdown.astro';
@@ -499,22 +500,23 @@ const sortHrefs = {
 
       {!hasCatalogError && (
       <div class="grid gap-10 pb-12 lg:grid-cols-[264px_1fr]">
-        <div class="hidden lg:block">
-          <div class="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6">
-            <FiltersSidebar
-              labels={dictionary.filters}
-              categories={filterCategoryOptions}
-              brands={filterBrandOptions}
-              prices={filterPriceOptions}
-              colors={filterColorOptions}
-              sizes={filterSizeOptions}
-              clearHref={baseUrl}
-              activeCategory={filters.category ?? 'all'}
-              activePrice={activePriceSlug}
-              activeColors={filters.color ? [filters.color] : []}
-            />
-          </div>
-        </div>
+        {/* El wrapper trae el disclosure móvil (`<details>`, < lg) y el
+            panel estático desktop (≥ lg) con el mismo FiltersSidebar. */}
+        <FiltersDisclosure
+          labels={dictionary.filters}
+          triggerLabel={t['storefront.catalog.filters.trigger']}
+          triggerCountTemplate={t['storefront.catalog.filters.triggerCount']}
+          activeCount={activeFilterChips.length}
+          categories={filterCategoryOptions}
+          brands={filterBrandOptions}
+          prices={filterPriceOptions}
+          colors={filterColorOptions}
+          sizes={filterSizeOptions}
+          clearHref={baseUrl}
+          activeCategory={filters.category ?? 'all'}
+          activePrice={activePriceSlug}
+          activeColors={filters.color ? [filters.color] : []}
+        />
 
         <div class="flex flex-col gap-6">
           <FilterChips

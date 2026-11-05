@@ -1559,6 +1559,8 @@ export type TranslationKey =
   | 'storefront.catalog.states.errorRetry'
   | 'storefront.catalog.states.emptyCategory'
   | 'storefront.catalog.states.emptyCategoryClear'
+  | 'storefront.catalog.filters.trigger'
+  | 'storefront.catalog.filters.triggerCount'
   | 'storefront.productDetail.breadcrumb'
   | 'storefront.productDetail.outOfStock'
   | 'storefront.productDetail.inStock'

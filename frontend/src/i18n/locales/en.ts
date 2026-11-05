@@ -664,6 +664,8 @@ const en: Translations = {
   'storefront.catalog.states.errorRetry': 'Try again',
   'storefront.catalog.states.emptyCategory': 'There are no products in this category.',
   'storefront.catalog.states.emptyCategoryClear': 'View all products',
+  'storefront.catalog.filters.trigger': 'Filters',
+  'storefront.catalog.filters.triggerCount': 'Filters ({count})',
   'storefront.productDetail.breadcrumb': 'Back to catalog',
   'storefront.productDetail.outOfStock': 'Out of stock',
   'storefront.productDetail.inStock': 'In stock',

@@ -665,6 +665,8 @@ const es: Translations = {
   'storefront.catalog.states.errorRetry': 'Reintentar',
   'storefront.catalog.states.emptyCategory': 'No hay productos en esta categoría.',
   'storefront.catalog.states.emptyCategoryClear': 'Ver todos los productos',
+  'storefront.catalog.filters.trigger': 'Filtros',
+  'storefront.catalog.filters.triggerCount': 'Filtros ({count})',
   'storefront.productDetail.breadcrumb': 'Volver al catálogo',
   'storefront.productDetail.outOfStock': 'Agotado',
   'storefront.productDetail.inStock': 'En stock',
