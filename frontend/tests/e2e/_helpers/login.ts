@@ -3,12 +3,15 @@ import { type Page, type BrowserContext } from '@playwright/test';
 /**
  * Helper compartido para autenticar como admin en E2E tests.
  *
- * **Credenciales de test** (del seed data, definido en
- * `database/seeders/AdminUserSeeder` — ver backend/.env para los
- * específicos de cada entorno):
+ * **Credenciales de test** (seed `RecoveryCodesTestSeeder` — no existe
+ * un `AdminUserSeeder`; la password es su `DEFAULT_PASSWORD`):
  *
  * - Email: `admin@panda-estampados.test`
- * - Password: `secret-password`
+ * - Password: `password`
+ *
+ * OJO: este usuario tiene 2FA TOTP activo. El login responde
+ * `2fa_required` y hay que resolver el challenge en
+ * `/es/account/2fa?token=<id>` antes de entrar al admin.
  *
  * Si los credenciales cambian, actualizar este helper. NO hardcodear
  * en cada spec — usar `loginAsAdmin(page)`.
@@ -25,7 +28,7 @@ import { type Page, type BrowserContext } from '@playwright/test';
  * ```
  */
 export const ADMIN_TEST_EMAIL = 'admin@panda-estampados.test';
-export const ADMIN_TEST_PASSWORD = 'secret-password';
+export const ADMIN_TEST_PASSWORD = 'password';
 
 /**
  * Loguea como admin en `admin.panda-estampados.com` y espera a que
