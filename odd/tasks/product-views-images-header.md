@@ -188,3 +188,35 @@ galería), E1.6 (idempotencia de re-subida), y decidir merge/push.
 
 Responder la pregunta del drop de imágenes (T1) y arrancar F1 → F2 →
 F3 en ese orden (el header puede ir en paralelo a F2 si conviene).
+
+## Tanda E1.6 + smoke de la galería (2026-11-05)
+
+Rama `feat/e16-reupload-idempotency`:
+
+- **E1.6 idempotencia** — commit `0738c788`: `upload()` y `store()`
+  creaban filas a ciegas (mismo binario dos veces = 2 fotos). Ahora
+  deduplican por `(product_id, variant_id, image_url)`. TDD: RED (8
+  filas vs 4) → GREEN. Suite ProductImage 88 passed.
+- **Smoke de la galería admin con sesión** — login → 2FA → producto →
+  galería con fotos reales + acciones que llegan al API (PUT
+  `images/{id}` observado). Para que el smoke pasara hubo que arreglar
+  5 defectos reales (commits `dba79992`, `a0d266dc`, `d5b0f90a`):
+  1. `apiFetch` sin fallback a `window.location.origin` (todo cliente
+     revienta).
+  2. El form de login se tragaba el `2fa_required` (admin no podía
+     loguearse).
+  3. `verifyTotpChallenge` apuntaba al endpoint de gestión autenticado,
+     no al público del login.
+  4. El proxy dev no incluía `/sanctum` (CSRF bootstrap 404 → 419).
+  5. Sanctum compara Origin **con puerto**: `:5321` nunca era stateful
+     → sin sesión en browser.
+  Bonus: el detalle de producto admin ahora lee del API (TODO viejo;
+  el mock quedó vacío y todo decía "Producto no encontrado").
+- **`curl panda-estampados.com` falla porque Caddy está instalado y
+  PARADO** (el Caddyfile de `/etc/caddy` ya es el del proyecto). El
+  usuario debe correr: `sudo systemctl start caddy` (sudo pide
+  contraseña). Sin Caddy, el acceso es por el puerto dev
+  (`http://panda-estampados.com:5321`).
+
+Suite frontend 484/484; typecheck 0 errors. Pendiente: decidir merge
++ push de esta rama.
