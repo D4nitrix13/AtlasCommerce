@@ -52,6 +52,7 @@ use App\Http\Controllers\Api\Storefront\AssetController as StorefrontAssetContro
 use App\Http\Controllers\Api\Storefront\Auth\StorefrontAuthController;
 use App\Http\Controllers\Api\Storefront\Checkout\CheckoutController;
 use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
+use App\Http\Controllers\Api\Storefront\ProductRelationController;
 use App\Http\Controllers\Api\Storefront\ProductReviewLikeController;
 use App\Http\Controllers\Api\Storefront\ProductWishlistController;
 use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
@@ -1280,6 +1281,10 @@ Route::middleware(['store.domain', 'store.maintenance'])->prefix('storefront')->
         ->name('storefront.products.show');
     Route::get('/products/{slug}/price', [StorefrontProductController::class, 'price'])
         ->name('storefront.products.price');
+    // Rieles de recomendación de la PDP (comprados juntos / también
+    // te puede gustar) desde `product_relations`.
+    Route::get('/products/{slug}/relations', [ProductRelationController::class, 'index'])
+        ->name('storefront.products.relations.index');
     Route::get('/promotions', [StorefrontPromotionController::class, 'index'])
         ->name('storefront.promotions.index');
     Route::get('/theme', [StorefrontThemeController::class, 'show']);

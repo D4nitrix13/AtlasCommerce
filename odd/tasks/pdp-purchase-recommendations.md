@@ -124,9 +124,13 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
       el trabajo completo; verificación absorbida por el parent)._ _Commit
       `bcea346d`._ Checks: `bun run test` 492/492 · `astro check` 0 errores ·
       lint 0 errores nuevos vs HEAD (7 preexistentes en `[slug].astro`).
-- [ ] **T3** Tabs `Descripción | Ficha técnica | Reseñas | Preguntas | Envíos`
+- [x] **T3** Tabs `Descripción | Ficha técnica | Reseñas | Preguntas | Envíos`
       con conteos, reutilizando los bloques existentes. i18n + wire en PDP.
-      _Route: delegated writer._
+      _Route: delegated writer (`general-2`, 72 turnos, reportó verde)._ _Commit
+      `2d38cecd`._ Checks: `bun run test` 508/508 (spot check parent) ·
+      `astro check` 0 errores · lint 0 errores nuevos. Nota: la ficha técnica
+      enchufó `attributes`/`sizes` EAV que el PDP descartaba; accordions de
+      garantía/estuche/ajuste movidos al tab Envíos.
 - [ ] **T4** Backend `product_relations`: migración, modelo, endpoint
       storefront, `ProductRelationsSeeder` (FBT + you_may_also_like). TDD.
       _Route: delegated writer._
