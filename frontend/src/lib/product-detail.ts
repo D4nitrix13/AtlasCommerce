@@ -24,7 +24,7 @@ import {
   type ProductVariantAttribute,
 } from '../data/product-detail-mock';
 
-const PLACEHOLDER_IMAGE = '/images/product-placeholder.png';
+export const PLACEHOLDER_IMAGE = '/images/product-placeholder.png';
 
 /**
  * Aplana `Product.images` (que ahora puede ser `readonly string[]` o

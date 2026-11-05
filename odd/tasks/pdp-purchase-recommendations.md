@@ -113,9 +113,11 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
 
 ## Tasks
 
-- [ ] **T1** Layout PDP full-width: slide de galería sin pillarbox, grid
+- [x] **T1** Layout PDP full-width: slide de galería sin pillarbox, grid
       con aside más ancho, `PandaProductDetail` sin `max-w-6xl`.
       _Route: inline (ediciones mecánicas ya decididas, 3 archivos)._
+      _Commit `e577a97b`._ Checks: `astro check` 0 errores · `bun run test`
+      484/484 verdes.
 - [ ] **T2** Caja de compra: cantidad 1..stock de la variante (validada),
       "Añadir al carrito" + "Comprar ya" → checkout. i18n + wire en PDP.
       _Route: delegated writer._
@@ -160,7 +162,13 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
 ## Progress
 
 - 2026-11-05 — Feature doc creado. Decisiones D1-D4 registradas.
+- 2026-11-05 — T1 cerrado (`e577a97b`): galería `aspect-square`, grid
+  `1.05fr/0.95fr`, PandaProductDetail sin `max-w-6xl`, comentario del
+  docblock actualizado. Branch `feat/views/pdp-purchase-recommendations`
+  creado desde `master` (el branch `feat/e16-reupload-idempotency` queda
+  intacto, listo para merge/push a decisión del usuario).
+- 2026-11-05 — T2 en curso (writer delegado `general-1`).
 
 ## Next step
 
-T1 (layout full-width) → commit → T2.
+T2 (caja de compra) → spot check + verifier + commit → T3 (tabs).

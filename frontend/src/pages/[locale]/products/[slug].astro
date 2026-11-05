@@ -56,6 +56,7 @@ import ProductRecentlyViewed from '../../../components/storefront/products/Produ
 import ProductFitSelector from '../../../components/storefront/products/ProductFitSelector.astro';
 import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
 import ProductCTAs from '../../../components/storefront/products/ProductCTAs.astro';
+import ProductPurchaseBar from '../../../components/storefront/products/ProductPurchaseBar';
 import ProductShippingAccordion from '../../../components/storefront/products/ProductShippingAccordion.astro';
 import ProductDetailsBlock from '../../../components/storefront/products/ProductDetailsBlock.astro';
 import ProductReviews from '../../../components/storefront/products/ProductReviews.astro';
@@ -76,7 +77,7 @@ import {
   getAverageRating,
 } from '../../../data/product-detail-mock';
 import type { Product } from '../../../types/catalog';
-import { deriveProductDetail } from '../../../lib/product-detail';
+import { PLACEHOLDER_IMAGE, deriveProductDetail } from '../../../lib/product-detail';
 // `RELATED_PRODUCTS` ya NO se importa: el carrusel se deriva del catálogo
 // real del tenant en SSR (ver bloque más abajo). El export se mantiene en
 // `data/product-detail-mock.ts` por compat con quien lo consuma fuera de acá.
@@ -721,6 +722,41 @@ const RATING_COUNT = detail !== null ? detail.reviews.length : 0;
 // Precio formateado para el dl 2-col (single source of truth: formatCurrency).
 const precioFormatted = detail !== null ? formatCurrency(detail.priceCents, detail.currency) : '';
 
+// Stock de la variante seleccionada (acabado + talla cuando el producto
+// vende por tallas). Fuente preferida: `detail.variants`, la única que
+// trae `sizeSlug`; con tallas no hay fallback por acabado solo porque
+// mostraría el stock de otra talla. Sin match, el stock agregado del
+// producto. La barra de compra acota la cantidad con este número.
+const selectedVariantStock: number = (() => {
+  const hasSizes = detail?.hasSizes === true;
+  const detailMatches = (detail?.variants ?? []).filter(
+    (variant) =>
+      variant.finishSlug === SELECTED_COLOR &&
+      (!hasSizes || variant.sizeSlug === SELECTED_SIZE),
+  );
+  if (detailMatches.length > 0) {
+    return detailMatches.reduce((total, variant) => total + variant.stock, 0);
+  }
+  if (!hasSizes) {
+    const apiMatches = (apiVariants ?? []).filter(
+      (variant) => variant.finishSlug === SELECTED_COLOR,
+    );
+    if (apiMatches.length > 0) {
+      return apiMatches.reduce((total, variant) => total + variant.stock, 0);
+    }
+  }
+  return detail?.stock ?? product?.stock ?? 0;
+})();
+
+// Miniatura de la línea de carrito: la foto real de la variante
+// seleccionada cuando existe, para que el carrito muestre el acabado
+// elegido y no otra foto de la galería.
+const purchaseBarImageUrl =
+  variantFirstImage[SELECTED_COLOR] ??
+  detail?.images[0] ??
+  product?.imageUrl ??
+  PLACEHOLDER_IMAGE;
+
 const HIGHLY_RATED_LABEL = HIGHLY_RATED
   ? t['storefront.products.detail.v4.highlyRated']
   : undefined;
@@ -748,6 +784,7 @@ const REVIEWS: readonly ProductReview[] = detail?.reviews ?? [];
 const VIEW_ALL_HREF = `/${locale}/products/${product?.slug ?? ''}/reviews`;
 const WRITE_REVIEW_HREF = `/${locale}/products/${product?.slug ?? ''}/reviews/new`;
 const FIND_STORE_HREF = `/${locale}/stores`;
+const CHECKOUT_HREF = `/${locale}/checkout`;
 
 const reviewsLabels = {
   heading: 'Reseñas',
@@ -1127,14 +1164,39 @@ const cardLabels = {
               {/* El picker de variantes vive arriba en el dl "Acabado" (con thumbnails
                   reales via ?color=). No duplicamos el fieldset acá. */}
 
-              <ProductCTAs
-                addToCartLabel={t['storefront.productDetail.addToCart']}
-                favoriteLabel={t['storefront.products.detail.v4.favorite']}
-                inStock={IN_STOCK}
-                productId={product.id}
-                apiBaseUrl="/api/v1"
-                loginHref={`/${locale}/login`}
-              />
+              {/* Barra de compra (cantidad acotada al stock + CTAs) con el
+                  Favorite al lado. El corazón sigue siendo ProductCTAs:
+                  su Add to Bag muere acá porque el island lo reemplaza. */}
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <ProductPurchaseBar
+                  client:visible
+                  productSlug={product.slug}
+                  name={product.name}
+                  imageUrl={purchaseBarImageUrl}
+                  priceCents={detail.priceCents}
+                  currency={detail.currency}
+                  variantLabel={selectedFinish?.label}
+                  stock={selectedVariantStock}
+                  buyNowHref={CHECKOUT_HREF}
+                  labels={{
+                    quantity: t['storefront.productDetail.quantity'],
+                    addToCart: t['storefront.productDetail.addToCart'],
+                    buyNow: t['storefront.productDetail.buyNow'],
+                    outOfStock: t['storefront.productDetail.outOfStock'],
+                    added: t['storefront.productDetail.added'],
+                  }}
+                />
+
+                <ProductCTAs
+                  addToCartLabel={t['storefront.productDetail.addToCart']}
+                  favoriteLabel={t['storefront.products.detail.v4.favorite']}
+                  inStock={IN_STOCK}
+                  showAddToBag={false}
+                  productId={product.id}
+                  apiBaseUrl="/api/v1"
+                  loginHref={`/${locale}/login`}
+                />
+              </div>
 
               {detail.financing !== undefined && (
                 <ProductDetailFinancingBlock

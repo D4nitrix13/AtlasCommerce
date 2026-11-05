@@ -663,6 +663,9 @@ const en: Translations = {
   'storefront.productDetail.addToCart': 'Add to cart',
   'storefront.productDetail.addingToCart': 'Adding...',
   'storefront.productDetail.addToCartHint': 'Cart will be enabled in the next phase (cart store).',
+  'storefront.productDetail.quantity': 'Quantity',
+  'storefront.productDetail.buyNow': 'Buy now',
+  'storefront.productDetail.added': 'Added',
   'storefront.productDetail.category': 'Category',
   'storefront.productDetail.notFound': 'Product not found.',
   'storefront.productDetail.notFoundHint':

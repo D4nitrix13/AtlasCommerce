@@ -34,6 +34,9 @@ interface Props {
   inStock: boolean;
   /** Mostrar botón Favorite (true por default). */
   showFavorite?: boolean;
+  /** Mostrar el botón Add to Bag (true por default). La PDP lo apaga
+   *  cuando la barra de compra (island) reemplaza ese rol. */
+  showAddToBag?: boolean;
   /** Estado inicial del Favorite (visual). */
   isFavorite?: boolean;
   /** ID numérico del producto — usado por el handler wishlist (T14b).
@@ -51,6 +54,7 @@ const {
   favoriteLabel,
   inStock,
   showFavorite = true,
+  showAddToBag = true,
   isFavorite = false,
   productId,
   apiBaseUrl = '/api/v1',
@@ -70,35 +74,37 @@ const resolvedLoginHref = loginHref ?? `/${locale}/login`;
   data-api-base-url={apiBaseUrl}
   data-login-href={resolvedLoginHref}
 >
-  <button
-    type="submit"
-    disabled={!inStock}
-    class:list={[
-      'inline-flex h-16 flex-1 items-center justify-center gap-2 rounded-full px-8 text-lg font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-      inStock
-        ? 'bg-slate-900 text-white hover:bg-slate-800'
-        : 'cursor-not-allowed bg-slate-200 text-slate-500',
-    ]}
-  >
-    {inStock ? (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        class="h-5 w-5"
-        aria-hidden="true"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-        />
-      </svg>
-    ) : null}
-    <span>{addToCartLabel}</span>
-  </button>
+  {showAddToBag && (
+    <button
+      type="submit"
+      disabled={!inStock}
+      class:list={[
+        'inline-flex h-16 flex-1 items-center justify-center gap-2 rounded-full px-8 text-lg font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+        inStock
+          ? 'bg-slate-900 text-white hover:bg-slate-800'
+          : 'cursor-not-allowed bg-slate-200 text-slate-500',
+      ]}
+    >
+      {inStock ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="h-5 w-5"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+          />
+        </svg>
+      ) : null}
+      <span>{addToCartLabel}</span>
+    </button>
+  )}
 
   {showFavorite && (
     <div class="flex flex-col items-center gap-1">
