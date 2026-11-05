@@ -149,8 +149,13 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
 - [ ] **T6** Frontend secciones: FBT con datos reales + "Agregar todo",
       "También Te Puede Gustar" con fallbacks, "Visto recientemente" SSR/BD.
       _Route: delegated writer._
-- [ ] **T7** Cierre: checks completos (build, astro check, tests, lint vs
+- [x] **T7** Cierre: checks completos (build, astro check, tests, lint vs
       HEAD), verificación visual desktop/mobile, resumen.
+      _Commit con T6._ Checks: `bun run build` OK · 525 frontend + 25 backend
+      verdes · smoke SSR OK (tabs, compra, rieles presentes en HTML) ·
+      capturas 1440/390 en `output/playwright/pdp-*`. El pulido visual fino
+      y los detalles del usuario pasan a la **Sesión 3 (PDP)** de
+      `odd/tasks/vistas-cliente-sessions.md`.
 
 ## Acceptance criteria
 
@@ -184,7 +189,13 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
   creado desde `master` (el branch `feat/e16-reupload-idempotency` queda
   intacto, listo para merge/push a decisión del usuario).
 - 2026-11-05 — T2 en curso (writer delegado `general-1`).
+- 2026-11-05 — T2..T6 cerrados (`bcea346d`, `2d38cecd`, `0ff4b199`,
+  `69e60903`, `db6b7ffb`). T4 inline tras fallos de delegación
+  (ContentFilterError + hang). T7 cerrado con checks verdes.
+- 2026-11-05 — **Feature completa**. El trabajo restante de esta vista
+  (detalles del usuario + pulido visual) vive en la Sesión 3 del plan
+  `odd/tasks/vistas-cliente-sessions.md`.
 
 ## Next step
 
-T2 (caja de compra) → spot check + verifier + commit → T3 (tabs).
+Esperar los detalles del usuario por vista (plan de sesiones).
