@@ -59,6 +59,18 @@ export default defineConfig({
     plugins: [tailwindcss()],
     server: {
       allowedHosts: TENANT_HOSTS,
+      // Las URLs del API y de las imágenes de producto son relativas
+      // (/api/...). En dev el dev server no las proxyea solo y se
+      // resuelven contra Astro → 404 → imágenes rotas. El proxy las
+      // manda al backend; en prod las sirve el mismo origin.
+      proxy: {
+        "/api": {
+          target: process.env.INTERNAL_API_ORIGIN ?? "http://localhost:9000",
+          // Conservar el Host original: el middleware de tenant del
+          // backend resuelve por store_domains.domain == host.
+          changeOrigin: false,
+        },
+      },
     },
   },
 
