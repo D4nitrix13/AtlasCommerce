@@ -1363,7 +1363,6 @@ export type TranslationKey =
   // ─── storefront: layout (header/footer) ──────────────────────────────
   | 'storefront.header.nav.home'
   | 'storefront.header.nav.products'
-  | 'storefront.header.nav.search'
   | 'storefront.header.nav.cases'
   | 'storefront.header.nav.account'
   | 'storefront.header.nav.cart'

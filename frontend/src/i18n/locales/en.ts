@@ -1238,8 +1238,7 @@ const en: Translations = {
   // ─── storefront: layout (header/footer) ───────────────────────────
   'storefront.header.nav.home': 'Home',
   'storefront.header.nav.products': 'Products',
-  'storefront.header.nav.search': 'Search',
-  'storefront.header.nav.cases': 'Cases',
+  'storefront.header.nav.cases': 'Use cases',
   'storefront.header.nav.account': 'My account',
   'storefront.header.nav.cart': 'Cart',
   'storefront.header.cartBadge': '{count} in cart',

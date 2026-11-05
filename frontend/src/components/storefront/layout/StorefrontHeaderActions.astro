@@ -56,10 +56,10 @@ const iconLinkClasses =
   'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 hover:text-[var(--primary,#2D9D8E)] active:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)]';
 ---
 
-<div class="flex shrink-0 items-center gap-1 sm:gap-1.5">
+<div class="flex shrink-0 items-center justify-self-end gap-1 sm:gap-1.5">
   {/* Search pill (lg+): angosto, redondeado, lupa a la izquierda. */}
   <form action={searchHref} method="get" role="search" class="hidden lg:flex">
-    <label class="relative block w-40 xl:w-64">
+    <label class="relative block w-36 xl:w-48">
       <span class="sr-only">{searchLabel}</span>
       <Icon
         name="magnifying-glass"
@@ -95,12 +95,12 @@ const iconLinkClasses =
   <a
     href={wishlistHref}
     aria-label={wishlistLabel}
-    class={`${iconLinkClasses} ml-1 hidden md:inline-flex`}
+    class={`${iconLinkClasses} ml-1 max-md:hidden`}
   >
     <Icon name="heart" class="h-5 w-5" />
   </a>
 
-  <a href={accountHref} aria-label={accountLabel} class={`${iconLinkClasses} hidden md:inline-flex`}>
+  <a href={accountHref} aria-label={accountLabel} class={`${iconLinkClasses} max-md:hidden`}>
     <Icon name="user" class="h-5 w-5" />
   </a>
 
