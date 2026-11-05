@@ -540,6 +540,15 @@ const en: Translations = {
   'storefront.cart.v3.continueShopping': 'Continue shopping',
   'storefront.cart.v3.remove': 'Remove',
   'storefront.cart.v3.quantity': 'Quantity',
+  'storefront.cart.v3.freeShippingProgress': 'Add {amount} more for free shipping',
+  'storefront.cart.v3.freeShippingReached': 'You have free shipping',
+  'storefront.cart.v3.steps.bag': 'Bag',
+  'storefront.cart.v3.steps.checkout': 'Checkout',
+  'storefront.cart.v3.steps.done': 'Done',
+  'storefront.cart.v3.trust.shipping': 'Free shipping over $50',
+  'storefront.cart.v3.trust.guarantee': 'Official warranty',
+  'storefront.cart.v3.trust.returns': '30-day returns',
+  'storefront.cart.v3.trust.secure': '100% secure payment',
 
   // ─── storefront: account orders v3 (Bonfire mockup 10) ─────────────
   'storefront.account.orders.v3.title': 'My orders',

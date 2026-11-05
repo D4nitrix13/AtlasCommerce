@@ -1,25 +1,18 @@
 ---
 /**
- * Página pública del carrito de compras — Bonfire mockup 08.
+ * Página pública del carrito de compras — rediseño "mostrador boutique".
  *
- * Composición v3 (sobre el cart store):
- *   - Header H1 con el título del carrito (server).
- *   - `CartView` (isla, `client:visible`) lee el cart store
- *     (`stores/cart.ts`, localStorage) y renderiza empty state, lista de
- *     líneas con controles de cantidad y resumen de totales. El conteo
- *     de productos vive en la isla porque depende del store, que el SSR
- *     no conoce.
+ * Composición:
+ *   - Indicador de pasos (1 Bolsa · 2 Checkout · 3 Listo) + H1 server.
+ *   - `CartView` (isla, `client:visible`) lee el cart store y renderiza
+ *     empty state, líneas y resumen tipo recibo. El conteo de productos
+ *     vive en la isla porque depende del store, que el SSR no conoce.
  *   - `TrustSignalsCompact` (Astro estático, cero hidratación) entra
- *     como children de la isla para aparecer junto al resumen solo
- *     cuando hay líneas, sin duplicar su markup en TSX.
+ *     como children del resumen, con labels desde i18n.
  *
- * Decisiones Bonfire:
- *   - `bg-slate-50` en el main + cards blancas con `rounded-2xl` +
- *     `border-slate-200` (consistente con el resto del storefront v3).
- *   - Resumen sticky en desktop (`lg:sticky lg:top-24`) dentro de la
- *     isla; en mobile apila debajo de la lista.
- *   - Lista con `data-reveal-stagger` para animar cada item al entrar
- *     al viewport (coherente con scroll-fx.css).
+ * Tokens de shop-canvas (--paper/--ink/--primary/--line). Resumen
+ * sticky en desktop; en mobile apila debajo y la isla agrega barra
+ * fija inferior (total + CTA) — el `pb-` del main deja espacio.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import CartView from '../../components/storefront/cart/CartView';
@@ -45,15 +38,43 @@ const cartViewLabels = {
   total: t['storefront.cart.v3.total'],
   checkout: t['storefront.cart.v3.checkout'],
   empty: t['storefront.cart.v3.empty'],
+  emptyHint: t['storefront.cart.emptyHint'],
   emptyCta: t['storefront.cart.v3.emptyCta'],
   continueShopping: t['storefront.cart.v3.continueShopping'],
   itemsCount: t['storefront.cart.itemsCount'],
+  freeShippingProgress: t['storefront.cart.v3.freeShippingProgress'],
+  freeShippingReached: t['storefront.cart.v3.freeShippingReached'],
 };
+
+const checkoutSteps = [
+  t['storefront.cart.v3.steps.bag'],
+  t['storefront.cart.v3.steps.checkout'],
+  t['storefront.cart.v3.steps.done'],
+];
 ---
 
 <StorefrontLayout title={t['storefront.cart.v3.title']}>
-  <main class="w-full px-4 py-8 sm:px-6 sm:py-12 lg:px-10">
-    <header class="mb-8 flex flex-wrap items-end justify-between gap-3">
+  <main class="w-full px-4 pb-28 pt-8 sm:px-6 sm:pt-12 lg:px-10 lg:pb-12">
+    <header class="mb-8">
+      <ol class="mb-3 flex flex-wrap items-center gap-2 text-[13px]">
+        {checkoutSteps.map((step, index) => {
+          const isCurrent = index === 0;
+          return (
+            <li
+              aria-current={isCurrent ? 'step' : undefined}
+              class:list={[
+                'inline-flex items-center gap-1.5 rounded-full px-3 py-1',
+                isCurrent
+                  ? 'bg-[var(--primary-soft,#e6f7f4)] font-semibold text-[var(--primary,#475569)]'
+                  : 'text-[var(--ink,#1c1917)]/50',
+              ]}
+            >
+              <span class="tabular-nums">{index + 1}</span>
+              {step}
+            </li>
+          );
+        })}
+      </ol>
       <h1 class="text-4xl sm:text-5xl">
         {t['storefront.cart.v3.title']}
       </h1>
@@ -68,10 +89,10 @@ const cartViewLabels = {
     >
       <TrustSignalsCompact
         signals={[
-          { iconKey: 'truck', label: 'Envio gratis sobre $50' },
-          { iconKey: 'shield-check', label: 'Garantia oficial' },
-          { iconKey: 'rotate-ccw', label: 'Devolucion 30 dias' },
-          { iconKey: 'lock', label: 'Pago 100% seguro' },
+          { iconKey: 'truck', label: t['storefront.cart.v3.trust.shipping'] },
+          { iconKey: 'shield-check', label: t['storefront.cart.v3.trust.guarantee'] },
+          { iconKey: 'rotate-ccw', label: t['storefront.cart.v3.trust.returns'] },
+          { iconKey: 'lock', label: t['storefront.cart.v3.trust.secure'] },
         ]}
       />
     </CartView>

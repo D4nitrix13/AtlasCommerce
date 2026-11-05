@@ -47,15 +47,15 @@ const ICONS: Record<TrustSignal['iconKey'], string> = {
 
 <ul
   class:list={[
-    'flex items-center gap-x-5 gap-y-2 text-xs text-slate-600',
-    variant === 'horizontal' ? 'flex-wrap' : 'flex-col items-start gap-y-2.5',
+    'flex items-center gap-2 text-[11px]',
+    variant === 'horizontal' ? 'flex-wrap' : 'flex-col items-start',
   ]}
   aria-label="Garantías del envío"
 >
   {signals.map((signal) => (
-    <li class="flex items-center gap-1.5">
+    <li class="inline-flex items-center gap-1.5 rounded-full border border-[var(--line,#e7e5e4)] bg-white px-2.5 py-1 text-[var(--ink,#1c1917)]/60">
       <svg
-        class="h-4 w-4 shrink-0 text-[var(--primary,#475569)]"
+        class="h-3.5 w-3.5 shrink-0 text-[var(--primary,#475569)]"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
