@@ -41,3 +41,35 @@ export function clampToStock(value: number, stock: number): number {
   }
   return Math.min(stock, Math.max(1, value));
 }
+
+/** Estado del stepper − / + de la barra de compra. */
+export interface QuantityStepperState {
+  /** Valor acotado al rango comprable. */
+  value: number;
+  /** `true` cuando − ya no puede bajar (mínimo 1). */
+  decrementDisabled: boolean;
+  /** `true` cuando + ya no puede subir (tope = stock). */
+  incrementDisabled: boolean;
+}
+
+/**
+ * Estado del stepper de cantidad tras aplicar `delta` al valor actual.
+ *
+ * `delta` 0 sólo lee el estado (para los flags de los botones). El
+ * resultado se acota al rango comprable `[1..stock]` (0 sin stock):
+ * el decremento se detiene en 1 y el incremento en el stock. Los
+ * flags marcan los extremos para deshabilitar − / + donde ya no hay
+ * movimiento posible.
+ */
+export function quantityStepperState(
+  current: number,
+  delta: number,
+  stock: number,
+): QuantityStepperState {
+  const value = clampToStock(current + delta, stock);
+  return {
+    value,
+    decrementDisabled: value <= 1,
+    incrementDisabled: stock <= 0 || value >= stock,
+  };
+}
