@@ -130,7 +130,7 @@ _(se completa por tarea)_
 |---|---|---|---|
 | T1 | hecha | `8e259118` | `bun run test`: 525 tests OK · `astro check`: 0 errors · `eslint` 3 archivos: exit 0 |
 | T2 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · capturas 1440/390 en `output/playwright/t2-footer-*` |
-| T3 | pendiente | — | — |
+| T3 | hecha | (este) | TDD: RED 7 failed (404 ruta inexistente) → GREEN `php artisan test --filter=StorefrontSocialLink`: 7 passed (43 assertions) |
 | T4 | pendiente | — | — |
 | T5 | pendiente | — | — |
 | T6 | pendiente | — | — |
@@ -157,8 +157,35 @@ _(se completa por tarea)_
 - Los hrefs de la nav legal siguen apuntando a `#` — T5 los conecta.
 - El writer T2 murió con `ContentFilterError` (fallo de runtime, sin handoff
   según contrato) después de editar pero antes de reportar; la verificación
-  funcional y visual la corrió el orquestador.
+  funcional y visual la corrió el orquestador. El actor se recuperó después y
+  confirmó los mismos resultados.
+- **Dominio de dev**: el tenant Panda se sirve en `panda-estampados.com` (puerto
+  80 y `:5321`); `panda-estampados.test` responde 403. Usar `.com` en capturas.
+- **Playwright**: chromium NO está instalado — usar `--browser firefox` (único
+  disponible, ya es la convención del repo). El wrapper del skill no es
+  ejecutable: invocarlo con `bash "$PWCLI"`. En capturas de elemento el
+  `astro-dev-toolbar` se superpone al footer: ocultarlo antes de capturar.
+- **A11y preexistente**: `aria-label="Redes sociales"` sobre un `<div>` sin
+  `role` es ignorado por los lectores de pantalla. Corregir en T4 (agregar
+  `role="group"` o pasar el bloque a `<ul>`).
+- Quedan `.gitkeep` en los dirs de componentes ya vacíos
+  (`components/storefront/footer/`, `components/storefront/header/`).
+
+### Notas T3
+
+- `GET /api/v1/storefront/social-links` (público, grupo `storefront` con
+  `store.domain` + `store.maintenance`). Devuelve solo `is_active` de la
+  tienda resuelta por dominio, orden `sort_order` asc + `id` asc.
+- Scope por tienda via `$store->socialLinks()` — nunca consulta otras tiendas.
+  503 si el contexto queda vacío (misma convención que `StorefrontAuthController`).
+- Tests backend **solo corren dentro del container**:
+  `./scripts/docker-stack.sh exec development panda-estampados-and-kitsune backend php artisan test --filter=...`
+  (el PHP local no tiene `pdo_pgsql`).
+- Suite completa backend: 24 failed / 1485 passed — los 24 fallos son
+  **preexistentes** (`ProductAttributeValueControllerTest`, `ProductSeederTest`,
+  `BackfillVariantFinishCommandTest`) y no tocan esta feature.
+- Pendiente: pint/phpstan sobre los archivos tocados (T6).
 
 ## Próximo paso
 
-T2 — Footer full-width + header en coherencia.
+T4 — Footer consume redes desde BD.
