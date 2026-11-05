@@ -1074,6 +1074,14 @@ const en: Translations = {
   'storefront.products.detail.v4.financing.shopPay': 'From $721.98/mo with Shop Pay. ?',
   'storefront.products.detail.v4.financing.learnMore': 'Learn how',
   'storefront.products.detail.v4.featuredArticle.cta': 'Read article',
+  // PDP tabs — own labels; specs/reviews/faq reuse
+  // `details.specsHeading`, `productDetail.reviews.heading` and
+  // `faq.heading`.
+  'storefront.products.detail.v4.tabs.description': 'Description',
+  'storefront.products.detail.v4.tabs.shipping': 'Shipping',
+  'storefront.products.detail.v4.tabs.emptySpecs':
+    'This product has no technical specifications yet.',
+  'storefront.products.detail.v4.tabs.legend': 'Product information',
 
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   'storefront.checkout.title': 'Checkout',

@@ -118,9 +118,12 @@ tarea-solo-visual: se documenta y se sigue (no partir artificialmente).
       _Route: inline (ediciones mecánicas ya decididas, 3 archivos)._
       _Commit `e577a97b`._ Checks: `astro check` 0 errores · `bun run test`
       484/484 verdes.
-- [ ] **T2** Caja de compra: cantidad 1..stock de la variante (validada),
+- [x] **T2** Caja de compra: cantidad 1..stock de la variante (validada),
       "Añadir al carrito" + "Comprar ya" → checkout. i18n + wire en PDP.
-      _Route: delegated writer._
+      _Route: delegated writer (`general-1`, cancelado a los 51 turnos con
+      el trabajo completo; verificación absorbida por el parent)._ _Commit
+      `bcea346d`._ Checks: `bun run test` 492/492 · `astro check` 0 errores ·
+      lint 0 errores nuevos vs HEAD (7 preexistentes en `[slug].astro`).
 - [ ] **T3** Tabs `Descripción | Ficha técnica | Reseñas | Preguntas | Envíos`
       con conteos, reutilizando los bloques existentes. i18n + wire en PDP.
       _Route: delegated writer._

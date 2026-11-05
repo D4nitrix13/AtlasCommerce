@@ -45,7 +45,6 @@ import ProductDetailVariants, {
 // en el dl "Acabado" usando thumbnails reales de cada variante.
 import ProductDetailRatingRow from '../../../components/storefront/products/ProductDetailRatingRow.astro';
 import ProductDetailFinancingBlock from '../../../components/storefront/products/ProductDetailFinancingBlock.astro';
-import ProductFeaturedArticle from '../../../components/storefront/products/ProductFeaturedArticle.astro';
 // FENDER_PLAYER_FUSION_BASS_DETAIL fue removido en el refactor
 // seeders/mocks brand-agnostic (Oct 2026). El bundle "comprados juntos
 // frecuentemente" que vivía acá se restaurará cuando exista data real
@@ -57,15 +56,9 @@ import ProductFitSelector from '../../../components/storefront/products/ProductF
 import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
 import ProductCTAs from '../../../components/storefront/products/ProductCTAs.astro';
 import ProductPurchaseBar from '../../../components/storefront/products/ProductPurchaseBar';
-import ProductShippingAccordion from '../../../components/storefront/products/ProductShippingAccordion.astro';
 import ProductDetailsBlock from '../../../components/storefront/products/ProductDetailsBlock.astro';
-import ProductReviews from '../../../components/storefront/products/ProductReviews.astro';
 import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
-import ProductHighlights from '../../../components/storefront/products/ProductHighlights.astro';
-import ProductExtendedDescription from '../../../components/storefront/products/ProductExtendedDescription.astro';
-import ProductFAQ from '../../../components/storefront/products/ProductFAQ.astro';
-
-import ProductSpecificationsByCategory from '../../../components/storefront/products/ProductSpecificationsByCategory.astro';
+import ProductDetailTabs from '../../../components/storefront/products/ProductDetailTabs.astro';
 import { getServerDictionary } from '../../../i18n/server';
 // CATEGORIES se mantiene para el breadcrumb; el lookup del producto
 // ya NO usa la data mock (ver fetch SSR abajo).
@@ -76,7 +69,7 @@ import {
   type ProductReview,
   getAverageRating,
 } from '../../../data/product-detail-mock';
-import type { Product } from '../../../types/catalog';
+import type { Product, ProductAttribute, ProductSize } from '../../../types/catalog';
 import { PLACEHOLDER_IMAGE, deriveProductDetail } from '../../../lib/product-detail';
 // `RELATED_PRODUCTS` ya NO se importa: el carrusel se deriva del catálogo
 // real del tenant en SSR (ver bloque más abajo). El export se mantiene en
@@ -188,6 +181,10 @@ interface StorefrontApiProduct {
   isExclusive?: boolean;
   hasCondition?: boolean;
   hasSizes?: boolean;
+  /** Atributos EAV (PDP, `attributeValues` eager-loaded). */
+  attributes?: readonly ProductAttribute[];
+  /** Tallas/capacidades con medida (PDP, `sizes` eager-loaded). */
+  sizes?: readonly ProductSize[];
 }
 
 const SSR_FETCH_TIMEOUT_MS = 5_000;
@@ -293,6 +290,10 @@ if (typeof slug !== 'string' || slug.length === 0) {
         ...(data.isExclusive === true && { isExclusive: true }),
         ...(data.hasCondition !== undefined && { hasCondition: data.hasCondition }),
         ...(data.hasSizes !== undefined && { hasSizes: data.hasSizes }),
+        // Atributos EAV + tallas: la ficha técnica real del PDP
+        // (antes se descartaban en este mapping).
+        ...(data.attributes !== undefined && { attributes: data.attributes }),
+        ...(data.sizes !== undefined && { sizes: data.sizes }),
       };
       // Resguardar la shape cruda del API (variants y images con metadata
       // `variantId`) en variables separadas. La galería del PDP los lee
@@ -807,6 +808,26 @@ const reviewsLabels = {
   loginRequired: t['storefront.products.detail.v4.reviews.loginRequired'],
 };
 
+// Labels del tab strip de información (ProductDetailTabs). Los labels de
+// specs/reviews/faq reutilizan keys existentes; `tabs.*` agrega los de
+// descripción/envíos, el mensaje vacío y el nombre accesible del strip.
+const tabLabels = {
+  legend: t['storefront.products.detail.v4.tabs.legend'],
+  description: t['storefront.products.detail.v4.tabs.description'],
+  specs: t['storefront.products.detail.v4.details.specsHeading'],
+  reviews: t['storefront.productDetail.reviews.heading'],
+  faq: t['storefront.products.detail.v4.faq.heading'],
+  shipping: t['storefront.products.detail.v4.tabs.shipping'],
+  emptySpecs: t['storefront.products.detail.v4.tabs.emptySpecs'],
+  specsHeading: t['storefront.products.detail.v4.specsByCategory.heading'],
+  faqHeading: t['storefront.products.detail.v4.faq.heading'],
+  highlightsHeading: t['storefront.products.detail.v4.highlights.heading'],
+  extendedHeading: t['storefront.products.detail.v4.extendedDescription.heading'],
+  featuredCta: t['storefront.products.detail.v4.featuredArticle.cta'],
+  more: t['storefront.products.detail.v4.details.more'],
+  less: t['storefront.products.detail.v4.details.less'],
+};
+
 /** Metadata mínima del producto actual — expuesta a window.__PRODUCT_META__
  *  para que ProductRecentlyViewed pueda trackear este producto via localStorage. */
 const CURRENT_PRODUCT =
@@ -1206,11 +1227,9 @@ const cardLabels = {
                 />
               )}
 
-              <div class="flex flex-col gap-2">
-                {INCLUSION_ACCORDIONS.map((entry) => (
-                  <ProductShippingAccordion label={entry.label} content={entry.content} />
-                ))}
-              </div>
+              {/* Accordions de inclusión (Garantía/Estuche/Ajuste) movidos al
+                  tab "Envíos" de ProductDetailTabs: son product-info, no
+                  decisión de compra. */}
 
               <a
                 href={FIND_STORE_HREF}
@@ -1233,68 +1252,34 @@ const cardLabels = {
             </aside>
           </section>
 
-          {/* Description block (card + Lee más toggle). Las specs por categoría
-              se renderizan aparte en `<ProductSpecificationsByCategory>`. */}
-          {detail.description.length > 0 && (
-            <ProductDetailsBlock
-              heading={undefined}
-              intro={detail.description}
-              moreLabel={t['storefront.products.detail.v4.details.more']}
-              lessLabel={t['storefront.products.detail.v4.details.less']}
-            />
-          )}
-
-          {detail.featuredArticle !== undefined && (
-            <ProductFeaturedArticle
-              {...detail.featuredArticle}
-              ctaLabel={t['storefront.products.detail.v4.featuredArticle.cta']}
-            />
-          )}
-
-          {/* Highlights — sólo si el mock los provee */}
-          {detail.highlights !== undefined && detail.highlights.length > 0 && (
-            <ProductHighlights
-              heading={t['storefront.products.detail.v4.highlights.heading']}
-              items={detail.highlights}
-            />
-          )}
-
-          {/* Especificaciones por categoría — sólo si el mock las provee */}
-          {detail.groupedSpecs !== undefined && detail.groupedSpecs.length > 0 && (
-            <ProductSpecificationsByCategory
-              heading={t['storefront.products.detail.v4.specsByCategory.heading']}
-              groups={detail.groupedSpecs}
-              expanded={expandedSpecs}
-            />
-          )}
-
-          {/* Descripción extendida — Fase 8. Vacío = no renderiza. */}
-          {detail.extendedDescriptions !== undefined && detail.extendedDescriptions.length > 0 && (
-            <ProductExtendedDescription
-              items={detail.extendedDescriptions}
-              labels={{ heading: t['storefront.products.detail.v4.extendedDescription.heading'] }}
-            />
-          )}
-
-          {/* Preguntas frecuentes — Fase 8. Vacío = no renderiza. */}
-          {detail.faqs !== undefined && detail.faqs.length > 0 && (
-            <ProductFAQ
-              faqs={detail.faqs}
-              labels={{ heading: t['storefront.products.detail.v4.faq.heading'] }}
-            />
-          )}
-
-          {/* Reseñas — full-width después de specs (convención e-commerce: specs → reviews → related) */}
-          {REVIEWS.length > 0 && (
-            <ProductReviews
-              labels={reviewsLabels}
-              reviews={REVIEWS}
-              viewAllHref={VIEW_ALL_HREF}
-              writeHref={WRITE_REVIEW_HREF}
-              apiBaseUrl="/api/v1"
-              loginHref={`/${locale}/login`}
-            />
-          )}
+          {/* Tabs de información (Descripción · Ficha técnica · Reseñas ·
+              Preguntas frecuentes · Envíos). Reemplaza los bloques apilados
+              de la PDP: descripción, artículo destacado, highlights, specs,
+              descripción extendida, FAQ y reseñas. */}
+          <ProductDetailTabs
+            labels={tabLabels}
+            description={detail.description}
+            highlights={detail.highlights}
+            extendedDescriptions={detail.extendedDescriptions}
+            featuredArticle={detail.featuredArticle}
+            groupedSpecs={detail.groupedSpecs}
+            expandedSpecs={expandedSpecs}
+            attributes={product.attributes}
+            sizes={product.sizes}
+            booleanLabels={{
+              yes: t['admin.catalog.products.detail.specs.yes'],
+              no: t['admin.catalog.products.detail.specs.no'],
+            }}
+            reviews={REVIEWS}
+            reviewsLabels={reviewsLabels}
+            viewAllHref={VIEW_ALL_HREF}
+            writeHref={WRITE_REVIEW_HREF}
+            apiBaseUrl="/api/v1"
+            loginHref={`/${locale}/login`}
+            faqs={detail.faqs}
+            shippingInline={t['storefront.products.detail.v4.shippingInline']}
+            inclusionAccordions={INCLUSION_ACCORDIONS}
+          />
 
           {/* Features carousel — removido: sección redundante con Highlights. */}
 

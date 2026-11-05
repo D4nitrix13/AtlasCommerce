@@ -1,0 +1,245 @@
+---
+/**
+ * ProductDetailTabs — tab strip accesible del PDP: Descripción · Ficha
+ * técnica · Reseñas (N) · Preguntas frecuentes (N) · Envíos.
+ *
+ * Contrato WAI-ARIA APG con activación automática: flechas y Home/End
+ * mueven el foco Y activan; Enter/Space activan vía click nativo del
+ * `<button>`. Tabs sin contenido se ocultan (Reseñas/Preguntas con 0);
+ * Descripción, Ficha técnica y Envíos siempre se muestran.
+ */
+import ProductDetailsBlock from './ProductDetailsBlock.astro';
+import ProductExtendedDescription from './ProductExtendedDescription.astro';
+import type { ProductExtendedDescriptionItem } from './ProductExtendedDescription.types';
+import ProductFAQ from './ProductFAQ.astro';
+import type { ProductFAQItem } from './ProductFAQ.types';
+import ProductFeaturedArticle from './ProductFeaturedArticle.astro';
+import type { ProductFeaturedArticleProps } from './ProductFeaturedArticle.types';
+import ProductHighlights from './ProductHighlights.astro';
+import type { ProductHighlightsItem } from './ProductHighlights.types';
+import ProductReviews, { type ProductReviewsLabels } from './ProductReviews.astro';
+import ProductShippingAccordion from './ProductShippingAccordion.astro';
+import ProductSpecsTable from './ProductSpecsTable.astro';
+import ProductSpecificationsByCategory from './ProductSpecificationsByCategory.astro';
+import type { ProductSpecificationsByCategoryGroup } from './ProductSpecificationsByCategory.types';
+import type { ProductReview } from '../../../data/product-detail-mock';
+import { buildProductSpecRows, type BooleanLabels } from '../../../lib/product-specs';
+import type { ProductAttribute, ProductSize } from '../../../types/catalog';
+
+export interface ProductDetailTabLabels {
+  /** Nombre accesible del tablist. */
+  legend: string;
+  description: string;
+  specs: string;
+  reviews: string;
+  faq: string;
+  shipping: string;
+  /** Mensaje del panel Ficha técnica sin datos cargados. */
+  emptySpecs: string;
+  /** Headings de los paneles / componentes hijos. */
+  specsHeading: string;
+  faqHeading: string;
+  highlightsHeading: string;
+  extendedHeading: string;
+  featuredCta: string;
+  more: string;
+  less: string;
+}
+
+interface Props {
+  labels: ProductDetailTabLabels;
+  /** Descripción corta (HTML) — base del panel Descripción. */
+  description: string;
+  highlights?: readonly ProductHighlightsItem[];
+  extendedDescriptions?: readonly ProductExtendedDescriptionItem[];
+  featuredArticle?: ProductFeaturedArticleProps;
+  groupedSpecs?: readonly ProductSpecificationsByCategoryGroup[];
+  expandedSpecs?: readonly string[];
+  /** Atributos EAV reales del backend (productos derivados de la API). */
+  attributes?: readonly ProductAttribute[];
+  sizes?: readonly ProductSize[];
+  /** Labels Sí/No para atributos booleanos (i18n inyectada por el caller). */
+  booleanLabels: BooleanLabels;
+  reviews: readonly ProductReview[];
+  reviewsLabels: ProductReviewsLabels;
+  viewAllHref: string;
+  writeHref: string;
+  loginHref?: string;
+  apiBaseUrl?: string;
+  faqs?: readonly ProductFAQItem[];
+  shippingInline: string;
+  inclusionAccordions?: readonly { label: string; content: string }[];
+}
+
+const {
+  labels, description, highlights, extendedDescriptions, featuredArticle,
+  groupedSpecs, expandedSpecs, attributes, sizes, booleanLabels,
+  reviews, reviewsLabels, viewAllHref, writeHref, loginHref, apiBaseUrl,
+  faqs, shippingInline, inclusionAccordions,
+} = Astro.props;
+
+type TabId = 'description' | 'specs' | 'reviews' | 'faq' | 'shipping';
+
+const highlightItems = highlights ?? [];
+const extendedItems = extendedDescriptions ?? [];
+const faqItems = faqs ?? [];
+const accordionEntries = inclusionAccordions ?? [];
+const groupedSpecEntries = groupedSpecs ?? [];
+
+const realSpecRows = buildProductSpecRows(attributes, sizes, booleanLabels);
+const hasGroupedSpecs = groupedSpecEntries.length > 0;
+const hasRealSpecs = realSpecRows.length > 0;
+const showReviews = reviews.length > 0;
+const showFaq = faqItems.length > 0;
+
+const tabs: readonly { id: TabId; label: string; count?: number }[] = [
+  { id: 'description', label: labels.description },
+  { id: 'specs', label: labels.specs },
+  ...(showReviews ? [{ id: 'reviews' as const, label: labels.reviews, count: reviews.length }] : []),
+  ...(showFaq ? [{ id: 'faq' as const, label: labels.faq, count: faqItems.length }] : []),
+  { id: 'shipping', label: labels.shipping },
+];
+// Tab activo en el SSR: los paneles inactivos llevan `hidden` estático
+// (equivalente al render de `activeId !== '<id>'` sin comparar literales).
+const activeId: TabId = 'description';
+---
+
+<section class="flex w-full flex-col gap-6" data-pdp-tabs>
+  <div role="tablist" aria-label={labels.legend} class="flex flex-wrap gap-2">
+    {tabs.map((tab) => {
+      const isActive = tab.id === activeId;
+      return (
+        <button
+          type="button"
+          role="tab"
+          id={`pdp-tab-${tab.id}`}
+          aria-controls={`pdp-panel-${tab.id}`}
+          aria-selected={isActive ? 'true' : 'false'}
+          tabindex={isActive ? 0 : -1}
+          class:list={[
+            'rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
+            isActive
+              ? 'bg-slate-900 text-white'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+          ]}
+        >
+          {tab.label}
+          {tab.count !== undefined && <span class="tabular-nums"> ({tab.count})</span>}
+        </button>
+      );
+    })}
+  </div>
+
+  {/* Descripción — bloque largo + opcionales mock-era (vacíos = no render). */}
+  <div
+    role="tabpanel" id="pdp-panel-description" aria-labelledby="pdp-tab-description"
+    tabindex="0" class="flex flex-col gap-8"
+  >
+    <ProductDetailsBlock
+      heading={labels.description}
+      intro={description}
+      moreLabel={labels.more}
+      lessLabel={labels.less}
+    />
+    {highlightItems.length > 0 && (
+      <ProductHighlights heading={labels.highlightsHeading} items={highlightItems} />
+    )}
+    {extendedItems.length > 0 && (
+      <ProductExtendedDescription items={extendedItems} labels={{ heading: labels.extendedHeading }} />
+    )}
+    {featuredArticle !== undefined && (
+      <ProductFeaturedArticle {...featuredArticle} ctaLabel={labels.featuredCta} />
+    )}
+  </div>
+
+  {/* Ficha técnica — specs agrupadas (mock) o atributos EAV reales. */}
+  <div
+    role="tabpanel" id="pdp-panel-specs" aria-labelledby="pdp-tab-specs"
+    tabindex="0" hidden class="flex flex-col gap-8"
+  >
+    {hasGroupedSpecs && (
+      <ProductSpecificationsByCategory
+        heading={labels.specsHeading}
+        groups={groupedSpecEntries}
+        expanded={expandedSpecs ?? []}
+      />
+    )}
+    {!hasGroupedSpecs && hasRealSpecs && <ProductSpecsTable rows={realSpecRows} />}
+    {!hasGroupedSpecs && !hasRealSpecs && (
+      <p class="text-sm text-slate-500">{labels.emptySpecs}</p>
+    )}
+  </div>
+
+  {showReviews && (
+    <div
+      role="tabpanel" id="pdp-panel-reviews" aria-labelledby="pdp-tab-reviews"
+      tabindex="0" hidden
+    >
+      <ProductReviews
+        labels={reviewsLabels}
+        reviews={reviews}
+        viewAllHref={viewAllHref}
+        writeHref={writeHref}
+        apiBaseUrl={apiBaseUrl}
+        loginHref={loginHref}
+      />
+    </div>
+  )}
+
+  {showFaq && (
+    <div
+      role="tabpanel" id="pdp-panel-faq" aria-labelledby="pdp-tab-faq"
+      tabindex="0" hidden
+    >
+      <ProductFAQ faqs={faqItems} labels={{ heading: labels.faqHeading }} />
+    </div>
+  )}
+
+  <div
+    role="tabpanel" id="pdp-panel-shipping" aria-labelledby="pdp-tab-shipping"
+    tabindex="0" hidden class="flex flex-col gap-4"
+  >
+    <p class="text-sm leading-relaxed text-slate-700">{shippingInline}</p>
+    {accordionEntries.map((entry) => (
+      <ProductShippingAccordion label={entry.label} content={entry.content} />
+    ))}
+  </div>
+</section>
+
+<script>
+  import { isTabNavKey, nextTabIndex } from '../../../lib/pdp-tabs';
+
+  document.querySelectorAll<HTMLElement>('[data-pdp-tabs]').forEach((root) => {
+    const tablist = root.querySelector<HTMLElement>('[role="tablist"]');
+    if (tablist === null) return;
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+
+    const activate = (next: number): void => {
+      tabs.forEach((tab, index) => {
+        const isSelected = index === next;
+        tab.setAttribute('aria-selected', String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        const panelId = tab.getAttribute('aria-controls');
+        const panel = panelId === null ? null : root.querySelector<HTMLElement>(`#${panelId}`);
+        if (panel !== null) panel.hidden = !isSelected;
+      });
+    };
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activate(index));
+    });
+
+    tablist.addEventListener('keydown', (event) => {
+      const target = event.target instanceof HTMLElement
+        ? event.target.closest<HTMLButtonElement>('[role="tab"]')
+        : null;
+      if (target === null) return;
+      const current = tabs.indexOf(target);
+      if (current === -1 || !isTabNavKey(event.key)) return;
+      const next = nextTabIndex(current, tabs.length, event.key);
+      event.preventDefault();
+      tabs[next]?.focus();
+      activate(next);
+    });
+  });
+</script>

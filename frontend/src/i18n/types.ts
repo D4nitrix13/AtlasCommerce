@@ -1926,6 +1926,10 @@ export type TranslationKey =
   | 'storefront.products.detail.v4.financing.shopPay'
   | 'storefront.products.detail.v4.financing.learnMore'
   | 'storefront.products.detail.v4.featuredArticle.cta'
+  | 'storefront.products.detail.v4.tabs.description'
+  | 'storefront.products.detail.v4.tabs.shipping'
+  | 'storefront.products.detail.v4.tabs.emptySpecs'
+  | 'storefront.products.detail.v4.tabs.legend'
 
   // ─── storefront: checkout multi-step (F4.1) ─────────────────────────
   | 'storefront.checkout.title'

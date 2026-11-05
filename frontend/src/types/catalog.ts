@@ -30,6 +30,37 @@ export interface ProductSize {
   label: string;
   /** Posición en el grid (ascendente). */
   position?: number;
+  /**
+   * Valor numérico de la talla/capacidad (ej. `11` para una taza de
+   * 11 oz). `null` cuando la talla no mide nada (ropa S/M/L).
+   */
+  value?: number | null;
+  /** Unidad del valor (ej. `oz`, `cm`). `null` sin unidad. */
+  unit?: string | null;
+}
+
+/**
+ * Atributo EAV del producto (material, peso, cuidados…).
+ *
+ * Shape del wire `GET /api/v1/storefront/products[/{slug}]`
+ * (`StorefrontProductResource::toArray()` → `attributes[]`). Sólo el
+ * campo correspondiente a `type` viene poblado; el resto va en `null`.
+ */
+export interface ProductAttribute {
+  /** Slug URL-safe del atributo (ej. `material`). */
+  slug: string;
+  /** Label legible (ej. `Material`). */
+  label: string;
+  /** Tipo del atributo (`text` | `number` | `boolean` | `select`). */
+  type?: string | null;
+  /** Unidad del valor numérico (ej. `oz`, `kg`). `null` sin unidad. */
+  unit?: string | null;
+  /** Valor textual (`type: 'text' | 'select'`). */
+  value?: string | null;
+  /** Valor numérico (`type: 'number'`). */
+  valueNumber?: number | null;
+  /** Valor booleano (`type: 'boolean'`). */
+  valueBoolean?: boolean | null;
 }
 
 /**
@@ -202,6 +233,12 @@ export interface Product {
    * Vacío/ausente para guitarras eléctricas y productos sin tallas.
    */
   sizes?: readonly ProductSize[];
+  /**
+   * Atributos EAV del producto (material, peso, cuidados…). El
+   * backend los emite en el PDP (`attributeValues` eager-loaded);
+   * vacío/ausente cuando el producto no tiene atributos cargados.
+   */
+  attributes?: readonly ProductAttribute[];
 }
 
 export interface Category {
