@@ -194,12 +194,24 @@ layout se valida con tests de clases (estilo `catalog-grid-css.test.ts`)
    Assess: medium, `under_budget` (715 líneas; slice pendiente).
    Nota: `ProductRelated.astro` llegó a 398 líneas (sobre límite) —
    T3.4/T3.5 deben extraer el body de la card a subcomponente.
-4. **Acabados: color real + hover cambia imagen** — selector ACABADO
+4. ✅ **Acabados: color real + hover cambia imagen** — selector ACABADO
    (`[slug].astro:1115-1190`): swatches hex en vez de thumbnails
    (hoy "parecen imágenes repetidas"); hover/focus del swatch cambia la
    imagen (cards: `setupVariantPreview` existe pero no se percibe —
    fix; galería: preview de la variante). i18n de "Acabado"/"Precio"
    si se tocan esas líneas. [delegated]
+   → `506bb56d`: chips hex primero (thumbnail sólo sin hex) en el
+   picker y en el caso de acabado único; `data-finish-preview` + script
+   hover/focus → galería; **causa raíz del hover muerto**: CSS scoped
+   de Astro ganaba a las reglas de opacity (`[data-astro-cid]`) y la
+   imagen primaria tenía `data-variant-id="default"` (nunca matcheaba)
+   — fix con `buildVariantPreviewCss` global + stack con ids reales;
+   swatches de card dedupeados **por acabado** en
+   `toRelatedProductCard` (antes 1 círculo por variante = repetidos).
+   Tests: 5 propios + 10 del fix de hover (RED→GREEN). 567 tests OK ·
+   astro check OK · eslint 0 nuevos. Delegación falló 2× (writers
+   colgados) → implementación inline + patch residual del writer
+   zombi reconciliado. Assess: pendiente de este commit.
 5. **Hover imagen → trasera en cards de rieles** — cablear
    `product-card-swap` (`deriveProductCardSwap`, `imageUrlSecondary`,
    CSS `img[data-role='back']` como `ProductCard.astro`) en
