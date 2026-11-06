@@ -135,6 +135,12 @@ final class OAuthRedirectTarget
             $result = $loginSegment;
         }
 
-        return $locale !== null ? '/'.$locale.$result : $result;
+        // El router del frontend exige `/<locale>/` en toda ruta (Astro
+        // i18n con `prefixDefaultLocale: true`). Sin este fallback, un
+        // session target vacío producía `/account/login` sin prefijo, y
+        // el usuario caía en un redirect extra antes del login.
+        $locale ??= (string) (((array) config(key: 'app.available_locales', default: ['es', 'en']))[0] ?? 'es');
+
+        return '/'.$locale.$result;
     }
 }

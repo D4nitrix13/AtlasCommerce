@@ -28,6 +28,11 @@ export const API_ENDPOINTS = {
 
     forgotPassword: '/v1/auth/forgot-password',
     resetPassword: '/v1/auth/reset-password',
+    // 2-step recovery: el usuario verifica un segundo factor (recovery
+    // code o TOTP) y obtiene un `challenge_token` de un solo uso para
+    // poder llamar a resetPassword.
+    recoverViaRecoveryCode: '/v1/auth/recover-via-recovery-code',
+    recoverViaTotp: '/v1/auth/recover-via-totp',
 
     twoFactor: {
       status: '/v1/auth/2fa',
