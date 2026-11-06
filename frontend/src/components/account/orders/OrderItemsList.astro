@@ -22,10 +22,7 @@ interface Props {
 const { items, currencyCode, locale, heading, quantityLabel } = Astro.props;
 ---
 
-<section
-  aria-labelledby="order-items-heading"
-  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
->
+<section aria-labelledby="order-items-heading" class="paper-card p-5 sm:p-6">
   <h2 id="order-items-heading" class="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
     {heading}
   </h2>

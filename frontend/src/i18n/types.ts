@@ -1467,7 +1467,6 @@ export type TranslationKey =
   | 'storefront.footer.socialLabel'
   | 'storefront.footer.copyright'
 
-
   // ─── storefront: legal (chrome de las 5 páginas legales) ─────────────
   | 'storefront.legal.breadcrumbLabel'
   | 'storefront.legal.about.title'

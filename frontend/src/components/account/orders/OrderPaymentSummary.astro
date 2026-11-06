@@ -73,10 +73,7 @@ const subtotalCents = Math.max(0, totalCents - shippingCents);
 const isShippingFree = shippingCents === 0;
 ---
 
-<section
-  aria-labelledby="order-payment-heading"
-  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
->
+<section aria-labelledby="order-payment-heading" class="paper-card p-5 sm:p-6">
   <h2 id="order-payment-heading" class="mb-4 text-base font-semibold text-slate-900 sm:text-lg">
     {heading}
   </h2>
