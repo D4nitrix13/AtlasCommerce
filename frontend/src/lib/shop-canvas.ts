@@ -11,7 +11,7 @@
  */
 
 export const SHOP_FONT_STYLESHEET =
-  'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap';
+  'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Great+Vibes&display=swap';
 
 export function shopThemeStyle(accent: string, hover: string): string {
   return [

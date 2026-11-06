@@ -1183,7 +1183,6 @@ const en: Translations = {
   // ─── storefront: layout (header/footer) ───────────────────────────
   'storefront.header.nav.home': 'Home',
   'storefront.header.nav.products': 'Products',
-  'storefront.header.nav.cases': 'Use cases',
   'storefront.header.nav.account': 'My account',
   'storefront.header.nav.cart': 'Cart',
   'storefront.header.cartBadge': '{count} in cart',
@@ -1200,6 +1199,9 @@ const en: Translations = {
   'storefront.footer.privacy': 'Privacy',
   'storefront.footer.help': 'Help',
   'storefront.footer.contact': 'Contact',
+  'storefront.footer.navHeading': 'Links',
+  'storefront.footer.supportHeading': 'Support',
+  'storefront.footer.followHeading': 'Follow us',
   'storefront.footer.socialLabel': 'Social media',
   'storefront.footer.copyright': '© {year} {brand}. All rights reserved.',
 

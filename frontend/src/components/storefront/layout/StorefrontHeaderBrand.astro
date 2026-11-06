@@ -2,7 +2,8 @@
 /**
  * StorefrontHeaderBrand — bloque de marca (logo + nombre) del header.
  *
- * Versión compacta: logo + shortName en una línea, sin tagline. El
+ * Versión compacta: logo + `brand.name` en tipografía script
+ * (Great Vibes, vía `font-script`) en una línea, sin tagline. El
  * link envuelve todo para un hit area generoso (≥ 40px de alto).
  *
  * El logo se sirve desde `/api/v1/storefront/assets/tenants/{slug}/branding/`
@@ -33,7 +34,7 @@ const initials = brand.shortName
 
 <a
   href={homeHref}
-  class="flex h-10 shrink-0 items-center justify-self-start gap-2 rounded-md pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)]"
+  class="flex min-h-10 shrink-0 items-center justify-self-start gap-2 rounded-md pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)]"
 >
   <span
     class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm ring-1 ring-slate-200"
@@ -54,7 +55,7 @@ const initials = brand.shortName
       onerror="this.onerror=null;this.style.display='none'"
     />
   </span>
-  <span class="whitespace-nowrap text-base font-bold tracking-tight text-slate-900">
-    {brand.shortName}
+  <span class="whitespace-nowrap font-script text-2xl leading-none text-slate-900">
+    {brand.name}
   </span>
 </a>

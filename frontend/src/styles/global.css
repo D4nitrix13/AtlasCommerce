@@ -3,6 +3,7 @@
 @theme {
   --font-sans: 'Figtree', system-ui, sans-serif;
   --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-script: 'Great Vibes', cursive;
 }
 
 @layer base {
