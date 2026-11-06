@@ -1,42 +1,38 @@
 ---
 /**
- * `/[locale]/account/orders/[id]` — Detalle de un pedido (F2.2).
+ * `/[locale]/account/orders/[id]` — Detalle del trabajo (job-ticket).
  *
- * Basado en Baymard §5.1 / 63-order-tracking-page (ref Apple Shop,
- * Warby Parker). Para Kitsune B2C aplicamos el patrón §6.3 del
- * design-refs: timeline temático kitsune de 5 hitos.
+ * Rediseño al lenguaje del taller (consistente con el dashboard):
+ *  1. Back link quieto.
+ *  2. Hero: hoja `paper-card-hero` con marcas de registro, banda
+ *     kraft (Orden de trabajo · #ID + chip de tinta) y el rail de
+ *     etapas `ProductionRail` como FOCAL.
+ *  3. Acciones compactas: Descargar factura (documento real, data
+ *     URL) · Solicitar cambio (mail del soporte del tenant) ·
+ *     Rastrear envío · Volver a pedir.
+ *  4. Tracking, timeline (5 hitos), items / envío / pago.
+ *  5. 404 amistoso reestilizado (sin emojis).
  *
- * Layout:
- *  1. Back to list (sticky near top)
- *  2. Summary card (id + date + status pill)
- *  3. OrderTimeline (5 milestones)
- *  4. Tracking number + link si shipped+
- *  5. Two-column grid:
- *     - Items list (image + name + qty + price)
- *     - Right column: Shipping + Payment
- *  6. Reorder button si delivered (placeholder link al product)
- *
- * Cuando el pedido está cancelado, mostramos un banner persistente
- * Y en lugar del timeline renderizamos el mismo con todos los
- * milestones en estado pending (porque cancelled es un anti-flow).
- *
- * 404 handling:
- *  - Si `findOrderById` devuelve null → empty state con botón back.
- *  - En producción, el backend devolvería 404 → el page renderiza
- *    el empty state amistosamente.
+ * Decisiones:
+ *  - Sin emojis, sin hex de tenant (todo `var(--primary)` / tintas).
+ *  - "Descargar factura" genera un documento HTML autocontenido
+ *    descargable desde los mocks — no se inventa backend.
+ *  - "Solicitar cambio" abre el mail del soporte del tenant.
  */
 import AccountLayout from '../../../../layouts/AccountLayout.astro';
 import OrderTimeline from '../../../../components/account/orders/OrderTimeline.astro';
 import OrderItemsList from '../../../../components/account/orders/OrderItemsList.astro';
 import OrderShippingCard from '../../../../components/account/orders/OrderShippingCard.astro';
 import OrderPaymentSummary from '../../../../components/account/orders/OrderPaymentSummary.astro';
-import Badge from '../../../../components/ui/Badge.astro';
+import InkChip from '../../../../components/account/dashboard/InkChip.astro';
+import ProductionRail from '../../../../components/account/dashboard/ProductionRail.astro';
+import RegistrationMarks from '../../../../components/account/dashboard/RegistrationMarks.astro';
 import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
-import { findOrderById } from '../../../../data/orders-mock';
-import type { OrderStatus } from '../../../../data/account-mock';
-import { formatCentsAsDecimal, formatDate } from '../../../../lib/formatters';
+import { findOrderById, countOrderItems, type OrderMock } from '../../../../data/orders-mock';
+import { PRODUCTION_STAGE_INDEX } from '../../../../data/dashboard-kpis';
 import { getBrandBySlug } from '../../../../config/stores';
 import { themeToBrand } from '../../../../lib/theme';
+import { formatCurrency, formatDate } from '../../../../lib/formatters';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
@@ -44,47 +40,82 @@ const t = getServerDictionary(Astro.locals.locale);
 const orderId = Astro.params.id;
 const order = typeof orderId === 'string' ? findOrderById(orderId) : null;
 
+const localePrefix = `/${locale}`;
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const brand = themeToBrand(Astro.locals.theme, getBrandBySlug(tenantSlug));
-const changeSubject = t['account.orders.action.requestChangeSubject'].replace('{id}', orderId ?? '');
-const changeBody = t['account.orders.action.requestChangeBody']
-  .replace('{id}', orderId ?? '')
-  .replace('{date}', order ? formatDate(order.date) : '');
-const requestChangeHref = `mailto:${brand.supportEmail}?subject=${encodeURIComponent(
-  changeSubject
-)}&body=${encodeURIComponent(changeBody)}`;
-
-const localePrefix = `/${locale}`;
 
 const orderIdTemplate = t['account.dashboard.recentOrders.orderId'];
+const orderLabel = (id: string): string => orderIdTemplate.replace('{id}', id);
 
-const statusLabel = (status: OrderStatus): string => t[`account.orderStatus.${status}` as const];
+interface InvoiceLabels {
+  title: string;
+  orderNumber: string;
+  date: string;
+  items: string;
+  quantity: string;
+  unitPrice: string;
+  total: string;
+}
 
-const STATUS_HERO = {
-  pending: 'bg-amber-100 text-amber-800',
-  processing: 'bg-violet-100 text-violet-800',
-  shipped: 'bg-cyan-100 text-cyan-800',
-  delivered: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-red-100 text-red-800',
-} satisfies Record<OrderStatus, string>;
+/** Documento de factura autocontenido (descargable desde los mocks). */
+function buildInvoiceHtml(current: OrderMock, labels: InvoiceLabels): string {
+  const rows = current.items
+    .map(
+      (item) =>
+        `<tr><td>${item.productName}</td><td>${item.quantity}</td><td>${formatCurrency(item.unitPriceCents, 'USD')}</td></tr>`
+    )
+    .join('');
+  const total = formatCurrency(current.totalCents, 'USD');
+  return `<!doctype html><meta charset="utf-8"><title>${labels.title} ${current.id}</title><body style="font-family:system-ui,sans-serif;background:#f3efe8;color:#1c1917;padding:40px"><h1 style="font-size:22px">${labels.title} · ${labels.orderNumber} ${current.id}</h1><p>${labels.date}: ${formatDate(current.date)}</p><table style="width:100%;border-collapse:collapse" cellpadding="8"><thead><tr style="text-align:left;border-bottom:1px solid rgba(28,25,23,.15)"><th>${labels.items}</th><th>${labels.quantity}</th><th>${labels.unitPrice}</th></tr></thead><tbody>${rows}</tbody></table><p style="font-size:18px;font-weight:600">${labels.total}: ${total}</p></body>`;
+}
+
+const invoiceHref =
+  order === null
+    ? '#'
+    : `data:text/html;charset=utf-8,${encodeURIComponent(
+        buildInvoiceHtml(order, {
+          title: t['account.orders.invoice.title'],
+          orderNumber: t['account.orders.list.column.orderNumber'],
+          date: t['account.orders.list.column.date'],
+          items: t['account.orders.list.column.items'],
+          quantity: t['account.orders.detail.items.quantity'],
+          unitPrice: t['account.orders.invoice.unitPrice'],
+          total: t['account.orders.detail.payment.total'],
+        })
+      )}`;
+
+const changeSubject =
+  order === null ? '' : t['account.orders.action.requestChangeSubject'].replace('{id}', order.id);
+const changeBody =
+  order === null
+    ? ''
+    : t['account.orders.action.requestChangeBody']
+        .replace('{id}', order.id)
+        .replace('{date}', formatDate(order.date));
+const requestChangeHref = `mailto:${brand.supportEmail}?subject=${encodeURIComponent(changeSubject)}&body=${encodeURIComponent(changeBody)}`;
+
+const isDelivered = order?.status === 'delivered';
+const reorderHref =
+  order !== null && isDelivered && order.items.length > 0
+    ? `${localePrefix}/products/${order.items[0].productSlug}`
+    : null;
 ---
 
 <AccountLayout title={t['account.orders.detail.heading']}>
   {!order && (
-    <section class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-      <div
-        class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl"
-        aria-hidden="true"
-      >
-        🔍
-      </div>
-      <p class="text-base font-semibold text-slate-900 sm:text-lg">
+    <section class="paper-card-hero relative overflow-hidden px-6 py-14 text-center lg:px-12">
+      <RegistrationMarks />
+      <p class="micro-label">{t['account.orders.ledger.eyebrow']}</p>
+      <h1 class="mt-3 font-display text-3xl lg:text-[40px]">
         {t['account.orders.detail.notFound.title']}
+      </h1>
+      <p class="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-[var(--ink-muted)]">
+        {t['account.orders.detail.notFound.hint']}
       </p>
-      <p class="max-w-md text-sm text-slate-500">{t['account.orders.detail.notFound.hint']}</p>
       <a
         href={`${localePrefix}/account/orders`}
-        class="mt-2 inline-flex items-center gap-1 rounded-lg bg-[var(--primary,#7c3aed)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+        class="pressable mt-8 inline-flex min-h-10 items-center rounded-[10px] px-5 py-2.5 text-sm font-semibold text-white"
+        style="background:var(--primary)"
       >
         {t['account.orders.detail.notFound.back']}
       </a>
@@ -92,87 +123,136 @@ const STATUS_HERO = {
   )}
 
   {order && (
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-8">
       <a
         href={`${localePrefix}/account/orders`}
-        class="inline-flex w-fit items-center gap-1 text-sm font-medium text-[var(--primary,#7c3aed)] transition hover:underline focus-visible:outline-none focus-visible:underline"
+        class="pressable inline-flex w-fit min-h-10 items-center gap-1.5 text-sm font-semibold text-[var(--primary)] hover:underline"
       >
-        ← {t['account.orders.detail.backToList']}
+        <span aria-hidden="true">←</span>
+        {t['account.orders.detail.backToList']}
       </a>
 
       {order.status === 'cancelled' && (
         <div
           role="status"
-          class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          class="rounded-[12px] px-5 py-4 text-sm"
+          style="background:var(--ink-void-soft);color:var(--ink-void)"
         >
-          <span aria-hidden="true" class="text-base">
-            ⚠
-          </span>
-          <p>{t['account.orders.detail.cancelled.banner']}</p>
+          {t['account.orders.detail.cancelled.banner']}
         </div>
       )}
 
-      <section
-        aria-labelledby="order-summary-heading"
-        class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-      >
-        <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <div class="flex flex-col gap-1">
-            <h1 id="order-summary-heading" class="text-3xl sm:text-4xl">
-              {orderIdTemplate.replace('{id}', order.id)}
-            </h1>
-            <p class="text-sm text-slate-500">
-              {t['account.orders.detail.summary.placedOn']}{' '}
-              <time datetime={order.date}>{formatDate(order.date)}</time>
-            </p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <Badge status={order.status} label={statusLabel(order.status)} />
-            <span
-              class:list={[
-                'inline-flex items-center rounded-full px-3 py-1 text-base font-bold tabular-nums',
-                STATUS_HERO[order.status as OrderStatus],
-              ]}
-            >
-              {formatCentsAsDecimal(order.totalCents, 'USD')}
+      {/* Hero: la orden de trabajo. */}
+      <article class="paper-card-hero relative overflow-hidden" data-reveal>
+        <RegistrationMarks />
+        <header class="kraft-band flex flex-wrap items-center justify-between gap-3 px-6 py-3 lg:px-10">
+          <p class="micro-label" style="color:var(--ink-soft)">
+            {t['account.orders.detail.ticketLabel']}
+            <span aria-hidden="true" class="mx-1.5 text-[var(--ink-faint)]">
+              ·
             </span>
-          </div>
+            <span>#{order.id}</span>
+          </p>
+          <InkChip status={order.status} t={t} />
         </header>
 
-        {(order.trackingNumber || order.trackingCarrier) && (
-          <div class="mt-4 flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
-            <div class="flex-1">
-              <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
-                {t['account.orders.detail.tracking.heading']}
-              </p>
-              <p class="mt-1 font-mono text-sm text-slate-900">
-                <span class="text-slate-500">{t['account.orders.detail.tracking.carrier']}:</span>{' '}
-                {order.trackingCarrier ?? '—'}
-                {' · '}
-                <span class="text-slate-500">
-                  {t['account.orders.detail.tracking.number']}:
-                </span>{' '}
-                {order.trackingNumber ?? '—'}
+        <div class="flex flex-col gap-8 px-6 py-8 lg:px-10 lg:py-10">
+          <div class="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p class="micro-label">{t['account.dashboard.ticket.open']}</p>
+              <h1 class="mt-2 font-display text-4xl leading-none tracking-tight lg:text-[44px]">
+                {orderLabel(order.id)}
+              </h1>
+              <p class="mt-3 text-[13px] text-[var(--ink-muted)]">
+                {t['account.dashboard.ticket.pieces'].replace(
+                  '{count}',
+                  String(countOrderItems(order))
+                )}
+                <span aria-hidden="true" class="mx-1.5 text-[var(--ink-faint)]">
+                  ·
+                </span>
+                {t['account.orders.detail.summary.placedOn']}{' '}
+                <time datetime={order.date}>{formatDate(order.date)}</time>
               </p>
             </div>
+            <div class="text-right">
+              <p class="micro-label">{t['account.dashboard.ledger.column.total']}</p>
+              <p class="mt-2 text-3xl font-semibold tabular-nums lg:text-[32px]">
+                {formatCurrency(order.totalCents, 'USD')}
+              </p>
+            </div>
+          </div>
+
+          <ProductionRail
+            stageIndex={PRODUCTION_STAGE_INDEX[order.status]}
+            placedAt={order.date}
+            t={t}
+          />
+
+          <div class="flex flex-wrap items-center gap-3">
+            <a
+              href={invoiceHref}
+              download={`factura-${order.id}.html`}
+              class="pressable inline-flex min-h-10 items-center rounded-[10px] border px-5 py-2.5 text-sm font-semibold text-[var(--ink)]"
+              style="border-color:var(--edge-strong);background:var(--paper-raised)"
+              data-testid="order-download-invoice"
+            >
+              {t['account.orders.action.downloadInvoice']}
+            </a>
+            <a
+              href={requestChangeHref}
+              class="pressable inline-flex min-h-10 items-center rounded-[10px] border px-5 py-2.5 text-sm font-semibold text-[var(--ink)]"
+              style="border-color:var(--edge-strong);background:var(--paper-raised)"
+              data-testid="order-request-change"
+            >
+              {t['account.orders.action.requestChange']}
+            </a>
             {order.trackingUrl && (
               <a
                 href={order.trackingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-[var(--primary,#7c3aed)] transition hover:border-[var(--primary,#7c3aed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+                class="pressable inline-flex min-h-10 items-center rounded-[10px] border px-5 py-2.5 text-sm font-semibold text-[var(--ink)]"
+                style="border-color:var(--edge-strong);background:var(--paper-raised)"
               >
-                {t['account.orders.detail.tracking.openLabel']} ↗
+                {t['account.orders.detail.tracking.openLabel']}
+                <span aria-hidden="true" class="ml-1.5">
+                  ↗
+                </span>
+              </a>
+            )}
+            {reorderHref && (
+              <a
+                href={reorderHref}
+                class="pressable inline-flex min-h-10 items-center rounded-[10px] px-5 py-2.5 text-sm font-semibold text-white"
+                style="background:var(--primary)"
+                data-testid="order-detail-reorder"
+              >
+                {t['account.orders.detail.reorder']}
               </a>
             )}
           </div>
-        )}
-        {!order.trackingNumber && order.status !== 'cancelled' && (
-          <p class="mt-4 rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-500">
-            {t['account.orders.detail.tracking.notShipped']}
-          </p>
-        )}
-      </section>
+
+          {(order.trackingNumber || order.trackingCarrier) && (
+            <div
+              class="flex flex-col gap-1 rounded-[10px] px-4 py-3"
+              style="background:var(--paper-sunken)"
+            >
+              <p class="micro-label">{t['account.orders.detail.tracking.heading']}</p>
+              <p class="text-sm text-[var(--ink-soft)]">
+                {t['account.orders.detail.tracking.carrier']}: {order.trackingCarrier ?? '—'}
+                {' · '}
+                {t['account.orders.detail.tracking.number']}: {order.trackingNumber ?? '—'}
+              </p>
+            </div>
+          )}
+          {!order.trackingNumber && order.status !== 'cancelled' && (
+            <p class="text-[13px] text-[var(--ink-muted)]">
+              {t['account.orders.detail.tracking.notShipped']}
+            </p>
+          )}
+        </div>
+      </article>
 
       <OrderTimeline
         milestones={order.milestones}
@@ -182,31 +262,31 @@ const STATUS_HERO = {
             key: 'received',
             title: t['account.orders.detail.timeline.received'],
             description: t['account.orders.detail.timeline.receivedDescription'],
-            icon: '⛩',
+            icon: '',
           },
           {
             key: 'preparing',
             title: t['account.orders.detail.timeline.preparing'],
             description: t['account.orders.detail.timeline.preparingDescription'],
-            icon: '🎨',
+            icon: '',
           },
           {
             key: 'shipped',
             title: t['account.orders.detail.timeline.shipped'],
             description: t['account.orders.detail.timeline.shippedDescription'],
-            icon: '🚚',
+            icon: '',
           },
           {
             key: 'outForDelivery',
             title: t['account.orders.detail.timeline.outForDelivery'],
             description: t['account.orders.detail.timeline.outForDeliveryDescription'],
-            icon: '🏠',
+            icon: '',
           },
           {
             key: 'delivered',
             title: t['account.orders.detail.timeline.delivered'],
             description: t['account.orders.detail.timeline.deliveredDescription'],
-            icon: '✨',
+            icon: '',
           },
         ]}
       />
@@ -246,30 +326,6 @@ const STATUS_HERO = {
             labelTotal={t['account.orders.detail.payment.total']}
           />
         </div>
-      </div>
-
-      <div class="flex flex-wrap items-center justify-end gap-2">
-        <button
-          type="button"
-          class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[var(--edge,rgba(28,25,23,0.12))] bg-[var(--lift-1,#fff)] px-4 py-2 text-sm font-medium text-[var(--ink,#1c1917)] transition hover:bg-[var(--paper-sunken,#f3efe8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
-        >
-          {t['account.orders.detail.invoice']}
-        </button>
-        <a
-          href={requestChangeHref}
-          class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[var(--edge,rgba(28,25,23,0.12))] bg-[var(--lift-1,#fff)] px-4 py-2 text-sm font-medium text-[var(--ink,#1c1917)] transition hover:bg-[var(--paper-sunken,#f3efe8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
-          data-testid="order-request-change"
-        >
-          {t['account.orders.detail.requestChange']}
-        </a>
-        {order.status === 'delivered' && order.items.length > 0 && (
-          <a
-            href={`${localePrefix}/products/${order.items[0].productSlug}`}
-            class="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
-          >
-            {t['account.orders.detail.reorder']}
-          </a>
-        )}
       </div>
     </div>
   )}

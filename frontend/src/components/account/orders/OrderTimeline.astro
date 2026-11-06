@@ -89,11 +89,8 @@ const resolved: ResolvedMilestone[] = orderedKeys.map((key, idx) => {
 const hasAnyTimestamp = resolved.some((m) => m.timestamp !== null);
 ---
 
-<section
-  aria-labelledby="order-timeline-heading"
-  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
->
-  <h2 id="order-timeline-heading" class="mb-6 text-base font-semibold text-slate-900 sm:text-lg">
+<section aria-labelledby="order-timeline-heading" class="paper-card p-5 sm:p-6">
+  <h2 id="order-timeline-heading" class="mb-6 text-base font-semibold text-[var(--ink)] sm:text-lg">
     {heading}
   </h2>
 
@@ -101,29 +98,40 @@ const hasAnyTimestamp = resolved.some((m) => m.timestamp !== null);
     <ol class="relative flex flex-col gap-6">
       {resolved.map((milestone, idx) => {
         const isLast = idx === resolved.length - 1;
-        const dotClasses =
+        const dotStyle =
           milestone.state === 'done'
-            ? 'bg-emerald-500 text-white'
+            ? 'background:var(--ink-done)'
             : milestone.state === 'current'
-              ? 'bg-[var(--primary,#7c3aed)] text-white ring-4 ring-[color-mix(in_srgb,var(--primary,#7c3aed)_20%,white)]'
-              : 'bg-slate-200 text-slate-400';
-        const connectorColor = milestone.state === 'done' ? 'bg-emerald-300' : 'bg-slate-200';
+              ? 'background:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb, var(--primary) 20%, transparent)'
+              : 'background:var(--paper-sunken);box-shadow:inset 0 0 0 1px var(--edge-strong)';
+        const connectorColor =
+          milestone.state === 'done'
+            ? 'background:var(--ink-done)'
+            : milestone.state === 'current'
+              ? 'background:color-mix(in srgb, var(--primary) 40%, transparent)'
+              : 'background:var(--edge)';
         return (
           <li class="relative flex gap-4">
             <div class="flex flex-col items-center">
               <div
-                class:list={[
-                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base font-semibold shadow-sm',
-                  dotClasses,
-                ]}
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px]"
+                style={dotStyle}
                 aria-hidden="true"
               >
-                {milestone.state === 'done' ? '✓' : milestone.icon}
+                <span
+                  class="h-2.5 w-2.5 rounded-[2px]"
+                  style={
+                    milestone.state === 'pending'
+                      ? 'background:var(--edge-strong)'
+                      : 'background:var(--paper-raised)'
+                  }
+                ></span>
               </div>
               {!isLast && (
                 <span
                   aria-hidden="true"
-                  class:list={['mt-1 h-full w-0.5 min-h-[24px] flex-1', connectorColor]}
+                  class:list={['mt-1 h-full w-0.5 min-h-[24px] flex-1']}
+                  style={connectorColor}
                 />
               )}
             </div>
@@ -131,7 +139,7 @@ const hasAnyTimestamp = resolved.some((m) => m.timestamp !== null);
               <p
                 class:list={[
                   'text-sm font-semibold',
-                  milestone.state === 'pending' ? 'text-slate-400' : 'text-slate-900',
+                  milestone.state === 'pending' ? 'text-[var(--ink-faint)]' : 'text-[var(--ink)]',
                 ]}
               >
                 {milestone.title}
