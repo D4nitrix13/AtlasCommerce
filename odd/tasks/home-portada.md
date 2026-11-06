@@ -79,8 +79,40 @@ tiene tres defectos concretos verificados en captura (1440):
 **Aceptación**: una sola fila sin wrap, nav centrada, marca visible sin asset,
 search pill compacta, hit areas ≥40px, hover/focus correctos, 0 errores nuevos.
 
-### T2 — Portada Home: inventario vs mockup _(pendiente)_
-### T3 — Portada Home: secciones y destacados reales _(pendiente)_
+### T2 — Portada Home: gaps vs criterios de aceptación
+Inventario hecho (ver «Notas T2»). Diseño vigente: **Bonfire**
+(`home-redesign-bonfire-adaptation.md`). El prompt v3 (mega menu Nike)
+no está implementado y **no** entra en esta sesión.
+
+- [ ] **Destacados sin mocks**: quitar el fallback a `data/panda-catalog.ts` /
+      `data/products.ts` en `FeaturedProducts`. Si la API no da productos,
+      estado vacío honesto (i18n), nunca inventar catálogo.
+- [ ] **Full-width**: reemplazar `max-w-7xl` / `max-w-4xl` / `max-w-[1280px]`
+      de los contenedores de sección por padding simétrico sin tope
+      (`px-4 sm:px-6 lg:px-10`), en ~12 componentes de home + `FaqAccordion` +
+      `b2b/TenantHero`. Los `max-w-*` de headings/texto/imagenes son
+      constraints de legibilidad — **no tocar**.
+- [ ] **Theming por tenant**: quitar colores hardcodeados que rompen el accent
+      (`CategoryBadge` tone `emerald`, `#D1C59E` en `UseCases`, `#F6C36F`/`bg-slate-900`
+      en `CtaBanner`) → `var(--primary*)`.
+- [ ] **`index.astro` bajo 400 líneas** (hoy 433): extraer los datos inline
+      (stats, client logos, customer stories) a un módulo de datos.
+- [ ] Verificación: `bun run test` · `astro check` · `build` · `eslint` · capturas.
+
+**Aceptación**: destacados reales (sin mocks), acentos por tenant correctos,
+full-width sin `max-w` estrechos, 0 errores nuevos.
+
+### T3 — Hallazgos para el usuario _(no implementar sin confirmación)_
+- **No existe endpoint público de categorías** (`storefront.categories`).
+  Hoy `FeaturedCategories` usa mocks (`data/b2b-mock.ts`, `data/products.ts`).
+  Solo hay `GET admin/categories`. Implementarlo es backend nuevo → requiere
+  confirmación según `vistas-cliente-sessions.md` §Fuera de scope.
+- Sin API de testimonios / stats / client logos: hoy viven como contenido
+  editorial en el código. Si el usuario quiere que el admin los gestione,
+  necesita modelo + endpoint nuevos.
+- `atlascommerce-design-prompt-v3-home.md` (mega menu Nike) sigue sin
+  implementar — es una propuesta, no el diseño vigente.
+
 ### T4 — Cierre de sesión (checks + capturas + reporte) _(pendiente)_
 
 ## Criterios de aceptación (sesión completa)
@@ -93,8 +125,8 @@ search pill compacta, hit areas ≥40px, hover/focus correctos, 0 errores nuevos
 | Tarea | Estado | Commit | Verificación |
 |---|---|---|---|
 | T1 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · capturas `output-playwright-home-header-{1440,390}.png` |
-| T2 | pendiente | — | — |
-| T3 | pendiente | — | — |
+| T2 | hecha | (este) | `bun run test`: 625 OK (66 files) · `astro check`: 0 errors · `build`: OK · `eslint` 18 archivos: exit 0 · `index.astro` 296 líneas · capturas 1440/390 revisadas |
+| T3 | reportado | — | hallazgos listos para el usuario (endpoint de categorías) |
 | T4 | pendiente | — | — |
 
 ### Notas T1
@@ -121,6 +153,30 @@ search pill compacta, hit areas ≥40px, hover/focus correctos, 0 errores nuevos
   `docker-stack.sh`, y restaurando después). El compose quedó igual que antes.
   Hallazgo: el dev server monta el checkout principal, no el worktree — las
   sesiones en paralelo van a necesitar un mecanismo para esto.
+
+### Notas T2
+
+- **Destacados sin mocks**: eliminado el fallback a `getPandaFeaturedProducts`
+  / `getFeaturedProducts` en ambas ramas de `index.astro`. Ahora
+  `featuredFromApi.slice(0, 4)` y, si la API no da productos, el estado vacío
+  honesto que `ProductGrid` ya renderiza (`emptyLabel`/`emptyHint`). Los módulos
+  `data/panda-catalog.ts` / `data/products.ts` siguen existiendo para otras
+  vistas — solo dejaron de consumirse desde la portada.
+- **Full-width**: `max-w-7xl` / `max-w-4xl` / `max-w-[1280px]` de los
+  contenedores de sección → `w-full px-4 sm:px-6 lg:px-10` en 13 componentes.
+  Los `max-w-*` de headings/texto/imágenes quedaron intactos (son constraints
+  de legibilidad, no de layout).
+- **Theming**: `CategoryBadge` (tone `emerald` → `accent`), squiggle de
+  `UseCases` (`#D1C59E` → `var(--primary)`) y `CtaBanner` (`bg-slate-900` +
+  `#F6C36F` → `color-mix` con accent). Quedan colores hardcodeados en
+  `DarkHeroCard(B2C)`, `StatsBar`, `ProcessSteps`, `MaterialsCard`,
+  `CtaFinal` y `HomeHero:121` — no estaban en el alcance de esta pasada.
+- **`index.astro`**: 433 → **296 líneas**. Los datos inline (stats, logos de
+  clientes, historias, pasos, faq, materiales) se extrajeron a
+  `src/data/home-content.ts` (`getHomeContent(t)`, tipado), sin cambiar valores.
+- Tests: 625 (66 files) — master trajo tests nuevos con el rebase.
+- Verificación visual hecha con el mismo truco del mount temporal; compose
+  restaurado después.
 
 ## Próximo paso
 

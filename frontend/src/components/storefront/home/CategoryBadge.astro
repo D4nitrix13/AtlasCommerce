@@ -10,19 +10,23 @@
  *
  * API:
  *   - label: texto del badge (ej. "Popular", "Nuevo", "Eco-friendly").
- *   - tone: paleta de color — 'emerald' (verde teal) o 'slate' (gris).
- *     El default 'emerald' emula los pills de Bonfire.
+ *   - tone: paleta de color — 'accent' (color del tenant), 'slate'
+ *     (gris) o 'amber'. El default 'accent' toma los acentos del theme
+ *     vía `var(--primary*)` para que el badge hable el color de la tienda.
  */
 interface Props {
   label?: string;
-  tone?: 'emerald' | 'slate' | 'amber';
+  tone?: 'accent' | 'slate' | 'amber';
   class?: string;
 }
 
-const { label, tone = 'emerald', class: className = '' } = Astro.props;
+const { label, tone = 'accent', class: className = '' } = Astro.props;
 
 const toneClasses: Record<NonNullable<Props['tone']>, string> = {
-  emerald: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  // Texto mezclado con tinta oscura para que el contraste sobre el
+  // soft del accent se mantenga legible con acentos claros.
+  accent:
+    'border-[var(--line)] bg-[var(--primary-soft)] text-[color-mix(in_srgb,var(--primary)_60%,#1c1917)]',
   slate: 'border-slate-200 bg-slate-50 text-slate-700',
   amber: 'border-amber-200 bg-amber-50 text-amber-800',
 };
