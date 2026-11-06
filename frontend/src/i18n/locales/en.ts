@@ -912,6 +912,8 @@ const en: Translations = {
   'storefront.b2b.rfq.v3.totalLabel': 'Estimated total',
   'storefront.b2b.rfq.v3.b2bOnly': 'B2B only',
   'storefront.b2b.rfq.v3.back': 'Back to start',
+  'storefront.b2b.rfq.v3.discountLabel': 'Volume discount',
+  'storefront.b2b.rfq.v3.unitPriceLabel': 'Unit price',
 
   // ─── account: addresses B2B (F3.4) ───────────────────────────────────
   'account.addresses.b2b.subtitle':
