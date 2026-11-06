@@ -260,7 +260,7 @@ describe('deriveProductCardSwap — primary & hover resolution', () => {
 });
 
 describe('deriveProductCardSwap — swatch row', () => {
-  it('devuelve un swatch por variant sin filtrar', () => {
+  it('devuelve un swatch por acabado distinto, en orden de variantes', () => {
     const product: Product = {
       id: 1,
       slug: 'sg',
@@ -325,6 +325,46 @@ describe('deriveProductCardSwap — swatch row', () => {
     const { swap } = cssFor(productWithSharedFinishPhoto());
 
     expect(swatchIdsOf(swap)).toEqual(['87', '88']);
+  });
+});
+
+describe('deriveProductCardSwap — un swatch por acabado', () => {
+  it('colapsa las tallas del mismo acabado a un solo swatch (sin círculos repetidos)', () => {
+    // Caso real `taza-ceramica` / `playera-manga-corta`: 2 acabados × 2
+    // tallas, foto compartida entre tallas. Sin colapsar, la fila pintaba
+    // 4 círculos con 2 fotos repetidas y el contador decía "4 colores".
+    const { swap } = cssFor(productWithSizeSiblingsSharedPhoto());
+
+    expect(swatchIdsOf(swap)).toEqual(['1', '4']);
+    expect(swap.swatches.map((s) => s.label)).toEqual(['Blanco', 'Negro']);
+    expect(swap.swatches.map((s) => s.thumbnailUrl)).toEqual(['blanco.webp', 'negro.webp']);
+  });
+
+  it('oculta la fila cuando todas las tallas comparten un único acabado', () => {
+    // Caso real `hoodie`: 4 tallas del mismo color. "N colores" no aplica
+    // y la fila sería un control muerto de círculos idénticos.
+    const swap = deriveProductCardSwap(productWithSingleFinishSizes());
+
+    expect(swap.swatches).toHaveLength(1);
+    expect(shouldRenderSwatchRow(swap.swatches)).toBe(false);
+  });
+
+  it('normaliza primaryVariantId al swatch representante del acabado', () => {
+    // La portada pertenece a la talla '3', pero el círculo del acabado
+    // es el del representante del grupo ('1'): sin normalizar, ningún
+    // swatch quedaba marcado como activo.
+    const swap = deriveProductCardSwap(productWithSizeSiblingsSharedPhoto());
+
+    expect(swap.primaryVariantId).toBe('1');
+  });
+
+  it('cada swatch del acabado matchea una <img> del stack (el swap no se rompe)', () => {
+    // Un `data-swatch-id` sin `<img data-variant-id>` propio cae al
+    // escape (portada fija): las tallas hermanas no pueden comerse la
+    // foto del acabado al deduplicar el stack por `src`.
+    const { swap, stack } = cssFor(productWithSizeSiblingsSharedPhoto());
+
+    expect([...collectVariantIdsInStack(stack)].sort()).toEqual(swatchIdsOf(swap).sort());
   });
 });
 
@@ -515,6 +555,61 @@ function productWithHostileVariantId(): Product {
     images: [
       imageWith({ url: 'front.webp', altText: 'SG - vista front', isPrimary: true, variantId: 'v1' }),
       imageWith({ url: 'front-v2.webp', altText: 'SG v2 - vista front', isPrimary: false, variantId: hostileId }),
+    ],
+  };
+}
+
+/**
+ * 2 acabados × 2 tallas = 4 variantes, foto compartida entre tallas del
+ * mismo acabado (caso real `taza-ceramica`: ids 1/3 blanco, 4/5 negro).
+ * La portada la aporta la talla '3' para ejercitar la normalización del
+ * representante.
+ */
+function productWithSizeSiblingsSharedPhoto(): Product {
+  return {
+    id: 1,
+    slug: 'taza-ceramica',
+    name: 'Taza cerámica',
+    description: 'desc',
+    priceCents: 100,
+    imageUrl: 'placeholder',
+    category: 'drinkware',
+    stock: 1,
+    variants: [
+      variantWith({ id: '1', finishSlug: 'blanco', finishLabel: 'Blanco', finishHex: '#F7F4EF', sizeSlug: '11-oz' }),
+      variantWith({ id: '3', finishSlug: 'blanco', finishLabel: 'Blanco', finishHex: '#F7F4EF', sizeSlug: '15-oz' }),
+      variantWith({ id: '4', finishSlug: 'negro', finishLabel: 'Negro', finishHex: '#1C1917', sizeSlug: '11-oz' }),
+      variantWith({ id: '5', finishSlug: 'negro', finishLabel: 'Negro', finishHex: '#1C1917', sizeSlug: '15-oz' }),
+    ],
+    images: [
+      imageWith({ url: 'blanco.webp', altText: 'Taza - vista front', isPrimary: false, variantId: '1', sortOrder: 1 }),
+      imageWith({ url: 'blanco.webp', altText: 'Taza - vista front', isPrimary: true, variantId: '3', sortOrder: 1 }),
+      imageWith({ url: 'negro.webp', altText: 'Taza - vista front', isPrimary: false, variantId: '4', sortOrder: 1 }),
+      imageWith({ url: 'negro.webp', altText: 'Taza - vista front', isPrimary: false, variantId: '5', sortOrder: 1 }),
+    ],
+  };
+}
+
+/** 4 tallas de un único acabado (caso real `hoodie`): la fila de colores no aplica. */
+function productWithSingleFinishSizes(): Product {
+  const negro = { finishSlug: 'negro', finishLabel: 'Negro', finishHex: '#1C1917' };
+  return {
+    id: 1,
+    slug: 'hoodie',
+    name: 'Hoodie',
+    description: 'desc',
+    priceCents: 100,
+    imageUrl: 'placeholder',
+    category: 'apparel',
+    stock: 1,
+    variants: [
+      variantWith({ id: '14', ...negro, sizeSlug: 'ch' }),
+      variantWith({ id: '15', ...negro, sizeSlug: 'm' }),
+      variantWith({ id: '16', ...negro, sizeSlug: 'g' }),
+      variantWith({ id: '17', ...negro, sizeSlug: 'xg' }),
+    ],
+    images: [
+      imageWith({ url: 'hoodie.webp', altText: 'Hoodie - vista front', isPrimary: true, variantId: '14', sortOrder: 1 }),
     ],
   };
 }
