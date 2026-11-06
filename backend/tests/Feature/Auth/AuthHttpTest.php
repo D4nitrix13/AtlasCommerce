@@ -35,6 +35,12 @@ final class AuthHttpTest extends TestCase
     {
         parent::setUp();
 
+        // Este suite aserta mensajes en español (registro voseo del
+        // producto). Con SetRequestLocale, el harness inyecta
+        // `Accept-Language: en-us` y resolvería a `en`; el header
+        // explícito fija el idioma bajo prueba.
+        $this->withHeaders(['X-Locale' => 'es']);
+
         $this->adminRole = Role::query()->updateOrCreate(
             attributes: ['slug' => 'admin'],
             values: ['name' => 'Administrador', 'is_active' => true],

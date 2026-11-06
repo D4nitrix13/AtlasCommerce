@@ -10,6 +10,7 @@ use App\Http\Middleware\HttpMetricsMiddleware;
 use App\Http\Middleware\HttpTracingMiddleware;
 use App\Http\Middleware\ResolveStoreFromDomain;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetRequestLocale;
 use App\Http\Middleware\SetSessionDomainFromHost;
 use App\Http\Middleware\StoreMaintenanceMode;
 use App\Http\Middleware\ValidateStoreIdHeader;
@@ -90,9 +91,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // EnsureFrontendRequestsAreStateful agrega StartSession + cookies
         // cuando el host está en SANCTUM_STATEFUL_DOMAINS; sin esto, los
         // requests a /api/* no reciben session cookies.
+        // SetRequestLocale va DESPUÉS de esos dos: el locale depende solo
+        // de los headers del request (X-Locale / Accept-Language), no de la
+        // sesión ni del tenant, pero debe quedar seteado antes de que el
+        // validator y los controllers resuelvan `trans()`.
         $middleware->api(prepend: [
             SetSessionDomainFromHost::class,
             EnsureFrontendRequestsAreStateful::class,
+            SetRequestLocale::class,
         ]);
 
         // CR2: SetSessionDomainFromHost también en el web group. Sin

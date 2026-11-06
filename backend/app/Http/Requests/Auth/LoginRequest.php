@@ -32,17 +32,4 @@ class LoginRequest extends FormRequest
             'device_name' => ['nullable', 'string', 'max:120'],
         ];
     }
-
-    /**
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'email.required' => 'El email es obligatorio.',
-            'email.email' => 'El email debe tener formato válido.',
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-        ];
-    }
 }

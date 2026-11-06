@@ -72,7 +72,7 @@ class StorefrontAuthController extends Controller
 
         if ($store === null) {
             return response()->json(
-                data: ['message' => 'No se puede registrar clientes: la tienda no está activa.'],
+                data: ['message' => trans('auth.register_store_inactive')],
                 status: 503,
             );
         }
