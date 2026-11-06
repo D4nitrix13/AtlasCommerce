@@ -135,8 +135,8 @@ const activeId: TabId = 'description';
     role="tabpanel" id="pdp-panel-description" aria-labelledby="pdp-tab-description"
     tabindex="0" class="flex flex-col gap-8"
   >
+    {/* Sin heading: el tab "Descripción" ya nombra la sección. */}
     <ProductDetailsBlock
-      heading={labels.description}
       intro={description}
       moreLabel={labels.more}
       lessLabel={labels.less}

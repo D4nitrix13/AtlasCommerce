@@ -36,9 +36,12 @@
  *  - Si el intro es corto (< threshold), no se renderiza el toggle.
  */
 interface Props {
-  /** Variante del layout. `full` (default) = card con eyebrow/heading. `inline` = fila compacta sin wrapper. */
+  /** Variante del layout. `full` (default) = bloque de contenido. `inline` = fila compacta sin wrapper. */
   variant?: 'inline' | 'full';
-  /** Heading principal del bloque. Sólo se renderiza en variant='full'. */
+  /**
+   * Heading del bloque. Opcional: cuando el bloque vive dentro de un
+   * tab que ya lo nombra (Descripción), el heading es redundante.
+   */
   heading?: string;
   /** Párrafo introductorio (HTML, soporta links). */
   intro: string;
@@ -50,7 +53,7 @@ interface Props {
 
 const {
   variant = 'full',
-  heading = 'Detalles del instrumento',
+  heading,
   intro,
   moreLabel = 'Leer más',
   lessLabel = 'Leer menos',
@@ -65,19 +68,21 @@ const canCollapse = plainText.length > threshold;
 
 {variant === 'full' ? (
   <section
-    aria-labelledby="product-details-heading"
-    class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
+    aria-labelledby={heading !== undefined ? 'product-details-heading' : undefined}
+    class="flex flex-col gap-3"
     data-reveal
   >
-    <h2
-      id="product-details-heading"
-      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
-    >
-      {heading}
-    </h2>
+    {heading !== undefined && (
+      <h2
+        id="product-details-heading"
+        class="text-2xl font-semibold tracking-tight text-[var(--ink,#1c1917)] sm:text-3xl"
+      >
+        {heading}
+      </h2>
+    )}
 
     <div
-      class="mt-4 max-w-none text-slate-700 [&_p]:mb-3 [&_p]:leading-relaxed"
+      class="max-w-none text-[var(--ink-soft,#57534e)] [&_p]:mb-3 [&_p]:leading-relaxed"
       data-collapsed-description
       data-mode="full"
     >
@@ -95,7 +100,7 @@ const canCollapse = plainText.length > threshold;
         data-toggle-description
         data-label-more={moreLabel}
         data-label-less={lessLabel}
-        class="mt-3 text-sm font-semibold text-[var(--primary,#475569)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2"
+        class="self-start text-sm font-semibold text-[var(--primary,#2D9D8E)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2"
       >
         {moreLabel}
       </button>
@@ -104,7 +109,7 @@ const canCollapse = plainText.length > threshold;
 ) : (
   <div class="pt-4">
     <div
-      class="text-sm leading-relaxed text-slate-700"
+      class="text-sm leading-relaxed text-[var(--ink-soft,#57534e)]"
       data-collapsed-description
       data-mode="inline"
     >
