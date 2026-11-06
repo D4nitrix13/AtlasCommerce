@@ -212,10 +212,17 @@ layout se valida con tests de clases (estilo `catalog-grid-css.test.ts`)
    astro check OK · eslint 0 nuevos. Delegación falló 2× (writers
    colgados) → implementación inline + patch residual del writer
    zombi reconciliado. Assess: pendiente de este commit.
-5. **Hover imagen → trasera en cards de rieles** — cablear
+5. ✅ **Hover imagen → trasera en cards de rieles** — cablear
    `product-card-swap` (`deriveProductCardSwap`, `imageUrlSecondary`,
    CSS `img[data-role='back']` como `ProductCard.astro`) en
    ProductRelated / FBT / RecentlyViewed (hoy no lo usan). [delegated]
+   → `aab479ed`: media stack extraído a `ProductRelatedMedia.astro`;
+   cross-fade a la imagen back (`isHover`) en hover/focus-within de los
+   3 rieles, subordinado al preview del swatch (reglas scoped
+   `article:not([data-active-variant])`). FBT/RV sin `imageUrlSecondary`
+   en los datos: caen a `deriveProductCardSwap().hoverImage`. Tests:
+   9 nuevos RED→GREEN. 579 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (1789 líneas; slice pendiente).
 6. **Cierre común** — `bun run test`, `astro check`, `build`, lint por
    archivo (0 errores nuevos vs HEAD), capturas 1440/390.
 
