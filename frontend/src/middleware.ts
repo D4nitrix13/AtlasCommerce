@@ -368,6 +368,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (localeFromUrl !== null) {
     context.locals.locale = localeFromUrl;
+
+    // Mismo redirect legacy que en el host admin: los links viejos
+    // `/admin/auth/*` siguen circulando en mails y favoritos, y no deben
+    // 404ear en el host storefront tampoco. Antes este redirect existía
+    // solo en el branch de host admin, así que un link viejo abierto en
+    // la tienda caía en el 404 de Astro.
+    const { barePath } = stripLocaleFromPath(pathname);
+    if (LEGACY_ADMIN_AUTH_PATHS.has(barePath)) {
+      const canonical = barePath.replace(/^\/admin\/auth/, '/account');
+      const newPath = `/${localeFromUrl}${canonical === '/' ? '' : canonical}` + url.search;
+      return context.redirect(newPath, 301);
+    }
+
     // Fetch del theme del tenant para storefront.
     context.locals.theme = await fetchThemeForHost(host);
     const response = await next();

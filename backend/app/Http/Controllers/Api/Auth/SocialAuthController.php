@@ -125,7 +125,7 @@ class SocialAuthController extends Controller
             ) ?: '/';
             $request->session()->put(key: self::SESSION_REDIRECT_TARGET, value: $refererPath);
 
-            $callbackUrl = $request->getSchemeAndHttpHost().'/api/auth/social/'.$provider.'/callback';
+            $callbackUrl = $request->getSchemeAndHttpHost().'/api/v1/auth/social/'.$provider.'/callback';
 
             return Socialite::driver($provider)
                 ->redirectUrl($callbackUrl)

@@ -140,11 +140,25 @@ final class OAuthRedirectTargetTest extends TestCase
     public function from_request_preserves_account_login_path_with_locale(): void
     {
         $result = OAuthRedirectTarget::fromRequest(
-            originalPath: '/en/account/auth/login',
+            originalPath: '/en/account/login',
             host: 'kitsune.com',
         );
 
-        $this->assertSame(expected: '/en/account/auth/login', actual: $result);
+        $this->assertSame(expected: '/en/account/login', actual: $result);
+    }
+
+    #[Test]
+    public function from_request_rewrites_broken_account_auth_login_form(): void
+    {
+        // Regresión: `/account/auth/login` (con `/auth/` de más) no tiene
+        // página y devolvía 404 tras un `oauth_email_conflict`. Debe caer en
+        // la canónica `/account/login`.
+        $result = OAuthRedirectTarget::fromRequest(
+            originalPath: '/es/account/auth/login',
+            host: 'panda-estampados.com',
+        );
+
+        $this->assertSame(expected: '/es/account/login', actual: $result);
     }
 
     #[Test]
@@ -180,6 +194,6 @@ final class OAuthRedirectTargetTest extends TestCase
             host: 'panda-estampados.com',
         );
 
-        $this->assertSame(expected: '/es/account/auth/login', actual: $result);
+        $this->assertSame(expected: '/es/account/login', actual: $result);
     }
 }

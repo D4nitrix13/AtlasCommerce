@@ -69,7 +69,9 @@ export default function ForgotPasswordForm({
         email: email.trim(),
         callback: callbackPath,
       });
-      window.location.href = `/${locale}/admin/auth/reset-password?${params.toString()}`;
+      // Path canónico (`/account/reset-password`), nunca el legacy
+      // `/admin/auth/*` — `path-helpers.ts` prohíbe generar esos links.
+      window.location.href = `/${locale}/account/reset-password?${params.toString()}`;
     } catch (error_) {
       const apiError = error_ as { message?: string };
       setErrorMessage(apiError.message ?? t('auth.passwordReset.error.generic'));
