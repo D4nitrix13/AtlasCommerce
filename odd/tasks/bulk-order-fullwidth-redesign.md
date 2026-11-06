@@ -136,9 +136,13 @@ existentes), sin dependencias nuevas.
   - Capturas finales: `output/playwright/bulk-order-final-desktop.png`
     (1440×1829) y `bulk-order-final-mobile.png` (390×3871). Antes:
     `bulk-order-before-desktop.png` / `-before-mobile.png`.
-- **T6** prettier + typecheck + lint ok; work-unit commit Conventional
-  Commit; push + PR + merge a master según
-  `.ai/rules/workflow/multi-session-isolation.md` §3.
+- **T6** prettier + typecheck + lint ok. Work-unit commit
+  `893bb030` `feat(frontend): bulk-order ocupa todo el ancho y respeta
+  el sistema de diseño`. Push `feat/views/bulk-order` → **PR #197**
+  (https://github.com/D4nitrix13/AtlasCommerce/pull/197) → **MERGED**
+  `e528b3cc` (2026-11-06T17:37:31Z). El merge fue vía `gh pr merge`
+  porque `master` está checked-out en el checkout principal (sesión
+  RFQ paralela activa) y no podía hacerse merge local sin pisarla.
 
 ## Next step
 
