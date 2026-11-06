@@ -8,19 +8,20 @@ import { formatCurrency } from '../../../../../src/lib/formatters';
 
 const labels = {
   summary: 'Resumen del pedido',
-  emptyItems: 'No hay productos en tu carrito.',
+  emptyItems: 'No hay productos en el carrito.',
   subtotal: 'Subtotal',
   shippingCost: 'Envío',
   shippingFree: 'Gratis',
   tax: 'Impuestos',
   total: 'Total',
-  cta: 'Realizar pedido',
-  termsHint: 'Al continuar aceptás los términos de compra.',
-};
-
-const baseProps = {
-  labels,
-  ctaHref: '/es/checkout?step=success',
+  freeShippingProgress: 'Te faltan {amount} para envío gratis',
+  freeShippingReached: 'Tenés envío gratis',
+  trust: {
+    shipping: 'Envío gratis sobre $50',
+    guarantee: 'Garantía oficial',
+    returns: 'Devolución 30 días',
+    secure: 'Pago 100% seguro',
+  },
 };
 
 function seedLine(
@@ -40,47 +41,57 @@ function seedLine(
   );
 }
 
-describe('CheckoutOrderSummary', (): void => {
+describe('CheckoutOrderSummary · panel-recibo', (): void => {
   beforeEach((): void => {
     clearCart();
   });
 
-  it('renders the empty item state and the CTA when the cart has no lines', (): void => {
-    render(<CheckoutOrderSummary {...baseProps} />);
+  it('is informational: renders the empty state with no checkout CTA', (): void => {
+    render(<CheckoutOrderSummary labels={labels} />);
 
     expect(screen.getByText(labels.emptyItems)).toBeTruthy();
-    const cta = screen.getByRole('link', { name: labels.cta });
-    expect(cta.getAttribute('href')).toBe('/es/checkout?step=success');
+    expect(screen.queryByRole('link', { name: /realizar pedido/i })).toBeNull();
   });
 
-  it('renders each line with quantity badge and line total', (): void => {
-    seedLine(2, { variantLabel: 'Negro' });
-    render(<CheckoutOrderSummary {...baseProps} />);
-
-    expect(screen.getByText('Remera Panda')).toBeTruthy();
-    expect(screen.getByText('2')).toBeTruthy();
-    // Uno en la fila del item, otro en la fila de subtotal.
-    expect(screen.getAllByText(formatCurrency(2000, 'USD'))).toHaveLength(2);
-    expect(screen.queryByText(labels.emptyItems)).toBeNull();
-  });
-
-  it('shows the store totals breakdown', (): void => {
-    // 1000 × 2 = 2000 subtotal; envío plano 400; tax 15% = 300; total 2700.
-    seedLine(2);
-    render(<CheckoutOrderSummary {...baseProps} />);
+  it('shows the store totals breakdown with the free shipping accent', (): void => {
+    // 3000 × 2 = 6000 ≥ 5000 → envío gratis; tax 15% = 900; total 6900.
+    seedLine(2, { priceCents: 3000 });
+    render(<CheckoutOrderSummary labels={labels} />);
 
     expect(screen.getByText(labels.subtotal)).toBeTruthy();
-    expect(screen.getAllByText(formatCurrency(2000, 'USD'))).toHaveLength(2);
-    expect(screen.getByText(formatCurrency(400, 'USD'))).toBeTruthy();
-    expect(screen.getByText(formatCurrency(300, 'USD'))).toBeTruthy();
-    expect(screen.getByText(formatCurrency(2700, 'USD'))).toBeTruthy();
+    expect(screen.getByText(formatCurrency(6000, 'USD'))).toBeTruthy();
+    expect(screen.getByText(labels.shippingFree)).toBeTruthy();
+    expect(screen.getByText(formatCurrency(900, 'USD'))).toBeTruthy();
+    expect(screen.getByText(formatCurrency(6900, 'USD'))).toBeTruthy();
   });
 
-  it('shows the free shipping label above the threshold', (): void => {
-    // 3000 × 2 = 6000 ≥ 5000 → envío gratis.
-    seedLine(2, { priceCents: 3000 });
-    render(<CheckoutOrderSummary {...baseProps} />);
+  it('shows the flat shipping cost below the threshold', (): void => {
+    // 1000 × 2 = 2000 subtotal; envío plano 400; tax 300; total 2700.
+    seedLine(2);
+    render(<CheckoutOrderSummary labels={labels} />);
 
-    expect(screen.getByText(labels.shippingFree)).toBeTruthy();
+    expect(screen.getByText(formatCurrency(400, 'USD'))).toBeTruthy();
+    expect(screen.getByText(formatCurrency(2700, 'USD'))).toBeTruthy();
+    expect(screen.queryByText(labels.shippingFree)).toBeNull();
+  });
+
+  it('renders the trust chips with the shared cart i18n labels', (): void => {
+    seedLine(1);
+    render(<CheckoutOrderSummary labels={labels} />);
+
+    expect(screen.getByText(labels.trust.shipping)).toBeTruthy();
+    expect(screen.getByText(labels.trust.guarantee)).toBeTruthy();
+    expect(screen.getByText(labels.trust.returns)).toBeTruthy();
+    expect(screen.getByText(labels.trust.secure)).toBeTruthy();
+  });
+
+  it('renders the free shipping meter progress below the threshold', (): void => {
+    // 1000 × 1 = 1000 → faltan 4000.
+    seedLine(1);
+    render(<CheckoutOrderSummary labels={labels} />);
+
+    expect(
+      screen.getByText('Te faltan ' + formatCurrency(4000, 'USD') + ' para envío gratis'),
+    ).toBeTruthy();
   });
 });

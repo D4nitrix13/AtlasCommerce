@@ -20,9 +20,8 @@
  *  - **Swatches y chips**: siguen siendo links redondos/cuadrados; el
  *    swatch sin texto conserva su `aria-label`.
  *  - **Sin animaciones costosas**: el sidebar es siempre visible a
- *    partir de `lg`. En mobile, la página debería esconderlo tras
- *    un toggle (`<details>` o hamburger); por ahora lo dejamos en
- *    `hidden lg:block` desde el caller para mantener este componente
+ *    partir de `lg`. En mobile lo esconde un disclosure nativo
+ *    (`FiltersDisclosure`, `<details>`); este componente sigue
  *    agnóstico al contexto responsive.
  *
  * Layout: una `<aside>` con `<h2>` "Filtros" + link "Limpiar", seguido
@@ -94,6 +93,13 @@ interface Props {
   activeColors?: readonly string[];
   /** Slugs actualmente activos (talla). */
   activeSizes?: readonly string[];
+  /**
+   * Prefijo de los ids internos (headings `aria-labelledby`). Dos
+   * instancias en el mismo documento (drawer móvil + panel desktop en
+   * `FiltersDisclosure`) necesitan prefijos distintos para no duplicar
+   * ids. Sin prefijo, el comportamiento es el de siempre.
+   */
+  idPrefix?: string;
 }
 
 const {
@@ -109,6 +115,7 @@ const {
   activePrice = null,
   activeColors = [],
   activeSizes = [],
+  idPrefix = '',
 } = Astro.props;
 
 const isCategoryActive = (slug: string): boolean => activeCategory === slug;
@@ -130,10 +137,10 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
   </header>
 
   <section
-    aria-labelledby="filter-category-heading"
+    aria-labelledby={`${idPrefix}filter-category-heading`}
     class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
   >
-    <h3 id="filter-category-heading" class="text-sm font-bold text-slate-900">
+    <h3 id={`${idPrefix}filter-category-heading`} class="text-sm font-bold text-slate-900">
       {labels.categoryHeading}
     </h3>
     <ul class="flex flex-col gap-2.5">
@@ -157,10 +164,10 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
 
   {brands.length > 0 && (
     <section
-      aria-labelledby="filter-brand-heading"
+      aria-labelledby={`${idPrefix}filter-brand-heading`}
       class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
     >
-      <h3 id="filter-brand-heading" class="text-sm font-bold text-slate-900">
+      <h3 id={`${idPrefix}filter-brand-heading`} class="text-sm font-bold text-slate-900">
         {labels.brandHeading}
       </h3>
       <ul class="flex flex-col gap-2.5">
@@ -189,10 +196,10 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
   )}
 
   <section
-    aria-labelledby="filter-price-heading"
+    aria-labelledby={`${idPrefix}filter-price-heading`}
     class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
   >
-    <h3 id="filter-price-heading" class="text-sm font-bold text-slate-900">
+    <h3 id={`${idPrefix}filter-price-heading`} class="text-sm font-bold text-slate-900">
       {labels.priceHeading}
     </h3>
     <ul class="flex flex-col gap-2.5">
@@ -214,10 +221,10 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
   </section>
 
   <section
-    aria-labelledby="filter-color-heading"
+    aria-labelledby={`${idPrefix}filter-color-heading`}
     class="flex flex-col gap-3 border-b border-slate-200 pb-6 last:border-b-0"
   >
-    <h3 id="filter-color-heading" class="text-sm font-bold text-slate-900">
+    <h3 id={`${idPrefix}filter-color-heading`} class="text-sm font-bold text-slate-900">
       {labels.colorHeading}
     </h3>
     <div role="group" aria-label={labels.colorHeading} class="flex flex-wrap gap-2">
@@ -239,8 +246,8 @@ const isSizeActive = (slug: string): boolean => activeSizes.includes(slug);
   </section>
 
   {sizes.length > 0 && (
-  <section aria-labelledby="filter-size-heading" class="flex flex-col gap-3 pb-2">
-    <h3 id="filter-size-heading" class="text-sm font-bold text-slate-900">
+  <section aria-labelledby={`${idPrefix}filter-size-heading`} class="flex flex-col gap-3 pb-2">
+    <h3 id={`${idPrefix}filter-size-heading`} class="text-sm font-bold text-slate-900">
       {labels.sizeHeading}
     </h3>
     <div role="group" aria-label={labels.sizeHeading} class="flex flex-wrap gap-2">

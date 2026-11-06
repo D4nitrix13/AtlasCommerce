@@ -37,6 +37,7 @@ const t = getServerDictionary(locale);
 
 const homeHref = `/${locale}`;
 const productsHref = `/${locale}/products`;
+const useCasesHref = `/${locale}#use-cases`;
 const searchHref = `/${locale}/search`;
 const rfqHref = `/${locale}/rfq`;
 const accountHref = `/${locale}/account`;
@@ -50,8 +51,7 @@ const navLinks = [
     href: productsHref,
     matchPrefix: productsHref,
   },
-  { labelKey: 'storefront.header.nav.search' as const, href: searchHref, matchPrefix: searchHref },
-  { labelKey: 'storefront.header.nav.cases' as const, href: searchHref },
+  { labelKey: 'storefront.header.nav.cases' as const, href: useCasesHref },
 ];
 
 const showQuote = brand.slug === 'panda-estampados';
@@ -60,7 +60,10 @@ const showQuote = brand.slug === 'panda-estampados';
 <header
   class="sticky top-0 z-30 w-full border-b border-[var(--line,#e7e5e4)] bg-[var(--paper,#f3efe8)]/90 backdrop-blur supports-[backdrop-filter]:bg-[var(--paper,#f3efe8)]/80"
 >
-  <div class="flex h-16 w-full flex-nowrap items-center gap-2 px-4 sm:px-6 lg:gap-6 lg:px-10">
+  {/* Fila única: flex en mobile (hamburguesa pegada a las acciones) y
+      grid 1fr/auto/1fr desde md para que el nav quede centrado de
+      verdad, con brand al inicio y acciones al final. */}
+  <div class="flex h-16 w-full flex-nowrap items-center gap-2 px-4 sm:px-6 md:grid md:grid-cols-[1fr_auto_1fr] lg:gap-6 lg:px-10">
     <StorefrontHeaderBrand brand={brand} homeHref={homeHref} />
 
     <StorefrontHeaderNav

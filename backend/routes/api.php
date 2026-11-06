@@ -58,6 +58,7 @@ use App\Http\Controllers\Api\Storefront\ProductWishlistController;
 use App\Http\Controllers\Api\Storefront\PromotionController as StorefrontPromotionController;
 use App\Http\Controllers\Api\Storefront\RecentlyViewedProductController;
 use App\Http\Controllers\Api\Storefront\RfqController;
+use App\Http\Controllers\Api\Storefront\SocialLinkController as StorefrontSocialLinkController;
 use App\Http\Controllers\Api\Storefront\ThemeController as StorefrontThemeController;
 use App\Http\Controllers\Api\Support\ProductQuestionController;
 use App\Http\Controllers\Api\Support\SupportTicketController;
@@ -1298,6 +1299,10 @@ Route::middleware(['store.domain', 'store.maintenance'])->prefix('storefront')->
     Route::get('/promotions', [StorefrontPromotionController::class, 'index'])
         ->name('storefront.promotions.index');
     Route::get('/theme', [StorefrontThemeController::class, 'show']);
+    // Redes sociales activas del footer (RF-STOR-133). Solo las de la
+    // tienda resuelta por dominio, con `is_active = true`.
+    Route::get('/social-links', [StorefrontSocialLinkController::class, 'index'])
+        ->name('storefront.social-links.index');
     // Proxy de assets del tenant desde FTP al browser.
     // El {path} acepta slashes via where() regex para que coincida
     // con paths completos tipo tenants/panda-estampados/branding/logo.webp.

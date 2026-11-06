@@ -28,6 +28,8 @@
 import '../styles/global.css';
 import '../styles/scroll-fx.css';
 import { SHOP_FONT_STYLESHEET, shopThemeStyle } from '../lib/shop-canvas';
+import { apiFetch } from '../lib/api';
+import { API_ENDPOINTS } from '../lib/endpoints';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
 import { resolveTenantFavicon } from '../lib/tenant-favicon';
 import StorefrontHeader from '../components/storefront/layout/StorefrontHeader.astro';
@@ -38,11 +40,38 @@ interface Props {
   cartCount?: number;
 }
 
+interface SocialLinkRow {
+  platform: string;
+  url: string | null;
+}
+
 const { title = 'AtlasCommerce', cartCount = 0 } = Astro.props;
 
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const brand: StoreBrand = getBrandBySlug(tenantSlug);
 const locale = Astro.locals.locale ?? 'es';
+
+// Redes sociales del footer desde el API (tenant por host). Fail-soft
+// obligatorio: si el backend no responde, devolvemos [] y el footer
+// renderiza el fallback decorativo — el footer nunca tumba la página.
+async function loadSocialLinks(): Promise<SocialLinkRow[]> {
+  try {
+    const response = await apiFetch<{ data: SocialLinkRow[] }>(
+      API_ENDPOINTS.storefront.socialLinks,
+      {
+        headers: { Accept: 'application/json' },
+        origin: Astro.url.origin,
+        host: Astro.url.host,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[layout] apiFetch social-links failed:', error);
+    return [];
+  }
+}
+
+const socialLinks = await loadSocialLinks();
 
 // Theme root: convierte los accent colors del brand en CSS vars que
 // cualquier componente puede consumir vía `var(--primary)` o
@@ -101,7 +130,7 @@ const favicon = resolveTenantFavicon(brand);
       <slot />
     </main>
 
-    <StorefrontFooter brand={brand} locale={locale} />
+    <StorefrontFooter brand={brand} locale={locale} socialLinks={socialLinks} />
 
     {/* Scroll-driven animations fallback para Safari/Firefox. Chrome/Edge
         115+ corren animation-timeline nativamente via scroll-fx.css. */}

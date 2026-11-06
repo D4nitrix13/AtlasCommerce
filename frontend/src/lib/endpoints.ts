@@ -114,6 +114,7 @@ export const API_ENDPOINTS = {
     productSearch: '/v1/storefront/products/search',
     products: '/v1/storefront/products',
     theme: '/v1/storefront/theme',
+    socialLinks: '/v1/storefront/social-links',
   },
 
   catalog: {

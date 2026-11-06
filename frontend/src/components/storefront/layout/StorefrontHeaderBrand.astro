@@ -6,7 +6,11 @@
  * link envuelve todo para un hit area generoso (≥ 40px de alto).
  *
  * El logo se sirve desde `/api/v1/storefront/assets/tenants/{slug}/branding/`
- * siguiendo la convención del resto del repo.
+ * siguiendo la convención del resto del repo. Los assets pueden no
+ * existir (el endpoint responde 404), así que el tile siempre dibuja
+ * las iniciales del shortName y el <img> va encima: si el asset carga
+ * lo cubre, y si falla se oculta y quedan las iniciales — nunca un
+ * cuadrado vacío.
  */
 import type { StoreBrand } from '../../../config/stores';
 
@@ -16,20 +20,36 @@ interface Props {
 }
 
 const { brand, homeHref } = Astro.props;
+
+// Iniciales del shortName: primera letra de cada palabra (máx. 2),
+// mayúsculas. "Panda" → "P"; "Panda Prints" → "PP".
+const initials = brand.shortName
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((word) => word.charAt(0).toUpperCase())
+  .join('');
 ---
 
 <a
   href={homeHref}
-  class="flex h-10 shrink-0 items-center gap-2 rounded-md pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)]"
+  class="flex h-10 shrink-0 items-center justify-self-start gap-2 rounded-md pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)]"
 >
   <span
-    class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200"
+    class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm ring-1 ring-slate-200"
     style={`background-color: ${brand.accentColor}1a;`}
   >
+    <span
+      class="text-sm font-bold leading-none tracking-wide"
+      style={`color: ${brand.accentColor};`}
+      aria-hidden="true"
+    >
+      {initials}
+    </span>
     <img
       src={brand.logoPath}
-      alt={brand.shortName}
-      class="h-7 w-7 object-contain"
+      alt=""
+      class="absolute inset-0 h-full w-full object-contain p-1"
       loading="eager"
       onerror="this.onerror=null;this.style.display='none'"
     />

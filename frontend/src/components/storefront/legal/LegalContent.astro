@@ -1,0 +1,65 @@
+---
+/**
+ * LegalContent — renderer compartido del contenido legal/informativo.
+ *
+ * Consume la shape tipada de `i18n/legal/types.ts` y la renderiza con
+ * la jerarquía de encabezados h2 → h3, listas ordenadas para
+ * procedimientos y viñetas para enumeraciones. El h1 de la página lo
+ * pone cada vista (chrome i18n); acá empiezan las secciones.
+ */
+import type { LegalPageContent } from '../../../i18n/legal/types';
+
+interface Props {
+  content: LegalPageContent;
+}
+
+const { content } = Astro.props;
+---
+
+<div class="mt-8">
+  {content.intro?.map((paragraph) => (
+    <p class="mt-4 text-base leading-7 text-slate-600">{paragraph}</p>
+  ))}
+
+  {content.sections.map((section) => (
+    <section class="mt-10">
+      <h2 class="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+        {section.heading}
+      </h2>
+      {section.paragraphs?.map((paragraph) => (
+        <p class="mt-4 text-base leading-7 text-slate-600">{paragraph}</p>
+      ))}
+      {section.items && (
+        <ul class="mt-4 list-disc space-y-2 pl-6 text-base leading-7 text-slate-600">
+          {section.items.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      )}
+      {section.steps && (
+        <ol class="mt-4 list-decimal space-y-2 pl-6 text-base leading-7 text-slate-600">
+          {section.steps.map((step) => (
+            <li>{step}</li>
+          ))}
+        </ol>
+      )}
+      {section.subSections?.map((sub) => (
+        <div class="mt-6">
+          <h3 class="text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
+            {sub.heading}
+          </h3>
+          {sub.paragraphs?.map((paragraph) => (
+            <p class="mt-3 text-base leading-7 text-slate-600">{paragraph}</p>
+          ))}
+          {sub.items && (
+            <ul class="mt-3 list-disc space-y-2 pl-6 text-base leading-7 text-slate-600">
+              {sub.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </section>
+  ))}
+</div>

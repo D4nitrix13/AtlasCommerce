@@ -2,10 +2,13 @@
 /**
  * StorefrontFooter — footer principal de la tienda.
  *
- * Composición en grid de 3 columnas estilo Bonfire:
- *   - Columna izquierda: brand + tagline
- *   - Columna central: nav secundaria con los links legales / info
- *   - Columna derecha: contacto (soporte email + locale)
+ * Full-bleed como el header: sin `mx-auto max-w-*`, con el mismo ritmo
+ * de padding (`px-4 sm:px-6 lg:px-10`). El ancho extra de pantallas
+ * anchas se reparte en el grid en vez de quedar como aire a los
+ * costados de un contenedor centrado de 1280px.
+ *
+ * Columnas: brand + tagline | nav legal | contacto | redes + locale.
+ * En mobile stack vertical, en md 2 columnas, en lg 4.
  *
  * El footer es semántico (`<footer>`) y vive dentro del `<body>` para
  * que los lectores de pantalla lo identifiquen como landmark "content
@@ -13,6 +16,9 @@
  * `var(--primary)` del theme.
  */
 import type { StoreBrand } from '../../../config/stores';
+import { getServerDictionary } from '../../../i18n/server';
+import { SOCIAL_ICON_PATHS, type SocialPlatform } from '../../ui/social-icon-paths';
+import LanguageSwitcher from '../../ui/LanguageSwitcher';
 import StorefrontFooterNav from './StorefrontFooterNav.astro';
 import StorefrontFooterLegal from './StorefrontFooterLegal.astro';
 import SocialIcon from './SocialIcon.astro';
@@ -27,29 +33,61 @@ interface FooterLink {
   href: string;
 }
 
+/** Fila de red social tal como la expone el backend (solo campos útiles). */
+interface SocialLinkItem {
+  platform: string;
+  url: string | null;
+}
+
 interface Props {
   brand: StoreBrand;
   locale: string;
   links?: FooterLink[];
+  socialLinks?: SocialLinkItem[];
 }
 
-const { brand, locale, links } = Astro.props;
+const { brand, locale, links, socialLinks = [] } = Astro.props;
 
 const defaultLinks: FooterLink[] = [
-  { labelKey: 'storefront.footer.about', href: '#' },
-  { labelKey: 'storefront.footer.terms', href: '#' },
-  { labelKey: 'storefront.footer.privacy', href: '#' },
-  { labelKey: 'storefront.footer.help', href: '#' },
-  { labelKey: 'storefront.footer.contact', href: '#' },
+  { labelKey: 'storefront.footer.about', href: `/${locale}/about` },
+  { labelKey: 'storefront.footer.terms', href: `/${locale}/terms` },
+  { labelKey: 'storefront.footer.privacy', href: `/${locale}/privacy` },
+  { labelKey: 'storefront.footer.help', href: `/${locale}/help` },
+  { labelKey: 'storefront.footer.contact', href: `/${locale}/contact` },
 ];
 
 const navLinks = links ?? defaultLinks;
+
+// Fallback decorativo: las URLs de marca todavía no existen, así que
+// los 4 iconos por defecto no redirigen a ningún lado.
+const DEFAULT_SOCIAL_ICONS: { variant: SocialPlatform; href: string | null }[] = [
+  { variant: 'facebook', href: null },
+  { variant: 'instagram', href: null },
+  { variant: 'tiktok', href: null },
+  { variant: 'whatsapp', href: null },
+];
+
+// Ignora con gracia cualquier plataforma fuera del enum conocido: el
+// guard lee el mismo mapa de paths que consume SocialIcon, así que
+// cubre las 8 variantes sin duplicar la lista.
+const toSocialPlatform = (value: string): SocialPlatform | null =>
+  value in SOCIAL_ICON_PATHS ? (value as SocialPlatform) : null;
+
+const mappedLinks = socialLinks.flatMap((link) => {
+  const variant = toSocialPlatform(link.platform);
+  return variant === null ? [] : [{ variant, href: link.url }];
+});
+
+// El fallback aplica cuando no hay filas configuradas, cuando el fetch
+// falló (el layout devuelve []) o cuando ninguna plataforma es válida.
+const socialIcons = mappedLinks.length > 0 ? mappedLinks : DEFAULT_SOCIAL_ICONS;
+
+const t = getServerDictionary(locale);
 ---
 
 <footer class="border-t border-slate-200 bg-slate-50">
-  <div class="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:px-10">
-    {/* Grid 3 columnas: brand | nav | contact. En mobile stack vertical. */}
-    <div class="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-12">
+  <div class="w-full px-4 py-10 sm:px-6 lg:px-10">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
       {/* Columna 1: brand */}
       <div class="flex flex-col gap-2">
         <p class="text-base font-semibold tracking-tight text-slate-900">{brand.name}</p>
@@ -57,20 +95,32 @@ const navLinks = links ?? defaultLinks;
       </div>
 
       {/* Columna 2: nav links */}
-      <div class="md:mx-auto">
+      <div>
         <StorefrontFooterNav links={navLinks} locale={locale} />
       </div>
 
-      {/* Columna 3: contacto + locale */}
+      {/* Columna 3: contacto (email de soporte) */}
+      <div class="flex flex-col gap-3">
+        <a
+          href={`mailto:${brand.supportEmail}`}
+          class="text-xs text-slate-500 transition hover:text-[var(--primary,#1e293b)]"
+        >
+          {brand.supportEmail}
+        </a>
+      </div>
+
+      {/* Columna 4: redes sociales (desde la BD, orden del backend) +
+          selector de locale. Sin filas configuradas cae al fallback de
+          4 iconos decorativos sin href. */}
       <div class="flex flex-col gap-3 md:items-end md:text-right">
-        <p class="text-xs uppercase tracking-wide text-slate-500">
-          {locale === 'es' ? 'Español' : 'English'}
-        </p>
-        <div class="flex items-center gap-2 md:justify-end" aria-label="Redes sociales">
-          <SocialIcon variant="facebook" />
-          <SocialIcon variant="instagram" />
-          <SocialIcon variant="tiktok" />
-        </div>
+        <ul class="flex items-center gap-2" aria-label={t['storefront.footer.socialLabel']}>
+          {socialIcons.map((icon) => (
+            <li>
+              <SocialIcon variant={icon.variant} href={icon.href ?? ''} />
+            </li>
+          ))}
+        </ul>
+        <LanguageSwitcher client:visible variant="compact" theme="light" />
       </div>
     </div>
 
