@@ -1,22 +1,26 @@
 /**
  * ProductPurchaseBar — barra de compra del PDP genérico.
  *
- * Fila `[ Cantidad ▾ ] [ Añadir al carrito ] [ Comprar ya ]` con la
- * cantidad acotada al stock de la variante seleccionada. A diferencia
- * de `AddToCart` (Panda), NO renderiza selector de acabado: el PDP ya
+ * Fila `[ − Cantidad + ] [ Añadir al carrito ] [ Comprar ya ]` con la
+ * cantidad acotada al stock de la variante seleccionada. El stepper
+ * usa los botones − / + reales de `ProductQuantitySelector` (patrón
+ * Baymard) en vez del dropdown nativo de cantidad. A diferencia de
+ * `AddToCart` (Panda), NO renderiza selector de acabado: el PDP ya
  * muestra los swatches en su dl "Acabado" y duplicarlos rompería el
  * flujo `?finish=`.
  *
  * Labels por props con fallback español (mismo patrón que `AddToCart`):
  * el componente no importa el diccionario i18n.
  */
-import type { ChangeEvent, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { clampToStock, quantityOptions } from '../../../lib/purchase-quantity';
+import { clampToStock, quantityStepperState } from '../../../lib/purchase-quantity';
 import { addToCart } from '../../../stores/cart';
 
 export interface PurchaseBarLabels {
   quantity: string;
+  decrement: string;
+  increment: string;
   addToCart: string;
   buyNow: string;
   outOfStock: string;
@@ -42,6 +46,8 @@ const ADDED_FEEDBACK_MS = 1500;
 
 const DEFAULT_LABELS: PurchaseBarLabels = {
   quantity: 'Cantidad',
+  decrement: 'Disminuir cantidad',
+  increment: 'Aumentar cantidad',
   addToCart: 'Añadir al carrito',
   buyNow: 'Comprar ya',
   outOfStock: 'Agotado',
@@ -61,8 +67,7 @@ export default function ProductPurchaseBar({
 }: ProductPurchaseBarProps): ReactElement {
   const resolved: PurchaseBarLabels = { ...DEFAULT_LABELS, ...labels };
   const isOutOfStock = stock <= 0;
-  const options = quantityOptions(stock);
-  const [quantity, setQuantity] = useState<number>(options[0] ?? 1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [added, setAdded] = useState(false);
   const feedbackTimer = useRef<number | undefined>(undefined);
 
@@ -72,8 +77,14 @@ export default function ProductPurchaseBar({
     };
   }, []);
 
-  function handleQuantityChange(event: ChangeEvent<HTMLSelectElement>): void {
-    setQuantity(clampToStock(Number.parseInt(event.target.value, 10) || 1, stock));
+  const stepState = quantityStepperState(quantity, 0, stock);
+
+  function handleDecrement(): void {
+    setQuantity(quantityStepperState(quantity, -1, stock).value);
+  }
+
+  function handleIncrement(): void {
+    setQuantity(quantityStepperState(quantity, 1, stock).value);
   }
 
   function handleAdd(): void {
@@ -100,22 +111,40 @@ export default function ProductPurchaseBar({
 
   return (
     <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-end">
-      <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-900">
+      <div className="flex flex-col gap-1.5 text-sm font-semibold text-slate-900">
         {resolved.quantity}
-        <select
-          name="quantity"
-          value={quantity}
-          disabled={isOutOfStock}
-          onChange={handleQuantityChange}
-          className="h-12 w-24 rounded-xl border border-slate-200 bg-white px-3 text-base font-normal tabular-nums text-slate-900 transition hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+        <div
+          className="inline-flex w-fit items-center overflow-hidden rounded-lg border border-slate-200"
+          role="group"
+          aria-label={resolved.quantity}
         >
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </label>
+          <button
+            type="button"
+            aria-label={resolved.decrement}
+            disabled={stepState.decrementDisabled}
+            onClick={handleDecrement}
+            className="flex h-10 w-10 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <span aria-hidden="true">−</span>
+          </button>
+          <span
+            className="flex h-10 min-w-[3rem] items-center justify-center border-x border-slate-200 px-3 text-sm font-semibold tabular-nums text-slate-900"
+            aria-live="polite"
+          >
+            {stepState.value}
+          </span>
+          <button
+            type="button"
+            aria-label={resolved.increment}
+            disabled={stepState.incrementDisabled}
+            onClick={handleIncrement}
+            className="flex h-10 w-10 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <span aria-hidden="true">+</span>
+          </button>
+          <input type="hidden" name="quantity" value={stepState.value} />
+        </div>
+      </div>
 
       <button
         type="button"

@@ -385,9 +385,44 @@ function cssEscape(value: string): string {
  * cambiar el color sea un solo cambio. `null` → `slate-400` para que
  * el swatch siga siendo visible (no transparente).
  */
-export function swatchFallbackHex(swatch: VariantSwatch): string {
+export function swatchFallbackHex(swatch: Pick<VariantSwatch, 'hex'>): string {
   if (swatch.hex === null || swatch.hex === '') return FALLBACK_SWATCH_COLOR;
   return swatch.hex;
+}
+
+/**
+ * CSS de cross-fade por variante para el preview de hover/focus de las
+ * cards de rieles (`ProductRelated`).
+ *
+ * El markup stackea una `<img>` por variante: la primaria lleva la
+ * clase `.card__img--default` (visible sin hover) y todas —primaria
+ * incluida— `.card__img--variant` + `data-variant-id`. Las reglas:
+ *
+ *  1. base: variantes ocultas, primaria visible (el orden importa:
+ *     misma especificidad, gana la última).
+ *  2. con `article[data-active-variant]` se oculta todo lo anterior.
+ *  3. una regla por id muestra la variante activa.
+ *
+ * TODO va en un `<style is:global>`: si estas reglas vivieran en el
+ * `<style>` scoped del componente, Astro les suma `[data-astro-cid]` a
+ * cada compound y les gana en especificidad a las de show — el preview
+ * quedaba siempre en `opacity: 0` (bug reportado por el usuario: "al
+ * poner el cursor sobre el circulito no se cambia la imagen").
+ */
+export function buildVariantPreviewCss(variantIds: readonly string[]): string {
+  const rules: string[] = [
+    '.card__img--variant{opacity:0;transition:opacity 250ms ease;}',
+    '.card__img--default{opacity:1;transition:opacity 250ms ease;}',
+    'article[data-active-variant] .card__img--default{opacity:0;}',
+    'article[data-active-variant] .card__img--variant{opacity:0;}',
+  ];
+  for (const id of variantIds) {
+    const escaped = cssEscape(id);
+    rules.push(
+      `article[data-active-variant="${escaped}"] .card__img--variant[data-variant-id="${escaped}"]{opacity:1;}`,
+    );
+  }
+  return rules.join('');
 }
 
 /**

@@ -1,0 +1,103 @@
+---
+/**
+ * ProductRelatedMedia — media stack (imagen 1:1) de las cards del riel
+ * "También Te Puede Gustar".
+ *
+ * Extraído de `ProductRelated.astro` (límite de 250 líneas). Renderiza
+ * el `<a>` de la imagen con:
+ *   - El stack de imágenes por variante (`data-variant-id` real; la
+ *     primera además `card__img--default` para verse sin hover).
+ *   - La imagen trasera (`data-role="back"`, rol BACK/`isHover` del
+ *     API) que hover/focus-within del media revela con cross-fade —
+ *     mismo contrato que `ProductCard.astro`. Sólo se renderiza si
+ *     `imageUrlSecondary` existe: sin ella, cero cambio.
+ *
+ * Precedencia: las reglas hover/focus llevan el guard
+ * `:not([data-active-variant])` — si un swatch dejó activa una
+ * variante, la foto de ESA variante manda y el back no la tapa.
+ */
+interface Props {
+  /** URL de la card (producto, locale-prefixed). */
+  href: string;
+  /** Nombre del producto (aria-label del link + alt de la primaria). */
+  productName: string;
+  /** Imágenes por variante (orden: primera = default). */
+  variantImages: readonly { id: string; imageUrl: string }[];
+  /** Imagen de hover (rol BACK) — opcional; sin ella no hay swap. */
+  imageUrlSecondary?: string;
+}
+
+const { href, productName, variantImages, imageUrlSecondary } = Astro.props;
+---
+
+<a
+  href={href}
+  class="card__media relative block aspect-square overflow-hidden rounded-xl bg-slate-50"
+  aria-label={productName}
+>
+  {/* Stack de imágenes por variante — una `<img>` por acabado con su
+      `data-variant-id` REAL (también la primera: si la primaria quedara
+      como "default", el hover de su swatch no matchearía ninguna
+      imagen). Las reglas de cross-fade salen de `buildVariantPreviewCss`
+      (bloque global de ProductRelated). */}
+  {variantImages.map((img, index) => (
+    <img
+      src={img.imageUrl}
+      alt={index === 0 ? productName : ''}
+      loading="lazy"
+      decoding="async"
+      aria-hidden={index === 0 ? undefined : 'true'}
+      data-variant-id={img.id}
+      class:list={[
+        'card__img absolute inset-0 h-full w-full object-cover',
+        'card__img--variant',
+        index === 0 && 'card__img--default',
+      ]}
+    />
+  ))}
+  {/* Imagen trasera (hover) — mismo rect que el stack, revelada en
+      hover/focus-within del media y subordinada al swatch preview. */}
+  {imageUrlSecondary !== undefined && (
+    <img
+      src={imageUrlSecondary}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      aria-hidden="true"
+      data-role="back"
+      class="card__img card__img--back absolute inset-0 h-full w-full object-cover"
+    />
+  )}
+</a>
+
+<style is:global>
+  /* Hover → imagen trasera (T3.5). Global a propósito: las reglas de
+     opacidad scoped ganan en especificidad a las de show (ver nota en
+     ProductRelated.astro). El back comparte el rect del stack. */
+  [data-related-scroller] .card__img--back {
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  /* `@media (hover: hover)` evita sticky-hover en touch (mismo motivo
+     que ProductCard.astro). */
+  @media (hover: hover) {
+    [data-related-scroller] article:not([data-active-variant]) .card__media:hover
+      .card__img--default {
+      opacity: 0;
+    }
+    [data-related-scroller] article:not([data-active-variant]) .card__media:hover
+      .card__img--back {
+      opacity: 1;
+    }
+  }
+  /* Teclado: mismo contrato con :focus-within, FUERA del media query
+     (un híbrido touch+teclado no lo matchearía). */
+  [data-related-scroller] article:not([data-active-variant]) .card__media:focus-within
+    .card__img--default {
+    opacity: 0;
+  }
+  [data-related-scroller] article:not([data-active-variant]) .card__media:focus-within
+    .card__img--back {
+    opacity: 1;
+  }
+</style>

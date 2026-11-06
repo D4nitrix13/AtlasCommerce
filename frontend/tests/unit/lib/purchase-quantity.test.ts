@@ -6,12 +6,16 @@
  *     y lista vacía cuando no hay stock.
  *   - `clampToStock`: acota cualquier valor programático al rango
  *     comprable [1..stock]; sin stock no hay cantidad válida (0).
+ *   - `quantityStepperState`: semántica del stepper − / + de la barra
+ *     de compra (T3.2) — el decremento se detiene en 1, el incremento
+ *     en el stock, y los flags de botón marcan los extremos.
  */
 import { describe, expect, it } from 'vitest';
 import {
   MAX_QUANTITY_OPTIONS,
   clampToStock,
   quantityOptions,
+  quantityStepperState,
 } from '../../../src/lib/purchase-quantity';
 
 describe('quantityOptions', () => {
@@ -59,5 +63,83 @@ describe('clampToStock', () => {
     expect(clampToStock(Number.NaN, 5)).toBe(1);
     expect(clampToStock(Number.POSITIVE_INFINITY, 5)).toBe(5);
     expect(clampToStock(Number.POSITIVE_INFINITY, 0)).toBe(0);
+  });
+});
+
+describe('quantityStepperState — pasos', () => {
+  it('el decremento se detiene en 1', () => {
+    // − baja una unidad mientras haya rango; en el mínimo el
+    // resultado sigue siendo 1 y el botón queda deshabilitado.
+    expect(quantityStepperState(3, -1, 5)).toEqual({
+      value: 2,
+      decrementDisabled: false,
+      incrementDisabled: false,
+    });
+    expect(quantityStepperState(1, -1, 5)).toEqual({
+      value: 1,
+      decrementDisabled: true,
+      incrementDisabled: false,
+    });
+    expect(quantityStepperState(1, -1, 5).value).toBe(1);
+  });
+
+  it('el incremento se detiene en el stock', () => {
+    // + sube una unidad mientras quede stock; en el tope el
+    // resultado sigue siendo el stock y el botón queda deshabilitado.
+    expect(quantityStepperState(3, 1, 5)).toEqual({
+      value: 4,
+      decrementDisabled: false,
+      incrementDisabled: false,
+    });
+    expect(quantityStepperState(5, 1, 5)).toEqual({
+      value: 5,
+      decrementDisabled: false,
+      incrementDisabled: true,
+    });
+    expect(quantityStepperState(5, 1, 5).value).toBe(5);
+  });
+});
+
+describe('quantityStepperState — flags de extremos', () => {
+  it('sin paso (delta 0) reporta los flags de los extremos', () => {
+    expect(quantityStepperState(1, 0, 5)).toEqual({
+      value: 1,
+      decrementDisabled: true,
+      incrementDisabled: false,
+    });
+    expect(quantityStepperState(5, 0, 5)).toEqual({
+      value: 5,
+      decrementDisabled: false,
+      incrementDisabled: true,
+    });
+    expect(quantityStepperState(3, 0, 5)).toEqual({
+      value: 3,
+      decrementDisabled: false,
+      incrementDisabled: false,
+    });
+  });
+
+  it('sin stock el stepper queda inmóvil con ambos botones deshabilitados', () => {
+    expect(quantityStepperState(1, -1, 0)).toEqual({
+      value: 0,
+      decrementDisabled: true,
+      incrementDisabled: true,
+    });
+    expect(quantityStepperState(1, 1, -2)).toEqual({
+      value: 0,
+      decrementDisabled: true,
+      incrementDisabled: true,
+    });
+  });
+
+  it('acota valores fuera de rango antes de evaluar los extremos', () => {
+    // Entradas inválidas (NaN, infinito) caen al mismo clamp que
+    // `clampToStock`: ningún valor se cuela fuera de [1..stock].
+    expect(quantityStepperState(Number.NaN, 0, 5).value).toBe(1);
+    expect(quantityStepperState(Number.POSITIVE_INFINITY, 0, 5)).toEqual({
+      value: 5,
+      decrementDisabled: false,
+      incrementDisabled: true,
+    });
   });
 });

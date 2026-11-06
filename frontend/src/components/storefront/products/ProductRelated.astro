@@ -38,6 +38,8 @@
  */
 import type { RelatedProduct } from '../../../data/product-detail-mock';
 import { formatCurrency } from '../../../lib/formatters';
+import { buildVariantPreviewCss, swatchFallbackHex } from '../../../lib/product-card-swap';
+import ProductRelatedMedia from './ProductRelatedMedia.astro';
 
 export interface ProductRelatedLabels {
   heading: string;
@@ -83,21 +85,36 @@ interface RenderableItem {
   product: RelatedProduct;
   variantsText: string | null;
   /** Lista de imágenes de variant (orden: primera = default). */
-  variantImages: ReadonlyArray<{ id: string; imageUrl: string; label: string }>;
+  variantImages: ReadonlyArray<{ id: string; imageUrl: string; label: string; hex: string | null }>;
 }
 
 const items: RenderableItem[] = products.map((product) => {
   const variantsText = formatVariantsLabel(product, labels.variantsLabel);
   const variants = product.variants ?? [];
-  const variantImages = variants
+  const variantImages: RenderableItem['variantImages'][number][] = variants
     .filter((v) => v.imageUrl !== undefined)
-    .map((v) => ({ id: v.id, imageUrl: v.imageUrl as string, label: v.label }));
+    .map((v) => ({
+      id: v.id,
+      imageUrl: v.imageUrl as string,
+      label: v.label,
+      hex: v.hex ?? null,
+    }));
   // Si no hay variants con imageUrl, fallback al imageUrl del product
   if (variantImages.length === 0) {
-    variantImages.push({ id: 'default', imageUrl: product.imageUrl, label: product.name });
+    variantImages.push({ id: 'default', imageUrl: product.imageUrl, label: product.name, hex: null });
   }
   return { product, variantsText, variantImages };
 });
+
+/**
+ * CSS de cross-fade de TODAS las cards en un solo bloque global.
+ * Reglas de opacidad en el style scoped del componente: prohibido —
+ * Astro les suma `[data-astro-cid]` y les gana a las reglas de show
+ * (ver `buildVariantPreviewCss`).
+ */
+const variantPreviewCss = buildVariantPreviewCss([
+  ...new Set(items.flatMap(({ variantImages }) => variantImages.map((img) => img.id))),
+]);
 ---
 
 <section aria-labelledby="related-heading" class="flex flex-col gap-5">
@@ -156,44 +173,22 @@ const items: RenderableItem[] = products.map((product) => {
       data-related-scroller
     >
       {items.map(({ product, variantsText, variantImages }) => (
-        <li class="w-[260px] shrink-0 snap-start sm:w-[300px]">
+        <li class="w-[260px] h-full shrink-0 snap-start sm:w-[300px]">
           <article
             data-product-id={product.id}
-            class="group flex flex-col rounded-2xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md"
+            class="group flex h-full flex-col rounded-2xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md"
           >
-            <a
+            <ProductRelatedMedia
               href={`/${locale}/products/${product.slug}`}
-              class="relative block aspect-square overflow-hidden rounded-xl bg-slate-50"
-              aria-label={product.name}
-            >
-              {/* Imagen default (primer variant o product.imageUrl).
-                                Se muestra por default. */}
-              <img
-                src={variantImages[0]?.imageUrl}
-                alt={product.name}
-                loading="lazy"
-                decoding="async"
-                data-variant-id="default"
-                class="card__img card__img--default absolute inset-0 h-full w-full object-contain"
-              />
-              {/* Variants siguientes como imágenes ocultas que se
-                                muestran vía CSS cuando data-active-variant
-                                coincide con su data-variant-id. */}
-              {variantImages.slice(1).map((img) => (
-                <img
-                  src={img.imageUrl}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  aria-hidden="true"
-                  data-variant-id={img.id}
-                  class="card__img card__img--variant absolute inset-0 h-full w-full object-contain"
-                />
-              ))}
-            </a>
+              productName={product.name}
+              variantImages={variantImages}
+              imageUrlSecondary={product.imageUrlSecondary}
+            />
 
             {/* Swatches: cuando hay 2+ variants, se muestran como
-                            botones. Hover cambia la imagen via setupVariantPreview
+                            botones de COLOR REAL (hex por acabado, nunca
+                            thumbnails — el usuario: "parecen imágenes repetidas").
+                            Hover/focus cambia la imagen via setupVariantPreview
                             (data-active-variant en el <article>). */}
             {variantImages.length > 1 && (
               <div
@@ -201,14 +196,21 @@ const items: RenderableItem[] = products.map((product) => {
                 role="group"
                 aria-label={`Variantes disponibles (${variantImages.length})`}
               >
-                {variantImages.map((img) => (
+                {variantImages.map((img, index) => (
                   <button
                     type="button"
                     data-variant-swatch={img.id}
                     title={img.label}
                     aria-label={img.label}
-                    class="card__swatch inline-block h-6 w-6 rounded-full border-2 border-white shadow ring-1 ring-slate-300 transition-all duration-150 hover:scale-110 focus-visible:scale-110"
-                    style={`background-color: ${product.variants?.find((v) => v.id === img.id)?.hex ?? '#888'};`}
+                    class:list={[
+                      'card__swatch inline-block h-6 w-6 rounded-full border-2 border-white shadow transition-all duration-150',
+                      'focus:outline-none focus-visible:scale-110 focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+                      'disabled:opacity-40 disabled:cursor-not-allowed',
+                      index === 0
+                        ? 'ring-2 ring-[var(--primary,#475569)]'
+                        : 'ring-1 ring-slate-300 hover:scale-110 hover:ring-2 hover:ring-slate-900',
+                    ]}
+                    style={`background-color: ${swatchFallbackHex({ hex: img.hex })};`}
                   />
                 ))}
               </div>
@@ -276,44 +278,19 @@ const items: RenderableItem[] = products.map((product) => {
   .gallery-scroller {
     scrollbar-width: none;
   }
-
-  /* Variant preview:
-     - .card__img--default: opacity 1 (default = primer variant).
-     - .card__img--variant: opacity 0 (ocultas por default).
-     - Cuando el JS setea data-active-variant en el <article>, el
-       image matching (data-variant-id="X") hace fade-in. */
-  .card__img--default {
-    opacity: 1;
-    transition: opacity 250ms ease;
-  }
-  .card__img--variant {
-    opacity: 0;
-    transition: opacity 250ms ease;
-  }
-  article[data-active-variant] .card__img--default {
-    opacity: 0;
-  }
-  article[data-active-variant] .card__img--variant {
-    opacity: 0;
-  }
+  /* NO poner reglas de opacidad del stack de imágenes acá: este bloque
+     es scoped y Astro le suma [data-astro-cid] a cada compound,
+     ganándole en especificidad a las reglas de show (la imagen preview
+     quedaba siempre invisible). Van todas en el <style is:global> de abajo. */
 </style>
 
 {/*
-  Reglas CSS por variante — generadas dinámicamente para mostrar la
-  imagen correcta cuando el JS setea [data-active-variant]. Usamos
-  is:global + set:html para inyectar CSS crudo (Astro procesaría
-  los selectores por atributo si fuera scoped y rompería el match).
+  Reglas CSS de cross-fade por variante — un solo bloque global
+  (`buildVariantPreviewCss`): sin scoping de Astro, la cascada resuelve
+  por orden/fuente y el hover del swatch sí muestra la foto de ESA
+  variante.
 */}
-{items.flatMap(({ variantImages }) =>
-  variantImages
-    .filter((v) => v.id !== 'default')
-    .map((v) => (
-      <style
-        is:global
-        set:html={`article[data-active-variant="${v.id}"] .card__img--variant[data-variant-id="${v.id}"] { opacity: 1; }`}
-      />
-    ))
-)}
+<style is:global set:html={variantPreviewCss} />
 
 <script>
   /**

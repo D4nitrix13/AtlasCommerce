@@ -20,6 +20,12 @@
  */
 import type { Product } from '../../../types/catalog';
 import { formatCurrency } from '../../../lib/formatters';
+import { deriveProductCardSwap } from '../../../lib/product-card-swap';
+
+/** Imagen de hover (rol BACK): campo explícito o `isHover` de la galería. */
+function hoverImageOf(product: Product & { imageUrlSecondary?: string }): string | undefined {
+  return product.imageUrlSecondary ?? deriveProductCardSwap(product).hoverImage?.url;
+}
 
 interface Props {
   /** Heading de la sección (i18n). */
@@ -27,7 +33,7 @@ interface Props {
   /** Locale para links de producto y formato de precios. */
   locale: string;
   /** Productos ya resueltos en SSR (sin el producto actual). */
-  products?: readonly Product[];
+  products?: readonly (Product & { imageUrlSecondary?: string })[];
   /** Slug del producto actual — se excluye del fallback localStorage. */
   currentSlug?: string;
   /** true cuando el fetch del API falló: render oculto + localStorage. */
@@ -66,25 +72,39 @@ const showServerGrid = !useFallback && products.length > 0;
       role="list"
       aria-label={heading}
     >
-      {products.map((product) => (
-        <li class="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-[var(--primary,#475569)] hover:shadow-sm">
-          <a href={`/${locale}/products/${product.slug}`} class="flex flex-col gap-2">
-            <span class="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-slate-50">
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                loading="lazy"
-                decoding="async"
-                class="h-full w-full object-cover"
-              />
-            </span>
-            <span class="text-xs font-medium text-slate-900 line-clamp-2">{product.name}</span>
-            <span class="text-sm font-bold tabular-nums text-slate-900">
-              {formatCurrency(product.priceCents, product.currency ?? 'USD')}
-            </span>
-          </a>
-        </li>
-      ))}
+      {products.map((product) => {
+        const secondary = hoverImageOf(product);
+        return (
+          <li class="group flex h-full flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-[var(--primary,#475569)] hover:shadow-sm">
+            <a href={`/${locale}/products/${product.slug}`} class="card__media flex h-full flex-col gap-2">
+              <span class="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-slate-50">
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  loading="lazy"
+                  decoding="async"
+                  class="card__img--default h-full w-full object-cover"
+                />
+                {secondary !== undefined && (
+                  <img
+                    src={secondary}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    aria-hidden="true"
+                    data-role="back"
+                    class="card__img--back absolute inset-0 h-full w-full object-cover"
+                  />
+                )}
+              </span>
+              <span class="text-xs font-medium text-slate-900 line-clamp-2">{product.name}</span>
+              <span class="mt-auto text-sm font-bold tabular-nums text-slate-900">
+                {formatCurrency(product.priceCents, product.currency ?? 'USD')}
+              </span>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </section>
 )}
@@ -122,6 +142,8 @@ const showServerGrid = !useFallback && products.length > 0;
     slug: string;
     name: string;
     imageUrl: string;
+    /** Imagen de hover (rol BACK) — opcional; sin ella no hay swap. */
+    imageUrlSecondary?: string;
     priceCents: number;
     currency: string;
     viewedAt: number;
@@ -170,6 +192,8 @@ const showServerGrid = !useFallback && products.length > 0;
     interface ProductMeta {
       name: string;
       imageUrl: string;
+      /** Imagen de hover (rol BACK) — viaja cuando el PDP la expone. */
+      imageUrlSecondary?: string;
       priceCents: number;
       currency: string;
     }
@@ -181,6 +205,7 @@ const showServerGrid = !useFallback && products.length > 0;
       slug,
       name: meta.name,
       imageUrl: meta.imageUrl,
+      ...(meta.imageUrlSecondary !== undefined ? { imageUrlSecondary: meta.imageUrlSecondary } : {}),
       priceCents: meta.priceCents,
       currency: meta.currency,
       viewedAt: Date.now(),
@@ -208,19 +233,24 @@ const showServerGrid = !useFallback && products.length > 0;
 
     section.classList.remove('hidden');
     listEl.innerHTML = entries
-      .map(
-        (entry) => `
-        <li class="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-[var(--primary,#475569)] hover:shadow-sm">
-          <a href="/${locale}/products/${entry.slug}" class="flex flex-col gap-2">
+      .map((entry) => {
+        const hoverImg =
+          entry.imageUrlSecondary !== undefined && entry.imageUrlSecondary !== ''
+            ? `<img src="${entry.imageUrlSecondary}" alt="" loading="lazy" aria-hidden="true" data-role="back" class="card__img--back absolute inset-0 h-full w-full object-cover" />`
+            : '';
+        return `
+        <li class="group flex h-full flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-[var(--primary,#475569)] hover:shadow-sm">
+          <a href="/${locale}/products/${entry.slug}" class="card__media flex h-full flex-col gap-2">
             <span class="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-slate-50">
-              <img src="${entry.imageUrl}" alt="${entry.name}" loading="lazy" class="h-full w-full object-cover" />
+              <img src="${entry.imageUrl}" alt="${entry.name}" loading="lazy" class="card__img--default h-full w-full object-cover" />
+              ${hoverImg}
             </span>
             <span class="text-xs font-medium text-slate-900 line-clamp-2">${entry.name}</span>
-            <span class="text-sm font-bold tabular-nums text-slate-900">${formatCurrency(entry.priceCents, entry.currency)}</span>
+            <span class="mt-auto text-sm font-bold tabular-nums text-slate-900">${formatCurrency(entry.priceCents, entry.currency)}</span>
           </a>
         </li>
-      `
-      )
+      `;
+      })
       .join('');
   }
 
@@ -238,3 +268,33 @@ const showServerGrid = !useFallback && products.length > 0;
     document.addEventListener('DOMContentLoaded', hydrate);
   }
 </script>
+
+<style is:global>
+  /* Hover → imagen trasera (T3.5) — mismo contrato que
+     ProductCard.astro (cross-fade 250ms). Scoped a
+     [data-recently-viewed] para no pisar el stack de variantes de
+     ProductRelated. Sin imagen de hover no hay back en el DOM y nada
+     cambia. */
+  [data-recently-viewed] .card__img--default {
+    opacity: 1;
+    transition: opacity 250ms ease;
+  }
+  [data-recently-viewed] .card__img--back {
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  @media (hover: hover) {
+    [data-recently-viewed] .card__media:hover .card__img--default {
+      opacity: 0;
+    }
+    [data-recently-viewed] .card__media:hover .card__img--back {
+      opacity: 1;
+    }
+  }
+  [data-recently-viewed] .card__media:focus-within .card__img--default {
+    opacity: 0;
+  }
+  [data-recently-viewed] .card__media:focus-within .card__img--back {
+    opacity: 1;
+  }
+</style>
