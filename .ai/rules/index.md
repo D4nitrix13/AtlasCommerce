@@ -23,6 +23,7 @@
 | [`tooling/dev-domains-and-session.md`](tooling/dev-domains-and-session.md) | Acceso en dev (Caddy del host, puerto 5321) y los 3 invariantes de la sesión: SANCTUM_STATEFUL_DOMAINS con `host:puerto`, proxy `/sanctum`+`/api` con `changeOrigin:false`, SSR autenticado reenvía `Cookie`+`Origin`. |
 | [`assets-naming-policy.md`](assets-naming-policy.md) | Estructura per-tenant de `assets/products/`, naming legible en repo vs hasheado en FTP, roles de galería, comandos del seeder. |
 | [`workflow/conventions-first.md`](workflow/conventions-first.md) | Antes de cualquier edición, leer las reglas del scope + AGENTS.md + skill load-bearing. |
+| [`workflow/multi-session-isolation.md`](workflow/multi-session-isolation.md) | **Sesiones en paralelo**: worktree propio por sesión, bloque de estado ✅/⏳/⬜ en cada respuesta, y entrega push+PR+merge al terminar. |
 | [`workflow/decisions-storefront-rendering.md`](workflow/decisions-storefront-rendering.md) | Decisión CSR vs SSR del listado de productos del storefront y su porqué. |
 | [`workflow/browser-auth-contract.md`](workflow/browser-auth-contract.md) | Contrato del login con 2FA (challenge → `/es/account/2fa`, verify público `verify-totp-login`), credenciales dev con TOTP, y la resolución de origin de `apiFetch`. |
 
