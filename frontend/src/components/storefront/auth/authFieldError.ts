@@ -1,9 +1,10 @@
 import type { Translations } from '../../../i18n/types';
 
 /**
- * Validación client-side y mapeo de errores por campo para el
- * RegisterForm. Extraído como helper local para mantener el
- * componente acotado (convención de tamaño en frontend/AGENTS.md).
+ * Validación client-side y mapeo de errores por campo para los forms
+ * de auth (RegisterForm y StorefrontLoginForm). Extraído como helper
+ * local para mantener los componentes acotados (convención de tamaño
+ * en frontend/AGENTS.md).
  */
 
 export type FieldName =
@@ -70,6 +71,34 @@ export function mapApiFieldErrors(
     }
   }
   return mapped;
+}
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
+/**
+ * Validación client-side del login: email requerido + formato,
+ * password requerida (el `min:8` del backend llega via 422 y se
+ * mapea al campo con `mapApiFieldErrors`).
+ */
+export function validateLoginForm(values: LoginFormValues, t: TranslateFn): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (values.email.trim() === '') {
+    errors.email = t('auth.validation.required', { field: t('auth.login.shell.emailLabel') });
+  } else if (!EMAIL_PATTERN.test(values.email)) {
+    errors.email = t('auth.validation.email');
+  }
+
+  if (values.password === '') {
+    errors.password = t('auth.validation.required', {
+      field: t('auth.login.shell.passwordLabel'),
+    });
+  }
+
+  return errors;
 }
 
 /**
