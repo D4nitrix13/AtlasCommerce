@@ -20,7 +20,8 @@
 import type { Product } from '../../../types/catalog';
 
 interface BundleItem {
-  product: Product;
+  /** `imageUrlSecondary` llega cuando el rail trae la foto de hover. */
+  product: Product & { imageUrlSecondary?: string };
   /** Posición en el bundle (1-based). Usado para aria-label. */
   position: number;
 }
@@ -48,7 +49,13 @@ const { heading, subtitle, items, addAllHref, addAllLabel, totalLabel, itemsAria
   Astro.props;
 
 import { formatCurrency } from '../../../lib/formatters';
+import { deriveProductCardSwap } from '../../../lib/product-card-swap';
 import FbtAddAllButton from './FbtAddAllButton';
+
+/** Imagen de hover (rol BACK): campo explícito o `isHover` de la galería. */
+function hoverImageOf(product: Product & { imageUrlSecondary?: string }): string | undefined {
+  return product.imageUrlSecondary ?? deriveProductCardSwap(product).hoverImage?.url;
+}
 
 const totalCents = items.reduce((sum, item) => sum + item.product.priceCents, 0);
 const totalAmountLabel = formatCurrency(totalCents, items[0]?.product.currency ?? 'USD');
@@ -80,40 +87,55 @@ const bundleLines = items.map((item) => ({
     class="flex flex-wrap items-stretch justify-center gap-4 sm:gap-6"
     role="list"
     aria-label={itemsAriaLabel}
+    data-fbt-cards
   >
-    {items.map((item, idx) => (
-      <Fragment>
-        <li class="flex h-full w-32 flex-col items-center gap-2 sm:w-40">
-          <a
-            href={`/${locale}/products/${item.product.slug}`}
-            class="group flex h-full w-full flex-col items-center gap-2 text-center"
-            aria-label={`${item.product.name} — posición ${item.position} del bundle`}
-          >
-            <span class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition group-hover:border-[var(--primary,#475569)]">
-              <img
-                src={item.product.imageUrl}
-                alt={item.product.name}
-                loading="lazy"
-                decoding="async"
-                class="h-full w-full object-cover"
-              />
-            </span>
-            <span class="text-xs font-medium text-slate-900 sm:text-sm">{item.product.name}</span>
-            <span class="mt-auto text-xs font-bold tabular-nums text-slate-900">
-              {formatCurrency(item.product.priceCents, item.product.currency ?? 'USD')}
-            </span>
-          </a>
-        </li>
-        {idx < items.length - 1 && (
-          <li
-            aria-hidden="true"
-            class="flex h-12 w-8 items-center justify-center self-center text-2xl font-light text-slate-400"
-          >
-            +
+    {items.map((item, idx) => {
+      const secondary = hoverImageOf(item.product);
+      return (
+        <Fragment>
+          <li class="flex h-full w-32 flex-col items-center gap-2 sm:w-40">
+            <a
+              href={`/${locale}/products/${item.product.slug}`}
+              class="card__media group flex h-full w-full flex-col items-center gap-2 text-center"
+              aria-label={`${item.product.name} — posición ${item.position} del bundle`}
+            >
+              <span class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition group-hover:border-[var(--primary,#475569)]">
+                <img
+                  src={item.product.imageUrl}
+                  alt={item.product.name}
+                  loading="lazy"
+                  decoding="async"
+                  class="card__img--default h-full w-full object-cover"
+                />
+                {secondary !== undefined && (
+                  <img
+                    src={secondary}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    aria-hidden="true"
+                    data-role="back"
+                    class="card__img--back absolute inset-0 h-full w-full object-cover"
+                  />
+                )}
+              </span>
+              <span class="text-xs font-medium text-slate-900 sm:text-sm">{item.product.name}</span>
+              <span class="mt-auto text-xs font-bold tabular-nums text-slate-900">
+                {formatCurrency(item.product.priceCents, item.product.currency ?? 'USD')}
+              </span>
+            </a>
           </li>
-        )}
-      </Fragment>
-    ))}
+          {idx < items.length - 1 && (
+            <li
+              aria-hidden="true"
+              class="flex h-12 w-8 items-center justify-center self-center text-2xl font-light text-slate-400"
+            >
+              +
+            </li>
+          )}
+        </Fragment>
+      );
+    })}
   </ul>
 
   <footer class="mt-6 flex flex-col items-center gap-4 border-t border-slate-100 pt-6 sm:flex-row sm:justify-between">
@@ -124,3 +146,32 @@ const bundleLines = items.map((item) => ({
     <FbtAddAllButton client:visible lines={bundleLines} cartHref={addAllHref} label={addAllLabel} />
   </footer>
 </section>
+
+<style is:global>
+  /* Hover → imagen trasera (T3.5) — mismo contrato que
+     ProductCard.astro (cross-fade 250ms). Scoped a [data-fbt-cards]
+     para no pisar el stack de variantes de ProductRelated. Sin imagen
+     de hover no hay back en el DOM y nada cambia. */
+  [data-fbt-cards] .card__img--default {
+    opacity: 1;
+    transition: opacity 250ms ease;
+  }
+  [data-fbt-cards] .card__img--back {
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  @media (hover: hover) {
+    [data-fbt-cards] .card__media:hover .card__img--default {
+      opacity: 0;
+    }
+    [data-fbt-cards] .card__media:hover .card__img--back {
+      opacity: 1;
+    }
+  }
+  [data-fbt-cards] .card__media:focus-within .card__img--default {
+    opacity: 0;
+  }
+  [data-fbt-cards] .card__media:focus-within .card__img--back {
+    opacity: 1;
+  }
+</style>

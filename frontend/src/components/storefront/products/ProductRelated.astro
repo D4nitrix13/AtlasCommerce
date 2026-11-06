@@ -39,6 +39,7 @@
 import type { RelatedProduct } from '../../../data/product-detail-mock';
 import { formatCurrency } from '../../../lib/formatters';
 import { buildVariantPreviewCss, swatchFallbackHex } from '../../../lib/product-card-swap';
+import ProductRelatedMedia from './ProductRelatedMedia.astro';
 
 export interface ProductRelatedLabels {
   heading: string;
@@ -177,33 +178,12 @@ const variantPreviewCss = buildVariantPreviewCss([
             data-product-id={product.id}
             class="group flex h-full flex-col rounded-2xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md"
           >
-            <a
+            <ProductRelatedMedia
               href={`/${locale}/products/${product.slug}`}
-              class="relative block aspect-square overflow-hidden rounded-xl bg-slate-50"
-              aria-label={product.name}
-            >
-              {/* Stack de imágenes por variante — una `<img>` por acabado
-                                con su `data-variant-id` REAL (también la primera: si la primaria
-                                quedara como "default", el hover de su swatch no matchearía
-                                ninguna imagen). La primaria lleva además `.card__img--default`
-                                para verse sin hover; las reglas de cross-fade salen de
-                                `buildVariantPreviewCss` en el bloque global de abajo. */}
-              {variantImages.map((img, index) => (
-                <img
-                  src={img.imageUrl}
-                  alt={index === 0 ? product.name : ''}
-                  loading="lazy"
-                  decoding="async"
-                  aria-hidden={index === 0 ? undefined : 'true'}
-                  data-variant-id={img.id}
-                  class:list={[
-                    'card__img absolute inset-0 h-full w-full object-cover',
-                    'card__img--variant',
-                    index === 0 && 'card__img--default',
-                  ]}
-                />
-              ))}
-            </a>
+              productName={product.name}
+              variantImages={variantImages}
+              imageUrlSecondary={product.imageUrlSecondary}
+            />
 
             {/* Swatches: cuando hay 2+ variants, se muestran como
                             botones de COLOR REAL (hex por acabado, nunca

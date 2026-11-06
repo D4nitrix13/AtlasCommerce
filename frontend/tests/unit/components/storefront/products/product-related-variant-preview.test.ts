@@ -25,12 +25,15 @@ const RELATED_PATH = resolve(
 );
 
 const SOURCE = readFileSync(RELATED_PATH, 'utf-8');
+/** El stack de imágenes vive en el subcomponente extraído (límite de líneas). */
+const MEDIA = readFileSync(resolve(RELATED_PATH, '..', 'ProductRelatedMedia.astro'), 'utf-8');
 
 describe('ProductRelated — preview de variante en hover/focus del swatch', () => {
   it('cada imagen del stack se etiqueta con su data-variant-id real (también la primera)', () => {
-    expect(SOURCE).not.toMatch(/data-variant-id="default"/);
-    expect(SOURCE).not.toMatch(/variantImages\.slice\(1\)/);
-    expect(SOURCE).toMatch(/data-variant-id=\{img\.id\}/);
+    const stack = SOURCE + MEDIA;
+    expect(stack).not.toMatch(/data-variant-id="default"/);
+    expect(stack).not.toMatch(/variantImages\.slice\(1\)/);
+    expect(stack).toMatch(/data-variant-id=\{img\.id\}/);
   });
 
   it('las reglas de opacidad del preview viven en el CSS global, no en el <style> scoped', () => {

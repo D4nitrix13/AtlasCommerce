@@ -21,6 +21,8 @@ import { resolve } from 'node:path';
 const PRODUCTS_DIR = resolve(__dirname, '../../../../../src/components/storefront/products');
 
 const RELATED = readFileSync(resolve(PRODUCTS_DIR, 'ProductRelated.astro'), 'utf-8');
+/** El media stack vive en el subcomponente extraído (límite de líneas). */
+const RELATED_MEDIA = readFileSync(resolve(PRODUCTS_DIR, 'ProductRelatedMedia.astro'), 'utf-8');
 const FBT = readFileSync(
   resolve(PRODUCTS_DIR, 'ProductFrequentlyBoughtTogether.astro'),
   'utf-8',
@@ -68,8 +70,8 @@ describe('ProductRelated — cards de la misma altura (También Te Puede Gustar)
     // object-contain letterboxea (huecos) cuando la foto no es
     // cuadrada; object-cover escala proporcional y recorta bordes:
     // sin estirar, sin deformar, sin huecos.
-    expect(RELATED).not.toMatch(/object-contain/);
-    expect(card).toContain('object-cover');
+    expect(RELATED + RELATED_MEDIA).not.toMatch(/object-contain/);
+    expect(card + RELATED_MEDIA).toContain('object-cover');
   });
 });
 
