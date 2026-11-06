@@ -119,6 +119,15 @@ class StorefrontAuthController extends Controller
         // /me. Mismo patrón que AuthController::login.
         $token = $user->createToken(name: 'storefront-register', expiresAt: now()->addDays(7));
 
+        // Sanctum stateful (mismo patrón que AuthController::login):
+        // además del PAT, iniciar la sesión web para que el browser
+        // quede logueado via cookie httpOnly y /me responda sin
+        // re-login. Guard con hasSession() porque los tests Bearer-only
+        // corren sin sesión (driver=array, sin request stateful).
+        if ($request->hasSession()) {
+            auth('web')->login($user);
+        }
+
         // Cargamos el customer para la response (relación inversa
         // user->customer no existe en el modelo, pero podemos
         // obtenerlo via el user_id).
