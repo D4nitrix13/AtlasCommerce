@@ -105,6 +105,20 @@ final class OAuthRedirectTarget
     }
 
     /**
+     * ¿El path corresponde a una página de login (no de signup)?
+     *
+     * Usado por el callback para distinguir el intent del flow: desde el
+     * login, un email ya registrado es lo esperado y se vincula la
+     * identidad; desde el signup es un conflicto.
+     */
+    public static function isLoginPath(string $path): bool
+    {
+        $bare = self::stripLocaleFromPath($path);
+
+        return str_ends_with($bare, '/admin/auth/login') || str_ends_with($bare, '/account/login');
+    }
+
+    /**
      * Construye el path de login al que redirigir en failure.
      *
      * Combina `stripLocaleFromPath` + decisión admin/account según

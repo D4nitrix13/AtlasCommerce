@@ -173,11 +173,19 @@ class SocialAuthController extends Controller
                 throw new OAuthStateMismatchException(provider: $provider);
             }
 
-            // Resolve identity (5 branches, A3-A8).
+            // Resolve identity (5 branches, A3-A8). El intent del flow
+            // viene del path que guardamos al iniciar el redirect: si el
+            // usuario venía del login, un email ya registrado es esperado
+            // y se vincula la identidad en vez de rechazar.
+            $storedTarget = $request->hasSession()
+                ? $request->session()->get(key: self::SESSION_REDIRECT_TARGET)
+                : null;
+
             $user = $this->socialAccountService->findOrCreateFromProvider(
                 providerUser: $providerUser,
                 host: (string) $request->getHost(),
                 provider: $provider,
+                linkExistingByEmail: is_string($storedTarget) && OAuthRedirectTarget::isLoginPath($storedTarget),
             );
 
             // Tenant gate (A9) — same logic as AuthController::login.

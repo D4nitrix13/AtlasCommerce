@@ -37,7 +37,7 @@ const en: Translations = {
   'auth.login.error.invalid': 'Invalid credentials.',
   'auth.login.error.disabled': 'This account is disabled.',
   'auth.login.error.oauth_email_conflict':
-    'That email is already registered. Sign in with your password and link Google/Facebook from your account.',
+    'That email is already registered. Sign in with your password to access your account.',
   'auth.login.error.oauth_email_unverified':
     'Your OAuth provider reported the email as unverified. Verify it in Google and try again.',
   'auth.login.error.oauth_admin_signup_disabled':

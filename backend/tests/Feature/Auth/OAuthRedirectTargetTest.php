@@ -162,15 +162,17 @@ final class OAuthRedirectTargetTest extends TestCase
     }
 
     #[Test]
-    public function from_request_works_without_locale_prefix(): void
+    public function from_request_adds_locale_prefix_when_path_has_none(): void
     {
-        // Host sin locale en el routing (ej: ruta legacy `/admin/auth/login`).
+        // Path sin locale (ej: ruta legacy `/admin/auth/login`): el router
+        // del frontend exige `/<locale>/`, así que se agrega el default
+        // en vez de emitir un path sin prefijo.
         $result = OAuthRedirectTarget::fromRequest(
             originalPath: '/admin/auth/login',
             host: 'admin.panda-estampados.com',
         );
 
-        $this->assertSame(expected: '/admin/auth/login', actual: $result);
+        $this->assertSame(expected: '/es/admin/auth/login', actual: $result);
     }
 
     #[Test]

@@ -131,6 +131,36 @@ final class SocialAccountServiceFullTest extends TestCase
         $this->assertSame(expected: $socialCountBefore, actual: SocialAccount::count());
     }
 
+    #[Test]
+    public function find_or_create_links_existing_user_when_login_intent_and_email_matches(): void
+    {
+        // Regresión: desde el login, un email ya registrado es lo esperado.
+        // Como el provider ya verificó el email (R9), se asume que es la
+        // misma persona — se vincula la identidad y se devuelve el user
+        // existente, en vez de rechazar con oauth_email_conflict.
+        $existing = User::factory()->create(['email' => 'carlos@example.com']);
+
+        $oauthUser = $this->makeSocialiteUser(
+            providerId: 'g-new',
+            email: 'carlos@example.com',
+            emailVerified: true,
+        );
+
+        $result = $this->service->findOrCreateFromProvider(
+            providerUser: $oauthUser,
+            host: 'panda-estampados.com',
+            provider: 'google',
+            linkExistingByEmail: true,
+        );
+
+        $this->assertSame(expected: $existing->id, actual: $result->id);
+        $this->assertDatabaseHas(table: 'social_accounts', data: [
+            'user_id' => $existing->id,
+            'provider' => 'google',
+            'provider_user_id' => 'g-new',
+        ]);
+    }
+
     // ---------------------------------------------------------------------
     // Scenario A5 — email_unverified (Google only — R9)
     // ---------------------------------------------------------------------

@@ -99,6 +99,7 @@ class SocialAccountService
         ProviderUserContract $providerUser,
         string $host,
         string $provider,
+        bool $linkExistingByEmail = false,
     ): User {
         $providerUserId = (string) $providerUser->getId();
         $email = $providerUser->getEmail();
@@ -117,12 +118,29 @@ class SocialAccountService
         // 3. Email conflict detection (R1) — solo si el provider
         // devolvió email. Si email es null, skip (Google puede no
         // compartir email si el scope es limitado).
+        //
+        // `$linkExistingByEmail` distingue el intent del flow: si el
+        // usuario venía del login (no del signup), un email ya registrado
+        // es lo esperado, y como el provider ya verificó el email (branch 2)
+        // podemos asumir que es la misma persona — vinculamos la identidad
+        // y devolvemos el user para que entre. Sin esto, el botón de Google
+        // en la página de login era un callejón sin salida.
         if ($email !== null) {
             $existingByEmail = User::query()
                 ->where(column: 'email', operator: '=', value: $email)
                 ->first();
             if ($existingByEmail !== null) {
-                throw new OAuthEmailConflictException(email: $email);
+                if (! $linkExistingByEmail) {
+                    throw new OAuthEmailConflictException(email: $email);
+                }
+
+                $this->createSocialAccount(
+                    user: $existingByEmail,
+                    providerUser: $providerUser,
+                    provider: $provider,
+                );
+
+                return $existingByEmail;
             }
         }
 
