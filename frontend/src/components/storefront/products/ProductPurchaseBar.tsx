@@ -111,10 +111,10 @@ export default function ProductPurchaseBar({
 
   return (
     <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-end">
-      <div className="flex flex-col gap-1.5 text-sm font-semibold text-slate-900">
-        {resolved.quantity}
+      <div className="flex flex-col gap-1.5">
+        <span className="micro-label">{resolved.quantity}</span>
         <div
-          className="inline-flex w-fit items-center overflow-hidden rounded-lg border border-slate-200"
+          className="pressable inline-flex w-fit items-center overflow-hidden rounded-full border border-[var(--line,#d6d3d1)] bg-white"
           role="group"
           aria-label={resolved.quantity}
         >
@@ -123,12 +123,12 @@ export default function ProductPurchaseBar({
             aria-label={resolved.decrement}
             disabled={stepState.decrementDisabled}
             onClick={handleDecrement}
-            className="flex h-10 w-10 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center text-[var(--ink-soft,#57534e)] transition hover:bg-[var(--primary-soft,#e6f2f0)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span aria-hidden="true">−</span>
           </button>
           <span
-            className="flex h-10 min-w-[3rem] items-center justify-center border-x border-slate-200 px-3 text-sm font-semibold tabular-nums text-slate-900"
+            className="flex h-10 min-w-[3rem] items-center justify-center border-x border-[var(--line,#d6d3d1)] px-3 text-sm font-semibold tabular-nums text-[var(--ink,#1c1917)]"
             aria-live="polite"
           >
             {stepState.value}
@@ -138,7 +138,7 @@ export default function ProductPurchaseBar({
             aria-label={resolved.increment}
             disabled={stepState.incrementDisabled}
             onClick={handleIncrement}
-            className="flex h-10 w-10 items-center justify-center text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center text-[var(--ink-soft,#57534e)] transition hover:bg-[var(--primary-soft,#e6f2f0)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span aria-hidden="true">+</span>
           </button>
@@ -150,7 +150,7 @@ export default function ProductPurchaseBar({
         type="button"
         disabled={isOutOfStock}
         onClick={handleAdd}
-        className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-slate-900 px-6 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+        className="pressable inline-flex h-12 flex-1 items-center justify-center rounded-lg bg-[var(--primary,#2D9D8E)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--paper-sunken,#ebe6dd)] disabled:text-[var(--ink-faint,#a8a29e)]"
       >
         {added ? resolved.added : resolved.addToCart}
       </button>
@@ -159,13 +159,13 @@ export default function ProductPurchaseBar({
         type="button"
         disabled={isOutOfStock}
         onClick={handleBuyNow}
-        className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-slate-900 bg-white px-6 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-500"
+        className="pressable inline-flex h-12 flex-1 items-center justify-center rounded-lg border border-[var(--line,#d6d3d1)] bg-transparent px-6 text-sm font-semibold text-[var(--ink,#1c1917)] transition hover:bg-[var(--primary-soft,#e6f2f0)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-[var(--edge,#e7e5e1)] disabled:text-[var(--ink-faint,#a8a29e)]"
       >
         {resolved.buyNow}
       </button>
 
       {isOutOfStock && (
-        <span className="inline-flex h-12 items-center justify-center rounded-full bg-slate-200 px-6 text-sm font-semibold text-slate-500">
+        <span className="inline-flex h-12 items-center justify-center rounded-lg bg-[var(--paper-sunken,#ebe6dd)] px-6 text-sm font-semibold text-[var(--ink-faint,#a8a29e)]">
           {resolved.outOfStock}
         </span>
       )}
