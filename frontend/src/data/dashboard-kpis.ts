@@ -166,6 +166,14 @@ const STAGE_INDEX: Record<ProductionTicket['status'], number> = {
   cancelled: -1,
 };
 
+/**
+ * Índice 0..3 de la etapa de producción para un status de orden
+ * (`-1` cuando está cancelada). Exportado para que el ledger de
+ * `/account/orders` reutilice la misma escala que la tira del
+ * dashboard — una sola verdad para el rail.
+ */
+export const PRODUCTION_STAGE_INDEX = STAGE_INDEX;
+
 const isActiveStatus = (status: ProductionTicket['status']): boolean =>
   status === 'pending' || status === 'processing' || status === 'shipped';
 

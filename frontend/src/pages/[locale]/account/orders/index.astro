@@ -1,165 +1,140 @@
 ---
 /**
- * `/[locale]/account/orders` — Mis órdenes (Bonfire mockup 10 v3).
+ * `/[locale]/account/orders` — Mis pedidos (ledger job-ticket).
  *
- * Composición:
- *  - H1 + subtítulo con count total.
- *  - Fila de filter pills (StatusFilter, visual-only por ahora).
- *  - Lista de cards colapsables (OrderRow) con `<details>` nativo.
- *  - Empty state con dashed border + CTA.
+ * Composición (consistente con el dashboard rediseñado):
+ *  1. Header quieto: eyebrow micro-label + H1 Fraunces + subtítulo,
+ *     con el sort select a la derecha.
+ *  2. StatusFilter — pills de tinta que filtran de verdad (links GET
+ *     sobre la query string, patrón SSR de la PLP).
+ *  3. OrdersLedger — la hoja del taller: cabecera kraft + una fila
+ *     por trabajo (mini-rail de etapas + chip de tinta como focal).
+ *  4. Footer del ledger: "mostrando X de Y" + Cargar más órdenes.
+ *
+ * Estado vacío diseñado (`StudioEmptyState`) cuando nunca hubo
+ * trabajos; estado de filtro sin resultados vive dentro del ledger.
  *
  * Decisiones:
- *  - `<details>` nativo para expand/collapse (sin JS, accesible).
- *  - El filter es visual (click handler se agregará después). El
- *    `current` se mantiene en estado de servidor para que la
- *    primera fila activa de pills siempre refleje un estado real.
- *  - Statuses se mapean a los strings existentes
- *    `account.orderStatus.*` (no se duplican).
- *  - Subtotal del header usa el helper `countOf` ya existente para
- *    mantener paridad con la versión legacy.
- *  - `data-reveal-stagger` activa la animación escalonada de
- *    scroll-fx.css (no requiere JS).
- *
- * Multi-tenant: el shell hereda tokens del tenant vía AccountLayout.
+ *  - Filtrado/orden/corte en SSR vía `lib/orders-filters.ts` — sin
+ *    islas React y sin estado en cliente.
+ *  - Los datos siguen viniendo de mocks (`data/orders-mock`): no se
+ *    inventan endpoints de backend.
+ *  - "Solicitar cambio" abre el mail del soporte del tenant.
  */
 import AccountLayout from '../../../../layouts/AccountLayout.astro';
-import OrderRow from '../../../../components/account/orders/OrderRow.astro';
+import OrdersLedger from '../../../../components/account/orders/OrdersLedger.astro';
+import OrdersSortSelect from '../../../../components/account/orders/OrdersSortSelect.astro';
 import StatusFilter from '../../../../components/account/orders/StatusFilter.astro';
-import type { OrderStatusFilterValue } from '../../../../components/account/orders/StatusFilter.astro';
+import StudioEmptyState from '../../../../components/account/dashboard/StudioEmptyState.astro';
 import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
 import { getAllOrders } from '../../../../data/orders-mock';
-import type { OrderStatus } from '../../../../data/account-mock';
+import {
+  DEFAULT_ORDERS_SHOWN,
+  ORDER_STATUS_FILTER_VALUES,
+  applyOrdersQuery,
+  buildOrdersHref,
+  countOrdersByStatus,
+  parseOrdersQuery,
+  type OrderStatusFilterValue,
+} from '../../../../lib/orders-filters';
+import { getBrandBySlug } from '../../../../config/stores';
+import { themeToBrand } from '../../../../lib/theme';
+import type { TranslationKey } from '../../../../i18n/types';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
+const localePrefix = `/${locale}`;
+const ordersPath = `${localePrefix}/account/orders`;
 
-const ALL_ORDERS = getAllOrders();
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const brand = themeToBrand(Astro.locals.theme, getBrandBySlug(tenantSlug));
 
-// Status filter options (Bonfire v3 spec: 6 pills, "Todas" primero).
-const FILTER_VALUES: readonly OrderStatusFilterValue[] = [
-  'all',
-  'pending',
-  'processing',
-  'shipped',
-  'delivered',
-  'cancelled',
-];
+const allOrders = getAllOrders();
+const query = parseOrdersQuery(Astro.url.searchParams);
+const counts = countOrdersByStatus(allOrders);
+const visibleOrders = applyOrdersQuery(allOrders, query);
 
-function countByStatus(status: OrderStatus): number {
-  return ALL_ORDERS.filter((order) => order.status === status).length;
-}
+const FILTER_LABEL_KEY: Record<OrderStatusFilterValue, TranslationKey> = {
+  all: 'account.orders.list.filter.all',
+  pending: 'account.orders.list.filter.pending',
+  processing: 'account.orders.list.filter.processing',
+  shipped: 'account.orders.list.filter.shipped',
+  delivered: 'account.orders.list.filter.delivered',
+  cancelled: 'account.orders.list.filter.cancelled',
+};
 
-const filterOptions = FILTER_VALUES.map((value) => ({
+const filterOptions = ORDER_STATUS_FILTER_VALUES.map((value) => ({
   value,
-  label: t[`storefront.account.orders.v3.filter.${value}` as const],
-  count: value === 'all' ? ALL_ORDERS.length : countByStatus(value as OrderStatus),
+  label: t[FILTER_LABEL_KEY[value]],
+  count: counts[value],
+  href: `${ordersPath}${buildOrdersHref(query, { status: value })}`,
 }));
 
-// Default filter: "all" (visual state only — no SSR filtering yet).
-const currentFilter: OrderStatusFilterValue = 'all';
+const filteredCount = counts[query.status];
+const hasAnyOrder = allOrders.length > 0;
+const hasMore = visibleOrders.length < filteredCount;
+const loadMoreHref = `${ordersPath}${buildOrdersHref(query, {
+  shown: query.shown + DEFAULT_ORDERS_SHOWN,
+})}`;
+const showingLabel = t['account.orders.ledger.showing']
+  .replace('{shown}', String(visibleOrders.length))
+  .replace('{count}', String(filteredCount));
 
-const showEmpty = ALL_ORDERS.length === 0;
-const totalCount = ALL_ORDERS.length;
-
-const orderIdTemplate = t['account.dashboard.recentOrders.orderId'];
-const orderIdLabel = (id: string): string => orderIdTemplate.replace('{id}', id);
-
-const statusLabel = (status: OrderStatus): string => t[`account.orderStatus.${status}` as const];
-
-const subtitle = t['storefront.account.orders.v3.subtitle'].replace('{count}', String(totalCount));
-
-const localePrefix = `/${locale}`;
-const currencyCode = 'USD';
-
-// Default open: only the first order, para que la página muestre
-// el body expandido como demo. El resto arranca colapsado.
-const ordersToRender = showEmpty ? [] : [...ALL_ORDERS];
+const catalogHref = `${localePrefix}/products`;
+const quoteHref = `${localePrefix}/rfq`;
 ---
 
-<AccountLayout title={t['storefront.account.orders.v3.title']}>
-  <section
-    aria-labelledby="my-orders-heading"
-    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-  >
-    <header class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h1
-          id="my-orders-heading"
-          class="text-3xl sm:text-4xl"
-        >
-          {t['storefront.account.orders.v3.title']}
-        </h1>
-        <p class="mt-1 text-sm text-slate-500">{subtitle}</p>
-      </div>
-
-      {/* CTA prominent estilo Nike: 'Volver a pedir' (re-order) como
-          accion principal del header. El re-order button en cada row
-          individual sigue presente (visible al expandir la card).
-          Aca lo exponemos a nivel de pagina para los clientes que
-          repiten compras (nike.com member/orders tiene este mismo
-          patron). */}
-      <a
-        href={`${localePrefix}/products`}
-        class="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--primary,#7c3aed)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#6d28d9)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
-      >
-        {t['storefront.account.orders.v3.reorder']}
-      </a>
-    </header>
-
-    <div class="mb-5">
-      <StatusFilter
-        current={currentFilter}
-        options={filterOptions}
-        navLabel={t['storefront.account.orders.v3.filter.all']}
-      />
-    </div>
-
-    {showEmpty ? (
-      <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-        <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-white"
-          aria-hidden="true"
-        >
-          <span class="h-2 w-2 rounded-full bg-[var(--primary)]"></span>
+<AccountLayout title={t['account.orders.list.heading']}>
+  {!hasAnyOrder ? (
+    <StudioEmptyState variant="first" t={t} catalogHref={catalogHref} quoteHref={quoteHref} />
+  ) : (
+    <section aria-labelledby="my-orders-heading" class="flex flex-col gap-6">
+      <header class="flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p class="micro-label">{t['account.orders.ledger.eyebrow']}</p>
+          <h1 id="my-orders-heading" class="mt-2 text-4xl lg:text-[44px]">
+            {t['account.orders.list.heading']}
+          </h1>
+          <p class="mt-2 text-[15px] text-[var(--ink-muted)]">
+            {t['account.orders.ledger.subtitle'].replace('{count}', String(allOrders.length))}
+          </p>
         </div>
-        <p class="text-base font-semibold text-slate-900">
-          {t['storefront.account.orders.v3.empty']}
-        </p>
-        <a
-          href={`${localePrefix}/products`}
-          class="mt-2 inline-flex items-center gap-1 rounded-lg bg-[var(--primary,#7c3aed)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
-        >
-          {t['storefront.account.orders.v3.emptyCta']}
-        </a>
+        <OrdersSortSelect
+          currentSort={query.sort}
+          statusValue={query.status}
+          actionHref={ordersPath}
+          t={t}
+        />
+      </header>
+
+      <StatusFilter
+        current={query.status}
+        options={filterOptions}
+        navLabel={t['account.orders.ledger.filterLabel']}
+      />
+
+      <OrdersLedger
+        orders={visibleOrders}
+        localePrefix={localePrefix}
+        supportEmail={brand.supportEmail}
+        clearFilterHref={`${ordersPath}${buildOrdersHref(query, { status: 'all' })}`}
+        t={t}
+      />
+
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <p class="text-[13px] tabular-nums text-[var(--ink-muted)]">{showingLabel}</p>
+        {hasMore && (
+          <a
+            href={loadMoreHref}
+            class="pressable inline-flex min-h-10 items-center gap-2 rounded-[10px] border px-5 py-2.5 text-sm font-semibold text-[var(--ink)]"
+            style="border-color:var(--edge-strong);background:var(--paper-raised)"
+            data-testid="orders-load-more"
+          >
+            {t['account.orders.ledger.loadMore']}
+            <span aria-hidden="true">↓</span>
+          </a>
+        )}
       </div>
-    ) : (
-      <div class="flex flex-col gap-3" data-reveal-stagger>
-        {ordersToRender.map((order, index) => (
-          <OrderRow
-            order={order}
-            currencyCode={currencyCode}
-            localePrefix={localePrefix}
-            orderIdLabel={orderIdLabel(order.id)}
-            statusLabel={statusLabel(order.status)}
-            etaLabel={t['storefront.account.orders.v3.eta']}
-            itemsHeading={t['storefront.account.orders.v3.items']}
-            shippingHeading={t['storefront.account.orders.v3.shippingAddress']}
-            paymentHeading={t['storefront.account.orders.v3.payment']}
-            recipientLabel={t['storefront.account.orders.v3.recipient']}
-            phoneLabel={t['storefront.account.orders.v3.phone']}
-            addressLabel={t['storefront.account.orders.v3.address']}
-            countryLabel={t['storefront.account.orders.v3.country']}
-            methodLabel={t['storefront.account.orders.v3.method']}
-            subtotalLabel={t['storefront.account.orders.v3.subtotal']}
-            totalLabel={t['storefront.account.orders.v3.total']}
-            reorderLabel={t['storefront.account.orders.v3.reorder']}
-            viewDetailLabel={t['storefront.account.orders.v3.expand']}
-            viewInvoiceLabel={t['storefront.account.orders.v3.viewInvoice']}
-            trackShipmentLabel={t['storefront.account.orders.v3.trackShipment']}
-            defaultOpen={index === 0}
-          />
-        ))}
-      </div>
-    )}
-  </section>
+    </section>
+  )}
 </AccountLayout>

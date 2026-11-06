@@ -1,0 +1,149 @@
+---
+/**
+ * OrderTicketRow — una fila-trabajo del ledger de órdenes.
+ *
+ * Checkpoint de diseño:
+ *   Intent:   el cliente escanea su historial como un ledger de
+ *             trabajos de imprenta: ¿dónde está cada uno, qué pasó,
+ *             qué puedo hacer?
+ *   Hierarchy: UN focal por fila = el mini-rail de etapas + el chip de
+ *             tinta (lenguaje del dashboard). El id, la fecha, las
+ *             piezas y el total se demoten a metadata secundaria; las
+ *             acciones son una fila compacta de links.
+ *   Palette:  papel + tinta; tintas semánticas en el rail/chip;
+ *             `--primary` solo en el anillo de etapa actual y en
+ *             "Volver a pedir".
+ *   Depth:    plano dentro de la hoja `paper-card` del ledger.
+ *   Type:     id en Fraunces 17px (identidad), metadata 12-13px muted,
+ *             total tabular-nums/600.
+ *   Spacing:  celdas 16-20px; ritmo denso de ledger.
+ *
+ * Reutiliza `InkChip` y la escala `PRODUCTION_STAGE_INDEX` del
+ * dashboard — una sola verdad para las etapas.
+ */
+import type { OrderMock } from '../../../data/orders-mock';
+import { countOrderItems } from '../../../data/orders-mock';
+import { PRODUCTION_STAGE_INDEX } from '../../../data/dashboard-kpis';
+import { formatCurrency, formatDate } from '../../../lib/formatters';
+import type { TranslationKey } from '../../../i18n/types';
+import InkChip from '../dashboard/InkChip.astro';
+import OrderRowActions from './OrderRowActions.astro';
+
+interface Props {
+  order: OrderMock;
+  localePrefix: string;
+  supportEmail: string;
+  t: Record<TranslationKey, string>;
+}
+
+const { order, localePrefix, supportEmail, t } = Astro.props;
+
+const STAGE_INKS = [
+  'var(--ink-received)',
+  'var(--ink-press)',
+  'var(--ink-transit)',
+  'var(--ink-done)',
+] as const;
+
+const stageIndex = PRODUCTION_STAGE_INDEX[order.status];
+const pieces = countOrderItems(order);
+const totalLabel = formatCurrency(order.totalCents, 'USD');
+const detailHref = `${localePrefix}/account/orders/${order.id}`;
+const isDelivered = order.status === 'delivered';
+
+const reorderHref =
+  isDelivered && order.items.length > 0
+    ? `${localePrefix}/products/${order.items[0].productSlug}`
+    : null;
+
+const changeSubject = t['account.orders.action.requestChangeSubject'].replace('{id}', order.id);
+const changeBody = t['account.orders.action.requestChangeBody']
+  .replace('{id}', order.id)
+  .replace('{date}', formatDate(order.date));
+const requestChangeHref = `mailto:${supportEmail}?subject=${encodeURIComponent(
+  changeSubject
+)}&body=${encodeURIComponent(changeBody)}`;
+
+const orderIdTemplate = t['account.dashboard.recentOrders.orderId'];
+const detailLabel = `${t['account.orders.list.viewDetail']} — ${orderIdTemplate.replace('{id}', order.id)}`;
+
+/**
+ * Mini-rail: nodos y conectores por etapa. Hecho = tinta sólida,
+ * actual = tinta + anillo `--primary`, futuro = hueco en el papel.
+ */
+const railSegments = STAGE_INKS.map((ink, index) => {
+  const isFuture = stageIndex < 0 || index > stageIndex;
+  const isCurrent = index === stageIndex;
+  return {
+    node: isFuture
+      ? 'background:var(--paper-sunken);box-shadow:inset 0 0 0 1px var(--edge-strong)'
+      : isCurrent
+        ? `background:${ink};box-shadow:0 0 0 2px var(--primary)`
+        : `background:${ink}`,
+    connector: isFuture
+      ? 'background:var(--edge)'
+      : isCurrent
+        ? 'background:color-mix(in srgb, var(--primary) 40%, transparent)'
+        : `background:${ink}`,
+  };
+});
+---
+
+<tr
+  class="border-b transition-colors last:border-b-0 hover:bg-[var(--paper-sunken)]"
+  style="border-color:var(--edge-soft)"
+  data-order-id={order.id}
+  data-testid="order-ticket-row"
+>
+  {/* Identidad del trabajo — el id es el link al detalle. */}
+  <td class="px-5 py-4 align-middle">
+    <a
+      href={detailHref}
+      aria-label={detailLabel}
+      class="pressable inline-flex min-h-10 items-center font-display text-[17px] font-medium tracking-tight text-[var(--ink)] hover:text-[var(--primary)] hover:underline"
+    >
+      #{order.id}
+    </a>
+    <p class="text-[12px] text-[var(--ink-muted)]">
+      <time datetime={order.date}>{formatDate(order.date)}</time>
+    </p>
+  </td>
+
+  {/* FOCAL — mini-rail de etapas + chip de tinta. */}
+  <td class="px-5 py-4 align-middle">
+    <div class="flex flex-col gap-2">
+      <ol
+        class="flex items-center gap-1"
+        aria-label={t['account.dashboard.ticket.railLabel']}
+        data-testid="order-stage-rail"
+      >
+        {railSegments.map((segment, index) => (
+          <li class="flex items-center">
+            <span class="h-2.5 w-2.5 rounded-[3px]" style={segment.node}></span>
+            {index < railSegments.length - 1 && (
+              <span class="mx-1 h-[2px] w-5 rounded-full" style={segment.connector}></span>
+            )}
+          </li>
+        ))}
+      </ol>
+      <InkChip status={order.status} t={t} />
+    </div>
+  </td>
+
+  <td class="whitespace-nowrap px-5 py-4 text-right text-[13px] tabular-nums text-[var(--ink-muted)]">
+    {pieces}
+  </td>
+
+  <td class="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold tabular-nums">
+    {totalLabel}
+  </td>
+
+  <td class="px-5 py-3 align-middle">
+    <OrderRowActions
+      requestChangeHref={requestChangeHref}
+      trackHref={order.trackingUrl ?? null}
+      reorderHref={reorderHref}
+      t={t}
+    />
+  </td>
+</tr>

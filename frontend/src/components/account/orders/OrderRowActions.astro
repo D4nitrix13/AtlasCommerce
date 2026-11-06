@@ -1,41 +1,59 @@
 ---
 /**
- * OrderRowActions — celda de acciones para una fila de OrdersTable.
+ * OrderRowActions — fila compacta de acciones de un ticket del ledger.
  *
- * Sigue la decisión del dashboard (`dashboard/index.astro`): el
- * "View detail" es un link real al detail page (no un botón que
- * delega a un handler). Mantenerlo como `<a>` permite pre-fetching
- * por el navegador y no requiere hidratar nada (AGENTS §18).
+ * Checkpoint de diseño:
+ *   Intent:   "qué puedo hacer con este trabajo" en una fila de links
+ *             silenciosa — nunca botones grandes que compitan con el
+ *             rail de etapas (el focal del row).
+ *   Hierarchy: tier 3 — links 12px muted; sólo "Volver a pedir" lleva
+ *             acento `--primary` (la acción que trae plata).
+ *   Palette:  ink-muted → hover primary. Sin fills, sin bordes.
+ *   Depth:    plano.
+ *   Type:     12px/500, hover subrayado.
+ *   Spacing:  8px de separación; hit-area 40px por link.
  *
- * Accesibilidad:
- *  - `<a>` con texto visible + aria-label que agrega el contexto
- *    "Pedido #XXX" para que SR no se pierda si solo queda el ícono.
+ * "Solicitar cambio" abre el mail del soporte del tenant (el flujo
+ * in-app de solicitudes aún no existe — no se inventa backend).
  */
+import type { TranslationKey } from '../../../i18n/types';
+
 interface Props {
-  orderId: string;
-  detailHref: string;
-  viewDetailLabel: string;
-  orderIdTemplate: string;
+  requestChangeHref: string;
+  trackHref?: string | null;
+  reorderHref?: string | null;
+  t: Record<TranslationKey, string>;
 }
 
-const { orderId, detailHref, viewDetailLabel, orderIdTemplate } = Astro.props;
+const { requestChangeHref, trackHref = null, reorderHref = null, t } = Astro.props;
 
-const orderLabel = orderIdTemplate.replace('{id}', orderId);
+const quietLink =
+  'pressable inline-flex min-h-10 items-center text-[12px] font-medium text-[var(--ink-muted)] hover:text-[var(--primary)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 rounded-[4px]';
+const accentLink =
+  'pressable inline-flex min-h-10 items-center text-[12px] font-semibold text-[var(--primary)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 rounded-[4px]';
 ---
 
-<div class="flex items-center justify-end gap-2">
-  <a
-    href={detailHref}
-    aria-label={`${viewDetailLabel} — ${orderLabel}`}
-    class:list={[
-      'inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors',
-      'hover:border-[var(--primary,#7c3aed)] hover:bg-[color-mix(in_srgb,var(--primary,#7c3aed)_6%,white)] hover:text-[var(--primary,#7c3aed)]',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2',
-    ]}
-  >
-    <span>{viewDetailLabel}</span>
-    <span aria-hidden="true" class="text-xs">
-      →
-    </span>
+<div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+  <a href={requestChangeHref} class={quietLink} data-testid="order-request-change">
+    {t['account.orders.action.requestChange']}
   </a>
+  {trackHref !== null && (
+    <a
+      href={trackHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      class={quietLink}
+      data-testid="order-track-shipment"
+    >
+      {t['storefront.account.orders.v3.trackShipment']}
+    </a>
+  )}
+  {reorderHref !== null && (
+    <a href={reorderHref} class={accentLink} data-testid="order-reorder">
+      {t['account.orders.detail.reorder']}
+      <span aria-hidden="true" class="ml-1">
+        →
+      </span>
+    </a>
+  )}
 </div>
