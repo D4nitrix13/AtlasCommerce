@@ -1,0 +1,93 @@
+---
+/**
+ * OrdersLedger — la hoja-ledger de trabajos (job tickets).
+ *
+ * Checkpoint de diseño:
+ *   Intent:   el historial de impresión del cliente leído como el
+ *             libro de trabajos del taller: una hoja, cabecera kraft,
+ *             filas densas.
+ *   Hierarchy: tier 1 de la página (debajo del header quieto). Cada
+ *             fila lleva su propio focal (rail + chip) dentro de una
+ *             tabla que no compite.
+ *   Palette:  hoja papel + banda kraft en el thead; divisores
+ *             `--edge-soft`; hover `--paper-sunken`.
+ *   Depth:    una sola hoja `paper-card` (sombras en capas).
+ *   Type:     micro-labels en cabecera (11px tracked), 13-14px body,
+ *             números tabular-nums.
+ *   Spacing:  20px celdas, 14px 20px en el header kraft.
+ *
+ * Consistente con `RecentOrdersTable` del dashboard (tabla densa sobre
+ * hoja elevada) pero con banda kraft — es EL ledger de la sección.
+ */
+import type { OrderMock } from '../../../data/orders-mock';
+import type { TranslationKey } from '../../../i18n/types';
+import OrderTicketRow from './OrderTicketRow.astro';
+
+interface Props {
+  orders: readonly OrderMock[];
+  localePrefix: string;
+  supportEmail: string;
+  /** Query string actual para el link "ver todos" del estado vacío. */
+  clearFilterHref: string;
+  t: Record<TranslationKey, string>;
+}
+
+const { orders, localePrefix, supportEmail, clearFilterHref, t } = Astro.props;
+
+const hasOrders = orders.length > 0;
+---
+
+<div class="paper-card overflow-hidden" data-reveal data-testid="orders-ledger">
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[760px] text-left">
+      <thead>
+        <tr class="border-b" style="background:var(--kraft-soft);border-color:var(--edge)">
+          <th class="micro-label px-5 py-3.5 font-medium" style="color:var(--ink-soft)">
+            {t['account.dashboard.ledger.column.ticket']}
+          </th>
+          <th class="micro-label px-5 py-3.5 font-medium" style="color:var(--ink-soft)">
+            {t['account.dashboard.ledger.column.stage']}
+          </th>
+          <th class="micro-label px-5 py-3.5 text-right font-medium" style="color:var(--ink-soft)">
+            {t['account.dashboard.ledger.column.pieces']}
+          </th>
+          <th class="micro-label px-5 py-3.5 text-right font-medium" style="color:var(--ink-soft)">
+            {t['account.dashboard.ledger.column.total']}
+          </th>
+          <th class="micro-label px-5 py-3.5 text-right font-medium" style="color:var(--ink-soft)">
+            {t['account.orders.list.column.actions']}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {hasOrders ? (
+          orders.map((order) => (
+            <OrderTicketRow
+              order={order}
+              localePrefix={localePrefix}
+              supportEmail={supportEmail}
+              t={t}
+            />
+          ))
+        ) : (
+          <tr data-testid="orders-ledger-empty-filter">
+            <td colspan="5" class="px-6 py-12 text-center">
+              <p class="font-display text-xl">{t['account.orders.ledger.emptyFilter.title']}</p>
+              <p class="mt-2 text-sm text-[var(--ink-muted)]">
+                {t['account.orders.ledger.emptyFilter.hint']}
+              </p>
+              <a
+                href={clearFilterHref}
+                class="pressable mt-4 inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[var(--primary)] hover:underline"
+                data-testid="orders-ledger-clear-filter"
+              >
+                {t['account.orders.ledger.emptyFilter.clear']}
+                <span aria-hidden="true">→</span>
+              </a>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>

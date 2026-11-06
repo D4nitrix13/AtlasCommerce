@@ -2125,6 +2125,8 @@ const en: Translations = {
   // ─── account: order tracking detail (F2.2) ─────────────
   'account.orders.detail.heading': 'Order detail',
   'account.orders.detail.backToList': 'Back to my orders',
+  'account.orders.detail.invoice': 'Download invoice',
+  'account.orders.detail.requestChange': 'Request a change',
   'account.orders.detail.summary.heading': 'Summary',
   'account.orders.detail.summary.placedOn': 'Placed on',
   'account.orders.detail.summary.orderNumber': 'Order',
@@ -2176,6 +2178,28 @@ const en: Translations = {
   'account.orders.detail.addedDaysAgo': '{days} days ago',
   'account.orders.detail.addedYesterday': 'yesterday',
   'account.orders.detail.addedToday': 'today',
+
+  // ─── account: orders ledger (job-ticket redesign) ──────────────
+  'account.orders.ledger.eyebrow': 'Job history',
+  'account.orders.ledger.subtitle': '{count} jobs in the ledger',
+  'account.orders.ledger.showing': 'Showing {shown} of {count}',
+  'account.orders.ledger.filterLabel': 'Filter by status',
+  'account.orders.ledger.sortLabel': 'Sort',
+  'account.orders.ledger.sort.recent': 'Newest first',
+  'account.orders.ledger.sort.oldest': 'Oldest first',
+  'account.orders.ledger.sortApply': 'Apply sort',
+  'account.orders.ledger.loadMore': 'Load more orders',
+  'account.orders.ledger.emptyFilter.title': 'No jobs in this status',
+  'account.orders.ledger.emptyFilter.hint': 'Try another status in the ledger.',
+  'account.orders.ledger.emptyFilter.clear': 'View all jobs',
+  'account.orders.action.requestChange': 'Request a change',
+  'account.orders.action.requestChangeSubject': 'Change request — Order #{id}',
+  'account.orders.action.requestChangeBody':
+    'Hello, I would like to request a change on order #{id} from {date}.\n\nChange details:\n',
+  'account.orders.action.downloadInvoice': 'Download invoice',
+  'account.orders.invoice.title': 'Invoice',
+  'account.orders.invoice.unitPrice': 'Unit price',
+  'account.orders.detail.ticketLabel': 'Job ticket',
 
   // ─── account: wishlist "My Collection" (F2.3) ──────────────
   'account.wishlist.heading': 'My Collection',

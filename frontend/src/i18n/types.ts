@@ -628,6 +628,8 @@ export type TranslationKey =
   // ─── account: order tracking detail (F2.2) ────────────────────────
   | 'account.orders.detail.heading'
   | 'account.orders.detail.backToList'
+  | 'account.orders.detail.invoice'
+  | 'account.orders.detail.requestChange'
   | 'account.orders.detail.summary.heading'
   | 'account.orders.detail.summary.placedOn'
   | 'account.orders.detail.summary.orderNumber'
@@ -673,6 +675,27 @@ export type TranslationKey =
   | 'account.orders.detail.addedDaysAgo'
   | 'account.orders.detail.addedYesterday'
   | 'account.orders.detail.addedToday'
+
+  // ─── account: orders ledger (job-ticket redesign) ───────────────────
+  | 'account.orders.ledger.eyebrow'
+  | 'account.orders.ledger.subtitle'
+  | 'account.orders.ledger.showing'
+  | 'account.orders.ledger.filterLabel'
+  | 'account.orders.ledger.sortLabel'
+  | 'account.orders.ledger.sort.recent'
+  | 'account.orders.ledger.sort.oldest'
+  | 'account.orders.ledger.sortApply'
+  | 'account.orders.ledger.loadMore'
+  | 'account.orders.ledger.emptyFilter.title'
+  | 'account.orders.ledger.emptyFilter.hint'
+  | 'account.orders.ledger.emptyFilter.clear'
+  | 'account.orders.action.requestChange'
+  | 'account.orders.action.requestChangeSubject'
+  | 'account.orders.action.requestChangeBody'
+  | 'account.orders.action.downloadInvoice'
+  | 'account.orders.invoice.title'
+  | 'account.orders.invoice.unitPrice'
+  | 'account.orders.detail.ticketLabel'
 
   // ─── account: wishlist "My Collection" (F2.3) ─────────────────────
   | 'account.wishlist.heading'

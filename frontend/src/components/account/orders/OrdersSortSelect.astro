@@ -1,0 +1,79 @@
+---
+/**
+ * OrdersSortSelect — control de orden del ledger ("más recientes" /
+ * "más antiguos").
+ *
+ * Checkpoint de diseño:
+ *   Intent:   dar un orden explícito al ledger sin sacarlo del
+ *             lenguaje de taller: micro-label + control compacto.
+ *   Hierarchy: tier 3 — vive en el header de la página, a la derecha;
+ *             nunca compite con el título.
+ *   Palette:  papel levantado + borde `--edge-strong`; `--primary`
+ *             solo en el focus ring.
+ *   Depth:    plano (control inserto, sin lift).
+ *   Type:     micro-label 11px tracked + 13px/500 en el select.
+ *   Spacing:  8px entre label y control; hit-area 40px.
+ *
+ * Es un `<form GET>` nativo: sin JS funciona con el botón de envío
+ * accesible (sr-only); con JS auto-envía al cambiar. El `status`
+ * actual viaja como hidden para no perder el filtro.
+ */
+import type { TranslationKey } from '../../../i18n/types';
+import type { OrdersSortValue, OrderStatusFilterValue } from '../../../lib/orders-filters';
+import { ORDERS_SORT_VALUES } from '../../../lib/orders-filters';
+
+interface Props {
+  currentSort: OrdersSortValue;
+  statusValue: OrderStatusFilterValue;
+  actionHref: string;
+  t: Record<TranslationKey, string>;
+}
+
+const { currentSort, statusValue, actionHref, t } = Astro.props;
+
+const SORT_LABEL_KEY = {
+  recent: 'account.orders.ledger.sort.recent',
+  oldest: 'account.orders.ledger.sort.oldest',
+} as const;
+---
+
+<form
+  method="get"
+  action={actionHref}
+  class="flex items-end gap-2"
+  data-orders-sort-form
+  data-testid="orders-sort-form"
+>
+  {statusValue !== 'all' && <input type="hidden" name="status" value={statusValue} />}
+  <div class="flex flex-col gap-1.5">
+    <label for="orders-sort" class="micro-label">
+      {t['account.orders.ledger.sortLabel']}
+    </label>
+    <select
+      id="orders-sort"
+      name="sort"
+      class="pressable min-h-10 rounded-[8px] border px-3 py-2 text-[13px] font-medium text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+      style="border-color:var(--edge-strong);background:var(--paper-raised)"
+      data-testid="orders-sort-select"
+    >
+      {ORDERS_SORT_VALUES.map((value) => (
+        <option value={value} selected={value === currentSort}>
+          {t[SORT_LABEL_KEY[value]]}
+        </option>
+      ))}
+    </select>
+  </div>
+  <button
+    type="submit"
+    class="pressable sr-only rounded-[8px] focus-visible:not-sr-only focus-visible:min-h-10 focus-visible:px-3"
+  >
+    {t['account.orders.ledger.sortApply']}
+  </button>
+</form>
+
+<script>
+  const sortForm = document.querySelector<HTMLFormElement>('[data-orders-sort-form]');
+  sortForm?.querySelector('select')?.addEventListener('change', () => {
+    sortForm.requestSubmit();
+  });
+</script>

@@ -2141,6 +2141,8 @@ const es: Translations = {
   // ─── account: order tracking detail (F2.2) ─────────────
   'account.orders.detail.heading': 'Detalle del pedido',
   'account.orders.detail.backToList': 'Volver a mis pedidos',
+  'account.orders.detail.invoice': 'Descargar factura',
+  'account.orders.detail.requestChange': 'Solicitar cambio',
   'account.orders.detail.summary.heading': 'Resumen',
   'account.orders.detail.summary.placedOn': 'Realizado el',
   'account.orders.detail.summary.orderNumber': 'Número',
@@ -2192,6 +2194,28 @@ const es: Translations = {
   'account.orders.detail.addedDaysAgo': 'hace {days} días',
   'account.orders.detail.addedYesterday': 'ayer',
   'account.orders.detail.addedToday': 'hoy',
+
+  // ─── account: orders ledger (job-ticket redesign) ──────────────
+  'account.orders.ledger.eyebrow': 'Historial de trabajos',
+  'account.orders.ledger.subtitle': '{count} trabajos en el ledger',
+  'account.orders.ledger.showing': 'Mostrando {shown} de {count}',
+  'account.orders.ledger.filterLabel': 'Filtrar por estado',
+  'account.orders.ledger.sortLabel': 'Ordenar',
+  'account.orders.ledger.sort.recent': 'Más recientes',
+  'account.orders.ledger.sort.oldest': 'Más antiguos',
+  'account.orders.ledger.sortApply': 'Aplicar orden',
+  'account.orders.ledger.loadMore': 'Cargar más órdenes',
+  'account.orders.ledger.emptyFilter.title': 'Ningún trabajo en este estado',
+  'account.orders.ledger.emptyFilter.hint': 'Probá con otro estado del ledger.',
+  'account.orders.ledger.emptyFilter.clear': 'Ver todos los trabajos',
+  'account.orders.action.requestChange': 'Solicitar cambio',
+  'account.orders.action.requestChangeSubject': 'Solicitud de cambio — Orden #{id}',
+  'account.orders.action.requestChangeBody':
+    'Hola, quisiera solicitar un cambio sobre la orden #{id} del {date}.\n\nDetalle del cambio:\n',
+  'account.orders.action.downloadInvoice': 'Descargar factura',
+  'account.orders.invoice.title': 'Factura',
+  'account.orders.invoice.unitPrice': 'Precio unit.',
+  'account.orders.detail.ticketLabel': 'Orden de trabajo',
 
   // ─── account: wishlist "My Collection" (F2.3) ──────────────
   'account.wishlist.heading': 'My Collection',

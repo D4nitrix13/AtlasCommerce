@@ -35,12 +35,24 @@ import { getServerDictionary, getServerLocale } from '../../../../i18n/server';
 import { findOrderById } from '../../../../data/orders-mock';
 import type { OrderStatus } from '../../../../data/account-mock';
 import { formatCentsAsDecimal, formatDate } from '../../../../lib/formatters';
+import { getBrandBySlug } from '../../../../config/stores';
+import { themeToBrand } from '../../../../lib/theme';
 
 const locale = getServerLocale(Astro.locals.locale);
 const t = getServerDictionary(Astro.locals.locale);
 
 const orderId = Astro.params.id;
 const order = typeof orderId === 'string' ? findOrderById(orderId) : null;
+
+const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
+const brand = themeToBrand(Astro.locals.theme, getBrandBySlug(tenantSlug));
+const changeSubject = t['account.orders.action.requestChangeSubject'].replace('{id}', orderId ?? '');
+const changeBody = t['account.orders.action.requestChangeBody']
+  .replace('{id}', orderId ?? '')
+  .replace('{date}', order ? formatDate(order.date) : '');
+const requestChangeHref = `mailto:${brand.supportEmail}?subject=${encodeURIComponent(
+  changeSubject
+)}&body=${encodeURIComponent(changeBody)}`;
 
 const localePrefix = `/${locale}`;
 
@@ -236,16 +248,29 @@ const STATUS_HERO = {
         </div>
       </div>
 
-      {order.status === 'delivered' && order.items.length > 0 && (
-        <div class="flex justify-end">
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <button
+          type="button"
+          class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[var(--edge,rgba(28,25,23,0.12))] bg-[var(--lift-1,#fff)] px-4 py-2 text-sm font-medium text-[var(--ink,#1c1917)] transition hover:bg-[var(--paper-sunken,#f3efe8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+        >
+          {t['account.orders.detail.invoice']}
+        </button>
+        <a
+          href={requestChangeHref}
+          class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[var(--edge,rgba(28,25,23,0.12))] bg-[var(--lift-1,#fff)] px-4 py-2 text-sm font-medium text-[var(--ink,#1c1917)] transition hover:bg-[var(--paper-sunken,#f3efe8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+          data-testid="order-request-change"
+        >
+          {t['account.orders.detail.requestChange']}
+        </a>
+        {order.status === 'delivered' && order.items.length > 0 && (
           <a
             href={`${localePrefix}/products/${order.items[0].productSlug}`}
-            class="inline-flex items-center gap-2 rounded-lg bg-[var(--primary,#7c3aed)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover,#6d28d9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#7c3aed)] focus-visible:ring-offset-2"
+            class="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
           >
-            ↻ {t['account.orders.detail.reorder']}
+            {t['account.orders.detail.reorder']}
           </a>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )}
 </AccountLayout>
