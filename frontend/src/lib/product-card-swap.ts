@@ -124,15 +124,74 @@ function buildVariantImageMap(richImages: readonly ProductImage[]): Map<string, 
   return map;
 }
 
+/** Clave de agrupación de un acabado: slug|label|hex. */
+function finishGroupKey(variant: ProductVariant): string {
+  return `${variant.finishSlug ?? ''}|${variant.finishLabel ?? ''}|${variant.finishHex ?? ''}`;
+}
+
+/** Agrupa variantes por acabado, preservando el orden de primera aparición. */
+function groupVariantsByFinish(
+  variants: readonly ProductVariant[],
+): Map<string, ProductVariant[]> {
+  const groups = new Map<string, ProductVariant[]>();
+  for (const variant of variants) {
+    const key = finishGroupKey(variant);
+    const members = groups.get(key);
+    if (members === undefined) groups.set(key, [variant]);
+    else members.push(variant);
+  }
+  return groups;
+}
+
+/** Swatch del acabado a partir de su variant representante. */
+function swatchFor(rep: ProductVariant, ownImage: ProductImage | undefined): VariantSwatch {
+  return {
+    id: rep.id,
+    // `name` (Phase 9, backend PDP) > `finishLabel` (Phase 7) > id
+    // como última instancia para no mostrar aria-label vacío.
+    label: rep.name ?? rep.finishLabel ?? rep.id,
+    hex: rep.finishHex ?? null,
+    thumbnailUrl: ownImage?.url ?? null,
+    thumbnailSrcset: ownImage?.srcset ?? null,
+  };
+}
+
+/**
+ * Colapsa las variantes a UN SWATCH POR ACABADO (clave
+ * `finishSlug|finishLabel|finishHex`): las tallas del mismo acabado
+ * comparten color y foto, y repetirlas producía la fila de círculos
+ * idénticos que se leía como "imágenes repetidas" — más un contador
+ * "N colores" inflado por las tallas.
+ *
+ * Representante del grupo: la primera variante con foto propia (sin
+ * foto el preview en hover sería invisible); si ninguna tiene, la
+ * primera. `repOfVariant` normaliza cada variant a su swatch, para que
+ * `primaryVariantId` apunte al círculo que realmente se renderiza.
+ */
+function buildFinishSwatches(
+  variants: readonly ProductVariant[],
+  variantImages: ReadonlyMap<string, ProductImage>,
+): { swatches: VariantSwatch[]; repOfVariant: Map<string, string> } {
+  const repOfVariant = new Map<string, string>();
+  const swatches: VariantSwatch[] = [];
+  for (const members of groupVariantsByFinish(variants).values()) {
+    const rep = members.find((v) => variantImages.has(v.id)) ?? members[0];
+    if (rep === undefined) continue;
+    for (const member of members) repOfVariant.set(member.id, rep.id);
+    swatches.push(swatchFor(rep, variantImages.get(rep.id)));
+  }
+  return { swatches, repOfVariant };
+}
+
 /** Lo que la card necesita para renderizar un swatch. */
 export interface VariantSwatch {
-  /** ID estable del variant (string). */
+  /** ID del variant representante del acabado (string). */
   id: string;
   /** Label accesible (`aria-label` y `title`). */
   label: string;
   /** Color hex para el swatch cuando no hay thumbnail propio. */
   hex: string | null;
-  /** URL del thumbnail del variant (opcional). */
+  /** URL del thumbnail del acabado (opcional). */
   thumbnailUrl: string | null;
   /** Srcset del thumbnail cuando viene del backend (opcional). */
   thumbnailSrcset: string | null;
@@ -160,8 +219,9 @@ export interface ProductCardSwapData {
    */
   hoverImage: ProductImage | null;
   /**
-   * Swatch row de variantes, con su thumbnail y color. Vacío = la
-   * card no renderiza la fila (sigue mostrando 1 sola imagen).
+   * Swatch row de ACABADOS (uno por finish, no por variant), con su
+   * thumbnail y color. Vacío = la card no renderiza la fila (sigue
+   * mostrando 1 sola imagen).
    */
   swatches: readonly VariantSwatch[];
   /**
@@ -171,7 +231,7 @@ export interface ProductCardSwapData {
    * desde acá — por eso el CSS decide sobre el stack, no sobre este mapa.
    */
   variantImages: ReadonlyMap<string, ProductImage>;
-  /** ID del variant activo (elegido por la imagen principal). */
+  /** ID del swatch activo (representante del acabado de la imagen principal). */
   primaryVariantId: string | null;
 }
 
@@ -189,22 +249,13 @@ export function deriveProductCardSwap(product: Product): ProductCardSwapData {
   const richImages = isRichImageArray(product.images) ? product.images : [];
 
   const primaryImage = resolvePrimaryImage(richImages);
-  const primaryVariantId = primaryImage?.variantId ?? null;
   const hoverImage = resolveHoverImage(richImages);
   const variantImages = buildVariantImageMap(richImages);
+  const { swatches, repOfVariant } = buildFinishSwatches(variants, variantImages);
 
-  const swatches: VariantSwatch[] = variants.map((variant) => {
-    const ownImage = variantImages.get(variant.id);
-    return {
-      id: variant.id,
-      // `name` (Phase 9, backend PDP) > `finishLabel` (Phase 7) > id
-      // como última instancia para no mostrar aria-label vacío.
-      label: variant.name ?? variant.finishLabel ?? variant.id,
-      hex: variant.finishHex ?? null,
-      thumbnailUrl: ownImage?.url ?? null,
-      thumbnailSrcset: ownImage?.srcset ?? null,
-    };
-  });
+  const rawPrimaryId = primaryImage?.variantId ?? null;
+  const primaryVariantId =
+    rawPrimaryId === null ? null : (repOfVariant.get(rawPrimaryId) ?? rawPrimaryId);
 
   return {
     primaryImage,
@@ -224,31 +275,54 @@ export function deriveProductCardSwap(product: Product): ProductCardSwapData {
  * Las "variant images" sólo se stackean si hay swatch row (sin
  * swatch nadie las ve, ocuparían ancho de banda al pedo).
  */
+/** Portada del stack: la primary rica o el `imageUrl` legacy. */
+function primaryStackImage(product: Product, swap: ProductCardSwapData): StackedImage {
+  if (swap.primaryImage === null) {
+    // Legacy sin galería rica: una sola imagen con `imageUrl`. La
+    // card no hace swap en este caso — el CSS sólo conoce el primary.
+    return { src: product.imageUrl, srcset: '', alt: product.name, role: 'primary', variantId: null };
+  }
+  return {
+    src: swap.primaryImage.url,
+    srcset: swap.primaryImage.srcset,
+    alt: swap.primaryImage.altText,
+    role: 'primary',
+    // El `data-variant-id` del DOM es el del swatch que representa al
+    // acabado de la portada; con el id crudo de la talla, su círculo
+    // caía a la regla de escape aunque la foto sí estaba en el stack.
+    variantId: swap.primaryVariantId,
+  };
+}
+
+/**
+ * `<img>` candidatas de los swatches, en orden de fila. Se emiten por
+ * SWATCH (no por `variantImages`) para que cada una quede con el
+ * `variantId` del círculo que la gatilla; quien dedupe por `src` decide
+ * cuál sobrevive — si dos acabados comparten archivo, el segundo swatch
+ * se queda sin `<img>` propia y lo cubre el escape de `buildVariantHoverCss`.
+ */
+function buildSwatchStackImages(swap: ProductCardSwapData): StackedImage[] {
+  const images: StackedImage[] = [];
+  for (const swatch of swap.swatches) {
+    const image = swap.variantImages.get(swatch.id);
+    if (image === undefined) continue;
+    images.push({
+      src: image.url,
+      srcset: image.srcset,
+      alt: image.altText,
+      role: 'variant',
+      variantId: swatch.id,
+    });
+  }
+  return images;
+}
+
 export function buildStackedImages(
   product: Product,
   swap: ProductCardSwapData,
   hasSwatchRow: boolean,
 ): StackedImage[] {
-  const images: StackedImage[] = [];
-  if (swap.primaryImage !== null) {
-    images.push({
-      src: swap.primaryImage.url,
-      srcset: swap.primaryImage.srcset,
-      alt: swap.primaryImage.altText,
-      role: 'primary',
-      variantId: swap.primaryImage.variantId,
-    });
-  } else {
-    // Legacy sin galería rica: una sola imagen con `imageUrl`. La
-    // card no hace swap en este caso — el CSS sólo conoce el primary.
-    images.push({
-      src: product.imageUrl,
-      srcset: '',
-      alt: product.name,
-      role: 'primary',
-      variantId: null,
-    });
-  }
+  const images: StackedImage[] = [primaryStackImage(product, swap)];
   // La foto de hover viaja con su propio `srcset`: el cross-fade es un
   // `<img>` más en el mismo rect, y el browser necesita poder pedir la
   // resolución que corresponde al ancho de la card en cada momento
@@ -263,15 +337,9 @@ export function buildStackedImages(
     });
   }
   if (hasSwatchRow) {
-    for (const [variantId, image] of swap.variantImages.entries()) {
-      if (images.some((entry) => entry.src === image.url)) continue;
-      images.push({
-        src: image.url,
-        srcset: image.srcset,
-        alt: image.altText,
-        role: 'variant',
-        variantId,
-      });
+    for (const variantImage of buildSwatchStackImages(swap)) {
+      if (images.some((entry) => entry.src === variantImage.src)) continue;
+      images.push(variantImage);
     }
   }
   return images;

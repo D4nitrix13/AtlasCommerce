@@ -1190,7 +1190,6 @@ const es: Translations = {
   // ─── storefront: layout (header/footer) ───────────────────────────
   'storefront.header.nav.home': 'Inicio',
   'storefront.header.nav.products': 'Productos',
-  'storefront.header.nav.cases': 'Casos de uso',
   'storefront.header.nav.account': 'Mi cuenta',
   'storefront.header.nav.cart': 'Carrito',
   'storefront.header.cartBadge': '{count} en el carrito',
@@ -1207,6 +1206,8 @@ const es: Translations = {
   'storefront.footer.privacy': 'Privacidad',
   'storefront.footer.help': 'Ayuda',
   'storefront.footer.contact': 'Contacto',
+  'storefront.footer.supportHeading': 'Soporte',
+  'storefront.footer.followHeading': 'Síguenos',
   'storefront.footer.socialLabel': 'Redes sociales',
   'storefront.footer.copyright': '© {year} {brand}. Todos los derechos reservados.',
 

@@ -89,7 +89,7 @@ export function themeToBrand(
   return {
     ...fallback,
     shortName: theme.short_name ?? fallback.shortName,
-    name: theme.short_name ?? fallback.name,
+    name: fallback.name,
     logoPath: rewriteLegacyAssetPath(theme.logo_path, tenantSlug) ?? fallback.logoPath,
     loginLogoPath: rewriteLegacyAssetPath(theme.login_logo_path, tenantSlug) ?? fallback.loginLogoPath,
     accentColor: theme.accent_color ?? fallback.accentColor,

@@ -37,7 +37,6 @@ const t = getServerDictionary(locale);
 
 const homeHref = `/${locale}`;
 const productsHref = `/${locale}/products`;
-const useCasesHref = `/${locale}#use-cases`;
 const searchHref = `/${locale}/search`;
 const rfqHref = `/${locale}/rfq`;
 const accountHref = `/${locale}/account`;
@@ -51,7 +50,6 @@ const navLinks = [
     href: productsHref,
     matchPrefix: productsHref,
   },
-  { labelKey: 'storefront.header.nav.cases' as const, href: useCasesHref },
 ];
 
 const showQuote = brand.slug === 'panda-estampados';

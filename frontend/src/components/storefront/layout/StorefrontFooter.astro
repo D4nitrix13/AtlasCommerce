@@ -3,12 +3,12 @@
  * StorefrontFooter — footer principal de la tienda.
  *
  * Full-bleed como el header: sin `mx-auto max-w-*`, con el mismo ritmo
- * de padding (`px-4 sm:px-6 lg:px-10`). El ancho extra de pantallas
- * anchas se reparte en el grid en vez de quedar como aire a los
- * costados de un contenedor centrado de 1280px.
+ * de padding (`px-4 sm:px-6 lg:px-10`). El grid de columnas se expande
+ * a todo el ancho disponible.
  *
- * Columnas: brand + tagline | nav legal | contacto | redes + locale.
- * En mobile stack vertical, en md 2 columnas, en lg 4.
+ * Columnas: brand + tagline | contacto | redes + locale. En mobile
+ * stack vertical, en md 3 columnas. Los links legales van en una fila
+ * horizontal al pie (estilo Nike) junto al copyright.
  *
  * El footer es semántico (`<footer>`) y vive dentro del `<body>` para
  * que los lectores de pantalla lo identifiquen como landmark "content
@@ -18,6 +18,7 @@
 import type { StoreBrand } from '../../../config/stores';
 import { getServerDictionary } from '../../../i18n/server';
 import { SOCIAL_ICON_PATHS, type SocialPlatform } from '../../ui/social-icon-paths';
+import Icon from '../../ui/Icon.astro';
 import LanguageSwitcher from '../../ui/LanguageSwitcher';
 import StorefrontFooterNav from './StorefrontFooterNav.astro';
 import StorefrontFooterLegal from './StorefrontFooterLegal.astro';
@@ -87,32 +88,34 @@ const t = getServerDictionary(locale);
 
 <footer class="border-t border-slate-200 bg-slate-50">
   <div class="w-full px-4 py-10 sm:px-6 lg:px-10">
-    <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12">
       {/* Columna 1: brand */}
       <div class="flex flex-col gap-2">
-        <p class="text-base font-semibold tracking-tight text-slate-900">{brand.name}</p>
+        <p class="font-script text-2xl leading-tight text-slate-900">{brand.name}</p>
         <p class="text-sm text-slate-500">{brand.shortName} — hecho con cuidado.</p>
       </div>
 
-      {/* Columna 2: nav links */}
-      <div>
-        <StorefrontFooterNav links={navLinks} locale={locale} />
-      </div>
-
-      {/* Columna 3: contacto (email de soporte) */}
+      {/* Columna 2: contacto (email de soporte) */}
       <div class="flex flex-col gap-3">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {t['storefront.footer.supportHeading']}
+        </p>
         <a
           href={`mailto:${brand.supportEmail}`}
-          class="text-xs text-slate-500 transition hover:text-[var(--primary,#1e293b)]"
+          class="inline-flex items-center gap-2 text-sm text-slate-600 transition hover:text-[var(--primary,#1e293b)]"
         >
+          <Icon name="envelope" class="h-4 w-4 shrink-0" />
           {brand.supportEmail}
         </a>
       </div>
 
-      {/* Columna 4: redes sociales (desde la BD, orden del backend) +
+      {/* Columna 3: redes sociales (desde la BD, orden del backend) +
           selector de locale. Sin filas configuradas cae al fallback de
           4 iconos decorativos sin href. */}
       <div class="flex flex-col gap-3 md:items-end md:text-right">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {t['storefront.footer.followHeading']}
+        </p>
         <ul class="flex items-center gap-2" aria-label={t['storefront.footer.socialLabel']}>
           {socialIcons.map((icon) => (
             <li>
@@ -124,8 +127,13 @@ const t = getServerDictionary(locale);
       </div>
     </div>
 
+    {/* Fila legal: copyright + links inline en una fila horizontal (estilo
+        Nike). Si no caben, los links envuelven a la siguiente línea. */}
     <div class="mt-8 border-t border-slate-200 pt-6">
-      <StorefrontFooterLegal brand={brand} locale={locale} />
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <StorefrontFooterLegal brand={brand} locale={locale} />
+        <StorefrontFooterNav links={navLinks} locale={locale} />
+      </div>
     </div>
   </div>
 </footer>

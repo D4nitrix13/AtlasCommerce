@@ -7,6 +7,8 @@
  *   - `<head>` con theme tokens del tenant en CSS vars (`--primary`,
  *     `--primary-hover`) para que TODO el subtree herede el branding
  *     sin hardcodear hexes.
+ *   - `<StorefrontHeader>` + `<StorefrontFooter>` del storefront para
+ *     mantener el chrome de la tienda en la sección clientes.
  *   - `<AccountAuthGuard client:load />` (F0.4): gateo client-side de
  *     auth — redirige a `/account/login?redirect=...` si no hay
  *     sesión Sanctum. Pages públicas (login, signup, forgot, reset,
@@ -31,6 +33,9 @@ import { themeToBrand } from '../lib/theme';
 import { getServerDictionary, getServerLocale } from '../i18n/server';
 import AccountAuthGuard from '../components/account/auth/AccountAuthGuard';
 import AccountSidebar from '../components/account/layout/AccountSidebar.astro';
+import StorefrontHeader from '../components/storefront/layout/StorefrontHeader.astro';
+import StorefrontFooter from '../components/storefront/layout/StorefrontFooter.astro';
+import { loadSocialLinks } from '../lib/server/social-links';
 
 interface Props {
   title?: string;
@@ -46,6 +51,9 @@ const fallbackBrand = getBrandBySlug(tenantSlug);
 const brand: StoreBrand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
 const themeRootStyle = shopThemeStyle(brand.accentColor, brand.accentHoverColor);
+
+// Redes sociales del footer (fail-soft: [] si el fetch falla).
+const socialLinks = await loadSocialLinks(Astro.url.origin, Astro.url.host);
 
 const localePrefix = `/${locale}`;
 const currentPath = Astro.url.pathname;
@@ -119,12 +127,14 @@ const navItems = [
     <title>{title} · {brand.name}</title>
   </head>
 
-  <body class="shop-canvas min-h-screen font-sans antialiased" style={themeRootStyle}>
+  <body class="shop-canvas flex min-h-screen flex-col font-sans antialiased" style={themeRootStyle}>
     <AccountAuthGuard client:load />
+
+    <StorefrontHeader brand={brand} locale={locale} cartCount={0} />
 
     <main
       id="main-content"
-      class="flex w-full flex-col gap-6 px-5 py-6 sm:px-8 lg:flex-row lg:gap-10 lg:px-10 lg:py-10"
+      class="flex w-full flex-1 flex-col gap-6 px-5 py-6 sm:px-8 lg:flex-row lg:gap-10 lg:px-10 lg:py-10"
     >
       <AccountSidebar
         title={t['account.sidebar.title']}
@@ -139,6 +149,8 @@ const navItems = [
         <slot />
       </div>
     </main>
+
+    <StorefrontFooter brand={brand} locale={locale} socialLinks={socialLinks} />
 
     {/* Fallback IntersectionObserver para data-reveal (Safari/Firefox). */}
     <script>

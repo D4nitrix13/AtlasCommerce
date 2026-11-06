@@ -28,10 +28,9 @@
 import '../styles/global.css';
 import '../styles/scroll-fx.css';
 import { SHOP_FONT_STYLESHEET, shopThemeStyle } from '../lib/shop-canvas';
-import { apiFetch } from '../lib/api';
-import { API_ENDPOINTS } from '../lib/endpoints';
 import { getBrandBySlug, type StoreBrand } from '../config/stores';
 import { resolveTenantFavicon } from '../lib/tenant-favicon';
+import { loadSocialLinks } from '../lib/server/social-links';
 import StorefrontHeader from '../components/storefront/layout/StorefrontHeader.astro';
 import StorefrontFooter from '../components/storefront/layout/StorefrontFooter.astro';
 
@@ -40,38 +39,16 @@ interface Props {
   cartCount?: number;
 }
 
-interface SocialLinkRow {
-  platform: string;
-  url: string | null;
-}
-
 const { title = 'AtlasCommerce', cartCount = 0 } = Astro.props;
 
 const tenantSlug = Astro.locals.tenant?.tenantSlug ?? null;
 const brand: StoreBrand = getBrandBySlug(tenantSlug);
 const locale = Astro.locals.locale ?? 'es';
 
-// Redes sociales del footer desde el API (tenant por host). Fail-soft
-// obligatorio: si el backend no responde, devolvemos [] y el footer
-// renderiza el fallback decorativo — el footer nunca tumba la página.
-async function loadSocialLinks(): Promise<SocialLinkRow[]> {
-  try {
-    const response = await apiFetch<{ data: SocialLinkRow[] }>(
-      API_ENDPOINTS.storefront.socialLinks,
-      {
-        headers: { Accept: 'application/json' },
-        origin: Astro.url.origin,
-        host: Astro.url.host,
-      },
-    );
-    return response.data;
-  } catch (error) {
-    console.error('[layout] apiFetch social-links failed:', error);
-    return [];
-  }
-}
-
-const socialLinks = await loadSocialLinks();
+// Redes sociales del footer desde el API (tenant por host). El helper
+// es fail-soft: si el fetch falla devuelve [] y el footer renderiza el
+// fallback decorativo.
+const socialLinks = await loadSocialLinks(Astro.url.origin, Astro.url.host);
 
 // Theme root: convierte los accent colors del brand en CSS vars que
 // cualquier componente puede consumir vía `var(--primary)` o

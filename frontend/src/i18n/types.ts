@@ -1454,7 +1454,6 @@ export type TranslationKey =
   // ─── storefront: layout (header/footer) ──────────────────────────────
   | 'storefront.header.nav.home'
   | 'storefront.header.nav.products'
-  | 'storefront.header.nav.cases'
   | 'storefront.header.nav.account'
   | 'storefront.header.nav.cart'
   | 'storefront.header.cartBadge'
@@ -1471,6 +1470,8 @@ export type TranslationKey =
   | 'storefront.footer.privacy'
   | 'storefront.footer.help'
   | 'storefront.footer.contact'
+  | 'storefront.footer.supportHeading'
+  | 'storefront.footer.followHeading'
   | 'storefront.footer.socialLabel'
   | 'storefront.footer.copyright'
 

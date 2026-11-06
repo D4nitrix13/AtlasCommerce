@@ -14,8 +14,7 @@
  *     por categoría (`pickRelatedProducts`), sin duplicar y con tope.
  */
 import type { RelatedProduct } from '../data/product-detail-mock';
-import type { Product, ProductVariant } from '../types/catalog';
-import type { ProductCardSwapData } from './product-card-swap';
+import type { Product } from '../types/catalog';
 import { deriveProductCardSwap, swatchFallbackHex } from './product-card-swap';
 
 /** Identidad mínima para deduplicar rieles. */
@@ -59,53 +58,23 @@ export function mergeAlikeProducts<T extends IdentifiedProduct>(
 /**
  * Proyección `Product` → `RelatedProduct` para el card de
  * `<ProductRelated>`. Los swatches (y su preview de imagen) salen del
- * mismo derivador que usa `ProductCard`; sin variantes o imágenes ricas
- * degrada a la imagen única del producto.
+ * mismo derivador que usa `ProductCard` — ya colapsados a un swatch por
+ * acabado, así que acá sólo se proyectan a la shape del card. Sin
+ * variantes o imágenes ricas degrada a la imagen única del producto.
  */
-/** Clave de agrupación de un acabado: slug|label|hex. */
-function finishKey(raw: ProductVariant | undefined, hex: string): string {
-  return `${raw?.finishSlug ?? ''}|${raw?.finishLabel ?? ''}|${hex}`;
-}
-
-/**
- * Colapsa los swatches a UNO POR ACABADO (clave slug|label|hex): las
- * tallas del mismo acabado comparten color y foto, y repetirlas
- * producía la fila de círculos idénticos que se leía como "imágenes
- * repetidas". Dentro de cada grupo se prefiere la variante con foto
- * propia — sin imagen el preview en hover sería invisible.
- */
-function dedupeSwatchesByFinish(
-  swatches: ProductCardSwapData['swatches'],
-  rawVariants: readonly ProductVariant[],
-): { id: string; label: string; hex: string; imageUrl?: string }[] {
-  const byFinish = new Map<
-    string,
-    { id: string; label: string; hex: string; imageUrl?: string }
-  >();
-  swatches.forEach((swatch, index) => {
-    const raw = rawVariants[index];
-    const key = finishKey(raw, String(raw?.finishHex ?? ''));
-    const entry = {
+export function toRelatedProductCard(product: Product): RelatedProduct {
+  const swap = deriveProductCardSwap(product);
+  const variants = swap.swatches.map((swatch) => {
+    // El chip representa al acabado: `finishLabel` gana sobre el `name`
+    // de la variante representante (que arrastra la talla).
+    const raw = product.variants?.find((variant) => variant.id === swatch.id);
+    return {
       id: swatch.id,
       label: raw?.finishLabel ?? swatch.label,
       hex: swatchFallbackHex(swatch),
       ...(swatch.thumbnailUrl !== null && { imageUrl: swatch.thumbnailUrl }),
     };
-    const kept = byFinish.get(key);
-    if (kept === undefined) {
-      byFinish.set(key, entry);
-      return;
-    }
-    if (kept.imageUrl === undefined && entry.imageUrl !== undefined) {
-      byFinish.set(key, entry);
-    }
   });
-  return [...byFinish.values()];
-}
-
-export function toRelatedProductCard(product: Product): RelatedProduct {
-  const swap = deriveProductCardSwap(product);
-  const variants = dedupeSwatchesByFinish(swap.swatches, product.variants ?? []);
   const brand = product.brand ?? '';
   const finish = product.variants?.[0]?.finishLabel;
 
