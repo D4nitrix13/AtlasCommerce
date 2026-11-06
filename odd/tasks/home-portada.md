@@ -127,7 +127,7 @@ full-width sin `max-w` estrechos, 0 errores nuevos.
 | T1 | hecha | (este) | `bun run test`: 525 OK · `astro check`: 0 errors · `build`: OK · `eslint`: exit 0 · capturas `output-playwright-home-header-{1440,390}.png` |
 | T2 | hecha | (este) | `bun run test`: 625 OK (66 files) · `astro check`: 0 errors · `build`: OK · `eslint` 18 archivos: exit 0 · `index.astro` 296 líneas · capturas 1440/390 revisadas |
 | T3 | reportado | — | hallazgos listos para el usuario (endpoint de categorías) |
-| T4 | pendiente | — | — |
+| T4 | hecha | (este) | cierre común corrido: 625 tests · astro check 0 errors · build OK · eslint 0 errores nuevos · capturas 1440/390 |
 
 ### Notas T1
 
