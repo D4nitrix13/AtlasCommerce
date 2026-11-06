@@ -11,8 +11,9 @@
 > modelo de ejecución de ese plan (PRs por vista en 3 sprints) por el
 > modelo sesión-por-vista.
 >
-> **Estado**: definido. Detalles del usuario: **pendientes** (sección
-> `Detalles del usuario` al final de cada sesión).
+> **Estado**: definido. Detalles del usuario: sesión 3 **recibidos**
+> (2026-11-05); resto pendientes (sección `Detalles del usuario` al
+> final de cada sesión).
 
 ## Antes de editar cualquier archivo (todas las sesiones)
 
@@ -151,18 +152,92 @@ quiera cambiar en ella.
 - 525 tests frontend verdes · backend 25 tests verdes · build OK ·
   capturas en `output/playwright/pdp-*`.
 
-**Tareas**
-1. Aplicar los **detalles del usuario** sobre esta vista.
-2. Revisión visual fina de las capturas existentes (1440 + 390) y de lo
-   que el usuario señale.
-3. Pulir interacción talla/acabado ↔ galería si los detalles lo piden.
-4. **Portar el backend Fase 8** (PR #169 cerrado por conflicto; código
-   portable: migraciones + modelos + seeders de `product_faqs` y
-   `product_extended_descriptions`, y `product_highlights`) para que los
-   tabs Preguntas frecuentes / Descripción extendida tengan datos reales.
-   `product_grouped_specs`/`product_spec_values` requieren decisión de
-   diseño vs atributos EAV (la Ficha técnica hoy se alimenta de EAV).
-5. Cierre común.
+**Plan del lote 2 (2026-11-05 — detalles del usuario, ver sección final)**
+Worktree `~/Code/AtlasCommerce-worktrees/pdp` · rama `feat/views/pdp`.
+Una work-unit commit por tarea (convencional en español, sin push/merge
+sin pedido del usuario). TDD estricto (config global), runner
+`bun test` (frontend): RED previo en lógica (swap/preview/quantity);
+layout se valida con tests de clases (estilo `catalog-grid-css.test.ts`)
++ capturas. Guía ~400 líneas autoreadas por work-unit.
+
+1. ✅ **Tabs a la sección de datos** — mover `ProductDetailTabs` del
+   bloque aparte (`[slug].astro:1348`, bajo el grid) a la sección de
+   datos del producto (columna derecha), reemplazando la descripción
+   suelta; tab bar compacta. [delegated writer — 2 archivos]
+   → `4630a6f7`: tabs al final del `<aside>`, bloque suelto y párrafos
+   duplicados eliminados; `pdp-tabs-placement.test.ts` (4 tests,
+   RED→GREEN). 529 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (230 líneas; slice pendiente).
+   Nota abierta: el `<aside>` `lg:sticky` queda alto con los paneles
+   adentro — revisar reachabilidad del sticky en work-unit de layout.
+2. ✅ **Talla + Cantidad** — `ProductSizeGrid.astro` (botones grandes en
+   grilla) → pills compactas inline; `<select>` nativo de
+   `ProductPurchaseBar.tsx` → stepper − / + (semántica de
+   `purchase-quantity.ts`, patrón de `ProductQuantitySelector.astro`).
+   Respetar `aria-pressed`, hidden input y `?size=`. [delegated]
+   → `beef67b8`: pills `h-9 rounded-full` en flex-wrap (sin grilla) y
+   stepper −/+ con `tabular-nums` y clamp 1..stock; `quantityStepperState`
+   en `purchase-quantity.ts` + `pdp-purchase-controls.test.ts` (12 tests
+   nuevos, RED→GREEN). 541 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (561 líneas; slice pendiente).
+   Desviación resuelta: semántica real de tallas = `role="radio"` /
+   `aria-checked` (no `aria-pressed`) — preservada como estaba.
+3. ✅ **Cards de rieles parejas** — `ProductRelated.astro` (y FBT /
+   RecentlyViewed por consistencia): `h-full` + footer `mt-auto` y media
+   `aspect-square` con `object-cover` (hoy `object-contain` deja
+   huecos). Sin estirar ni deformar imágenes. [inline si 1 archivo]
+   → `c3a2388f`: stretch chain `h-full` en `li`/`article` de los 3
+   rieles (patrón `ProductCard.astro:108`), `object-contain` →
+   `object-cover` en ProductRelated, `items-stretch` + `self-center`
+   del separador `+` en FBT; `pdp-rail-card-heights.test.ts` (11 tests,
+   RED→GREEN). 552 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (715 líneas; slice pendiente).
+   Nota: `ProductRelated.astro` llegó a 398 líneas (sobre límite) —
+   T3.4/T3.5 deben extraer el body de la card a subcomponente.
+4. ✅ **Acabados: color real + hover cambia imagen** — selector ACABADO
+   (`[slug].astro:1115-1190`): swatches hex en vez de thumbnails
+   (hoy "parecen imágenes repetidas"); hover/focus del swatch cambia la
+   imagen (cards: `setupVariantPreview` existe pero no se percibe —
+   fix; galería: preview de la variante). i18n de "Acabado"/"Precio"
+   si se tocan esas líneas. [delegated]
+   → `506bb56d`: chips hex primero (thumbnail sólo sin hex) en el
+   picker y en el caso de acabado único; `data-finish-preview` + script
+   hover/focus → galería; **causa raíz del hover muerto**: CSS scoped
+   de Astro ganaba a las reglas de opacity (`[data-astro-cid]`) y la
+   imagen primaria tenía `data-variant-id="default"` (nunca matcheaba)
+   — fix con `buildVariantPreviewCss` global + stack con ids reales;
+   swatches de card dedupeados **por acabado** en
+   `toRelatedProductCard` (antes 1 círculo por variante = repetidos).
+   Tests: 5 propios + 10 del fix de hover (RED→GREEN). 567 tests OK ·
+   astro check OK · eslint 0 nuevos. Delegación falló 2× (writers
+   colgados) → implementación inline + patch residual del writer
+   zombi reconciliado. Assess: pendiente de este commit.
+5. ✅ **Hover imagen → trasera en cards de rieles** — cablear
+   `product-card-swap` (`deriveProductCardSwap`, `imageUrlSecondary`,
+   CSS `img[data-role='back']` como `ProductCard.astro`) en
+   ProductRelated / FBT / RecentlyViewed (hoy no lo usan). [delegated]
+   → `aab479ed`: media stack extraído a `ProductRelatedMedia.astro`;
+   cross-fade a la imagen back (`isHover`) en hover/focus-within de los
+   3 rieles, subordinado al preview del swatch (reglas scoped
+   `article:not([data-active-variant])`). FBT/RV sin `imageUrlSecondary`
+   en los datos: caen a `deriveProductCardSwap().hoverImage`. Tests:
+   9 nuevos RED→GREEN. 579 tests OK · astro check OK · eslint 0 nuevos.
+   Assess: medium, `under_budget` (1789 líneas; slice pendiente).
+6. ✅ **Cierre común** — `bun run test` **579 passed (0 failed)** ·
+   `astro check` 0 errores/0 warnings · `bun run build` OK · eslint 0
+   errores nuevos vs HEAD · capturas `output/playwright/pdp-lote2-*`
+   (desktop 1440 + mobile 390, firefox, mount del worktree en :5321).
+   Nota infra: el contenedor frontend compartido fue re-apuntado 2×
+   por sesiones paralelas ("robo de mount") — protocolo confirmado:
+   `docker-stack.sh up dev panda-estampados-and-kitsune frontend` desde
+   el worktree antes de capturar. Historia ruidosa: `7d3bdf76` (patch
+   del writer zombi sobre [slug].astro) + `d55850ac` (revert) +
+   revert-del-revert — neto cero, tests verdes en HEAD.
+
+**Diferido (fuera de este lote)**: port del backend Fase 8
+(`product_faqs`, `product_extended_descriptions`, `product_highlights`;
+PR #169 cerrado por conflicto) — `product_grouped_specs`/
+`product_spec_values` requieren decisión de diseño vs atributos EAV.
 
 **Aceptación**: sin regresiones (525 tests siguen verdes), detalles del
 usuario aplicados, capturas nuevas.
@@ -264,7 +339,22 @@ Panda (features B2B del tenant).
 
 - **Sesión 1 (Home)**: _pendiente_
 - **Sesión 2 (Catálogo + Búsqueda)**: _pendiente_
-- **Sesión 3 (PDP)**: _pendiente_
+- **Sesión 3 (PDP)**: **recibidos 2026-11-05** (worktree
+  `~/Code/AtlasCommerce-worktrees/pdp`, rama `feat/views/pdp`):
+  1. Las tabs (Descripción | Ficha técnica | Envíos) van en la **misma
+     sección donde están los datos del producto** — hoy están aparte y
+     "es horrible". Objetivo general: **"aprovechar cada espacio"**.
+  2. Rediseñar el componente de **Tamaño/talla** ("representa su
+     información de otra manera") y el de **Cantidad** ("se ve horrible").
+  3. En **"También Te Puede Gustar"** una card se ve más alta que otra:
+     corregir alturas — "evita estirar o redimensionar la imagen ya que
+     eso generaría huecos".
+  4. **Acabados**: "parecen imágenes repetidas"; además, al poner el
+     cursor sobre el circulito del acabado **no se cambia la imagen**
+     (debe cambiar).
+  5. "cuando pongo el cursor sobre una imagen de producto debe mostrarse
+     ese mismo producto pero **la imagen trasera**" (semántica
+     `isHover`/`back` ya existente en catálogo).
 - **Sesión 4 (Carrito + Checkout)**: _pendiente_
 - **Sesión 5 (Cuenta + Auth)**: _pendiente_
 - **Sesión 6 (B2B, opcional)**: _pendiente_

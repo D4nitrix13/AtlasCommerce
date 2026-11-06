@@ -5,13 +5,12 @@
  * Composición:
  *   - Top: grid 2-col con gallery uniforme (2-col image grid) +
  *     aside pegajoso de info (sticky top-20). Aside acomoda título,
- *     tag "Limitado" condicional, dl 2-col Precio/Acabado, shipping
- *     inline, selectores (condición, tamaño, acabado), CTA grande,
- *     3 accordions de inclusión y link "Buscar una tienda".
- *   - Debajo: reseñas full-width → ficha técnica (ProductDetailsBlock)
- *     → highlights (ProductHighlights) → specs por categoría
- *     (ProductSpecificationsByCategory) → features carousel →
- *     productos relacionados.
+ *     tag "Limitado" condicional, dl 2-col Precio/Acabado/mano,
+ *     selectores (condición, tamaño), CTA grande, link "Buscar una
+ *     tienda" y, al pie de la misma sección, las tabs de detalle
+ *     (Descripción · Ficha técnica · Reseñas · Preguntas · Envíos).
+ *   - Debajo del grid: rieles (comprados juntos, relacionados,
+ *     vistos recientemente).
  *
  * Decisiones:
  *  - Variants estáticas hasta cart store: conditionOptions y
@@ -55,7 +54,6 @@ import ProductFitSelector from '../../../components/storefront/products/ProductF
 import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
 import ProductCTAs from '../../../components/storefront/products/ProductCTAs.astro';
 import ProductPurchaseBar from '../../../components/storefront/products/ProductPurchaseBar';
-import ProductDetailsBlock from '../../../components/storefront/products/ProductDetailsBlock.astro';
 import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
 import ProductDetailTabs from '../../../components/storefront/products/ProductDetailTabs.astro';
 import { getServerDictionary } from '../../../i18n/server';
@@ -91,9 +89,11 @@ import {
   collectHandednessOptions,
   hasFinishPicker,
   hasHandednessPicker,
+  resolveFinishPreviewImage,
   resolveSelectedFinishId,
   type ProductApiVariant,
 } from '../../../lib/product-variant-selection';
+import { swatchFallbackHex } from '../../../lib/product-card-swap';
 import PandaProductDetail from '../../../components/storefront/products/PandaProductDetail.astro';
 import { findPandaProduct, isPandaStore, pandaCategoryLabel } from '../../../data/panda-catalog';
 
@@ -1116,31 +1116,29 @@ const fbtLabels = {
                   <dd class="flex flex-col gap-3 text-sm font-medium text-slate-900">
                     <div class="flex flex-col items-start gap-2">
                       {/*
-                        Con un solo acabado no hay nada que elegir, pero la
-                        miniatura sigue siendo información: dice cómo es el
-                        color. Se muestra como imagen fija bajo la etiqueta,
-                        no como enlace, porque un enlace que no cambia nada
-                        es un control muerto.
+                        Con un solo acabado no hay nada que elegir: el dato
+                        de texto alcanza. El punto de color lo complementa
+                        (dice cómo es el color) sin repetir la foto de la
+                        galería — un enlace que no cambia nada es un control
+                        muerto.
                       */}
                       <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
-                      {!showFinishPicker &&
-                        selectedFinish !== undefined &&
-                        variantFirstImage[selectedFinish.id] !== undefined && (
-                          <img
-                            src={variantFirstImage[selectedFinish.id]}
-                            alt=""
-                            width={48}
-                            height={48}
-                            loading="lazy"
-                            decoding="async"
-                            class="h-12 w-12 shrink-0 rounded-md border border-slate-200 object-cover"
-                          />
-                        )}
+                      {!showFinishPicker && selectedFinish !== undefined && (
+                        <span
+                          aria-hidden="true"
+                          class="block h-12 w-12 shrink-0 rounded-full border border-slate-200 shadow"
+                          style={`background-color: ${swatchFallbackHex({ hex: selectedFinish.hex ?? null })};`}
+                        />
+                      )}
                     </div>
-                    {/* Picker de variantes con thumbnails reales (estilo Nike).
-                        Cada swatch es un <a> con ?finish=<id> que filtra la galería
-                        via query param (sin JS). Thumbnails uniformes ~48×48
-                        con object-cover para mantener el aspect ratio.
+                    {/* Picker de variantes: punto de color hex por acabado —
+                        una miniatura fotográfica por finish a 48px se lee
+                        como "imágenes repetidas". Sin hex del backend, el
+                        color de fallback mantiene los dots visualmente
+                        distintos. Cada swatch es un <a> con ?finish=<id> que
+                        filtra la galería via query param (el click navega,
+                        sin JS). Hover/focus previsualiza la foto de la
+                        variante en la galería vía data-finish-preview.
 
                         `showFinishPicker` oculta el control cuando el producto
                         ofrece un solo acabado: el dato de arriba alcanza y un
@@ -1153,7 +1151,7 @@ const fbtLabels = {
                       >
                         {finishesForHand.map((option) => {
                           const isActive = option.id === SELECTED_COLOR;
-                          const thumbSrc = variantFirstImage[option.id];
+                          const previewSrc = resolveFinishPreviewImage(option.id, variantFirstImage);
                           return (
                             <li>
                               <a
@@ -1161,34 +1159,71 @@ const fbtLabels = {
                                 title={option.label}
                                 aria-label={`Cambiar a ${option.label}`}
                                 aria-current={isActive ? 'true' : undefined}
+                                data-finish-preview={previewSrc}
                                 class:list={[
-                                  'block h-12 w-12 overflow-hidden rounded-md border-2 bg-slate-50 object-cover transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
+                                  'block h-12 w-12 shrink-0 rounded-full border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
                                   isActive
-                                    ? 'border-slate-900'
-                                    : 'border-slate-200 opacity-70 hover:opacity-100',
+                                    ? 'border-slate-900 ring-2 ring-slate-900 ring-offset-1'
+                                    : 'border-slate-200 opacity-70 hover:opacity-100 hover:ring-2 hover:ring-slate-900 hover:ring-offset-1',
                                 ]}
                               >
-                                {thumbSrc !== undefined ? (
-                                  <img
-                                    src={thumbSrc}
-                                    alt=""
-                                    loading="lazy"
-                                    decoding="async"
-                                    class="h-full w-full rounded-md object-cover"
-                                  />
-                                ) : (
-                                  <span
-                                    aria-hidden="true"
-                                    class="block h-full w-full rounded-md"
-                                    style={`background-color: ${option.hex ?? '#e2e8f0'};`}
-                                  />
-                                )}
+                                <span
+                                  aria-hidden="true"
+                                  class="block h-full w-full rounded-full"
+                                  style={`background-color: ${swatchFallbackHex({ hex: option.hex ?? null })};`}
+                                />
                               </a>
                             </li>
                           );
                         })}
                       </ul>
                     )}
+
+                    <script>
+                      // Preview de acabado: hover/focus del swatch muestra la
+                      // foto de la variante en la galería sin navegar; al
+                      // salir se restaura la imagen que estaba visible.
+                      function setupFinishPreview(link: HTMLAnchorElement): void {
+                        const previewSrc = link.dataset.finishPreview;
+                        if (previewSrc === undefined || previewSrc === '') return;
+                        const slideImg = document.querySelector<HTMLImageElement>(
+                          '[data-gallery-slide] img',
+                        );
+                        if (slideImg === null) return;
+
+                        const originalSrc = slideImg.getAttribute('src') ?? '';
+                        // La imagen de la galería lleva srcset: con srcset
+                        // presente el browser elige la resolución del srcset e
+                        // ignora el cambio de src (el preview no se veía).
+                        // Se quita durante el preview y se restaura al salir.
+                        const originalSrcset = slideImg.getAttribute('srcset') ?? '';
+                        let isActive = false;
+
+                        const activate = (): void => {
+                          if (isActive) return;
+                          isActive = true;
+                          slideImg.setAttribute('src', previewSrc);
+                          slideImg.removeAttribute('srcset');
+                        };
+                        const deactivate = (): void => {
+                          if (!isActive) return;
+                          isActive = false;
+                          slideImg.setAttribute('src', originalSrc);
+                          if (originalSrcset !== '') {
+                            slideImg.setAttribute('srcset', originalSrcset);
+                          }
+                        };
+
+                        link.addEventListener('mouseenter', activate);
+                        link.addEventListener('mouseleave', deactivate);
+                        link.addEventListener('focus', activate);
+                        link.addEventListener('blur', deactivate);
+                      }
+
+                      document
+                        .querySelectorAll<HTMLAnchorElement>('a[data-finish-preview]')
+                        .forEach((link) => setupFinishPreview(link));
+                    </script>
 
                     {/* Mano — dos ramas, porque el catálogo actual ofrece
                         una sola mano por producto:
@@ -1242,17 +1277,6 @@ const fbtLabels = {
                 </div>
               </dl>
 
-              <ProductDetailsBlock
-                variant="inline"
-                intro={detail.description}
-                moreLabel={t['storefront.products.detail.v4.details.more']}
-                lessLabel={t['storefront.products.detail.v4.details.less']}
-              />
-
-              <p class="text-xs text-slate-500">
-                {t['storefront.products.detail.v4.shippingInline']}
-              </p>
-
               {detail.hasCondition === true && (
                 <ProductFitSelector
                   legend={t['storefront.products.detail.v4.condition.legend']}
@@ -1290,6 +1314,8 @@ const fbtLabels = {
                   buyNowHref={CHECKOUT_HREF}
                   labels={{
                     quantity: t['storefront.productDetail.quantity'],
+                    decrement: t['storefront.productDetail.quantity.decrement'],
+                    increment: t['storefront.productDetail.quantity.increment'],
                     addToCart: t['storefront.productDetail.addToCart'],
                     buyNow: t['storefront.productDetail.buyNow'],
                     outOfStock: t['storefront.productDetail.outOfStock'],
@@ -1338,37 +1364,37 @@ const fbtLabels = {
                   <path d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </a>
+
+              {/* Tabs de detalle (Descripción · Ficha técnica · Reseñas ·
+                  Preguntas · Envíos) al pie de la sección de datos: el
+                  usuario pidió las tabs junto a los datos del producto,
+                  no como bloque aparte bajo el grid. */}
+              <ProductDetailTabs
+                labels={tabLabels}
+                description={detail.description}
+                highlights={detail.highlights}
+                extendedDescriptions={detail.extendedDescriptions}
+                featuredArticle={detail.featuredArticle}
+                groupedSpecs={detail.groupedSpecs}
+                expandedSpecs={expandedSpecs}
+                attributes={product.attributes}
+                sizes={product.sizes}
+                booleanLabels={{
+                  yes: t['admin.catalog.products.detail.specs.yes'],
+                  no: t['admin.catalog.products.detail.specs.no'],
+                }}
+                reviews={REVIEWS}
+                reviewsLabels={reviewsLabels}
+                viewAllHref={VIEW_ALL_HREF}
+                writeHref={WRITE_REVIEW_HREF}
+                apiBaseUrl="/api/v1"
+                loginHref={`/${locale}/login`}
+                faqs={detail.faqs}
+                shippingInline={t['storefront.products.detail.v4.shippingInline']}
+                inclusionAccordions={INCLUSION_ACCORDIONS}
+              />
             </aside>
           </section>
-
-          {/* Tabs de información (Descripción · Ficha técnica · Reseñas ·
-              Preguntas frecuentes · Envíos). Reemplaza los bloques apilados
-              de la PDP: descripción, artículo destacado, highlights, specs,
-              descripción extendida, FAQ y reseñas. */}
-          <ProductDetailTabs
-            labels={tabLabels}
-            description={detail.description}
-            highlights={detail.highlights}
-            extendedDescriptions={detail.extendedDescriptions}
-            featuredArticle={detail.featuredArticle}
-            groupedSpecs={detail.groupedSpecs}
-            expandedSpecs={expandedSpecs}
-            attributes={product.attributes}
-            sizes={product.sizes}
-            booleanLabels={{
-              yes: t['admin.catalog.products.detail.specs.yes'],
-              no: t['admin.catalog.products.detail.specs.no'],
-            }}
-            reviews={REVIEWS}
-            reviewsLabels={reviewsLabels}
-            viewAllHref={VIEW_ALL_HREF}
-            writeHref={WRITE_REVIEW_HREF}
-            apiBaseUrl="/api/v1"
-            loginHref={`/${locale}/login`}
-            faqs={detail.faqs}
-            shippingInline={t['storefront.products.detail.v4.shippingInline']}
-            inclusionAccordions={INCLUSION_ACCORDIONS}
-          />
 
           {/* Features carousel — removido: sección redundante con Highlights. */}
 

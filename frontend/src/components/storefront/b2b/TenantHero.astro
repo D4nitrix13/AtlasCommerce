@@ -86,13 +86,12 @@ const trendingLabel = t['storefront.b2b.home.hero.trendingLabel'];
     class="absolute bottom-0 right-0 translate-x-1/4 w-96 h-96 opacity-25 hidden lg:block"
   />
 
-  {/* Container con max-width estándar de Bonfire (1248px) y padding
-      lateral progresivo. relative para anclar los mockups flotantes. */}
-  <div class="relative mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-10">
-    {/* Bloque de copy. En mobile/tablet ocupa todo el ancho; en
-        desktop se centra con max-width 5xl (1024px) para que el H1
-        tenga espacio amplio para varias lineas sin sentirse agobiado. */}
-    <div class="lg:max-w-5xl lg:mx-auto lg:text-center">
+  {/* Container full-width con padding lateral progresivo (mismo ritmo
+      que header/footer). relative para anclar los mockups flotantes. */}
+  <div class="relative w-full px-4 sm:px-6 lg:px-10">
+    {/* Bloque de copy: en desktop se centra el texto para que el H1
+        masivo no pierda legibilidad por el ancho completo. */}
+    <div class="lg:text-center">
       {/* Eyebrow pill + trending link. El pill es aria-hidden porque
           su contenido (Explorar) ya está implícito en el copy del H1
           y no aporta información nueva — es marca visual. */}

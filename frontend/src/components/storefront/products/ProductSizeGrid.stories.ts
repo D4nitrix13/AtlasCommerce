@@ -1,5 +1,5 @@
 /**
- * ProductSizeGrid — grid 2 columnas de botones de tamaño.
+ * ProductSizeGrid — fila inline de pills de tamaño.
  *
  * Variantes: Default (4 tallas), Selected, Disabled, Empty.
  */
