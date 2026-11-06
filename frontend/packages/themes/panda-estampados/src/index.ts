@@ -5,8 +5,8 @@ export const pandaTheme = {
     shortName: 'Panda',
     domains: ['panda-estampados.com', 'www.panda-estampados.com'],
     adminDomains: ['admin.panda-estampados.com', 'admin.localhost', 'admin.127.0.0.1'],
-    logoPath: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp',
-    loginLogoPath: '/api/v1/storefront/assets/tenants/panda-estampados/branding/logo.webp',
+    logoPath: '/assets/branding/panda-estampados/logo.webp',
+    loginLogoPath: '/assets/branding/panda-estampados/logo.webp',
     // Paleta derivada del logo de Panda Estampados (monocromático
     // + acentos del "universo panda + estampados"). El logo es
     // estrictamente negro/blanco, así que los acentos de la web
