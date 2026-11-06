@@ -1,10 +1,18 @@
 /**
- * Wrapper que reutiliza el admin ForgotPasswordForm con labels en
- * castellano para el cliente.
+ * Wrapper storefront del `ForgotPasswordWizard` — el flujo multi-método
+ * (email → método de verificación → código → contraseña) para clientes.
  */
 import type { ReactElement } from 'react';
-import ForgotPasswordForm from '../../admin/auth/ForgotPasswordForm';
+import ForgotPasswordWizard from '../../admin/auth/ForgotPasswordWizard';
 
-export default function StorefrontForgotPasswordForm(): ReactElement {
-  return <ForgotPasswordForm callbackPath="/account" locale="es" />;
+interface Props {
+  locale?: string;
+  callbackPath?: string;
+}
+
+export default function StorefrontForgotPasswordForm({
+  locale = 'es',
+  callbackPath = '/account',
+}: Props): ReactElement {
+  return <ForgotPasswordWizard locale={locale} callbackPath={callbackPath} />;
 }
