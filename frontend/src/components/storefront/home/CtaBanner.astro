@@ -3,19 +3,17 @@
  * CtaBanner — banda full-width de cierre de la composición B2C.
  *
  * Toma el rol de "banner de llamada a la acción" final que en la home
- * de Bonfire antecede al footer. Fondo charcoal slate-900 neutro
- * (replica el #1B1E24 char/footer Bonfire, sin copiarlo), texto
- * blanco, H2 centrado y un único botón CTA outline blanco.
+ * de Bonfire antecede al footer. Fondo oscuro derivado del accent del
+ * tenant (color-mix sobre tinta), texto blanco, H2 centrado y un único
+ * botón CTA outline blanco.
  *
- * Por qué slate-900 y no el accent del tenant:
- *   El diseño original de Bonfire cierra la home con un banner
- *   charcoal full-width (design-references-bonfire §5) que actúa
- *   como pausa dramática antes del footer. La versión previa de
- *   este componente usaba el accent del tenant, lo que compite con
- *   el H1 del hero. Cambiar a slate-900 da contraste alto,
- *   coherencia con `DarkHeroCardB2C` y crea ritmo narrativo: dos
- *   pausas oscuras (DarkHeroCard a mitad de página + este banner al
- *   final) con secciones claras entremedias.
+ * Por qué un oscuro derivado del accent y no un charcoal fijo:
+ *   La banda debe heredar el color de la tienda sin perder contraste
+ *   AA con el texto blanco. Mezclar el accent con tinta (`#1c1917`)
+ *   mantiene el fondo siempre oscuro, cualquiera sea el accent del
+ *   tenant, y crea ritmo narrativo: dos pausas oscuras (DarkHeroCard a
+ *   mitad de página + este banner al final) con secciones claras
+ *   entremedias.
  *
  * Enriquecimiento visual Bonfire (sprint visual fidelity B2C):
  *   Squiggle ámbar decorativa flotando sobre la sección, mismo
@@ -41,19 +39,22 @@ interface Props {
 const { heading, ctaLabel, ctaHref } = Astro.props;
 ---
 
-<section aria-labelledby="cta-banner-heading" class="relative w-full overflow-hidden bg-slate-900">
+<section
+  aria-labelledby="cta-banner-heading"
+  class="relative w-full overflow-hidden bg-[color-mix(in_srgb,var(--primary)_30%,#1c1917)]"
+>
   <Squiggle
     variant="loop"
-    color="#F6C36F"
+    color="var(--primary-soft)"
     class="pointer-events-none absolute left-8 top-8 h-12 w-12 opacity-40"
   />
   <Squiggle
     variant="arc"
-    color="#F6C36F"
+    color="var(--primary-soft)"
     class="pointer-events-none absolute bottom-10 right-12 hidden h-3 w-20 opacity-50 md:block"
   />
 
-  <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 py-12 text-center sm:px-6 sm:py-16 lg:py-20">
+  <div class="relative flex w-full flex-col items-center gap-6 px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-10 lg:py-20">
     <h2
       id="cta-banner-heading"
       class="max-w-3xl text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl"
