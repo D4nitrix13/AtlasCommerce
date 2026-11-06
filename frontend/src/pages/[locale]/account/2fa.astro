@@ -13,7 +13,7 @@ const locale = getServerLocale(Astro.locals.locale);
 const fallbackBrand = getBrandBySlug(Astro.locals.tenant?.tenantSlug ?? null) ?? DEFAULT_BRAND;
 const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
 
-const loginPath = `/${locale}/admin/auth/login`;
+const loginPath = `/${locale}/account/login`;
 
 /**
  * 2FA challenge page.
@@ -34,7 +34,7 @@ if (!Number.isFinite(challengeId)) {
   return Astro.redirect(loginPath);
 }
 
-const fallbackRedirect = `/${locale}/admin/dashboard`;
+const fallbackRedirect = `/${locale}/account`;
 const redirectTo =
   rawRedirect !== null && rawRedirect.startsWith(`/${locale}`) ? rawRedirect : fallbackRedirect;
 ---
