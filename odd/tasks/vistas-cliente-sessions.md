@@ -223,8 +223,16 @@ layout se valida con tests de clases (estilo `catalog-grid-css.test.ts`)
    en los datos: caen a `deriveProductCardSwap().hoverImage`. Tests:
    9 nuevos RED→GREEN. 579 tests OK · astro check OK · eslint 0 nuevos.
    Assess: medium, `under_budget` (1789 líneas; slice pendiente).
-6. **Cierre común** — `bun run test`, `astro check`, `build`, lint por
-   archivo (0 errores nuevos vs HEAD), capturas 1440/390.
+6. ✅ **Cierre común** — `bun run test` **579 passed (0 failed)** ·
+   `astro check` 0 errores/0 warnings · `bun run build` OK · eslint 0
+   errores nuevos vs HEAD · capturas `output/playwright/pdp-lote2-*`
+   (desktop 1440 + mobile 390, firefox, mount del worktree en :5321).
+   Nota infra: el contenedor frontend compartido fue re-apuntado 2×
+   por sesiones paralelas ("robo de mount") — protocolo confirmado:
+   `docker-stack.sh up dev panda-estampados-and-kitsune frontend` desde
+   el worktree antes de capturar. Historia ruidosa: `7d3bdf76` (patch
+   del writer zombi sobre [slug].astro) + `d55850ac` (revert) +
+   revert-del-revert — neto cero, tests verdes en HEAD.
 
 **Diferido (fuera de este lote)**: port del backend Fase 8
 (`product_faqs`, `product_extended_descriptions`, `product_highlights`;
