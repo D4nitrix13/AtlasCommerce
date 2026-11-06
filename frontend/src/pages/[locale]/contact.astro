@@ -2,11 +2,16 @@
 /**
  * Página «Contacto» — canales de soporte del tenant.
  *
- * Cascarón fino: el cuerpo vive en `i18n/legal/contact.ts` (es/en) y
- * sale del `brand.supportEmail` de `config/stores.ts`. No hay formulario
- * de contacto: no existe backend para eso, y un formulario muerto es
- * peor que un mailto honesto. Los horarios de atención que falten
- * quedan como `[completar: …]` en el contenido.
+ * Cascarón fino: el cuerpo vive en `i18n/legal/contact.ts` (es/en).
+ * Canales:
+ *   - Email de `brand.supportEmail` como mailto, canal principal.
+ *   - WhatsApp solo si el theme del tenant lo trae configurado
+ *     (`Astro.locals.theme.whatsapp`, de `stores.whatsapp` en BD);
+ *     sin el dato, el bloque se omite. El enlace wa.me se arma con el
+ *     número normalizado a dígitos.
+ *   - Sin formulario de contacto: no hay backend para eso y un
+ *     formulario muerto es peor que un mailto honesto.
+ * Los horarios que falten quedan como `[completar: …]` en el contenido.
  */
 import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
 import LegalContent from '../../components/storefront/legal/LegalContent.astro';
@@ -24,11 +29,56 @@ const content = getContactContent(locale, {
 });
 
 const heading = t['storefront.legal.contact.title'];
+
+const whatsappRaw = Astro.locals.theme?.whatsapp ?? null;
+const whatsappDigits = whatsappRaw === null ? '' : whatsappRaw.replace(/\D/g, '');
+const whatsappHref = whatsappDigits.length > 0 ? `https://wa.me/${whatsappDigits}` : null;
+
+// La intro se renderiza arriba, antes de las tarjetas de canal; las
+// secciones quedan para LegalContent.
+const sectionsOnly = { sections: content.sections };
 ---
 
 <StorefrontLayout title={`${heading} — ${brand.name}`}>
   <div class="w-full px-4 py-10 sm:px-6 lg:px-10">
+    <nav aria-label={t['storefront.legal.breadcrumbLabel']} class="mb-2 text-sm text-slate-500">
+      <a href={`/${locale}`} class="hover:text-[var(--primary,#1e293b)] focus:outline-none focus-visible:underline">
+        {t['storefront.header.nav.home']}
+      </a>
+      <span aria-hidden="true"> / </span>
+      <span aria-current="page">{heading}</span>
+    </nav>
     <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{heading}</h1>
-    <LegalContent content={content} />
+
+    {content.intro?.map((paragraph) => (
+      <p class="mt-6 text-base leading-7 text-slate-600">{paragraph}</p>
+    ))}
+
+    <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 class="text-base font-semibold text-slate-900">{t['storefront.legal.contact.emailLabel']}</h2>
+        <a
+          href={`mailto:${brand.supportEmail}`}
+          class="mt-2 inline-block text-base text-slate-600 transition hover:text-[var(--primary,#1e293b)] focus:outline-none focus-visible:underline"
+        >
+          {brand.supportEmail}
+        </a>
+      </div>
+      {whatsappHref && (
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+          <h2 class="text-base font-semibold text-slate-900">{t['storefront.legal.contact.whatsappLabel']}</h2>
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-2 inline-block text-base text-slate-600 transition hover:text-[var(--primary,#1e293b)] focus:outline-none focus-visible:underline"
+          >
+            {whatsappRaw}
+          </a>
+        </div>
+      )}
+    </div>
+
+    <LegalContent content={sectionsOnly} />
   </div>
 </StorefrontLayout>
