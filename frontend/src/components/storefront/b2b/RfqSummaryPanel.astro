@@ -1,0 +1,141 @@
+---
+/**
+ * RfqSummaryPanel — panel-resumen estilo recibo para el flujo RFQ.
+ *
+ * Patrón "resumen-recibo" de `.interface-design/system.md`:
+ *   - Header kraft band con título.
+ *   - Breakdown de filas (label muted / valor ink tabular).
+ *   - Chip de descuento por volumen (visible solo si > 0).
+ *   - Divisor punteado (border-dashed).
+ *   - Total display 32px Fraunces tabular.
+ *   - Trust chips compactos.
+ *
+ * Los labels llegan traducidos como props — el componente NO consulta
+ * i18n. Los data-testid hooks permiten que el script de la página
+ * actualice los valores en vivo.
+ */
+interface Props {
+  productName: string;
+  quantity: number;
+  techniqueLabel: string;
+  unitPrice: string;
+  total: string;
+  discountPercent: number;
+  labels: {
+    summary: string;
+    product: string;
+    quantity: string;
+    technique: string;
+    unitPrice: string;
+    discount: string;
+    totalLabel: string;
+    responseTime: string;
+  };
+}
+
+const { productName, quantity, techniqueLabel, unitPrice, total, discountPercent, labels } =
+  Astro.props;
+
+const hasDiscount = discountPercent > 0;
+---
+
+<aside class="paper-card overflow-hidden lg:sticky lg:top-24" data-testid="rfq-summary">
+  {/* Header kraft band */}
+  <div class="kraft-band px-6 py-4">
+    <h2 class="text-lg font-semibold text-[var(--ink,#1c1917)]">{labels.summary}</h2>
+  </div>
+
+  <div class="space-y-4 px-6 py-6">
+    {/* Breakdown rows */}
+    <dl class="space-y-3 text-sm">
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[13px] text-[var(--ink-muted,#78716c)]">{labels.product}</dt>
+        <dd
+          class="text-right text-[14px] font-medium tabular-nums text-[var(--ink,#1c1917)]"
+          data-testid="rfq-summary-producto"
+        >
+          {productName}
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[13px] text-[var(--ink-muted,#78716c)]">{labels.quantity}</dt>
+        <dd
+          class="text-right text-[14px] font-medium tabular-nums text-[var(--ink,#1c1917)]"
+          data-testid="rfq-summary-cantidad"
+        >
+          {quantity} und.
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[13px] text-[var(--ink-muted,#78716c)]">{labels.technique}</dt>
+        <dd
+          class="text-right text-[14px] font-medium text-[var(--ink,#1c1917)]"
+          data-testid="rfq-summary-tecnica"
+        >
+          {techniqueLabel}
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[13px] text-[var(--ink-muted,#78716c)]">{labels.unitPrice}</dt>
+        <dd
+          class="text-right text-[14px] font-medium tabular-nums text-[var(--ink,#1c1917)]"
+          data-testid="rfq-summary-unit-price"
+        >
+          {unitPrice}
+        </dd>
+      </div>
+    </dl>
+
+    {/* Discount chip */}
+    <div data-testid="rfq-summary-discount-row" class={hasDiscount ? '' : 'hidden'}>
+      <span class="ink-chip chip-done" data-testid="rfq-summary-discount">
+        <span class="ink-swatch" style="background: var(--primary, #2D9D8E);"></span>
+        {labels.discount}
+        −<span data-testid="rfq-summary-discount-pct">{discountPercent}</span>%
+      </span>
+    </div>
+
+    {/* Dashed divider (receipt pattern) */}
+    <hr class="border-0 border-t border-dashed border-[var(--edge,#e7e5e4)]" />
+
+    {/* Total display */}
+    <div class="flex items-baseline justify-between gap-2">
+      <span class="text-[13px] text-[var(--ink-muted,#78716c)]">{labels.totalLabel}</span>
+      <span
+        class="font-display text-[32px] font-semibold tabular-nums leading-none tracking-tight text-[var(--ink,#1c1917)]"
+        data-testid="rfq-summary-total"
+      >
+        {total}
+      </span>
+    </div>
+
+    {/* Response time */}
+    <p class="text-xs leading-relaxed text-[var(--ink-faint,#a8a29e)]">{labels.responseTime}</p>
+
+    {/* Trust chips */}
+    <div class="flex flex-wrap items-center gap-2 pt-1">
+      <span
+        class="inline-flex items-center gap-1.5 rounded-full bg-[var(--paper-sunken,#ece9e4)] px-2.5 py-1 text-[11px] font-medium text-[var(--ink-muted,#78716c)]"
+      >
+        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+        >
+        B2B
+      </span>
+      <span
+        class="inline-flex items-center gap-1.5 rounded-full bg-[var(--paper-sunken,#ece9e4)] px-2.5 py-1 text-[11px] font-medium text-[var(--ink-muted,#78716c)]"
+      >
+        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+        >
+        24h
+      </span>
+    </div>
+  </div>
+</aside>

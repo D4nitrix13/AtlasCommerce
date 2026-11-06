@@ -1,45 +1,31 @@
 ---
 /**
- * /rfq — Request For Quote v3 (Bonfire) para B2B Panda Estampados.
+ * /rfq — Request For Quote (B2B Panda Estampados).
  *
- * Mockup: 06-rfq.html (vista 06 del set de wireframes Bonfire).
+ * Layout full-width (sin `max-w` estrecho) siguiendo el design system
+ * de `.interface-design/system.md`: canvas papel, tinta, un acento
+ * (tenant), panel-resumen estilo recibo con divisor punteado y total
+ * display Fraunces.
  *
- * Layout:
- *   - Main con fondo slate-50.
- *   - Header con badge "Solo B2B" + H1 + subtítulo.
- *   - Grid 2 columnas en lg (form 1fr + summary 320px).
- *   - Form a la izquierda en card blanco con stepper (3 pasos) +
- *     3 fieldsets (Detalles / Contacto / Revisión).
- *   - Summary card a la derecha con line items + total estimado.
- *     Sticky en lg+, oculto el sticky en mobile.
- *
- * Tenant:
- *   - El endpoint vive bajo Panda Estampados (B2B). El layout se
- *     mantiene multi-tenant aware — los colores vienen de
- *     `var(--primary)` seteado por `StorefrontLayout` según brand.
+ * Multi-tenant: colores vía tokens (`--primary`, `--ink`, `--edge`,
+ * `--paper-raised`) — sin hex hardcodeados por tenant.
  *
  * Accesibilidad (AGENTS §17):
- *   - Stepper con `<nav aria-label>`.
+ *   - Stepper con `<nav aria-label>` + `aria-current="step"`.
  *   - Form con `<fieldset>` por sección + `<legend>`.
- *   - Labels asociados via `for` o wrapping.
- *   - Banner B2B con `<span>` badge.
+ *   - Labels asociados via `for`.
  *
  * Estados (AGENTS §11):
  *   - Submit: button disabled + label cambia vía JS.
  *   - Mock submit: genera ticket ID + redirect a /rfq/confirmation.
- *
- * Multi-tenant aware:
- *   - Stepper es reutilizable (cualquier número de labels).
- *   - Colores via CSS vars del brand — sin hex hardcoded.
- *   - Sin referencias a "Panda" en el layout, solo en el badge B2B
- *     del header (acorde al mockup).
  */
 import StorefrontLayout from '../../../layouts/StorefrontLayout.astro';
 import RFQStepper from '../../../components/storefront/b2b/RFQStepper.astro';
+import RfqSummaryPanel from '../../../components/storefront/b2b/RfqSummaryPanel.astro';
 import { getServerDictionary } from '../../../i18n/server';
 import { isPandaStore, PANDA_PRODUCTS } from '../../../data/panda-catalog';
 import { PRODUCTS } from '../../../data/products';
-import { bulkTotalCents } from '../../../lib/bulk-estimate';
+import { bulkTotalCents, bulkDiscountPercent } from '../../../lib/bulk-estimate';
 import { formatCurrency } from '../../../lib/formatters';
 
 const locale = Astro.locals.locale ?? 'es';
@@ -60,56 +46,71 @@ const initialTotal =
         bulkTotalCents(selectedPiece.priceCents, initialQuantity),
         selectedPiece.currency ?? 'USD',
       );
+const initialDiscountPercent = bulkDiscountPercent(initialQuantity);
+const initialUnitPrice =
+  selectedPiece === undefined
+    ? '—'
+    : formatCurrency(selectedPiece.priceCents, selectedPiece.currency ?? 'USD');
 
 const stepperLabels = [
   t['storefront.b2b.rfq.v3.step1.label'],
   t['storefront.b2b.rfq.v3.step2.label'],
   t['storefront.b2b.rfq.v3.step3.label'],
 ];
+
+/** Clase compartida para inputs/selects/textarea del form. */
+const inputClass =
+  'block w-full rounded-lg border border-[var(--edge,#e7e5e4)] bg-white px-3.5 py-2.5 text-sm text-[var(--ink,#1c1917)] transition placeholder:text-[var(--ink-faint,#a8a29e)] hover:border-[var(--edge-strong,#d6d3d1)]';
+
+/** Clase de label de campo: 13px/500 ink-soft. */
+const labelClass = 'mb-1.5 block text-[13px] font-medium text-[var(--ink-soft,#44403c)]';
+
+/** Clase de legend/section header: micro-label tracked. */
+const sectionClass = 'px-1 text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted,#78716c)]';
 ---
 
 <StorefrontLayout title={`${t['storefront.b2b.rfq.v3.title']} | AtlasCommerce`} cartCount={0}>
   <main class="min-h-screen">
-    <section class="relative mx-auto w-full max-w-6xl px-4 pb-20 pt-12 sm:px-6">
-      <header class="relative mb-10 max-w-3xl">
+    <section class="w-full px-4 pb-16 pt-10 sm:px-6 lg:px-10">
+      {/* Header full-width */}
+      <header class="mb-10">
         <span
-          class="mb-4 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700"
+          class="mb-4 inline-flex items-center rounded-full bg-[var(--primary-soft,#e6f3f1)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--primary,#2D9D8E)]"
           data-testid="rfq-b2b-badge"
         >
           {t['storefront.b2b.rfq.v3.b2bOnly']}
         </span>
-        <h1 class="text-4xl sm:text-5xl">
+        <h1 class="text-4xl sm:text-5xl lg:text-[3.25rem]">
           {t['storefront.b2b.rfq.v3.title']}
         </h1>
-        <p class="mt-4 text-base leading-relaxed text-slate-500 sm:text-lg">
+        <p class="mt-4 max-w-2xl text-base leading-relaxed text-[var(--ink-muted,#78716c)] sm:text-lg">
           {t['storefront.rfq.subtitle']}
         </p>
       </header>
 
-      <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <!-- LEFT: form card -->
-        <div
-          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md sm:p-8"
-          data-testid="rfq-card"
-        >
+      {/* Grid: form + receipt summary */}
+      <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        {/* LEFT: form panel */}
+        <div class="paper-card p-6 sm:p-8" data-testid="rfq-card">
           <RFQStepper currentStep={1} labels={stepperLabels} />
 
           <form id="rfq-form" class="space-y-8" novalidate data-testid="rfq-form" data-reveal>
-            <!-- Paso 1: detalles del pedido -->
+            {/* Paso 1: detalles del pedido */}
             <fieldset class="space-y-4">
-              <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
+              <legend class={sectionClass}>
                 {t['storefront.b2b.rfq.v3.step1.label']}
               </legend>
 
               <div class="grid gap-4 sm:grid-cols-2">
-                <label class="block">
-                  <span class="mb-1 block text-sm font-medium text-slate-700">
+                <div>
+                  <label for="rfq-tipo-producto" class={labelClass}>
                     {t['storefront.b2b.rfq.v3.step1.tipoProducto']}
-                  </span>
+                  </label>
                   <select
+                    id="rfq-tipo-producto"
                     name="tipoProducto"
                     required
-                    class="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                    class={`${inputClass} cursor-pointer`}
                     data-testid="rfq-tipo-producto"
                   >
                     {catalog.map((product) => (
@@ -123,33 +124,35 @@ const stepperLabels = [
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
 
-                <label class="block">
-                  <span class="mb-1 block text-sm font-medium text-slate-700">
+                <div>
+                  <label for="rfq-cantidad" class={labelClass}>
                     {t['storefront.b2b.rfq.v3.step1.cantidad']}
-                  </span>
+                  </label>
                   <input
+                    id="rfq-cantidad"
                     type="number"
                     name="cantidad"
                     min="1"
                     required
                     placeholder="100"
                     value={initialQuantity}
-                    class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                    class={inputClass}
                     data-testid="rfq-cantidad"
                   />
-                </label>
+                </div>
               </div>
 
-              <label class="block">
-                <span class="mb-1 block text-sm font-medium text-slate-700">
+              <div>
+                <label for="rfq-tecnica" class={labelClass}>
                   {t['storefront.b2b.rfq.v3.step1.tecnica']}
-                </span>
+                </label>
                 <select
+                  id="rfq-tecnica"
                   name="tecnica"
                   required
-                  class="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                  class={`${inputClass} cursor-pointer`}
                   data-testid="rfq-tecnica"
                 >
                   <option value="serigrafia">
@@ -163,118 +166,131 @@ const stepperLabels = [
                   </option>
                   <option value="vinilo">{t['storefront.b2b.rfq.v3.step1.tecnica.vinilo']}</option>
                 </select>
-              </label>
+              </div>
 
-              <label class="block">
-                <span class="mb-1 block text-sm font-medium text-slate-700">
+              <div>
+                <label for="rfq-descripcion" class={labelClass}>
                   {t['storefront.b2b.rfq.v3.step1.descripcion']}
-                </span>
+                </label>
                 <textarea
+                  id="rfq-descripcion"
                   name="descripcion"
                   rows="4"
                   required
-                  class="block w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                  class={`${inputClass} resize-none`}
                   data-testid="rfq-descripcion"
                 ></textarea>
-              </label>
+              </div>
 
-              <label class="block">
-                <span class="mb-1 block text-sm font-medium text-slate-700">
+              <div>
+                <label for="rfq-fecha" class={labelClass}>
                   {t['storefront.b2b.rfq.v3.step1.fechaRequerida']}
-                </span>
+                </label>
                 <input
+                  id="rfq-fecha"
                   type="date"
                   name="fechaRequerida"
                   required
-                  class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                  class={inputClass}
                   data-testid="rfq-fecha"
                 />
-              </label>
+              </div>
             </fieldset>
 
-            <!-- Paso 2: datos de contacto -->
+            <hr class="border-0 border-t border-[var(--edge-soft,#f0eeec)]" />
+
+            {/* Paso 2: datos de contacto */}
             <fieldset class="space-y-4">
-              <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
+              <legend class={sectionClass}>
                 {t['storefront.b2b.rfq.v3.step2.label']}
               </legend>
 
               <div class="grid gap-4 sm:grid-cols-2">
-                <label class="block">
-                  <span class="mb-1 block text-sm font-medium text-slate-700">
+                <div>
+                  <label for="rfq-nombre" class={labelClass}>
                     {t['storefront.b2b.rfq.v3.step2.nombre']}
-                  </span>
+                  </label>
                   <input
+                    id="rfq-nombre"
                     type="text"
                     name="nombre"
                     required
                     autocomplete="name"
-                    class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                    class={inputClass}
                     data-testid="rfq-nombre"
                   />
-                </label>
+                </div>
 
-                <label class="block">
-                  <span class="mb-1 block text-sm font-medium text-slate-700">
+                <div>
+                  <label for="rfq-email" class={labelClass}>
                     {t['storefront.b2b.rfq.v3.step2.email']}
-                  </span>
+                  </label>
                   <input
+                    id="rfq-email"
                     type="email"
                     name="email"
                     required
                     autocomplete="email"
-                    class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                    class={inputClass}
                     data-testid="rfq-email"
                   />
-                </label>
+                </div>
 
-                <label class="block">
-                  <span class="mb-1 block text-sm font-medium text-slate-700">
+                <div>
+                  <label for="rfq-telefono" class={labelClass}>
                     {t['storefront.b2b.rfq.v3.step2.telefono']}
-                  </span>
+                  </label>
                   <input
+                    id="rfq-telefono"
                     type="tel"
                     name="telefono"
                     required
                     autocomplete="tel"
-                    class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                    class={inputClass}
                     data-testid="rfq-telefono"
                   />
-                </label>
+                </div>
 
-                <label class="block">
-                  <span class="mb-1 block text-sm font-medium text-slate-700">
+                <div>
+                  <label for="rfq-empresa" class={labelClass}>
                     {t['storefront.b2b.rfq.v3.step2.empresa']}
-                  </span>
+                  </label>
                   <input
+                    id="rfq-empresa"
                     type="text"
                     name="empresa"
                     autocomplete="organization"
-                    class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)]"
+                    class={inputClass}
                     data-testid="rfq-empresa"
                   />
-                </label>
+                </div>
               </div>
             </fieldset>
 
-            <!-- Paso 3: revisión + CTA -->
+            <hr class="border-0 border-t border-[var(--edge-soft,#f0eeec)]" />
+
+            {/* Paso 3: revisión */}
             <fieldset class="space-y-3">
-              <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--primary,#059669)]">
+              <legend class={sectionClass}>
                 {t['storefront.b2b.rfq.v3.step3.label']}
               </legend>
-              <p class="text-sm text-slate-500">{t['storefront.rfq.responseTime']}</p>
+              <p class="text-sm leading-relaxed text-[var(--ink-muted,#78716c)]">
+                {t['storefront.rfq.responseTime']}
+              </p>
             </fieldset>
 
-            <div class="flex flex-col-reverse items-stretch gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            {/* Footer: back + submit */}
+            <div class="flex flex-col-reverse items-stretch gap-3 border-t border-[var(--edge-soft,#f0eeec)] pt-6 sm:flex-row sm:items-center sm:justify-between">
               <a
                 href={homeHref}
-                class="text-sm font-medium text-slate-600 transition hover:text-slate-900 hover:underline"
+                class="text-sm font-medium text-[var(--ink-muted,#78716c)] transition hover:text-[var(--ink,#1c1917)]"
                 data-testid="rfq-back"
               >
                 {t['storefront.b2b.rfq.v3.back']}
               </a>
               <button
                 type="submit"
-                class="inline-flex items-center justify-center rounded-lg bg-[var(--primary,#059669)] px-6 py-3 font-semibold text-white transition hover:bg-[var(--primary-hover,#047857)] focus:outline-none focus:ring-2 focus:ring-[var(--primary,#059669)] focus:ring-offset-2 disabled:opacity-60"
+                class="pressable inline-flex h-12 items-center justify-center rounded-lg bg-[var(--primary,#2D9D8E)] px-8 text-[15px] font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)] disabled:opacity-60"
                 data-testid="rfq-submit"
               >
                 {t['storefront.b2b.rfq.v3.submit']}
@@ -283,52 +299,32 @@ const stepperLabels = [
           </form>
         </div>
 
-        <!-- RIGHT: summary sticky card -->
-        <aside
-          class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md lg:sticky lg:top-24"
-          data-testid="rfq-summary"
-        >
-          <h2 class="text-lg font-bold text-slate-900">{t['storefront.b2b.rfq.v3.summary']}</h2>
-
-          <dl class="space-y-3 text-sm">
-            <div class="flex items-center justify-between gap-2">
-              <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.cantidad']}</dt>
-              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-cantidad">
-                {initialQuantity} und.
-              </dd>
-            </div>
-            <div class="flex items-center justify-between gap-2">
-              <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.tecnica']}</dt>
-              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-tecnica">
-                {t['storefront.b2b.rfq.v3.step1.tecnica.serigrafia']}
-              </dd>
-            </div>
-            <div class="flex items-center justify-between gap-2">
-              <dt class="text-slate-500">{t['storefront.b2b.rfq.v3.step1.tipoProducto']}</dt>
-              <dd class="font-semibold text-slate-900" data-testid="rfq-summary-producto">
-                {selectedPiece?.name ?? '—'}
-              </dd>
-            </div>
-          </dl>
-
-          <div class="border-t border-slate-200"></div>
-
-          <div class="flex items-baseline justify-between gap-2">
-            <span class="text-sm text-slate-500">{t['storefront.b2b.rfq.v3.totalLabel']}</span>
-            <span class="text-2xl font-bold text-slate-900" data-testid="rfq-summary-total">
-              {initialTotal}
-            </span>
-          </div>
-
-          <p class="text-xs leading-relaxed text-slate-400">{t['storefront.rfq.responseTime']}</p>
-        </aside>
+        {/* RIGHT: receipt-style summary panel */}
+        <RfqSummaryPanel
+          productName={selectedPiece?.name ?? '—'}
+          quantity={initialQuantity}
+          techniqueLabel={t['storefront.b2b.rfq.v3.step1.tecnica.serigrafia']}
+          unitPrice={initialUnitPrice}
+          total={initialTotal}
+          discountPercent={initialDiscountPercent}
+          labels={{
+            summary: t['storefront.b2b.rfq.v3.summary'],
+            product: t['storefront.b2b.rfq.v3.step1.tipoProducto'],
+            quantity: t['storefront.b2b.rfq.v3.step1.cantidad'],
+            technique: t['storefront.b2b.rfq.v3.step1.tecnica'],
+            unitPrice: t['storefront.b2b.rfq.v3.unitPriceLabel'],
+            discount: t['storefront.b2b.rfq.v3.discountLabel'],
+            totalLabel: t['storefront.b2b.rfq.v3.totalLabel'],
+            responseTime: t['storefront.rfq.responseTime'],
+          }}
+        />
       </div>
 
-      <!-- Below form: subtle notice -->
-      <p class="mt-8 text-xs text-slate-500" data-testid="rfq-notice">
+      {/* Bottom notice */}
+      <p class="mt-10 text-sm text-[var(--ink-muted,#78716c)]" data-testid="rfq-notice">
         <a
           href={`${homeHref}/account`}
-          class="font-medium text-[var(--primary,#059669)] hover:underline"
+          class="font-medium text-[var(--primary,#2D9D8E)] transition hover:underline"
         >
           {t['storefront.rfq.alreadyCustomer']}
         </a>
@@ -338,96 +334,5 @@ const stepperLabels = [
 </StorefrontLayout>
 
 <script>
-  import { bulkTotalCents } from '../../../lib/bulk-estimate';
-
-  /**
-   * Cotización de prototipo: el resumen sigue al formulario y el envío
-   * abre el ticket. El total usa los mismos cortes de volumen que la
-   * calculadora. Cuando exista POST /api/storefront/rfq, este handler
-   * pasa a ser un fetch.
-   */
-  const form = document.getElementById('rfq-form') as HTMLFormElement | null;
-  const summaryProducto = document.querySelector('[data-testid="rfq-summary-producto"]');
-  const summaryCantidad = document.querySelector('[data-testid="rfq-summary-cantidad"]');
-  const summaryTecnica = document.querySelector('[data-testid="rfq-summary-tecnica"]');
-  const summaryTotal = document.querySelector('[data-testid="rfq-summary-total"]');
-
-  function readControl(source: HTMLFormElement, name: string): HTMLElement | null {
-    const element = source.elements.namedItem(name);
-    if (
-      element instanceof HTMLInputElement ||
-      element instanceof HTMLTextAreaElement ||
-      element instanceof HTMLSelectElement
-    ) {
-      return element;
-    }
-    return null;
-  }
-
-  function selectedLabel(control: HTMLElement | null): string {
-    if (control instanceof HTMLSelectElement) {
-      return control.selectedOptions[0]?.textContent?.trim() ?? '';
-    }
-    if (control instanceof HTMLInputElement) return control.value.trim();
-    return '';
-  }
-
-  function money(cents: number, currency: string): string {
-    try {
-      return new Intl.NumberFormat('es-NI', { style: 'currency', currency }).format(cents / 100);
-    } catch {
-      return `${(cents / 100).toFixed(2)} ${currency}`;
-    }
-  }
-
-  function writeSummary(source: HTMLFormElement): void {
-    const product = readControl(source, 'tipoProducto');
-    const quantityControl = readControl(source, 'cantidad');
-    const technique = readControl(source, 'tecnica');
-    const productName = selectedLabel(product);
-    const quantity = quantityControl instanceof HTMLInputElement ? quantityControl.value.trim() : '';
-    const techniqueName = selectedLabel(technique);
-
-    if (summaryProducto instanceof HTMLElement) {
-      summaryProducto.textContent = productName === '' ? '—' : productName;
-    }
-    if (summaryCantidad instanceof HTMLElement) {
-      summaryCantidad.textContent = quantity === '' ? '—' : `${quantity} und.`;
-    }
-    if (summaryTecnica instanceof HTMLElement) {
-      summaryTecnica.textContent = techniqueName === '' ? '—' : techniqueName;
-    }
-    if (!(summaryTotal instanceof HTMLElement) || !(product instanceof HTMLSelectElement)) return;
-    const price = Number.parseInt(product.selectedOptions[0]?.dataset.price ?? '', 10);
-    const units = Number.parseInt(quantity, 10);
-    const currency = product.selectedOptions[0]?.dataset.currency ?? 'USD';
-    if (Number.isNaN(price) || Number.isNaN(units) || units < 1) {
-      summaryTotal.textContent = '—';
-      return;
-    }
-    summaryTotal.textContent = money(bulkTotalCents(price, units), currency);
-  }
-
-  if (form !== null) {
-    form.addEventListener('input', () => writeSummary(form));
-    form.addEventListener('submit', (event: Event) => {
-      event.preventDefault();
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-      const ticketNumber = `RFQ-${Date.now().toString(36).toUpperCase()}`;
-      const product = readControl(form, 'tipoProducto');
-      const quantityControl = readControl(form, 'cantidad');
-      const params = new URLSearchParams({ ticket: ticketNumber });
-      if (product instanceof HTMLSelectElement && product.value !== '') {
-        params.set('product', product.value);
-        params.set('producto', selectedLabel(product));
-      }
-      if (quantityControl instanceof HTMLInputElement && quantityControl.value !== '') {
-        params.set('cantidad', quantityControl.value);
-      }
-      window.location.href = `${window.location.pathname.replace(/\/$/, '')}/confirmation?${params.toString()}`;
-    });
-  }
+  import './rfq-form';
 </script>

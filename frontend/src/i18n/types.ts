@@ -1851,6 +1851,8 @@ export type TranslationKey =
   | 'storefront.b2b.rfq.v3.totalLabel'
   | 'storefront.b2b.rfq.v3.b2bOnly'
   | 'storefront.b2b.rfq.v3.back'
+  | 'storefront.b2b.rfq.v3.discountLabel'
+  | 'storefront.b2b.rfq.v3.unitPriceLabel'
 
   // ─── storefront: bulk order (F3.3) ──────────────────────────────────
   | 'storefront.bulk_order.title'

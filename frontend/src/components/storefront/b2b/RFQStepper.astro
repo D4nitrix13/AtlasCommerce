@@ -51,22 +51,22 @@ function isDone(stepNumber: number, current: number): boolean {
 
 function circleClasses(done: boolean, current: boolean): string {
   if (done || current) {
-    return 'border-transparent bg-[var(--primary,#059669)] text-white';
+    return 'border-transparent bg-[var(--primary,#2D9D8E)] text-white';
   }
-  return 'border-slate-300 bg-white text-slate-400';
+  return 'border-[var(--edge,#e7e5e4)] bg-white text-[var(--ink-faint,#a8a29e)]';
 }
 
 function labelClasses(done: boolean, current: boolean): string {
   const base = 'hidden text-[15px] font-semibold sm:block';
-  if (done) return `${base} text-slate-700`;
-  if (current) return `${base} text-slate-900`;
-  return `${base} text-slate-500`;
+  if (done) return `${base} text-[var(--ink-soft,#44403c)]`;
+  if (current) return `${base} text-[var(--ink,#1c1917)]`;
+  return `${base} text-[var(--ink-muted,#78716c)]`;
 }
 
 function connectorClasses(stepNumber: number, current: number): string {
   return stepNumber < current
-    ? 'h-0.5 flex-1 rounded-full bg-[var(--primary,#059669)] transition'
-    : 'h-0.5 flex-1 rounded-full bg-slate-200 transition';
+    ? 'h-0.5 flex-1 rounded-full bg-[var(--primary,#2D9D8E)] transition'
+    : 'h-0.5 flex-1 rounded-full bg-[var(--edge,#e7e5e4)] transition';
 }
 ---
 
