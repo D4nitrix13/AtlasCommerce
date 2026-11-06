@@ -37,7 +37,7 @@ const es: Translations = {
   'auth.login.error.invalid': 'Las credenciales no son válidas.',
   'auth.login.error.disabled': 'La cuenta está desactivada.',
   'auth.login.error.oauth_email_conflict':
-    'Ese correo ya está registrado. Iniciá sesión con tu contraseña y vinculá Google/Facebook desde tu cuenta.',
+    'Ese correo ya está registrado. Iniciá sesión con tu contraseña para acceder a tu cuenta.',
   'auth.login.error.oauth_email_unverified':
     'Tu proveedor de OAuth reportó que el correo no está verificado. Verificá tu correo en Google y reintentá.',
   'auth.login.error.oauth_admin_signup_disabled':
