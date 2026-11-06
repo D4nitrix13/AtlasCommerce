@@ -33,8 +33,7 @@ import { useCustomerAuth } from '../../../stores/customer-auth';
 interface StorefrontLoginFormProps {
   callbackPath?: string;
   forgotHref?: string;
-  // Reservado para uso futuro. Mantener el prop evita romper el call
-  // site mientras no haya un consumer real.
+  /** Prefijo de idioma para armar rutas internas (ej. `/es/account/2fa`). */
   locale?: string;
 }
 
@@ -42,7 +41,6 @@ export default function StorefrontLoginForm({
   callbackPath = '/account',
   forgotHref = 'forgot-password',
   locale = 'es',
-  locale: _locale = 'es',
 }: StorefrontLoginFormProps): ReactElement {
   const { t } = useTranslations();
 
@@ -82,15 +80,15 @@ export default function StorefrontLoginForm({
       const outcome = await customerLogin(email, password);
 
       // 2FA (admin y usuarios con TOTP): el challenge se resuelve en
-      // /es/account/2fa. El token viaja en la query porque esa página
-      // lo recibe como prop (ver account/2fa.astro).
+      // /{locale}/account/2fa. El token viaja en la query porque esa
+      // página lo recibe como prop (ver account/2fa.astro).
       if (outcome.kind === '2fa_required') {
         const params = new URLSearchParams(window.location.search);
         const requested = params.get('redirect') ?? '';
         const isAdminPath = /^\/(?:[a-z]{2}\/)?admin\//i.test(requested);
         const target = requested !== '' && !isAdminPath ? requested : callbackPath;
         window.location.href =
-          `/es/account/2fa?token=${outcome.challengeId}` +
+          `/${locale}/account/2fa?token=${outcome.challengeId}` +
           `&redirect=${encodeURIComponent(target)}`;
         return;
       }
