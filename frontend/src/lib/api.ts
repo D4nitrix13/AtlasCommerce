@@ -68,6 +68,7 @@ export function buildApiUrl(endpoint: string): string {
 }
 
 import { getXsrfToken, bootstrapCsrf } from './csrf';
+import { getLocale } from '../i18n';
 
 interface ApiErrorResponse {
   message?: string;
@@ -269,6 +270,9 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
   // el cast a `HeadersInit` que devuelve fetch igual acepta este objeto plano.
   const requestHeaders: Record<string, string> = {
     Accept: 'application/json',
+    // Locale de la UI activa: el backend localiza los mensajes de
+    // validación según esta cabecera (middleware X-Locale).
+    'X-Locale': getLocale(),
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(shouldInjectXsrf ? { 'X-XSRF-TOKEN': xsrfToken! } : {}),
     ...(headers as Record<string, string> | undefined),

@@ -1,28 +1,40 @@
-import { useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { buildApiUrl } from '../../../lib/api';
 import { API_ENDPOINTS } from '../../../lib/endpoints';
-import { useTranslations } from '../../../i18n';
+import { useTranslations, type Locale } from '../../../i18n';
+import { withLocale, stripLocaleFromPath } from '../../../lib/path-helpers';
 import { GoogleIcon, FacebookIcon } from '../../../components/ui/SocialIcons';
 import { customerAuthStore, useCustomerAuth } from '../../../stores/customer-auth';
+import FormField, { RequiredMark, inputClass } from './FormField';
+import {
+  FIELD_IDS,
+  firstInvalidField,
+  mapApiFieldErrors,
+  validateRegisterForm,
+  type FieldErrors,
+  type FieldName,
+} from './authFieldError';
 
 /**
  * Form de registro para clientes.
  *
- * Solo email + password (sin social login). Sigue el design system:
+ * Sigue el design system:
  *   - Nombre + Apellido (2 columnas)
  *   - Correo
  *   - Contraseña con indicador de fuerza (4 barras)
  *   - Checkbox de Términos + Privacidad (requerido)
  *   - Submit "Crear mi cuenta"
+ *
+ * Validación client-side alineada al backend: errores por campo
+ * (inline + highlight + foco al primer inválido), mensajes
+ * localizados y redirect post-registro preservando el locale.
  */
 
 interface RegisterFormProps {
   callbackPath?: string;
-  // Reservado para uso futuro (ej. price formatting localizado por moneda
-  // del tenant). Mantener el prop evita romper el call site mientras
-  // no haya un consumer real.
-  locale?: string;
+  /** Locale activo: links de términos/privacidad y redirect post-registro. */
+  locale?: Locale;
 }
 
 type StrengthLevel = 'weak' | 'medium' | 'good';
@@ -44,7 +56,7 @@ function strengthLevel(score: number): StrengthLevel {
 
 export default function RegisterForm({
   callbackPath = '/account',
-  locale: _locale = 'es',
+  locale = 'es',
 }: RegisterFormProps): ReactElement {
   const { t } = useTranslations();
 
@@ -58,6 +70,8 @@ export default function RegisterForm({
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [attentionField, setAttentionField] = useState<FieldName | null>(null);
 
   // CA.5 — usamos el customer auth store (CA.4) en vez de apiFetch
   // directo. El store se hidrata via /me si Sanctum stateful ya tiene
@@ -71,19 +85,58 @@ export default function RegisterForm({
   const score = useMemo(() => scorePassword(password), [password]);
   const strength = useMemo(() => strengthLevel(score), [score]);
 
+  // Cue de atención breve (~600ms) en el error del primer campo
+  // inválido. `motion-safe:` lo anima solo si el usuario no pidió
+  // reduced-motion.
+  useEffect(() => {
+    if (attentionField === null) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setAttentionField(null);
+    }, 600);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [attentionField]);
+
+  const showFieldErrors = (errors: FieldErrors): void => {
+    setFieldErrors(errors);
+    const first = firstInvalidField(errors);
+    if (first === null) {
+      return;
+    }
+    setAttentionField(first);
+    const el = document.getElementById(FIELD_IDS[first]);
+    if (el === null) {
+      return;
+    }
+    el.focus();
+    if (typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ block: 'center' });
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setErrorMessage(null);
 
-    if (!acceptTerms) {
-      setErrorMessage(t('auth.signup.shell.termsAccept'));
+    const clientErrors = validateRegisterForm(
+      {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password,
+        password_confirmation: passwordConfirmation,
+        accept_terms: acceptTerms,
+      },
+      t,
+    );
+    if (Object.keys(clientErrors).length > 0) {
+      showFieldErrors(clientErrors);
       return;
     }
-
-    if (password !== passwordConfirmation) {
-      setErrorMessage(t('auth.signup.shell.passwordMismatch'));
-      return;
-    }
+    setFieldErrors({});
 
     setIsSubmitting(true);
     try {
@@ -103,7 +156,12 @@ export default function RegisterForm({
       await customerAuthStore.hydrate();
 
       const params = new URLSearchParams(window.location.search);
-      const fallback = `${window.location.origin}${callbackPath}`;
+      // Fallback con prefijo de locale: /{locale}/account (el
+      // callbackPath puede venir sin locale o con uno viejo).
+      const fallback = `${window.location.origin}${withLocale(
+        stripLocaleFromPath(callbackPath).barePath,
+        locale,
+      )}`;
       const target = params.get('redirect') ?? fallback;
       window.location.href = target;
     } catch (error) {
@@ -111,9 +169,12 @@ export default function RegisterForm({
         message?: string;
         errors?: Record<string, string[]>;
       };
-      const fieldErrors = apiError.errors;
-      const firstFieldError = fieldErrors ? Object.values(fieldErrors).flat()[0] : undefined;
-      setErrorMessage(firstFieldError ?? apiError.message ?? t('auth.passwordReset.error.generic'));
+      const mapped = mapApiFieldErrors(apiError.errors);
+      if (Object.keys(mapped).length > 0) {
+        showFieldErrors(mapped);
+      } else {
+        setErrorMessage(apiError.message ?? t('auth.passwordReset.error.generic'));
+      }
       setIsSubmitting(false);
     }
   };
@@ -145,6 +206,8 @@ export default function RegisterForm({
           {errorMessage}
         </div>
       )}
+
+      <p className="text-xs text-slate-500">{t('forms.requiredLegend')}</p>
 
       <div className="grid grid-cols-2 gap-3">
         <button
@@ -180,67 +243,90 @@ export default function RegisterForm({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 mb-1.5">
-            {t('auth.signup.shell.firstNameLabel')}
-          </label>
+        <FormField
+          id="firstName"
+          label={t('auth.signup.shell.firstNameLabel')}
+          required
+          error={fieldErrors.first_name}
+          attention={attentionField === 'first_name'}
+        >
           <input
             id="firstName"
             name="first_name"
             type="text"
             autoComplete="given-name"
             required
+            aria-required="true"
+            aria-invalid={fieldErrors.first_name !== undefined ? 'true' : undefined}
+            aria-describedby={
+              fieldErrors.first_name !== undefined ? 'firstName-error' : undefined
+            }
             placeholder={t('auth.signup.shell.firstNamePlaceholder')}
             value={firstName}
             onChange={(event) => {
               setFirstName(event.target.value);
             }}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+            className={inputClass(fieldErrors.first_name !== undefined)}
           />
-        </div>
-        <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-slate-700 mb-1.5">
-            {t('auth.signup.shell.lastNameLabel')}
-          </label>
+        </FormField>
+        <FormField
+          id="lastName"
+          label={t('auth.signup.shell.lastNameLabel')}
+          required
+          error={fieldErrors.last_name}
+          attention={attentionField === 'last_name'}
+        >
           <input
             id="lastName"
             name="last_name"
             type="text"
             autoComplete="family-name"
             required
+            aria-required="true"
+            aria-invalid={fieldErrors.last_name !== undefined ? 'true' : undefined}
+            aria-describedby={fieldErrors.last_name !== undefined ? 'lastName-error' : undefined}
             placeholder={t('auth.signup.shell.lastNamePlaceholder')}
             value={lastName}
             onChange={(event) => {
               setLastName(event.target.value);
             }}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+            className={inputClass(fieldErrors.last_name !== undefined)}
           />
-        </div>
+        </FormField>
       </div>
 
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
-          {t('auth.signup.shell.emailLabel')}
-        </label>
+      <FormField
+        id="email"
+        label={t('auth.signup.shell.emailLabel')}
+        required
+        error={fieldErrors.email}
+        attention={attentionField === 'email'}
+      >
         <input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
+          aria-required="true"
+          aria-invalid={fieldErrors.email !== undefined ? 'true' : undefined}
+          aria-describedby={fieldErrors.email !== undefined ? 'email-error' : undefined}
           placeholder={t('auth.signup.shell.emailPlaceholder')}
           value={email}
           onChange={(event) => {
             setEmail(event.target.value);
           }}
-          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+          className={inputClass(fieldErrors.email !== undefined)}
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
-          {t('auth.signup.shell.passwordLabel')}
-        </label>
+      <FormField
+        id="password"
+        label={t('auth.signup.shell.passwordLabel')}
+        required
+        error={fieldErrors.password}
+        attention={attentionField === 'password'}
+      >
         <div className="relative">
           <input
             id="password"
@@ -248,13 +334,16 @@ export default function RegisterForm({
             type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
             required
+            aria-required="true"
             minLength={8}
+            aria-invalid={fieldErrors.password !== undefined ? 'true' : undefined}
+            aria-describedby={fieldErrors.password !== undefined ? 'password-error' : undefined}
             placeholder={t('auth.signup.shell.passwordPlaceholder')}
             value={password}
             onChange={(event) => {
               setPassword(event.target.value);
             }}
-            className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+            className={`${inputClass(fieldErrors.password !== undefined)} pr-10`}
           />
           <button
             type="button"
@@ -297,17 +386,17 @@ export default function RegisterForm({
             )}
           </span>
         </p>
-      </div>
+      </FormField>
 
       {/* CA.5 — password_confirmation (validation cliente-side antes de
           mandar al backend, que también lo valida via same:password). */}
-      <div>
-        <label
-          htmlFor="passwordConfirmation"
-          className="block text-sm font-medium text-slate-700 mb-1.5"
-        >
-          {t('auth.signup.shell.passwordConfirmationLabel')}
-        </label>
+      <FormField
+        id="passwordConfirmation"
+        label={t('auth.signup.shell.passwordConfirmationLabel')}
+        required
+        error={fieldErrors.password_confirmation}
+        attention={attentionField === 'password_confirmation'}
+      >
         <div className="relative">
           <input
             id="passwordConfirmation"
@@ -315,22 +404,26 @@ export default function RegisterForm({
             type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
             required
+            aria-required="true"
             minLength={8}
+            aria-invalid={fieldErrors.password_confirmation !== undefined ? 'true' : undefined}
+            aria-describedby={
+              fieldErrors.password_confirmation !== undefined
+                ? 'passwordConfirmation-error'
+                : undefined
+            }
             placeholder={t('auth.signup.shell.passwordConfirmationPlaceholder')}
             value={passwordConfirmation}
             onChange={(event) => {
               setPasswordConfirmation(event.target.value);
             }}
-            className="w-full px-4 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+            className={`${inputClass(fieldErrors.password_confirmation !== undefined)} pr-10`}
           />
         </div>
-      </div>
+      </FormField>
 
       {/* CA.5 — phone opcional. El backend acepta el campo como null. */}
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1.5">
-          {t('auth.signup.shell.phoneLabel')}
-        </label>
+      <FormField id="phone" label={t('auth.signup.shell.phoneLabel')}>
         <input
           id="phone"
           name="phone"
@@ -341,33 +434,55 @@ export default function RegisterForm({
           onChange={(event) => {
             setPhone(event.target.value);
           }}
-          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 transition focus:bg-white focus:border-[var(--brand-accent,#2D9D8E)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-accent-ring,#2D9D8E40)]"
+          className={inputClass(false)}
         />
-      </div>
+      </FormField>
 
-      <label htmlFor="acceptTerms" className="flex items-start gap-2 cursor-pointer">
-        <input
-          id="acceptTerms"
-          type="checkbox"
-          required
-          checked={acceptTerms}
-          onChange={(event) => {
-            setAcceptTerms(event.target.checked);
-          }}
-          className="w-4 h-4 mt-0.5 rounded border-slate-300 text-[var(--brand-accent,#2D9D8E)] focus:ring-[var(--brand-accent,#2D9D8E)]"
-        />
-        <span className="text-sm text-slate-600">
-          Acepto los{' '}
-          <a href="#" className="text-[var(--brand-accent,#2D9D8E)] hover:underline">
-            {t('auth.signup.shell.termsLink')}
-          </a>{' '}
-          y la{' '}
-          <a href="#" className="text-[var(--brand-accent,#2D9D8E)] hover:underline">
-            {t('auth.signup.shell.privacyLink')}
-          </a>
-          .
-        </span>
-      </label>
+      <div>
+        <label htmlFor="acceptTerms" className="flex items-start gap-2 cursor-pointer">
+          <input
+            id="acceptTerms"
+            type="checkbox"
+            required
+            aria-required="true"
+            aria-invalid={fieldErrors.terms !== undefined ? 'true' : undefined}
+            aria-describedby={fieldErrors.terms !== undefined ? 'acceptTerms-error' : undefined}
+            checked={acceptTerms}
+            onChange={(event) => {
+              setAcceptTerms(event.target.checked);
+            }}
+            className="w-4 h-4 mt-0.5 rounded border-slate-300 text-[var(--brand-accent,#2D9D8E)] focus:ring-[var(--brand-accent,#2D9D8E)]"
+          />
+          <span className="text-sm text-slate-600">
+            {t('auth.signup.shell.termsAcceptPrefix')}{' '}
+            <a
+              href={withLocale('/terms', locale)}
+              className="text-[var(--brand-accent,#2D9D8E)] hover:underline"
+            >
+              {t('auth.signup.shell.termsLink')}
+            </a>{' '}
+            {t('auth.signup.shell.termsAcceptInfix')}{' '}
+            <a
+              href={withLocale('/privacy', locale)}
+              className="text-[var(--brand-accent,#2D9D8E)] hover:underline"
+            >
+              {t('auth.signup.shell.privacyLink')}
+            </a>
+            .<RequiredMark />
+          </span>
+        </label>
+        {fieldErrors.terms !== undefined && (
+          <p
+            id="acceptTerms-error"
+            role="alert"
+            className={`mt-1.5 text-sm text-red-600${
+              attentionField === 'terms' ? ' motion-safe:animate-pulse' : ''
+            }`}
+          >
+            {fieldErrors.terms}
+          </p>
+        )}
+      </div>
 
       <button
         type="submit"

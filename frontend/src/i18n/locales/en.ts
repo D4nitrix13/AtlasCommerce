@@ -8,6 +8,8 @@ const en: Translations = {
   'common.back': 'Back',
   'common.confirm': 'Confirm',
   'common.cancelar': 'Cancel',
+  'forms.requiredMark': 'required',
+  'forms.requiredLegend': '* Required fields',
 
   'auth.brand.name': 'Panda Estampados',
   'auth.login.title': 'Sign in',
@@ -121,7 +123,9 @@ const en: Translations = {
   'auth.signup.shell.strengthWeak': 'Weak',
   'auth.signup.shell.strengthMedium': 'Fair',
   'auth.signup.shell.strengthGood': 'Good',
-  'auth.signup.shell.termsAccept': 'I accept the {terms} and {privacy}.',
+  'auth.signup.shell.termsRequired': 'To create your account, accept the Terms and Privacy Policy.',
+  'auth.signup.shell.termsAcceptPrefix': 'I accept the',
+  'auth.signup.shell.termsAcceptInfix': 'and the',
   'auth.signup.shell.termsLink': 'Terms',
   'auth.signup.shell.privacyLink': 'Privacy Policy',
   'auth.signup.shell.submit': 'Create my account',
@@ -129,6 +133,9 @@ const en: Translations = {
   'auth.signup.shell.google': 'Google',
   'auth.signup.shell.facebook': 'Facebook',
   'auth.signup.shell.facebookComingSoon': 'Coming soon — Facebook OAuth will be available soon',
+  'auth.validation.required': 'Enter {field}.',
+  'auth.validation.email': 'Enter a valid email address.',
+  'auth.validation.minLength': '{field} must be at least {min} characters.',
 
   'auth.forgot.shell.heading': 'Recover access',
   'auth.forgot.shell.subtitle':
