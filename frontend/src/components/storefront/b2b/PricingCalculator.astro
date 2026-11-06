@@ -2,32 +2,15 @@
 /**
  * PricingCalculator — Calculadora interactiva de bulk order (Bonfire 07).
  *
- * Componente Astro con reactividad en cliente via `<script>` que importa
- * el controlador `pricing-calculator.client.ts`. Render inicial
- * server-side con estado determinístico (cantidad 50) para evitar
- * layout shift; el script sincroniza slider ↔ input sin React island.
+ * Island de TS (`pricing-calculator.client.ts`) sin React: sincroniza
+ * slider ↔ input y reescribe los `data-pricing-*` outputs. El `<form>`
+ * lleva `<label for>` + `<output aria-live>` (AGENTS §17).
+ * Cálculo (F3.3 v3): total = unit × qty × (1 − d/100); savings = unit ×
+ * qty × (d/100). Datos y lógica intactos — solo se estiliza el template.
  *
- * Estructura semántica (AGENTS §17):
- *   - `<form>` envuelve todos los controles (acción visual = no submit).
- *   - `<label for>` enlazado a cada input.
- *   - `<output>` para los resultados computados (precio unitario, total,
- *     ahorro) — el navegador los anuncia automáticamente al cambiar.
- *   - `<input type="range">` para el slider + `<input type="number">`
- *     sincronizados, ambos comparten `name="quantity"`.
- *
- * Cálculo (F3.3 v3):
- *   - totalCents    = unitPrice × quantity × (1 - discount / 100)
- *   - savingsCents  = unitPrice × quantity × (discount / 100)
- *
- * Tokens Bonfire:
- *   - Card: `bg-white rounded-2xl border border-slate-200 shadow-sm`.
- *   - Inputs: `bg-white rounded-lg border border-slate-300` con focus
- *     sobre `--primary`.
- *   - Highlight total: `text-slate-900 tabular-nums font-bold`.
- *   - Savings: `text-emerald-700 font-semibold`.
- *
- * El componente es B2B (Panda Estampados) por diseño — no se itera
- * fuera del scope del tenant Panda.
+ * Tokens (system.md): panel-recibo blanco con lift whisper shadow,
+ * divisor punteado + total display Fraunces 32px, savings en acento
+ * `--primary` (nunca verde).
  */
 import { BULK_PRODUCTS, type BulkOrderProduct } from '../../../data/b2b-mock';
 import { formatCurrency } from '../../../lib/formatters';
@@ -127,32 +110,39 @@ const initialSavingsText = formatCurrency(initialSavings, firstProduct.currency)
 const initialTierBadgeText = tierLabelTemplate
   .replace('{range}', initialTierText)
   .replace('{discount}', initialTierDiscountText);
+
+const PANEL =
+  'rounded-2xl border border-[var(--line,#e7e5e4)] bg-white p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_2px_-1px_rgba(0,0,0,0.06),0_2px_4px_rgba(0,0,0,0.04)] sm:p-8';
+const LABEL = 'mb-1.5 block text-sm font-semibold text-[var(--ink,#1c1917)]';
+const INPUT =
+  'w-full rounded-lg border border-[var(--line,#e7e5e4)] bg-white px-3 py-2.5 text-sm text-[var(--ink,#1c1917)] focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary,#2d9d8e)]/25';
+const CTA =
+  'inline-flex h-12 w-full items-center justify-center rounded-lg bg-[var(--primary,#2d9d8e)] px-4 text-sm font-semibold text-white transition-transform hover:bg-[var(--primary-hover,#258777)] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:active:scale-100';
+const VALUE = 'font-medium tabular-nums text-[var(--ink,#1c1917)]';
+const SAVINGS = 'font-medium tabular-nums text-[var(--primary,#2d9d8e)]';
+const TOTAL_ROW =
+  'flex items-baseline justify-between gap-4 border-t border-dashed border-[var(--line,#e7e5e4)] pt-4';
+const TOTAL_LABEL = 'text-xs font-medium uppercase tracking-wide text-[var(--ink,#1c1917)]/60';
+const TOTAL_VALUE =
+  'font-display text-[32px] font-semibold leading-none tracking-tight tabular-nums text-[var(--ink,#1c1917)]';
 ---
 
-<section
-  aria-labelledby="pricing-calculator-heading"
-  class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
->
-  <h2 id="pricing-calculator-heading" class="text-lg font-bold text-slate-900 sm:text-xl">
+<section aria-labelledby="pricing-calculator-heading" class={PANEL}>
+  <h2 id="pricing-calculator-heading" class="text-lg sm:text-xl">
     {heading}
   </h2>
 
   <form
-    class="mt-5 space-y-5"
+    class="mt-6 space-y-6"
     data-pricing-calculator
     data-tiers={JSON.stringify(tiers)}
     novalidate
   >
     <div>
-      <label for="bulk-product-select" class="mb-1.5 block text-sm font-semibold text-slate-900">
+      <label for="bulk-product-select" class={LABEL}>
         {productLabel}
       </label>
-      <select
-        id="bulk-product-select"
-        name="product"
-        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,.28))]"
-        data-pricing-product
-      >
+      <select id="bulk-product-select" name="product" class={INPUT} data-pricing-product>
         {products.map((product) => (
           <option
             value={product.slug}
@@ -167,7 +157,7 @@ const initialTierBadgeText = tierLabelTemplate
     </div>
 
     <div>
-      <label for="bulk-quantity-slider" class="mb-1.5 block text-sm font-semibold text-slate-900">
+      <label for="bulk-quantity-slider" class={LABEL}>
         {quantityLabel}
       </label>
       <input
@@ -184,11 +174,14 @@ const initialTierBadgeText = tierLabelTemplate
         aria-valuemax={QUANTITY_MAX}
         aria-valuenow={initialQuantity}
       />
-      <div class="mt-1 flex items-center justify-between text-xs text-slate-500" aria-hidden="true">
+      <div
+        class="mt-1 flex items-center justify-between text-xs text-[var(--ink,#1c1917)]/45"
+        aria-hidden="true"
+      >
         <span>{QUANTITY_MIN}</span>
         <span>{QUANTITY_MAX}</span>
       </div>
-      <p id="bulk-quantity-hint" class="mt-1 text-xs text-slate-500">
+      <p id="bulk-quantity-hint" class="mt-1 text-xs text-[var(--ink,#1c1917)]/55">
         {quantityHint}
       </p>
     </div>
@@ -205,33 +198,33 @@ const initialTierBadgeText = tierLabelTemplate
         max={QUANTITY_MAX}
         step={QUANTITY_STEP}
         value={initialQuantity}
-        class="w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center text-sm font-semibold tabular-nums text-slate-900 focus:border-[var(--primary,#2d9d8e)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-ring,rgba(45,157,142,.28))]"
+        class={INPUT}
         data-pricing-input
       />
       <span
-        class="rounded-full bg-[var(--primary-soft,#e6f7f4)] px-3 py-1 text-xs font-semibold text-[var(--primary,#2d9d8e)]"
+        class="shrink-0 rounded-full bg-[var(--primary-soft,#e6f7f4)] px-3 py-1 text-xs font-semibold text-[var(--primary,#2d9d8e)]"
         data-pricing-tier
       >
         {initialTierBadgeText}
       </span>
     </div>
 
-    <dl class="space-y-3 border-t border-slate-100 pt-5 text-sm">
-      <div class="flex items-center justify-between">
-        <dt class="text-slate-500">{unitPriceLabel}</dt>
-        <dd class="font-semibold tabular-nums text-slate-900" data-pricing-unit>
+    <dl class="mt-6 space-y-4 border-t border-[var(--line,#e7e5e4)] pt-5 text-sm">
+      <div class="flex items-center justify-between gap-4">
+        <dt class="text-[var(--ink,#1c1917)]/55">{unitPriceLabel}</dt>
+        <dd class={VALUE} data-pricing-unit>
           {initialUnitPriceText}
         </dd>
       </div>
-      <div class="flex items-center justify-between">
-        <dt class="text-slate-500">{savingsLabel}</dt>
-        <dd class="font-semibold tabular-nums text-emerald-700" data-pricing-savings>
+      <div class="flex items-center justify-between gap-4">
+        <dt class="text-[var(--ink,#1c1917)]/55">{savingsLabel}</dt>
+        <dd class={SAVINGS} data-pricing-savings>
           {initialSavingsText}
         </dd>
       </div>
-      <div class="flex items-baseline justify-between border-t border-slate-100 pt-3">
-        <dt class="text-base font-bold text-slate-900">{totalLabel}</dt>
-        <dd class="text-2xl font-bold tabular-nums text-slate-900 sm:text-3xl" data-pricing-total>
+      <div class={TOTAL_ROW}>
+        <dt class={TOTAL_LABEL}>{totalLabel}</dt>
+        <dd class={TOTAL_VALUE} data-pricing-total>
           {initialTotalText}
         </dd>
       </div>
@@ -242,10 +235,7 @@ const initialTierBadgeText = tierLabelTemplate
       {initialTotalText}.
     </output>
 
-    <a
-      href={ctaHref}
-      class="inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--primary,#2d9d8e)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary-hover,#258777)]"
-    >
+    <a href={ctaHref} class={CTA}>
       {ctaLabel}
     </a>
   </form>

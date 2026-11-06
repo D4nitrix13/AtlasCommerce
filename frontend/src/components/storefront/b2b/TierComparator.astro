@@ -2,27 +2,22 @@
 /**
  * TierComparator — Tabla comparativa de tiers de volumen (Bonfire mockup 07).
  *
- * Renderiza los 5 tiers canónicos del modelo B2B estampados como
- * cards lado a lado, con un tier marcado como "Más popular" (highlight).
+ * Renderiza los 5 tiers canónicos F3.3 (10→0%, 25→5%, 50→12%, 100→20%
+ * destacado, 500→35%) como cards lado a lado.
  *
- * Tokens Bonfire:
- *   - Card base: `bg-white rounded-2xl border border-slate-200`.
- *   - Highlight: `border-2 border-[var(--primary)]` + badge superior.
- *   - Discount badge: rounded-full `bg-emerald-50 text-emerald-700`.
- *   - CTA: `bg-[var(--primary)]` con hover sobre `--primary-hover`.
+ * Tokens del sistema (`.interface-design/system.md`):
+ *   - Card base: `bg-white rounded-2xl border border-[var(--line)]`
+ *     + lift whisper shadow + `hover:-translate-y-0.5`.
+ *   - Highlight: `border-2 border-[var(--primary)]` + lift fuerte +
+ *     badge superior + `lg:-mt-4`.
+ *   - Discount badge: rounded-full `bg-[var(--primary-soft)]` en acento
+ *     (nunca verde — "Gratis/éxito usa el acento").
+ *   - CTA destacado: receta primaria `h-10`; el resto, receta secundaria.
  *   - `data-reveal-stagger` aplica el rise-in escalonado del CSS global.
  *
- * Datos (F3.3 v3):
- *   - 10+ unidades  → 0% (precio base).
- *   - 25+           → -5%.
- *   - 50+           → -12%.
- *   - 100+          → -20% (highlight).
- *   - 500+          → -35%.
- *
- * Accesibilidad (AGENTS §17):
- *   - Cada card es `<article>` con `<h3>` de tier.
- *   - El badge "Más popular" se anuncia antes del título del tier.
- *   - Los beneficios son `<ul>` con `<li>` (no párrafos sueltos).
+ * Accesibilidad (AGENTS §17): cada card es `<article>` con `<h3>`, el
+ * badge "Más popular" se anuncia antes del título, los beneficios son
+ * `<ul>` con `<li>`.
  */
 import { formatCurrency } from '../../../lib/formatters';
 
@@ -129,6 +124,12 @@ const DEFAULT_TIERS: readonly TierData[] = [
   },
 ];
 
+const CTA_PRIMARY =
+  'inline-flex h-10 w-full items-center justify-center rounded-lg bg-[var(--primary,#2d9d8e)] px-4 text-sm font-semibold text-white transition-transform hover:bg-[var(--primary-hover,#258777)] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:active:scale-100';
+
+const CTA_SECONDARY =
+  'inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--line,#e7e5e4)] bg-white text-sm font-semibold text-[var(--ink,#1c1917)] transition-colors hover:border-[var(--primary,#2d9d8e)] hover:text-[var(--primary,#2d9d8e)] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2d9d8e)] focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:active:scale-100';
+
 const {
   basePriceCents,
   currency,
@@ -145,7 +146,7 @@ const tierCount = tiers.length;
 ---
 
 <section aria-labelledby="tier-comparator-heading" class="relative">
-  <p class="mx-auto mb-4 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white">
+  <p class="mx-auto mb-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--ink,#1c1917)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white">
     <span aria-hidden="true">★</span>
     {eyebrow}
   </p>
@@ -154,7 +155,10 @@ const tierCount = tiers.length;
     Comparativa de tiers por volumen
   </h2>
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:gap-3" data-reveal-stagger>
+  <div
+    class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+    data-reveal-stagger
+  >
     {tiers.map((tier) => {
       const discountedCents = Math.round(basePriceCents * (1 - tier.discountPercent / 100));
       const priceText = formatCurrency(discountedCents, currency);
@@ -166,15 +170,15 @@ const tierCount = tiers.length;
         <article
           id={anchorId}
           class:list={[
-            'relative flex flex-col rounded-2xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6',
+            'relative flex flex-col rounded-2xl bg-white p-5 transition-transform hover:-translate-y-0.5 sm:p-6',
             tier.isPopular
-              ? 'border-2 border-[var(--primary,#2d9d8e)] lg:-mt-4 lg:shadow-md'
-              : 'border-slate-200',
+              ? 'border-2 border-[var(--primary,#2d9d8e)] shadow-[0_0_0_1px_rgba(45,157,142,0.18),0_2px_4px_-2px_rgba(28,25,23,0.07),0_10px_24px_-10px_rgba(28,25,23,0.12)] lg:-mt-4'
+              : 'border border-[var(--line,#e7e5e4)] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_2px_-1px_rgba(0,0,0,0.06),0_2px_4px_rgba(0,0,0,0.04)]',
           ]}
         >
           {tier.isPopular && (
             <span
-              class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--primary,#2d9d8e)] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm"
+              class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--primary,#2d9d8e)] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_2px_-1px_rgba(0,0,0,0.06),0_2px_4px_rgba(0,0,0,0.04)]"
               aria-label={popularBadge}
             >
               {popularBadge}
@@ -182,29 +186,40 @@ const tierCount = tiers.length;
           )}
 
           <header class="mb-4 text-center">
-            <h3 class="text-base font-bold text-slate-900 sm:text-lg">{tier.quantityLabel}</h3>
-            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+            <h3 class="text-base font-semibold text-[var(--ink,#1c1917)] sm:text-lg">
+              {tier.quantityLabel}
+            </h3>
+            <p class="mt-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink,#1c1917)]/55">
               {perUnitLabel}
             </p>
           </header>
 
           <div class="mb-4 text-center">
-            <p class="text-3xl font-bold tabular-nums text-slate-900 sm:text-4xl">{priceText}</p>
+            <p
+              class:list={[
+                'tabular-nums tracking-tight text-[var(--ink,#1c1917)]',
+                tier.isPopular
+                  ? 'text-3xl font-bold sm:text-4xl'
+                  : 'text-2xl font-semibold sm:text-3xl',
+              ]}
+            >
+              {priceText}
+            </p>
             {showDiscountBadge ? (
-              <span class="mt-2 inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+              <span class="mt-2 inline-flex rounded-full bg-[var(--primary-soft,#e6f7f4)] px-2.5 py-0.5 text-xs font-semibold text-[var(--primary,#2d9d8e)]">
                 {discountBadgeText}
               </span>
             ) : (
-              <span class="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+              <span class="mt-2 inline-flex rounded-full bg-[var(--paper-sunken,#e9e4db)] px-2.5 py-0.5 text-xs font-semibold text-[var(--ink,#1c1917)]/60">
                 Base
               </span>
             )}
           </div>
 
-          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink,#1c1917)]/55">
             {includesLabel}
           </p>
-          <ul class="mb-6 flex-1 space-y-2 text-sm text-slate-700">
+          <ul class="mb-6 flex-1 space-y-2 text-sm text-[var(--ink,#1c1917)]/75">
             {tier.features.map((feature) => (
               <li class="flex items-start gap-2">
                 <svg
@@ -224,15 +239,7 @@ const tierCount = tiers.length;
             ))}
           </ul>
 
-          <a
-            href={cardHref}
-            class:list={[
-              'inline-flex h-10 w-full items-center justify-center rounded-full text-sm font-semibold transition',
-              tier.isPopular
-                ? 'bg-[var(--primary,#2d9d8e)] text-white hover:bg-[var(--primary-hover,#258777)]'
-                : 'border border-slate-300 bg-white text-slate-900 hover:border-slate-400 hover:bg-slate-50',
-            ]}
-          >
+          <a href={cardHref} class={tier.isPopular ? CTA_PRIMARY : CTA_SECONDARY}>
             {ctaLabel}
           </a>
         </article>
