@@ -115,7 +115,9 @@ export default function ResetPasswordForm({
         const params = new URLSearchParams({
           callback: callbackPath,
         });
-        window.location.href = `/${locale}/admin/auth/reset-success?${params.toString()}`;
+        // Path canónico, nunca el legacy `/admin/auth/*` (ver
+        // `path-helpers.ts`: el frontend no debe generar esos links).
+        window.location.href = `/${locale}/account/reset-success?${params.toString()}`;
       }, 600);
     } catch (error_) {
       const apiError = error_ as {

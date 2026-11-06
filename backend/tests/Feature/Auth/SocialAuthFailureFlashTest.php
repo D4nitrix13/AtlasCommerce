@@ -143,7 +143,7 @@ final class SocialAuthFailureFlashTest extends TestCase
 
         $response->assertStatus(302);
         $location = $response->headers->get('Location');
-        $this->assertStringContainsString('/account/auth/login', (string) $location);
+        $this->assertStringContainsString('/account/login', (string) $location);
         $this->assertStringContainsString('flash=oauth_state_mismatch', (string) $location);
     }
 
@@ -178,7 +178,7 @@ final class SocialAuthFailureFlashTest extends TestCase
 
         $response->assertStatus(302);
         $location = $response->headers->get('Location');
-        $this->assertStringContainsString('/account/auth/login', (string) $location);
+        $this->assertStringContainsString('/account/login', (string) $location);
         $this->assertStringContainsString('flash=oauth_state_mismatch', (string) $location);
     }
 }

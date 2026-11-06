@@ -97,7 +97,7 @@ final class SocialAuthStateCsrfTest extends TestCase
     public function state_mismatch_falls_back_to_account_login_when_session_target_empty(): void
     {
         // Sin session target + host = `localhost` (no admin.*), el
-        // helper cae a `/account/auth/login`. Cubierto por
+        // helper cae a `/account/login`. Cubierto por
         // `OAuthRedirectTargetTest::from_request_falls_back_to_account_login_for_storefront`
         // — este test verifica que el controller invoca correctamente.
 
@@ -120,7 +120,7 @@ final class SocialAuthStateCsrfTest extends TestCase
 
         $response->assertStatus(302);
         $location = $response->headers->get('Location');
-        $this->assertStringContainsString('/account/auth/login', (string) $location);
+        $this->assertStringContainsString('/account/login', (string) $location);
         $this->assertStringContainsString('flash=oauth_state_mismatch', (string) $location);
     }
 

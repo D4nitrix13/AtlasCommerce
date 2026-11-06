@@ -57,13 +57,15 @@ return [
     'google' => [
         'client_id' => env(key: 'GOOGLE_CLIENT_ID', default: null),
         'client_secret' => env(key: 'GOOGLE_CLIENT_SECRET', default: null),
-        'redirect' => env(key: 'OAUTH_REDIRECT_BASE_URL', default: null).'/api/auth/social/google/callback',
+        // El prefijo de versión es parte del path: las rutas viven bajo
+        // /api/v1 (bootstrap/app.php). Sin el `v1` Google redirige a un 404.
+        'redirect' => env(key: 'OAUTH_REDIRECT_BASE_URL', default: null).'/api/v1/auth/social/google/callback',
     ],
 
     'facebook' => [
         'client_id' => env(key: 'FACEBOOK_CLIENT_ID', default: null),
         'client_secret' => env(key: 'FACEBOOK_CLIENT_SECRET', default: null),
-        'redirect' => env(key: 'OAUTH_REDIRECT_BASE_URL', default: null).'/api/auth/social/facebook/callback',
+        'redirect' => env(key: 'OAUTH_REDIRECT_BASE_URL', default: null).'/api/v1/auth/social/facebook/callback',
     ],
 
 ];

@@ -23,7 +23,7 @@ final class OAuthRedirectTarget
      *
      * Reglas:
      *   - `/es/admin/auth/login`  → `es`
-     *   - `/en/account/auth/login` → `en`
+     *   - `/en/account/login`     → `en`
      *   - `/admin/auth/login`     → `null` (sin locale)
      *   - `/`                     → `null`
      *
@@ -53,7 +53,7 @@ final class OAuthRedirectTarget
      *
      * Reglas:
      *   - `/es/admin/auth/login`  → `/admin/auth/login`
-     *   - `/en/account/auth/login` → `/account/auth/login`
+     *   - `/en/account/login`     → `/account/login`
      *   - `/admin/auth/login`     → `/admin/auth/login` (sin locale, unchanged)
      *   - `/`                     → `/`
      *
@@ -121,13 +121,15 @@ final class OAuthRedirectTarget
     {
         $locale = self::extractLocaleFromPath($originalPath);
         $path = self::stripLocaleFromPath($originalPath);
-        $loginSegment = self::isAdminHost(host: $host) ? '/admin/auth/login' : '/account/auth/login';
+        $loginSegment = self::isAdminHost(host: $host) ? '/admin/auth/login' : '/account/login';
 
         // Si el path original ya termina en el login URL, lo
         // respetamos (caso normal: redirect desde el login page).
         // Si no (caso raro: redirect desde una URL arbitraria),
-        // caemos al login del tenant del host.
-        if (str_ends_with($path, '/admin/auth/login') || str_ends_with($path, '/account/auth/login')) {
+        // caemos al login del tenant del host. `/account/auth/login`
+        // NO entra al primer grupo: esa forma (con `/auth/` de más) no
+        // tiene página y 404ea, así que se reemplaza por la canónica.
+        if (str_ends_with($path, '/admin/auth/login') || str_ends_with($path, '/account/login')) {
             $result = $path;
         } else {
             $result = $loginSegment;

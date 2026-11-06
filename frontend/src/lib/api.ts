@@ -50,21 +50,14 @@ const API_INTERNAL_URL = (
  * `resolveApiUrl` abajo).
  */
 export function buildApiUrl(endpoint: string): string {
-  if (!API_URL) {
-    throw new Error('PUBLIC_API_URL is not configured.');
-  }
-  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  if (API_URL.startsWith('/')) {
-    if (API_INTERNAL_URL === '') {
-      throw new Error(
-        'PUBLIC_API_URL is relative and INTERNAL_API_ORIGIN is not configured: ' +
-          'buildApiUrl needs an absolute origin. Set INTERNAL_API_ORIGIN in the runtime environment ' +
-          '(docker-compose env, .env.production, etc) or call apiFetch from the server.',
-      );
-    }
-    return `${API_INTERNAL_URL}${API_URL}${normalizedEndpoint}`;
-  }
-  return `${API_URL}${normalizedEndpoint}`;
+  // Misma resolución de origen que `resolveApiUrl`. La función existe para
+  // armar `window.location.assign`, o sea que su caso principal es el
+  // browser, donde el origen absoluto es el de la propia página (/api pasa
+  // por el proxy del host). Solo en SSR —sin `window`— hace falta
+  // INTERNAL_API_ORIGIN. Antes se leía únicamente ese último y el click en
+  // "Continuar con Google" reventaba con "buildApiUrl needs an absolute
+  // origin" en el navegador.
+  return resolveApiUrl(endpoint);
 }
 
 import { getXsrfToken, bootstrapCsrf } from './csrf';
@@ -179,7 +172,7 @@ function resolveApiUrl(endpoint: string, origin?: string): string {
         'PUBLIC_API_URL is relative and no origin was available: it can only be ' +
           'resolved during SSR. Either set INTERNAL_API_ORIGIN in the runtime ' +
           'environment, or pass `origin` (e.g. Astro.url.origin) when fetching ' +
-          'from the server.',
+          'from the server.'
       );
     }
 
