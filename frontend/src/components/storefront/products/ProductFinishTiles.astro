@@ -1,0 +1,138 @@
+---
+/**
+ * ProductFinishTiles — fichas de muestra de acabado.
+ *
+ * La fila de muestras del taller de estampado: una ficha rectangular
+ * por acabado con la foto de la variante y su nombre debajo, como el
+ * panel de acabados de Fender. Reemplaza los puntos de color hex del
+ * picker anterior (decisión revertida a pedido explícito del usuario).
+ *
+ * Cada ficha es un `<a href="?finish=…">` real: la navegación filtrando
+ * por acabado funciona sin JavaScript. El hover/focus previsualiza la
+ * foto de la variante en la galería sin navegar.
+ */
+export interface ProductFinishTile {
+  id: string;
+  label: string;
+  hex: string | null;
+  /** Foto de la variante; vacío cae a relleno con el hex. */
+  previewSrc: string;
+}
+
+interface Props {
+  options: readonly ProductFinishTile[];
+  selectedId: string | undefined;
+  /** Nombre accesible del grupo (rol list). */
+  ariaLabel: string;
+  /** Prefijo del aria-label de cada ficha, ej. "Cambiar a". */
+  labelPrefix: string;
+}
+
+const { options, selectedId, ariaLabel, labelPrefix } = Astro.props;
+
+/** Sin hex del backend el punto deja de distinguirse: gris neutro. */
+function fallbackHex(hex: string | null): string {
+  return hex !== null && hex !== '' ? hex : '#d6d3d1';
+}
+
+// Clases compartidas por todas las fichas (evita repetir el bloque en
+// el map y mantiene el callback del template bajo el límite de 40).
+const TILE_LINK =
+  'pressable group flex w-20 flex-col items-center gap-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2';
+const TILE_FRAME =
+  'block size-20 overflow-hidden rounded-lg outline outline-1 -outline-offset-1 outline-black/10';
+const TILE_FRAME_ACTIVE =
+  'ring-2 ring-[var(--primary,#2D9D8E)] ring-offset-2 ring-offset-[var(--paper,#f3efe8)]';
+const TILE_FRAME_IDLE = 'ring-1 ring-transparent';
+---
+
+<ul
+  class="flex flex-wrap items-start gap-2.5"
+  role="list"
+  aria-label={ariaLabel}
+  data-finish-tiles
+>
+  {options.map((option) => {
+    const isActive = option.id === selectedId;
+    const hasImage = option.previewSrc !== '';
+    return (
+      <li>
+        <a
+          href={`?finish=${option.id}`}
+          aria-label={`${labelPrefix} ${option.label}`}
+          aria-current={isActive ? 'true' : undefined}
+          data-finish-preview={option.previewSrc}
+          class:list={[TILE_LINK, isActive ? 'opacity-100' : 'opacity-60 hover:opacity-100']}
+        >
+          <span
+            class:list={[
+              TILE_FRAME,
+              isActive ? TILE_FRAME_ACTIVE : TILE_FRAME_IDLE,
+            ]}
+          >
+            {hasImage ? (
+              <img
+                src={option.previewSrc}
+                alt=""
+                loading="lazy"
+                class="h-full w-full object-cover"
+              />
+            ) : (
+              <span
+                class="block h-full w-full"
+                style={`background-color: ${fallbackHex(option.hex)};`}
+              />
+            )}
+          </span>
+          <span class="micro-label text-center">{option.label}</span>
+        </a>
+      </li>
+    );
+  })}
+</ul>
+
+<script>
+  // Preview de acabado: hover/focus de la ficha muestra la foto de la
+  // variante en la galería sin navegar; al salir se restaura la imagen
+  // que estaba visible.
+  function setupFinishPreview(link: HTMLAnchorElement): void {
+    const previewSrc = link.dataset.finishPreview;
+    if (previewSrc === undefined || previewSrc === '') return;
+    const slideImg = document.querySelector<HTMLImageElement>(
+      '[data-gallery-slide] img',
+    );
+    if (slideImg === null) return;
+
+    const originalSrc = slideImg.getAttribute('src') ?? '';
+    // La imagen de la galería lleva srcset: con srcset presente el
+    // browser elige la resolución del srcset e ignora el cambio de src
+    // (el preview no se veía). Se quita durante el preview y se
+    // restaura al salir.
+    const originalSrcset = slideImg.getAttribute('srcset') ?? '';
+    let isActive = false;
+
+    const activate = (): void => {
+      if (isActive) return;
+      isActive = true;
+      slideImg.setAttribute('src', previewSrc);
+      slideImg.removeAttribute('srcset');
+    };
+    const deactivate = (): void => {
+      if (!isActive) return;
+      isActive = false;
+      slideImg.setAttribute('src', originalSrc);
+      if (originalSrcset !== '') {
+        slideImg.setAttribute('srcset', originalSrcset);
+      }
+    };
+
+    link.addEventListener('mouseenter', activate);
+    link.addEventListener('mouseleave', deactivate);
+    link.addEventListener('focus', activate);
+    link.addEventListener('blur', deactivate);
+  }
+
+  document
+    .querySelectorAll<HTMLAnchorElement>('a[data-finish-preview]')
+    .forEach((link) => setupFinishPreview(link));
+</script>

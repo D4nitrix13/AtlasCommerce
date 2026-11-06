@@ -20,9 +20,15 @@
  *     via GET público tras la carga (no en SSR — Sanctum usa
  *     cookie httpOnly invisible al server-render).
  *
- * Tokens (todo más prominente):
- *   - Add to Bag: `bg-slate-900 hover:bg-slate-800 text-white font-bold h-16 text-lg px-8`.
- *   - Favorite: `border border-slate-200 hover:bg-slate-50 h-16 w-16`.
+ * Tokens (system.md — papel/tinta, un solo acento):
+ *   - Add to Bag: `h-12 rounded-lg bg-[var(--primary)] text-white`, hover
+ *     `--primary-hover`. Disabled en `--paper-sunken` + `--ink-faint`.
+ *   - Favorite: `h-12 w-12 rounded-lg` para compartir la línea base de
+ *     los CTAs; borde `--line`, relleno `--paper-raised`, hover
+ *     `--primary-soft`. El estado elegido vive en
+ *     `data-[in-wishlist=true]` (no en clases mutadas por JS).
+ *   - La fila usa `sm:items-center` — nunca `items-stretch`, que era lo
+ *     que estiraba el corazón y lo dejaba desalineado.
  */
 
 interface Props {
@@ -68,7 +74,7 @@ const resolvedLoginHref = loginHref ?? `/${locale}/login`;
 ---
 
 <div
-  class="flex flex-col gap-3 sm:flex-row sm:items-stretch"
+  class="flex flex-col gap-3 sm:flex-row sm:items-center"
   data-testid="product-ctas"
   data-product-ctas
   data-api-base-url={apiBaseUrl}
@@ -79,10 +85,10 @@ const resolvedLoginHref = loginHref ?? `/${locale}/login`;
       type="submit"
       disabled={!inStock}
       class:list={[
-        'inline-flex h-16 flex-1 items-center justify-center gap-2 rounded-full px-8 text-lg font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+        'pressable inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-lg px-8 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2',
         inStock
-          ? 'bg-slate-900 text-white hover:bg-slate-800'
-          : 'cursor-not-allowed bg-slate-200 text-slate-500',
+          ? 'bg-[var(--primary,#2D9D8E)] text-white hover:bg-[var(--primary-hover,#258777)]'
+          : 'cursor-not-allowed border border-[var(--line,#d6d3d1)] bg-[var(--paper-sunken,#ebe6dd)] text-[var(--ink-faint,#a8a29e)]',
       ]}
     >
       {inStock ? (
@@ -107,7 +113,7 @@ const resolvedLoginHref = loginHref ?? `/${locale}/login`;
   )}
 
   {showFavorite && (
-    <div class="flex flex-col items-center gap-1">
+    <>
       <button
         type="button"
         data-wishlist-toggle
@@ -116,12 +122,7 @@ const resolvedLoginHref = loginHref ?? `/${locale}/login`;
         data-label-login-required="Inicia sesión para guardar favoritos"
         aria-pressed={isFavorite ? 'true' : 'false'}
         aria-label={favoriteLabel}
-        class:list={[
-          'inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
-          isFavorite
-            ? 'border-slate-900 bg-slate-900 text-white'
-            : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50',
-        ]}
+        class="pressable inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[var(--line,#d6d3d1)] bg-[var(--paper-raised,#f7f4ef)] text-[var(--ink,#1c1917)] transition hover:bg-[var(--primary-soft,#e6f2f0)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2 data-[in-wishlist=true]:border-transparent data-[in-wishlist=true]:bg-[var(--primary,#2D9D8E)] data-[in-wishlist=true]:text-white"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -143,10 +144,10 @@ const resolvedLoginHref = loginHref ?? `/${locale}/login`;
           Lo mostramos persistentemente para que el user sepa que tiene
           que loguearse. Cuando existe auth store en el cliente, este
           texto se oculta via auth state. */}
-      <span class="hidden text-xs text-slate-500" data-wishlist-hint>
+      <span class="hidden text-xs text-[var(--ink-muted,#a8a29e)]" data-wishlist-hint>
         {favoriteLabel}
       </span>
-    </div>
+    </>
   )}
 </div>
 
@@ -291,19 +292,15 @@ const resolvedLoginHref = loginHref ?? `/${locale}/login`;
     hintEl: HTMLElement | null,
     inWishlist: boolean
   ): void {
+    // El color del botón vive en CSS vía `data-[in-wishlist=true]`:
+    // tocar clases desde acá duplicaba el estado y peleaba con los
+    // tokens del tema.
     btn.dataset.inWishlist = String(inWishlist);
     btn.setAttribute('aria-pressed', String(inWishlist));
     const svg = btn.querySelector('svg');
     if (svg !== null) {
       svg.setAttribute('fill', inWishlist ? 'currentColor' : 'none');
     }
-    btn.classList.toggle('border-slate-900', inWishlist);
-    btn.classList.toggle('bg-slate-900', inWishlist);
-    btn.classList.toggle('text-white', inWishlist);
-    btn.classList.toggle('border-slate-200', !inWishlist);
-    btn.classList.toggle('bg-white', !inWishlist);
-    btn.classList.toggle('text-slate-900', !inWishlist);
-    btn.classList.toggle('hover:bg-slate-50', !inWishlist);
     if (hintEl !== null && !hintEl.querySelector('a')) {
       hintEl.textContent = inWishlist ? 'Quitar de favoritos' : 'Guardar en favoritos';
     }

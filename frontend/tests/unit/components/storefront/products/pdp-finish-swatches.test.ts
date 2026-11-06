@@ -1,69 +1,66 @@
 /**
- * T3.4 — acabados: chips de color hex (no miniaturas que parecen
- * imágenes repetidas) + wiring de preview de imagen en hover.
+ * Acabados del PDP: fichas rectangulares con imagen (referencia Fender).
  *
- * Source scans sobre [slug].astro (mismo estilo que
- * pdp-tabs-placement.test.ts). Cobertura:
- *   - Los swatches del picker son spans de color hex — nunca `<img>`:
- *     los thumbnails a 48px "parecen imágenes repetidas" (usuario).
- *   - Cada swatch expone `data-finish-preview` (imagen de la variante).
- *   - El preview responde a hover + focus y restaura al salir, y
- *     reemplaza también el `srcset` (con srcset presente el browser
- *     ignora el cambio de src y el preview no se ve).
- *   - La navegación `?finish=` (click) se preserva.
+ * **Decisión revertida a pedido explícito del usuario (2026-01).** La
+ * versión anterior (commit 49c55c3b) codificaba "puntos de color hex,
+ * nunca `<img>`" porque las miniaturas de 48px "parecían imágenes
+ * repetidas". El usuario ahora quiere tiles rectangulares con la foto
+ * del producto, como muestra Fender: la ficha ES la muestra del
+ * sustrato en un taller de estampado.
+ *
+ * Source scans sobre `ProductFinishTiles.astro` (Astro no se renderiza
+ * en jsdom — mismo estilo que `pdp-tabs-placement.test.ts`).
  */
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const SLUG_PAGE_PATH = resolve(
+const TILES_PATH = resolve(
   __dirname,
-  '../../../../../src/pages/[locale]/products/[slug].astro',
+  '../../../../../src/components/storefront/products/ProductFinishTiles.astro',
 );
 
-const SOURCE = readFileSync(SLUG_PAGE_PATH, 'utf-8');
+const SOURCE = readFileSync(TILES_PATH, 'utf-8');
 
-/** Bloque `<dt>Acabado</dt><dd>…</dd>` del selector de acabado. */
-function extractAcabadoBlock(source: string): string {
-  const start = source.indexOf('Acabado</dt>');
-  expect(start).toBeGreaterThanOrEqual(0);
-  const end = source.indexOf('</dd>', start);
-  expect(end).toBeGreaterThan(start);
-  return source.slice(start, end);
-}
+describe('ProductFinishTiles — fichas rectangulares de acabado', () => {
+  it('cada ficha es rectangular (rounded-lg) con tamaño fijo', () => {
+    // La ficha es una tarjeta de muestra, no un punto de color:
+    // `rounded-lg` y un tamaño fijo para que la fila de muestras se
+    // lea como el panel de acabados de Fender.
+    expect(SOURCE).toMatch(/rounded-lg/);
+    expect(SOURCE).toMatch(/\bsize-(16|20)\b|w-(16|20)\b/);
+  });
 
-/** El `<ul>` del picker (swatches navegables). */
-function extractPickerBlock(source: string): string {
-  const start = source.indexOf('aria-label="Selector de acabado"');
-  expect(start).toBeGreaterThanOrEqual(0);
-  const end = source.indexOf('</ul>', start);
-  expect(end).toBeGreaterThan(start);
-  return source.slice(start, end);
-}
+  it('la ficha muestra la imagen del producto en un <img>', () => {
+    // Decisión revertida: ahora SÍ queremos la foto de la variante.
+    expect(SOURCE).toMatch(/<img\b/);
+    expect(SOURCE).toMatch(/object-cover/);
+  });
 
-describe('selector de acabado del PDP', () => {
-  const acabadoBlock = extractAcabadoBlock(SOURCE);
-  const pickerBlock = extractPickerBlock(SOURCE);
-
-  it('los swatches son spans de color hex, sin <img> en el bloque ACABADO', () => {
-    // El usuario: las miniaturas 48px "parecen imágenes repetidas".
-    // El acabado se comunica con su hex; sin hex, color de fallback.
-    expect(acabadoBlock).not.toMatch(/<img\b/);
-    expect(acabadoBlock).toMatch(/background-color/);
+  it('sin imagen de variante, cae a relleno con el hex del acabado', () => {
+    // Un acabado sin foto no debe romper la fila: se pinta su hex.
+    expect(SOURCE).toMatch(/background-color/);
   });
 
   it('expone data-finish-preview para el preview en hover/focus', () => {
-    expect(pickerBlock).toContain('data-finish-preview');
+    expect(SOURCE).toContain('data-finish-preview');
   });
 
-  it('el picker mantiene la navegación ?finish= en el click', () => {
-    expect(pickerBlock).toMatch(/href=/);
-    expect(pickerBlock).toMatch(/\?finish=/);
+  it('la navegación ?finish= se preserva y funciona sin JavaScript', () => {
+    // El click es un <a> real: sin JS el deep-link sigue filtrando.
+    expect(SOURCE).toMatch(/href=\{/);
+    expect(SOURCE).toMatch(/\?finish=/);
   });
 
-  it('el swatch activo mantiene ring claro y el hover agrega ring', () => {
-    expect(pickerBlock).toMatch(/hover:ring-2/);
-    expect(pickerBlock).toMatch(/ring-2/);
+  it('la ficha activa se marca con ring de acento y aria-current', () => {
+    expect(SOURCE).toMatch(/ring-2/);
+    expect(SOURCE).toMatch(/var\(--primary/);
+    expect(SOURCE).toMatch(/aria-current/);
+  });
+
+  it('cada ficha lleva su etiqueta en micro-label', () => {
+    // El chip de muestra se lee como Pantone: muestrario + nombre.
+    expect(SOURCE).toMatch(/micro-label/);
   });
 
   it('el preview responde a hover y focus (y restaura al salir)', () => {

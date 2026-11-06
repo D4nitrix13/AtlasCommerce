@@ -52,6 +52,7 @@ import ProductFrequentlyBoughtTogether from '../../../components/storefront/prod
 import ProductRecentlyViewed from '../../../components/storefront/products/ProductRecentlyViewed.astro';
 import ProductFitSelector from '../../../components/storefront/products/ProductFitSelector.astro';
 import ProductSizeGrid from '../../../components/storefront/products/ProductSizeGrid.astro';
+import ProductFinishTiles from '../../../components/storefront/products/ProductFinishTiles.astro';
 import ProductCTAs from '../../../components/storefront/products/ProductCTAs.astro';
 import ProductPurchaseBar from '../../../components/storefront/products/ProductPurchaseBar';
 import ProductRelated from '../../../components/storefront/products/ProductRelated.astro';
@@ -93,7 +94,6 @@ import {
   resolveSelectedFinishId,
   type ProductApiVariant,
 } from '../../../lib/product-variant-selection';
-import { swatchFallbackHex } from '../../../lib/product-card-swap';
 import PandaProductDetail from '../../../components/storefront/products/PandaProductDetail.astro';
 import { findPandaProduct, isPandaStore, pandaCategoryLabel } from '../../../data/panda-catalog';
 
@@ -795,6 +795,15 @@ const variantFirstImage: Record<string, string | undefined> = {};
   }
 }
 
+// Fichas de muestra del picker de acabado: la foto de la variante
+// alimenta la ficha y el preview; sin foto, el componente cae al hex.
+const finishTiles = finishesForHand.map((option) => ({
+  id: option.id,
+  label: option.label,
+  hex: option.hex ?? null,
+  previewSrc: resolveFinishPreviewImage(option.id, variantFirstImage) ?? '',
+}));
+
 const HIGHLY_RATED = detail !== null && detail.reviews.length >= 5;
 const IN_STOCK = detail !== null && detail.stock > 0;
 const AVG_RATING = detail !== null ? getAverageRating(detail.reviews) : 0;
@@ -1106,233 +1115,168 @@ const fbtLabels = {
                 </a>
               )}
 
-              <dl class="grid grid-cols-2 gap-4 border-b border-slate-200 pb-4">
+              {/* Orden de compra — una sola ficha: precio · acabado ·
+                  mano · tamaño · cantidad. El ritmo es el de una orden
+                  de trabajo del taller (system.md): etiqueta micro-caps
+                  sobre cada control y divisor punteado entre grupos. */}
+              <section class="paper-card flex flex-col gap-5 p-6 sm:p-8">
                 <div class="flex flex-col gap-1">
-                  <dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Precio</dt>
-                  <dd class="text-xl font-bold tabular-nums text-slate-900">{precioFormatted}</dd>
+                  <span class="micro-label">Precio</span>
+                  <span
+                    class="font-display text-3xl font-semibold tabular-nums tracking-tight text-[var(--ink,#1c1917)]"
+                  >
+                    {precioFormatted}
+                  </span>
                 </div>
-                <div class="flex flex-col gap-2">
-                  <dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Acabado</dt>
-                  <dd class="flex flex-col gap-3 text-sm font-medium text-slate-900">
-                    <div class="flex flex-col items-start gap-2">
-                      {/*
-                        Con un solo acabado no hay nada que elegir: el dato
-                        de texto alcanza. El punto de color lo complementa
-                        (dice cómo es el color) sin repetir la foto de la
-                        galería — un enlace que no cambia nada es un control
-                        muerto.
-                      */}
-                      <span class="text-base font-semibold">{selectedFinish?.label ?? '—'}</span>
-                      {!showFinishPicker && selectedFinish !== undefined && (
-                        <span
-                          aria-hidden="true"
-                          class="block h-12 w-12 shrink-0 rounded-full border border-slate-200 shadow"
-                          style={`background-color: ${swatchFallbackHex({ hex: selectedFinish.hex ?? null })};`}
-                        />
-                      )}
-                    </div>
-                    {/* Picker de variantes: punto de color hex por acabado —
-                        una miniatura fotográfica por finish a 48px se lee
-                        como "imágenes repetidas". Sin hex del backend, el
-                        color de fallback mantiene los dots visualmente
-                        distintos. Cada swatch es un <a> con ?finish=<id> que
-                        filtra la galería via query param (el click navega,
-                        sin JS). Hover/focus previsualiza la foto de la
-                        variante en la galería vía data-finish-preview.
 
-                        `showFinishPicker` oculta el control cuando el producto
-                        ofrece un solo acabado: el dato de arriba alcanza y un
-                        chip único sería un botón que no cambia nada. */}
-                    {showFinishPicker && (
-                      <ul
-                        class="flex flex-wrap items-center gap-1.5"
-                        role="list"
-                        aria-label="Selector de acabado"
-                      >
-                        {finishesForHand.map((option) => {
-                          const isActive = option.id === SELECTED_COLOR;
-                          const previewSrc = resolveFinishPreviewImage(option.id, variantFirstImage);
-                          return (
-                            <li>
-                              <a
-                                href={`?finish=${option.id}`}
-                                title={option.label}
-                                aria-label={`Cambiar a ${option.label}`}
-                                aria-current={isActive ? 'true' : undefined}
-                                data-finish-preview={previewSrc}
-                                class:list={[
-                                  'block h-12 w-12 shrink-0 rounded-full border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
-                                  isActive
-                                    ? 'border-slate-900 ring-2 ring-slate-900 ring-offset-1'
-                                    : 'border-slate-200 opacity-70 hover:opacity-100 hover:ring-2 hover:ring-slate-900 hover:ring-offset-1',
-                                ]}
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  class="block h-full w-full rounded-full"
-                                  style={`background-color: ${swatchFallbackHex({ hex: option.hex ?? null })};`}
-                                />
-                              </a>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
+                <hr class="border-0 border-t border-dashed border-[var(--edge,#e7e5e1)]" />
 
-                    <script>
-                      // Preview de acabado: hover/focus del swatch muestra la
-                      // foto de la variante en la galería sin navegar; al
-                      // salir se restaura la imagen que estaba visible.
-                      function setupFinishPreview(link: HTMLAnchorElement): void {
-                        const previewSrc = link.dataset.finishPreview;
-                        if (previewSrc === undefined || previewSrc === '') return;
-                        const slideImg = document.querySelector<HTMLImageElement>(
-                          '[data-gallery-slide] img',
+                <div class="flex flex-col gap-3">
+                  <div class="flex items-baseline justify-between gap-3">
+                    <span class="micro-label">Acabado</span>
+                    <span class="text-sm font-semibold text-[var(--ink,#1c1917)]">
+                      {selectedFinish?.label ?? '—'}
+                    </span>
+                  </div>
+
+                  {/*
+                    Con un solo acabado no hay nada que elegir: el dato de
+                    texto de arriba alcanza y un control que no cambia nada
+                    es un botón muerto.
+                  */}
+                  {showFinishPicker && (
+                    <ProductFinishTiles
+                      options={finishTiles}
+                      selectedId={SELECTED_COLOR}
+                      ariaLabel="Selector de acabado"
+                      labelPrefix="Cambiar a"
+                    />
+                  )}
+                </div>
+
+                {/* Mano — dos ramas, porque el catálogo actual ofrece una
+                    sola mano por producto:
+                      · `showHandednessPicker` (ambas manos): chips vía `?hand=`.
+                      · `showHandednessLabel` (una sola mano): sólo el dato.
+                      · ninguna: no se renderiza nada. */}
+                {showHandednessPicker && (
+                  <div class="flex flex-col gap-2">
+                    <span class="micro-label">
+                      {t['storefront.products.detail.v4.hand.legend']}
+                    </span>
+                    <ul class="flex flex-wrap items-center gap-2" role="list">
+                      {handednessOptions.map((option) => {
+                        const isActive = option.id === selectedHandedness;
+                        return (
+                          <li>
+                            <a
+                              href={`?hand=${option.id}`}
+                              aria-current={isActive ? 'true' : undefined}
+                              class:list={[
+                                'pressable inline-flex h-9 items-center justify-center rounded-full border px-4 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2',
+                                isActive
+                                  ? 'border-transparent bg-[var(--primary,#2D9D8E)] text-white'
+                                  : 'border-[var(--line,#d6d3d1)] text-[var(--ink-soft,#57534e)] hover:border-[var(--primary,#2D9D8E)] hover:text-[var(--ink,#1c1917)]',
+                              ]}
+                            >
+                              {option.label}
+                            </a>
+                          </li>
                         );
-                        if (slideImg === null) return;
+                      })}
+                    </ul>
+                  </div>
+                )}
 
-                        const originalSrc = slideImg.getAttribute('src') ?? '';
-                        // La imagen de la galería lleva srcset: con srcset
-                        // presente el browser elige la resolución del srcset e
-                        // ignora el cambio de src (el preview no se veía).
-                        // Se quita durante el preview y se restaura al salir.
-                        const originalSrcset = slideImg.getAttribute('srcset') ?? '';
-                        let isActive = false;
+                {showHandednessLabel && (
+                  <p
+                    class="flex items-baseline gap-2 text-sm text-[var(--ink-soft,#57534e)]"
+                    data-product-handedness={handednessOptions[0]?.id}
+                  >
+                    <span class="micro-label">
+                      {t['storefront.products.detail.v4.hand.label']}
+                    </span>
+                    <span class="font-semibold text-[var(--ink,#1c1917)]">
+                      {handednessOptions[0]?.label}
+                    </span>
+                  </p>
+                )}
 
-                        const activate = (): void => {
-                          if (isActive) return;
-                          isActive = true;
-                          slideImg.setAttribute('src', previewSrc);
-                          slideImg.removeAttribute('srcset');
-                        };
-                        const deactivate = (): void => {
-                          if (!isActive) return;
-                          isActive = false;
-                          slideImg.setAttribute('src', originalSrc);
-                          if (originalSrcset !== '') {
-                            slideImg.setAttribute('srcset', originalSrcset);
-                          }
-                        };
+                {detail.hasCondition === true && (
+                  <ProductFitSelector
+                    legend={t['storefront.products.detail.v4.condition.legend']}
+                    options={CONDITION_OPTIONS}
+                    selected={SELECTED_CONDITION}
+                    name="condition"
+                  />
+                )}
 
-                        link.addEventListener('mouseenter', activate);
-                        link.addEventListener('mouseleave', deactivate);
-                        link.addEventListener('focus', activate);
-                        link.addEventListener('blur', deactivate);
-                      }
+                {detail.hasSizes === true && (
+                  <ProductSizeGrid
+                    legend={t['storefront.products.detail.v4.size.legend']}
+                    options={SIZE_OPTIONS}
+                    selected={SELECTED_SIZE}
+                    name="size"
+                  />
+                )}
 
-                      document
-                        .querySelectorAll<HTMLAnchorElement>('a[data-finish-preview]')
-                        .forEach((link) => setupFinishPreview(link));
-                    </script>
+                {/* Cantidad acotada al stock + CTAs, con el favorito al
+                    lado. El corazón sigue siendo ProductCTAs: su Add to
+                    Bag muere acá porque el island lo reemplaza. */}
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <ProductPurchaseBar
+                    client:visible
+                    productSlug={product.slug}
+                    name={product.name}
+                    imageUrl={purchaseBarImageUrl}
+                    priceCents={detail.priceCents}
+                    currency={detail.currency}
+                    variantLabel={selectedFinish?.label}
+                    stock={selectedVariantStock}
+                    buyNowHref={CHECKOUT_HREF}
+                    labels={{
+                      quantity: t['storefront.productDetail.quantity'],
+                      decrement: t['storefront.productDetail.quantity.decrement'],
+                      increment: t['storefront.productDetail.quantity.increment'],
+                      addToCart: t['storefront.productDetail.addToCart'],
+                      buyNow: t['storefront.productDetail.buyNow'],
+                      outOfStock: t['storefront.productDetail.outOfStock'],
+                      added: t['storefront.productDetail.added'],
+                    }}
+                  />
 
-                    {/* Mano — dos ramas, porque el catálogo actual ofrece
-                        una sola mano por producto:
-
-                          · `showHandednessPicker` (producto con ambas manos):
-                            chips navegables vía `?hand=`.
-                          · `showHandednessLabel` (una sola mano): sólo el
-                            dato. Un selector de una opción es ruido.
-                          · ninguna (sin `handedness` en BD): no se
-                            renderiza nada. */}
-                    {showHandednessPicker && (
-                      <ul
-                        class="flex flex-wrap items-center gap-2"
-                        role="list"
-                        aria-label={t['storefront.products.detail.v4.hand.legend']}
-                      >
-                        {handednessOptions.map((option) => {
-                          const isActive = option.id === selectedHandedness;
-                          return (
-                            <li>
-                              <a
-                                href={`?hand=${option.id}`}
-                                aria-current={isActive ? 'true' : undefined}
-                                class:list={[
-                                  'inline-flex rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
-                                  isActive
-                                    ? 'border-slate-900 bg-slate-900 text-white'
-                                    : 'border-slate-200 text-slate-600 hover:border-slate-900 hover:text-slate-900',
-                                ]}
-                              >
-                                {option.label}
-                              </a>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-
-                    {showHandednessLabel && (
-                      <p
-                        class="text-xs text-slate-500"
-                        data-product-handedness={handednessOptions[0]?.id}
-                      >
-                        {t['storefront.products.detail.v4.hand.label']}:{' '}
-                        <span class="font-semibold text-slate-700">
-                          {handednessOptions[0]?.label}
-                        </span>
-                      </p>
-                    )}
-                  </dd>
+                  <ProductCTAs
+                    addToCartLabel={t['storefront.productDetail.addToCart']}
+                    favoriteLabel={t['storefront.products.detail.v4.favorite']}
+                    inStock={IN_STOCK}
+                    showAddToBag={false}
+                    productId={product.id}
+                    apiBaseUrl="/api/v1"
+                    loginHref={`/${locale}/login`}
+                  />
                 </div>
-              </dl>
 
-              {detail.hasCondition === true && (
-                <ProductFitSelector
-                  legend={t['storefront.products.detail.v4.condition.legend']}
-                  options={CONDITION_OPTIONS}
-                  selected={SELECTED_CONDITION}
-                  name="condition"
-                />
-              )}
+                <hr class="border-0 border-t border-dashed border-[var(--edge,#e7e5e1)]" />
 
-              {detail.hasSizes === true && (
-                <ProductSizeGrid
-                  legend={t['storefront.products.detail.v4.size.legend']}
-                  options={SIZE_OPTIONS}
-                  selected={SELECTED_SIZE}
-                  name="size"
-                />
-              )}
-
-              {/* El picker de variantes vive arriba en el dl "Acabado" (con thumbnails
-                  reales via ?color=). No duplicamos el fieldset acá. */}
-
-              {/* Barra de compra (cantidad acotada al stock + CTAs) con el
-                  Favorite al lado. El corazón sigue siendo ProductCTAs:
-                  su Add to Bag muere acá porque el island lo reemplaza. */}
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-                <ProductPurchaseBar
-                  client:visible
-                  productSlug={product.slug}
-                  name={product.name}
-                  imageUrl={purchaseBarImageUrl}
-                  priceCents={detail.priceCents}
-                  currency={detail.currency}
-                  variantLabel={selectedFinish?.label}
-                  stock={selectedVariantStock}
-                  buyNowHref={CHECKOUT_HREF}
-                  labels={{
-                    quantity: t['storefront.productDetail.quantity'],
-                    decrement: t['storefront.productDetail.quantity.decrement'],
-                    increment: t['storefront.productDetail.quantity.increment'],
-                    addToCart: t['storefront.productDetail.addToCart'],
-                    buyNow: t['storefront.productDetail.buyNow'],
-                    outOfStock: t['storefront.productDetail.outOfStock'],
-                    added: t['storefront.productDetail.added'],
-                  }}
-                />
-
-                <ProductCTAs
-                  addToCartLabel={t['storefront.productDetail.addToCart']}
-                  favoriteLabel={t['storefront.products.detail.v4.favorite']}
-                  inStock={IN_STOCK}
-                  showAddToBag={false}
-                  productId={product.id}
-                  apiBaseUrl="/api/v1"
-                  loginHref={`/${locale}/login`}
-                />
-              </div>
+                <a
+                  href={FIND_STORE_HREF}
+                  class="inline-flex items-center gap-1 self-start text-sm font-semibold text-[var(--primary,#2D9D8E)] hover:underline"
+                >
+                  {t['storefront.products.detail.v4.findStore']}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    class="h-4 w-4"
+                    aria-hidden="true"
+                  >
+                    <path d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </a>
+              </section>
 
               {detail.financing !== undefined && (
                 <ProductDetailFinancingBlock
@@ -1341,29 +1285,6 @@ const fbtLabels = {
                   learnMoreLabel={t['storefront.products.detail.v4.financing.learnMore']}
                 />
               )}
-
-              {/* Accordions de inclusión (Garantía/Estuche/Ajuste) movidos al
-                  tab "Envíos" de ProductDetailTabs: son product-info, no
-                  decisión de compra. */}
-
-              <a
-                href={FIND_STORE_HREF}
-                class="inline-flex items-center gap-1 self-start text-sm font-semibold text-[var(--primary,#475569)] hover:underline"
-              >
-                {t['storefront.products.detail.v4.findStore']}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  class="h-4 w-4"
-                  aria-hidden="true"
-                >
-                  <path d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </a>
 
               {/* Tabs de detalle (Descripción · Ficha técnica · Reseñas ·
                   Preguntas · Envíos) al pie de la sección de datos: el

@@ -1,5 +1,9 @@
 /**
- * ProductDetailsBlock — bloque "Tech specs" bajo la gallery.
+ * ProductDetailsBlock — contenido del panel de descripción.
+ *
+ * Variantes: WithHeading (heading propio), NoHeading (vive dentro de un
+ * tab que ya nombra la sección — el caso del PDP), Short (sin toggle),
+ * Inline.
  */
 import type { Meta, StoryObj } from '@storybook/astro';
 import ProductDetailsBlock from './ProductDetailsBlock.astro';
@@ -8,40 +12,33 @@ const meta: Meta<typeof ProductDetailsBlock> = {
   title: 'Storefront/Products/ProductDetailsBlock',
   component: ProductDetailsBlock,
   tags: ['autodocs'],
+  args: {
+    intro:
+      '<p>Taza de cerámica para estampado por sublimación. Apto para horno de transferencia.</p><p>Disponible en 11 oz y 15 oz, en acabado blanco brillante y negro. La impresión se realiza sobre la superficie esmaltada, por lo que conviene evitar el lavavajillas para prolongar la vida del estampado.</p>',
+    moreLabel: 'Leer más',
+    lessLabel: 'Leer menos',
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const SAMPLE_SPECS = [
-  { label: 'Cuerpo', value: 'Aliso' },
-  { label: 'Brazo', value: 'Arce con perfil "Modern Deep C"' },
-  { label: 'Escala', value: '25.5" (648 mm)' },
-  { label: 'Trastes', value: '22, Narrow Tall' },
-  { label: 'Pastillas', value: '3 × V-Mod II Single-Coil' },
-  { label: 'Acabado', value: 'Gloss urethane' },
-];
+export const NoHeading: Story = {};
 
-const SAMPLE_INTRO = `<p>Construida en Corona (California), la Stratocaster American Pro II incorpora décadas de feedback de artistas profesionales.</p><p>El cuerpo de aliso y el brazo de arce con perfil Modern Deep C ofrecen un balance familiar pero con un sustain mejorado.</p>`;
+export const WithHeading: Story = {
+  args: { heading: 'Descripción' },
+};
 
-export const Default: Story = {
+export const Short: Story = {
   args: {
-    intro: SAMPLE_INTRO,
-    specs: SAMPLE_SPECS,
-    specsHeading: 'Ficha técnica',
+    heading: 'Descripción',
+    intro: '<p>Taza de cerámica para estampado. Disponible en 11 oz y 15 oz.</p>',
   },
 };
 
-export const Loading: Story = {
+export const Inline: Story = {
   args: {
-    intro: '<p>Cargando detalles del instrumento.</p>',
-    specs: [],
-  },
-};
-
-export const Empty: Story = {
-  args: {
-    intro: '<p>El fabricante no publicó descripción extendida para este instrumento.</p>',
-    specs: [],
+    variant: 'inline',
+    intro: '<p>Taza de cerámica para estampado. Disponible en 11 oz y 15 oz.</p>',
   },
 };

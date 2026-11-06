@@ -50,8 +50,8 @@ const { legend, options, selected, name, disabledIds = [] } = Astro.props;
 const disabledSet = new Set(disabledIds);
 ---
 
-<fieldset class="flex flex-col gap-3">
-  <legend class="text-sm font-bold text-slate-900">{legend}</legend>
+<fieldset class="flex flex-col gap-2">
+  <legend class="micro-label">{legend}</legend>
   <div class="flex flex-wrap gap-2" role="radiogroup" aria-label={legend}>
     {options.map((option) => {
       const isActive = option.id === selected;
@@ -65,10 +65,10 @@ const disabledSet = new Set(disabledIds);
           disabled={isDisabled}
           data-size-option={option.id}
           class:list={[
-            'inline-flex h-9 items-center justify-center px-4 rounded-full border text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#475569)] focus-visible:ring-offset-2',
+            'pressable inline-flex h-9 items-center justify-center px-4 rounded-full border text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary,#2D9D8E)] focus-visible:ring-offset-2',
             isActive
-              ? 'border-slate-900 bg-slate-900 text-white'
-              : 'border-slate-200 bg-white text-slate-900 hover:border-slate-400',
+              ? 'border-transparent bg-[var(--primary,#2D9D8E)] text-white'
+              : 'border-[var(--line,#d6d3d1)] bg-white text-[var(--ink,#1c1917)] hover:border-[var(--primary,#2D9D8E)]',
             isDisabled && 'cursor-not-allowed opacity-40 line-through',
           ]}
         >
