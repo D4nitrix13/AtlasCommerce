@@ -31,6 +31,6 @@ const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
       <p class="mt-2 text-slate-500">{t['auth.signup.shell.subtitle']}</p>
     </div>
 
-    <RegisterForm client:load />
+    <RegisterForm client:load locale={Astro.locals.locale} />
   </AuthShell>
 </AuthLayout>

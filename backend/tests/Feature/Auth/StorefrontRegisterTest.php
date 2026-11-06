@@ -13,6 +13,7 @@ use App\Models\Stores\StoreDomain;
 use Database\Seeders\PermissionsCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -65,6 +66,20 @@ final class StorefrontRegisterTest extends TestCase
         ]);
     }
 
+    protected function tearDown(): void
+    {
+        // Limpiar archivos de sesión del harness stateful (session driver
+        // `file`) para no acumular cruft entre corridas. Mismo patrón que
+        // StatefulCookieFlowTest::tearDown.
+        $sessionDir = sys_get_temp_dir().'/storefront-register-stateful-sessions';
+        if (is_dir($sessionDir)) {
+            array_map(unlink(...), glob($sessionDir.'/*') ?: []);
+            @rmdir($sessionDir);
+        }
+
+        parent::tearDown();
+    }
+
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
@@ -78,7 +93,7 @@ final class StorefrontRegisterTest extends TestCase
         ], $overrides);
     }
 
-    private function registerAs(string $host, array $payload): \Illuminate\Testing\TestResponse
+    private function registerAs(string $host, array $payload): TestResponse
     {
         // Usamos la URL completa con host para que el middleware
         // `store.domain` resuelva el contexto via Host header. El método
@@ -254,5 +269,85 @@ final class StorefrontRegisterTest extends TestCase
         // estuviera bajo auth:sanctum, sería 401.
         $response = $this->registerAs('localhost', $this->validPayload());
         $response->assertStatus(201);
+    }
+
+    /**
+     * Extrae los cookies Set-Cookie de un response como [nombre => valor].
+     *
+     * @return array<string, string>
+     */
+    private function cookiesFrom(TestResponse $response): array
+    {
+        $cookies = [];
+        foreach ($response->headers->getCookies() as $cookie) {
+            $cookies[$cookie->getName()] = $cookie->getValue();
+        }
+
+        return $cookies;
+    }
+
+    #[Test]
+    public function register_from_stateful_host_establishes_web_session_for_cookie_only_me(): void
+    {
+        // Harness stateful (mismo patrón que StatefulCookieFlowTest):
+        // session driver `file` para persistir la sesión entre requests
+        // (el driver `array` de phpunit.xml la descarta por request) y host
+        // en `sanctum.stateful` para que EnsureFrontendRequestsAreStateful
+        // arranque StartSession en /register y /me.
+        $sessionDir = sys_get_temp_dir().'/storefront-register-stateful-sessions';
+        if (! is_dir($sessionDir)) {
+            mkdir($sessionDir, 0777, true);
+        }
+        config(['session.driver' => 'file']);
+        config(['session.files' => $sessionDir]);
+        config(['sanctum.stateful' => ['localhost']]);
+
+        // 1. Bootstrap CSRF (doble-submit cookie): la sesión nace acá con su
+        //    token, entregado al browser via cookie XSRF-TOKEN. El middleware
+        //    custom ValidateStatefulCsrf (sin bypass para tests) lo exige en
+        //    todo POST stateful.
+        $csrfResponse = $this->withHeaders(['Origin' => 'http://localhost'])
+            ->get(uri: 'http://localhost/sanctum/csrf-cookie');
+
+        $csrfCookies = $this->cookiesFrom(response: $csrfResponse);
+        $sessionCookieName = config(key: 'session.cookie');
+        $this->assertNotEmpty($csrfCookies[$sessionCookieName] ?? null);
+        $this->assertNotEmpty($csrfCookies['XSRF-TOKEN'] ?? null);
+
+        // 2. Register desde host stateful, con la cookie de sesión + el
+        //    header X-XSRF-TOKEN con el valor crudo de la cookie (el browser
+        //    copia document.cookie tal cual; ValidateStatefulCsrf lo
+        //    desencripta y compara contra el token de la sesión).
+        $registerResponse = $this->withCookie(
+            name: $sessionCookieName,
+            value: $csrfCookies[$sessionCookieName],
+        )->withHeaders([
+            'Origin' => 'http://localhost',
+            'X-XSRF-TOKEN' => $csrfCookies['XSRF-TOKEN'],
+        ])->registerAs('localhost', $this->validPayload());
+
+        $registerResponse->assertStatus(201);
+
+        // El login rota el session ID (SessionGuard::login → migrate): la
+        // cookie de sesión que vale para /me es la emitida por el register.
+        $registerCookies = $this->cookiesFrom(response: $registerResponse);
+        $this->assertNotEmpty(
+            $registerCookies[$sessionCookieName] ?? null,
+            'El register desde host stateful debe emitir cookie de sesión.',
+        );
+
+        // 3. GET /me con SOLO la cookie de sesión (sin Authorization): el
+        //    usuario recién creado debe quedar autenticado en la sesión web.
+        $meResponse = $this->withCookie(
+            name: $sessionCookieName,
+            value: $registerCookies[$sessionCookieName],
+        )->getJson(
+            uri: 'http://localhost/api/v1/auth/me',
+            headers: ['Origin' => 'http://localhost'],
+        );
+
+        $meResponse->assertOk();
+        $meResponse->assertJsonPath('user.email', 'cliente@panda-estampados.test');
+        $meResponse->assertJsonPath('customer.email', 'cliente@panda-estampados.test');
     }
 }

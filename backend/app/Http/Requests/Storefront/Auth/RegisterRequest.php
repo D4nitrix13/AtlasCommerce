@@ -45,16 +45,4 @@ class RegisterRequest extends FormRequest
             'customer_type' => ['nullable', 'string', 'in:retail,wholesale,vip'],
         ];
     }
-
-    /**
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'email.unique' => 'Ya existe una cuenta con este email.',
-            'password_confirmation.same' => 'Las contraseñas no coinciden.',
-            'customer_type.in' => 'El tipo de cliente debe ser retail, wholesale o vip.',
-        ];
-    }
 }

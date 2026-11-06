@@ -45,6 +45,10 @@ final class TwoFactorLoginFlowTest extends TestCase
     {
         parent::setUp();
 
+        // Este suite aserta mensajes en español; `SetRequestLocale`
+        // resolvería el `Accept-Language: en-us` del harness a `en`.
+        $this->withHeaders(['X-Locale' => 'es']);
+
         $this->seed(DefaultAdminSeeder::class);
 
         // El RateLimiter usa cache shared entre tests. Limpiamos para

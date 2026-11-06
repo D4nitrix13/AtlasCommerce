@@ -8,6 +8,8 @@ const es: Translations = {
   'common.back': 'Volver',
   'common.confirm': 'Confirmar',
   'common.cancelar': 'Cancelar',
+  'forms.requiredMark': 'obligatorio',
+  'forms.requiredLegend': '* Campos obligatorios',
 
   'auth.brand.name': 'Panda Estampados',
   'auth.login.title': 'Iniciar sesión',
@@ -120,7 +122,10 @@ const es: Translations = {
   'auth.signup.shell.strengthWeak': 'Débil',
   'auth.signup.shell.strengthMedium': 'Aceptable',
   'auth.signup.shell.strengthGood': 'Buena',
-  'auth.signup.shell.termsAccept': 'Acepto los {terms} y la {privacy}.',
+  'auth.signup.shell.termsRequired':
+    'Para crear tu cuenta, aceptá los Términos y la Política de Privacidad.',
+  'auth.signup.shell.termsAcceptPrefix': 'Acepto los',
+  'auth.signup.shell.termsAcceptInfix': 'y la',
   'auth.signup.shell.termsLink': 'Términos',
   'auth.signup.shell.privacyLink': 'Política de Privacidad',
   'auth.signup.shell.submit': 'Crear mi cuenta',
@@ -128,6 +133,9 @@ const es: Translations = {
   'auth.signup.shell.google': 'Google',
   'auth.signup.shell.facebook': 'Facebook',
   'auth.signup.shell.facebookComingSoon': 'Próximamente — Facebook OAuth estará disponible pronto',
+  'auth.validation.required': 'Ingresá {field}.',
+  'auth.validation.email': 'Ingresá un correo válido.',
+  'auth.validation.minLength': '{field} debe tener al menos {min} caracteres.',
 
   'auth.forgot.shell.heading': 'Recuperar acceso',
   'auth.forgot.shell.subtitle':

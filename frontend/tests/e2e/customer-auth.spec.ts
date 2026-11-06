@@ -47,7 +47,7 @@ async function fillRegisterForm(
   if (opts.phone !== undefined && opts.phone !== '') {
     await page.getByLabel('auth.signup.shell.phoneLabel').fill(opts.phone);
   }
-  await page.getByLabel('auth.signup.shell.termsAccept').check();
+  await page.locator('#acceptTerms').check();
 }
 
 test.describe('CA.5 — customer auth flow end-to-end', () => {

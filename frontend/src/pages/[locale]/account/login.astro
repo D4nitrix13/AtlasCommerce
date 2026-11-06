@@ -34,7 +34,7 @@ const brand = themeToBrand(Astro.locals.theme, fallbackBrand);
       <p class="mt-2 text-slate-500">{t['auth.login.shell.subtitle']}</p>
     </div>
 
-    <StorefrontLoginForm client:load />
+    <StorefrontLoginForm client:load locale={Astro.locals.locale} />
 
     <p class="text-center text-xs text-slate-400 mt-8" slot="terms">
       {t['auth.shell.termsPrefix']}{' '}

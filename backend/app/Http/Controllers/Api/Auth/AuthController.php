@@ -51,7 +51,7 @@ class AuthController extends Controller
         $loginKey = 'login:'.$request->input(key: 'email').'|'.$request->ip();
         if (RateLimiter::tooManyAttempts(key: $loginKey, maxAttempts: 5)) {
             throw ValidationException::withMessages([
-                'email' => ['Demasiados intentos. Probá de nuevo en '.RateLimiter::availableIn(key: $loginKey).' segundos.'],
+                'email' => [trans('auth.login_throttle', ['seconds' => RateLimiter::availableIn(key: $loginKey)])],
             ]);
         }
 
@@ -66,14 +66,14 @@ class AuthController extends Controller
             // Contar el intento fallido en el throttle.
             RateLimiter::hit(key: $loginKey, decaySeconds: 300);
             throw ValidationException::withMessages([
-                'email' => ['Las credenciales no son válidas.'],
+                'email' => [trans('auth.invalid_credentials')],
             ]);
         }
 
         if (! $user->is_active) {
             RateLimiter::hit(key: $loginKey, decaySeconds: 300);
             throw ValidationException::withMessages([
-                'email' => ['La cuenta está desactivada.'],
+                'email' => [trans('auth.account_disabled')],
             ]);
         }
 
@@ -89,7 +89,7 @@ class AuthController extends Controller
         if ($currentStoreId !== null && ! $isCustomer && ! $user->hasAccessToStore(storeId: $currentStoreId)) {
             RateLimiter::hit(key: $loginKey, decaySeconds: 300);
             throw ValidationException::withMessages([
-                'email' => ['No tienes acceso a esta tienda.'],
+                'email' => [trans('auth.no_store_access')],
             ]);
         }
 
@@ -170,7 +170,7 @@ class AuthController extends Controller
         $ipKey = 'verify-totp-login:'.$request->ip();
         if (RateLimiter::tooManyAttempts(key: $ipKey, maxAttempts: 10)) {
             throw ValidationException::withMessages([
-                'code' => ['Demasiados intentos. Probá de nuevo en '.RateLimiter::availableIn(key: $ipKey).' segundos.'],
+                'code' => [trans('auth.login_throttle', ['seconds' => RateLimiter::availableIn(key: $ipKey)])],
             ]);
         }
         // Cuenta el intento actual. Hit ANTES de validar challenge para
@@ -189,7 +189,7 @@ class AuthController extends Controller
             ->first();
 
         if ($challenge === null || ! $challenge->isUsable()) {
-            return response()->json(data: ['message' => 'Challenge inválido o expirado.'], status: 422);
+            return response()->json(data: ['message' => trans('auth.totp_challenge_invalid')], status: 422);
         }
 
         $user = $challenge->user;
@@ -198,7 +198,7 @@ class AuthController extends Controller
             $challenge->attempts++;
             $challenge->save();
 
-            return response()->json(data: ['message' => 'Código inválido.'], status: 422);
+            return response()->json(data: ['message' => trans('auth.totp_code_invalid')], status: 422);
         }
 
         // Challenge consumido

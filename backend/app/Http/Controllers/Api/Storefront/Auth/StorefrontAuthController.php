@@ -72,7 +72,7 @@ class StorefrontAuthController extends Controller
 
         if ($store === null) {
             return response()->json(
-                data: ['message' => 'No se puede registrar clientes: la tienda no está activa.'],
+                data: ['message' => trans('auth.register_store_inactive')],
                 status: 503,
             );
         }
@@ -118,6 +118,15 @@ class StorefrontAuthController extends Controller
         // `stores/customer-auth.ts` (CA.4) y lo manda como Bearer en
         // /me. Mismo patrón que AuthController::login.
         $token = $user->createToken(name: 'storefront-register', expiresAt: now()->addDays(7));
+
+        // Sanctum stateful (mismo patrón que AuthController::login):
+        // además del PAT, iniciar la sesión web para que el browser
+        // quede logueado via cookie httpOnly y /me responda sin
+        // re-login. Guard con hasSession() porque los tests Bearer-only
+        // corren sin sesión (driver=array, sin request stateful).
+        if ($request->hasSession()) {
+            auth('web')->login($user);
+        }
 
         // Cargamos el customer para la response (relación inversa
         // user->customer no existe en el modelo, pero podemos
