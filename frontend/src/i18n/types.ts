@@ -1470,7 +1470,6 @@ export type TranslationKey =
   | 'storefront.footer.privacy'
   | 'storefront.footer.help'
   | 'storefront.footer.contact'
-  | 'storefront.footer.navHeading'
   | 'storefront.footer.supportHeading'
   | 'storefront.footer.followHeading'
   | 'storefront.footer.socialLabel'

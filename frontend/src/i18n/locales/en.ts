@@ -1199,7 +1199,6 @@ const en: Translations = {
   'storefront.footer.privacy': 'Privacy',
   'storefront.footer.help': 'Help',
   'storefront.footer.contact': 'Contact',
-  'storefront.footer.navHeading': 'Links',
   'storefront.footer.supportHeading': 'Support',
   'storefront.footer.followHeading': 'Follow us',
   'storefront.footer.socialLabel': 'Social media',

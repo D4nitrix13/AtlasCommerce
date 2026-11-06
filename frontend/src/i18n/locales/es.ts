@@ -1206,7 +1206,6 @@ const es: Translations = {
   'storefront.footer.privacy': 'Privacidad',
   'storefront.footer.help': 'Ayuda',
   'storefront.footer.contact': 'Contacto',
-  'storefront.footer.navHeading': 'Enlaces',
   'storefront.footer.supportHeading': 'Soporte',
   'storefront.footer.followHeading': 'Síguenos',
   'storefront.footer.socialLabel': 'Redes sociales',

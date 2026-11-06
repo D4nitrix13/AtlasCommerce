@@ -3,9 +3,8 @@
  * StorefrontFooterNav — bloque de navegación del footer.
  *
  * Links secundarios (Acerca de, Términos, Privacidad, Ayuda, Contacto)
- * apilados en columna: el footer los aloja en una columna del grid de
- * 4, donde un `flex-wrap` horizontal no entra y obliga a cortes de
- * línea arbitrarios. Vive en `<nav aria-label="Secundaria">`.
+ * en fila horizontal inline junto al copyright (estilo Nike). Si no
+ * caben en una línea, envuelven a la siguiente fila.
  *
  * Los hrefs llegan por props y apuntan a las páginas reales
  * (`/{locale}/about`, `/terms`, …) — los defaults viven en
@@ -32,7 +31,7 @@ const { links, locale } = Astro.props;
 const t = getServerDictionary(locale);
 ---
 
-<nav aria-label="Secundaria" class="flex flex-col gap-y-2">
+<nav aria-label="Secundaria" class="flex flex-wrap items-center gap-x-4 gap-y-2">
   {links.map((link) => (
     <a
       href={link.href}
